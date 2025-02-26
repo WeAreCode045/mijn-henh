@@ -4,9 +4,17 @@ import { WebViewImageGrid } from "../WebViewImageGrid";
 
 export function OverviewSection({ property, settings }: WebViewSectionProps) {
   // Format price with thousand separators
-  const formatPrice = (price?: number): string => {
+  const formatPrice = (price?: string | number): string => {
     if (price === undefined || price === null) return "€ 0";
-    return "€ " + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    
+    // Convert string to number if needed
+    const numericPrice = typeof price === 'string' ? parseFloat(price.replace(/\D/g, '')) : price;
+    
+    // Handle NaN case
+    if (isNaN(numericPrice)) return "€ 0";
+    
+    // Format with thousand separators
+    return "€ " + numericPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   return (
