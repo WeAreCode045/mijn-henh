@@ -61,14 +61,14 @@ export function PropertyWebViewContent({
       ? {
           backgroundImage: `url(${settings.webviewBackgroundUrl})`,
           backgroundSize: 'contain',
-          backgroundPosition: 'right top',
+          backgroundPosition: 'right bottom',
           backgroundRepeat: 'no-repeat',
           opacity: 0.2,
           position: 'absolute' as const,
-          top: 0,
-          right: 0,
-          width: '50%',
-          height: '100%',
+          bottom: -10,
+          right: -120,
+          width: '100%',
+          height: '85%',
           zIndex: 0
         } 
       : {};
