@@ -68,8 +68,11 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                           borderBottom: 'none'
                         }}
                       >
-                        <TableCell className="p-2 text-gray-700 flex items-center">
-                          <Check className="w-4 h-4 mr-2 text-green-600" />
+                        <TableCell className="p-2 text-gray-700 flex items-center text-left pl-4">
+                          <Check 
+                            className="w-4 h-4 mr-2" 
+                            style={{ color: settings?.secondaryColor }}
+                          />
                           <span style={{ fontWeight: 600 }}>
                             {feature.description}
                           </span>
