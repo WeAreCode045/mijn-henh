@@ -37,9 +37,9 @@ export function PropertyWebViewDialog({
 }: PropertyWebViewDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[800px] h-[842px] p-0 overflow-hidden">
+      <DialogContent className="max-w-[800px] h-[80vh] p-0 overflow-hidden">
         <DialogTitle className="sr-only">Property View</DialogTitle>
-        <div ref={contentRef} className="h-full">
+        <div ref={contentRef} className="h-full overflow-hidden">
           <PropertyWebViewContent 
             property={propertyData}
             settings={settings}

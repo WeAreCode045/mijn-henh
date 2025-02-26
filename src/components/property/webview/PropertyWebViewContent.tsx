@@ -55,30 +55,28 @@ export function PropertyWebViewContent({
   };
 
   return (
-    <>
-      <div className="flex flex-col h-full max-h-full">
-        {/* Header */}
-        <div className="border-b flex-shrink-0">
-          <WebViewHeader settings={settings} />
-        </div>
-
-        {/* Content Section - Make it scrollable */}
-        <div className="flex-1 overflow-y-scroll scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400">
-          <div className="p-4">
-            {sections[currentPage]?.content}
-          </div>
-        </div>
-
-        <ImagePreviewDialog 
-          selectedImage={selectedImage}
-          onClose={() => setSelectedImage(null)}
-        />
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="border-b flex-shrink-0">
+        <WebViewHeader settings={settings} />
       </div>
 
-      {/* Fixed Navigation Footer - Outside the content container */}
+      {/* Content Section */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="p-4 pb-24">
+          {sections[currentPage]?.content}
+        </div>
+      </div>
+
+      <ImagePreviewDialog 
+        selectedImage={selectedImage}
+        onClose={() => setSelectedImage(null)}
+      />
+
+      {/* Fixed Navigation Footer */}
       {!isPrintView && (
         <div 
-          className="fixed bottom-0 left-0 right-0 p-4 border-t z-10"
+          className="absolute bottom-0 left-0 right-0 p-4 border-t bg-opacity-95"
           style={{ backgroundColor: settings?.primaryColor || '#9b87f5' }}
         >
           <div className="flex justify-between items-center">
@@ -113,6 +111,6 @@ export function PropertyWebViewContent({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
