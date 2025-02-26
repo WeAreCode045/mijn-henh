@@ -5,7 +5,7 @@ import { WebViewImageGrid } from "../WebViewImageGrid";
 export function OverviewSection({ property, settings }: WebViewSectionProps) {
   // Format price with thousand separators
   const formatPrice = (price?: number): string => {
-    if (!price && price !== 0) return "€ 0";
+    if (price === undefined || price === null) return "€ 0";
     return "€ " + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
