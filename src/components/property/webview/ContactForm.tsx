@@ -8,10 +8,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-interface ContactFormProps {
+export interface ContactFormProps {
   propertyId: string;
-  propertyTitle: string;
-  agentId: string | undefined;
+  propertyTitle?: string;
+  agentId?: string;
 }
 
 const INQUIRY_TYPES = [
@@ -20,7 +20,7 @@ const INQUIRY_TYPES = [
   { value: "offer", label: "Een bod uitbrengen" }
 ];
 
-export function ContactForm({ propertyId, propertyTitle, agentId }: ContactFormProps) {
+export function ContactForm({ propertyId, propertyTitle = "", agentId }: ContactFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
@@ -34,14 +34,19 @@ export function ContactForm({ propertyId, propertyTitle, agentId }: ContactFormP
     e.preventDefault();
     
     try {
-      // First, get the agent's details
-      const { data: agentData, error: agentError } = await supabase
-        .from('profiles')
-        .select('email, full_name')
-        .eq('id', agentId)
-        .single();
+      // First, get the agent's details if agentId is provided
+      let agentData = null;
+      
+      if (agentId) {
+        const { data, error: agentError } = await supabase
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', agentId)
+          .single();
 
-      if (agentError) throw agentError;
+        if (agentError) throw agentError;
+        agentData = data;
+      }
 
       // Save the submission to the database
       const { data: submission, error } = await supabase
@@ -60,22 +65,24 @@ export function ContactForm({ propertyId, propertyTitle, agentId }: ContactFormP
 
       if (error) throw error;
 
-      // Send email notification to agent
-      const { error: emailError } = await supabase.functions.invoke('send-agent-notification', {
-        body: {
-          id: submission.id,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          message: formData.message,
-          inquiry_type: formData.inquiryType,
-          property_title: propertyTitle,
-          agent_email: agentData.email,
-          agent_name: agentData.full_name
-        }
-      });
+      // Send email notification to agent if agent exists
+      if (agentData) {
+        const { error: emailError } = await supabase.functions.invoke('send-agent-notification', {
+          body: {
+            id: submission.id,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            message: formData.message,
+            inquiry_type: formData.inquiryType,
+            property_title: propertyTitle,
+            agent_email: agentData.email,
+            agent_name: agentData.full_name
+          }
+        });
 
-      if (emailError) throw emailError;
+        if (emailError) throw emailError;
+      }
 
       toast({
         title: "Bericht verzonden",

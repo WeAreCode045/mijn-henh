@@ -10,6 +10,7 @@ export interface AgencySettings {
   logoUrl?: string;
   pdfBackgroundUrl?: string;
   webviewBackgroundUrl?: string;
+  webviewBgImage?: string;
   iconBuildYear?: string;
   iconBedrooms?: string;
   iconBathrooms?: string;

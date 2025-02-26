@@ -27,6 +27,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     logoUrl: data.logo_url,
     pdfBackgroundUrl: data.description_background_url, // Updated to use existing column
     webviewBackgroundUrl: data.description_background_url, // Using the same column for now
+    webviewBgImage: data.description_background_url, // Added this line
     instagramUrl: data.instagram_url || defaultAgencySettings.instagramUrl,
     youtubeUrl: data.youtube_url || defaultAgencySettings.youtubeUrl,
     facebookUrl: data.facebook_url || defaultAgencySettings.facebookUrl,

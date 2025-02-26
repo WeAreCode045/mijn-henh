@@ -108,7 +108,11 @@ export function ContactSection({ property, settings }: WebViewSectionProps) {
           
           {/* Contact Form */}
           <div>
-            <ContactForm propertyId={property.id} />
+            <ContactForm 
+              propertyId={property.id} 
+              propertyTitle={property.title} 
+              agentId={property.agent_id} 
+            />
           </div>
         </div>
       </div>

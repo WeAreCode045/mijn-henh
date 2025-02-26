@@ -8,6 +8,7 @@ export const defaultAgencySettings: AgencySettings = {
   address: "",
   primaryColor: "#40497A",
   secondaryColor: "#E2E8F0",
+  webviewBgImage: "",
   iconBuildYear: "calendar",
   iconBedrooms: "bed",
   iconBathrooms: "bath",

@@ -1,3 +1,4 @@
+
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -32,6 +33,16 @@ export interface PropertyGridImage {
   url: string;
 }
 
+// Agent interface for property
+export interface PropertyAgent {
+  id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  address?: string;
+}
+
 // Base interface with common properties
 interface BasePropertyData {
   title: string;
@@ -61,6 +72,7 @@ interface BasePropertyData {
   latitude?: number | null;
   longitude?: number | null;
   agent_id?: string;
+  agent?: PropertyAgent;
   virtualTourUrl?: string;
 }
 
