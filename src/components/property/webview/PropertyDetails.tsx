@@ -40,35 +40,8 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
   // Get current grade
   const currentGrade = property.energyLabel?.toUpperCase().charAt(0) || null;
   
-  // Generate 5 energy grades with the current grade in the middle (3rd position)
-  let displayGrades: string[] = [];
-  
-  if (currentGrade) {
-    const allGrades = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    const currentIndex = allGrades.indexOf(currentGrade);
-    
-    if (currentIndex !== -1) {
-      // Calculate the starting index to place current grade in the middle (3rd position)
-      let startIndex = currentIndex - 2;
-      
-      // Ensure we don't go below 0
-      if (startIndex < 0) startIndex = 0;
-      
-      // Ensure we don't go beyond the end of available grades
-      if (startIndex + 5 > allGrades.length) {
-        startIndex = allGrades.length - 5;
-      }
-      
-      // If we don't have enough grades, just show what we have
-      if (startIndex < 0) startIndex = 0;
-      
-      // Get 5 grades (or fewer if not enough)
-      displayGrades = allGrades.slice(startIndex, startIndex + 5);
-    }
-  } else {
-    // If no grade, show the first 5 grades
-    displayGrades = ['A', 'B', 'C', 'D', 'E'];
-  }
+  // Always show all energy grades A-G for the new visualization
+  const allGrades = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
   return (
     <div className="grid grid-cols-4 gap-4 p-6">
@@ -94,40 +67,82 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         ))}
       </div>
 
-      {/* Right side: Energy label column spanning two rows - without background */}
+      {/* Right side: Energy label column spanning two rows - new house-style visualization */}
       <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4">
         <p className="text-gray-700 font-bold text-sm mb-4">Energy Label</p>
         
-        {/* Energy efficiency barometer - maximum 5 gradations */}
-        <div className="w-full max-w-[120px] mb-3">
-          {displayGrades.map((grade) => {
-            const isCurrentGrade = grade === currentGrade;
-            const barColor = energyLabelColors[grade];
-            
-            return (
-              <div key={grade} className="flex items-center mb-1">
-                <div className="w-8 text-gray-700 text-xs font-bold text-center mr-2">
-                  {grade}
-                </div>
-                <div 
-                  className={`h-5 flex-grow rounded-sm relative ${isCurrentGrade ? 'border-2 border-gray-700' : ''}`}
-                  style={{ backgroundColor: barColor }}
-                >
-                  {isCurrentGrade && (
-                    <div className="absolute -right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="w-2 h-2 bg-gray-700 rotate-45 transform"></div>
+        {/* Top energy rating banner showing the current rating */}
+        {currentGrade && (
+          <div className="relative w-full max-w-[180px] mb-2">
+            <div className="w-full h-12 bg-gray-100 relative">
+              {/* Banner shape with zigzags */}
+              <div className="absolute bottom-0 w-full h-3 overflow-hidden">
+                <div className="flex">
+                  {allGrades.map((_, i) => (
+                    <div key={i} className="w-1/7 h-3 bg-gray-100">
+                      <div className="w-full h-full transform rotate-45 origin-bottom-right translate-y-1"></div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
-            );
-          })}
+              
+              {/* Current grade highlighted in dark blue/black banner */}
+              <div className="absolute top-0 left-0 w-1/7 h-full flex items-center justify-center bg-gray-800 text-white font-bold text-2xl"
+                   style={{
+                     width: `${(100 / 7) * (currentGrade ? allGrades.indexOf(currentGrade) + 1 : 1)}%`,
+                     clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0% 100%)'
+                   }}>
+                {currentGrade}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Main energy efficiency visualization with house */}
+        <div className="relative w-full max-w-[180px] h-[200px]">
+          {/* Energy class bars */}
+          <div className="absolute bottom-0 w-full h-[150px]">
+            <div className="relative w-full h-full flex">
+              {allGrades.map((grade, index) => {
+                const isCurrentGrade = grade === currentGrade;
+                // Calculate height percentage - A is tallest, G is shortest in the reference image
+                // But we want to make it the opposite - A is shortest (most efficient), G is tallest (least efficient)
+                const heightPercentage = 60 + (index * 5);
+                
+                return (
+                  <div 
+                    key={grade} 
+                    className={`relative flex-1 flex items-end justify-center 
+                              ${isCurrentGrade ? 'ring-2 ring-gray-800 ring-inset z-10' : ''}`}
+                    style={{ 
+                      height: `${heightPercentage}%`,
+                      backgroundColor: energyLabelColors[grade],
+                      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0% 100%, 15% 85%)'
+                    }}
+                  >
+                    <span className="absolute bottom-2 text-white font-bold text-sm">
+                      {grade}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* House image */}
+          <div className="absolute bottom-[20px] left-1/2 transform -translate-x-1/2 w-[120px] h-[80px] z-20">
+            <img 
+              src="/lovable-uploads/fa38e067-ac44-41ec-85d9-b34d88c88608.png" 
+              alt="Energy Efficient House" 
+              className="w-full h-full object-contain opacity-60"
+            />
+          </div>
         </div>
-
+        
         {/* Display unknown energy label if not specified */}
         {!currentGrade && (
-          <div className="text-gray-700 text-sm mt-2">
-            Not specified
+          <div className="text-gray-700 text-sm mt-4">
+            Energy class not specified
           </div>
         )}
       </div>
