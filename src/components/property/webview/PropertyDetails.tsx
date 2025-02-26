@@ -70,12 +70,6 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4"
         style={{ backgroundColor: settings?.primaryColor }}
       >
-        <div 
-          className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-          style={{ backgroundColor: settings?.secondaryColor }}
-        >
-          <Zap className="w-6 h-6 text-white" />
-        </div>
         <p className="text-white font-bold text-sm mb-4">Energy Label</p>
         
         {/* Energy efficiency barometer */}
@@ -104,33 +98,10 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
           })}
         </div>
 
-        {/* Current energy grade display */}
-        {currentGrade ? (
-          <div className="flex flex-col items-center mt-2">
-            <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-1"
-              style={{ backgroundColor: energyLabelColor }}
-            >
-              {currentGrade}
-            </div>
-            <p 
-              className="text-sm font-semibold"
-              style={{ color: energyLabelColor }}
-            >
-              {property.energyLabel || 'Not specified'}
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center mt-2">
-            <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-1"
-              style={{ backgroundColor: '#94A3B8' }}
-            >
-              ?
-            </div>
-            <p className="text-white text-sm">
-              Not specified
-            </p>
+        {/* Display unknown energy label if not specified */}
+        {!currentGrade && (
+          <div className="text-white text-sm mt-2">
+            Not specified
           </div>
         )}
       </div>
