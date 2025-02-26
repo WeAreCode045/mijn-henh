@@ -37,9 +37,38 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
       ? energyLabelColors[property.energyLabel.toUpperCase().charAt(0)]
       : '#94A3B8'; // Gray
 
-  // Energy label grades for the barometer
-  const energyGrades = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  // Get current grade
   const currentGrade = property.energyLabel?.toUpperCase().charAt(0) || null;
+  
+  // Generate 5 energy grades with the current grade in the middle (3rd position)
+  let displayGrades: string[] = [];
+  
+  if (currentGrade) {
+    const allGrades = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const currentIndex = allGrades.indexOf(currentGrade);
+    
+    if (currentIndex !== -1) {
+      // Calculate the starting index to place current grade in the middle (3rd position)
+      let startIndex = currentIndex - 2;
+      
+      // Ensure we don't go below 0
+      if (startIndex < 0) startIndex = 0;
+      
+      // Ensure we don't go beyond the end of available grades
+      if (startIndex + 5 > allGrades.length) {
+        startIndex = allGrades.length - 5;
+      }
+      
+      // If we don't have enough grades, just show what we have
+      if (startIndex < 0) startIndex = 0;
+      
+      // Get 5 grades (or fewer if not enough)
+      displayGrades = allGrades.slice(startIndex, startIndex + 5);
+    }
+  } else {
+    // If no grade, show the first 5 grades
+    displayGrades = ['A', 'B', 'C', 'D', 'E'];
+  }
 
   return (
     <div className="grid grid-cols-4 gap-4 p-6">
@@ -65,31 +94,28 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         ))}
       </div>
 
-      {/* Right side: Energy label column spanning two rows */}
-      <div 
-        className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4"
-        style={{ backgroundColor: settings?.primaryColor }}
-      >
-        <p className="text-white font-bold text-sm mb-4">Energy Label</p>
+      {/* Right side: Energy label column spanning two rows - without background */}
+      <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4">
+        <p className="text-gray-700 font-bold text-sm mb-4">Energy Label</p>
         
-        {/* Energy efficiency barometer */}
+        {/* Energy efficiency barometer - maximum 5 gradations */}
         <div className="w-full max-w-[120px] mb-3">
-          {energyGrades.map((grade) => {
+          {displayGrades.map((grade) => {
             const isCurrentGrade = grade === currentGrade;
             const barColor = energyLabelColors[grade];
             
             return (
               <div key={grade} className="flex items-center mb-1">
-                <div className="w-8 text-white text-xs font-bold text-center mr-2">
+                <div className="w-8 text-gray-700 text-xs font-bold text-center mr-2">
                   {grade}
                 </div>
                 <div 
-                  className={`h-5 flex-grow rounded-sm relative ${isCurrentGrade ? 'border-2 border-white' : ''}`}
+                  className={`h-5 flex-grow rounded-sm relative ${isCurrentGrade ? 'border-2 border-gray-700' : ''}`}
                   style={{ backgroundColor: barColor }}
                 >
                   {isCurrentGrade && (
                     <div className="absolute -right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="w-2 h-2 bg-white rotate-45 transform"></div>
+                      <div className="w-2 h-2 bg-gray-700 rotate-45 transform"></div>
                     </div>
                   )}
                 </div>
@@ -100,7 +126,7 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
 
         {/* Display unknown energy label if not specified */}
         {!currentGrade && (
-          <div className="text-white text-sm mt-2">
+          <div className="text-gray-700 text-sm mt-2">
             Not specified
           </div>
         )}
