@@ -8,7 +8,8 @@ export interface AgencySettings {
   primaryColor: string;
   secondaryColor: string;
   logoUrl?: string;
-  descriptionBackgroundUrl?: string;
+  pdfBackgroundUrl?: string;
+  webviewBackgroundUrl?: string;
   iconBuildYear?: string;
   iconBedrooms?: string;
   iconBathrooms?: string;

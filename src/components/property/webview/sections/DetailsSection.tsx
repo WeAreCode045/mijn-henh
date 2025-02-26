@@ -18,11 +18,11 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
       <div className="px-6 py-2 flex flex-col md:flex-row gap-6">
         {/* Description Section */}
         <div className="flex-1 relative">
-          {settings?.descriptionBackgroundUrl && (
+          {settings?.webviewBackgroundUrl && (
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url(${settings.descriptionBackgroundUrl})`,
+                backgroundImage: `url(${settings.webviewBackgroundUrl})`,
                 opacity: 0.2
               }}
             />

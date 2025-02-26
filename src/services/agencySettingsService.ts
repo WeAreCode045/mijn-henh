@@ -10,7 +10,8 @@ interface AgencySettingsData {
   primary_color: string;
   secondary_color: string;
   logo_url?: string;
-  description_background_url?: string;
+  pdf_background_url?: string;
+  webview_background_url?: string;
   icon_build_year: string;
   icon_bedrooms: string;
   icon_bathrooms: string;
@@ -40,7 +41,7 @@ export const agencySettingsService = {
     return publicUrl;
   },
 
-  async uploadDescriptionBackground(file: Blob, filename: string) {
+  async uploadBackground(file: Blob, filename: string) {
     const { data, error } = await supabase.storage
       .from('agency_files')
       .upload(filename, file);
@@ -63,7 +64,8 @@ export const agencySettingsService = {
       primary_color: data.primaryColor,
       secondary_color: data.secondaryColor,
       logo_url: data.logoUrl,
-      description_background_url: data.descriptionBackgroundUrl,
+      pdf_background_url: data.pdfBackgroundUrl,
+      webview_background_url: data.webviewBackgroundUrl,
       icon_build_year: data.iconBuildYear,
       icon_bedrooms: data.iconBedrooms,
       icon_bathrooms: data.iconBathrooms,

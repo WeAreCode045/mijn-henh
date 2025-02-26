@@ -1,5 +1,5 @@
 
-import { CalendarDays, Ruler, Home, Bed, Bath, Car } from "lucide-react";
+import { CalendarDays, Ruler, Home, Bed, Bath, Car, Zap } from "lucide-react";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 

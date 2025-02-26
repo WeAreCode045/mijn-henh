@@ -17,7 +17,8 @@ const Settings = () => {
     handleChange,
     handleSelectChange,
     handleLogoUpload,
-    handleDescriptionBackgroundUpload,
+    handlePdfBackgroundUpload,
+    handleWebviewBackgroundUpload,
   } = useAgencySettings();
 
   return (
@@ -59,7 +60,8 @@ const Settings = () => {
             settings={settings}
             onChange={handleChange}
             onSelectChange={handleSelectChange}
-            onDescriptionBackgroundUpload={handleDescriptionBackgroundUpload}
+            onPdfBackgroundUpload={handlePdfBackgroundUpload}
+            onWebviewBackgroundUpload={handleWebviewBackgroundUpload}
           />
         )}
         

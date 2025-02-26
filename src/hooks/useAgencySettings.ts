@@ -42,7 +42,8 @@ export const useAgencySettings = () => {
           primary_color: settings.primaryColor,
           secondary_color: settings.secondaryColor,
           logo_url: logoUrl,
-          description_background_url: settings.descriptionBackgroundUrl,
+          pdf_background_url: settings.pdfBackgroundUrl,
+          webview_background_url: settings.webviewBackgroundUrl,
           icon_build_year: settings.iconBuildYear,
           icon_bedrooms: settings.iconBedrooms,
           icon_bathrooms: settings.iconBathrooms,
@@ -51,7 +52,10 @@ export const useAgencySettings = () => {
           icon_sqft: settings.iconSqft,
           icon_living_space: settings.iconLivingSpace,
           google_maps_api_key: settings.googleMapsApiKey,
-          xml_import_url: settings.xmlImportUrl
+          xml_import_url: settings.xmlImportUrl,
+          instagram_url: settings.instagramUrl,
+          youtube_url: settings.youtubeUrl,
+          facebook_url: settings.facebookUrl
         };
         await agencySettingsService.createSettings(createData);
       }
@@ -92,18 +96,18 @@ export const useAgencySettings = () => {
     }));
   };
 
-  const handleDescriptionBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePdfBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
-      const filename = `description-bg-${Date.now()}.${file.name.split('.').pop()}`;
-      const url = await agencySettingsService.uploadDescriptionBackground(file, filename);
+      const filename = `pdf-bg-${Date.now()}.${file.name.split('.').pop()}`;
+      const url = await agencySettingsService.uploadBackground(file, filename);
       
       if (settings.id) {
         await agencySettingsService.updateSettings(settings.id, {
           ...settings,
-          descriptionBackgroundUrl: url
+          pdfBackgroundUrl: url
         });
 
         const newSettings = await fetchAgencySettings();
@@ -113,19 +117,58 @@ export const useAgencySettings = () => {
       } else {
         setSettings(prev => ({
           ...prev,
-          descriptionBackgroundUrl: url
+          pdfBackgroundUrl: url
         }));
       }
 
       toast({
         title: "Success",
-        description: "Background image uploaded successfully",
+        description: "PDF background image uploaded successfully",
       });
     } catch (error) {
-      console.error('Error uploading background image:', error);
+      console.error('Error uploading PDF background image:', error);
       toast({
         title: "Error",
-        description: "Failed to upload background image",
+        description: "Failed to upload PDF background image",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleWebviewBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const filename = `webview-bg-${Date.now()}.${file.name.split('.').pop()}`;
+      const url = await agencySettingsService.uploadBackground(file, filename);
+      
+      if (settings.id) {
+        await agencySettingsService.updateSettings(settings.id, {
+          ...settings,
+          webviewBackgroundUrl: url
+        });
+
+        const newSettings = await fetchAgencySettings();
+        if (newSettings) {
+          setSettings(newSettings);
+        }
+      } else {
+        setSettings(prev => ({
+          ...prev,
+          webviewBackgroundUrl: url
+        }));
+      }
+
+      toast({
+        title: "Success",
+        description: "Webview background image uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading webview background image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload webview background image",
         variant: "destructive",
       });
     }
@@ -152,6 +195,7 @@ export const useAgencySettings = () => {
     handleChange,
     handleSelectChange,
     handleLogoUpload,
-    handleDescriptionBackgroundUpload,
+    handlePdfBackgroundUpload,
+    handleWebviewBackgroundUpload,
   };
 };
