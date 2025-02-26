@@ -6,6 +6,7 @@ import { ImagePreviewDialog } from "./components/ImagePreviewDialog";
 import { WebViewHeader } from "./WebViewHeader";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CSSProperties } from "react";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
@@ -55,7 +56,7 @@ export function PropertyWebViewContent({
   };
 
   // Apply background image to all pages except Overview (page 0)
-  const backgroundStyle = 
+  const backgroundStyle: CSSProperties = 
     currentPage !== 0 && settings?.webviewBackgroundUrl 
       ? {
           backgroundImage: `url(${settings.webviewBackgroundUrl})`,
@@ -63,7 +64,7 @@ export function PropertyWebViewContent({
           backgroundPosition: 'right top',
           backgroundRepeat: 'no-repeat',
           opacity: 0.2,
-          position: 'absolute',
+          position: 'absolute' as const,
           top: 0,
           right: 0,
           width: '50%',
