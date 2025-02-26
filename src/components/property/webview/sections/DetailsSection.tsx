@@ -2,6 +2,7 @@
 import { PropertyDetails } from "../PropertyDetails";
 import { WebViewSectionProps } from "../types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
   console.log('Property details:', property);
@@ -67,8 +68,11 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                           borderBottom: 'none'
                         }}
                       >
-                        <TableCell className="p-2 text-gray-700">
-                          {feature.description}
+                        <TableCell className="p-2 text-gray-700 flex items-center">
+                          <Check className="w-4 h-4 mr-2 text-green-600" />
+                          <span style={{ fontWeight: 600 }}>
+                            {feature.description}
+                          </span>
                         </TableCell>
                       </TableRow>
                     );
