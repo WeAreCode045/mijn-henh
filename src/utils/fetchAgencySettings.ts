@@ -25,8 +25,8 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     primaryColor: data.primary_color || defaultAgencySettings.primaryColor,
     secondaryColor: data.secondary_color || defaultAgencySettings.secondaryColor,
     logoUrl: data.logo_url,
-    pdfBackgroundUrl: data.pdf_background_url,
-    webviewBackgroundUrl: data.webview_background_url,
+    pdfBackgroundUrl: data.description_background_url, // Updated to use existing column
+    webviewBackgroundUrl: data.description_background_url, // Using the same column for now
     instagramUrl: data.instagram_url || defaultAgencySettings.instagramUrl,
     youtubeUrl: data.youtube_url || defaultAgencySettings.youtubeUrl,
     facebookUrl: data.facebook_url || defaultAgencySettings.facebookUrl,

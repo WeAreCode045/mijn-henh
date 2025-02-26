@@ -10,8 +10,7 @@ interface AgencySettingsData {
   primary_color: string;
   secondary_color: string;
   logo_url?: string;
-  pdf_background_url?: string;
-  webview_background_url?: string;
+  description_background_url?: string; // Updated to use existing column
   icon_build_year: string;
   icon_bedrooms: string;
   icon_bathrooms: string;
@@ -64,8 +63,7 @@ export const agencySettingsService = {
       primary_color: data.primaryColor,
       secondary_color: data.secondaryColor,
       logo_url: data.logoUrl,
-      pdf_background_url: data.pdfBackgroundUrl,
-      webview_background_url: data.webviewBackgroundUrl,
+      description_background_url: data.pdfBackgroundUrl || data.webviewBackgroundUrl, // Store both in the same field
       icon_build_year: data.iconBuildYear,
       icon_bedrooms: data.iconBedrooms,
       icon_bathrooms: data.iconBathrooms,

@@ -42,8 +42,7 @@ export const useAgencySettings = () => {
           primary_color: settings.primaryColor,
           secondary_color: settings.secondaryColor,
           logo_url: logoUrl,
-          pdf_background_url: settings.pdfBackgroundUrl,
-          webview_background_url: settings.webviewBackgroundUrl,
+          description_background_url: settings.pdfBackgroundUrl || settings.webviewBackgroundUrl,
           icon_build_year: settings.iconBuildYear,
           icon_bedrooms: settings.iconBedrooms,
           icon_bathrooms: settings.iconBathrooms,
@@ -104,27 +103,22 @@ export const useAgencySettings = () => {
       const filename = `pdf-bg-${Date.now()}.${file.name.split('.').pop()}`;
       const url = await agencySettingsService.uploadBackground(file, filename);
       
+      setSettings(prev => ({
+        ...prev,
+        pdfBackgroundUrl: url
+      }));
+
       if (settings.id) {
         await agencySettingsService.updateSettings(settings.id, {
           ...settings,
           pdfBackgroundUrl: url
         });
-
-        const newSettings = await fetchAgencySettings();
-        if (newSettings) {
-          setSettings(newSettings);
-        }
-      } else {
-        setSettings(prev => ({
-          ...prev,
-          pdfBackgroundUrl: url
-        }));
+        
+        toast({
+          title: "Success",
+          description: "PDF background image uploaded successfully",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: "PDF background image uploaded successfully",
-      });
     } catch (error) {
       console.error('Error uploading PDF background image:', error);
       toast({
@@ -143,27 +137,22 @@ export const useAgencySettings = () => {
       const filename = `webview-bg-${Date.now()}.${file.name.split('.').pop()}`;
       const url = await agencySettingsService.uploadBackground(file, filename);
       
+      setSettings(prev => ({
+        ...prev,
+        webviewBackgroundUrl: url
+      }));
+
       if (settings.id) {
         await agencySettingsService.updateSettings(settings.id, {
           ...settings,
           webviewBackgroundUrl: url
         });
-
-        const newSettings = await fetchAgencySettings();
-        if (newSettings) {
-          setSettings(newSettings);
-        }
-      } else {
-        setSettings(prev => ({
-          ...prev,
-          webviewBackgroundUrl: url
-        }));
+        
+        toast({
+          title: "Success",
+          description: "Webview background image uploaded successfully",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: "Webview background image uploaded successfully",
-      });
     } catch (error) {
       console.error('Error uploading webview background image:', error);
       toast({
