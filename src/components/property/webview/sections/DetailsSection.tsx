@@ -6,25 +6,6 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
   console.log('Property details:', property);
 
-  // Function to get lighter shade of a color
-  const getLighterShade = (hexColor: string): string => {
-    // Remove the # if present
-    let hex = hexColor.replace('#', '');
-    
-    // Parse the hex color to RGB
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
-    
-    // Lighten by mixing with white (255, 255, 255)
-    r = Math.floor(r + (255 - r) * 0.7);
-    g = Math.floor(g + (255 - g) * 0.7);
-    b = Math.floor(b + (255 - b) * 0.7);
-    
-    // Convert back to hex
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-  };
-
   return (
     <div className="space-y-4 pb-24">
       <PropertyDetails 
@@ -72,9 +53,10 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                 <TableBody>
                   {property.features.map((feature, index) => {
                     const isEven = index % 2 === 0;
+                    // Use white for odd rows instead of the lighter shade
                     const bgColor = isEven 
                       ? settings?.secondaryColor || '#7E69AB'
-                      : getLighterShade(settings?.secondaryColor || '#7E69AB');
+                      : '#FFFFFF';
                     
                     return (
                       <TableRow 
