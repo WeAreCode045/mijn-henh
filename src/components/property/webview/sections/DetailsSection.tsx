@@ -5,8 +5,6 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
-  console.log('Property details:', property);
-
   return (
     <div className="space-y-4 pb-24">
       <PropertyDetails 
