@@ -37,6 +37,10 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
       ? energyLabelColors[property.energyLabel.toUpperCase().charAt(0)]
       : '#94A3B8'; // Gray
 
+  // Energy label grades for the barometer
+  const energyGrades = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  const currentGrade = property.energyLabel?.toUpperCase().charAt(0) || null;
+
   return (
     <div className="grid grid-cols-4 gap-4 p-6">
       {/* Left side: 2x3 grid of property details */}
@@ -63,7 +67,7 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
 
       {/* Right side: Energy label column spanning two rows */}
       <div 
-        className="row-span-2 rounded-lg flex flex-col items-center justify-center text-center"
+        className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4"
         style={{ backgroundColor: settings?.primaryColor }}
       >
         <div 
@@ -72,19 +76,63 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         >
           <Zap className="w-6 h-6 text-white" />
         </div>
-        <p className="text-white font-bold text-xs mb-2">Energy Label</p>
+        <p className="text-white font-bold text-sm mb-4">Energy Label</p>
         
-        <div className="flex flex-col items-center mt-2">
-          <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-1"
-            style={{ backgroundColor: energyLabelColor }}
-          >
-            {property.energyLabel?.toUpperCase().charAt(0) || '?'}
-          </div>
-          <p className="text-white text-sm">
-            {property.energyLabel || 'Not specified'}
-          </p>
+        {/* Energy efficiency barometer */}
+        <div className="w-full max-w-[120px] mb-3">
+          {energyGrades.map((grade) => {
+            const isCurrentGrade = grade === currentGrade;
+            const barColor = energyLabelColors[grade];
+            
+            return (
+              <div key={grade} className="flex items-center mb-1">
+                <div className="w-8 text-white text-xs font-bold text-center mr-2">
+                  {grade}
+                </div>
+                <div 
+                  className={`h-5 flex-grow rounded-sm relative ${isCurrentGrade ? 'border-2 border-white' : ''}`}
+                  style={{ backgroundColor: barColor }}
+                >
+                  {isCurrentGrade && (
+                    <div className="absolute -right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="w-2 h-2 bg-white rotate-45 transform"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
+
+        {/* Current energy grade display */}
+        {currentGrade ? (
+          <div className="flex flex-col items-center mt-2">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-1"
+              style={{ backgroundColor: energyLabelColor }}
+            >
+              {currentGrade}
+            </div>
+            <p 
+              className="text-sm font-semibold"
+              style={{ color: energyLabelColor }}
+            >
+              {property.energyLabel || 'Not specified'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center mt-2">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-1"
+              style={{ backgroundColor: '#94A3B8' }}
+            >
+              ?
+            </div>
+            <p className="text-white text-sm">
+              Not specified
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
