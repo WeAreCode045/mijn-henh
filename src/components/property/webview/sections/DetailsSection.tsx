@@ -18,16 +18,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
       <div className="px-6 py-2 flex flex-col md:flex-row gap-6">
         {/* Description Section */}
         <div className="flex-1 relative">
-          {settings?.webviewBackgroundUrl && (
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${settings.webviewBackgroundUrl})`,
-                opacity: 0.2
-              }}
-            />
-          )}
-          <div className="relative">
+          <div className="relative bg-white/90 p-4 rounded-lg shadow-sm">
             <h3 
               className="text-xl font-semibold mb-2"
               style={{ color: settings?.secondaryColor }}
@@ -43,46 +34,48 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
         {/* Features Section */}
         {property.features && property.features.length > 0 && (
           <div className="flex-1">
-            <h3 
-              className="text-xl font-semibold mb-2"
-              style={{ color: settings?.secondaryColor }}
-            >
-              Features
-            </h3>
-            <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
-              <Table>
-                <TableBody>
-                  {property.features.map((feature, index) => {
-                    const isEven = index % 2 === 0;
-                    
-                    // Blue/gray for even rows, light gray for odd rows
-                    const bgColor = isEven 
-                      ? '#e2e8f0' // Tailwind's slate-200 color (blue/gray tint)
-                      : '#f3f3f3'; // Light gray
-                    
-                    return (
-                      <TableRow 
-                        key={feature.id || index}
-                        style={{ 
-                          backgroundColor: bgColor,
-                          borderBottom: 'none'
-                        }}
-                      >
-                        <TableCell className="p-2 text-gray-700 flex items-center text-left pl-4">
-                          <Check 
-                            className="w-5 h-5 mr-2"
-                            strokeWidth={2.5}
-                            style={{ color: settings?.secondaryColor }}
-                          />
-                          <span style={{ fontWeight: 600 }}>
-                            {feature.description}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+            <div className="bg-white/90 p-4 rounded-lg shadow-sm">
+              <h3 
+                className="text-xl font-semibold mb-2"
+                style={{ color: settings?.secondaryColor }}
+              >
+                Features
+              </h3>
+              <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
+                <Table>
+                  <TableBody>
+                    {property.features.map((feature, index) => {
+                      const isEven = index % 2 === 0;
+                      
+                      // Blue/gray for even rows, light gray for odd rows
+                      const bgColor = isEven 
+                        ? '#e2e8f0' // Tailwind's slate-200 color (blue/gray tint)
+                        : '#f3f3f3'; // Light gray
+                      
+                      return (
+                        <TableRow 
+                          key={feature.id || index}
+                          style={{ 
+                            backgroundColor: bgColor,
+                            borderBottom: 'none'
+                          }}
+                        >
+                          <TableCell className="p-2 text-gray-700 flex items-center text-left pl-4">
+                            <Check 
+                              className="w-5 h-5 mr-2"
+                              strokeWidth={2.5}
+                              style={{ color: settings?.secondaryColor }}
+                            />
+                            <span style={{ fontWeight: 600 }}>
+                              {feature.description}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         )}

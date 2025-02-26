@@ -1,135 +1,116 @@
 
-import { ContactForm } from "../ContactForm";
 import { WebViewSectionProps } from "../types";
-import { MessageCircle, Mail, Phone, QrCode } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { QRCodeSVG } from "qrcode.react";
-
-interface Agent {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string;
-  whatsapp_number: string | null;
-  agent_photo: string | null;
-}
+import { ContactForm } from "../ContactForm";
 
 export function ContactSection({ property, settings }: WebViewSectionProps) {
-  const [agent, setAgent] = useState<Agent | null>(null);
-  const [showQR, setShowQR] = useState(false);
-
-  useEffect(() => {
-    const fetchAgent = async () => {
-      if (property.agent_id) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, email, phone, whatsapp_number, agent_photo')
-          .eq('id', property.agent_id)
-          .single();
-        
-        if (!error && data) {
-          setAgent({
-            id: data.id,
-            full_name: data.full_name || '',
-            email: data.email || '',
-            phone: data.phone || '',
-            whatsapp_number: data.whatsapp_number,
-            agent_photo: data.agent_photo
-          });
-        }
-      }
-    };
-
-    fetchAgent();
-  }, [property.agent_id]);
+  // Prepare agent data
+  const agentName = property.agent?.name || "Agent information not available";
+  const agentImage = property.agent?.photoUrl || "";
+  const agentPhone = property.agent?.phone || "";
+  const agentEmail = property.agent?.email || "";
 
   return (
-    <div className="p-4 sm:p-6 space-y-6">
-      <div className="grid grid-cols-1 gap-6">
-        {/* Contact Form */}
-        <div className="w-full rounded-xl shadow-lg p-8 text-white" style={{ backgroundColor: settings?.secondaryColor }}>
-          <h3 className="text-xl font-semibold mb-6">Interesse in deze woning?</h3>
-          <ContactForm 
-            propertyId={property.id}
-            propertyTitle={property.title}
-            agentId={property.agent_id}
-          />
-        </div>
-
-        {/* Agent Details */}
-        {agent && (
-          <div className="w-full rounded-xl shadow-lg p-8" style={{ backgroundColor: settings?.primaryColor }}>
-            <div className="flex justify-between items-start mb-6">
-              <h4 className="text-xl font-semibold text-white">Contact Agent</h4>
-              <button
-                onClick={() => setShowQR(!showQR)}
-                className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
-              >
-                <QrCode className="w-5 h-5" />
-                <span className="text-sm">Show QR</span>
-              </button>
+    <div className="space-y-4 pb-24">
+      <div className="bg-white/90 p-4 rounded-lg shadow-sm mx-6">
+        <h3 className="text-xl font-semibold mb-4">Get in Touch</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Agent Information */}
+          <div className="space-y-4">
+            <div className="flex items-center">
+              {agentImage ? (
+                <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
+                  <img 
+                    src={agentImage} 
+                    alt={agentName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-gray-200 rounded-full mr-4 flex items-center justify-center">
+                  <span className="text-gray-500 text-xl">
+                    {agentName.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <div>
+                <h4 className="font-semibold">{agentName}</h4>
+                <p className="text-sm text-gray-500">Property Agent</p>
+              </div>
             </div>
-
-            {showQR && (
-              <div className="bg-white p-4 rounded-lg mb-6 flex justify-center">
-                <QRCodeSVG 
-                  value={window.location.href}
-                  size={150}
-                  level="H"
-                  includeMargin={true}
-                />
+            
+            <div className="space-y-2">
+              {agentPhone && (
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span>{agentPhone}</span>
+                </div>
+              )}
+              
+              {agentEmail && (
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span>{agentEmail}</span>
+                </div>
+              )}
+              
+              {property.agent?.address && (
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>{property.agent.address}</span>
+                </div>
+              )}
+            </div>
+            
+            {/* Agency Information */}
+            {settings?.name && (
+              <div className="pt-4 border-t mt-4">
+                <h4 className="font-semibold mb-2">{settings.name}</h4>
+                <div className="space-y-2 text-sm">
+                  {settings.address && (
+                    <div className="flex items-start">
+                      <svg className="w-4 h-4 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>{settings.address}</span>
+                    </div>
+                  )}
+                  
+                  {settings.phone && (
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <span>{settings.phone}</span>
+                    </div>
+                  )}
+                  
+                  {settings.email && (
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span>{settings.email}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-
-            <div className="flex flex-col gap-4 mb-6">
-              <div className="flex items-start gap-4">
-                <Avatar className="w-24 h-24 border-2 border-white">
-                  {agent.agent_photo ? (
-                    <AvatarImage src={agent.agent_photo} alt={agent.full_name} />
-                  ) : (
-                    <AvatarFallback className="bg-white/10 text-white text-xl">
-                      {agent.full_name?.charAt(0)}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <p className="font-medium text-base text-white mt-2">{agent.full_name}</p>
-              </div>
-              <div className="flex flex-col items-start gap-3">
-                {agent.phone && (
-                  <a 
-                    href={`tel:${agent.phone}`}
-                    className="flex items-center gap-3 text-sm text-white/90 hover:text-white transition-colors"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span>{agent.phone}</span>
-                  </a>
-                )}
-                {agent.email && (
-                  <a 
-                    href={`mailto:${agent.email}`}
-                    className="flex items-center gap-3 text-sm text-white/90 hover:text-white transition-colors"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>{agent.email}</span>
-                  </a>
-                )}
-                {agent.whatsapp_number && (
-                  <a 
-                    href={`https://wa.me/${agent.whatsapp_number.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-sm text-white/90 hover:text-white transition-colors"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>WhatsApp</span>
-                  </a>
-                )}
-              </div>
-            </div>
           </div>
-        )}
+          
+          {/* Contact Form */}
+          <div>
+            <ContactForm propertyId={property.id} />
+          </div>
+        </div>
       </div>
     </div>
   );

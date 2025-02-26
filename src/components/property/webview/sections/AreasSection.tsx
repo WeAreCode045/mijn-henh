@@ -25,7 +25,7 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
           const areaImages = getAreaImages(area.imageIds || []);
           
           return (
-            <div key={index} className="space-y-4">
+            <div key={index} className="space-y-4 bg-white/90 p-4 rounded-lg shadow-sm">
               <div>
                 <h3 
                   className="text-xl font-semibold mb-2"

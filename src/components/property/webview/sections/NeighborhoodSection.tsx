@@ -1,147 +1,167 @@
 
+import { Check } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
 import { WebViewSectionProps } from "../types";
-import { useEffect, useState } from "react";
-import supabase from "@/utils/supabase";
-import { School, ShoppingBag, Train, Bus, Dumbbell } from "lucide-react";
-import { WebViewImageGrid } from "../WebViewImageGrid";
 
-interface PlaceDetails {
-  types: string[];
-  vicinity?: string;
-  name?: string;
-  rating?: number;
-  photos?: string[];
-}
-
-interface PlacesData {
-  education: PlaceDetails[];
-  shopping: PlaceDetails[];
-  train: PlaceDetails[];
-  bus: PlaceDetails[];
-  sports: PlaceDetails[];
-}
-
-const initialPlacesData: PlacesData = {
-  education: [],
-  shopping: [],
-  train: [],
-  bus: [],
-  sports: [],
-};
-
-export function NeighborhoodSection({ property, settings }: WebViewSectionProps) {
-  const [placesData, setPlacesData] = useState<PlacesData>(initialPlacesData);
-  const [loading, setLoading] = useState(true);
+export function NeighborhoodSection({ property, settings, waitForPlaces = false }: WebViewSectionProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [places, setPlaces] = useState<{ name: string; category: string; distance: string }[]>([]);
 
   useEffect(() => {
-    const fetchNearbyPlaces = async () => {
-      if (!settings?.googleMapsApiKey || !property.address) {
-        setLoading(false);
-        return;
-      }
+    let map: google.maps.Map | null = null;
+    let service: google.maps.places.PlacesService | null = null;
 
-      try {
-        const { data, error } = await supabase.functions.invoke('nearby-places', {
-          body: {
-            address: property.address,
-            apiKey: settings.googleMapsApiKey
-          }
+    const initMap = () => {
+      if (!mapRef.current) return;
+
+      const lat = parseFloat(property.latitude || "0");
+      const lng = parseFloat(property.longitude || "0");
+      
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const location = { lat, lng };
+      map = new google.maps.Map(mapRef.current, {
+        center: location,
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false,
+      });
+
+      const marker = new google.maps.Marker({
+        position: location,
+        map,
+        title: property.title,
+      });
+
+      setMapLoaded(true);
+
+      // Nearby places search
+      if (!waitForPlaces) {
+        service = new google.maps.places.PlacesService(map);
+        
+        const placesTypes = [
+          "school",
+          "restaurant",
+          "shopping_mall",
+          "supermarket",
+          "park",
+          "hospital",
+          "transit_station"
+        ];
+
+        const categoryMap: { [key: string]: string } = {
+          school: "Education",
+          restaurant: "Dining",
+          shopping_mall: "Shopping",
+          supermarket: "Grocery",
+          park: "Recreation",
+          hospital: "Healthcare",
+          transit_station: "Transportation"
+        };
+
+        const allPlaces: { name: string; category: string; distance: string }[] = [];
+
+        placesTypes.forEach(type => {
+          service?.nearbySearch(
+            {
+              location,
+              radius: 1500,
+              type: type as google.maps.places.PlaceType
+            },
+            (results, status) => {
+              if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                const topResults = results
+                  .slice(0, 3)
+                  .map(place => {
+                    // Calculate distance
+                    const placeLocation = place.geometry?.location;
+                    let distance = "";
+                    if (placeLocation) {
+                      const distanceInMeters = google.maps.geometry.spherical.computeDistanceBetween(
+                        new google.maps.LatLng(lat, lng),
+                        placeLocation
+                      );
+                      distance = `${(distanceInMeters / 1000).toFixed(1)} km`;
+                    }
+
+                    return {
+                      name: place.name || "Unknown place",
+                      category: categoryMap[type] || "Other",
+                      distance
+                    };
+                  });
+
+                allPlaces.push(...topResults);
+                setPlaces([...allPlaces]);
+              }
+            }
+          );
         });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setPlacesData({
-            education: (data.education || []).filter(place => place.rating && place.rating >= 4),
-            shopping: (data.shopping || []).filter(place => place.rating && place.rating >= 4),
-            train: (data.train || []).filter(place => place.rating && place.rating >= 4),
-            bus: (data.bus || []).filter(place => place.rating && place.rating >= 4),
-            sports: (data.sports || []).filter(place => place.rating && place.rating >= 4),
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching nearby places:', error);
-        setPlacesData(initialPlacesData);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchNearbyPlaces();
-  }, [property.address, settings?.googleMapsApiKey]);
+    // Check if Google Maps API is already loaded
+    if (window.google && window.google.maps) {
+      initMap();
+    } else {
+      console.log("Google Maps API not loaded");
+    }
 
-  const renderPlacesList = (places: PlaceDetails[], title: string, Icon: React.ElementType) => {
-    if (!places || places.length === 0) return null;
-
-    return (
-      <div>
-        <h4 className="font-semibold mb-2 text-gray-700 flex items-center gap-2">
-          <Icon className="w-5 h-5" style={{ color: settings?.secondaryColor }} />
-          {title}
-        </h4>
-        <ul className="list-disc list-inside space-y-1">
-          {places.map((place, index) => (
-            <li key={index} className="text-gray-600">
-              {place.name}
-              {place.rating && <span className="text-yellow-500 ml-1">★ {place.rating}</span>}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-full">Loading location data...</div>;
-  }
+    return () => {
+      // Cleanup
+    };
+  }, [property.latitude, property.longitude, waitForPlaces]);
 
   return (
     <div className="space-y-6 pb-24">
-      {property.areaPhotos && property.areaPhotos.length > 0 && (
-        <div className="mb-8 w-full">
-          <WebViewImageGrid images={property.areaPhotos} settings={settings} isLocationGrid={true} />
-        </div>
-      )}
-      
-      <div className="relative px-6">
-        <h3 
-          className="text-xl font-semibold mb-4"
-          style={{ color: settings?.secondaryColor }}
-        >
-          Locatie
-        </h3>
-        <div className="text-gray-600 text-[13px] leading-relaxed mb-6">
-          {loading && settings?.googleMapsApiKey ? (
-            <div className="text-center py-4">Locatie informatie laden...</div>
-          ) : (
-            <div className="mt-4 grid grid-cols-2 gap-6">
-              {renderPlacesList(placesData.education, "Onderwijsinstellingen", School)}
-              {renderPlacesList(placesData.shopping, "Winkelcentra", ShoppingBag)}
-              {renderPlacesList(placesData.train, "Treinstations", Train)}
-              {renderPlacesList(placesData.bus, "Busstations", Bus)}
-              {renderPlacesList(placesData.sports, "Sportfaciliteiten", Dumbbell)}
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="w-full h-[300px] rounded-lg overflow-hidden px-6">
-        {settings?.googleMapsApiKey ? (
-          <iframe
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            style={{ border: 0 }}
-            src={`https://www.google.com/maps/embed/v1/place?key=${settings.googleMapsApiKey}&q=${encodeURIComponent(property.address)}&zoom=14&maptype=roadmap&language=nl&region=NL`}
-            allowFullScreen
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-            Voeg een Google Maps API-sleutel toe in Instellingen &gt; Geavanceerd om de kaart te bekijken
+      <div className="bg-white/90 p-4 rounded-lg shadow-sm mx-6">
+        <h3 className="text-xl font-semibold mb-4">Location & Nearby Places</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Map */}
+          <div className="h-[300px] rounded-lg overflow-hidden">
+            <div ref={mapRef} className="w-full h-full"></div>
           </div>
-        )}
+          
+          {/* Address and Nearby Places */}
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-2">Address</h4>
+              <p className="text-sm">
+                {property.address}
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-2">Nearby Places</h4>
+              {places.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">
+                  {waitForPlaces ? "Places data will be available in the printed version." : "No nearby places found."}
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {places.map((place, index) => (
+                    <li key={index} className="text-sm flex items-start">
+                      <Check className="w-4 h-4 mr-2 mt-0.5" />
+                      <span className="font-medium">{place.name}</span>
+                      <span className="mx-1 text-gray-500">•</span>
+                      <span className="text-gray-500">{place.category}</span>
+                      {place.distance && (
+                        <>
+                          <span className="mx-1 text-gray-500">•</span>
+                          <span className="text-gray-500">{place.distance}</span>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

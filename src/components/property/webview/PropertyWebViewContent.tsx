@@ -54,10 +54,22 @@ export function PropertyWebViewContent({
     }
   };
 
+  // Apply background image to all pages except Overview (page 0)
+  const backgroundStyle = 
+    currentPage !== 0 && settings?.webviewBackgroundUrl 
+      ? {
+          backgroundImage: `url(${settings.webviewBackgroundUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
+        } 
+      : {};
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={backgroundStyle}>
       {/* Header */}
-      <div className="border-b flex-shrink-0">
+      <div className="border-b flex-shrink-0 bg-white">
         <WebViewHeader settings={settings} />
       </div>
 
