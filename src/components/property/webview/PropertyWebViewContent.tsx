@@ -59,22 +59,33 @@ export function PropertyWebViewContent({
     currentPage !== 0 && settings?.webviewBackgroundUrl 
       ? {
           backgroundImage: `url(${settings.webviewBackgroundUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: 'contain',
+          backgroundPosition: 'right top',
           backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
+          opacity: 0.2,
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '50%',
+          height: '100%',
+          zIndex: 0
         } 
       : {};
 
   return (
-    <div className="flex flex-col h-full" style={backgroundStyle}>
+    <div className="flex flex-col h-full relative">
+      {/* Background Image */}
+      {currentPage !== 0 && settings?.webviewBackgroundUrl && (
+        <div style={backgroundStyle}></div>
+      )}
+
       {/* Header */}
-      <div className="border-b flex-shrink-0 bg-white">
+      <div className="border-b flex-shrink-0 bg-white relative z-10">
         <WebViewHeader settings={settings} />
       </div>
 
       {/* Content Section */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 relative z-10">
         <div className="p-4 pb-24">
           {sections[currentPage]?.content}
         </div>
@@ -88,7 +99,7 @@ export function PropertyWebViewContent({
       {/* Fixed Navigation Footer */}
       {!isPrintView && (
         <div 
-          className="absolute bottom-0 left-0 right-0 p-4 border-t bg-opacity-95"
+          className="absolute bottom-0 left-0 right-0 p-4 border-t bg-opacity-95 z-10"
           style={{ backgroundColor: settings?.primaryColor || '#9b87f5' }}
         >
           <div className="flex justify-between items-center">
