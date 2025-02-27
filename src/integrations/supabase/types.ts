@@ -208,11 +208,14 @@ export type Database = {
           longitude: number | null
           map_image: string | null
           nearby_places: Json | null
+          notes: string | null
           object_id: string | null
           price: string | null
           sqft: string | null
           title: string | null
           updated_at: string
+          virtualTourUrl: string | null
+          youtubeUrl: string | null
         }
         Insert: {
           address?: string | null
@@ -239,11 +242,14 @@ export type Database = {
           longitude?: number | null
           map_image?: string | null
           nearby_places?: Json | null
+          notes?: string | null
           object_id?: string | null
           price?: string | null
           sqft?: string | null
           title?: string | null
           updated_at?: string
+          virtualTourUrl?: string | null
+          youtubeUrl?: string | null
         }
         Update: {
           address?: string | null
@@ -270,11 +276,14 @@ export type Database = {
           longitude?: number | null
           map_image?: string | null
           nearby_places?: Json | null
+          notes?: string | null
           object_id?: string | null
           price?: string | null
           sqft?: string | null
           title?: string | null
           updated_at?: string
+          virtualTourUrl?: string | null
+          youtubeUrl?: string | null
         }
         Relationships: [
           {

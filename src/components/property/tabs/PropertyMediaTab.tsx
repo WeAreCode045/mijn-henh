@@ -1,13 +1,13 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Upload, X, Image, FileText, Video360, Youtube } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { ImageUpload, Video, Youtube } from "lucide-react";
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
-import { useToast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyMediaTabProps {
@@ -16,11 +16,12 @@ interface PropertyMediaTabProps {
   floorplans: PropertyFloorplan[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
+  notes?: string;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
   onRemoveFloorplan: (index: number) => void;
-  onUpdateFloorplan: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
 }
 
 export function PropertyMediaTab({
@@ -29,216 +30,245 @@ export function PropertyMediaTab({
   floorplans = [],
   virtualTourUrl = "",
   youtubeUrl = "",
+  notes = "",
   onImageUpload,
   onFloorplanUpload,
   onRemoveImage,
   onRemoveFloorplan,
   onUpdateFloorplan,
 }: PropertyMediaTabProps) {
-  const [activeTab, setActiveTab] = useState("photos");
-  const [tourUrl, setTourUrl] = useState(virtualTourUrl);
-  const [videoUrl, setVideoUrl] = useState(youtubeUrl);
-  const { toast } = useToast();
-  
-  const handleSaveUrls = async () => {
+  const [currentVirtualTourUrl, setCurrentVirtualTourUrl] = useState(virtualTourUrl);
+  const [currentYoutubeUrl, setCurrentYoutubeUrl] = useState(youtubeUrl);
+  const [currentNotes, setCurrentNotes] = useState(notes);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveExternalLinks = async () => {
+    if (!id) return;
+    
+    setIsSaving(true);
     try {
       const { error } = await supabase
         .from('properties')
         .update({
-          virtualTourUrl: tourUrl,
-          youtubeUrl: videoUrl
+          virtualTourUrl: currentVirtualTourUrl,
+          youtubeUrl: currentYoutubeUrl,
+          notes: currentNotes
         })
         .eq('id', id);
       
       if (error) throw error;
       
       toast({
-        description: "URLs saved successfully",
+        description: "External links saved successfully",
       });
     } catch (error) {
-      console.error('Error saving URLs:', error);
+      console.error('Error saving external links:', error);
       toast({
         title: "Error",
-        description: "Failed to save URLs",
+        description: "Failed to save external links",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="photos" className="flex items-center gap-2">
-            <Image className="h-4 w-4" />
-            Property Photos
-          </TabsTrigger>
-          <TabsTrigger value="floorplans" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Floorplans
-          </TabsTrigger>
-          <TabsTrigger value="videos" className="flex items-center gap-2">
-            <Video360 className="h-4 w-4" />
-            Virtual Tour & Video
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="photos" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Property Photos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Input
-                  type="file"
-                  onChange={onImageUpload}
-                  accept="image/*"
-                  multiple
-                  id="property-images"
-                />
-                <Label htmlFor="property-images" className="sr-only">
-                  Upload Images
-                </Label>
-              </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ImageUpload className="h-5 w-5" />
+            Property Images
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-2">Property Images ({images.length})</h3>
               
               {images.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {images.map((image, index) => (
-                    <div key={image.id} className="relative group aspect-square">
+                    <div key={image.id} className="relative group">
                       <img
                         src={image.url}
                         alt={`Property image ${index + 1}`}
-                        className="w-full h-full object-cover rounded-md"
+                        className="w-full h-24 object-cover rounded-md"
                       />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      <button
+                        type="button"
                         onClick={() => onRemoveImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-md">
-                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">No images uploaded yet</p>
+                <div className="text-center py-8 bg-gray-50 rounded-md text-gray-500">
+                  <p>No images have been added yet</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="floorplans" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Floorplans</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Input
-                  type="file"
-                  onChange={onFloorplanUpload}
-                  accept="image/*"
-                  multiple
-                  id="floorplan-images"
-                />
-                <Label htmlFor="floorplan-images" className="sr-only">
-                  Upload Floorplans
-                </Label>
-              </div>
+            </div>
+            
+            <div>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.multiple = true;
+                  input.accept = "image/*";
+                  input.onchange = onImageUpload as any;
+                  input.click();
+                }}
+              >
+                Upload Images
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ImageUpload className="h-5 w-5" />
+            Floorplans
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-2">Floorplans ({floorplans.length})</h3>
               
               {floorplans.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {floorplans.map((floorplan, index) => (
-                    <div key={index} className="relative border rounded-md p-3 bg-white">
-                      <div className="flex flex-col space-y-3">
-                        <div className="relative aspect-video">
-                          <img 
-                            src={floorplan.url} 
-                            alt={`Floorplan ${index + 1}`} 
-                            className="w-full h-full object-contain rounded-md"
-                          />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6"
-                            onClick={() => onRemoveFloorplan(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Label className="flex-shrink-0">Columns:</Label>
+                    <div key={index} className="relative border rounded-md p-3">
+                      <img
+                        src={floorplan.url}
+                        alt={`Floorplan ${index + 1}`}
+                        className="w-full h-40 object-contain"
+                      />
+                      
+                      {onUpdateFloorplan && (
+                        <div className="mt-2">
+                          <Label htmlFor={`columns-${index}`}>Display Columns</Label>
                           <select
-                            value={String(floorplan.columns || 1)}
+                            id={`columns-${index}`}
+                            value={floorplan.columns || 1}
                             onChange={(e) => onUpdateFloorplan(index, 'columns', parseInt(e.target.value))}
-                            className="h-9 w-24 rounded-md border border-input bg-background px-3 py-1"
+                            className="block w-full mt-1 border border-gray-300 rounded-md p-2 text-sm"
                           >
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
+                            <option value={1}>1 Column</option>
+                            <option value={2}>2 Columns</option>
+                            <option value={3}>3 Columns</option>
+                            <option value={4}>4 Columns</option>
                           </select>
                         </div>
-                      </div>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => onRemoveFloorplan(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-md">
-                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">No floorplans uploaded yet</p>
+                <div className="text-center py-8 bg-gray-50 rounded-md text-gray-500">
+                  <p>No floorplans have been added yet</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="videos" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Virtual Tour & Video</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <Label htmlFor="virtual-tour-url">360° Virtual Tour URL</Label>
-                  <Input
-                    id="virtual-tour-url"
-                    value={tourUrl}
-                    onChange={(e) => setTourUrl(e.target.value)}
-                    placeholder="https://my360tour.com/property"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter the URL to your 360° virtual tour (e.g., Matterport, VPiX)
-                  </p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <Label htmlFor="youtube-url">YouTube Video URL</Label>
-                  <Input
-                    id="youtube-url"
-                    value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter the URL to your YouTube property video
-                  </p>
-                </div>
-              </div>
-              
-              <Button onClick={handleSaveUrls}>Save URLs</Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+            
+            <div>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.multiple = true;
+                  input.accept = "image/*";
+                  input.onchange = onFloorplanUpload as any;
+                  input.click();
+                }}
+              >
+                Upload Floorplans
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Video className="h-5 w-5" />
+            Virtual Tour & Videos
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="virtual-tour">Virtual Tour URL (360° Tour)</Label>
+            <Input 
+              id="virtual-tour" 
+              placeholder="https://example.com/virtual-tour" 
+              value={currentVirtualTourUrl}
+              onChange={(e) => setCurrentVirtualTourUrl(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter the URL for an external 360° tour (Matterport, etc.)
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="youtube" className="flex items-center gap-2">
+              <Youtube className="h-4 w-4" /> YouTube Video URL
+            </Label>
+            <Input 
+              id="youtube" 
+              placeholder="https://youtube.com/watch?v=..." 
+              value={currentYoutubeUrl}
+              onChange={(e) => setCurrentYoutubeUrl(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter a YouTube video URL to embed in property views
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="notes">Property Notes (Internal)</Label>
+            <Textarea
+              id="notes"
+              placeholder="Add private notes about this property..."
+              value={currentNotes}
+              onChange={(e) => setCurrentNotes(e.target.value)}
+              rows={4}
+            />
+            <p className="text-xs text-muted-foreground">
+              These notes are for internal use only and won't be shown to clients
+            </p>
+          </div>
+          
+          <Button 
+            onClick={handleSaveExternalLinks}
+            disabled={isSaving}
+          >
+            {isSaving ? "Saving..." : "Save External Links"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

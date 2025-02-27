@@ -1,5 +1,5 @@
 
-import { PropertyData, PropertyFeature, PropertyImage, PropertyArea, PropertyAgent } from "@/types/property";
+import { PropertyData, PropertyFeature, PropertyImage, PropertyArea, PropertyAgent, PropertyFloorplan } from "@/types/property";
 
 export function transformSupabaseData(data: any): PropertyData {
   // Process features array or object
@@ -32,6 +32,33 @@ export function transformSupabaseData(data: any): PropertyData {
       }))
     : [];
 
+  // Process floorplans
+  const floorplans: PropertyFloorplan[] = Array.isArray(data.floorplans)
+    ? data.floorplans.map((floorplan: any) => {
+        if (typeof floorplan === 'string') {
+          try {
+            // Try to parse as JSON string
+            const parsedFloorplan = JSON.parse(floorplan);
+            return {
+              url: parsedFloorplan.url || '',
+              columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
+            };
+          } catch (e) {
+            // If parsing fails, treat as a simple URL string
+            return { url: floorplan, columns: 1 };
+          }
+        } else if (typeof floorplan === 'object' && floorplan !== null) {
+          // If it's already an object
+          return {
+            url: floorplan.url || '',
+            columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
+          };
+        }
+        // Default case
+        return { url: '', columns: 1 };
+      }).filter(f => f.url) // Filter out items with empty URLs
+    : [];
+
   // Process agent data if available
   const agent: PropertyAgent | undefined = data.agent_id ? {
     id: data.agent_id,
@@ -60,7 +87,7 @@ export function transformSupabaseData(data: any): PropertyData {
     location_description: data.location_description || "",
     features: features,
     images: images,
-    floorplans: Array.isArray(data.floorplans) ? data.floorplans : [],
+    floorplans: floorplans,
     featuredImage: data.featuredImage || null,
     gridImages: Array.isArray(data.gridImages) ? data.gridImages : [],
     areas: areas,
@@ -70,6 +97,9 @@ export function transformSupabaseData(data: any): PropertyData {
     latitude: data.latitude || null,
     longitude: data.longitude || null,
     agent_id: data.agent_id || undefined,
-    agent: agent
+    agent: agent,
+    virtualTourUrl: data.virtualTourUrl || '',
+    youtubeUrl: data.youtubeUrl || '',
+    notes: data.notes || ''
   };
 }

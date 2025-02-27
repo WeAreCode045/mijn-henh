@@ -80,6 +80,8 @@ interface BasePropertyData {
   agent_id?: string;
   agent?: PropertyAgent;
   virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
 }
 
 // PropertyData requires id
@@ -120,6 +122,9 @@ export interface PropertySubmitData {
   nearby_places: Json;
   images: string[];
   agent_id?: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
 }
 
 export interface PropertyDatabaseData {
@@ -150,4 +155,7 @@ export interface PropertyDatabaseData {
   images?: string[];
   created_at?: string;
   updated_at?: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
 }
