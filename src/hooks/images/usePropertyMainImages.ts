@@ -109,5 +109,6 @@ export function usePropertyMainImages(
   return {
     handleImageUpload,
     handleRemoveImage,
+    images: formData?.images || []
   };
 }
