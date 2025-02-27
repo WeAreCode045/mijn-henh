@@ -34,17 +34,23 @@ export function PropertyFormContainer() {
     if (formData && formData.id) {
       // Fetch template info
       const fetchTemplateInfo = async () => {
-        const { data } = await supabase
-          .from('brochure_templates')
-          .select('id, name')
-          .eq('id', formData.template_id || 'default')
-          .single();
+        const templateId = formData.template_id || 'default';
         
-        if (data) {
-          setTemplateInfo(data);
-        } else {
-          setTemplateInfo({ id: 'default', name: 'Default Template' });
+        if (templateId !== 'default') {
+          const { data } = await supabase
+            .from('brochure_templates')
+            .select('id, name')
+            .eq('id', templateId)
+            .single();
+            
+          if (data) {
+            setTemplateInfo(data);
+            return;
+          }
         }
+        
+        // Set default if no template or fetching failed
+        setTemplateInfo({ id: 'default', name: 'Default Template' });
       };
 
       // Fetch agent info if agent_id exists

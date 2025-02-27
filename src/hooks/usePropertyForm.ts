@@ -27,7 +27,8 @@ const initialFormData: PropertyFormData = {
   map_image: null,
   nearby_places: [],
   latitude: null,
-  longitude: null
+  longitude: null,
+  template_id: "default" // Set default template_id
 };
 
 export function usePropertyForm(id: string | undefined, onSubmit?: (data: PropertyFormData) => void) {
@@ -148,7 +149,14 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
           nearby_places: nearbyPlaces,
           latitude: propertyData.latitude || null,
           longitude: propertyData.longitude || null,
-          areaPhotos: propertyData.areaPhotos || []
+          areaPhotos: propertyData.areaPhotos || [],
+          created_at: propertyData.created_at,
+          updated_at: propertyData.updated_at,
+          virtualTourUrl: propertyData.virtualTourUrl || "",
+          youtubeUrl: propertyData.youtubeUrl || "",
+          notes: propertyData.notes || "",
+          template_id: propertyData.template_id || "default",
+          agent_id: propertyData.agent_id
         });
       }
       setIsLoading(false);

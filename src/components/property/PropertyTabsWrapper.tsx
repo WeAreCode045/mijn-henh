@@ -60,16 +60,53 @@ export function PropertyTabsWrapper({
       
       <TabsContent value="content">
         <PropertyContentTab 
-          id={property.id}
-          title={property.title}
-          description={property.description}
-          features={property.features}
+          formData={property}
+          currentStep={0}
+          handleStepClick={() => {}}
+          handleNext={() => {}}
+          handlePrevious={() => {}}
+          onSubmit={() => {}}
+          onFieldChange={() => {}}
+          onAddFeature={() => {}}
+          onRemoveFeature={() => {}}
+          onUpdateFeature={() => {}}
+          onAddArea={() => {}}
+          onRemoveArea={() => {}}
+          onUpdateArea={() => {}}
+          onAreaImageUpload={() => {}}
+          onAreaImageRemove={() => {}}
+          onAreaImagesSelect={() => {}}
+          handleImageUpload={() => {}}
+          handleAreaPhotosUpload={() => {}}
+          handleFloorplanUpload={() => {}}
+          handleRemoveImage={() => {}}
+          handleRemoveAreaPhoto={() => {}}
+          handleRemoveFloorplan={() => {}}
+          handleSetFeaturedImage={() => {}}
+          handleToggleGridImage={() => {}}
+          isUpdateMode={true}
         />
       </TabsContent>
       
       <TabsContent value="media">
         <PropertyMediaTab 
-          property={property}
+          id={property.id}
+          title={property.title}
+          images={property.images}
+          featuredImage={property.featuredImage}
+          gridImages={property.gridImages}
+          floorplans={property.floorplans}
+          virtualTourUrl={property.virtualTourUrl}
+          youtubeUrl={property.youtubeUrl}
+          onUpload={() => {}}
+          onRemove={() => {}}
+          onFeaturedImageSelect={() => {}}
+          onGridImageToggle={() => {}}
+          onFloorplanUpload={() => {}}
+          onFloorplanRemove={() => {}}
+          onFloorplanUpdate={() => {}}
+          onVirtualTourUpdate={() => {}}
+          onYoutubeUrlUpdate={() => {}}
         />
       </TabsContent>
       

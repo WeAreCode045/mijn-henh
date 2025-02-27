@@ -84,6 +84,7 @@ interface BasePropertyData {
   notes?: string;
   created_at?: string;
   updated_at?: string;
+  template_id?: string; // Added template_id property
 }
 
 // PropertyData requires id
@@ -129,6 +130,7 @@ export interface PropertySubmitData {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  template_id?: string; // Added template_id property
 }
 
 export interface PropertyDatabaseData {
@@ -162,4 +164,5 @@ export interface PropertyDatabaseData {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  template_id?: string; // Added template_id property
 }

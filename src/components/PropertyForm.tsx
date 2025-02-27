@@ -5,6 +5,7 @@ import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyData } from "@/types/property";
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -69,11 +70,18 @@ export function PropertyForm() {
     return <div>Loading...</div>;
   }
 
+  // Ensure formData has an id property by casting it to PropertyData
+  // This is safe because we've already checked that formData is not null
+  const propertyData: PropertyData = {
+    ...formData,
+    id: formData.id || '', // Provide empty string as fallback if id is missing
+  };
+
   return (
     <div className="space-y-4">
       <form id="propertyForm">
         <PropertyTabsWrapper
-          property={formData}
+          property={propertyData}
           settings={settings}
           onSave={handleSave}
           onDelete={handleDelete}
