@@ -133,6 +133,14 @@ export function PropertyFormContainer() {
   // Create data objects needed by child components
   const propertyDataWithId = createPropertyDataFromFormData(formData);
   
+  // Create adapter functions to match expected types
+  const handleRemoveImageAdapter = (index: number) => {
+    const imageToRemove = propertyDataWithId.images[index];
+    if (imageToRemove) {
+      handleRemoveImage(index);
+    }
+  };
+  
   return (
     <PropertyFormLayout
       title={id ? "Edit Property" : "New Property"}
@@ -145,12 +153,7 @@ export function PropertyFormContainer() {
       onDeleteProperty={handleDeleteProperty}
       onSaveProperty={handleSaveProperty}
       onImageUpload={handleImageUpload}
-      onRemoveImage={(index) => {
-        const imageToRemove = propertyDataWithId.images[index];
-        if (imageToRemove) {
-          handleRemoveImage(imageToRemove.id);
-        }
-      }}
+      onRemoveImage={handleRemoveImageAdapter}
       images={propertyDataWithId.images.map(img => img.url)}
     >
       <PropertyForm />

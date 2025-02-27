@@ -73,23 +73,7 @@ export function PropertyForm() {
   // Create adapter functions to match expected types
   const handleRemoveImageAdapter = (index: number) => {
     if (!formData || !formData.images[index]) return;
-    
-    const imageToRemove = formData.images[index];
-    if (imageToRemove) {
-      handleRemoveImage(imageToRemove.id);
-    }
-  };
-
-  const handleToggleGridImageAdapter = (url: string) => {
-    if (!formData) return;
-    
-    const newGridImages = [...(formData.gridImages || [])];
-    if (newGridImages.includes(url)) {
-      newGridImages.splice(newGridImages.indexOf(url), 1);
-    } else {
-      newGridImages.push(url);
-    }
-    handleToggleGridImage(newGridImages);
+    handleRemoveImage(index);
   };
 
   const onFormSubmit = useCallback((e: React.FormEvent) => {
@@ -174,7 +158,7 @@ export function PropertyForm() {
           handleRemoveFloorplan={handleRemoveFloorplan}
           handleUpdateFloorplan={handleUpdateFloorplan}
           handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleGridImage={handleToggleGridImageAdapter}
+          handleToggleGridImage={handleToggleGridImage}
           handleMapImageDelete={handleMapImageDelete}
         />
       </form>

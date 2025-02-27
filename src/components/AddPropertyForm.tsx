@@ -11,12 +11,14 @@ import { steps } from "./property/form/formSteps";
 import { FormStepNavigation } from "./property/form/FormStepNavigation";
 import { useFormSteps } from "@/hooks/useFormSteps";
 import { PropertyFormContent } from "./property/form/PropertyFormContent";
+import { useState, useCallback } from "react";
 
 export function AddPropertyForm() {
   const { formData, setFormData, isLoading } = usePropertyForm(undefined);
   const { addFeature, removeFeature, updateFeature } = useFeatures(formData, setFormData);
   const { handleSubmit } = usePropertyFormSubmit();
   const { autosaveData } = usePropertyAutosave();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     handleImageUpload,
@@ -55,21 +57,24 @@ export function AddPropertyForm() {
 
   // Create adapter functions to match expected types
   const handleRemoveImageAdapter = (index: number) => {
-    const imageToRemove = formData.images[index];
-    if (imageToRemove) {
-      handleRemoveImage(imageToRemove.id);
-    }
+    if (!formData || !formData.images[index]) return;
+    handleRemoveImage(index);
   };
 
-  const handleToggleGridImageAdapter = (url: string) => {
-    const newGridImages = [...(formData.gridImages || [])];
-    if (newGridImages.includes(url)) {
-      newGridImages.splice(newGridImages.indexOf(url), 1);
-    } else {
-      newGridImages.push(url);
+  const onFormSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (isSubmitting || !formData) return;
+    
+    setIsSubmitting(true);
+    try {
+      handleSubmit(e, formData);
+    } catch (error) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    handleToggleGridImage(newGridImages);
-  };
+  }, [formData, handleSubmit, isSubmitting]);
 
   if (isLoading) {
     return null;
@@ -79,7 +84,7 @@ export function AddPropertyForm() {
     <Card className="w-full p-6 animate-fadeIn">
       <form 
         id="propertyForm" 
-        onSubmit={(e) => handleSubmit(e, formData)} 
+        onSubmit={onFormSubmit} 
         className="space-y-6"
       >
         <FormStepNavigation
@@ -88,6 +93,7 @@ export function AddPropertyForm() {
           onStepClick={handleStepClick}
           onPrevious={handlePrevious}
           onNext={handleNext}
+          onSubmit={() => onFormSubmit(new Event('submit') as any)}
           isUpdateMode={false}
         />
         <PropertyFormContent 
@@ -111,7 +117,7 @@ export function AddPropertyForm() {
           handleRemoveFloorplan={handleRemoveFloorplan}
           handleUpdateFloorplan={handleUpdateFloorplan}
           handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleGridImage={handleToggleGridImageAdapter}
+          handleToggleGridImage={handleToggleGridImage}
           handleMapImageDelete={handleMapImageDelete}
         />
       </form>
