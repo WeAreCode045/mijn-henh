@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertySubmitData, PropertyPlaceType, PropertyImage, PropertyArea } from "@/types/property";
+import type { PropertyFormData, PropertyPlaceType, PropertyImage, PropertyArea } from "@/types/property";
 
 const initialFormData: PropertyFormData = {
   title: "",
@@ -29,7 +30,7 @@ const initialFormData: PropertyFormData = {
   longitude: null
 };
 
-export function usePropertyForm(id: string | undefined, onSubmit: (data: PropertyFormData) => void) {
+export function usePropertyForm(id: string | undefined, onSubmit?: (data: PropertyFormData) => void) {
   const { toast } = useToast();
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
   const [isLoading, setIsLoading] = useState(id ? true : false);
@@ -71,9 +72,12 @@ export function usePropertyForm(id: string | undefined, onSubmit: (data: Propert
               id: area.id || crypto.randomUUID(),
               title: area.title || "",
               description: area.description || "",
-              imageIds: Array.isArray(area.imageIds) ? area.imageIds : []
+              imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
+              columns: typeof area.columns === 'number' ? area.columns : 2 // Load columns property
             }))
           : [];
+
+        console.log("Loaded areas with columns:", areas);
 
         const nearbyPlaces = Array.isArray(propertyData.nearby_places)
           ? propertyData.nearby_places.map((place: any) => ({

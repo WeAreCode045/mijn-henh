@@ -17,7 +17,7 @@ export function transformSupabaseData(data: any): PropertyData {
         title: area.title || "",
         description: area.description || "",
         imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
-        columns: area.columns || 2
+        columns: typeof area.columns === 'number' ? area.columns : 2 // Ensure columns is preserved
       }))
     : [];
 
@@ -31,8 +31,6 @@ export function transformSupabaseData(data: any): PropertyData {
         url: img.url
       }))
     : [];
-
-  console.log("transformSupabaseData - images:", images);
 
   // Process agent data if available
   const agent: PropertyAgent | undefined = data.agent_id ? {

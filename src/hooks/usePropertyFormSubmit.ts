@@ -12,16 +12,16 @@ export function usePropertyFormSubmit() {
   const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData) => {
     e.preventDefault();
     
-    // Prepare data for submission - ensure areas includes imageIds
+    // Prepare data for submission - ensure areas includes columns property
     const areasWithImages = formData.areas.map(area => ({
       id: area.id,
       title: area.title,
       description: area.description,
       imageIds: area.imageIds || [],
-      columns: area.columns || 2
+      columns: area.columns || 2 // Ensure columns property is included
     }));
 
-    console.log("Form submission - areas with images:", areasWithImages);
+    console.log("Form submission - areas with images and columns:", areasWithImages);
     
     // Cast the features and nearby_places to Json type to satisfy TypeScript
     const featuresJson = formData.features as unknown as Json;

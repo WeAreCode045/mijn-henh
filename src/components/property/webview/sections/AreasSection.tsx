@@ -21,8 +21,6 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
   };
 
   console.log("AreasSection - property.areas:", property.areas);
-  console.log("AreasSection - property.images:", property.images);
-  console.log("AreasSection - areasForThisPage:", areasForThisPage);
 
   return (
     <div className="space-y-4 pb-24">
@@ -31,6 +29,7 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
           const areaImages = getAreaImages(area.imageIds || []);
           const columnCount = area.columns || 2; // Default to 2 columns if not specified
           
+          console.log(`Area ${index} (${area.title}) - columns:`, columnCount);
           console.log(`Area ${index} (${area.title}) - imageIds:`, area.imageIds);
           console.log(`Area ${index} (${area.title}) - resolved images:`, areaImages);
           
@@ -50,7 +49,7 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
 
               {areaImages.length > 0 && (
                 <div 
-                  className={`grid gap-4`}
+                  className="grid gap-4"
                   style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
                 >
                   {areaImages.map((imageUrl, imgIndex) => (
