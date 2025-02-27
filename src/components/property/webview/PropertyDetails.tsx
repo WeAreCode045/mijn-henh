@@ -94,27 +94,21 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         ))}
       </div>
 
-      {/* Right side: Energy label column displaying the image from Supabase */}
-      <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4 bg-white shadow">
+      {/* Right side: Energy label column without the white background card */}
+      <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4">
         <p className="text-gray-700 font-bold text-sm mb-4">Energy Label</p>
         
         {/* Energy label image from Supabase */}
         {energyImage ? (
-          <div className="flex flex-col items-center">
-            {/* Round card with opacity for the energy image */}
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center mb-3">
+          <div className="flex items-center justify-center">
+            {/* White background circle for the energy image, made larger */}
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-sm">
               <img 
                 src={energyImage} 
                 alt={`Energy Class ${currentGrade}`} 
-                className="w-16 h-16 object-contain opacity-60"
+                className="w-24 h-24 object-contain opacity-70"
               />
             </div>
-            {/* Label outside the card */}
-            {currentGrade && (
-              <p className="font-bold text-lg" style={{ color: energyLabelColor }}>
-                Class {currentGrade}
-              </p>
-            )}
           </div>
         ) : currentGrade ? (
           // Fallback to the previous visualization if image isn't loaded
