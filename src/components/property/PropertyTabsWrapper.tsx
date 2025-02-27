@@ -107,6 +107,8 @@ export function PropertyTabsWrapper({
           onFloorplanUpdate={() => {}}
           onVirtualTourUpdate={() => {}}
           onYoutubeUrlUpdate={() => {}}
+          onImageUpload={() => {}} // Add the missing property
+          onRemoveImage={() => {}} // Add the missing property
         />
       </TabsContent>
       

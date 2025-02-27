@@ -155,7 +155,7 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
           virtualTourUrl: propertyData.virtualTourUrl || "",
           youtubeUrl: propertyData.youtubeUrl || "",
           notes: propertyData.notes || "",
-          template_id: propertyData.template_id || "default",
+          template_id: propertyData.template_id || "default", // Safely get template_id with fallback
           agent_id: propertyData.agent_id
         });
       }
