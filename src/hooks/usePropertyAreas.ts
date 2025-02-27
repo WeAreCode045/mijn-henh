@@ -120,11 +120,33 @@ export function usePropertyAreas(
     }
   };
 
+  const handleAreaImagesSelect = (areaId: string, selectedImageIds: string[]) => {
+    try {
+      const area = formData.areas.find(a => a.id === areaId);
+      if (!area) return;
+
+      updateArea(areaId, 'imageIds', selectedImageIds);
+
+      toast({
+        title: "Success",
+        description: "Images selected successfully",
+      });
+    } catch (error) {
+      console.error('Error selecting area images:', error);
+      toast({
+        title: "Error",
+        description: "Failed to select images",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     addArea,
     removeArea,
     updateArea,
     handleAreaImageUpload,
-    removeAreaImage
+    removeAreaImage,
+    handleAreaImagesSelect
   };
 }

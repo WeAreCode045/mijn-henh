@@ -40,7 +40,8 @@ export function PropertyForm({ onSubmit }: PropertyFormProps) {
     addArea,
     removeArea,
     updateArea,
-    removeAreaImage
+    removeAreaImage,
+    handleAreaImagesSelect
   } = usePropertyAreas(formData, setFormData);
 
   const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(
@@ -105,6 +106,7 @@ export function PropertyForm({ onSubmit }: PropertyFormProps) {
           onUpdateArea={updateArea}
           onAreaImageUpload={handleAreaImageUpload}
           onAreaImageRemove={removeAreaImage}
+          onAreaImagesSelect={handleAreaImagesSelect}
           handleImageUpload={handleImageUpload}
           handleAreaPhotosUpload={handleAreaPhotosUpload}
           handleFloorplanUpload={handleFloorplanUpload}

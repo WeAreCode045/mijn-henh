@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, X, Upload } from "lucide-react";
+import { PlusCircle, X, Upload, Image as ImageIcon } from "lucide-react";
 import { PropertyArea, PropertyImage } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImageSelectDialog } from "../property/ImageSelectDialog";
 
 interface PropertyAreasProps {
   areas: PropertyArea[];
@@ -16,6 +17,7 @@ interface PropertyAreasProps {
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
   onImageUpload: (id: string, files: FileList) => void;
   onImageRemove: (id: string, imageId: string) => void;
+  onImagesSelect?: (areaId: string, imageIds: string[]) => void;
 }
 
 export function PropertyAreas({
@@ -26,6 +28,7 @@ export function PropertyAreas({
   onUpdate,
   onImageUpload,
   onImageRemove,
+  onImagesSelect,
 }: PropertyAreasProps) {
   // Create a hidden file input for image upload
   const createFileInput = (areaId: string, onClickCallback: () => void) => {
@@ -133,9 +136,25 @@ export function PropertyAreas({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Images</Label>
-                      {createFileInput(area.id, () => {
-                        document.getElementById(`area-images-${area.id}`)?.click();
-                      })}
+                      <div className="flex gap-2">
+                        {createFileInput(area.id, () => {
+                          document.getElementById(`area-images-${area.id}`)?.click();
+                        })}
+                        
+                        <ImageSelectDialog
+                          images={images}
+                          selectedImageIds={area.imageIds || []}
+                          onSelect={(selectedIds) => {
+                            if (onImagesSelect) {
+                              onImagesSelect(area.id, selectedIds);
+                            } else {
+                              onUpdate(area.id, "imageIds", selectedIds);
+                            }
+                          }}
+                          buttonText="Select from Library"
+                          buttonIcon={<ImageIcon className="h-4 w-4 mr-2" />}
+                        />
+                      </div>
                     </div>
                     
                     {areaImages.length > 0 ? (

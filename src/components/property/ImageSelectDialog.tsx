@@ -16,6 +16,7 @@ export interface ImageSelectDialogProps {
   selectedImageIds?: string[];
   onSelect: (selectedIds: string[]) => void;
   buttonText: string;
+  buttonIcon?: React.ReactNode;
   maxSelect?: number;
 }
 
@@ -24,6 +25,7 @@ export function ImageSelectDialog({
   selectedImageIds = [],
   onSelect,
   buttonText,
+  buttonIcon,
   maxSelect,
 }: ImageSelectDialogProps) {
   const [selected, setSelected] = useState<string[]>(selectedImageIds);
@@ -51,11 +53,14 @@ export function ImageSelectDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">{buttonText}</Button>
+        <Button variant="outline" size="sm" className="flex items-center">
+          {buttonIcon}
+          {buttonText}
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Select Images</DialogTitle>
+          <DialogTitle>Select Images from Library</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
           {images.map((image) => (

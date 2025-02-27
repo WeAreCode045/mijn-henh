@@ -10,6 +10,7 @@ interface AreasStepProps {
   onUpdateArea: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
   onAreaImageUpload: (id: string, files: FileList) => void;
   onAreaImageRemove: (id: string, imageId: string) => void;
+  onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
 export function AreasStep({
@@ -20,6 +21,7 @@ export function AreasStep({
   onUpdateArea,
   onAreaImageUpload,
   onAreaImageRemove,
+  onAreaImagesSelect,
 }: AreasStepProps) {
   return (
     <PropertyAreas
@@ -30,6 +32,7 @@ export function AreasStep({
       onUpdate={onUpdateArea}
       onImageUpload={onAreaImageUpload}
       onImageRemove={onAreaImageRemove}
+      onImagesSelect={onAreaImagesSelect}
     />
   );
 }

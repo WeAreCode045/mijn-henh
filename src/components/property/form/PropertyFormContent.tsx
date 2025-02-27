@@ -16,6 +16,7 @@ interface PropertyFormContentProps {
   onUpdateArea: (id: string, field: keyof PropertyFormData["areas"][0], value: string | string[] | number) => void;
   onAreaImageUpload: (id: string, files: FileList) => void;
   onAreaImageRemove: (id: string, imageId: string) => void;
+  onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -39,6 +40,7 @@ export function PropertyFormContent({
   onUpdateArea,
   onAreaImageUpload,
   onAreaImageRemove,
+  onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
   handleFloorplanUpload,
@@ -79,6 +81,7 @@ export function PropertyFormContent({
             onUpdateArea={onUpdateArea}
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
+            onAreaImagesSelect={onAreaImagesSelect}
           />
         );
       default:
