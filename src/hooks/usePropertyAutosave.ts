@@ -27,36 +27,35 @@ export function usePropertyAutosave() {
         columns: floorplan.columns || 1
       }));
 
-      const upsertData = {
-        address: formData.address || null,
-        areaPhotos: formData.areaPhotos || [],
-        areas: formData.areas as unknown as Json[],
-        bathrooms: formData.bathrooms || null,
-        bedrooms: formData.bedrooms || null,
-        buildYear: formData.buildYear || null,
-        description: formData.description || null,
-        energyLabel: formData.energyLabel || null,
-        featuredImage: formData.featuredImage || null,
-        features: formData.features as unknown as Json,
-        floorplans: floorplansForDb as unknown as Json,
-        garages: formData.garages || null,
-        gridImages: formData.gridImages || [],
-        hasGarden: formData.hasGarden || false,
-        images: imageUrls,
-        latitude: formData.latitude ?? currentData?.latitude ?? null,
-        livingArea: formData.livingArea || null,
-        longitude: formData.longitude ?? currentData?.longitude ?? null,
-        map_image: formData.map_image ?? currentData?.map_image ?? null,
-        nearby_places: formData.nearby_places as unknown as Json,
-        price: formData.price || null,
-        sqft: formData.sqft || null,
-        title: formData.title || null,
-        id: formData.id
-      };
-
+      // Get the database schema structure
       const { error } = await supabase
         .from('properties')
-        .upsert(upsertData);
+        .upsert({
+          address: formData.address || null,
+          areaPhotos: formData.areaPhotos || [],
+          areas: formData.areas as unknown as Json[],
+          bathrooms: formData.bathrooms || null,
+          bedrooms: formData.bedrooms || null,
+          buildYear: formData.buildYear || null,
+          description: formData.description || null,
+          energyLabel: formData.energyLabel || null,
+          featuredImage: formData.featuredImage || null,
+          features: formData.features as unknown as Json,
+          floorplans: floorplansForDb as unknown as Json, // This is the key fix - treating floorplans as Json not string[]
+          garages: formData.garages || null,
+          gridImages: formData.gridImages || [],
+          hasGarden: formData.hasGarden || false,
+          images: imageUrls,
+          latitude: formData.latitude ?? currentData?.latitude ?? null,
+          livingArea: formData.livingArea || null,
+          longitude: formData.longitude ?? currentData?.longitude ?? null,
+          map_image: formData.map_image ?? currentData?.map_image ?? null,
+          nearby_places: formData.nearby_places as unknown as Json,
+          price: formData.price || null,
+          sqft: formData.sqft || null,
+          title: formData.title || null,
+          id: formData.id
+        });
 
       if (error) throw error;
 
