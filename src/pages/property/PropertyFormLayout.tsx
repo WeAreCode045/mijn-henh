@@ -6,6 +6,7 @@ import { PropertyActions } from "@/components/property/PropertyActions";
 import { AgentSelector } from "@/components/property/AgentSelector";
 import { PropertyMediaLibrary } from "@/components/property/PropertyMediaLibrary";
 import { Settings } from "@/types/settings";
+import { AgencySettings } from "@/types/agency";
 
 interface PropertyFormLayoutProps {
   children: ReactNode;
@@ -39,8 +40,11 @@ export function PropertyFormLayout({
   images
 }: PropertyFormLayoutProps) {
   // Create an AgencySettings compatible object by mapping properties
-  const agencySettings = {
-    ...settings,
+  const agencySettings: AgencySettings = {
+    name: settings.name,
+    email: settings.email || "",
+    phone: settings.phone || "",
+    address: settings.address || "",
     primaryColor: settings.primary_color || "#40497A",
     secondaryColor: settings.secondary_color || "#E2E8F0",
     logoUrl: settings.logo_url,

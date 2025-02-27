@@ -45,12 +45,44 @@ export function usePropertyAreas(
       const area = formData.areas.find(a => a.id === areaId);
       if (!area) return;
 
-      const imageIds = area.imageIds || [];
+      const fileArray = Array.from(files);
+      const uploadPromises = fileArray.map(async (file) => {
+        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
+        const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
+        const filePath = `properties/${formData.id || 'new'}/areas/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('properties')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('properties')
+          .getPublicUrl(filePath);
+
+        // Add the new image to the images array
+        const newImageId = crypto.randomUUID();
+        const newImage = {
+          id: newImageId,
+          url: publicUrl
+        };
+
+        setFormData(current => ({
+          ...current,
+          images: [...current.images, newImage]
+        }));
+
+        return newImageId;
+      });
+
+      const newImageIds = await Promise.all(uploadPromises);
+      const imageIds = [...(area.imageIds || []), ...newImageIds];
       updateArea(areaId, 'imageIds', imageIds);
 
       toast({
         title: "Success",
-        description: "Area images updated successfully",
+        description: "Area images uploaded successfully",
       });
     } catch (error) {
       console.error('Error uploading area images:', error);

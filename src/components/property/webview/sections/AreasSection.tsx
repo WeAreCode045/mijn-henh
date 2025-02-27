@@ -13,9 +13,11 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
   // Get image URLs for an area based on its imageIds
   const getAreaImages = (imageIds: string[]): string[] => {
     if (!imageIds || !property.images) return [];
-    return imageIds
-      .map(id => property.images.find(img => img.id === id)?.url)
-      .filter((url): url is string => url !== undefined);
+    
+    // Find matching images based on ID
+    return property.images
+      .filter(img => imageIds.includes(img.id))
+      .map(img => img.url);
   };
 
   return (
