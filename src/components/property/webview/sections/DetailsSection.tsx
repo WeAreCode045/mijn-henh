@@ -6,14 +6,14 @@ import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-1 pb-16">
       <PropertyDetails 
         property={property}
         primaryColor={settings?.secondaryColor}
         settings={settings}
       />
       
-      <div className="px-6 py-2 flex flex-col md:flex-row gap-6">
+      <div className="px-6 py-1 flex flex-col md:flex-row gap-6">
         {/* Description Section - adjusted width to be more balanced */}
         <div className="flex-[3] relative">
           <div className="relative bg-white/90 p-4 rounded-lg shadow-sm">

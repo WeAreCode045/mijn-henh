@@ -103,13 +103,13 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
       <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4">
         {/* Energy label image from Supabase */}
         {energyImage ? (
-          <div className="flex items-center justify-center">
-            {/* White background circle for the energy image, made much larger */}
-            <div className="w-48 h-48 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-sm">
+          <div className="flex items-center justify-center -mt-4">
+            {/* White background circle for the energy image, made much larger, with shadow */}
+            <div className="w-48 h-48 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-lg">
               <img 
                 src={energyImage} 
                 alt={`Energy Class ${currentGrade}`} 
-                className="w-40 h-40 object-contain opacity-80" /* Made image significantly larger */
+                className="w-40 h-40 object-contain opacity-80" 
               />
             </div>
           </div>
