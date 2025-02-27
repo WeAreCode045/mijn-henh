@@ -11,9 +11,21 @@ export const FloorplansSection = ({ property, settings, styles }: {
   styles: any;
 }) => {
   // Extract the floorplan URLs from the floorplans array
-  const floorplanUrls = property.floorplans.map(plan => 
-    typeof plan === 'string' ? plan : plan.url
-  );
+  const floorplanUrls = property.floorplans.map(plan => {
+    if (typeof plan === 'string') {
+      // If it's a stringified JSON object, try to parse it
+      try {
+        const parsedPlan = JSON.parse(plan);
+        return parsedPlan.url;
+      } catch (e) {
+        // If parsing fails, assume it's a direct URL string
+        return plan;
+      }
+    } else {
+      // If it's already an object, get the URL
+      return plan.url;
+    }
+  });
 
   return (
     <Page size="A4" style={styles.page}>

@@ -18,9 +18,19 @@ export function usePropertySubmit() {
         console.log("usePropertySubmit - Areas before final formatting:", JSON.stringify(data.areas));
       }
       
-      // Make sure floorplans data is properly formatted as JSONB
+      // Make sure floorplans data is properly formatted as string array
       if (Array.isArray(data.floorplans)) {
         console.log("usePropertySubmit - Floorplans before final formatting:", JSON.stringify(data.floorplans));
+        
+        // Convert floorplans to string[] if they're structured objects
+        if (typeof data.floorplans[0] !== 'string') {
+          data.floorplans = data.floorplans.map((floorplan: any) => 
+            JSON.stringify({
+              url: floorplan.url,
+              columns: floorplan.columns || 1
+            })
+          );
+        }
       }
       
       if (id) {

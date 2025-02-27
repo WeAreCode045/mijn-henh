@@ -22,10 +22,14 @@ export function usePropertyAutosave() {
       const imageUrls = formData.images.map(img => img.url);
       
       // Convert floorplans from PropertyFloorplan[] to proper format for database
-      const floorplansForDb = formData.floorplans.map(floorplan => ({
-        url: floorplan.url,
-        columns: floorplan.columns || 1
-      }));
+      // The database expects floorplans as string[] but we need to store additional metadata
+      // We'll stringify the objects to ensure they're stored as strings in the array
+      const floorplansForDb = formData.floorplans.map(floorplan => 
+        JSON.stringify({
+          url: floorplan.url,
+          columns: floorplan.columns || 1
+        })
+      );
 
       // Get the database schema structure
       const { error } = await supabase
@@ -41,7 +45,7 @@ export function usePropertyAutosave() {
           energyLabel: formData.energyLabel || null,
           featuredImage: formData.featuredImage || null,
           features: formData.features as unknown as Json,
-          floorplans: floorplansForDb as unknown as Json, // This is the key fix - treating floorplans as Json not string[]
+          floorplans: floorplansForDb, // Sending as string[] which is what Supabase expects
           garages: formData.garages || null,
           gridImages: formData.gridImages || [],
           hasGarden: formData.hasGarden || false,
