@@ -77,19 +77,24 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         {detailsConfig.map((detail, index) => (
           <div
             key={index}
-            className="p-4 rounded-lg"
+            className="p-4 rounded-lg flex"
             style={{ backgroundColor: settings?.primaryColor }}
           >
-            <div className="flex items-center space-x-3 mb-1">
+            {/* Icon container - now spans the full height */}
+            <div className="flex items-center mr-3">
               <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center" /* Increased icon container size */
+                className="w-10 h-10 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: settings?.secondaryColor }}
               >
-                <detail.icon className="w-6 h-6 text-white" /> {/* Increased icon size */}
+                <detail.icon className="w-6 h-6 text-white" />
               </div>
-              <p className="text-white font-bold text-xs">{detail.label}</p>
             </div>
-            <p className="text-white font-bold text-sm ml-11">{detail.value}</p>
+            
+            {/* Text content container */}
+            <div className="flex flex-col justify-center">
+              <p className="text-white font-bold text-xs mb-1">{detail.label}</p>
+              <p className="text-white font-bold text-sm">{detail.value}</p>
+            </div>
           </div>
         ))}
       </div>
