@@ -38,6 +38,27 @@ export function PropertyFormLayout({
   onRemoveImage,
   images
 }: PropertyFormLayoutProps) {
+  // Create an AgencySettings compatible object by mapping properties
+  const agencySettings = {
+    ...settings,
+    primaryColor: settings.primary_color || "#40497A",
+    secondaryColor: settings.secondary_color || "#E2E8F0",
+    logoUrl: settings.logo_url,
+    webviewBackgroundUrl: settings.description_background_url,
+    instagramUrl: settings.instagram_url,
+    youtubeUrl: settings.youtube_url,
+    facebookUrl: settings.facebook_url,
+    iconBuildYear: settings.icon_build_year,
+    iconBedrooms: settings.icon_bedrooms,
+    iconBathrooms: settings.icon_bathrooms,
+    iconGarages: settings.icon_garages,
+    iconEnergyClass: settings.icon_energy_class,
+    iconSqft: settings.icon_sqft,
+    iconLivingSpace: settings.icon_living_space,
+    googleMapsApiKey: settings.google_maps_api_key,
+    xmlImportUrl: settings.xml_import_url
+  };
+
   return (
     <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -60,7 +81,7 @@ export function PropertyFormLayout({
             {propertyData.id && (
               <PropertyActions
                 property={propertyData}
-                settings={settings}
+                settings={agencySettings}
                 onDelete={onDeleteProperty}
                 onSave={onSaveProperty}
               />

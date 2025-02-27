@@ -22,4 +22,8 @@ export interface Settings {
   icon_build_year?: string | null;
   icon_garages?: string | null;
   icon_energy_class?: string | null;
+  
+  // Add property aliases to match AgencySettings expected properties
+  primaryColor?: string;
+  secondaryColor?: string;
 }
