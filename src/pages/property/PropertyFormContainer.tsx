@@ -18,7 +18,9 @@ import { PropertyActionsPanel } from "./components/PropertyActionsPanel";
 import { createAgencySettingsFromSettings } from "./components/PropertySettingsAdapter";
 import { 
   createPropertyDataFromFormData, 
-  createSubmitDataFromPropertyData 
+  createSubmitDataFromPropertyData,
+  prepareAreasForSubmission,
+  prepareFloorplansForSubmission
 } from "./components/PropertyDataAdapter";
 
 export function PropertyFormContainer() {
