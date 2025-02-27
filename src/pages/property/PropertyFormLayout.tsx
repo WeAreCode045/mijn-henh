@@ -19,7 +19,7 @@ interface PropertyFormLayoutProps {
   onSaveProperty: () => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  images: string[];
+  images: string[]; // This expects string[] not PropertyImage[]
 }
 
 export function PropertyFormLayout({

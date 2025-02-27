@@ -89,7 +89,7 @@ export function PropertyFormContainer() {
       onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
-      images={images || []}
+      images={images.map(img => img.url)} // Convert PropertyImage[] to string[] by extracting the URL
     >
       <PropertyForm />
     </PropertyFormLayout>
