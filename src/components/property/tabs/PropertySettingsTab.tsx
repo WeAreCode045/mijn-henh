@@ -40,6 +40,7 @@ export function PropertySettingsTab({
   const [currentObjectId, setCurrentObjectId] = useState(objectId);
   const [currentAgentId, setCurrentAgentId] = useState(agentId);
   const [currentTemplateId, setCurrentTemplateId] = useState(selectedTemplateId);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,8 +71,25 @@ export function PropertySettingsTab({
     fetchAgents();
   }, []);
 
+  // Update state when props change
+  useEffect(() => {
+    setCurrentObjectId(objectId);
+    setCurrentAgentId(agentId);
+    setCurrentTemplateId(selectedTemplateId);
+  }, [objectId, agentId, selectedTemplateId]);
+
   const handleSaveSettings = async () => {
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      setIsSaving(true);
       const { error } = await supabase
         .from('properties')
         .update({
@@ -92,6 +110,8 @@ export function PropertySettingsTab({
         description: "Failed to save settings",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -118,9 +138,9 @@ export function PropertySettingsTab({
             </p>
           </div>
           
-          <Button onClick={handleSaveSettings}>
+          <Button onClick={handleSaveSettings} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            Save Settings
+            {isSaving ? "Saving..." : "Save Settings"}
           </Button>
         </CardContent>
       </Card>
@@ -153,9 +173,9 @@ export function PropertySettingsTab({
             </Select>
           </div>
           
-          <Button onClick={handleSaveSettings}>
+          <Button onClick={handleSaveSettings} disabled={isSaving}>
             <Save className="h-4 w-4 mr-2" />
-            Assign Agent
+            {isSaving ? "Saving..." : "Assign Agent"}
           </Button>
         </CardContent>
       </Card>

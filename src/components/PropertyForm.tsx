@@ -9,7 +9,7 @@ import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { useFeatures } from "@/hooks/useFeatures";
 import { usePropertyAutosave } from "@/hooks/usePropertyAutosave";
 import { useToast } from "@/components/ui/use-toast";
-import { PropertyFormData, PropertyPlaceType } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyPlaceType } from "@/types/property";
 import { steps } from "./property/form/formSteps";
 import { useFormSteps } from "@/hooks/useFormSteps";
 import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
@@ -199,6 +199,12 @@ export function PropertyForm() {
   console.log("PropertyForm floorplans:", formData.floorplans);
   console.log("PropertyForm areas:", formData.areas);
 
+  // Ensure formData has an id when passing to PropertyWebView to avoid type errors
+  const formDataWithId: PropertyData = {
+    ...formData,
+    id: formData.id || ''
+  };
+
   return (
     <Card className="w-full p-6 animate-fadeIn">
       <form 
@@ -264,6 +270,7 @@ export function PropertyForm() {
               floorplans={formData.floorplans || []}
               virtualTourUrl={formData.virtualTourUrl}
               youtubeUrl={formData.youtubeUrl}
+              notes={formData.notes}
               onImageUpload={handleImageUpload}
               onFloorplanUpload={handleFloorplanUpload}
               onRemoveImage={handleRemoveImageAdapter}
@@ -285,7 +292,7 @@ export function PropertyForm() {
       </form>
       
       <PropertyWebView
-        property={formData}
+        property={formDataWithId}
         open={isWebViewOpen}
         onOpenChange={setIsWebViewOpen}
       />
