@@ -104,13 +104,35 @@ export function PropertyFormContainer() {
     }
   };
 
-  if (!formData || isLoading) {
-    return null;
+  // Show a loading indicator while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-estate-800"></div>
+      </div>
+    );
+  }
+
+  // Make sure we have formData before rendering the form
+  if (!formData) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-red-500 text-lg font-semibold">
+          Unable to load property data
+        </div>
+        <button 
+          onClick={() => navigate('/')}
+          className="mt-4 px-4 py-2 bg-estate-700 text-white rounded hover:bg-estate-800"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
   }
 
   // Create data objects needed by child components
   const propertyDataWithId = createPropertyDataFromFormData(formData);
-  const agencySettings = createAgencySettingsFromSettings(settings);
+  const agencySettings = createAgencySettingsFromSettings(settings || {});
   
   return (
     <PropertyFormLayout
