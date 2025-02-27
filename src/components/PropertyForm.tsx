@@ -78,10 +78,7 @@ export function PropertyForm() {
 
   return (
     <Card className="w-full p-6 animate-fadeIn">
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit(e, formData);
-      }} className="space-y-6">
+      <form onSubmit={(e) => handleSubmit(e, formData)} className="space-y-6">
         <FormStepNavigation
           steps={steps}
           currentStep={currentStep}
