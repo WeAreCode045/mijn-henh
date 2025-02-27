@@ -22,14 +22,9 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         const energyClass = property.energyLabel.toUpperCase().charAt(0);
         
         try {
-          const { data, error } = await supabase.storage
+          const { data } = await supabase.storage
             .from('global')
-            .getPublicUrl(`energy/${energyClass}/${energyClass}.png`);
-          
-          if (error) {
-            console.error('Error fetching energy image:', error);
-            return;
-          }
+            .getPublicUrl(`energy/${energyClass}.png`);
           
           if (data) {
             setEnergyImage(data.publicUrl);
