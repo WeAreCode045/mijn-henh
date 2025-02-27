@@ -26,6 +26,11 @@ export function PropertyFormContainer() {
     console.log("PropertyFormContainer - handleFormSubmit called with formData:", formData);
     if (!formData.id) {
       console.error('Property ID is required');
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -96,8 +101,8 @@ export function PropertyFormContainer() {
       agent_id: selectedAgent || null
     };
     
-    console.log("Submitting property with areas data:", JSON.stringify(submitData.areas));
-    handleDatabaseSubmit(submitData, id);
+    console.log("Submitting property with data:", JSON.stringify(submitData));
+    handleDatabaseSubmit(submitData, formData.id);
   };
 
   const { formData, setFormData, isLoading } = usePropertyForm(id, handleFormSubmit);
@@ -129,6 +134,20 @@ export function PropertyFormContainer() {
       toast({
         title: "Error",
         description: "Failed to delete the property",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveProperty = () => {
+    console.log("Save button clicked in PropertyFormContainer, submitting current formData");
+    if (formData && formData.id) {
+      handleFormSubmit(formData);
+    } else {
+      console.error("Cannot save: formData is missing or incomplete");
+      toast({
+        title: "Error",
+        description: "Cannot save: form data is missing or incomplete",
         variant: "destructive",
       });
     }
@@ -172,10 +191,7 @@ export function PropertyFormContainer() {
       selectedAgent={selectedAgent}
       onAgentSelect={setSelectedAgent}
       onDeleteProperty={handleDeleteProperty}
-      onSaveProperty={() => {
-        console.log("Save button clicked, calling handleFormSubmit with current formData");
-        handleFormSubmit(formData);
-      }}
+      onSaveProperty={handleSaveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={(index) => {
         const imageToRemove = propertyDataWithId.images[index];

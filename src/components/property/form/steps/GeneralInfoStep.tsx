@@ -24,8 +24,11 @@ export function GeneralInfoStep({
           <Input
             id="title"
             type="text"
-            value={formData.title}
-            onChange={(e) => onFieldChange('title', e.target.value)}
+            value={formData.title || ''}
+            onChange={(e) => {
+              console.log("Title changed to:", e.target.value);
+              onFieldChange('title', e.target.value);
+            }}
             placeholder="Title"
           />
         </div>
@@ -34,8 +37,11 @@ export function GeneralInfoStep({
           <Input
             id="price"
             type="text"
-            value={formData.price}
-            onChange={(e) => onFieldChange('price', e.target.value)}
+            value={formData.price || ''}
+            onChange={(e) => {
+              console.log("Price changed to:", e.target.value);
+              onFieldChange('price', e.target.value);
+            }}
             placeholder="Price"
           />
         </div>
@@ -44,7 +50,7 @@ export function GeneralInfoStep({
           <Input
             id="address"
             type="text"
-            value={formData.address}
+            value={formData.address || ''}
             onChange={(e) => onFieldChange('address', e.target.value)}
             placeholder="Address"
           />
@@ -64,7 +70,7 @@ export function GeneralInfoStep({
           <Input
             id="bedrooms"
             type="number"
-            value={formData.bedrooms}
+            value={formData.bedrooms || ''}
             onChange={(e) => onFieldChange('bedrooms', e.target.value)}
             placeholder="Number of bedrooms"
           />
@@ -74,7 +80,7 @@ export function GeneralInfoStep({
           <Input
             id="bathrooms"
             type="number"
-            value={formData.bathrooms}
+            value={formData.bathrooms || ''}
             onChange={(e) => onFieldChange('bathrooms', e.target.value)}
             placeholder="Number of bathrooms"
           />
@@ -84,7 +90,7 @@ export function GeneralInfoStep({
           <Input
             id="sqft"
             type="text"
-            value={formData.sqft}
+            value={formData.sqft || ''}
             onChange={(e) => onFieldChange('sqft', e.target.value)}
             placeholder="Lot size in square feet"
           />
@@ -94,7 +100,7 @@ export function GeneralInfoStep({
           <Input
             id="livingArea"
             type="text"
-            value={formData.livingArea}
+            value={formData.livingArea || ''}
             onChange={(e) => onFieldChange('livingArea', e.target.value)}
             placeholder="Living area in square feet"
           />
@@ -104,7 +110,7 @@ export function GeneralInfoStep({
           <Input
             id="buildYear"
             type="text"
-            value={formData.buildYear}
+            value={formData.buildYear || ''}
             onChange={(e) => onFieldChange('buildYear', e.target.value)}
             placeholder="Year built"
           />
@@ -114,7 +120,7 @@ export function GeneralInfoStep({
           <Input
             id="energyLabel"
             type="text"
-            value={formData.energyLabel}
+            value={formData.energyLabel || ''}
             onChange={(e) => onFieldChange('energyLabel', e.target.value)}
             placeholder="Energy label"
           />
@@ -125,7 +131,7 @@ export function GeneralInfoStep({
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
-          value={formData.description}
+          value={formData.description || ''}
           onChange={(e) => onFieldChange('description', e.target.value)}
           placeholder="Description"
         />

@@ -13,6 +13,16 @@ export function usePropertyFormSubmit() {
     e.preventDefault();
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
     
+    if (!formData) {
+      console.error("Form data is undefined or null");
+      toast({
+        title: "Error",
+        description: "No form data available to submit",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Prepare areas data with correct types for submission
     const areasWithImages = formData.areas.map(area => {
       console.log(`usePropertyFormSubmit - Preparing area ${area.id} for submission with columns:`, area.columns);
@@ -55,12 +65,15 @@ export function usePropertyFormSubmit() {
       longitude: formData.longitude,
       areas: areasJson,
       nearby_places: nearby_placesJson,
-      images: formData.images.map(img => img.url)
+      images: formData.images.map(img => img.url),
+      object_id: formData.object_id
     };
     
     try {
       if (formData.id) {
-        console.log("usePropertyFormSubmit - Updating property with areas data:", JSON.stringify(submitData.areas));
+        console.log("usePropertyFormSubmit - Updating property with ID:", formData.id);
+        console.log("usePropertyFormSubmit - Update data:", JSON.stringify(submitData));
+        
         const { error } = await supabase
           .from('properties')
           .update(submitData)

@@ -47,6 +47,7 @@ export function PropertyForm() {
   );
 
   const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
+    console.log(`Field ${field} changed to:`, value);
     setFormData({ ...formData, [field]: value });
   };
 
@@ -78,7 +79,14 @@ export function PropertyForm() {
 
   return (
     <Card className="w-full p-6 animate-fadeIn">
-      <form id="propertyForm" onSubmit={(e) => handleSubmit(e, formData)} className="space-y-6">
+      <form 
+        id="propertyForm" 
+        onSubmit={(e) => {
+          console.log("PropertyForm - Form submitted via standard submit event");
+          handleSubmit(e, formData);
+        }} 
+        className="space-y-6"
+      >
         <FormStepNavigation
           steps={steps}
           currentStep={currentStep}

@@ -19,10 +19,16 @@ export function usePropertySubmit() {
       }
       
       if (id) {
-        console.log(`usePropertySubmit - Updating property ${id} with areas:`, JSON.stringify(data.areas));
+        console.log(`usePropertySubmit - Updating property ${id} with data:`, JSON.stringify(data));
+        
+        // Strip any undefined values from the data
+        const cleanData = Object.fromEntries(
+          Object.entries(data).filter(([_, v]) => v !== undefined)
+        ) as PropertySubmitData;
+        
         const { error: updateError } = await supabase
           .from('properties')
-          .update(data)
+          .update(cleanData)
           .eq('id', id);
         
         if (updateError) {
@@ -36,7 +42,7 @@ export function usePropertySubmit() {
           variant: "default",
         });
       } else {
-        console.log("usePropertySubmit - Creating new property with areas:", JSON.stringify(data.areas));
+        console.log("usePropertySubmit - Creating new property with data:", JSON.stringify(data));
         const { error: insertError } = await supabase
           .from('properties')
           .insert(data);

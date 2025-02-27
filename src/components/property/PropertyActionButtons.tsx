@@ -29,7 +29,7 @@ export function PropertyActionButtons({
             variant="outline" 
             className="w-full justify-start" 
             onClick={() => {
-              console.log("Save button clicked");
+              console.log("Save button clicked, triggering onSave callback");
               onSave();
             }}
             type="button"
