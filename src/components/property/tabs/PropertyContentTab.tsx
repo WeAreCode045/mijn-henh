@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
@@ -6,11 +7,11 @@ import { steps } from "@/components/property/form/formSteps";
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
-  currentStep: number;
-  handleStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
-  onSubmit: (e: React.FormEvent) => void;
+  currentStep?: number;
+  handleStepClick?: (step: number) => void;
+  handleNext?: () => void;
+  handlePrevious?: () => void;
+  onSubmit?: (e: React.FormEvent) => void;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -38,11 +39,11 @@ interface PropertyContentTabProps {
 
 export function PropertyContentTab({
   formData,
-  currentStep,
-  handleStepClick,
-  handleNext,
-  handlePrevious,
-  onSubmit,
+  currentStep: initialStep,
+  handleStepClick: externalHandleStepClick,
+  handleNext: externalHandleNext,
+  handlePrevious: externalHandlePrevious,
+  onSubmit: externalOnSubmit,
   onFieldChange,
   onAddFeature,
   onRemoveFeature,
@@ -67,6 +68,34 @@ export function PropertyContentTab({
   onRemoveNearbyPlace,
   isUpdateMode,
 }: PropertyContentTabProps) {
+  // Initialize with step 1 if not provided
+  const [currentStep, setCurrentStep] = useState(initialStep || 1);
+  
+  // Internal handlers if external ones aren't provided
+  const handleStepClick = (step: number) => {
+    setCurrentStep(step);
+    if (externalHandleStepClick) externalHandleStepClick(step);
+  };
+  
+  const handleNext = () => {
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    }
+    if (externalHandleNext) externalHandleNext();
+  };
+  
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+    if (externalHandlePrevious) externalHandlePrevious();
+  };
+  
+  const onSubmit = (e: React.FormEvent) => {
+    if (externalOnSubmit) externalOnSubmit(e);
+    else e.preventDefault();
+  };
+
   return (
     <div className="space-y-4">
       <FormStepNavigation
@@ -75,7 +104,7 @@ export function PropertyContentTab({
         onStepClick={handleStepClick}
         onPrevious={handlePrevious}
         onNext={handleNext}
-        onSubmit={() => onSubmit(new Event('submit') as any)}
+        onSubmit={onSubmit}
         isUpdateMode={isUpdateMode}
       />
       <PropertyFormContent

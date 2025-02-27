@@ -25,7 +25,9 @@ interface PropertySettingsTabProps {
   objectId?: string;
   agentId?: string;
   selectedTemplateId?: string;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
+  onSaveSettings: (objectId: string, agentId: string, templateId: string) => Promise<void>;
+  isUpdating?: boolean;
 }
 
 export function PropertySettingsTab({
@@ -34,13 +36,14 @@ export function PropertySettingsTab({
   agentId = "",
   selectedTemplateId = "default",
   onDelete,
+  onSaveSettings,
+  isUpdating = false,
 }: PropertySettingsTabProps) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [currentObjectId, setCurrentObjectId] = useState(objectId);
   const [currentAgentId, setCurrentAgentId] = useState(agentId);
   const [currentTemplateId, setCurrentTemplateId] = useState(selectedTemplateId);
-  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -89,29 +92,9 @@ export function PropertySettingsTab({
     }
 
     try {
-      setIsSaving(true);
-      const { error } = await supabase
-        .from('properties')
-        .update({
-          object_id: currentObjectId,
-          agent_id: currentAgentId
-        })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      toast({
-        description: "Settings saved successfully",
-      });
+      await onSaveSettings(currentObjectId, currentAgentId, currentTemplateId);
     } catch (error) {
-      console.error('Error saving settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save settings",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+      console.error('Error in handleSaveSettings:', error);
     }
   };
 
@@ -138,9 +121,9 @@ export function PropertySettingsTab({
             </p>
           </div>
           
-          <Button onClick={handleSaveSettings} disabled={isSaving}>
+          <Button onClick={handleSaveSettings} disabled={isUpdating}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : "Save Settings"}
+            {isUpdating ? "Saving..." : "Save Settings"}
           </Button>
         </CardContent>
       </Card>
@@ -173,9 +156,9 @@ export function PropertySettingsTab({
             </Select>
           </div>
           
-          <Button onClick={handleSaveSettings} disabled={isSaving}>
+          <Button onClick={handleSaveSettings} disabled={isUpdating}>
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : "Assign Agent"}
+            {isUpdating ? "Saving..." : "Assign Agent"}
           </Button>
         </CardContent>
       </Card>
@@ -207,6 +190,11 @@ export function PropertySettingsTab({
               </SelectContent>
             </Select>
           </div>
+          
+          <Button onClick={handleSaveSettings} disabled={isUpdating}>
+            <Save className="h-4 w-4 mr-2" />
+            {isUpdating ? "Saving..." : "Save Template"}
+          </Button>
         </CardContent>
       </Card>
       
