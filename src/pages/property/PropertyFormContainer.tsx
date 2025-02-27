@@ -69,13 +69,16 @@ export function PropertyFormContainer() {
     });
 
     // Prepare floorplans in the correct format for the database
-    const floorplansForDb = propertyData.floorplans.map(floorplan => ({
-      url: floorplan.url,
-      columns: floorplan.columns || 1
-    }));
+    const floorplansForDb = propertyData.floorplans.map(floorplan => {
+      return JSON.stringify({
+        url: floorplan.url,
+        columns: floorplan.columns || 1
+      });
+    });
 
     // Log the areas data for debugging
     console.log("Areas data before submission:", JSON.stringify(areasWithColumns));
+    console.log("Floorplans data before submission:", JSON.stringify(floorplansForDb));
 
     const submitData: PropertySubmitData = {
       id: propertyData.id,
@@ -92,7 +95,7 @@ export function PropertyFormContainer() {
       hasGarden: propertyData.hasGarden,
       description: propertyData.description,
       location_description: propertyData.location_description,
-      floorplans: floorplansForDb as unknown as Json,
+      floorplans: floorplansForDb,
       featuredImage: propertyData.featuredImage,
       gridImages: propertyData.gridImages,
       areaPhotos: propertyData.areaPhotos,

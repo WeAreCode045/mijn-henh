@@ -21,11 +21,14 @@ export const FloorplansSection = ({ property, settings, styles }: {
         // If parsing fails, assume it's a direct URL string
         return plan;
       }
-    } else {
-      // If it's already an object, get the URL
+    } else if (plan && typeof plan === 'object' && 'url' in plan) {
+      // If it's already an object with a url property
       return plan.url;
+    } else {
+      // Fallback
+      return '';
     }
-  });
+  }).filter(url => url); // Filter out empty URLs
 
   return (
     <Page size="A4" style={styles.page}>

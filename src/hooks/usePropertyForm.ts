@@ -82,21 +82,30 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
         // Transform floorplans from database format to PropertyFloorplan[]
         let floorplans: PropertyFloorplan[] = [];
         if (Array.isArray(propertyData.floorplans)) {
-          if (propertyData.floorplans.length > 0) {
-            if (typeof propertyData.floorplans[0] === 'string') {
-              // Handle legacy format (array of strings)
-              floorplans = propertyData.floorplans.map((url: string) => ({ 
-                url, 
-                columns: 1 
-              }));
+          floorplans = propertyData.floorplans.map((floorplan: any) => {
+            if (typeof floorplan === 'string') {
+              try {
+                // Try to parse as JSON if it's a stringified object
+                const parsedFloorplan = JSON.parse(floorplan);
+                return {
+                  url: parsedFloorplan.url || '',
+                  columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
+                };
+              } catch (e) {
+                // If parsing fails, treat it as a plain URL string
+                return { url: floorplan, columns: 1 };
+              }
+            } else if (typeof floorplan === 'object' && floorplan !== null) {
+              // If it's already an object
+              return {
+                url: floorplan.url || '',
+                columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
+              };
             } else {
-              // Handle new format (array of objects with url and columns)
-              floorplans = propertyData.floorplans.map((plan: any) => ({
-                url: plan.url || '',
-                columns: typeof plan.columns === 'number' ? plan.columns : 1
-              }));
+              // Fallback for any other case
+              return { url: '', columns: 1 };
             }
-          }
+          }).filter(f => f.url); // Filter out any items with empty URLs
         }
 
         console.log("Loaded floorplans:", floorplans);

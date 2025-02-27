@@ -15,21 +15,26 @@ export function usePropertyAutosave() {
         .from('properties')
         .select('map_image, nearby_places, latitude, longitude')
         .eq('id', formData.id)
-        .single();
+        .maybeSingle();
 
       if (fetchError) throw fetchError;
 
       const imageUrls = formData.images.map(img => img.url);
       
-      // Convert floorplans from PropertyFloorplan[] to proper format for database
-      // The database expects floorplans as string[] but we need to store additional metadata
-      // We'll stringify the objects to ensure they're stored as strings in the array
-      const floorplansForDb = formData.floorplans.map(floorplan => 
-        JSON.stringify({
+      // Process floorplans data - ensure it's stored as string[] in the database
+      // Each string in the array is a stringified JSON object with url and columns properties
+      const floorplansForDb = formData.floorplans.map(floorplan => {
+        // Create a clean object with just the properties we want to store
+        const floorplanData = {
           url: floorplan.url,
           columns: floorplan.columns || 1
-        })
-      );
+        };
+        
+        // Return the stringified object
+        return JSON.stringify(floorplanData);
+      });
+
+      console.log("usePropertyAutosave - Processed floorplans for database:", floorplansForDb);
 
       // Get the database schema structure
       const { error } = await supabase

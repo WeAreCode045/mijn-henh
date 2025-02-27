@@ -37,22 +37,22 @@ export function usePropertyFormSubmit() {
 
     console.log("usePropertyFormSubmit - Form submission - areas with columns:", areasWithImages);
     
-    // Prepare floorplans data with columns
+    // Prepare floorplans data - ensure consistency with other hooks
     const floorplansData = formData.floorplans.map(floorplan => {
       console.log("usePropertyFormSubmit - Preparing floorplan for submission:", floorplan);
-      return {
+      const floorplanData = {
         url: floorplan.url,
         columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
       };
+      return JSON.stringify(floorplanData);
     });
     
-    console.log("usePropertyFormSubmit - Form submission - floorplans with columns:", floorplansData);
+    console.log("usePropertyFormSubmit - Form submission - floorplans processed:", floorplansData);
     
     // Cast the features and nearby_places to Json type to satisfy TypeScript
     const featuresJson = formData.features as unknown as Json;
     const nearby_placesJson = formData.nearby_places as unknown as Json;
     const areasJson = areasWithImages as unknown as Json[];
-    const floorplansJson = floorplansData as unknown as Json;
     
     const submitData: PropertySubmitData = {
       title: formData.title,
@@ -69,7 +69,7 @@ export function usePropertyFormSubmit() {
       description: formData.description,
       location_description: formData.location_description,
       features: featuresJson,
-      floorplans: floorplansJson,
+      floorplans: floorplansData, // Now consistently formatted as string[]
       featuredImage: formData.featuredImage,
       gridImages: formData.gridImages,
       map_image: formData.map_image,
