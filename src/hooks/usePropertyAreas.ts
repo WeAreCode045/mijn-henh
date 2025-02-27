@@ -68,10 +68,14 @@ export function usePropertyAreas(
           url: publicUrl
         };
 
-        setFormData(current => ({
-          ...current,
-          images: [...current.images, newImage]
-        }));
+        // Create a new images array with the new image
+        const updatedImages = [...formData.images, newImage];
+        
+        // Update the form data directly instead of using a callback function
+        setFormData({
+          ...formData,
+          images: updatedImages
+        });
 
         return newImageId;
       });
