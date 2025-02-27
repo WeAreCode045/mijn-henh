@@ -82,6 +82,8 @@ interface BasePropertyData {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // PropertyData requires id
@@ -92,6 +94,8 @@ export interface PropertyData extends BasePropertyData {
 // PropertyFormData makes id optional
 export interface PropertyFormData extends BasePropertyData {
   id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PropertySubmitData {

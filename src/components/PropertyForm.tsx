@@ -25,6 +25,7 @@ import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -291,4 +292,3 @@ export function PropertyForm() {
     </Card>
   );
 }
-

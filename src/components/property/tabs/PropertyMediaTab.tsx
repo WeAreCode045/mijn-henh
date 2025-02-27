@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { ImageUpload, Video, Youtube } from "lucide-react";
+import { Image, Video, Youtube } from "lucide-react";
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,7 +78,7 @@ export function PropertyMediaTab({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ImageUpload className="h-5 w-5" />
+            <Image className="h-5 w-5" />
             Property Images
           </CardTitle>
         </CardHeader>
@@ -137,7 +137,7 @@ export function PropertyMediaTab({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ImageUpload className="h-5 w-5" />
+            <Image className="h-5 w-5" />
             Floorplans
           </CardTitle>
         </CardHeader>

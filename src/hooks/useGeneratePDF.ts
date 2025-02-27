@@ -20,9 +20,15 @@ export function useGeneratePDF() {
       return;
     }
 
+    // Ensure property has an ID, if not generate a temporary one
+    const propertyWithId = {
+      ...property,
+      id: property.id || crypto.randomUUID()  // Add a temporary ID if none exists
+    };
+
     try {
       setIsGenerating(true);
-      await generatePropertyPDF(property, settings, templateId);
+      await generatePropertyPDF(propertyWithId, settings, templateId);
       toast({
         title: "Success",
         description: "PDF generated successfully",
