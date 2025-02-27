@@ -52,20 +52,32 @@ export function PropertyFormContent({
   handleMapImageDelete,
 }: PropertyFormContentProps) {
   
-  const CurrentStep = steps.find(s => s.id === step)?.component;
-
-  if (!CurrentStep) {
-    return <div>Error: Step not found</div>;
+  // Find the step component that corresponds to the current step
+  const StepComponent = steps.find(s => s.id === step)?.component;
+  
+  // Add defensive check
+  if (!StepComponent) {
+    console.error(`Step component not found for step: ${step}`);
+    return (
+      <div className="p-4 border border-red-300 bg-red-50 rounded-md">
+        <p className="text-red-500">Error: Step not found. Please try refreshing the page.</p>
+      </div>
+    );
   }
 
   // If formData is not available, show a loading state
   if (!formData) {
-    return <div className="py-4 animate-fadeIn">Loading property data...</div>;
+    return (
+      <div className="py-4 flex justify-center items-center h-32">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
+  // Pass all props to the step component
   return (
     <div className="py-4 animate-fadeIn">
-      <CurrentStep
+      <StepComponent
         formData={formData}
         onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}

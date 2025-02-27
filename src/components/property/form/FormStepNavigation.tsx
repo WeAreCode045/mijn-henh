@@ -22,6 +22,7 @@ export function FormStepNavigation({
   onSubmit,
   isUpdateMode
 }: FormStepNavigationProps) {
+  // Prevent event propagation to avoid unwanted form submissions
   const handleStepClick = (e: React.MouseEvent, stepId: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -30,15 +31,22 @@ export function FormStepNavigation({
 
   const handleNext = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     console.log("Next button clicked, currentStep:", currentStep);
     onNext();
+  };
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onPrevious();
   };
 
   return (
     <>
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold">{steps[currentStep - 1].title}</h2>
+          <h2 className="text-2xl font-semibold">{steps[currentStep - 1]?.title || 'Property Information'}</h2>
           <div className="text-sm text-gray-500">
             Step {currentStep} of {steps.length}
           </div>
@@ -74,7 +82,7 @@ export function FormStepNavigation({
         <Button
           type="button"
           variant="outline"
-          onClick={onPrevious}
+          onClick={handlePrevious}
           disabled={currentStep === 1}
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
@@ -82,7 +90,7 @@ export function FormStepNavigation({
         </Button>
         
         {currentStep === steps.length ? (
-          <Button type="submit">
+          <Button type="submit" onClick={onSubmit}>
             Save Property
           </Button>
         ) : (

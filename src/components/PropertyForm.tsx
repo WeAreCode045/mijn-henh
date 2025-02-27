@@ -7,6 +7,8 @@ import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { useFeatures } from "@/hooks/useFeatures";
 import { usePropertyAutosave } from "@/hooks/usePropertyAutosave";
+import { useState, useCallback } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import type { PropertyFormData } from "@/types/property";
 import { steps } from "./property/form/formSteps";
 import { FormStepNavigation } from "./property/form/FormStepNavigation";
@@ -15,6 +17,8 @@ import { PropertyFormContent } from "./property/form/PropertyFormContent";
 
 export function PropertyForm() {
   const { id } = useParams();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { formData, setFormData, isLoading } = usePropertyForm(id);
   const { addFeature, removeFeature, updateFeature } = useFeatures(formData, setFormData);
   const { handleSubmit } = usePropertyFormSubmit();
@@ -41,26 +45,35 @@ export function PropertyForm() {
     handleAreaImagesSelect
   } = usePropertyAreas(formData, setFormData);
 
+  // Perform autosave when changing steps
+  const onAutosave = useCallback(() => {
+    console.log("Autosaving form data...");
+    if (formData) autosaveData(formData);
+  }, [formData, autosaveData]);
+
   const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(
     formData,
-    () => {
-      console.log("Autosaving form data...");
-      if (formData) autosaveData(formData);
-    },
+    onAutosave,
     steps.length
   );
 
   const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
     console.log(`Field ${field} changed to:`, value);
-    setFormData({ ...formData, [field]: value });
+    if (formData) {
+      setFormData({ ...formData, [field]: value });
+    }
   };
 
   const handleMapImageDelete = async () => {
-    setFormData({ ...formData, map_image: null });
+    if (formData) {
+      setFormData({ ...formData, map_image: null });
+    }
   };
 
   // Create adapter functions to match expected types
   const handleRemoveImageAdapter = (index: number) => {
+    if (!formData || !formData.images[index]) return;
+    
     const imageToRemove = formData.images[index];
     if (imageToRemove) {
       handleRemoveImage(imageToRemove.id);
@@ -68,6 +81,8 @@ export function PropertyForm() {
   };
 
   const handleToggleGridImageAdapter = (url: string) => {
+    if (!formData) return;
+    
     const newGridImages = [...(formData.gridImages || [])];
     if (newGridImages.includes(url)) {
       newGridImages.splice(newGridImages.indexOf(url), 1);
@@ -77,14 +92,48 @@ export function PropertyForm() {
     handleToggleGridImage(newGridImages);
   };
 
-  if (!formData || isLoading) {
-    return null;
+  const onFormSubmit = useCallback((e: React.FormEvent) => {
+    console.log("PropertyForm - Form submitted via standard submit event");
+    e.preventDefault();
+    
+    if (isSubmitting || !formData) return;
+    
+    setIsSubmitting(true);
+    try {
+      handleSubmit(e, formData);
+      toast({
+        title: "Form submitted",
+        description: "Your property information has been saved.",
+      });
+    } catch (error) {
+      console.error("Form submission error:", error);
+      toast({
+        title: "Submission error",
+        description: "There was a problem saving your property information.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData, handleSubmit, isSubmitting, toast]);
+
+  if (isLoading) {
+    return (
+      <Card className="w-full p-6 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </Card>
+    );
   }
 
-  const onFormSubmit = (e: React.FormEvent) => {
-    console.log("PropertyForm - Form submitted via standard submit event");
-    handleSubmit(e, formData);
-  };
+  if (!formData) {
+    return (
+      <Card className="w-full p-6">
+        <div className="p-4 border border-red-300 bg-red-50 rounded-md">
+          <p className="text-red-500">Error loading property data. Please try again later.</p>
+        </div>
+      </Card>
+    );
+  }
 
   console.log("PropertyForm rendering, currentStep:", currentStep);
 
@@ -101,6 +150,7 @@ export function PropertyForm() {
           onStepClick={handleStepClick}
           onPrevious={handlePrevious}
           onNext={handleNext}
+          onSubmit={() => onFormSubmit(new Event('submit') as any)}
           isUpdateMode={!!id}
         />
         <PropertyFormContent 

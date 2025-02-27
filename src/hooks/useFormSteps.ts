@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { PropertyFormData } from "@/types/property";
 
 export function useFormSteps(
@@ -9,7 +9,8 @@ export function useFormSteps(
 ) {
   const [currentStep, setCurrentStep] = useState(1);
 
-  const handleNext = () => {
+  // Use useCallback to prevent unnecessary re-renders
+  const handleNext = useCallback(() => {
     console.log("handleNext called, current step:", currentStep, "maxSteps:", maxSteps);
     if (currentStep < maxSteps) {
       const nextStep = currentStep + 1;
@@ -18,9 +19,9 @@ export function useFormSteps(
       // Save data when moving to next step
       onAutosave();
     }
-  };
+  }, [currentStep, maxSteps, onAutosave]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     console.log("handlePrevious called, current step:", currentStep);
     if (currentStep > 1) {
       const prevStep = currentStep - 1;
@@ -29,9 +30,9 @@ export function useFormSteps(
       // Save data when moving to previous step
       onAutosave();
     }
-  };
+  }, [currentStep, onAutosave]);
 
-  const handleStepClick = (step: number) => {
+  const handleStepClick = useCallback((step: number) => {
     console.log("handleStepClick called, selected step:", step);
     if (step >= 1 && step <= maxSteps) {
       console.log("Setting current step to:", step);
@@ -39,7 +40,7 @@ export function useFormSteps(
       // Save data when directly clicking a step
       onAutosave();
     }
-  };
+  }, [maxSteps, onAutosave]);
 
   return {
     currentStep,
