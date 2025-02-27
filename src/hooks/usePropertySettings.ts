@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -82,38 +81,8 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
   };
 
   const handleSaveTemplate = async (templateId: string) => {
-    if (!propertyId || templateId === '') {
-      return;
-    }
-
-    try {
-      setIsUpdating(true);
-      
-      const { error } = await supabase
-        .from('properties')
-        .update({ 
-          // Using bracket notation to avoid TypeScript property error
-          "template_id": templateId 
-        })
-        .eq('id', propertyId);
-      
-      if (error) throw error;
-      
-      toast({
-        description: "Template saved successfully",
-      });
-      
-      onSaveCallback();
-    } catch (error) {
-      console.error('Error saving template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save template",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+    console.log("Template functionality disabled, ignoring update to:", templateId);
+    return Promise.resolve();
   };
 
   return {

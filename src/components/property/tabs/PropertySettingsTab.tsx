@@ -1,7 +1,6 @@
 
 import { PropertyIdSection } from "../settings/PropertyIdSection";
 import { AgentSection } from "../settings/AgentSection";
-import { TemplateSection } from "../settings/TemplateSection";
 import { DangerZoneSection } from "../settings/DangerZoneSection";
 
 interface PropertySettingsTabProps {
@@ -20,10 +19,8 @@ export function PropertySettingsTab({
   propertyId,
   objectId,
   agentId,
-  templateId,
   onSaveObjectId,
   onSaveAgent,
-  onSaveTemplate,
   onDelete,
   isUpdating
 }: PropertySettingsTabProps) {
@@ -41,11 +38,7 @@ export function PropertySettingsTab({
         isUpdating={isUpdating}
       />
       
-      <TemplateSection 
-        templateId={templateId || "default"} 
-        onSave={onSaveTemplate}
-        isUpdating={isUpdating}
-      />
+      {/* Template section removed temporarily */}
       
       <DangerZoneSection onDelete={onDelete} />
     </div>
