@@ -1,108 +1,98 @@
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Image } from "lucide-react";
-import type { PropertyImage } from "@/types/property";
+import { PropertyImage } from "@/types/property";
+import { Check } from "lucide-react";
+import { useState } from "react";
 
-interface ImageSelectDialogProps {
+export interface ImageSelectDialogProps {
   images: PropertyImage[];
-  onSelect: (imageIds: string[]) => void;
+  selectedImageIds?: string[];
+  onSelect: (selectedIds: string[]) => void;
   buttonText: string;
   maxSelect?: number;
 }
 
 export function ImageSelectDialog({
-  images = [],
+  images,
+  selectedImageIds = [],
   onSelect,
   buttonText,
   maxSelect,
 }: ImageSelectDialogProps) {
+  const [selected, setSelected] = useState<string[]>(selectedImageIds);
   const [open, setOpen] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
-  const handleImageClick = (imageId: string) => {
-    setSelectedImages(prev => {
-      if (prev.includes(imageId)) {
-        return prev.filter(id => id !== imageId);
+  const handleToggleSelect = (imageId: string) => {
+    if (selected.includes(imageId)) {
+      setSelected(selected.filter((id) => id !== imageId));
+    } else {
+      if (maxSelect === 1) {
+        setSelected([imageId]);
+      } else if (maxSelect && selected.length >= maxSelect) {
+        return;
+      } else {
+        setSelected([...selected, imageId]);
       }
-      if (maxSelect && prev.length >= maxSelect) {
-        return prev;
-      }
-      return [...prev, imageId];
-    });
+    }
   };
 
   const handleConfirm = () => {
-    onSelect(selectedImages);
+    onSelect(selected);
     setOpen(false);
-    setSelectedImages([]);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedImages([]);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <Image className="h-4 w-4" />
-          {buttonText}
-        </Button>
+        <Button variant="outline">{buttonText}</Button>
       </DialogTrigger>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Select Images</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-4 max-h-[60vh] overflow-y-auto p-4">
-          {images?.map((image) => (
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
+          {images.map((image) => (
             <div
               key={image.id}
-              className="relative group cursor-pointer"
-              onClick={() => handleImageClick(image.id)}
+              className={`relative cursor-pointer rounded-md overflow-hidden border-2 ${
+                selected.includes(image.id)
+                  ? "border-primary"
+                  : "border-transparent"
+              }`}
+              onClick={() => handleToggleSelect(image.id)}
             >
               <img
                 src={image.url}
-                alt="Property"
-                className={`w-full aspect-square object-cover rounded-lg transition-all ${
-                  selectedImages.includes(image.id) 
-                    ? 'ring-2 ring-primary ring-offset-2' 
-                    : 'hover:ring-2 hover:ring-primary/50 hover:ring-offset-2'
-                }`}
+                alt=""
+                className="w-full h-24 object-cover"
               />
-              {selectedImages.includes(image.id) && (
-                <div className="absolute top-2 right-2 bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
-                  {selectedImages.indexOf(image.id) + 1}
+              {selected.includes(image.id) && (
+                <div className="absolute top-1 right-1 bg-primary text-primary-foreground p-1 rounded-full">
+                  <Check className="w-3 h-3" />
                 </div>
               )}
             </div>
           ))}
         </div>
-        <DialogFooter>
-          <div className="flex justify-between items-center w-full">
-            <span className="text-sm text-muted-foreground">
-              {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} selected
-              {maxSelect ? ` (max ${maxSelect})` : ''}
-            </span>
-            <div className="space-x-2">
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button onClick={handleConfirm} disabled={selectedImages.length === 0}>
-                Add Selected
-              </Button>
-            </div>
-          </div>
-        </DialogFooter>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+              setSelected(selectedImageIds);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm}>Confirm</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
