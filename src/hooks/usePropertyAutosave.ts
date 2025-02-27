@@ -13,7 +13,7 @@ export function usePropertyAutosave() {
     try {
       const { data: currentData, error: fetchError } = await supabase
         .from('properties')
-        .select('map_image, nearby_places, latitude, longitude')
+        .select('map_image, nearby_places, latitude, longitude, virtualTourUrl, youtubeUrl, notes')
         .eq('id', formData.id)
         .maybeSingle();
 
@@ -63,7 +63,12 @@ export function usePropertyAutosave() {
           price: formData.price || null,
           sqft: formData.sqft || null,
           title: formData.title || null,
-          id: formData.id
+          id: formData.id,
+          agent_id: formData.agent_id || null,
+          virtualTourUrl: formData.virtualTourUrl ?? currentData?.virtualTourUrl ?? null,
+          youtubeUrl: formData.youtubeUrl ?? currentData?.youtubeUrl ?? null,
+          notes: formData.notes ?? currentData?.notes ?? null,
+          object_id: formData.object_id || null
         });
 
       if (error) throw error;
