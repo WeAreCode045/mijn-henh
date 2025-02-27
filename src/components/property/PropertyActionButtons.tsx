@@ -28,9 +28,19 @@ export function PropertyActionButtons({
           <Button 
             variant="outline" 
             className="w-full justify-start" 
-            onClick={() => {
-              console.log("Save button clicked, triggering onSave callback");
-              onSave();
+            onClick={(e) => {
+              e.preventDefault(); // Prevent any default form behavior
+              console.log("Save button in Actions panel clicked, triggering onSave callback");
+              
+              // Trigger the form submission programmatically
+              const propertyForm = document.getElementById("propertyForm") as HTMLFormElement;
+              if (propertyForm) {
+                propertyForm.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+              } else {
+                console.error("Property form element not found");
+                // Fall back to the callback if the form element is not found
+                onSave();
+              }
             }}
             type="button"
           >
