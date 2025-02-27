@@ -11,21 +11,24 @@ export function usePropertySubmit() {
   const handleDatabaseSubmit = async (data: PropertySubmitData, id?: string) => {
     try {
       // Log the complete data object for debugging
-      console.log("Full data being submitted to database:", JSON.stringify(data));
+      console.log("usePropertySubmit - Full data being submitted to database:", JSON.stringify(data));
       
       // Make sure areas data is properly formatted as JSONB
       if (Array.isArray(data.areas)) {
-        console.log("Areas before final formatting:", JSON.stringify(data.areas));
+        console.log("usePropertySubmit - Areas before final formatting:", JSON.stringify(data.areas));
       }
       
       if (id) {
-        console.log(`Updating property ${id} with areas:`, JSON.stringify(data.areas));
+        console.log(`usePropertySubmit - Updating property ${id} with areas:`, JSON.stringify(data.areas));
         const { error: updateError } = await supabase
           .from('properties')
           .update(data)
           .eq('id', id);
         
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Supabase update error:", updateError);
+          throw updateError;
+        }
 
         toast({
           title: "Property Updated",
@@ -33,12 +36,15 @@ export function usePropertySubmit() {
           variant: "default",
         });
       } else {
-        console.log("Creating new property with areas:", JSON.stringify(data.areas));
+        console.log("usePropertySubmit - Creating new property with areas:", JSON.stringify(data.areas));
         const { error: insertError } = await supabase
           .from('properties')
           .insert(data);
         
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error("Supabase insert error:", insertError);
+          throw insertError;
+        }
 
         toast({
           title: "Property Created",
@@ -48,7 +54,7 @@ export function usePropertySubmit() {
         navigate('/');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('usePropertySubmit - Error:', error);
       toast({
         title: "Error",
         description: "An error occurred while saving the property",

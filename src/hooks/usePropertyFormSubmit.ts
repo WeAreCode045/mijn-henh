@@ -11,10 +11,11 @@ export function usePropertyFormSubmit() {
 
   const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData) => {
     e.preventDefault();
+    console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
     
     // Prepare areas data with correct types for submission
     const areasWithImages = formData.areas.map(area => {
-      console.log(`Preparing area ${area.id} for submission with columns:`, area.columns);
+      console.log(`usePropertyFormSubmit - Preparing area ${area.id} for submission with columns:`, area.columns);
       return {
         id: area.id,
         title: area.title,
@@ -24,7 +25,7 @@ export function usePropertyFormSubmit() {
       };
     });
 
-    console.log("Form submission - areas with columns:", areasWithImages);
+    console.log("usePropertyFormSubmit - Form submission - areas with columns:", areasWithImages);
     
     // Cast the features and nearby_places to Json type to satisfy TypeScript
     const featuresJson = formData.features as unknown as Json;
@@ -59,25 +60,31 @@ export function usePropertyFormSubmit() {
     
     try {
       if (formData.id) {
-        console.log("Updating property with areas data:", JSON.stringify(submitData.areas));
+        console.log("usePropertyFormSubmit - Updating property with areas data:", JSON.stringify(submitData.areas));
         const { error } = await supabase
           .from('properties')
           .update(submitData)
           .eq('id', formData.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
         
         toast({
           title: "Success",
           description: "Property updated successfully",
         });
       } else {
-        console.log("Creating property with areas data:", JSON.stringify(submitData.areas));
+        console.log("usePropertyFormSubmit - Creating property with areas data:", JSON.stringify(submitData.areas));
         const { error } = await supabase
           .from('properties')
           .insert(submitData);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
         
         toast({
           title: "Success",
@@ -86,7 +93,7 @@ export function usePropertyFormSubmit() {
         navigate('/');
       }
     } catch (error) {
-      console.error('Error saving property:', error);
+      console.error('usePropertyFormSubmit - Error saving property:', error);
       toast({
         title: "Error",
         description: "There was a problem saving the property",

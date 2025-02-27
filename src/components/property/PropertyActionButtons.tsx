@@ -28,7 +28,11 @@ export function PropertyActionButtons({
           <Button 
             variant="outline" 
             className="w-full justify-start" 
-            onClick={onSave}
+            onClick={() => {
+              console.log("Save button clicked");
+              onSave();
+            }}
+            type="button"
           >
             <Save className="mr-2 h-4 w-4" />
             Save Changes
@@ -38,6 +42,7 @@ export function PropertyActionButtons({
             variant="outline"
             className="w-full justify-start"
             onClick={onWebView}
+            type="button"
           >
             <Globe className="mr-2 h-4 w-4" />
             Web View
@@ -47,6 +52,7 @@ export function PropertyActionButtons({
             variant="outline"
             className="w-full justify-start"
             onClick={onGeneratePDF}
+            type="button"
           >
             <FileDown className="mr-2 h-4 w-4" />
             Generate PDF
@@ -67,6 +73,7 @@ export function PropertyActionButtons({
             variant="destructive"
             className="w-full justify-start"
             onClick={onDelete}
+            type="button"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Property

@@ -23,6 +23,7 @@ export function PropertyFormContainer() {
   const { handleDatabaseSubmit } = usePropertySubmit();
 
   const handleFormSubmit = (formData: PropertyFormData) => {
+    console.log("PropertyFormContainer - handleFormSubmit called with formData:", formData);
     if (!formData.id) {
       console.error('Property ID is required');
       return;
@@ -171,7 +172,10 @@ export function PropertyFormContainer() {
       selectedAgent={selectedAgent}
       onAgentSelect={setSelectedAgent}
       onDeleteProperty={handleDeleteProperty}
-      onSaveProperty={() => handleFormSubmit(formData)}
+      onSaveProperty={() => {
+        console.log("Save button clicked, calling handleFormSubmit with current formData");
+        handleFormSubmit(formData);
+      }}
       onImageUpload={handleImageUpload}
       onRemoveImage={(index) => {
         const imageToRemove = propertyDataWithId.images[index];
