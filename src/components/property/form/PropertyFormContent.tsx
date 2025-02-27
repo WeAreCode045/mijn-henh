@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -24,6 +25,7 @@ interface PropertyFormContentProps {
   handleSetFeaturedImage: (url: string) => void;
   handleToggleGridImage: (url: string) => void;
   handleMapImageDelete?: () => Promise<void>;
+  onFetchLocationData?: () => Promise<void>;
 }
 
 export function PropertyFormContent({
@@ -49,6 +51,7 @@ export function PropertyFormContent({
   handleSetFeaturedImage,
   handleToggleGridImage,
   handleMapImageDelete,
+  onFetchLocationData,
 }: PropertyFormContentProps) {
   
   // Find the step component that corresponds to the current step
@@ -87,14 +90,35 @@ export function PropertyFormContent({
       ) : step === 5 ? (
         // AreasStep
         <StepComponent
-          areas={formData.areas}
-          images={formData.images}
+          areas={formData.areas || []}
+          images={formData.images || []}
           onAddArea={onAddArea}
           onRemoveArea={onRemoveArea}
           onUpdateArea={onUpdateArea}
           onAreaImageUpload={onAreaImageUpload}
           onAreaImageRemove={onAreaImageRemove}
           onAreaImagesSelect={onAreaImagesSelect}
+        />
+      ) : step === 2 ? (
+        // FeaturesStep
+        <StepComponent
+          features={formData.features || []}
+          onAddFeature={onAddFeature}
+          onRemoveFeature={onRemoveFeature}
+          onUpdateFeature={onUpdateFeature}
+        />
+      ) : step === 6 ? (
+        // LocationStep
+        <StepComponent
+          address={formData.address || ""}
+          latitude={formData.latitude}
+          longitude={formData.longitude}
+          location_description={formData.location_description}
+          map_image={formData.map_image}
+          nearby_places={formData.nearby_places}
+          onFieldChange={onFieldChange}
+          onMapImageDelete={handleMapImageDelete}
+          onFetchLocationData={onFetchLocationData}
         />
       ) : (
         // Other steps
@@ -120,6 +144,7 @@ export function PropertyFormContent({
           onSetFeaturedImage={handleSetFeaturedImage}
           onToggleGridImage={handleToggleGridImage}
           onMapImageDelete={handleMapImageDelete}
+          onFetchLocationData={onFetchLocationData}
         />
       )}
     </div>

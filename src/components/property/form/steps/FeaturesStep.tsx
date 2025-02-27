@@ -10,15 +10,17 @@ interface FeaturesStepProps {
 }
 
 export function FeaturesStep({
-  features,
+  features = [], // Add default empty array to prevent null/undefined issues
   onAddFeature,
   onRemoveFeature,
   onUpdateFeature,
 }: FeaturesStepProps) {
+  console.log("FeaturesStep rendering with features:", features);
+  
   return (
     <div className="space-y-6">
       <PropertyFeatures
-        features={features}
+        features={features || []} // Ensure we always pass an array
         onAdd={onAddFeature}
         onRemove={onRemoveFeature}
         onUpdate={onUpdateFeature}
