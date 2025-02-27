@@ -58,10 +58,15 @@ export function PropertyFormContent({
     return <div>Error: Step not found</div>;
   }
 
+  // If formData is not available, show a loading state
+  if (!formData) {
+    return <div className="py-4 animate-fadeIn">Loading property data...</div>;
+  }
+
   return (
     <div className="py-4 animate-fadeIn">
       <CurrentStep
-        {...formData}
+        formData={formData}
         onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}

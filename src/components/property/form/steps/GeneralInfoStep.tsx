@@ -16,6 +16,11 @@ export function GeneralInfoStep({
   onFieldChange,
   handleSetFeaturedImage,
 }: GeneralInfoStepProps) {
+  // Make sure formData exists before trying to render the component
+  if (!formData) {
+    return <div>Loading property information...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -149,7 +154,7 @@ export function GeneralInfoStep({
               />
             )}
             <ImageSelectDialog
-              images={formData.images}
+              images={formData.images || []}
               selectedImageIds={formData.featuredImage ? [formData.images.find(img => img.url === formData.featuredImage)?.id || ''] : []}
               onSelect={(imageIds) => {
                 if (imageIds[0]) {
@@ -176,10 +181,10 @@ export function GeneralInfoStep({
             ))}
           </div>
           <ImageSelectDialog
-            images={formData.images}
-            selectedImageIds={formData.gridImages?.map(url => 
+            images={formData.images || []}
+            selectedImageIds={(formData.gridImages || []).map(url => 
               formData.images.find(img => img.url === url)?.id || ''
-            ).filter(id => id !== '') || []}
+            ).filter(id => id !== '')}
             onSelect={(imageIds) => {
               const selectedImages = imageIds.map(id => {
                 const image = formData.images.find(img => img.id === id);
