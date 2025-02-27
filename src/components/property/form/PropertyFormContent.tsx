@@ -1,7 +1,6 @@
 
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan } from "@/types/property";
 import { steps } from "./formSteps";
-import { PropertyStepContent } from "./PropertyStepContent";
 
 interface PropertyFormContentProps {
   step: number;
@@ -25,7 +24,7 @@ interface PropertyFormContentProps {
   handleUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
   handleSetFeaturedImage: (url: string) => void;
   handleToggleGridImage: (url: string) => void;
-  handleMapImageDelete?: () => void;
+  handleMapImageDelete?: () => Promise<void>;
 }
 
 export function PropertyFormContent({
@@ -53,7 +52,7 @@ export function PropertyFormContent({
   handleMapImageDelete,
 }: PropertyFormContentProps) {
   
-  const CurrentStep = steps[step]?.component;
+  const CurrentStep = steps.find(s => s.id === step)?.component;
 
   if (!CurrentStep) {
     return <div>Error: Step not found</div>;
@@ -61,31 +60,29 @@ export function PropertyFormContent({
 
   return (
     <div className="py-4 animate-fadeIn">
-      <PropertyStepContent step={step}>
-        <CurrentStep
-          {...formData}
-          onFieldChange={onFieldChange}
-          onAddFeature={onAddFeature}
-          onRemoveFeature={onRemoveFeature}
-          onUpdateFeature={onUpdateFeature}
-          onAddArea={onAddArea}
-          onRemoveArea={onRemoveArea}
-          onUpdateArea={onUpdateArea}
-          onAreaImageUpload={onAreaImageUpload}
-          onAreaImageRemove={onAreaImageRemove}
-          onAreaImagesSelect={onAreaImagesSelect}
-          onFloorplanUpload={handleFloorplanUpload}
-          onRemoveFloorplan={handleRemoveFloorplan}
-          onUpdateFloorplan={handleUpdateFloorplan}
-          onImageUpload={handleImageUpload}
-          onRemoveImage={handleRemoveImage}
-          onAreaPhotosUpload={handleAreaPhotosUpload}
-          onRemoveAreaPhoto={handleRemoveAreaPhoto}
-          onSetFeaturedImage={handleSetFeaturedImage}
-          onToggleGridImage={handleToggleGridImage}
-          onMapImageDelete={handleMapImageDelete}
-        />
-      </PropertyStepContent>
+      <CurrentStep
+        {...formData}
+        onFieldChange={onFieldChange}
+        onAddFeature={onAddFeature}
+        onRemoveFeature={onRemoveFeature}
+        onUpdateFeature={onUpdateFeature}
+        onAddArea={onAddArea}
+        onRemoveArea={onRemoveArea}
+        onUpdateArea={onUpdateArea}
+        onAreaImageUpload={onAreaImageUpload}
+        onAreaImageRemove={onAreaImageRemove}
+        onAreaImagesSelect={onAreaImagesSelect}
+        onFloorplanUpload={handleFloorplanUpload}
+        onRemoveFloorplan={handleRemoveFloorplan}
+        onUpdateFloorplan={handleUpdateFloorplan}
+        onImageUpload={handleImageUpload}
+        onRemoveImage={handleRemoveImage}
+        onAreaPhotosUpload={handleAreaPhotosUpload}
+        onRemoveAreaPhoto={handleRemoveAreaPhoto}
+        onSetFeaturedImage={handleSetFeaturedImage}
+        onToggleGridImage={handleToggleGridImage}
+        onMapImageDelete={handleMapImageDelete}
+      />
     </div>
   );
 }

@@ -1,6 +1,8 @@
+
 import { WebViewSectionProps } from "../types";
 import { useState } from "react";
 import { ImagePreviewDialog } from "../components/ImagePreviewDialog";
+import { PropertyFloorplan } from "@/types/property";
 
 export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -16,18 +18,20 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   const getFloorplansByColumns = () => {
     const floorplans = property.floorplans || [];
     
+    // Check if using the legacy format (array of strings)
     const isLegacyFormat = floorplans.length > 0 && typeof floorplans[0] === 'string';
     
     if (isLegacyFormat) {
       return [{
         columns: 1,
-        plans: floorplans.map((url: string) => ({ url, columns: 1 }))
+        plans: (floorplans as string[]).map((url: string) => ({ url, columns: 1 }))
       }];
     }
     
-    const groupedFloorplans: { [key: number]: { url: string, columns: number }[] } = {};
+    // Using the new format (array of objects with url and columns)
+    const groupedFloorplans: { [key: number]: PropertyFloorplan[] } = {};
     
-    floorplans.forEach((plan: any) => {
+    (floorplans as PropertyFloorplan[]).forEach((plan) => {
       const columns = plan.columns || 1;
       if (!groupedFloorplans[columns]) {
         groupedFloorplans[columns] = [];
