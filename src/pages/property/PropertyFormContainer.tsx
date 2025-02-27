@@ -18,10 +18,10 @@ import { PropertyActionsPanel } from "./components/PropertyActionsPanel";
 import { createAgencySettingsFromSettings } from "./components/PropertySettingsAdapter";
 import { 
   createPropertyDataFromFormData, 
-  createSubmitDataFromPropertyData,
-  prepareAreasForSubmission,
-  prepareFloorplansForSubmission
+  createSubmitDataFromPropertyData 
 } from "./components/PropertyDataAdapter";
+// Import the missing functions
+import { prepareAreasForFormSubmission, prepareFloorplansForFormSubmission } from "@/hooks/property-form/preparePropertyData";
 
 export function PropertyFormContainer() {
   const navigate = useNavigate();
@@ -46,9 +46,9 @@ export function PropertyFormContainer() {
     // Create a propertyData object with the required id
     const propertyData = createPropertyDataFromFormData(formData);
 
-    // Log the areas data for debugging
-    console.log("Areas data before submission:", JSON.stringify(prepareAreasForSubmission(propertyData)));
-    console.log("Floorplans data before submission:", JSON.stringify(prepareFloorplansForSubmission(propertyData)));
+    // Log the areas data for debugging - use the correctly imported functions
+    console.log("Areas data before submission:", JSON.stringify(prepareAreasForFormSubmission(propertyData.areas)));
+    console.log("Floorplans data before submission:", JSON.stringify(prepareFloorplansForFormSubmission(propertyData.floorplans)));
 
     const submitData = createSubmitDataFromPropertyData(propertyData, selectedAgent);
     

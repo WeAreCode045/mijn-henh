@@ -1,6 +1,7 @@
 
 import { PropertyFormData, PropertyData, PropertySubmitData } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
+import { prepareAreasForFormSubmission, prepareFloorplansForFormSubmission } from "@/hooks/property-form/preparePropertyData";
 
 export function createPropertyDataFromFormData(formData: PropertyFormData): PropertyData {
   return {
@@ -27,28 +28,9 @@ export function createPropertyDataFromFormData(formData: PropertyFormData): Prop
   };
 }
 
-export function prepareAreasForSubmission(propertyData: PropertyData) {
-  return propertyData.areas.map(area => {
-    return {
-      ...area,
-      columns: typeof area.columns === 'number' ? area.columns : 2,
-      imageIds: area.imageIds || []
-    };
-  });
-}
-
-export function prepareFloorplansForSubmission(propertyData: PropertyData) {
-  return propertyData.floorplans.map(floorplan => {
-    return JSON.stringify({
-      url: floorplan.url,
-      columns: floorplan.columns || 1
-    });
-  });
-}
-
 export function createSubmitDataFromPropertyData(propertyData: PropertyData, selectedAgent: string | null): PropertySubmitData {
-  const areasWithColumns = prepareAreasForSubmission(propertyData);
-  const floorplansForDb = prepareFloorplansForSubmission(propertyData);
+  const areasWithColumns = prepareAreasForFormSubmission(propertyData.areas);
+  const floorplansForDb = prepareFloorplansForFormSubmission(propertyData.floorplans);
 
   return {
     id: propertyData.id,
