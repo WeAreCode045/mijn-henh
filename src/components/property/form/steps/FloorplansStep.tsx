@@ -15,7 +15,7 @@ interface FloorplansStepProps {
 }
 
 export function FloorplansStep({
-  floorplans,
+  floorplans = [], // Add default empty array
   onFloorplanUpload,
   onRemoveFloorplan,
   onUpdateFloorplan
@@ -56,7 +56,7 @@ export function FloorplansStep({
         </p>
       </div>
 
-      {floorplans && floorplans.length > 0 && (
+      {floorplans && floorplans.length > 0 ? (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Uploaded Floorplans</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -99,6 +99,10 @@ export function FloorplansStep({
               </div>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center p-6 border border-dashed rounded-md">
+          <p className="text-muted-foreground text-center">No floorplans uploaded yet.</p>
         </div>
       )}
     </div>

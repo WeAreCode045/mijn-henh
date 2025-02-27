@@ -26,6 +26,7 @@ interface PropertyFormContentProps {
   handleToggleGridImage: (url: string) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
 }
 
 export function PropertyFormContent({
@@ -52,6 +53,7 @@ export function PropertyFormContent({
   handleToggleGridImage,
   handleMapImageDelete,
   onFetchLocationData,
+  onRemoveNearbyPlace,
 }: PropertyFormContentProps) {
   
   // Find the step component that corresponds to the current step
@@ -82,7 +84,7 @@ export function PropertyFormContent({
       {step === 4 ? (
         // FloorplansStep
         <StepComponent
-          floorplans={formData.floorplans}
+          floorplans={formData.floorplans || []}
           onFloorplanUpload={handleFloorplanUpload}
           onRemoveFloorplan={handleRemoveFloorplan}
           onUpdateFloorplan={handleUpdateFloorplan}
@@ -119,6 +121,7 @@ export function PropertyFormContent({
           onFieldChange={onFieldChange}
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}
+          onRemoveNearbyPlace={onRemoveNearbyPlace}
         />
       ) : (
         // Other steps
@@ -145,6 +148,7 @@ export function PropertyFormContent({
           onToggleGridImage={handleToggleGridImage}
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}
+          onRemoveNearbyPlace={onRemoveNearbyPlace}
         />
       )}
     </div>

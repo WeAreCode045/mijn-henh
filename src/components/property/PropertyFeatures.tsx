@@ -13,7 +13,7 @@ interface PropertyFeaturesProps {
 }
 
 export function PropertyFeatures({
-  features,
+  features = [], // Add default empty array
   onAdd,
   onRemove,
   onUpdate,
@@ -27,23 +27,29 @@ export function PropertyFeatures({
           Kenmerk Toevoegen
         </Button>
       </div>
-      {features.map((feature) => (
-        <div key={feature.id} className="flex items-center gap-2">
-          <Input
-            value={feature.description}
-            onChange={(e) => onUpdate(feature.id, e.target.value)}
-            placeholder="Voer kenmerk in"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => onRemove(feature.id)}
-          >
-            <MinusCircle className="w-4 h-4 text-destructive" />
-          </Button>
-        </div>
-      ))}
+      {features.length === 0 ? (
+        <p className="text-sm text-muted-foreground italic">
+          Nog geen kenmerken toegevoegd. Klik op de knop hierboven om te beginnen.
+        </p>
+      ) : (
+        features.map((feature) => (
+          <div key={feature.id} className="flex items-center gap-2">
+            <Input
+              value={feature.description}
+              onChange={(e) => onUpdate(feature.id, e.target.value)}
+              placeholder="Voer kenmerk in"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onRemove(feature.id)}
+            >
+              <MinusCircle className="w-4 h-4 text-destructive" />
+            </Button>
+          </div>
+        ))
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PropertyFormData, PropertyPlaceType } from "@/types/property";
-import { MapIcon, MapPin, Navigation, Search } from "lucide-react";
+import { MapIcon, MapPin, Navigation, Search, X } from "lucide-react";
 import { useState } from "react";
 
 interface LocationStepProps {
@@ -17,6 +17,7 @@ interface LocationStepProps {
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
 }
 
 export function LocationStep({
@@ -29,6 +30,7 @@ export function LocationStep({
   onFieldChange,
   onMapImageDelete,
   onFetchLocationData,
+  onRemoveNearbyPlace
 }: LocationStepProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +44,17 @@ export function LocationStep({
       console.error("Error fetching location data:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRemoveNearbyPlace = (index: number) => {
+    if (!onRemoveNearbyPlace && nearby_places) {
+      // If no explicit handler is provided, modify the array in place
+      const updatedPlaces = [...nearby_places];
+      updatedPlaces.splice(index, 1);
+      onFieldChange("nearby_places", updatedPlaces);
+    } else if (onRemoveNearbyPlace) {
+      onRemoveNearbyPlace(index);
     }
   };
 
@@ -153,8 +166,16 @@ export function LocationStep({
           {nearby_places && nearby_places.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {nearby_places.map((place, index) => (
-                <div key={index} className="border rounded-md p-3 bg-gray-50">
-                  <div className="font-medium">{place.name}</div>
+                <div key={index} className="border rounded-md p-3 bg-gray-50 relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6 text-destructive hover:bg-destructive/10"
+                    onClick={() => handleRemoveNearbyPlace(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="font-medium pr-6">{place.name}</div>
                   <div className="text-sm text-gray-600">{place.type.replace(/_/g, ' ')}</div>
                   <div className="text-xs text-gray-500 mt-1">{place.vicinity}</div>
                 </div>

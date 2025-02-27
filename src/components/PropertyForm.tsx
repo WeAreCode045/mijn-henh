@@ -9,7 +9,7 @@ import { useFeatures } from "@/hooks/useFeatures";
 import { usePropertyAutosave } from "@/hooks/usePropertyAutosave";
 import { useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import type { PropertyFormData } from "@/types/property";
+import type { PropertyFormData, PropertyPlaceType } from "@/types/property";
 import { steps } from "./property/form/formSteps";
 import { FormStepNavigation } from "./property/form/FormStepNavigation";
 import { useFormSteps } from "@/hooks/useFormSteps";
@@ -71,6 +71,18 @@ export function PropertyForm() {
   const handleMapImageDelete = async () => {
     if (formData) {
       setFormData({ ...formData, map_image: null });
+    }
+  };
+
+  const handleRemoveNearbyPlace = (index: number) => {
+    if (formData && formData.nearby_places) {
+      const updatedPlaces = [...formData.nearby_places];
+      updatedPlaces.splice(index, 1);
+      setFormData({ ...formData, nearby_places: updatedPlaces });
+      toast({
+        title: "Place removed",
+        description: "The nearby place has been removed.",
+      });
     }
   };
 
@@ -166,6 +178,8 @@ export function PropertyForm() {
           handleSetFeaturedImage={handleSetFeaturedImage}
           handleToggleGridImage={handleToggleGridImage}
           handleMapImageDelete={handleMapImageDelete}
+          onFetchLocationData={() => Promise.resolve()} // Placeholder for actual implementation
+          onRemoveNearbyPlace={handleRemoveNearbyPlace}
         />
       </form>
     </Card>
