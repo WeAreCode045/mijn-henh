@@ -77,7 +77,7 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         {detailsConfig.map((detail, index) => (
           <div
             key={index}
-            className="p-4 rounded-lg flex"
+            className="p-4 rounded-lg flex h-[110px]" // Set explicit height to match energy image card
             style={{ backgroundColor: settings?.primaryColor }}
           >
             {/* Icon container - now spans the full height */}
@@ -100,10 +100,10 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
       </div>
 
       {/* Right side: Energy label column - showing only the image, no label */}
-      <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4">
+      <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4 h-[230px]"> {/* Set explicit height for energy section */}
         {/* Energy label image from Supabase */}
         {energyImage ? (
-          <div className="flex items-center justify-center -mt-4">
+          <div className="flex items-center justify-center h-full"> {/* Full height container */}
             {/* White background circle for the energy image, made much larger, with shadow */}
             <div className="w-48 h-48 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-lg">
               <img 
