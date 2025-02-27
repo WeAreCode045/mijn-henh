@@ -12,10 +12,18 @@ export function usePropertyFeaturedImage(
     });
   };
 
-  const handleToggleGridImage = (urls: string[]) => {
+  const handleToggleGridImage = (url: string) => {
+    // Ensure gridImages is always an array
+    const currentGridImages = Array.isArray(formData.gridImages) ? formData.gridImages : [];
+    
+    // If the image is already in the grid, remove it, otherwise add it
+    const newGridImages = currentGridImages.includes(url)
+      ? currentGridImages.filter(img => img !== url)
+      : [...currentGridImages, url];
+    
     setFormData({
       ...formData,
-      gridImages: urls
+      gridImages: newGridImages
     });
   };
 

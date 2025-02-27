@@ -16,9 +16,9 @@ interface ImagesStepProps {
 }
 
 export function ImagesStep({
-  images,
-  featuredImage,
-  gridImages,
+  images = [],
+  featuredImage = null,
+  gridImages = [],
   onImageUpload,
   onRemoveImage,
   onSetFeaturedImage,
@@ -54,12 +54,12 @@ export function ImagesStep({
         </p>
       </div>
 
-      {images.length > 0 && (
+      {Array.isArray(images) && images.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Uploaded Images</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {images.map((image, index) => (
-              <div key={image.id} className="relative group border rounded-md overflow-hidden">
+              <div key={image.id || index} className="relative group border rounded-md overflow-hidden">
                 <img
                   src={image.url}
                   alt={`Property ${index + 1}`}
@@ -84,7 +84,7 @@ export function ImagesStep({
                     <Star className="h-4 w-4" fill={featuredImage === image.url ? "white" : "none"} />
                   </Button>
                   <Button
-                    variant={gridImages.includes(image.url) ? "default" : "outline"}
+                    variant={Array.isArray(gridImages) && gridImages.includes(image.url) ? "default" : "outline"}
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => onToggleGridImage(image.url)}
@@ -97,7 +97,7 @@ export function ImagesStep({
                     Featured
                   </div>
                 )}
-                {gridImages.includes(image.url) && (
+                {Array.isArray(gridImages) && gridImages.includes(image.url) && (
                   <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
                     Grid
                   </div>

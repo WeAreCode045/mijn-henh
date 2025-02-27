@@ -45,9 +45,12 @@ export function usePropertyMainImages(
 
       const uploadedImages = await Promise.all(uploadPromises);
       
+      // Ensure images is always an array
+      const currentImages = Array.isArray(formData.images) ? formData.images : [];
+      
       setFormData({
         ...formData,
-        images: [...formData.images, ...uploadedImages]
+        images: [...currentImages, ...uploadedImages]
       });
 
       toast({
@@ -64,18 +67,29 @@ export function usePropertyMainImages(
     }
   };
 
-  const handleRemoveImage = async (imageId: string) => {
+  const handleRemoveImage = async (index: number) => {
+    if (!Array.isArray(formData.images) || index < 0 || index >= formData.images.length) {
+      console.error('Invalid image index or images array is not defined');
+      return;
+    }
+
+    const imageToRemove = formData.images[index];
+    if (!imageToRemove || !imageToRemove.id) {
+      console.error('Image not found or has no ID');
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('property_images')
         .delete()
-        .eq('id', imageId);
+        .eq('id', imageToRemove.id);
 
       if (error) throw error;
 
       setFormData({
         ...formData,
-        images: formData.images.filter(img => img.id !== imageId)
+        images: formData.images.filter((_, i) => i !== index)
       });
 
       toast({
