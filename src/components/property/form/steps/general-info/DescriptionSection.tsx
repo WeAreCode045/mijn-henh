@@ -14,13 +14,14 @@ export function DescriptionSection({ formData, onFieldChange }: DescriptionSecti
   const maxChars = 2000; // Maximum character limit
   
   useEffect(() => {
-    setCharCount(formData.description?.length || 0);
-  }, [formData.description]);
+    // Safely handle undefined description
+    setCharCount(formData?.description?.length || 0);
+  }, [formData?.description]);
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     onFieldChange('description', value);
-    setCharCount(value.length);
+    setCharCount(value?.length || 0);
   };
   
   return (
@@ -33,7 +34,7 @@ export function DescriptionSection({ formData, onFieldChange }: DescriptionSecti
       </Label>
       <Textarea
         id="description"
-        value={formData.description || ''}
+        value={formData?.description || ''}
         onChange={handleChange}
         placeholder="Describe the property in detail..."
         className="min-h-[150px] resize-y"
