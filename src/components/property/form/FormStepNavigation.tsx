@@ -26,6 +26,7 @@ export function FormStepNavigation({
   const handleStepClick = (e: React.MouseEvent, stepId: number) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Step button clicked in FormStepNavigation, stepId:", stepId);
     onStepClick(stepId);
   };
 
@@ -39,7 +40,14 @@ export function FormStepNavigation({
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Previous button clicked");
     onPrevious();
+  };
+
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onSubmit) onSubmit();
   };
 
   return (
@@ -90,7 +98,7 @@ export function FormStepNavigation({
         </Button>
         
         {currentStep === steps.length ? (
-          <Button type="submit" onClick={onSubmit}>
+          <Button type="submit" onClick={handleSubmit}>
             Save Property
           </Button>
         ) : (

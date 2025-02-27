@@ -19,8 +19,10 @@ export function PropertySettingsTab({
   propertyId,
   objectId,
   agentId,
+  templateId,
   onSaveObjectId,
   onSaveAgent,
+  onSaveTemplate,
   onDelete,
   isUpdating
 }: PropertySettingsTabProps) {

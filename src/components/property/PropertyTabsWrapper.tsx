@@ -40,6 +40,7 @@ export function PropertyTabsWrapper({
   const { handleGeneratePDF, handleWebView } = usePropertyActions(property.id);
   
   const { 
+    currentStep,
     handleStepClick, 
     handleNext, 
     handlePrevious, 
@@ -89,7 +90,7 @@ export function PropertyTabsWrapper({
           handleSetFeaturedImage={(url) => console.log("Set featured image", url)}
           handleToggleGridImage={(url) => console.log("Toggle grid image", url)}
           isUpdateMode={true}
-          currentStep={1}
+          currentStep={currentStep}
           handleStepClick={handleStepClick}
           handleNext={handleNext}
           handlePrevious={handlePrevious}

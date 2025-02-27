@@ -39,7 +39,7 @@ interface PropertyContentTabProps {
 
 export function PropertyContentTab({
   formData,
-  currentStep: initialStep,
+  currentStep: externalCurrentStep,
   handleStepClick: externalHandleStepClick,
   handleNext: externalHandleNext,
   handlePrevious: externalHandlePrevious,
@@ -68,32 +68,47 @@ export function PropertyContentTab({
   onRemoveNearbyPlace,
   isUpdateMode,
 }: PropertyContentTabProps) {
-  // Initialize with step 1 if not provided
-  const [currentStep, setCurrentStep] = useState(initialStep || 1);
+  // Initialize with provided step or default to 1
+  const [internalCurrentStep, setInternalCurrentStep] = useState(1);
+  
+  // Use external state if provided, otherwise use internal state
+  const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
   
   // Internal handlers if external ones aren't provided
   const handleStepClick = (step: number) => {
-    setCurrentStep(step);
-    if (externalHandleStepClick) externalHandleStepClick(step);
+    console.log("Step clicked in PropertyContentTab:", step);
+    if (externalHandleStepClick) {
+      externalHandleStepClick(step);
+    } else {
+      setInternalCurrentStep(step);
+    }
   };
   
   const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+    console.log("Next clicked in PropertyContentTab");
+    if (externalHandleNext) {
+      externalHandleNext();
+    } else if (internalCurrentStep < steps.length) {
+      setInternalCurrentStep(internalCurrentStep + 1);
     }
-    if (externalHandleNext) externalHandleNext();
   };
   
   const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    console.log("Previous clicked in PropertyContentTab");
+    if (externalHandlePrevious) {
+      externalHandlePrevious();
+    } else if (internalCurrentStep > 1) {
+      setInternalCurrentStep(internalCurrentStep - 1);
     }
-    if (externalHandlePrevious) externalHandlePrevious();
   };
   
   const onSubmit = (e: React.FormEvent) => {
-    if (externalOnSubmit) externalOnSubmit(e);
-    else e.preventDefault();
+    if (externalOnSubmit) {
+      externalOnSubmit(e);
+    } else {
+      e.preventDefault();
+      console.log("Form submitted in PropertyContentTab");
+    }
   };
 
   return (
