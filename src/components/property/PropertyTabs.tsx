@@ -6,11 +6,12 @@ import {
   ImageIcon, 
   Settings
 } from "lucide-react";
+import { ReactNode } from "react";
 
 interface PropertyTabsProps {
   activeTab: string;
   onTabChange: (value: string) => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsProps) {
@@ -34,6 +35,8 @@ export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsP
           <span className="hidden sm:inline">Settings</span>
         </TabsTrigger>
       </TabsList>
+      
+      {/* Pass the children directly to make sure TabsContent components render properly */}
       {children}
     </Tabs>
   );

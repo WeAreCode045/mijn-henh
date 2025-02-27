@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyForm } from "@/components/PropertyForm";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
@@ -12,6 +12,7 @@ import { PropertyFormLayout } from "./PropertyFormLayout";
 import { useAuth } from "@/providers/AuthProvider";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { useAgentSelect } from "@/hooks/useAgentSelect";
+import { supabase } from "@/integrations/supabase/client";
 
 export function PropertyFormContainer() {
   const { id } = useParams();
@@ -20,11 +21,51 @@ export function PropertyFormContainer() {
   const { isAdmin } = useAuth();
   const { settings } = useAgencySettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [templateInfo, setTemplateInfo] = useState<{id: string, name: string} | null>(null);
+  const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
 
   // Load property data
   const { formData, setFormData, isLoading } = usePropertyForm(id);
   const { agents, selectedAgent, setSelectedAgent } = useAgentSelect(formData?.agent_id);
   const { handleSubmit } = usePropertyFormSubmit();
+
+  // Fetch template info and agent info
+  useEffect(() => {
+    if (formData && formData.id) {
+      // Fetch template info
+      const fetchTemplateInfo = async () => {
+        const { data } = await supabase
+          .from('brochure_templates')
+          .select('id, name')
+          .eq('id', formData.template_id || 'default')
+          .single();
+        
+        if (data) {
+          setTemplateInfo(data);
+        } else {
+          setTemplateInfo({ id: 'default', name: 'Default Template' });
+        }
+      };
+
+      // Fetch agent info if agent_id exists
+      const fetchAgentInfo = async () => {
+        if (formData.agent_id) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('id', formData.agent_id)
+            .single();
+          
+          if (data) {
+            setAgentInfo({ id: data.id, name: data.full_name });
+          }
+        }
+      };
+
+      fetchTemplateInfo();
+      fetchAgentInfo();
+    }
+  }, [formData]);
 
   // Load property image handlers
   const {
@@ -90,6 +131,8 @@ export function PropertyFormContainer() {
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
       images={images.map(img => img.url)} // Convert PropertyImage[] to string[] by extracting the URL
+      agentInfo={agentInfo}
+      templateInfo={templateInfo}
     >
       <PropertyForm />
     </PropertyFormLayout>

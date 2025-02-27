@@ -1,15 +1,14 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyInformationCard } from "@/components/property/PropertyInformationCard";
-import { PropertyActionButtons } from "@/components/property/PropertyActionButtons";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { Save } from "lucide-react";
+import { FileDown, Globe, Share2, Save, Trash2, Mailbox } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Code } from "@/components/ui/code";
 
 interface Submission {
   id: string;
@@ -28,6 +27,8 @@ interface PropertyDashboardTabProps {
   title: string;
   agentId?: string;
   agentName?: string;
+  templateId?: string;
+  templateName?: string;
   createdAt?: string;
   updatedAt?: string;
   onSave: () => void;
@@ -42,6 +43,8 @@ export function PropertyDashboardTab({
   title,
   agentId,
   agentName,
+  templateId,
+  templateName,
   createdAt,
   updatedAt,
   onSave,
@@ -53,6 +56,7 @@ export function PropertyDashboardTab({
   const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const { toast } = useToast();
+  const apiEndpoint = `${window.location.origin}/api/properties/${id}`;
 
   // Fetch submissions when opening the dialog
   const handleOpenSubmissions = async () => {
@@ -121,41 +125,79 @@ export function PropertyDashboardTab({
 
   return (
     <div className="space-y-6">
-      <PropertyInformationCard id={id} objectId={objectId} />
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" onClick={onSave} title="Save">
+            <Save className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={onWebView} title="Web View">
+            <Globe className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" onClick={onGeneratePDF} title="Generate PDF">
+            <FileDown className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon"
+            asChild
+            title="Share Link"
+          >
+            <a href={`/share/${id}`} target="_blank" rel="noopener noreferrer">
+              <Share2 className="h-4 w-4" />
+            </a>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleOpenSubmissions}
+            title="Contact Submissions"
+          >
+            <Mailbox className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="destructive" 
+            size="icon" 
+            onClick={onDelete}
+            title="Delete Property"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Property Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PropertyActionButtons
-              onSave={onSave}
-              onDelete={onDelete}
-              onGeneratePDF={onGeneratePDF}
-              onWebView={onWebView}
-              propertyId={id}
-            />
-            <Button 
-              variant="outline" 
-              className="w-full justify-start mt-2" 
-              onClick={handleOpenSubmissions}
-            >
-              <span className="mr-2">📨</span>
-              View Contact Submissions
-            </Button>
-          </CardContent>
-        </Card>
-        
         <Card>
           <CardHeader>
             <CardTitle>Property Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <span className="text-sm font-medium">ID:</span>
+              <p className="text-sm font-mono">{id}</p>
+            </div>
+            
+            <div>
+              <span className="text-sm font-medium">Object ID:</span>
+              <p className="text-sm font-mono">{objectId || 'Not set'}</p>
+            </div>
+            
+            <div>
+              <span className="text-sm font-medium">API Endpoint:</span>
+              <Code className="text-xs mt-1">{apiEndpoint}</Code>
+            </div>
+            
             {agentName && (
               <div>
                 <span className="text-sm font-medium">Assigned Agent:</span>
                 <p className="text-sm">{agentName}</p>
+              </div>
+            )}
+            
+            {templateName && (
+              <div>
+                <span className="text-sm font-medium">Brochure Template:</span>
+                <p className="text-sm">{templateName}</p>
               </div>
             )}
             
@@ -172,6 +214,17 @@ export function PropertyDashboardTab({
                 <p className="text-sm">{formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</p>
               </div>
             )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-gray-500 italic">
+              No recent activity to display.
+            </div>
           </CardContent>
         </Card>
       </div>
