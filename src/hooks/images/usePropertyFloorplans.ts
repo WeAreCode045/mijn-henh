@@ -1,7 +1,7 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData } from "@/types/property";
+import type { PropertyFormData, PropertyFloorplan } from "@/types/property";
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
@@ -29,14 +29,17 @@ export function usePropertyFloorplans(
           .from('properties')
           .getPublicUrl(filePath);
 
-        return publicUrl;
+        return {
+          url: publicUrl,
+          columns: 1 // Default to 1 column
+        };
       });
 
-      const urls = await Promise.all(uploadPromises);
+      const newFloorplans = await Promise.all(uploadPromises);
       
       setFormData({
         ...formData,
-        floorplans: [...formData.floorplans, ...urls]
+        floorplans: [...formData.floorplans, ...newFloorplans]
       });
 
       toast({
@@ -60,8 +63,22 @@ export function usePropertyFloorplans(
     });
   };
 
+  const handleUpdateFloorplan = (index: number, field: keyof PropertyFloorplan, value: any) => {
+    const updatedFloorplans = [...formData.floorplans];
+    updatedFloorplans[index] = {
+      ...updatedFloorplans[index],
+      [field]: value
+    };
+    
+    setFormData({
+      ...formData,
+      floorplans: updatedFloorplans
+    });
+  };
+
   return {
     handleFloorplanUpload,
     handleRemoveFloorplan,
+    handleUpdateFloorplan
   };
 }

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyPlaceType, PropertyImage, PropertyArea } from "@/types/property";
+import type { PropertyFormData, PropertyPlaceType, PropertyImage, PropertyArea, PropertyFloorplan } from "@/types/property";
 
 const initialFormData: PropertyFormData = {
   title: "",
@@ -73,11 +73,22 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
               title: area.title || "",
               description: area.description || "",
               imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
-              columns: typeof area.columns === 'number' ? area.columns : 2 // Load columns property
+              columns: typeof area.columns === 'number' ? area.columns : 2
             }))
           : [];
 
         console.log("Loaded areas with columns:", areas);
+
+        // Transform floorplans from array of URLs to array of objects with URL and columns
+        const floorplans = Array.isArray(propertyData.floorplans)
+          ? (typeof propertyData.floorplans[0] === 'string' 
+              // Handle legacy format (array of strings)
+              ? propertyData.floorplans.map((url: string) => ({ url, columns: 1 }))
+              // Handle new format (array of objects)
+              : propertyData.floorplans)
+          : [];
+
+        console.log("Loaded floorplans:", floorplans);
 
         const nearbyPlaces = Array.isArray(propertyData.nearby_places)
           ? propertyData.nearby_places.map((place: any) => ({
@@ -109,7 +120,7 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
           location_description: propertyData.location_description || "",
           features: features,
           images: images,
-          floorplans: propertyData.floorplans || [],
+          floorplans: floorplans,
           featuredImage: propertyData.featuredImage,
           gridImages: Array.isArray(propertyData.gridImages) ? propertyData.gridImages : [],
           areas: areas,

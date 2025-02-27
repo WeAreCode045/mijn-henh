@@ -1,5 +1,5 @@
 
-import type { PropertyFormData } from "@/types/property";
+import type { PropertyFormData, PropertyFloorplan } from "@/types/property";
 import { usePropertyMainImages } from "./images/usePropertyMainImages";
 import { usePropertyAreaPhotos } from "./images/usePropertyAreaPhotos";
 import { usePropertyFloorplans } from "./images/usePropertyFloorplans";
@@ -11,7 +11,7 @@ export function usePropertyImages(
 ) {
   const { handleImageUpload, handleRemoveImage } = usePropertyMainImages(formData, setFormData);
   const { handleAreaPhotosUpload, handleRemoveAreaPhoto } = usePropertyAreaPhotos(formData, setFormData);
-  const { handleFloorplanUpload, handleRemoveFloorplan } = usePropertyFloorplans(formData, setFormData);
+  const { handleFloorplanUpload, handleRemoveFloorplan, handleUpdateFloorplan } = usePropertyFloorplans(formData, setFormData);
   const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyFeaturedImage(formData, setFormData);
 
   return {
@@ -19,8 +19,9 @@ export function usePropertyImages(
     handleRemoveImage,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
-    handleRemoveAreaPhoto,
     handleRemoveFloorplan,
+    handleUpdateFloorplan,
+    handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleGridImage
   };

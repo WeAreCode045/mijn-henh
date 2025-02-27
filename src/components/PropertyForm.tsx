@@ -25,8 +25,9 @@ export function PropertyForm() {
     handleRemoveImage,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
-    handleRemoveAreaPhoto,
     handleRemoveFloorplan,
+    handleUpdateFloorplan,
+    handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleGridImage
   } = usePropertyImages(formData, setFormData);
@@ -114,6 +115,7 @@ export function PropertyForm() {
           handleRemoveImage={handleRemoveImageAdapter}
           handleRemoveAreaPhoto={handleRemoveAreaPhoto}
           handleRemoveFloorplan={handleRemoveFloorplan}
+          handleUpdateFloorplan={handleUpdateFloorplan}
           handleSetFeaturedImage={handleSetFeaturedImage}
           handleToggleGridImage={handleToggleGridImageAdapter}
           handleMapImageDelete={handleMapImageDelete}

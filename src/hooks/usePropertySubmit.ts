@@ -18,6 +18,11 @@ export function usePropertySubmit() {
         console.log("usePropertySubmit - Areas before final formatting:", JSON.stringify(data.areas));
       }
       
+      // Make sure floorplans data is properly formatted as JSONB
+      if (Array.isArray(data.floorplans)) {
+        console.log("usePropertySubmit - Floorplans before final formatting:", JSON.stringify(data.floorplans));
+      }
+      
       if (id) {
         console.log(`usePropertySubmit - Updating property ${id} with data:`, JSON.stringify(data));
         

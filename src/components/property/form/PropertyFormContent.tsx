@@ -1,8 +1,7 @@
 
-import type { PropertyFormData } from "@/types/property";
-import { GeneralInfoStep } from "./steps/GeneralInfoStep";
-import { FeaturesStep } from "./steps/FeaturesStep";
-import { AreasStep } from "./steps/AreasStep";
+import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan } from "@/types/property";
+import { steps } from "./formSteps";
+import { PropertyStepContent } from "./PropertyStepContent";
 
 interface PropertyFormContentProps {
   step: number;
@@ -13,19 +12,20 @@ interface PropertyFormContentProps {
   onUpdateFeature: (id: string, description: string) => void;
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: keyof PropertyFormData["areas"][0], value: string | string[] | number) => void;
-  onAreaImageUpload: (id: string, files: FileList) => void;
-  onAreaImageRemove: (id: string, imageId: string) => void;
-  onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
+  onUpdateArea: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => void;
+  onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
-  handleSetFeaturedImage: (url: string | null) => void;
+  handleUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  handleSetFeaturedImage: (url: string) => void;
   handleToggleGridImage: (url: string) => void;
-  handleMapImageDelete: () => Promise<void>;
+  handleMapImageDelete?: () => void;
 }
 
 export function PropertyFormContent({
@@ -47,51 +47,45 @@ export function PropertyFormContent({
   handleRemoveImage,
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
+  handleUpdateFloorplan,
   handleSetFeaturedImage,
   handleToggleGridImage,
   handleMapImageDelete,
 }: PropertyFormContentProps) {
+  
+  const CurrentStep = steps[step]?.component;
 
-  const renderStepContent = () => {
-    switch (step) {
-      case 1: // General Info
-        return (
-          <GeneralInfoStep 
-            formData={formData}
-            onFieldChange={onFieldChange}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-          />
-        );
-      case 2: // Features
-        return (
-          <FeaturesStep
-            features={formData.features}
-            onAddFeature={onAddFeature}
-            onRemoveFeature={onRemoveFeature}
-            onUpdateFeature={onUpdateFeature}
-          />
-        );
-      case 3: // Areas
-        return (
-          <AreasStep
-            areas={formData.areas}
-            images={formData.images}
-            onAddArea={onAddArea}
-            onRemoveArea={onRemoveArea}
-            onUpdateArea={onUpdateArea}
-            onAreaImageUpload={onAreaImageUpload}
-            onAreaImageRemove={onAreaImageRemove}
-            onAreaImagesSelect={onAreaImagesSelect}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  if (!CurrentStep) {
+    return <div>Error: Step not found</div>;
+  }
 
   return (
-    <div className="space-y-6">
-      {renderStepContent()}
+    <div className="py-4 animate-fadeIn">
+      <PropertyStepContent step={step}>
+        <CurrentStep
+          {...formData}
+          onFieldChange={onFieldChange}
+          onAddFeature={onAddFeature}
+          onRemoveFeature={onRemoveFeature}
+          onUpdateFeature={onUpdateFeature}
+          onAddArea={onAddArea}
+          onRemoveArea={onRemoveArea}
+          onUpdateArea={onUpdateArea}
+          onAreaImageUpload={onAreaImageUpload}
+          onAreaImageRemove={onAreaImageRemove}
+          onAreaImagesSelect={onAreaImagesSelect}
+          onFloorplanUpload={handleFloorplanUpload}
+          onRemoveFloorplan={handleRemoveFloorplan}
+          onUpdateFloorplan={handleUpdateFloorplan}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
+          onAreaPhotosUpload={handleAreaPhotosUpload}
+          onRemoveAreaPhoto={handleRemoveAreaPhoto}
+          onSetFeaturedImage={handleSetFeaturedImage}
+          onToggleGridImage={handleToggleGridImage}
+          onMapImageDelete={handleMapImageDelete}
+        />
+      </PropertyStepContent>
     </div>
   );
 }
