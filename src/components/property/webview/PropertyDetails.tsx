@@ -101,11 +101,20 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         {/* Energy label image from Supabase */}
         {energyImage ? (
           <div className="flex flex-col items-center">
-            <img 
-              src={energyImage} 
-              alt={`Energy Class ${currentGrade}`} 
-              className="w-full max-w-[140px] h-auto object-contain"
-            />
+            {/* Round card with opacity for the energy image */}
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center mb-3">
+              <img 
+                src={energyImage} 
+                alt={`Energy Class ${currentGrade}`} 
+                className="w-16 h-16 object-contain opacity-60"
+              />
+            </div>
+            {/* Label outside the card */}
+            {currentGrade && (
+              <p className="font-bold text-lg" style={{ color: energyLabelColor }}>
+                Class {currentGrade}
+              </p>
+            )}
           </div>
         ) : currentGrade ? (
           // Fallback to the previous visualization if image isn't loaded
