@@ -124,6 +124,9 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
 
         const images: PropertyImage[] = propertyData.property_images || [];
 
+        // Cast propertyData to any to allow accessing template_id since it might not be in the type
+        const propertyDataAny = propertyData as any;
+
         setFormData({
           id: propertyData.id,
           title: propertyData.title || "",
@@ -155,7 +158,8 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
           virtualTourUrl: propertyData.virtualTourUrl || "",
           youtubeUrl: propertyData.youtubeUrl || "",
           notes: propertyData.notes || "",
-          template_id: propertyData.template_id || "default", // Safely get template_id with fallback
+          // Use the casted version to access template_id or use default
+          template_id: propertyDataAny.template_id || "default",
           agent_id: propertyData.agent_id
         });
       }
