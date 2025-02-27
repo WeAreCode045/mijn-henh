@@ -132,9 +132,10 @@ export function AreaCard({
             </DialogTrigger>
             <DialogContent className="max-w-4xl">
               <ImageSelectDialog
-                allImages={images}
+                images={images}
                 selectedImageIds={area.imageIds || []}
                 onSelect={handleImageSelection}
+                buttonText="Select Images"
               />
             </DialogContent>
           </Dialog>
