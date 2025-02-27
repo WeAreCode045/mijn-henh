@@ -12,30 +12,48 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyMediaTabProps {
   id: string;
+  title: string; // Added title property to fix TypeScript error
   images: PropertyImage[];
   floorplans: PropertyFloorplan[];
+  featuredImage: string | null;
+  gridImages: string[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove?: (index: number) => void;
+  onFeaturedImageSelect?: (imageUrl: string) => void;
+  onGridImageToggle?: (imageUrl: string) => void;
   onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFloorplanRemove: (index: number) => void;
+  onFloorplanUpdate?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  onVirtualTourUpdate?: (url: string) => void;
+  onYoutubeUrlUpdate?: (url: string) => void;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  onRemoveFloorplan: (index: number) => void;
-  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
 }
 
 export function PropertyMediaTab({
   id,
+  title, // Added title property to component arguments
   images = [],
   floorplans = [],
+  featuredImage,
+  gridImages = [],
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
-  onImageUpload,
+  onUpload,
+  onRemove,
+  onFeaturedImageSelect,
+  onGridImageToggle,
   onFloorplanUpload,
+  onFloorplanRemove,
+  onFloorplanUpdate,
+  onVirtualTourUpdate,
+  onYoutubeUrlUpdate,
+  onImageUpload,
   onRemoveImage,
-  onRemoveFloorplan,
-  onUpdateFloorplan,
 }: PropertyMediaTabProps) {
   const [currentVirtualTourUrl, setCurrentVirtualTourUrl] = useState(virtualTourUrl);
   const [currentYoutubeUrl, setCurrentYoutubeUrl] = useState(youtubeUrl);
@@ -61,6 +79,10 @@ export function PropertyMediaTab({
       toast({
         description: "External links saved successfully",
       });
+      
+      // Call the update handlers if they exist
+      if (onVirtualTourUpdate) onVirtualTourUpdate(currentVirtualTourUrl);
+      if (onYoutubeUrlUpdate) onYoutubeUrlUpdate(currentYoutubeUrl);
     } catch (error) {
       console.error('Error saving external links:', error);
       toast({
@@ -156,13 +178,13 @@ export function PropertyMediaTab({
                         className="w-full h-40 object-contain"
                       />
                       
-                      {onUpdateFloorplan && (
+                      {onFloorplanUpdate && (
                         <div className="mt-2">
                           <Label htmlFor={`columns-${index}`}>Display Columns</Label>
                           <select
                             id={`columns-${index}`}
                             value={floorplan.columns || 1}
-                            onChange={(e) => onUpdateFloorplan(index, 'columns', parseInt(e.target.value))}
+                            onChange={(e) => onFloorplanUpdate(index, 'columns', parseInt(e.target.value))}
                             className="block w-full mt-1 border border-gray-300 rounded-md p-2 text-sm"
                           >
                             <option value={1}>1 Column</option>
@@ -175,7 +197,7 @@ export function PropertyMediaTab({
                       
                       <button
                         type="button"
-                        onClick={() => onRemoveFloorplan(index)}
+                        onClick={() => onFloorplanRemove(index)}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
