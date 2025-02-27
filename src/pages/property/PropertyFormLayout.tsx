@@ -2,6 +2,7 @@
 import { ReactNode } from "react";
 import { PropertyData } from "@/types/property";
 import { Settings } from "@/types/settings";
+import { AgencySettings } from "@/types/agency";
 
 // Import our new components
 import { PropertyFormHeader } from "./components/PropertyFormHeader";
@@ -40,7 +41,7 @@ export function PropertyFormLayout({
   images
 }: PropertyFormLayoutProps) {
   // Safely convert settings to the format needed by PropertyActions
-  const agencySettings = settings ? createAgencySettingsFromSettings(settings) : {};
+  const agencySettings: AgencySettings = createAgencySettingsFromSettings(settings);
 
   return (
     <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">

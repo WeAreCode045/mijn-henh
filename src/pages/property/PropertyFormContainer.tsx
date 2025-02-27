@@ -132,7 +132,6 @@ export function PropertyFormContainer() {
 
   // Create data objects needed by child components
   const propertyDataWithId = createPropertyDataFromFormData(formData);
-  const agencySettings = createAgencySettingsFromSettings(settings || {});
   
   return (
     <PropertyFormLayout

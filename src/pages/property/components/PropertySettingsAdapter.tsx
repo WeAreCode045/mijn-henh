@@ -1,36 +1,35 @@
 
 import { Settings } from "@/types/settings";
+import { AgencySettings } from "@/types/agency";
 
-export function createAgencySettingsFromSettings(settings: Settings | null | undefined) {
+export function createAgencySettingsFromSettings(settings: Settings | null | undefined): AgencySettings {
   if (!settings) {
     return {
-      logo_url: "",
       name: "",
-      primary_color: "#40497A",
-      secondary_color: "#E2E8F0",
-      background_image: "",
-      description: "",
       email: "",
       phone: "",
       address: "",
-      facebook_url: "",
-      instagram_url: "",
-      youtube_url: "",
+      primaryColor: "#40497A",
+      secondaryColor: "#E2E8F0",
+      logoUrl: "",
+      webviewBgImage: "",
+      facebookUrl: "",
+      instagramUrl: "",
+      youtubeUrl: "",
     };
   }
 
   return {
-    logo_url: settings.logo_url || "",
     name: settings.name || "",
-    primary_color: settings.primary_color || "#40497A",
-    secondary_color: settings.secondary_color || "#E2E8F0",
-    background_image: settings.description_background_url || "",
-    description: settings.description || "",
     email: settings.email || "",
     phone: settings.phone || "",
     address: settings.address || "",
-    facebook_url: settings.facebook_url || "",
-    instagram_url: settings.instagram_url || "",
-    youtube_url: settings.youtube_url || "",
+    primaryColor: settings.primary_color || "#40497A",
+    secondaryColor: settings.secondary_color || "#E2E8F0",
+    logoUrl: settings.logo_url || "",
+    webviewBgImage: settings.description_background_url || "",
+    facebookUrl: settings.facebook_url || "",
+    instagramUrl: settings.instagram_url || "",
+    youtubeUrl: settings.youtube_url || "",
   };
 }
