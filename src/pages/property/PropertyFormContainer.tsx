@@ -167,7 +167,7 @@ export function PropertyFormContainer() {
       }}
       images={propertyDataWithId.images.map(img => img.url)}
     >
-      <PropertyForm onSubmit={handleFormSubmit} />
+      <PropertyForm />
     </PropertyFormLayout>
   );
 }
