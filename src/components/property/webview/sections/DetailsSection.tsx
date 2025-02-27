@@ -14,8 +14,8 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
       />
       
       <div className="px-6 py-2 flex flex-col md:flex-row gap-6">
-        {/* Description Section - increased width from flex-1 to flex-grow-[2] */}
-        <div className="flex-grow-[2] relative">
+        {/* Description Section - adjusted width to be more balanced */}
+        <div className="flex-[3] relative">
           <div className="relative bg-white/90 p-4 rounded-lg shadow-sm">
             <h3 
               className="text-xl font-semibold mb-2"
@@ -29,9 +29,9 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
           </div>
         </div>
 
-        {/* Features Section - decreased width from flex-1 to flex-1 */}
+        {/* Features Section - adjusted width to be more balanced */}
         {property.features && property.features.length > 0 && (
-          <div className="flex-1">
+          <div className="flex-[2]">
             <div className="bg-white/90 p-4 rounded-lg shadow-sm">
               <h3 
                 className="text-xl font-semibold mb-2"
