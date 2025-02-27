@@ -43,7 +43,10 @@ export function PropertyForm() {
 
   const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(
     formData,
-    () => autosaveData(formData),
+    () => {
+      console.log("Autosaving form data...");
+      if (formData) autosaveData(formData);
+    },
     steps.length
   );
 
@@ -78,14 +81,18 @@ export function PropertyForm() {
     return null;
   }
 
+  const onFormSubmit = (e: React.FormEvent) => {
+    console.log("PropertyForm - Form submitted via standard submit event");
+    handleSubmit(e, formData);
+  };
+
+  console.log("PropertyForm rendering, currentStep:", currentStep);
+
   return (
     <Card className="w-full p-6 animate-fadeIn">
       <form 
         id="propertyForm" 
-        onSubmit={(e) => {
-          console.log("PropertyForm - Form submitted via standard submit event");
-          handleSubmit(e, formData);
-        }} 
+        onSubmit={onFormSubmit} 
         className="space-y-6"
       >
         <FormStepNavigation

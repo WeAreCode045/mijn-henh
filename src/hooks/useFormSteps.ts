@@ -10,20 +10,34 @@ export function useFormSteps(
   const [currentStep, setCurrentStep] = useState(1);
 
   const handleNext = () => {
+    console.log("handleNext called, current step:", currentStep, "maxSteps:", maxSteps);
     if (currentStep < maxSteps) {
-      setCurrentStep(prev => prev + 1);
+      const nextStep = currentStep + 1;
+      console.log("Moving to next step:", nextStep);
+      setCurrentStep(nextStep);
+      // Save data when moving to next step
+      onAutosave();
     }
   };
 
   const handlePrevious = () => {
+    console.log("handlePrevious called, current step:", currentStep);
     if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
+      const prevStep = currentStep - 1;
+      console.log("Moving to previous step:", prevStep);
+      setCurrentStep(prevStep);
+      // Save data when moving to previous step
+      onAutosave();
     }
   };
 
   const handleStepClick = (step: number) => {
+    console.log("handleStepClick called, selected step:", step);
     if (step >= 1 && step <= maxSteps) {
+      console.log("Setting current step to:", step);
       setCurrentStep(step);
+      // Save data when directly clicking a step
+      onAutosave();
     }
   };
 

@@ -28,6 +28,12 @@ export function FormStepNavigation({
     onStepClick(stepId);
   };
 
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Next button clicked, currentStep:", currentStep);
+    onNext();
+  };
+
   return (
     <>
       <div className="mb-8">
@@ -80,7 +86,7 @@ export function FormStepNavigation({
             Save Property
           </Button>
         ) : (
-          <Button type="button" onClick={onNext}>
+          <Button type="button" onClick={handleNext}>
             Next
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
