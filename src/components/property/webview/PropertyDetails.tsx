@@ -82,10 +82,10 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
           >
             <div className="flex items-center space-x-3 mb-1">
               <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center"
+                className="w-10 h-10 rounded-full flex items-center justify-center" /* Increased icon container size */
                 style={{ backgroundColor: settings?.secondaryColor }}
               >
-                <detail.icon className="w-4 h-4 text-white" />
+                <detail.icon className="w-6 h-6 text-white" /> {/* Increased icon size */}
               </div>
               <p className="text-white font-bold text-xs">{detail.label}</p>
             </div>
@@ -94,19 +94,17 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
         ))}
       </div>
 
-      {/* Right side: Energy label column without the white background card */}
+      {/* Right side: Energy label column - showing only the image, no label */}
       <div className="row-span-2 rounded-lg flex flex-col items-center justify-center p-4">
-        <p className="text-gray-700 font-bold text-sm mb-4">Energy Label</p>
-        
         {/* Energy label image from Supabase */}
         {energyImage ? (
           <div className="flex items-center justify-center">
-            {/* White background circle for the energy image, made larger */}
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-sm">
+            {/* White background circle for the energy image, made much larger */}
+            <div className="w-48 h-48 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-sm">
               <img 
                 src={energyImage} 
                 alt={`Energy Class ${currentGrade}`} 
-                className="w-24 h-24 object-contain opacity-70"
+                className="w-40 h-40 object-contain opacity-80" /* Made image significantly larger */
               />
             </div>
           </div>
