@@ -18,10 +18,10 @@ export function usePropertyFormSubmit() {
       title: area.title,
       description: area.description,
       imageIds: area.imageIds || [],
-      columns: area.columns || 2 // Ensure columns property is included
+      columns: typeof area.columns === 'number' ? area.columns : 2 // Ensure columns property is correctly typed
     }));
 
-    console.log("Form submission - areas with images and columns:", areasWithImages);
+    console.log("Form submission - areas with columns:", areasWithImages);
     
     // Cast the features and nearby_places to Json type to satisfy TypeScript
     const featuresJson = formData.features as unknown as Json;
@@ -55,6 +55,7 @@ export function usePropertyFormSubmit() {
     
     try {
       if (formData.id) {
+        console.log("Updating property with areas data:", submitData.areas);
         const { error } = await supabase
           .from('properties')
           .update(submitData)
@@ -67,6 +68,7 @@ export function usePropertyFormSubmit() {
           description: "Property updated successfully",
         });
       } else {
+        console.log("Creating property with areas data:", submitData.areas);
         const { error } = await supabase
           .from('properties')
           .insert(submitData);

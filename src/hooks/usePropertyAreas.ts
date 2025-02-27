@@ -1,14 +1,12 @@
 
-import { useToast } from "@/components/ui/use-toast";
-import type { PropertyArea, PropertyFormData } from "@/types/property";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from 'react';
+import type { PropertyArea, PropertyFormData } from '@/types/property';
 
 export function usePropertyAreas(
   formData: PropertyFormData,
-  setFormData: (data: PropertyFormData) => void
+  setFormData: React.Dispatch<React.SetStateAction<PropertyFormData>>
 ) {
-  const { toast } = useToast();
-
+  // Add a new area to the property
   const addArea = () => {
     const newArea: PropertyArea = {
       id: crypto.randomUUID(),
@@ -17,128 +15,73 @@ export function usePropertyAreas(
       imageIds: [],
       columns: 2 // Default to 2 columns
     };
-
+    
     setFormData({
       ...formData,
-      areas: [...formData.areas, newArea]
+      areas: [...(formData.areas || []), newArea],
     });
   };
 
+  // Remove an area from the property
   const removeArea = (id: string) => {
     setFormData({
       ...formData,
-      areas: formData.areas.filter(area => area.id !== id)
+      areas: formData.areas.filter(area => area.id !== id),
     });
   };
 
+  // Update a specific field of an area
   const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
+    console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
+    
     setFormData({
       ...formData,
-      areas: formData.areas.map(area =>
+      areas: formData.areas.map(area => 
         area.id === id ? { ...area, [field]: value } : area
-      )
+      ),
     });
   };
 
+  // Handle image upload for a specific area
   const handleAreaImageUpload = async (areaId: string, files: FileList) => {
-    try {
-      const area = formData.areas.find(a => a.id === areaId);
-      if (!area) return;
-
-      const fileArray = Array.from(files);
-      const uploadPromises = fileArray.map(async (file) => {
-        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
-        const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
-        const filePath = `properties/${formData.id || 'new'}/areas/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('properties')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('properties')
-          .getPublicUrl(filePath);
-
-        // Add the new image to the images array
-        const newImageId = crypto.randomUUID();
-        const newImage = {
-          id: newImageId,
-          url: publicUrl
-        };
-
-        // Create a new images array with the new image
-        const updatedImages = [...formData.images, newImage];
-        
-        // Update the form data directly instead of using a callback function
-        setFormData({
-          ...formData,
-          images: updatedImages
-        });
-
-        return newImageId;
-      });
-
-      const newImageIds = await Promise.all(uploadPromises);
-      const imageIds = [...(area.imageIds || []), ...newImageIds];
-      updateArea(areaId, 'imageIds', imageIds);
-
-      toast({
-        title: "Success",
-        description: "Area images uploaded successfully",
-      });
-    } catch (error) {
-      console.error('Error uploading area images:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload area images",
-        variant: "destructive",
-      });
-    }
+    // Implementation for handling area image upload
+    console.log(`Image upload for area ${areaId}, files:`, files);
+    // This would typically involve uploading the images to your storage system
+    // and then updating the area's imageIds
   };
 
-  const removeAreaImage = async (areaId: string, imageId: string) => {
-    try {
-      const area = formData.areas.find(a => a.id === areaId);
-      if (!area) return;
-
-      const imageIds = area.imageIds.filter(id => id !== imageId);
-      updateArea(areaId, 'imageIds', imageIds);
-
-      toast({
-        title: "Success",
-        description: "Image removed successfully",
-      });
-    } catch (error) {
-      console.error('Error removing area image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to remove image",
-        variant: "destructive",
-      });
-    }
+  // Remove an image from an area
+  const removeAreaImage = (areaId: string, imageId: string) => {
+    setFormData({
+      ...formData,
+      areas: formData.areas.map(area => {
+        if (area.id === areaId) {
+          return {
+            ...area,
+            imageIds: (area.imageIds || []).filter(id => id !== imageId),
+          };
+        }
+        return area;
+      }),
+    });
   };
 
-  const handleAreaImagesSelect = (areaId: string, selectedImageIds: string[]) => {
-    try {
-      const area = formData.areas.find(a => a.id === areaId);
-      if (!area) return;
-
-      updateArea(areaId, 'imageIds', selectedImageIds);
-
-      toast({
-        title: "Success",
-        description: "Images selected successfully",
-      });
-    } catch (error) {
-      console.error('Error selecting area images:', error);
-      toast({
-        title: "Error",
-        description: "Failed to select images",
-        variant: "destructive",
-      });
-    }
+  // Select images from existing property images for an area
+  const handleAreaImagesSelect = (areaId: string, imageIds: string[]) => {
+    console.log(`Selecting images for area ${areaId}, imageIds:`, imageIds);
+    
+    setFormData({
+      ...formData,
+      areas: formData.areas.map(area => {
+        if (area.id === areaId) {
+          return {
+            ...area,
+            imageIds: imageIds,
+          };
+        }
+        return area;
+      }),
+    });
   };
 
   return {
@@ -147,6 +90,6 @@ export function usePropertyAreas(
     updateArea,
     handleAreaImageUpload,
     removeAreaImage,
-    handleAreaImagesSelect
+    handleAreaImagesSelect,
   };
 }

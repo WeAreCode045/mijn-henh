@@ -11,6 +11,7 @@ export function usePropertySubmit() {
   const handleDatabaseSubmit = async (data: PropertySubmitData, id?: string) => {
     try {
       if (id) {
+        console.log("Updating property with areas data:", data.areas);
         const { error: updateError } = await supabase
           .from('properties')
           .update(data)
@@ -24,6 +25,7 @@ export function usePropertySubmit() {
           variant: "default",
         });
       } else {
+        console.log("Creating property with areas data:", data.areas);
         const { error: insertError } = await supabase
           .from('properties')
           .insert(data);

@@ -63,7 +63,7 @@ export function PropertyAreas({
   };
 
   useEffect(() => {
-    console.log("PropertyAreas - Current areas:", areas);
+    console.log("PropertyAreas - Current areas with columns:", areas);
   }, [areas]);
 
   const getImagesByIds = (imageIds: string[]): PropertyImage[] => {
@@ -90,7 +90,7 @@ export function PropertyAreas({
         <div className="space-y-6">
           {areas.map((area) => {
             const areaImages = getImagesByIds(area.imageIds || []);
-            console.log(`PropertyAreas - Area ${area.id} images:`, areaImages);
+            console.log(`PropertyAreas - Area ${area.id} with columns ${area.columns} and images:`, areaImages);
             
             return (
               <Card key={area.id} className="relative">
@@ -126,7 +126,11 @@ export function PropertyAreas({
                     <Label htmlFor={`columns-${area.id}`}>Image Grid Columns</Label>
                     <Select
                       value={String(area.columns || 2)}
-                      onValueChange={(value) => onUpdate(area.id, "columns", parseInt(value))}
+                      onValueChange={(value) => {
+                        const numValue = parseInt(value);
+                        console.log(`Updating columns for area ${area.id} to ${numValue}`);
+                        onUpdate(area.id, "columns", numValue);
+                      }}
                     >
                       <SelectTrigger id={`columns-${area.id}`} className="w-full">
                         <SelectValue placeholder="Select number of columns" />

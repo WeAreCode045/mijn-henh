@@ -52,6 +52,12 @@ export function PropertyFormContainer() {
       gridImages: formData.gridImages || []
     };
 
+    // Ensure the columns property is preserved for areas
+    const areasWithColumns = propertyData.areas.map(area => ({
+      ...area,
+      columns: typeof area.columns === 'number' ? area.columns : 2
+    }));
+
     const submitData: PropertySubmitData = {
       id: propertyData.id,
       title: propertyData.title,
@@ -72,7 +78,7 @@ export function PropertyFormContainer() {
       gridImages: propertyData.gridImages,
       areaPhotos: propertyData.areaPhotos,
       features: propertyData.features as unknown as Json,
-      areas: propertyData.areas as unknown as Json[],
+      areas: areasWithColumns as unknown as Json[],
       nearby_places: propertyData.nearby_places as unknown as Json,
       images: propertyData.images.map(img => img.url),
       latitude: propertyData.latitude,
@@ -82,6 +88,7 @@ export function PropertyFormContainer() {
       agent_id: selectedAgent || null
     };
     
+    console.log("Submitting property with areas data:", submitData.areas);
     handleDatabaseSubmit(submitData, id);
   };
 
