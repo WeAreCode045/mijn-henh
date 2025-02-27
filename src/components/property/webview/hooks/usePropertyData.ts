@@ -15,7 +15,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         // First try to fetch by object_id
         let { data, error } = await supabase
           .from('properties')
-          .select('*')
+          .select('*, property_images(*)')
           .eq('object_id', id)
           .maybeSingle();
 
@@ -23,7 +23,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         if (!data && !error) {
           const { data: uuidData, error: uuidError } = await supabase
             .from('properties')
-            .select('*')
+            .select('*, property_images(*)')
             .eq('id', id)
             .maybeSingle();
 
@@ -35,8 +35,12 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           data = uuidData;
         }
 
+        console.log("usePropertyData - Raw data from Supabase:", data);
+
         if (data) {
-          setPropertyData(transformSupabaseData(data));
+          const transformedData = transformSupabaseData(data);
+          console.log("usePropertyData - Transformed property data:", transformedData);
+          setPropertyData(transformedData);
         }
       } catch (error) {
         console.error('Error fetching property:', error);
@@ -46,6 +50,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
     if (id) {
       fetchProperty();
     } else if (property) {
+      console.log("usePropertyData - Using provided property data:", property);
       setPropertyData(property);
     }
   }, [id, property]);

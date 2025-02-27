@@ -20,12 +20,19 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
       .map(img => img.url);
   };
 
+  console.log("AreasSection - property.areas:", property.areas);
+  console.log("AreasSection - property.images:", property.images);
+  console.log("AreasSection - areasForThisPage:", areasForThisPage);
+
   return (
     <div className="space-y-4 pb-24">
       <div className="px-6 space-y-8">
         {areasForThisPage.map((area, index) => {
           const areaImages = getAreaImages(area.imageIds || []);
           const columnCount = area.columns || 2; // Default to 2 columns if not specified
+          
+          console.log(`Area ${index} (${area.title}) - imageIds:`, area.imageIds);
+          console.log(`Area ${index} (${area.title}) - resolved images:`, areaImages);
           
           return (
             <div key={index} className="space-y-4 bg-white/90 p-4 rounded-lg shadow-sm">

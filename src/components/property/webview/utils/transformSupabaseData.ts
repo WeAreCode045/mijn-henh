@@ -16,9 +16,13 @@ export function transformSupabaseData(data: any): PropertyData {
         id: area.id || crypto.randomUUID(),
         title: area.title || "",
         description: area.description || "",
-        imageIds: Array.isArray(area.imageIds) ? area.imageIds : []
+        imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
+        columns: area.columns || 2
       }))
     : [];
+
+  console.log("transformSupabaseData - raw areas data:", data.areas);
+  console.log("transformSupabaseData - processed areas:", areas);
 
   // Process images from property_images relation
   const images: PropertyImage[] = Array.isArray(data.property_images)
@@ -27,6 +31,8 @@ export function transformSupabaseData(data: any): PropertyData {
         url: img.url
       }))
     : [];
+
+  console.log("transformSupabaseData - images:", images);
 
   // Process agent data if available
   const agent: PropertyAgent | undefined = data.agent_id ? {

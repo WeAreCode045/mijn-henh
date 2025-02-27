@@ -8,6 +8,7 @@ import { PropertyArea, PropertyImage } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageSelectDialog } from "../property/ImageSelectDialog";
+import { useEffect } from "react";
 
 interface PropertyAreasProps {
   areas: PropertyArea[];
@@ -61,6 +62,10 @@ export function PropertyAreas({
     );
   };
 
+  useEffect(() => {
+    console.log("PropertyAreas - Current areas:", areas);
+  }, [areas]);
+
   const getImagesByIds = (imageIds: string[]): PropertyImage[] => {
     return images.filter(img => imageIds.includes(img.id));
   };
@@ -85,6 +90,8 @@ export function PropertyAreas({
         <div className="space-y-6">
           {areas.map((area) => {
             const areaImages = getImagesByIds(area.imageIds || []);
+            console.log(`PropertyAreas - Area ${area.id} images:`, areaImages);
+            
             return (
               <Card key={area.id} className="relative">
                 <Button
@@ -145,6 +152,7 @@ export function PropertyAreas({
                           images={images}
                           selectedImageIds={area.imageIds || []}
                           onSelect={(selectedIds) => {
+                            console.log(`ImageSelectDialog - Selected IDs for area ${area.id}:`, selectedIds);
                             if (onImagesSelect) {
                               onImagesSelect(area.id, selectedIds);
                             } else {
