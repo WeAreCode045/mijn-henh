@@ -23,6 +23,7 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
       <div className="px-6 space-y-8">
         {areasForThisPage.map((area, index) => {
           const areaImages = getAreaImages(area.imageIds || []);
+          const columnCount = area.columns || 2; // Default to 2 columns if not specified
           
           return (
             <div key={index} className="space-y-4 bg-white/90 p-4 rounded-lg shadow-sm">
@@ -39,7 +40,10 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
               </div>
 
               {areaImages.length > 0 && (
-                <div className="grid grid-cols-2 gap-4">
+                <div 
+                  className={`grid gap-4`}
+                  style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+                >
                   {areaImages.map((imageUrl, imgIndex) => (
                     <img
                       key={imgIndex}

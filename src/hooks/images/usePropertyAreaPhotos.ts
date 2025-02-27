@@ -1,4 +1,3 @@
-
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from "@/types/property";
@@ -34,10 +33,27 @@ export function usePropertyAreaPhotos(
 
       const urls = await Promise.all(uploadPromises);
       
-      setFormData({
-        ...formData,
-        areaPhotos: [...(formData.areaPhotos || []), ...urls]
-      });
+      if (urls.length > 0 && (!formData.areaPhotos || formData.areaPhotos.length === 0)) {
+        const areaId = crypto.randomUUID();
+        const newArea = {
+          id: areaId,
+          title: 'Location Photos',
+          description: 'Photos of the surrounding area',
+          imageIds: [],
+          columns: 2 // Default to 2 columns
+        };
+        
+        setFormData({
+          ...formData,
+          areas: [...formData.areas, newArea],
+          areaPhotos: [...(formData.areaPhotos || []), ...urls]
+        });
+      } else {
+        setFormData({
+          ...formData,
+          areaPhotos: [...(formData.areaPhotos || []), ...urls]
+        });
+      }
 
       toast({
         title: "Success",

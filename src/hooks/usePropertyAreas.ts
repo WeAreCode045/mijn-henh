@@ -14,7 +14,8 @@ export function usePropertyAreas(
       id: crypto.randomUUID(),
       title: '',
       description: '',
-      imageIds: []
+      imageIds: [],
+      columns: 2 // Default to 2 columns
     };
 
     setFormData({
@@ -30,7 +31,7 @@ export function usePropertyAreas(
     });
   };
 
-  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[]) => {
+  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
     setFormData({
       ...formData,
       areas: formData.areas.map(area =>

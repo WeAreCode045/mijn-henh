@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PropertyArea, PropertyImage } from "@/types/property";
 import { PlusCircle, MinusCircle, ImagePlus, Trash2 } from "lucide-react";
 import { ImageSelectDialog } from "./ImageSelectDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PropertyAreasProps {
   areas: PropertyArea[];
@@ -58,6 +59,26 @@ export function PropertyAreas({
             onChange={(e) => onUpdate(area.id, 'description', e.target.value)}
             placeholder="Area Description"
           />
+          
+          {/* Add column selector for image grid */}
+          <div className="w-full">
+            <Label htmlFor={`columns-${area.id}`}>Image Grid Columns</Label>
+            <Select
+              value={area.columns?.toString() || "2"}
+              onValueChange={(value) => onUpdate(area.id, 'columns', parseInt(value))}
+            >
+              <SelectTrigger id={`columns-${area.id}`} className="w-full">
+                <SelectValue placeholder="Select columns" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 Column</SelectItem>
+                <SelectItem value="2">2 Columns</SelectItem>
+                <SelectItem value="3">3 Columns</SelectItem>
+                <SelectItem value="4">4 Columns</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div className="space-y-2">
             <Label>Area Images</Label>
             <ImageSelectDialog 

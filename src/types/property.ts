@@ -17,6 +17,7 @@ export interface PropertyArea {
   title: string;
   description: string;
   imageIds: string[];
+  columns?: number; // New field for grid column count
 }
 
 export interface PropertyPlaceType {
