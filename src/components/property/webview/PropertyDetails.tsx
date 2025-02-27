@@ -106,11 +106,6 @@ export function PropertyDetails({ property, primaryColor, settings }: PropertyDe
               alt={`Energy Class ${currentGrade}`} 
               className="w-full max-w-[140px] h-auto object-contain"
             />
-            {currentGrade && (
-              <p className="mt-2 font-bold text-lg" style={{ color: energyLabelColor }}>
-                Class {currentGrade}
-              </p>
-            )}
           </div>
         ) : currentGrade ? (
           // Fallback to the previous visualization if image isn't loaded
