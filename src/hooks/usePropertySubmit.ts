@@ -10,8 +10,16 @@ export function usePropertySubmit() {
 
   const handleDatabaseSubmit = async (data: PropertySubmitData, id?: string) => {
     try {
+      // Log the complete data object for debugging
+      console.log("Full data being submitted to database:", JSON.stringify(data));
+      
+      // Make sure areas data is properly formatted as JSONB
+      if (Array.isArray(data.areas)) {
+        console.log("Areas before final formatting:", JSON.stringify(data.areas));
+      }
+      
       if (id) {
-        console.log("Updating property with areas data:", data.areas);
+        console.log(`Updating property ${id} with areas:`, JSON.stringify(data.areas));
         const { error: updateError } = await supabase
           .from('properties')
           .update(data)
@@ -25,7 +33,7 @@ export function usePropertySubmit() {
           variant: "default",
         });
       } else {
-        console.log("Creating property with areas data:", data.areas);
+        console.log("Creating new property with areas:", JSON.stringify(data.areas));
         const { error: insertError } = await supabase
           .from('properties')
           .insert(data);

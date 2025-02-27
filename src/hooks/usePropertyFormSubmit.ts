@@ -12,20 +12,24 @@ export function usePropertyFormSubmit() {
   const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData) => {
     e.preventDefault();
     
-    // Prepare data for submission - ensure areas includes columns property
-    const areasWithImages = formData.areas.map(area => ({
-      id: area.id,
-      title: area.title,
-      description: area.description,
-      imageIds: area.imageIds || [],
-      columns: typeof area.columns === 'number' ? area.columns : 2 // Ensure columns property is correctly typed
-    }));
+    // Prepare areas data with correct types for submission
+    const areasWithImages = formData.areas.map(area => {
+      console.log(`Preparing area ${area.id} for submission with columns:`, area.columns);
+      return {
+        id: area.id,
+        title: area.title,
+        description: area.description,
+        imageIds: area.imageIds || [],
+        columns: typeof area.columns === 'number' ? area.columns : 2 // Ensure columns property is correctly typed
+      };
+    });
 
     console.log("Form submission - areas with columns:", areasWithImages);
     
     // Cast the features and nearby_places to Json type to satisfy TypeScript
     const featuresJson = formData.features as unknown as Json;
     const nearby_placesJson = formData.nearby_places as unknown as Json;
+    const areasJson = areasWithImages as unknown as Json[];
     
     const submitData: PropertySubmitData = {
       title: formData.title,
@@ -48,14 +52,14 @@ export function usePropertyFormSubmit() {
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
-      areas: areasWithImages as unknown as Json[],
+      areas: areasJson,
       nearby_places: nearby_placesJson,
       images: formData.images.map(img => img.url)
     };
     
     try {
       if (formData.id) {
-        console.log("Updating property with areas data:", submitData.areas);
+        console.log("Updating property with areas data:", JSON.stringify(submitData.areas));
         const { error } = await supabase
           .from('properties')
           .update(submitData)
@@ -68,7 +72,7 @@ export function usePropertyFormSubmit() {
           description: "Property updated successfully",
         });
       } else {
-        console.log("Creating property with areas data:", submitData.areas);
+        console.log("Creating property with areas data:", JSON.stringify(submitData.areas));
         const { error } = await supabase
           .from('properties')
           .insert(submitData);

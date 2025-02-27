@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageSelectDialog } from "./ImageSelectDialog";
 import { AreaImageGrid } from "./AreaImageGrid";
+import { useEffect } from "react";
 
 interface AreaCardProps {
   area: PropertyArea;
@@ -29,6 +30,11 @@ export function AreaCard({
   onImageRemove,
   onImagesSelect,
 }: AreaCardProps) {
+  // Log the initial column value when the component mounts or area changes
+  useEffect(() => {
+    console.log(`AreaCard ${area.id} (${area.title}) - initial columns:`, area.columns);
+  }, [area.id, area.title, area.columns]);
+
   // Create a hidden file input for image upload
   const createFileInput = () => {
     const inputId = `area-images-${area.id}`;
@@ -60,6 +66,13 @@ export function AreaCard({
         </Button>
       </>
     );
+  };
+
+  // Handle column change
+  const handleColumnChange = (value: string) => {
+    const numValue = parseInt(value);
+    console.log(`AreaCard - Changing columns for area ${area.id} from ${area.columns} to ${numValue}`);
+    onUpdate(area.id, "columns", numValue);
   };
 
   // Filter images to only show those associated with this area
@@ -103,11 +116,7 @@ export function AreaCard({
           <Label htmlFor={`columns-${area.id}`}>Image Grid Columns</Label>
           <Select
             value={String(area.columns || 2)}
-            onValueChange={(value) => {
-              const numValue = parseInt(value);
-              console.log(`Updating columns for area ${area.id} to ${numValue}`);
-              onUpdate(area.id, "columns", numValue);
-            }}
+            onValueChange={handleColumnChange}
           >
             <SelectTrigger id={`columns-${area.id}`} className="w-full">
               <SelectValue placeholder="Select number of columns" />

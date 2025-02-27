@@ -16,6 +16,8 @@ export function usePropertyAreas(
       columns: 2 // Default to 2 columns
     };
     
+    console.log("Adding new area with default columns:", newArea);
+    
     setFormData({
       ...formData,
       areas: [...(formData.areas || []), newArea],
@@ -24,6 +26,8 @@ export function usePropertyAreas(
 
   // Remove an area from the property
   const removeArea = (id: string) => {
+    console.log(`Removing area ${id}`);
+    
     setFormData({
       ...formData,
       areas: formData.areas.filter(area => area.id !== id),
@@ -40,6 +44,12 @@ export function usePropertyAreas(
         area.id === id ? { ...area, [field]: value } : area
       ),
     });
+    
+    // Log the updated areas for debugging
+    const updatedAreas = formData.areas.map(area => 
+      area.id === id ? { ...area, [field]: value } : area
+    );
+    console.log("Areas after update:", updatedAreas);
   };
 
   // Handle image upload for a specific area
@@ -52,6 +62,8 @@ export function usePropertyAreas(
 
   // Remove an image from an area
   const removeAreaImage = (areaId: string, imageId: string) => {
+    console.log(`Removing image ${imageId} from area ${areaId}`);
+    
     setFormData({
       ...formData,
       areas: formData.areas.map(area => {
@@ -64,6 +76,18 @@ export function usePropertyAreas(
         return area;
       }),
     });
+    
+    // Log the updated areas for debugging
+    const updatedAreas = formData.areas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          imageIds: (area.imageIds || []).filter(id => id !== imageId),
+        };
+      }
+      return area;
+    });
+    console.log("Areas after image removal:", updatedAreas);
   };
 
   // Select images from existing property images for an area
@@ -82,6 +106,18 @@ export function usePropertyAreas(
         return area;
       }),
     });
+    
+    // Log the updated areas for debugging
+    const updatedAreas = formData.areas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          imageIds: imageIds,
+        };
+      }
+      return area;
+    });
+    console.log("Areas after image selection:", updatedAreas);
   };
 
   return {
