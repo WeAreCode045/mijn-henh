@@ -79,14 +79,25 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
 
         console.log("Loaded areas with columns:", areas);
 
-        // Transform floorplans from array of URLs to array of objects with URL and columns
-        const floorplans = Array.isArray(propertyData.floorplans)
-          ? (typeof propertyData.floorplans[0] === 'string' 
+        // Transform floorplans from database format to PropertyFloorplan[]
+        let floorplans: PropertyFloorplan[] = [];
+        if (Array.isArray(propertyData.floorplans)) {
+          if (propertyData.floorplans.length > 0) {
+            if (typeof propertyData.floorplans[0] === 'string') {
               // Handle legacy format (array of strings)
-              ? propertyData.floorplans.map((url: string) => ({ url, columns: 1 }))
-              // Handle new format (array of objects)
-              : propertyData.floorplans)
-          : [];
+              floorplans = propertyData.floorplans.map((url: string) => ({ 
+                url, 
+                columns: 1 
+              }));
+            } else {
+              // Handle new format (array of objects with url and columns)
+              floorplans = propertyData.floorplans.map((plan: any) => ({
+                url: plan.url || '',
+                columns: typeof plan.columns === 'number' ? plan.columns : 1
+              }));
+            }
+          }
+        }
 
         console.log("Loaded floorplans:", floorplans);
 

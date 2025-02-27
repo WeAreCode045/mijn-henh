@@ -88,7 +88,7 @@ export function usePropertyFormSubmit() {
         
         const { error } = await supabase
           .from('properties')
-          .update(submitData)
+          .update(submitData as any)
           .eq('id', formData.id);
           
         if (error) {
@@ -104,7 +104,7 @@ export function usePropertyFormSubmit() {
         console.log("usePropertyFormSubmit - Creating property with areas data:", JSON.stringify(submitData.areas));
         const { error } = await supabase
           .from('properties')
-          .insert(submitData);
+          .insert(submitData as any);
           
         if (error) {
           console.error("Supabase insert error:", error);

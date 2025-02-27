@@ -20,6 +20,12 @@ export function usePropertyAutosave() {
       if (fetchError) throw fetchError;
 
       const imageUrls = formData.images.map(img => img.url);
+      
+      // Convert floorplans from PropertyFloorplan[] to proper format for database
+      const floorplansForDb = formData.floorplans.map(floorplan => ({
+        url: floorplan.url,
+        columns: floorplan.columns || 1
+      }));
 
       const upsertData = {
         address: formData.address || null,
@@ -32,7 +38,7 @@ export function usePropertyAutosave() {
         energyLabel: formData.energyLabel || null,
         featuredImage: formData.featuredImage || null,
         features: formData.features as unknown as Json,
-        floorplans: formData.floorplans || [],
+        floorplans: floorplansForDb as unknown as Json,
         garages: formData.garages || null,
         gridImages: formData.gridImages || [],
         hasGarden: formData.hasGarden || false,

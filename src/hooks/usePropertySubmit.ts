@@ -33,7 +33,7 @@ export function usePropertySubmit() {
         
         const { error: updateError } = await supabase
           .from('properties')
-          .update(cleanData)
+          .update(cleanData as any)
           .eq('id', id);
         
         if (updateError) {
@@ -50,7 +50,7 @@ export function usePropertySubmit() {
         console.log("usePropertySubmit - Creating new property with data:", JSON.stringify(data));
         const { error: insertError } = await supabase
           .from('properties')
-          .insert(data);
+          .insert(data as any);
         
         if (insertError) {
           console.error("Supabase insert error:", insertError);

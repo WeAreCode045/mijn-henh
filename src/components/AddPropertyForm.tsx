@@ -1,51 +1,31 @@
 
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
-import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
+import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { useFeatures } from "@/hooks/useFeatures";
-import { usePropertyAreas } from "@/hooks/usePropertyAreas";
-import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyAutosave } from "@/hooks/usePropertyAutosave";
 import type { PropertyFormData } from "@/types/property";
-import { steps } from "@/components/property/form/formSteps";
-import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
+import { steps } from "./property/form/formSteps";
+import { FormStepNavigation } from "./property/form/FormStepNavigation";
 import { useFormSteps } from "@/hooks/useFormSteps";
+import { PropertyFormContent } from "./property/form/PropertyFormContent";
 
 export function AddPropertyForm() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const handlePropertySubmit = (data: PropertyFormData) => {
-    try {
-      navigate('/');
-      toast({
-        title: "Success",
-        description: "Property created successfully",
-        variant: "default",
-      });
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create property",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const { formData, setFormData } = usePropertyForm(undefined, handlePropertySubmit);
+  const { formData, setFormData, isLoading } = usePropertyForm(undefined);
   const { addFeature, removeFeature, updateFeature } = useFeatures(formData, setFormData);
-  const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(formData, () => {}, steps.length);
+  const { handleSubmit } = usePropertyFormSubmit();
+  const { autosaveData } = usePropertyAutosave();
   
   const {
     handleImageUpload,
     handleRemoveImage,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
-    handleRemoveAreaPhoto,
     handleRemoveFloorplan,
+    handleUpdateFloorplan,
+    handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleGridImage
   } = usePropertyImages(formData, setFormData);
@@ -55,8 +35,15 @@ export function AddPropertyForm() {
     addArea,
     removeArea,
     updateArea,
-    removeAreaImage
+    removeAreaImage,
+    handleAreaImagesSelect
   } = usePropertyAreas(formData, setFormData);
+
+  const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(
+    formData,
+    () => autosaveData(formData),
+    steps.length
+  );
 
   const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
     setFormData({ ...formData, [field]: value });
@@ -84,45 +71,50 @@ export function AddPropertyForm() {
     handleToggleGridImage(newGridImages);
   };
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    <div className="container py-10">
-      <Card className="w-full p-6">
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handlePropertySubmit(formData);
-        }} className="space-y-6">
-          <FormStepNavigation
-            steps={steps}
-            currentStep={currentStep}
-            onStepClick={handleStepClick}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            isUpdateMode={false}
-          />
-          <PropertyFormContent 
-            step={currentStep}
-            formData={formData}
-            onFieldChange={handleFieldChange}
-            onAddFeature={addFeature}
-            onRemoveFeature={removeFeature}
-            onUpdateFeature={updateFeature}
-            onAddArea={addArea}
-            onRemoveArea={removeArea}
-            onUpdateArea={updateArea}
-            onAreaImageUpload={handleAreaImageUpload}
-            onAreaImageRemove={removeAreaImage}
-            handleImageUpload={handleImageUpload}
-            handleAreaPhotosUpload={handleAreaPhotosUpload}
-            handleFloorplanUpload={handleFloorplanUpload}
-            handleRemoveImage={handleRemoveImageAdapter}
-            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-            handleRemoveFloorplan={handleRemoveFloorplan}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleGridImage={handleToggleGridImageAdapter}
-            handleMapImageDelete={handleMapImageDelete}
-          />
-        </form>
-      </Card>
-    </div>
+    <Card className="w-full p-6 animate-fadeIn">
+      <form 
+        id="propertyForm" 
+        onSubmit={(e) => handleSubmit(e, formData)} 
+        className="space-y-6"
+      >
+        <FormStepNavigation
+          steps={steps}
+          currentStep={currentStep}
+          onStepClick={handleStepClick}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          isUpdateMode={false}
+        />
+        <PropertyFormContent 
+          step={currentStep}
+          formData={formData}
+          onFieldChange={handleFieldChange}
+          onAddFeature={addFeature}
+          onRemoveFeature={removeFeature}
+          onUpdateFeature={updateFeature}
+          onAddArea={addArea}
+          onRemoveArea={removeArea}
+          onUpdateArea={updateArea}
+          onAreaImageUpload={handleAreaImageUpload}
+          onAreaImageRemove={removeAreaImage}
+          onAreaImagesSelect={handleAreaImagesSelect}
+          handleImageUpload={handleImageUpload}
+          handleAreaPhotosUpload={handleAreaPhotosUpload}
+          handleFloorplanUpload={handleFloorplanUpload}
+          handleRemoveImage={handleRemoveImageAdapter}
+          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+          handleRemoveFloorplan={handleRemoveFloorplan}
+          handleUpdateFloorplan={handleUpdateFloorplan}
+          handleSetFeaturedImage={handleSetFeaturedImage}
+          handleToggleGridImage={handleToggleGridImageAdapter}
+          handleMapImageDelete={handleMapImageDelete}
+        />
+      </form>
+    </Card>
   );
 }

@@ -24,7 +24,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     if (isLegacyFormat) {
       return [{
         columns: 1,
-        plans: (floorplans as string[]).map((url: string) => ({ url, columns: 1 }))
+        plans: (floorplans as unknown as string[]).map((url: string) => ({ url, columns: 1 }))
       }];
     }
     
