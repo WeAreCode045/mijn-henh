@@ -23,10 +23,13 @@ export function AreasStep({
   onAreaImageRemove,
   onAreaImagesSelect,
 }: AreasStepProps) {
+  console.log("AreasStep rendering with areas:", areas);
+  console.log("AreasStep images:", images);
+  
   return (
     <PropertyAreas
-      areas={areas}
-      images={images}
+      areas={areas || []}
+      images={images || []}
       onAdd={onAddArea}
       onRemove={onRemoveArea}
       onUpdate={onUpdateArea}

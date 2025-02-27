@@ -14,6 +14,7 @@ import { steps } from "./property/form/formSteps";
 import { FormStepNavigation } from "./property/form/FormStepNavigation";
 import { useFormSteps } from "@/hooks/useFormSteps";
 import { PropertyFormContent } from "./property/form/PropertyFormContent";
+import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -28,13 +29,16 @@ export function PropertyForm() {
     handleImageUpload,
     handleRemoveImage,
     handleAreaPhotosUpload,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleGridImage
   } = usePropertyImages(formData, setFormData);
+
+  const {
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    handleUpdateFloorplan
+  } = usePropertyFloorplans(formData, setFormData);
 
   const {
     handleAreaImageUpload,
@@ -120,6 +124,8 @@ export function PropertyForm() {
   }
 
   console.log("PropertyForm rendering, currentStep:", currentStep);
+  console.log("PropertyForm floorplans:", formData.floorplans);
+  console.log("PropertyForm areas:", formData.areas);
 
   return (
     <Card className="w-full p-6 animate-fadeIn">

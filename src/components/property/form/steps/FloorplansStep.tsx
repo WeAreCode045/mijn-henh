@@ -11,7 +11,7 @@ interface FloorplansStepProps {
   floorplans: PropertyFloorplan[];
   onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan: (index: number) => void;
-  onUpdateFloorplan: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
 }
 
 export function FloorplansStep({
@@ -21,6 +21,7 @@ export function FloorplansStep({
   onUpdateFloorplan
 }: FloorplansStepProps) {
   const [uploadKey, setUploadKey] = useState(Date.now());
+  console.log("FloorplansStep rendering with floorplans:", floorplans);
 
   // Reset the upload field after a successful upload
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +56,7 @@ export function FloorplansStep({
         </p>
       </div>
 
-      {floorplans.length > 0 && (
+      {floorplans && floorplans.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Uploaded Floorplans</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -81,7 +82,7 @@ export function FloorplansStep({
                     <Label className="flex-shrink-0">Columns:</Label>
                     <Select
                       value={String(floorplan.columns || 1)}
-                      onValueChange={(value) => onUpdateFloorplan(index, 'columns', parseInt(value))}
+                      onValueChange={(value) => onUpdateFloorplan && onUpdateFloorplan(index, 'columns', parseInt(value))}
                     >
                       <SelectTrigger className="w-24">
                         <SelectValue placeholder="Columns" />

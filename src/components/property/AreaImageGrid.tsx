@@ -9,8 +9,10 @@ interface AreaImageGridProps {
   onImageRemove: (areaId: string, imageId: string) => void;
 }
 
-export function AreaImageGrid({ areaImages, areaId, areaTitle, onImageRemove }: AreaImageGridProps) {
-  if (areaImages.length === 0) {
+export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemove }: AreaImageGridProps) {
+  console.log(`AreaImageGrid for ${areaId} (${areaTitle}) - images:`, areaImages);
+  
+  if (!areaImages || areaImages.length === 0) {
     return (
       <div className="text-center py-6 bg-gray-50 rounded-md text-gray-500 text-sm">
         No images added to this area yet

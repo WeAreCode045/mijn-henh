@@ -18,8 +18,8 @@ interface PropertyAreasProps {
 }
 
 export function PropertyAreas({
-  areas,
-  images,
+  areas = [],
+  images = [],
   onAdd,
   onRemove,
   onUpdate,
@@ -29,7 +29,8 @@ export function PropertyAreas({
 }: PropertyAreasProps) {
   useEffect(() => {
     console.log("PropertyAreas - Current areas with columns:", areas);
-  }, [areas]);
+    console.log("PropertyAreas - Available images:", images);
+  }, [areas, images]);
 
   return (
     <div className="space-y-4">
@@ -41,7 +42,7 @@ export function PropertyAreas({
         </Button>
       </div>
 
-      {areas.length === 0 ? (
+      {!areas || areas.length === 0 ? (
         <EmptyAreaMessage />
       ) : (
         <div className="space-y-6">

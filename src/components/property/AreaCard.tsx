@@ -23,7 +23,7 @@ interface AreaCardProps {
 
 export function AreaCard({
   area,
-  images,
+  images = [],
   onRemove,
   onUpdate,
   onImageUpload,
@@ -33,7 +33,8 @@ export function AreaCard({
   // Log the initial column value when the component mounts or area changes
   useEffect(() => {
     console.log(`AreaCard ${area.id} (${area.title}) - initial columns:`, area.columns);
-  }, [area.id, area.title, area.columns]);
+    console.log(`AreaCard ${area.id} (${area.title}) - imageIds:`, area.imageIds);
+  }, [area.id, area.title, area.columns, area.imageIds]);
 
   // Create a hidden file input for image upload
   const createFileInput = () => {
@@ -76,7 +77,7 @@ export function AreaCard({
   };
 
   // Filter images to only show those associated with this area
-  const getImagesByIds = (imageIds: string[]): PropertyImage[] => {
+  const getImagesByIds = (imageIds: string[] = []): PropertyImage[] => {
     return images.filter(img => imageIds.includes(img.id));
   };
 
@@ -96,7 +97,7 @@ export function AreaCard({
       <CardHeader>
         <CardTitle>
           <Input
-            value={area.title}
+            value={area.title || ''}
             onChange={(e) => onUpdate(area.id, "title", e.target.value)}
             placeholder="Area Title"
             className="text-xl font-bold"
@@ -106,7 +107,7 @@ export function AreaCard({
       
       <CardContent className="space-y-4">
         <Textarea
-          value={area.description}
+          value={area.description || ''}
           onChange={(e) => onUpdate(area.id, "description", e.target.value)}
           placeholder="Enter description for this area"
           className="min-h-[100px]"
@@ -156,7 +157,7 @@ export function AreaCard({
           <AreaImageGrid 
             areaImages={areaImages} 
             areaId={area.id} 
-            areaTitle={area.title}
+            areaTitle={area.title || ''}
             onImageRemove={onImageRemove}
           />
         </div>

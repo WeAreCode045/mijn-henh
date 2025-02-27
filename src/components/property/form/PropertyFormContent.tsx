@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -74,32 +73,55 @@ export function PropertyFormContent({
     );
   }
 
-  // Pass all props to the step component
+  // Pass all props to the step component based on the type of step
   return (
     <div className="py-4 animate-fadeIn">
-      <StepComponent
-        formData={formData}
-        onFieldChange={onFieldChange}
-        onAddFeature={onAddFeature}
-        onRemoveFeature={onRemoveFeature}
-        onUpdateFeature={onUpdateFeature}
-        onAddArea={onAddArea}
-        onRemoveArea={onRemoveArea}
-        onUpdateArea={onUpdateArea}
-        onAreaImageUpload={onAreaImageUpload}
-        onAreaImageRemove={onAreaImageRemove}
-        onAreaImagesSelect={onAreaImagesSelect}
-        onFloorplanUpload={handleFloorplanUpload}
-        onRemoveFloorplan={handleRemoveFloorplan}
-        onUpdateFloorplan={handleUpdateFloorplan}
-        onImageUpload={handleImageUpload}
-        onRemoveImage={handleRemoveImage}
-        onAreaPhotosUpload={handleAreaPhotosUpload}
-        onRemoveAreaPhoto={handleRemoveAreaPhoto}
-        onSetFeaturedImage={handleSetFeaturedImage}
-        onToggleGridImage={handleToggleGridImage}
-        onMapImageDelete={handleMapImageDelete}
-      />
+      {step === 4 ? (
+        // FloorplansStep
+        <StepComponent
+          floorplans={formData.floorplans}
+          onFloorplanUpload={handleFloorplanUpload}
+          onRemoveFloorplan={handleRemoveFloorplan}
+          onUpdateFloorplan={handleUpdateFloorplan}
+        />
+      ) : step === 5 ? (
+        // AreasStep
+        <StepComponent
+          areas={formData.areas}
+          images={formData.images}
+          onAddArea={onAddArea}
+          onRemoveArea={onRemoveArea}
+          onUpdateArea={onUpdateArea}
+          onAreaImageUpload={onAreaImageUpload}
+          onAreaImageRemove={onAreaImageRemove}
+          onAreaImagesSelect={onAreaImagesSelect}
+        />
+      ) : (
+        // Other steps
+        <StepComponent
+          formData={formData}
+          onFieldChange={onFieldChange}
+          onAddFeature={onAddFeature}
+          onRemoveFeature={onRemoveFeature}
+          onUpdateFeature={onUpdateFeature}
+          onAddArea={onAddArea}
+          onRemoveArea={onRemoveArea}
+          onUpdateArea={onUpdateArea}
+          onAreaImageUpload={onAreaImageUpload}
+          onAreaImageRemove={onAreaImageRemove}
+          onAreaImagesSelect={onAreaImagesSelect}
+          onFloorplanUpload={handleFloorplanUpload}
+          onRemoveFloorplan={handleRemoveFloorplan}
+          onUpdateFloorplan={handleUpdateFloorplan}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
+          onAreaPhotosUpload={handleAreaPhotosUpload}
+          onRemoveAreaPhoto={handleRemoveAreaPhoto}
+          onSetFeaturedImage={handleSetFeaturedImage}
+          onToggleGridImage={handleToggleGridImage}
+          onMapImageDelete={handleMapImageDelete}
+        />
+      )}
     </div>
   );
 }
