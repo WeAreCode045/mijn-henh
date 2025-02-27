@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertySubmitData } from "@/types/property";
+import { Json } from "@/integrations/supabase/types";
 
 export function usePropertyFormSubmit() {
   const { toast } = useToast();
@@ -22,6 +23,10 @@ export function usePropertyFormSubmit() {
 
     console.log("Form submission - areas with images:", areasWithImages);
     
+    // Cast the features and nearby_places to Json type to satisfy TypeScript
+    const featuresJson = formData.features as unknown as Json;
+    const nearby_placesJson = formData.nearby_places as unknown as Json;
+    
     const submitData: PropertySubmitData = {
       title: formData.title,
       price: formData.price,
@@ -36,15 +41,15 @@ export function usePropertyFormSubmit() {
       hasGarden: formData.hasGarden,
       description: formData.description,
       location_description: formData.location_description,
-      features: formData.features,
+      features: featuresJson,
       floorplans: formData.floorplans,
       featuredImage: formData.featuredImage,
       gridImages: formData.gridImages,
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
-      areas: areasWithImages,
-      nearby_places: formData.nearby_places,
+      areas: areasWithImages as unknown as Json[],
+      nearby_places: nearby_placesJson,
       images: formData.images.map(img => img.url)
     };
     

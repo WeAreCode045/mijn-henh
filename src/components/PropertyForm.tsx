@@ -13,15 +13,11 @@ import { FormStepNavigation } from "./property/form/FormStepNavigation";
 import { useFormSteps } from "@/hooks/useFormSteps";
 import { PropertyFormContent } from "./property/form/PropertyFormContent";
 
-interface PropertyFormProps {
-  onSubmit: (data: PropertyFormData) => void;
-}
-
-export function PropertyForm({ onSubmit }: PropertyFormProps) {
+export function PropertyForm() {
   const { id } = useParams();
-  const { formData, setFormData, isLoading } = usePropertyForm(id, onSubmit);
+  const { formData, setFormData, isLoading } = usePropertyForm(id);
   const { addFeature, removeFeature, updateFeature } = useFeatures(formData, setFormData);
-  const { handleSubmit } = usePropertyFormSubmit(onSubmit);
+  const { handleSubmit } = usePropertyFormSubmit();
   const { autosaveData } = usePropertyAutosave();
   
   const {
