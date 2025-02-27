@@ -5,7 +5,10 @@ import { TabsContent } from "@/components/ui/tabs";
 import { PropertyDashboardTab } from "./tabs/PropertyDashboardTab";
 import { PropertyContentTab } from "./tabs/PropertyContentTab";
 import { PropertyMediaTab } from "./tabs/PropertyMediaTab";
-import { PropertySettingsTab } from "./tabs/PropertySettingsTab";
+import { PropertyIdSection } from "./settings/PropertyIdSection";
+import { AgentSection } from "./settings/AgentSection";
+import { TemplateSection } from "./settings/TemplateSection";
+import { DangerZoneSection } from "./settings/DangerZoneSection";
 import { PropertyData } from "@/types/property";
 import { Settings } from "@/types/settings";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,8 +45,8 @@ export function PropertyTabsWrapper({
     window.open(`/webview/${property.id}`, "_blank");
   };
 
-  // Settings tab functions
-  const handleSaveSettings = async (objectId: string, agentId: string, templateId: string) => {
+  // Settings handler functions
+  const handleSaveObjectId = async (objectId: string) => {
     if (!property.id) {
       toast({
         title: "Error",
@@ -56,33 +59,92 @@ export function PropertyTabsWrapper({
     try {
       setIsUpdating(true);
       
-      // Update only the fields that are passed
-      const updateData: any = {};
-      if (objectId !== undefined) updateData.object_id = objectId;
-      if (agentId !== undefined) updateData.agent_id = agentId;
-      if (templateId !== undefined && templateId !== property.template_id) updateData.template_id = templateId;
+      const { error } = await supabase
+        .from('properties')
+        .update({ object_id: objectId })
+        .eq('id', property.id);
       
-      // Only update if there are changes
-      if (Object.keys(updateData).length > 0) {
-        const { error } = await supabase
-          .from('properties')
-          .update(updateData)
-          .eq('id', property.id);
-        
-        if (error) throw error;
-        
-        toast({
-          description: "Settings saved successfully",
-        });
-        
-        // Trigger a refresh/save of the property data
-        onSave();
-      }
+      if (error) throw error;
+      
+      toast({
+        description: "Object ID saved successfully",
+      });
+      
+      onSave();
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error('Error saving object ID:', error);
       toast({
         title: "Error",
-        description: "Failed to save settings",
+        description: "Failed to save object ID",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleSaveAgent = async (agentId: string) => {
+    if (!property.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ agent_id: agentId })
+        .eq('id', property.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Agent assigned successfully",
+      });
+      
+      onSave();
+    } catch (error) {
+      console.error('Error assigning agent:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign agent",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleSaveTemplate = async (templateId: string) => {
+    if (!property.id || templateId === property.template_id) {
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ template_id: templateId })
+        .eq('id', property.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Template saved successfully",
+      });
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save template",
         variant: "destructive",
       });
     } finally {
@@ -166,15 +228,27 @@ export function PropertyTabsWrapper({
       </TabsContent>
       
       <TabsContent value="settings">
-        <PropertySettingsTab 
-          id={property.id}
-          objectId={property.object_id || ""}
-          agentId={property.agent_id || ""}
-          selectedTemplateId={templateInfo?.id || "default"}
-          onDelete={onDelete}
-          onSaveSettings={handleSaveSettings}
-          isUpdating={isUpdating}
-        />
+        <div className="space-y-6">
+          <PropertyIdSection 
+            objectId={property.object_id || ""} 
+            onSave={handleSaveObjectId}
+            isUpdating={isUpdating}
+          />
+          
+          <AgentSection 
+            agentId={property.agent_id || ""} 
+            onSave={handleSaveAgent}
+            isUpdating={isUpdating}
+          />
+          
+          <TemplateSection 
+            templateId={templateInfo?.id || "default"} 
+            onSave={handleSaveTemplate}
+            isUpdating={isUpdating}
+          />
+          
+          <DangerZoneSection onDelete={onDelete} />
+        </div>
       </TabsContent>
     </PropertyTabs>
   );
