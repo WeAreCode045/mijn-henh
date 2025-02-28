@@ -94,9 +94,12 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
     try {
       setIsUpdating(true);
       
+      // Using type assertion to fix TypeScript error
+      const updateData: { template_id: string } = { template_id: templateId };
+      
       const { error } = await supabase
         .from('properties')
-        .update({ template_id: templateId })
+        .update(updateData as any)
         .eq('id', propertyId);
       
       if (error) throw error;
