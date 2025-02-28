@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,7 +126,11 @@ export function AreaCard({
                   input.type = "file";
                   input.multiple = true;
                   input.accept = "image/*";
-                  input.onchange = handleFileUpload;
+                  input.onchange = (e) => {
+                    if (e && e.target) {
+                      handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                    }
+                  };
                   input.click();
                 }}
                 className="flex items-center"
