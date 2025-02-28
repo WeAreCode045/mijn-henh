@@ -9,27 +9,32 @@ export function usePropertyFeaturedImage(
   const { toast } = useToast();
 
   const handleSetFeaturedImage = (url: string) => {
-    console.log("Toggling featured image:", url);
-    // Ensure gridImages is always an array
-    const currentFeaturedImage = Array.isArray(formData.featuredImage) ? formData.featuredImage : [];
+    console.log("Setting featured image:", url);
     
-    // If the image is already in the grid, remove it, otherwise add it
-    const newFeaturedImage = currentFeaturedImage.includes(url)
-      ? currentFeaturedImage.filter(img => img !== url)
-      : [...currentFeaturedImage, url];
-    
-    // Limit to max 4 grid images
-    const limitedFeaturedImage = newFeaturedImage.slice(0, 1);
-    
+    // Update the form data with the new featured image
     setFormData({
       ...formData,
-      featuredImage: limitedFeaturedImage
+      featuredImage: url
     });
     
-    const action = currentFeaturedImage.includes(url) ? "removed from" : "added to";
     toast({
       title: "Success",
-      description: `Image ${action} featured`,
+      description: "Featured image updated",
+    });
+  };
+
+  const handleRemoveFeaturedImage = () => {
+    console.log("Removing featured image");
+    
+    // Clear the featured image
+    setFormData({
+      ...formData,
+      featuredImage: null
+    });
+    
+    toast({
+      title: "Success",
+      description: "Featured image removed",
     });
   };
 
@@ -58,8 +63,20 @@ export function usePropertyFeaturedImage(
     });
   };
 
+  const isInGridImages = (url: string): boolean => {
+    const gridImages = Array.isArray(formData.gridImages) ? formData.gridImages : [];
+    return gridImages.includes(url);
+  };
+
+  const isFeaturedImage = (url: string): boolean => {
+    return formData.featuredImage === url;
+  };
+
   return {
     handleSetFeaturedImage,
+    handleRemoveFeaturedImage,
     handleToggleGridImage,
+    isInGridImages,
+    isFeaturedImage
   };
 }

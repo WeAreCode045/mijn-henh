@@ -57,7 +57,13 @@ export function AreaCard({
   };
 
   const handleUpdateImageIds = (imageIds: string[]) => {
+    console.log(`Updating area ${area.id} image IDs:`, imageIds);
     onUpdate(area.id, "imageIds", imageIds);
+    
+    // Additional callback for external handling if needed
+    if (onImagesSelect) {
+      onImagesSelect(area.id, imageIds);
+    }
   };
 
   const handleUploadClick = () => {

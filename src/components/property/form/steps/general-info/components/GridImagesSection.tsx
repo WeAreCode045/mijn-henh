@@ -1,11 +1,10 @@
 
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Grid3X3, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ImageSelectDialog } from "@/components/property/ImageSelectDialog";
 import type { PropertyFormData } from "@/types/property";
-import { Button } from "@/components/ui/button";
-import { Plus, Trash, Edit } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useState } from "react";
 
 interface GridImagesSectionProps {
   formData: PropertyFormData;
@@ -18,157 +17,85 @@ export function GridImagesSection({
 }: GridImagesSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const handleRemoveGridImage = (indexToRemove: number, e?: React.MouseEvent) => {
-    if (e) e.preventDefault(); // Prevent default form submission
-    console.log("Removing grid image at index:", indexToRemove);
-    const updatedGridImages = formData.gridImages.filter((_, index) => index !== indexToRemove);
+  const gridImages = Array.isArray(formData.gridImages) ? formData.gridImages : [];
+  
+  // Convert URLs to image IDs for the dialog
+  const selectedImageIds = gridImages
+    .map(url => formData.images.find(img => img.url === url)?.id || '')
+    .filter(id => id !== '');
+
+  const handleImagesSelect = (selectedIds: string[]) => {
+    // Map selected IDs back to URLs
+    const selectedUrls = selectedIds
+      .map(id => formData.images.find(img => img.id === id)?.url || '')
+      .filter(url => url !== '');
+    
+    onFieldChange('gridImages', selectedUrls);
+  };
+
+  const handleRemoveImage = (url: string) => {
+    const updatedGridImages = gridImages.filter(gridUrl => gridUrl !== url);
     onFieldChange('gridImages', updatedGridImages);
   };
 
-  const handleSelectGridImages = (imageIds: string[]) => {
-    console.log("Selected grid image IDs:", imageIds);
-    const selectedImages = imageIds.slice(0, 4).map(id => {
-      const image = formData.images.find(img => img.id === id);
-      return image?.url;
-    }).filter(Boolean) as string[];
-    
-    onFieldChange('gridImages', selectedImages);
-  };
-
-  // Prepare an array of 4 items for grid display (fill with nulls if needed)
-  const gridItems = [...(formData.gridImages || [])];
-  while (gridItems.length < 4) {
-    gridItems.push(null);
-  }
-
-  // Check if all grid slots are filled
-  const isGridFull = formData.gridImages && formData.gridImages.length >= 4;
-
   return (
-    <div className="space-y-2">
-      <Label>Grid Images (Max 4)</Label>
-      
-      <div className="grid grid-cols-2 gap-3 h-64">
-        {gridItems.map((imageUrl, index) => (
-          <GridImageItem 
-            key={index}
-            imageUrl={imageUrl}
-            index={index}
-            onRemove={(e) => handleRemoveGridImage(index, e)}
-            onOpenDialog={(e) => {
-              if (e) e.preventDefault();
-              setIsDialogOpen(true);
-            }}
-          />
-        ))}
-      </div>
-      
-      {/* Show a select button below the grid */}
-      <div className="mt-2 flex justify-center">
-        <Button 
-          variant="outline" 
-          onClick={(e) => {
-            e.preventDefault(); // Prevent default form submission
-            setIsDialogOpen(true);
-          }}
-          type="button"
-          disabled={isGridFull && !formData.gridImages.some(img => img !== null)}
-        >
-          {isGridFull ? "Modify Grid Images" : "Select Grid Images"}
-        </Button>
-      </div>
-      
+    <div>
+      <Card className="h-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-md">Grid Images (Max 4)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2">
+            {gridImages.map((url, index) => (
+              <div key={`grid-${index}`} className="relative group">
+                <img 
+                  src={url} 
+                  alt={`Grid image ${index + 1}`} 
+                  className="w-full h-24 object-cover rounded-md"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleRemoveImage(url)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            
+            {gridImages.length < 4 && (
+              <div 
+                className="flex flex-col items-center justify-center h-24 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors"
+                onClick={() => setIsDialogOpen(true)}
+              >
+                <Plus className="h-8 w-8 text-muted-foreground mb-1" />
+                <p className="text-muted-foreground text-xs">Add Grid Image</p>
+              </div>
+            )}
+          </div>
+          
+          {gridImages.length === 0 && (
+            <div 
+              className="flex flex-col items-center justify-center h-48 bg-muted rounded-md cursor-pointer hover:bg-muted/80 transition-colors mt-2"
+              onClick={() => setIsDialogOpen(true)}
+            >
+              <Grid3X3 className="h-10 w-10 text-muted-foreground mb-2" />
+              <p className="text-muted-foreground text-sm">Select Grid Images (Max 4)</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <ImageSelectDialog
         images={formData.images || []}
-        selectedImageIds={(formData.gridImages || []).map(url => 
-          formData.images.find(img => img.url === url)?.id || ''
-        ).filter(id => id !== '')}
-        onSelect={handleSelectGridImages}
+        selectedImageIds={selectedImageIds}
+        onSelect={handleImagesSelect}
         buttonText="Select Grid Images"
         maxSelect={4}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />
-    </div>
-  );
-}
-
-interface GridImageItemProps {
-  imageUrl: string | null;
-  index: number;
-  onRemove: (e?: React.MouseEvent) => void;
-  onOpenDialog: (e?: React.MouseEvent) => void;
-}
-
-function GridImageItem({
-  imageUrl,
-  index,
-  onRemove,
-  onOpenDialog
-}: GridImageItemProps) {
-  return (
-    <div 
-      className={`relative group rounded-lg overflow-hidden border ${
-        imageUrl ? 'border-gray-200' : 'border-dashed border-gray-300 bg-gray-50'
-      }`}
-    >
-      {imageUrl ? (
-        <>
-          <img 
-            src={imageUrl}
-            alt={`Grid image ${index + 1}`}
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Hover actions for existing images */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    size="icon" 
-                    onClick={onRemove}
-                    type="button"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Remove image</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="default"
-                    size="icon"
-                    onClick={onOpenDialog}
-                    type="button"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Change images</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </>
-      ) : (
-        // Empty grid cell
-        <div className="w-full h-full flex flex-col justify-center items-center p-2 cursor-pointer" onClick={(e) => {
-          e.preventDefault();
-          onOpenDialog(e);
-        }}>
-          <Plus className="h-8 w-8 text-gray-400 mb-2" />
-          <span className="text-xs text-gray-500 text-center">Add Grid Image</span>
-        </div>
-      )}
     </div>
   );
 }

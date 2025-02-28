@@ -24,6 +24,7 @@ export interface ImageSelectDialogProps {
   id?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  singleSelect?: boolean; // Added prop for single select mode
 }
 
 export function ImageSelectDialog({
@@ -36,6 +37,7 @@ export function ImageSelectDialog({
   id,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
+  singleSelect = false, // Default to multi-select
 }: ImageSelectDialogProps) {
   const [selected, setSelected] = useState<string[]>(selectedImageIds);
   const [open, setOpen] = useState(false);
@@ -54,6 +56,13 @@ export function ImageSelectDialog({
 
   const handleToggleSelect = (imageId: string) => {
     console.log("Toggling selection for image:", imageId);
+    
+    if (singleSelect) {
+      // In single select mode, just replace the selection
+      setSelected([imageId]);
+      return;
+    }
+    
     if (selected.includes(imageId)) {
       setSelected(selected.filter((id) => id !== imageId));
     } else {
@@ -120,6 +129,7 @@ export function ImageSelectDialog({
           images={images} 
           selected={selected} 
           onToggleSelect={handleToggleSelect} 
+          singleSelect={singleSelect}
         />
         
         <DialogActions 

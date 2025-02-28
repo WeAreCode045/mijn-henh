@@ -1,5 +1,5 @@
 
-import { PropertyImage, PropertyFloorplan } from "@/types/property";
+import { PropertyImage } from "@/types/property";
 import { PropertyImagesCard } from "./media/PropertyImagesCard";
 import { VirtualTourCard } from "./media/VirtualTourCard";
 
@@ -32,8 +32,6 @@ export function PropertyMediaTab({
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
-  onUpload,
-  onRemove,
   onFeaturedImageSelect,
   onGridImageToggle,
   onVirtualTourUpdate,
@@ -48,6 +46,10 @@ export function PropertyMediaTab({
         images={images}
         onImageUpload={onImageUpload}
         onRemoveImage={onRemoveImage}
+        onSetFeaturedImage={onFeaturedImageSelect}
+        onToggleGridImage={onGridImageToggle}
+        featuredImage={featuredImage}
+        gridImages={gridImages}
         isUploading={isUploading}
       />
 

@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PropertyImage } from "@/types/property";
+import { Check } from "lucide-react";
 
 interface AreaImageSelectDialogProps {
   open: boolean;
@@ -20,6 +21,19 @@ export function AreaImageSelectDialog({
   selectedImageIds,
   onUpdate,
 }: AreaImageSelectDialogProps) {
+  const toggleImageSelection = (imageId: string) => {
+    const currentSelection = [...selectedImageIds];
+    
+    if (currentSelection.includes(imageId)) {
+      // Remove from selection
+      const newSelection = currentSelection.filter(id => id !== imageId);
+      onUpdate(newSelection);
+    } else {
+      // Add to selection
+      onUpdate([...currentSelection, imageId]);
+    }
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -38,13 +52,7 @@ export function AreaImageSelectDialog({
                     relative cursor-pointer border rounded-md overflow-hidden
                     ${isSelected ? "ring-2 ring-primary" : "hover:opacity-80"}
                   `}
-                  onClick={() => {
-                    const currentIds = [...selectedImageIds];
-                    const newIds = isSelected
-                      ? currentIds.filter(id => id !== image.id)
-                      : [...currentIds, image.id];
-                    onUpdate(newIds);
-                  }}
+                  onClick={() => toggleImageSelection(image.id)}
                 >
                   <img
                     src={image.url}
@@ -53,7 +61,7 @@ export function AreaImageSelectDialog({
                   />
                   {isSelected && (
                     <div className="absolute top-1 right-1 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center">
-                      ✓
+                      <Check className="h-3 w-3" />
                     </div>
                   )}
                 </div>
