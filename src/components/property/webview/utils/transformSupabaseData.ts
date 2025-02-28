@@ -100,6 +100,7 @@ export function transformSupabaseData(data: any): PropertyData {
     agent: agent,
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
-    notes: data.notes || ''
+    notes: data.notes || '',
+    template_id: data.template_id || undefined
   };
 }
