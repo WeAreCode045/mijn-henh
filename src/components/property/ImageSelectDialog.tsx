@@ -75,7 +75,7 @@ export function ImageSelectDialog({
           {images.map((image) => (
             <div
               key={image.id}
-              className={`relative cursor-pointer rounded-md overflow-hidden border-2 ${
+              className={`relative cursor-pointer rounded-md border-2 ${
                 selected.includes(image.id)
                   ? "border-primary"
                   : "border-transparent"
