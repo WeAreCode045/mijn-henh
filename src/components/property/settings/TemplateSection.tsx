@@ -23,8 +23,15 @@ export function TemplateSection({
   onSave, 
   isUpdating 
 }: TemplateSectionProps) {
-  const [currentTemplateId, setCurrentTemplateId] = useState(templateId);
+  // Ensure templateId is never empty string
+  const safeTemplateId = templateId || "default";
+  const [currentTemplateId, setCurrentTemplateId] = useState(safeTemplateId);
   const [templates, setTemplates] = useState<Template[]>([]);
+
+  useEffect(() => {
+    // Update state when prop changes
+    setCurrentTemplateId(safeTemplateId);
+  }, [safeTemplateId]);
 
   useEffect(() => {
     // Fetch templates

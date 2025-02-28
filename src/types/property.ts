@@ -1,4 +1,3 @@
-
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -161,22 +160,22 @@ export interface PropertyDatabaseData {
   hasGarden?: boolean;
   description?: string;
   location_description?: string;
-  floorplans?: Json; // Updated to Json for structured floorplans
-  technicalItems?: Json; // New field for technical items
+  features?: Json;
+  floorplans?: Json;
   featuredImage?: string | null;
   gridImages?: string[];
+  areas?: Json[];
   areaPhotos?: string[];
+  object_id?: string;
   map_image?: string | null;
+  nearby_places?: Json;
   latitude?: number | null;
   longitude?: number | null;
-  features?: Json;
-  areas?: Json[];
-  nearby_places?: Json;
-  images?: string[];
-  created_at?: string;
-  updated_at?: string;
+  agent_id?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  template_id?: string; // Added template_id property
+  created_at?: string;
+  updated_at?: string;
+  template_id?: string;
 }

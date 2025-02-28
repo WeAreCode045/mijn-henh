@@ -35,22 +35,27 @@ export function PropertySettingsTab({
     );
   }
 
+  // Ensure we never pass empty strings to the child components
+  const safeObjectId = objectId || "";
+  const safeAgentId = agentId || "";
+  const safeTemplateId = templateId || "default";
+
   return (
     <div className="space-y-6">
       <PropertyIdSection 
-        objectId={objectId || ""} 
+        objectId={safeObjectId} 
         onSave={onSaveObjectId}
         isUpdating={isUpdating}
       />
       
       <AgentSection 
-        agentId={agentId || ""} 
+        agentId={safeAgentId} 
         onSave={onSaveAgent}
         isUpdating={isUpdating}
       />
       
       <TemplateSection 
-        templateId={templateId || "default"} 
+        templateId={safeTemplateId} 
         onSave={onSaveTemplate}
         isUpdating={isUpdating}
       />
