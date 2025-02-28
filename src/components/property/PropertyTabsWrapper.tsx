@@ -116,9 +116,9 @@ export function PropertyTabsWrapper({
         handleRemoveImage={handleRemoveImage}
         handleAreaPhotosUpload={handleAreaPhotosUpload}
         handleFloorplanUpload={handleFloorplanUpload}
+        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
         handleRemoveFloorplan={handleRemoveFloorplan}
         handleUpdateFloorplan={handleUpdateFloorplan}
-        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
         handleSetFeaturedImage={handleSetFeaturedImage}
         handleToggleGridImage={handleToggleGridImage}
         onAddTechnicalItem={addTechnicalItem}

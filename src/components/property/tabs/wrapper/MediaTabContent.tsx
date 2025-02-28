@@ -10,10 +10,11 @@ interface MediaTabContentProps {
   gridImages: string[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemove: (index: number) => void;
-  onFeaturedImageSelect: (url: string) => void;
-  onGridImageToggle: (url: string) => void;
+  notes?: string;
+  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove?: (index: number) => void;
+  onFeaturedImageSelect?: (imageUrl: string) => void;
+  onGridImageToggle?: (imageUrl: string) => void;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -28,6 +29,7 @@ export function MediaTabContent({
   gridImages,
   virtualTourUrl,
   youtubeUrl,
+  notes,
   onUpload,
   onRemove,
   onFeaturedImageSelect,
@@ -38,14 +40,15 @@ export function MediaTabContent({
   onRemoveImage,
 }: MediaTabContentProps) {
   return (
-    <PropertyMediaTab 
+    <PropertyMediaTab
       id={id}
-      title={title || ""}
-      images={images || []}
+      title={title}
+      images={images}
       featuredImage={featuredImage}
-      gridImages={gridImages || []}
+      gridImages={gridImages}
       virtualTourUrl={virtualTourUrl}
       youtubeUrl={youtubeUrl}
+      notes={notes}
       onUpload={onUpload}
       onRemove={onRemove}
       onFeaturedImageSelect={onFeaturedImageSelect}
