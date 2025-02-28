@@ -1,9 +1,6 @@
 
-import { TabsContent } from "@/components/ui/tabs";
-import { DashboardTabContent } from "./DashboardTabContent";
-import { ContentTabContent } from "./ContentTabContent";
-import { MediaTabContent } from "./MediaTabContent";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { renderDashboardTab, renderContentTab, renderMediaTab } from "../content/TabContentRenderers";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -108,83 +105,61 @@ export function PropertyTabContents({
   handlePrevious,
   onSubmit
 }: PropertyTabContentsProps) {
+  // Organize all handler functions into a single object
+  const handlers = {
+    onSave,
+    onDelete,
+    handleSaveObjectId,
+    handleSaveAgent,
+    handleSaveTemplate,
+    handleGeneratePDF,
+    handleWebView,
+    onFieldChange,
+    onAddFeature,
+    onRemoveFeature,
+    onUpdateFeature,
+    onAddArea,
+    onRemoveArea,
+    onUpdateArea,
+    onAreaImageUpload,
+    onAreaImageRemove,
+    onAreaImagesSelect,
+    handleImageUpload,
+    handleRemoveImage,
+    isUploading,
+    handleAreaPhotosUpload,
+    handleFloorplanUpload,
+    handleRemoveAreaPhoto,
+    handleRemoveFloorplan,
+    handleUpdateFloorplan,
+    handleSetFeaturedImage,
+    handleToggleGridImage,
+    onAddTechnicalItem,
+    onRemoveTechnicalItem,
+    onUpdateTechnicalItem,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    onSubmit
+  };
+
+  // Common props for all tab renderers
+  const tabProps = {
+    activeTab,
+    property,
+    formState,
+    agentInfo,
+    templateInfo,
+    isUpdating,
+    handlers
+  };
+
   return (
     <>
-      <TabsContent value="dashboard">
-        <DashboardTabContent 
-          id={property.id}
-          objectId={property.object_id}
-          title={property.title || "Untitled Property"}
-          agentId={property.agent_id}
-          agentName={agentInfo?.name}
-          templateId={templateInfo?.id}
-          templateName={templateInfo?.name}
-          createdAt={property.created_at}
-          updatedAt={property.updated_at}
-          onSave={onSave}
-          onDelete={onDelete}
-          onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebView}
-          onSaveAgent={handleSaveAgent}
-          onSaveObjectId={handleSaveObjectId}
-          onSaveTemplate={handleSaveTemplate}
-          isUpdating={isUpdating}
-        />
-      </TabsContent>
-      
-      <TabsContent value="content">
-        <ContentTabContent 
-          formData={formState}
-          onFieldChange={onFieldChange}
-          onAddFeature={onAddFeature}
-          onRemoveFeature={onRemoveFeature}
-          onUpdateFeature={onUpdateFeature}
-          onAddArea={onAddArea}
-          onRemoveArea={onRemoveArea}
-          onUpdateArea={onUpdateArea}
-          onAreaImageUpload={onAreaImageUpload}
-          onAreaImageRemove={onAreaImageRemove}
-          onAreaImagesSelect={onAreaImagesSelect}
-          handleImageUpload={handleImageUpload}
-          handleAreaPhotosUpload={handleAreaPhotosUpload}
-          handleFloorplanUpload={handleFloorplanUpload}
-          handleRemoveImage={handleRemoveImage}
-          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-          handleRemoveFloorplan={handleRemoveFloorplan}
-          handleUpdateFloorplan={handleUpdateFloorplan}
-          handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleGridImage={handleToggleGridImage}
-          onAddTechnicalItem={onAddTechnicalItem}
-          onRemoveTechnicalItem={onRemoveTechnicalItem}
-          onUpdateTechnicalItem={onUpdateTechnicalItem}
-          currentStep={currentStep}
-          handleStepClick={handleStepClick}
-          handleNext={handleNext}
-          handlePrevious={handlePrevious}
-          onSubmit={onSubmit}
-        />
-      </TabsContent>
-      
-      <TabsContent value="media">
-        <MediaTabContent 
-          id={property.id}
-          title={property.title || ""}
-          images={property.images || []}
-          featuredImage={property.featuredImage}
-          gridImages={property.gridImages || []}
-          virtualTourUrl={property.virtualTourUrl}
-          youtubeUrl={property.youtubeUrl}
-          onUpload={handleImageUpload}
-          onRemove={handleRemoveImage}
-          onFeaturedImageSelect={handleSetFeaturedImage}
-          onGridImageToggle={handleToggleGridImage}
-          onVirtualTourUpdate={(url) => onFieldChange('virtualTourUrl', url)}
-          onYoutubeUrlUpdate={(url) => onFieldChange('youtubeUrl', url)}
-          onImageUpload={handleImageUpload}
-          onRemoveImage={handleRemoveImage}
-          isUploading={isUploading}
-        />
-      </TabsContent>
+      {renderDashboardTab(tabProps)}
+      {renderContentTab(tabProps)}
+      {renderMediaTab(tabProps)}
     </>
   );
 }
