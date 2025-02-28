@@ -162,7 +162,7 @@ export function ContactForm({ propertyId, propertyTitle = "", agentId }: Contact
               Ik wil
             </Label>
             <Select
-              value={formData.inquiryType}
+              value={formData.inquiryType || "information"}
               onValueChange={(value) => setFormData(prev => ({ ...prev, inquiryType: value }))}
             >
               <SelectTrigger className="text-sm bg-white/10 border-white/20 text-white">

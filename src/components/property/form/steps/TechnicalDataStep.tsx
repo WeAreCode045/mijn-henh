@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -193,13 +192,13 @@ export function TechnicalDataStep({
                     <Label htmlFor={`floorplan-${item.id}`}>Floorplan</Label>
                     <Select 
                       onValueChange={(value) => handleUpdateTechnicalItem(item.id, 'floorplanId', value)}
-                      defaultValue={item.floorplanId || undefined}
+                      defaultValue={item.floorplanId || "none"}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a floorplan" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No Floorplan</SelectItem>
+                        <SelectItem value="none">No Floorplan</SelectItem>
                         {availableFloorplans.map((_, index) => (
                           <SelectItem key={index} value={index.toString()}>{`Floorplan ${index + 1}`}</SelectItem>
                         ))}

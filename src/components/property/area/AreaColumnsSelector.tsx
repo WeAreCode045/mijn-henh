@@ -1,5 +1,12 @@
 
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AreaColumnsSelectorProps {
   columns: number;
@@ -15,17 +22,23 @@ export function AreaColumnsSelector({
   return (
     <div>
       <Label htmlFor={`columns-${areaId}`}>Image Grid Columns</Label>
-      <select
-        id={`columns-${areaId}`}
-        value={columns}
-        onChange={(e) => onColumnsChange(parseInt(e.target.value))}
-        className="w-full rounded-md border border-input p-2 text-sm"
+      <Select
+        value={columns.toString()}
+        onValueChange={(value) => onColumnsChange(parseInt(value))}
       >
-        <option value={1}>1 Column</option>
-        <option value={2}>2 Columns</option>
-        <option value={3}>3 Columns</option>
-        <option value={4}>4 Columns</option>
-      </select>
+        <SelectTrigger 
+          id={`columns-${areaId}`}
+          className="w-full"
+        >
+          <SelectValue placeholder="Select columns" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="1">1 Column</SelectItem>
+          <SelectItem value="2">2 Columns</SelectItem>
+          <SelectItem value="3">3 Columns</SelectItem>
+          <SelectItem value="4">4 Columns</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

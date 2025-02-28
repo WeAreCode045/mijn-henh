@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
       const file = e.target.files[0];
       setPhotoFile(file);
       
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
