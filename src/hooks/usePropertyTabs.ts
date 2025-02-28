@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 
 export function usePropertyTabs() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const tabParam = searchParams.get('tab');
   
   // Valid tab values
@@ -26,10 +27,16 @@ export function usePropertyTabs() {
   
   // Sync with URL parameters on mount and when URL changes
   useEffect(() => {
+    // Check if URL ends with /edit and remove it if needed
+    if (location.pathname.endsWith('/edit')) {
+      const newPath = location.pathname.replace('/edit', '');
+      window.history.replaceState(null, '', newPath + location.search);
+    }
+
     if (tabParam && validTabs.includes(tabParam)) {
       setActiveTab(tabParam);
     }
-  }, [tabParam]);
+  }, [tabParam, location.pathname]);
   
   return {
     activeTab,
