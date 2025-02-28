@@ -6,6 +6,7 @@ import { Image, Upload, Star, Grid, X } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
@@ -86,41 +87,70 @@ export function PropertyImagesCard({
                       alt={`Property image ${index + 1}`}
                       className={`w-full h-24 object-cover rounded-md ${
                         featuredImage === image.url ? 'ring-2 ring-yellow-400' : ''
+                      } ${
+                        gridImages.includes(image.url) ? 'ring-1 ring-blue-400' : ''
                       }`}
                     />
-                    <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        type="button"
-                        onClick={(e) => handleRemoveImage(index, e)}
-                        className="bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X size={16} />
-                      </button>
+                    
+                    {/* Indicator badges */}
+                    <div className="absolute top-1 left-1 flex gap-1">
+                      {featuredImage === image.url && (
+                        <Badge variant="outline" className="bg-yellow-400 text-black text-xs">
+                          <Star className="h-3 w-3 mr-1" /> Featured
+                        </Badge>
+                      )}
+                      {gridImages.includes(image.url) && (
+                        <Badge variant="outline" className="bg-blue-400 text-black text-xs">
+                          <Grid className="h-3 w-3 mr-1" /> Grid
+                        </Badge>
+                      )}
                     </div>
                     
-                    {/* Image status badges */}
-                    <div className="absolute bottom-0 left-0 right-0 p-1 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between">
-                      <button
+                    {/* Delete button */}
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
                         type="button"
-                        onClick={(e) => handleSetFeatured(image.url, e)}
-                        className={`p-1 rounded-full ${
-                          featuredImage === image.url ? 'bg-yellow-400 text-black' : 'bg-black/50 text-white'
-                        }`}
-                        title={featuredImage === image.url ? "Remove from featured" : "Set as featured"}
+                        variant="destructive"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => handleRemoveImage(index, e)}
                       >
-                        <Star size={14} />
-                      </button>
+                        <X size={14} />
+                      </Button>
+                    </div>
+                    
+                    {/* Image action buttons */}
+                    <div className="absolute bottom-0 left-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between bg-black/50">
+                      <Tooltip content={featuredImage === image.url ? "Remove featured" : "Set as featured"}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className={`h-6 w-6 ${
+                            featuredImage === image.url ? 'text-yellow-400' : 'text-white'
+                          }`}
+                          onClick={(e) => handleSetFeatured(image.url, e)}
+                        >
+                          <Star size={14} />
+                        </Button>
+                      </Tooltip>
                       
-                      <button
-                        type="button"
-                        onClick={(e) => handleToggleGrid(image.url, e)}
-                        className={`p-1 rounded-full ${
-                          gridImages.includes(image.url) ? 'bg-blue-400 text-black' : 'bg-black/50 text-white'
-                        }`}
-                        title={gridImages.includes(image.url) ? "Remove from grid" : "Add to grid"}
-                      >
-                        <Grid size={14} />
-                      </button>
+                      <Tooltip content={gridImages.includes(image.url) ? "Remove from grid" : "Add to grid"}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className={`h-6 w-6 ${
+                            gridImages.includes(image.url) ? 'text-blue-400' : 'text-white'
+                          } ${
+                            gridImages.length >= 4 && !gridImages.includes(image.url) ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          onClick={(e) => handleToggleGrid(image.url, e)}
+                          disabled={gridImages.length >= 4 && !gridImages.includes(image.url)}
+                        >
+                          <Grid size={14} />
+                        </Button>
+                      </Tooltip>
                     </div>
                   </div>
                 ))}

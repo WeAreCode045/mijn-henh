@@ -11,14 +11,12 @@ interface MediaTabContentProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemove?: (index: number) => void;
-  onFeaturedImageSelect?: (imageUrl: string) => void;
-  onGridImageToggle?: (imageUrl: string) => void;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onSetFeaturedImage?: (imageUrl: string) => void;
+  onToggleGridImage?: (imageUrl: string) => void;
   isUploading?: boolean;
 }
 
@@ -31,14 +29,12 @@ export function MediaTabContent({
   virtualTourUrl,
   youtubeUrl,
   notes,
-  onUpload,
-  onRemove,
-  onFeaturedImageSelect,
-  onGridImageToggle,
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
   onImageUpload,
   onRemoveImage,
+  onSetFeaturedImage,
+  onToggleGridImage,
   isUploading,
 }: MediaTabContentProps) {
   return (
@@ -51,14 +47,12 @@ export function MediaTabContent({
       virtualTourUrl={virtualTourUrl}
       youtubeUrl={youtubeUrl}
       notes={notes}
-      onUpload={onUpload}
-      onRemove={onRemove}
-      onFeaturedImageSelect={onFeaturedImageSelect}
-      onGridImageToggle={onGridImageToggle}
       onVirtualTourUpdate={onVirtualTourUpdate}
       onYoutubeUrlUpdate={onYoutubeUrlUpdate}
       onImageUpload={onImageUpload}
       onRemoveImage={onRemoveImage}
+      onSetFeaturedImage={onSetFeaturedImage}
+      onToggleGridImage={onToggleGridImage}
       isUploading={isUploading}
     />
   );

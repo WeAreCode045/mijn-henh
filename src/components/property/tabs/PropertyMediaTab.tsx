@@ -12,14 +12,12 @@ interface PropertyMediaTabProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemove?: (index: number) => void;
-  onFeaturedImageSelect?: (imageUrl: string) => void;
-  onGridImageToggle?: (imageUrl: string) => void;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onSetFeaturedImage?: (imageUrl: string) => void;
+  onToggleGridImage?: (imageUrl: string) => void;
   isUploading?: boolean;
 }
 
@@ -32,12 +30,12 @@ export function PropertyMediaTab({
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
-  onFeaturedImageSelect,
-  onGridImageToggle,
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
   onImageUpload,
   onRemoveImage,
+  onSetFeaturedImage,
+  onToggleGridImage,
   isUploading = false,
 }: PropertyMediaTabProps) {
   return (
@@ -46,8 +44,8 @@ export function PropertyMediaTab({
         images={images}
         onImageUpload={onImageUpload}
         onRemoveImage={onRemoveImage}
-        onSetFeaturedImage={onFeaturedImageSelect}
-        onToggleGridImage={onGridImageToggle}
+        onSetFeaturedImage={onSetFeaturedImage}
+        onToggleGridImage={onToggleGridImage}
         featuredImage={featuredImage}
         gridImages={gridImages}
         isUploading={isUploading}

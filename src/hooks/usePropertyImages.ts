@@ -12,7 +12,7 @@ export function usePropertyImages(
   const { handleImageUpload, handleRemoveImage, isUploading, images } = usePropertyMainImages(formData, setFormData);
   const { handleAreaPhotosUpload, handleRemoveAreaPhoto } = usePropertyAreaPhotos(formData, setFormData);
   const { handleFloorplanUpload, handleRemoveFloorplan, handleUpdateFloorplan } = usePropertyFloorplans(formData, setFormData);
-  const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyFeaturedImage(formData, setFormData);
+  const { handleSetFeaturedImage, handleToggleGridImage, isInGridImages, isFeaturedImage } = usePropertyFeaturedImage(formData, setFormData);
 
   return {
     handleImageUpload,
@@ -25,6 +25,8 @@ export function usePropertyImages(
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleGridImage,
+    isInGridImages,
+    isFeaturedImage,
     images: formData?.images || []
   };
 }

@@ -9,8 +9,6 @@ export function usePropertyFeaturedImage(
   const { toast } = useToast();
 
   const handleSetFeaturedImage = (url: string) => {
-    console.log("Setting featured image:", url);
-    
     // Update the form data with the new featured image
     setFormData({
       ...formData,
@@ -23,23 +21,7 @@ export function usePropertyFeaturedImage(
     });
   };
 
-  const handleRemoveFeaturedImage = () => {
-    console.log("Removing featured image");
-    
-    // Clear the featured image
-    setFormData({
-      ...formData,
-      featuredImage: null
-    });
-    
-    toast({
-      title: "Success",
-      description: "Featured image removed",
-    });
-  };
-
   const handleToggleGridImage = (url: string) => {
-    console.log("Toggling grid image:", url);
     // Ensure gridImages is always an array
     const currentGridImages = Array.isArray(formData.gridImages) ? formData.gridImages : [];
     
@@ -74,7 +56,6 @@ export function usePropertyFeaturedImage(
 
   return {
     handleSetFeaturedImage,
-    handleRemoveFeaturedImage,
     handleToggleGridImage,
     isInGridImages,
     isFeaturedImage
