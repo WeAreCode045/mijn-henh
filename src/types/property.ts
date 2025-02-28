@@ -26,6 +26,7 @@ export interface PropertyTechnicalItem {
   size: string;
   description: string;
   floorplanId: string | null;
+  columns?: number; // Added columns property for grid layout
 }
 
 export interface PropertyFloorplan {
