@@ -20,6 +20,7 @@ interface PropertyMediaTabProps {
   onYoutubeUrlUpdate?: (url: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export function PropertyMediaTab({
@@ -39,6 +40,7 @@ export function PropertyMediaTab({
   onYoutubeUrlUpdate,
   onImageUpload,
   onRemoveImage,
+  isUploading = false,
 }: PropertyMediaTabProps) {
   return (
     <div className="space-y-6">
@@ -46,6 +48,7 @@ export function PropertyMediaTab({
         images={images}
         onImageUpload={onImageUpload}
         onRemoveImage={onRemoveImage}
+        isUploading={isUploading}
       />
 
       <VirtualTourCard 

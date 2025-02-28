@@ -1,15 +1,24 @@
 
 import type { PropertyFormData } from "@/types/property";
+import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyFeaturedImage(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
+  const { toast } = useToast();
+
   const handleSetFeaturedImage = (url: string | null) => {
     console.log("Setting featured image:", url);
+    
     setFormData({
       ...formData,
       featuredImage: url
+    });
+    
+    toast({
+      title: "Success",
+      description: url ? "Featured image updated" : "Featured image removed",
     });
   };
 
@@ -29,6 +38,12 @@ export function usePropertyFeaturedImage(
     setFormData({
       ...formData,
       gridImages: limitedGridImages
+    });
+    
+    const action = currentGridImages.includes(url) ? "removed from" : "added to";
+    toast({
+      title: "Success",
+      description: `Image ${action} grid`,
     });
   };
 

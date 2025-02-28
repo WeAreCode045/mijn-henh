@@ -19,6 +19,7 @@ interface MediaTabContentProps {
   onYoutubeUrlUpdate?: (url: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export function MediaTabContent({
@@ -38,6 +39,7 @@ export function MediaTabContent({
   onYoutubeUrlUpdate,
   onImageUpload,
   onRemoveImage,
+  isUploading,
 }: MediaTabContentProps) {
   return (
     <PropertyMediaTab
@@ -57,6 +59,7 @@ export function MediaTabContent({
       onYoutubeUrlUpdate={onYoutubeUrlUpdate}
       onImageUpload={onImageUpload}
       onRemoveImage={onRemoveImage}
+      isUploading={isUploading}
     />
   );
 }

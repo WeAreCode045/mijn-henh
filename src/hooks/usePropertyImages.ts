@@ -9,7 +9,7 @@ export function usePropertyImages(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
-  const { handleImageUpload, handleRemoveImage, images } = usePropertyMainImages(formData, setFormData);
+  const { handleImageUpload, handleRemoveImage, isUploading, images } = usePropertyMainImages(formData, setFormData);
   const { handleAreaPhotosUpload, handleRemoveAreaPhoto } = usePropertyAreaPhotos(formData, setFormData);
   const { handleFloorplanUpload, handleRemoveFloorplan, handleUpdateFloorplan } = usePropertyFloorplans(formData, setFormData);
   const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyFeaturedImage(formData, setFormData);
@@ -17,6 +17,7 @@ export function usePropertyImages(
   return {
     handleImageUpload,
     handleRemoveImage,
+    isUploading,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
     handleRemoveFloorplan,

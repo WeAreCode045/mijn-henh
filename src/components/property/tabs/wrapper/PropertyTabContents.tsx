@@ -46,6 +46,7 @@ interface PropertyTabContentsProps {
   // Media tab props
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
+  isUploading?: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAreaPhoto: (index: number) => void;
@@ -91,6 +92,7 @@ export function PropertyTabContents({
   onAreaImagesSelect,
   handleImageUpload,
   handleRemoveImage,
+  isUploading,
   handleAreaPhotosUpload,
   handleFloorplanUpload,
   handleRemoveAreaPhoto,
@@ -177,6 +179,7 @@ export function PropertyTabContents({
           onYoutubeUrlUpdate={(url) => onFieldChange('youtubeUrl', url)}
           onImageUpload={handleImageUpload}
           onRemoveImage={handleRemoveImage}
+          isUploading={isUploading}
         />
       </TabsContent>
       

@@ -2,15 +2,19 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyImage } from "@/types/property";
+import { useState } from "react";
 
 export function usePropertyMainImages(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
+    
+    setIsUploading(true);
 
     try {
       const files = Array.from(e.target.files);
@@ -48,9 +52,12 @@ export function usePropertyMainImages(
       // Ensure images is always an array
       const currentImages = Array.isArray(formData.images) ? formData.images : [];
       
+      const newImagesState = [...currentImages, ...uploadedImages];
+      
+      // Update form data with new images
       setFormData({
         ...formData,
-        images: [...currentImages, ...uploadedImages]
+        images: newImagesState
       });
 
       toast({
@@ -64,6 +71,12 @@ export function usePropertyMainImages(
         description: "Failed to upload images",
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
+      // Clear the input value to allow uploading the same file again
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 
@@ -99,9 +112,10 @@ export function usePropertyMainImages(
       // If this was in grid images, remove it
       const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageToRemove.url);
 
-      // Update formData without the removed image
+      // Create a new images array without the removed image
       const updatedImages = formData.images.filter((_, i) => i !== index);
       
+      // Update form data with the new state
       setFormData({
         ...formData,
         images: updatedImages,
@@ -126,6 +140,7 @@ export function usePropertyMainImages(
   return {
     handleImageUpload,
     handleRemoveImage,
+    isUploading,
     images: formData?.images || []
   };
 }

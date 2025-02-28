@@ -2,36 +2,49 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Image } from "lucide-react";
+import { Image, Upload } from "lucide-react";
 import { PropertyImage } from "@/types/property";
+import { Spinner } from "@/components/ui/spinner";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export function PropertyImagesCard({
   images = [],
   onImageUpload,
-  onRemoveImage
+  onRemoveImage,
+  isUploading = false
 }: PropertyImagesCardProps) {
+  const fileInputRef = useState<HTMLInputElement | null>(null);
+  
   // Create a file input ref to handle file selection
   const handleUploadClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     // Prevent any default form submission
     e.preventDefault();
     
-    const input = document.createElement("input");
-    input.type = "file";
-    input.multiple = true;
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      // Type assertion to safely convert Event to React.ChangeEvent<HTMLInputElement>
-      if (e && e.target) {
-        onImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-      }
-    };
-    input.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    } else {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.multiple = true;
+      input.accept = "image/*";
+      input.onchange = (e) => {
+        // Type assertion to safely convert Event to React.ChangeEvent<HTMLInputElement>
+        if (e && e.target) {
+          onImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+        }
+      };
+      input.click();
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onImageUpload(e);
   };
 
   return (
@@ -76,12 +89,32 @@ export function PropertyImagesCard({
           </div>
           
           <div>
+            <input 
+              type="file"
+              ref={node => fileInputRef.current = node}
+              style={{ display: 'none' }}
+              multiple
+              accept="image/*"
+              onChange={handleFileInputChange}
+            />
             <Button 
               variant="outline" 
               type="button" 
               onClick={handleUploadClick}
+              disabled={isUploading}
+              className="flex items-center gap-2"
             >
-              Upload Images
+              {isUploading ? (
+                <>
+                  <Spinner className="h-4 w-4" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  <span>Upload Images</span>
+                </>
+              )}
             </Button>
           </div>
         </div>

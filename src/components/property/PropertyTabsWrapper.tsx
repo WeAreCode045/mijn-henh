@@ -77,6 +77,7 @@ export function PropertyTabsWrapper({
   const {
     handleImageUpload,
     handleRemoveImage,
+    isUploading,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
     handleRemoveFloorplan,
@@ -114,6 +115,7 @@ export function PropertyTabsWrapper({
         onAreaImagesSelect={handleAreaImagesSelect}
         handleImageUpload={handleImageUpload}
         handleRemoveImage={handleRemoveImage}
+        isUploading={isUploading}
         handleAreaPhotosUpload={handleAreaPhotosUpload}
         handleFloorplanUpload={handleFloorplanUpload}
         handleRemoveAreaPhoto={handleRemoveAreaPhoto}
