@@ -1,11 +1,5 @@
 
-import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
-import { TabsContent } from "@/components/ui/tabs";
-import { PropertyDashboardTab } from "./tabs/PropertyDashboardTab";
-import { PropertyContentTab } from "./tabs/PropertyContentTab";
-import { PropertyMediaTab } from "./tabs/PropertyMediaTab";
-import { PropertySettingsTab } from "./tabs/PropertySettingsTab";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { Settings } from "@/types/settings";
 import { usePropertySettings } from "@/hooks/usePropertySettings";
@@ -15,6 +9,9 @@ import { usePropertyTechnicalData } from "@/hooks/usePropertyTechnicalData";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { useFeatures } from "@/hooks/useFeatures";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyTabs } from "@/hooks/usePropertyTabs";
+import { usePropertyFormState } from "@/hooks/usePropertyFormState";
+import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -33,8 +30,11 @@ export function PropertyTabsWrapper({
   agentInfo,
   templateInfo
 }: PropertyTabsWrapperProps) {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [formState, setFormState] = useState<PropertyFormData>(property);
+  // Tab state management
+  const { activeTab, setActiveTab } = usePropertyTabs();
+  
+  // Form state management
+  const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
   
   // Hooks for different functionalities
   const { isUpdating, handleSaveObjectId, handleSaveAgent, handleSaveTemplate } = usePropertySettings(
@@ -49,8 +49,7 @@ export function PropertyTabsWrapper({
     handleStepClick, 
     handleNext, 
     handlePrevious, 
-    onSubmit, 
-    handleFieldChange 
+    onSubmit
   } = usePropertyContent();
 
   const {
@@ -87,114 +86,50 @@ export function PropertyTabsWrapper({
     handleToggleGridImage
   } = usePropertyImages(formState, setFormState);
 
-  // Create a typed wrapper function for setFormState that matches the expected signature
-  function setFormData(data: PropertyFormData) {
-    console.log("Setting form data:", data);
-    setFormState(data);
-  }
-
-  // Update this function to properly handle the field change by accepting all required parameters
-  const handleFieldChangeWrapper = (field: keyof PropertyFormData, value: any) => {
-    console.log(`Field changed: ${String(field)} = `, value);
-    // Instead of calling handleFieldChange with formState and setFormState,
-    // we'll update formState directly since handleFieldChange expects different parameters
-    setFormState({
-      ...formState,
-      [field]: value
-    });
-  };
-
   return (
     <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
-      <TabsContent value="dashboard">
-        <PropertyDashboardTab 
-          id={property.id}
-          objectId={property.object_id}
-          title={property.title || "Untitled Property"}
-          agentId={property.agent_id}
-          agentName={agentInfo?.name}
-          templateId={templateInfo?.id}
-          templateName={templateInfo?.name}
-          createdAt={property.created_at}
-          updatedAt={property.updated_at}
-          onSave={onSave}
-          onDelete={onDelete}
-          onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebView}
-        />
-      </TabsContent>
-      
-      <TabsContent value="content">
-        <PropertyContentTab 
-          formData={formState}
-          onFieldChange={handleFieldChangeWrapper}
-          onAddFeature={addFeature}
-          onRemoveFeature={removeFeature}
-          onUpdateFeature={updateFeature}
-          onAddArea={addArea}
-          onRemoveArea={removeArea}
-          onUpdateArea={updateArea}
-          onAreaImageUpload={handleAreaImageUpload}
-          onAreaImageRemove={handleAreaImageRemove}
-          onAreaImagesSelect={handleAreaImagesSelect}
-          handleImageUpload={handleImageUpload}
-          handleAreaPhotosUpload={handleAreaPhotosUpload}
-          handleFloorplanUpload={handleFloorplanUpload}
-          handleRemoveImage={handleRemoveImage}
-          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-          handleRemoveFloorplan={handleRemoveFloorplan}
-          handleUpdateFloorplan={handleUpdateFloorplan}
-          handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleGridImage={handleToggleGridImage}
-          onAddTechnicalItem={addTechnicalItem}
-          onRemoveTechnicalItem={removeTechnicalItem}
-          onUpdateTechnicalItem={updateTechnicalItem}
-          isUpdateMode={true}
-          currentStep={currentStep}
-          handleStepClick={handleStepClick}
-          handleNext={handleNext}
-          handlePrevious={handlePrevious}
-          onSubmit={onSubmit}
-        />
-      </TabsContent>
-      
-      <TabsContent value="media">
-        <PropertyMediaTab 
-          id={property.id}
-          title={property.title || ""}
-          images={property.images || []}
-          featuredImage={property.featuredImage}
-          gridImages={property.gridImages || []}
-          floorplans={property.floorplans || []}
-          virtualTourUrl={property.virtualTourUrl}
-          youtubeUrl={property.youtubeUrl}
-          onUpload={handleImageUpload}
-          onRemove={handleRemoveImage}
-          onFeaturedImageSelect={handleSetFeaturedImage}
-          onGridImageToggle={handleToggleGridImage}
-          onFloorplanUpload={handleFloorplanUpload}
-          onFloorplanRemove={handleRemoveFloorplan}
-          onFloorplanUpdate={handleUpdateFloorplan}
-          onVirtualTourUpdate={(url) => handleFieldChangeWrapper('virtualTourUrl', url)}
-          onYoutubeUrlUpdate={(url) => handleFieldChangeWrapper('youtubeUrl', url)}
-          onImageUpload={handleImageUpload}
-          onRemoveImage={handleRemoveImage}
-        />
-      </TabsContent>
-      
-      <TabsContent value="settings">
-        <PropertySettingsTab
-          propertyId={property.id}
-          objectId={property.object_id}
-          agentId={property.agent_id}
-          templateId={templateInfo?.id}
-          onSaveObjectId={handleSaveObjectId}
-          onSaveAgent={handleSaveAgent}
-          onSaveTemplate={handleSaveTemplate}
-          onDelete={onDelete}
-          isUpdating={isUpdating}
-        />
-      </TabsContent>
+      <PropertyTabContents
+        activeTab={activeTab}
+        property={property}
+        formState={formState}
+        agentInfo={agentInfo}
+        templateInfo={templateInfo}
+        isUpdating={isUpdating}
+        onSave={onSave}
+        onDelete={onDelete}
+        handleSaveObjectId={handleSaveObjectId}
+        handleSaveAgent={handleSaveAgent}
+        handleSaveTemplate={handleSaveTemplate}
+        handleGeneratePDF={handleGeneratePDF}
+        handleWebView={handleWebView}
+        onFieldChange={handleFieldChange}
+        onAddFeature={addFeature}
+        onRemoveFeature={removeFeature}
+        onUpdateFeature={updateFeature}
+        onAddArea={addArea}
+        onRemoveArea={removeArea}
+        onUpdateArea={updateArea}
+        onAreaImageUpload={handleAreaImageUpload}
+        onAreaImageRemove={handleAreaImageRemove}
+        onAreaImagesSelect={handleAreaImagesSelect}
+        handleImageUpload={handleImageUpload}
+        handleRemoveImage={handleRemoveImage}
+        handleAreaPhotosUpload={handleAreaPhotosUpload}
+        handleFloorplanUpload={handleFloorplanUpload}
+        handleRemoveFloorplan={handleRemoveFloorplan}
+        handleUpdateFloorplan={handleUpdateFloorplan}
+        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+        handleSetFeaturedImage={handleSetFeaturedImage}
+        handleToggleGridImage={handleToggleGridImage}
+        onAddTechnicalItem={addTechnicalItem}
+        onRemoveTechnicalItem={removeTechnicalItem}
+        onUpdateTechnicalItem={updateTechnicalItem}
+        currentStep={currentStep}
+        handleStepClick={handleStepClick}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+        onSubmit={onSubmit}
+      />
     </PropertyTabs>
   );
 }
