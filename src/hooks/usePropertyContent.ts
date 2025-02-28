@@ -20,9 +20,10 @@ export function usePropertyContent() {
     setCurrentStep(prev => Math.max(prev - 1, 1)); // Ensure we don't go below 1
   }, []);
   
-  const onSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
+  // Change signature to match what FormStepNavigation expects
+  const onSubmit = useCallback(() => {
     console.log("Form submitted");
+    // Implementation can be added here
   }, []);
 
   const handleFieldChange = useCallback((field: any, value: any) => {

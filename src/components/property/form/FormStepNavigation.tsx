@@ -9,7 +9,7 @@ interface FormStepNavigationProps {
   onStepClick: (stepId: number) => void;
   onPrevious: () => void;
   onNext: () => void;
-  onSubmit?: () => void;
+  onSubmit?: () => void; // Keeping this signature consistent (no parameters)
   isUpdateMode?: boolean;
 }
 
