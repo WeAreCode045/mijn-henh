@@ -4,6 +4,7 @@ import { ImageSelectDialog } from "@/components/property/ImageSelectDialog";
 import type { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash, Edit } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ImageSelectionsProps {
   formData: PropertyFormData;
@@ -55,6 +56,9 @@ export function ImageSelections({
     gridItems.push(null);
   }
 
+  // Check if all grid slots are filled
+  const isGridFull = formData.gridImages && formData.gridImages.length >= 4;
+
   return (
     <div className="space-y-4">
       <Label className="text-lg font-medium">Media Selection</Label>
@@ -74,33 +78,45 @@ export function ImageSelections({
               
               {/* Hover actions */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center gap-2">
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  onClick={handleRemoveFeaturedImage}
-                >
-                  <Trash className="h-4 w-4 mr-1" />
-                  Remove
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="destructive" 
+                        size="icon" 
+                        onClick={handleRemoveFeaturedImage}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Remove image</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 
-                <ImageSelectDialog
-                  images={formData.images || []}
-                  selectedImageIds={formData.featuredImage ? [formData.images.find(img => img.url === formData.featuredImage)?.id || ''] : []}
-                  onSelect={(imageIds) => {
-                    if (imageIds[0]) {
-                      const selectedImage = formData.images.find(img => img.id === imageIds[0]);
-                      handleSetFeaturedImage(selectedImage?.url || null);
-                    }
-                  }}
-                  buttonText="Change"
-                  customButton={
-                    <Button variant="secondary" size="sm">
-                      <Edit className="h-4 w-4 mr-1" />
-                      Change
-                    </Button>
-                  }
-                  maxSelect={1}
-                />
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ImageSelectDialog
+                        images={formData.images || []}
+                        selectedImageIds={formData.featuredImage ? [formData.images.find(img => img.url === formData.featuredImage)?.id || ''] : []}
+                        onSelect={(imageIds) => {
+                          if (imageIds[0]) {
+                            const selectedImage = formData.images.find(img => img.id === imageIds[0]);
+                            handleSetFeaturedImage(selectedImage?.url || null);
+                          }
+                        }}
+                        buttonText="Change"
+                        buttonIcon={<Edit className="h-4 w-4" />}
+                        maxSelect={1}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Change image</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
           ) : (
@@ -148,16 +164,33 @@ export function ImageSelections({
                     
                     {/* Hover actions for existing images */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center gap-2">
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={() => handleRemoveGridImage(index)}
-                      >
-                        <Trash className="h-4 w-4 mr-1" />
-                        Remove
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="destructive" 
+                              size="icon" 
+                              onClick={() => handleRemoveGridImage(index)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Remove image</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       
-                      {selectGridImage()}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            {selectGridImage()}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Change image</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </>
                 ) : (
@@ -182,9 +215,12 @@ export function ImageSelections({
             ))}
           </div>
           
-          <div className="mt-2">
-            {selectGridImage()}
-          </div>
+          {/* Show the "Select Grid Images" button only if there are fewer than 4 images */}
+          {!isGridFull && (
+            <div className="mt-2">
+              {selectGridImage()}
+            </div>
+          )}
         </div>
       </div>
     </div>

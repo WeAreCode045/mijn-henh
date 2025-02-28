@@ -54,18 +54,24 @@ export function ImageSelectDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Card className="flex items-center justify-center w-full h-32 border-dashed cursor-pointer hover:bg-slate-50 transition-colors">
-          <div className="flex flex-col items-center p-4">
-            {buttonIcon || <Plus className="h-8 w-8 text-muted-foreground mb-2" />}
-            <span className="text-sm text-muted-foreground">{buttonText}</span>
-          </div>
-        </Card>
+        {buttonIcon ? (
+          <Button size="icon" variant="secondary">
+            {buttonIcon}
+          </Button>
+        ) : (
+          <Card className="flex items-center justify-center w-full h-32 border-dashed cursor-pointer hover:bg-slate-50 transition-colors">
+            <div className="flex flex-col items-center p-4">
+              <Plus className="h-8 w-8 text-muted-foreground mb-2" />
+              <span className="text-sm text-muted-foreground">{buttonText}</span>
+            </div>
+          </Card>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Images from Library</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-2">
           {images.map((image) => (
             <div
               key={image.id}
