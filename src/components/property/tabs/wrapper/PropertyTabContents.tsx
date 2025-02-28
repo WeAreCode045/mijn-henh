@@ -1,6 +1,10 @@
-
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
-import { renderDashboardTab, renderContentTab, renderMediaTab } from "../content/TabContentRenderers";
+import { 
+  renderDashboardTab, 
+  renderContentTab, 
+  renderMediaTab,
+  renderCommunicationsTab
+} from "../content/TabContentRenderers";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -160,6 +164,7 @@ export function PropertyTabContents({
       {renderDashboardTab(tabProps)}
       {renderContentTab(tabProps)}
       {renderMediaTab(tabProps)}
+      {renderCommunicationsTab(tabProps)}
     </>
   );
 }

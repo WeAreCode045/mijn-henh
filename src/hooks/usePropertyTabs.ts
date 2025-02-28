@@ -1,12 +1,38 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 export function usePropertyTabs() {
-  // Default to dashboard tab
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  
+  // Valid tab values
+  const validTabs = ['dashboard', 'content', 'media', 'communications'];
+  
+  // Default to dashboard tab if no valid tab is in URL
+  const [activeTab, setActiveTab] = useState(
+    validTabs.includes(tabParam || '') ? tabParam : 'dashboard'
+  );
+  
+  // Update the URL when tab changes
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('tab', tab);
+      return newParams;
+    });
+  };
+  
+  // Sync with URL parameters on mount and when URL changes
+  useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
   
   return {
     activeTab,
-    setActiveTab,
+    setActiveTab: handleTabChange,
   };
 }

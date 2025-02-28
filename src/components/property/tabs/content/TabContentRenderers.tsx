@@ -1,8 +1,8 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
+import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 
 interface TabContentProps {
@@ -25,7 +25,6 @@ interface TabContentProps {
   templateInfo?: { id: string; name: string } | null;
   isUpdating: boolean;
   handlers: {
-    // Dashboard tab handlers
     onSave: () => void;
     onDelete: () => Promise<void>;
     handleSaveObjectId: (objectId: string) => void;
@@ -33,7 +32,6 @@ interface TabContentProps {
     handleSaveTemplate: (templateId: string) => void;
     handleGeneratePDF: () => void;
     handleWebView: () => void;
-    // Content tab handlers
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;
@@ -44,7 +42,6 @@ interface TabContentProps {
     onAreaImageUpload: (areaId: string, files: FileList) => void;
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    // Media tab handlers
     handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveImage: (index: number) => void;
     isUploading?: boolean;
@@ -55,11 +52,9 @@ interface TabContentProps {
     handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
     handleSetFeaturedImage: (url: string) => void;
     handleToggleGridImage: (url: string) => void;
-    // Technical data handlers
     onAddTechnicalItem?: () => void;
     onRemoveTechnicalItem?: (id: string) => void;
     onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
-    // Step navigation handlers
     currentStep: number;
     handleStepClick: (step: number) => void;
     handleNext: () => void;
@@ -175,6 +170,25 @@ export const renderMediaTab = (props: TabContentProps) => {
         onImageUpload={handlers.handleImageUpload}
         onRemoveImage={handlers.handleRemoveImage}
         isUploading={handlers.isUploading}
+      />
+    </TabsContent>
+  );
+};
+
+/**
+ * Renders the Communications tab
+ */
+export const renderCommunicationsTab = (props: TabContentProps) => {
+  const { activeTab, property } = props;
+  
+  // Only render when the activeTab is 'communications'
+  if (activeTab !== 'communications') return null;
+  
+  return (
+    <TabsContent value="communications">
+      <CommunicationsTabContent 
+        id={property.id}
+        title={property.title || "Untitled Property"}
       />
     </TabsContent>
   );
