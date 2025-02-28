@@ -82,11 +82,13 @@ export function ImageSelectDialog({
               }`}
               onClick={() => handleToggleSelect(image.id)}
             >
-              <img
-                src={image.url}
-                alt=""
-                className="w-full aspect-square object-cover"
-              />
+              <div className="aspect-[4/3] relative">
+                <img
+                  src={image.url}
+                  alt=""
+                  className="w-full h-full object-contain absolute inset-0"
+                />
+              </div>
               {selected.includes(image.id) && (
                 <div className="absolute top-1 right-1 bg-primary text-primary-foreground p-1 rounded-full">
                   <Check className="w-3 h-3" />

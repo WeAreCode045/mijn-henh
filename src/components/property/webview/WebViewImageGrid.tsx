@@ -22,11 +22,13 @@ export function WebViewImageGrid({ images, settings, isLocationGrid = false }: W
     <div className={`grid ${gridClass} gap-4 px-6 mb-8`}>
       {images.slice(0, isLocationGrid ? 3 : 4).map((image, index) => (
         <div key={index} className="relative shadow-lg rounded-lg">
-          <img
-            src={image}
-            alt={`Grid ${index + 1}`}
-            className="w-full aspect-[4/3] object-cover rounded-lg"
-          />
+          <div className="aspect-[4/3] relative">
+            <img
+              src={image}
+              alt={`Grid ${index + 1}`}
+              className="w-full h-full object-contain absolute inset-0 rounded-lg"
+            />
+          </div>
           <div 
             className="absolute inset-0 rounded-lg"
             style={overlayStyle}
