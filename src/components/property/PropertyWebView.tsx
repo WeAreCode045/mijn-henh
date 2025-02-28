@@ -10,6 +10,9 @@ import { PropertyBreadcrumb } from "./webview/PropertyBreadcrumb";
 import { WebViewFooter } from "./webview/WebViewFooter";
 import { usePropertyData } from "./webview/hooks/usePropertyData";
 import { usePageCalculation } from "./webview/hooks/usePageCalculation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PropertyWebViewProps {
   property?: PropertyData;
@@ -24,7 +27,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
   const contentRef = useRef<HTMLDivElement>(null);
   const printContentRef = useRef<HTMLDivElement>(null);
   
-  const { propertyData } = usePropertyData(id, property);
+  const { propertyData, isLoading, error } = usePropertyData(id, property);
   const { calculateTotalPages } = usePageCalculation();
   const {
     selectedImage,
@@ -37,8 +40,44 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     handlePrevious
   } = usePropertyWebView();
 
-  if (!propertyData) {
-    return <div>Loading...</div>;
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full space-y-4">
+          <Skeleton className="h-8 w-3/4 mx-auto" />
+          <Skeleton className="h-64 w-full rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/6" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !propertyData) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-6">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
+          <h1 className="text-2xl font-bold text-gray-800">Property Not Found</h1>
+          <p className="text-gray-600">
+            {error || "We couldn't find the property you're looking for. It may have been removed or the URL is incorrect."}
+          </p>
+          <div className="flex space-x-4 justify-center">
+            <Button onClick={() => navigate('/')} variant="default">
+              Go Home
+            </Button>
+            <Button onClick={() => navigate('/properties')} variant="outline">
+              View All Properties
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const totalPages = calculateTotalPages(propertyData);

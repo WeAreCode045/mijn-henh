@@ -64,6 +64,8 @@ const App = () => (
                   <Auth />
                 </Suspense>
               } />
+              
+              {/* Public web view route */}
               <Route
                 path="/property/:id/webview"
                 element={
@@ -72,6 +74,17 @@ const App = () => (
                   </Suspense>
                 }
               />
+              
+              {/* Direct property route */}
+              <Route
+                path="/property/:id"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <PropertyWebView />
+                  </Suspense>
+                }
+              />
+              
               <Route
                 path="*"
                 element={
