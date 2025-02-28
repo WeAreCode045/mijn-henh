@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileType, Save } from "lucide-react";
+import { FileText, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Template {
@@ -49,7 +49,7 @@ export function TemplateSection({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileType className="h-5 w-5" />
+          <FileText className="h-5 w-5" />
           Brochure Template
         </CardTitle>
       </CardHeader>
@@ -76,7 +76,7 @@ export function TemplateSection({
         
         <Button onClick={handleSave} disabled={isUpdating}>
           <Save className="h-4 w-4 mr-2" />
-          {isUpdating ? "Saving..." : "Save Template"}
+          {isUpdating ? "Saving..." : "Set Template"}
         </Button>
       </CardContent>
     </Card>

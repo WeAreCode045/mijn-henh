@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -81,8 +82,40 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
   };
 
   const handleSaveTemplate = async (templateId: string) => {
-    console.log("Template functionality disabled, ignoring update to:", templateId);
-    return Promise.resolve();
+    if (!propertyId) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ template_id: templateId })
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Template assigned successfully",
+      });
+      
+      onSaveCallback();
+    } catch (error) {
+      console.error('Error assigning template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return {
