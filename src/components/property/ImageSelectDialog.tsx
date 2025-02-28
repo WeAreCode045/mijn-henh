@@ -19,6 +19,7 @@ export interface ImageSelectDialogProps {
   buttonText: string;
   buttonIcon?: React.ReactNode;
   maxSelect?: number;
+  id?: string; // Add the id property
 }
 
 export function ImageSelectDialog({
@@ -28,6 +29,7 @@ export function ImageSelectDialog({
   buttonText,
   buttonIcon,
   maxSelect,
+  id, // Add the id property to the destructured props
 }: ImageSelectDialogProps) {
   const [selected, setSelected] = useState<string[]>(selectedImageIds);
   const [open, setOpen] = useState(false);
@@ -55,11 +57,11 @@ export function ImageSelectDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {buttonIcon ? (
-          <Button size="icon" variant="secondary">
+          <Button size="icon" variant="secondary" id={id}>
             {buttonIcon}
           </Button>
         ) : (
-          <Card className="flex items-center justify-center w-full h-32 border-dashed cursor-pointer hover:bg-slate-50 transition-colors">
+          <Card className="flex items-center justify-center w-full h-32 border-dashed cursor-pointer hover:bg-slate-50 transition-colors" id={id}>
             <div className="flex flex-col items-center p-4">
               <Plus className="h-8 w-8 text-muted-foreground mb-2" />
               <span className="text-sm text-muted-foreground">{buttonText}</span>
