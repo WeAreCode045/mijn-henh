@@ -16,6 +16,24 @@ export function PropertyImagesCard({
   onImageUpload,
   onRemoveImage
 }: PropertyImagesCardProps) {
+  // Create a file input ref to handle file selection
+  const handleUploadClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent any default form submission
+    e.preventDefault();
+    
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      // Type assertion to safely convert Event to React.ChangeEvent<HTMLInputElement>
+      if (e && e.target) {
+        onImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+      }
+    };
+    input.click();
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -60,19 +78,8 @@ export function PropertyImagesCard({
           <div>
             <Button 
               variant="outline" 
-              onClick={() => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.multiple = true;
-                input.accept = "image/*";
-                input.onchange = (e) => {
-                  // Type assertion to safely convert Event to React.ChangeEvent<HTMLInputElement>
-                  if (e && e.target) {
-                    onImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-                  }
-                };
-                input.click();
-              }}
+              type="button" 
+              onClick={handleUploadClick}
             >
               Upload Images
             </Button>
