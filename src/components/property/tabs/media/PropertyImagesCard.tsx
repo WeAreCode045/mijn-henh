@@ -35,6 +35,12 @@ export function PropertyImagesCard({
     onImageUpload(e);
   };
 
+  const handleRemoveImage = (index: number, e: React.MouseEvent) => {
+    // Prevent any default form submission
+    e.preventDefault();
+    onRemoveImage(index);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -59,10 +65,7 @@ export function PropertyImagesCard({
                     />
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onRemoveImage(index);
-                      }}
+                      onClick={(e) => handleRemoveImage(index, e)}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
