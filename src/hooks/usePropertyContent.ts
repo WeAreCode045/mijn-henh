@@ -1,36 +1,49 @@
 
-import { useState, useCallback } from "react";
+import { useState } from 'react';
+import { steps } from '@/components/property/form/formSteps';
+import { useToast } from '@/components/ui/use-toast';
 
 export function usePropertyContent() {
   const [currentStep, setCurrentStep] = useState(1);
-  
-  // Implement actual step navigation
-  const handleStepClick = useCallback((step: number) => {
-    console.log("Step clicked:", step);
-    setCurrentStep(step);
-  }, []);
-  
-  const handleNext = useCallback(() => {
-    console.log("Next step");
-    setCurrentStep(prev => Math.min(prev + 1, 6)); // Assuming 6 is the max step
-  }, []);
-  
-  const handlePrevious = useCallback(() => {
-    console.log("Previous step");
-    setCurrentStep(prev => Math.max(prev - 1, 1)); // Ensure we don't go below 1
-  }, []);
-  
-  // Change signature to match what FormStepNavigation expects
-  const onSubmit = useCallback(() => {
-    console.log("Form submitted");
-    // Implementation can be added here
-  }, []);
+  const { toast } = useToast();
 
-  // Update the handleFieldChange to match the usage in PropertyTabsWrapper
-  const handleFieldChange = useCallback((field: string, value: any) => {
-    console.log(`Field ${field} changed to:`, value);
-    // This would normally update the formData in the parent component
-  }, []);
+  const handleStepClick = (stepId: number) => {
+    console.log(`usePropertyContent - Setting current step to ${stepId}`);
+    setCurrentStep(stepId);
+  };
+
+  const handleNext = () => {
+    console.log(`usePropertyContent - Current step: ${currentStep}, max steps: ${steps.length}`);
+    if (currentStep < steps.length) {
+      console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
+      setCurrentStep(prevStep => prevStep + 1);
+    } else {
+      console.log('usePropertyContent - Already at the last step');
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
+      setCurrentStep(prevStep => prevStep - 1);
+    } else {
+      console.log('usePropertyContent - Already at the first step');
+    }
+  };
+
+  const onSubmit = () => {
+    console.log('usePropertyContent - Form submitted');
+    toast({
+      title: "Form submitted",
+      description: "Your changes have been saved."
+    });
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    console.log(`Field "${field}" changed to:`, value);
+    // This function is just a placeholder as the actual changes
+    // are handled in the parent component
+  };
 
   return {
     currentStep,

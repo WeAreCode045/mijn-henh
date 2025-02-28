@@ -26,6 +26,14 @@ export function PropertySettingsTab({
   onDelete,
   isUpdating
 }: PropertySettingsTabProps) {
+  if (!propertyId) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-gray-500">Property data is loading or not available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PropertyIdSection 

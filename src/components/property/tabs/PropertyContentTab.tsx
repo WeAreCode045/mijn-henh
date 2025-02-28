@@ -11,7 +11,7 @@ interface PropertyContentTabProps {
   handleStepClick?: (step: number) => void;
   handleNext?: () => void;
   handlePrevious?: () => void;
-  onSubmit?: () => void; // Changed from (e: React.FormEvent) => void to match FormStepNavigation
+  onSubmit?: () => void;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -108,12 +108,13 @@ export function PropertyContentTab({
     }
   };
   
-  // Updated onSubmit implementation to match the expected signature (no parameters)
   const onSubmit = () => {
+    console.log("Submit clicked in PropertyContentTab");
     if (externalOnSubmit) {
       externalOnSubmit();
     } else {
       console.log("Form submitted in PropertyContentTab");
+      // Default submission behavior if needed
     }
   };
 

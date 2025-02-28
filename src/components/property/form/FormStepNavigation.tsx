@@ -9,7 +9,7 @@ interface FormStepNavigationProps {
   onStepClick: (stepId: number) => void;
   onPrevious: () => void;
   onNext: () => void;
-  onSubmit?: () => void; // Keeping this signature consistent (no parameters)
+  onSubmit?: () => void;
   isUpdateMode?: boolean;
 }
 
@@ -98,7 +98,7 @@ export function FormStepNavigation({
         </Button>
         
         {currentStep === steps.length ? (
-          <Button type="submit" onClick={handleSubmit}>
+          <Button type="button" onClick={handleSubmit}>
             Save Property
           </Button>
         ) : (
