@@ -72,7 +72,10 @@ interface TabContentProps {
  * Renders the Dashboard tab content
  */
 export const renderDashboardTab = (props: TabContentProps) => {
-  const { property, agentInfo, templateInfo, isUpdating, handlers } = props;
+  const { activeTab, property, agentInfo, templateInfo, isUpdating, handlers } = props;
+  
+  // Only render when the activeTab is 'dashboard'
+  if (activeTab !== 'dashboard') return null;
   
   return (
     <TabsContent value="dashboard">
@@ -103,7 +106,10 @@ export const renderDashboardTab = (props: TabContentProps) => {
  * Renders the Content tab
  */
 export const renderContentTab = (props: TabContentProps) => {
-  const { formState, handlers } = props;
+  const { activeTab, formState, handlers } = props;
+  
+  // Only render when the activeTab is 'content'
+  if (activeTab !== 'content') return null;
   
   return (
     <TabsContent value="content">
@@ -145,7 +151,10 @@ export const renderContentTab = (props: TabContentProps) => {
  * Renders the Media tab
  */
 export const renderMediaTab = (props: TabContentProps) => {
-  const { property, handlers } = props;
+  const { activeTab, property, handlers } = props;
+  
+  // Only render when the activeTab is 'media'
+  if (activeTab !== 'media') return null;
   
   return (
     <TabsContent value="media">
