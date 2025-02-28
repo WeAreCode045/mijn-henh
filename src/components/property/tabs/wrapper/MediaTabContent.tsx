@@ -18,6 +18,11 @@ interface MediaTabContentProps {
   onSetFeaturedImage?: (imageUrl: string) => void;
   onToggleGridImage?: (imageUrl: string) => void;
   isUploading?: boolean;
+  // Add onFeaturedImageSelect and onGridImageToggle as aliases
+  onFeaturedImageSelect?: (imageUrl: string) => void;
+  onGridImageToggle?: (imageUrl: string) => void;
+  // Add onUpload as an alias for onImageUpload
+  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function MediaTabContent({
@@ -36,6 +41,9 @@ export function MediaTabContent({
   onSetFeaturedImage,
   onToggleGridImage,
   isUploading,
+  onFeaturedImageSelect,
+  onGridImageToggle,
+  onUpload,
 }: MediaTabContentProps) {
   return (
     <PropertyMediaTab
@@ -49,10 +57,10 @@ export function MediaTabContent({
       notes={notes}
       onVirtualTourUpdate={onVirtualTourUpdate}
       onYoutubeUrlUpdate={onYoutubeUrlUpdate}
-      onImageUpload={onImageUpload}
+      onImageUpload={onUpload || onImageUpload}
       onRemoveImage={onRemoveImage}
-      onSetFeaturedImage={onSetFeaturedImage}
-      onToggleGridImage={onToggleGridImage}
+      onSetFeaturedImage={onFeaturedImageSelect || onSetFeaturedImage}
+      onToggleGridImage={onGridImageToggle || onToggleGridImage}
       isUploading={isUploading}
     />
   );

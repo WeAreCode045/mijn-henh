@@ -6,7 +6,7 @@ import { Image, Upload, Star, Grid, X } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
@@ -121,36 +121,50 @@ export function PropertyImagesCard({
                     
                     {/* Image action buttons */}
                     <div className="absolute bottom-0 left-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between bg-black/50">
-                      <Tooltip content={featuredImage === image.url ? "Remove featured" : "Set as featured"}>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className={`h-6 w-6 ${
-                            featuredImage === image.url ? 'text-yellow-400' : 'text-white'
-                          }`}
-                          onClick={(e) => handleSetFeatured(image.url, e)}
-                        >
-                          <Star size={14} />
-                        </Button>
-                      </Tooltip>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className={`h-6 w-6 ${
+                                featuredImage === image.url ? 'text-yellow-400' : 'text-white'
+                              }`}
+                              onClick={(e) => handleSetFeatured(image.url, e)}
+                            >
+                              <Star size={14} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {featuredImage === image.url ? "Remove featured" : "Set as featured"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       
-                      <Tooltip content={gridImages.includes(image.url) ? "Remove from grid" : "Add to grid"}>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className={`h-6 w-6 ${
-                            gridImages.includes(image.url) ? 'text-blue-400' : 'text-white'
-                          } ${
-                            gridImages.length >= 4 && !gridImages.includes(image.url) ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          onClick={(e) => handleToggleGrid(image.url, e)}
-                          disabled={gridImages.length >= 4 && !gridImages.includes(image.url)}
-                        >
-                          <Grid size={14} />
-                        </Button>
-                      </Tooltip>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className={`h-6 w-6 ${
+                                gridImages.includes(image.url) ? 'text-blue-400' : 'text-white'
+                              } ${
+                                gridImages.length >= 4 && !gridImages.includes(image.url) ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                              onClick={(e) => handleToggleGrid(image.url, e)}
+                              disabled={gridImages.length >= 4 && !gridImages.includes(image.url)}
+                            >
+                              <Grid size={14} />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {gridImages.includes(image.url) ? "Remove from grid" : "Add to grid"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 ))}

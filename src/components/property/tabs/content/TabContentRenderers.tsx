@@ -161,14 +161,12 @@ export const renderMediaTab = (props: TabContentProps) => {
         gridImages={property.gridImages || []}
         virtualTourUrl={property.virtualTourUrl}
         youtubeUrl={property.youtubeUrl}
-        onUpload={handlers.handleImageUpload}
-        onRemove={handlers.handleRemoveImage}
-        onFeaturedImageSelect={handlers.handleSetFeaturedImage}
-        onGridImageToggle={handlers.handleToggleGridImage}
         onVirtualTourUpdate={(url) => handlers.onFieldChange('virtualTourUrl', url)}
         onYoutubeUrlUpdate={(url) => handlers.onFieldChange('youtubeUrl', url)}
         onImageUpload={handlers.handleImageUpload}
         onRemoveImage={handlers.handleRemoveImage}
+        onSetFeaturedImage={handlers.handleSetFeaturedImage}
+        onToggleGridImage={handlers.handleToggleGridImage}
         isUploading={handlers.isUploading}
       />
     </TabsContent>
