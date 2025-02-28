@@ -18,7 +18,6 @@ interface PropertyTabContentsProps {
     images: any[];
     featuredImage: string | null;
     gridImages: string[];
-    floorplans: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
   };
@@ -48,9 +47,6 @@ interface PropertyTabContentsProps {
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
   handleRemoveAreaPhoto: (index: number) => void;
   handleSetFeaturedImage: (url: string) => void;
   handleToggleGridImage: (url: string) => void;
@@ -93,9 +89,6 @@ export function PropertyTabContents({
   handleImageUpload,
   handleRemoveImage,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  handleUpdateFloorplan,
   handleRemoveAreaPhoto,
   handleSetFeaturedImage,
   handleToggleGridImage,
@@ -143,11 +136,8 @@ export function PropertyTabContents({
           onAreaImagesSelect={onAreaImagesSelect}
           handleImageUpload={handleImageUpload}
           handleAreaPhotosUpload={handleAreaPhotosUpload}
-          handleFloorplanUpload={handleFloorplanUpload}
           handleRemoveImage={handleRemoveImage}
           handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-          handleRemoveFloorplan={handleRemoveFloorplan}
-          handleUpdateFloorplan={handleUpdateFloorplan}
           handleSetFeaturedImage={handleSetFeaturedImage}
           handleToggleGridImage={handleToggleGridImage}
           onAddTechnicalItem={onAddTechnicalItem}
@@ -168,16 +158,12 @@ export function PropertyTabContents({
           images={property.images || []}
           featuredImage={property.featuredImage}
           gridImages={property.gridImages || []}
-          floorplans={property.floorplans || []}
           virtualTourUrl={property.virtualTourUrl}
           youtubeUrl={property.youtubeUrl}
           onUpload={handleImageUpload}
           onRemove={handleRemoveImage}
           onFeaturedImageSelect={handleSetFeaturedImage}
           onGridImageToggle={handleToggleGridImage}
-          onFloorplanUpload={handleFloorplanUpload}
-          onFloorplanRemove={handleRemoveFloorplan}
-          onFloorplanUpdate={handleUpdateFloorplan}
           onVirtualTourUpdate={(url) => onFieldChange('virtualTourUrl', url)}
           onYoutubeUrlUpdate={(url) => onFieldChange('youtubeUrl', url)}
           onImageUpload={handleImageUpload}
