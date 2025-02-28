@@ -13,7 +13,8 @@ export function usePropertyTechnicalData(
       title: "",
       size: "",
       description: "",
-      floorplanId: null
+      floorplanId: null,
+      columns: 1 // Default to 1 column
     };
 
     setFormData({

@@ -15,13 +15,6 @@ export function PropertyFormHeader({ title, propertyId, objectId }: PropertyForm
           {title}
         </h1>
       </div>
-
-      {propertyId && (
-        <PropertyInformationCard
-          id={propertyId}
-          objectId={objectId}
-        />
-      )}
     </>
   );
 }

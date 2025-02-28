@@ -17,6 +17,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
 
   const getFloorplansByColumns = () => {
     const floorplans = property.floorplans || [];
+    const technicalItems = property.technicalItems || [];
     
     // Check if using the legacy format (array of strings)
     const isLegacyFormat = floorplans.length > 0 && typeof floorplans[0] === 'string';
@@ -29,17 +30,45 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     }
     
     // Using the new format (array of objects with url and columns)
-    const groupedFloorplans: { [key: number]: PropertyFloorplan[] } = {};
+    const resultGroups: { [key: number]: PropertyFloorplan[] } = {};
     
-    (floorplans as PropertyFloorplan[]).forEach((plan) => {
-      const columns = plan.columns || 1;
-      if (!groupedFloorplans[columns]) {
-        groupedFloorplans[columns] = [];
+    technicalItems.forEach(item => {
+      if (item.floorplanId !== null && item.floorplanId !== '') {
+        const floorplanIndex = parseInt(item.floorplanId);
+        const floorplan = floorplans[floorplanIndex];
+        
+        if (floorplan) {
+          const columns = item.columns || 1;
+          if (!resultGroups[columns]) {
+            resultGroups[columns] = [];
+          }
+          resultGroups[columns].push({
+            ...floorplan,
+            columns
+          });
+        }
       }
-      groupedFloorplans[columns].push(plan);
     });
     
-    return Object.entries(groupedFloorplans).map(([columns, plans]) => ({
+    // For any floorplans not linked to a technical item, put them in the 1-column group
+    floorplans.forEach((plan, index) => {
+      // Check if this floorplan is already assigned to a technical item
+      const isAssigned = technicalItems.some(item => 
+        item.floorplanId !== null && parseInt(item.floorplanId) === index
+      );
+      
+      if (!isAssigned) {
+        if (!resultGroups[1]) {
+          resultGroups[1] = [];
+        }
+        resultGroups[1].push({
+          ...plan,
+          columns: 1
+        });
+      }
+    });
+    
+    return Object.entries(resultGroups).map(([columns, plans]) => ({
       columns: parseInt(columns),
       plans
     }));
