@@ -26,7 +26,8 @@ export function usePropertyContent() {
     // Implementation can be added here
   }, []);
 
-  const handleFieldChange = useCallback((field: any, value: any) => {
+  // Update the handleFieldChange to match the usage in PropertyTabsWrapper
+  const handleFieldChange = useCallback((field: string, value: any) => {
     console.log(`Field ${field} changed to:`, value);
     // This would normally update the formData in the parent component
   }, []);

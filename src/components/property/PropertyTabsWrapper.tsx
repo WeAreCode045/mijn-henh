@@ -80,9 +80,15 @@ export function PropertyTabsWrapper({
     setFormState(data);
   }
 
+  // Update this function to properly handle the field change by accepting all required parameters
   const handleFieldChangeWrapper = (field: keyof PropertyFormData, value: any) => {
     console.log(`Field changed: ${String(field)} = `, value);
-    handleFieldChange(formState, setFormState, field, value);
+    // Instead of calling handleFieldChange with formState and setFormState,
+    // we'll update formState directly since handleFieldChange expects different parameters
+    setFormState({
+      ...formState,
+      [field]: value
+    });
   };
 
   return (
