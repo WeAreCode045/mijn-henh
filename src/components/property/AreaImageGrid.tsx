@@ -1,6 +1,7 @@
 
 import { PropertyImage } from "@/types/property";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface AreaImageGridProps {
   areaImages: PropertyImage[];
@@ -29,13 +30,15 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
             alt={areaTitle}
             className="w-full h-24 object-cover rounded-md"
           />
-          <button
+          <Button
             type="button"
+            variant="destructive"
+            size="icon"
+            className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={() => onImageRemove(areaId, image.id)}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </div>
       ))}
     </div>

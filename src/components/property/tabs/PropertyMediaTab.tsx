@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyMediaTabProps {
   id: string;
-  title: string; // Added title property to fix TypeScript error
+  title: string;
   images: PropertyImage[];
   floorplans: PropertyFloorplan[];
   featuredImage: string | null;
@@ -35,7 +35,7 @@ interface PropertyMediaTabProps {
 
 export function PropertyMediaTab({
   id,
-  title, // Added title property to component arguments
+  title,
   images = [],
   floorplans = [],
   featuredImage,

@@ -68,6 +68,8 @@ export function usePropertyMainImages(
   };
 
   const handleRemoveImage = async (index: number) => {
+    console.log("Removing image at index:", index);
+    
     if (!Array.isArray(formData.images) || index < 0 || index >= formData.images.length) {
       console.error('Invalid image index or images array is not defined');
       return;
@@ -80,16 +82,31 @@ export function usePropertyMainImages(
     }
 
     try {
+      // Delete the image from the database
       const { error } = await supabase
         .from('property_images')
         .delete()
         .eq('id', imageToRemove.id);
 
       if (error) throw error;
+      
+      // If this was the featured image, clear it
+      let updatedFeaturedImage = formData.featuredImage;
+      if (formData.featuredImage === imageToRemove.url) {
+        updatedFeaturedImage = null;
+      }
+      
+      // If this was in grid images, remove it
+      const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageToRemove.url);
 
+      // Update formData without the removed image
+      const updatedImages = formData.images.filter((_, i) => i !== index);
+      
       setFormData({
         ...formData,
-        images: formData.images.filter((_, i) => i !== index)
+        images: updatedImages,
+        featuredImage: updatedFeaturedImage,
+        gridImages: updatedGridImages
       });
 
       toast({

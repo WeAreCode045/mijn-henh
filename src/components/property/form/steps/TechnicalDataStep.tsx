@@ -1,252 +1,269 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyFloorplan } from "@/types/property";
-import { Plus, Trash, ImagePlus } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface TechnicalItem {
-  id: string;
-  title: string;
-  size: string;
-  description: string;
-  floorplanId: string | null;
-  columns?: number;
-}
+import { PropertyFloorplan, PropertyImage, PropertyTechnicalItem } from "@/types/property";
+import { PlusCircle, Trash2, LayoutGrid } from "lucide-react";
+import { useState } from "react";
 
 interface TechnicalDataStepProps {
+  technicalItems: PropertyTechnicalItem[];
   floorplans: PropertyFloorplan[];
-  technicalItems?: TechnicalItem[];
-  images?: any[];
-  onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan: (index: number) => void;
-  onUpdateFloorplan?: (index: number, field: any, value: any) => void;
+  images: PropertyImage[];
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: string, value: any) => void;
+  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan?: (index: number) => void;
+  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
 }
 
 export function TechnicalDataStep({
-  floorplans = [],
   technicalItems = [],
+  floorplans = [],
   images = [],
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
+  onUpdateTechnicalItem,
   onFloorplanUpload,
   onRemoveFloorplan,
   onUpdateFloorplan,
-  onAddTechnicalItem = () => console.log("Add technical item"),
-  onRemoveTechnicalItem = (id) => console.log("Remove technical item", id),
-  onUpdateTechnicalItem = (id, field, value) => console.log("Update technical item", id, field, value)
 }: TechnicalDataStepProps) {
-  const [uploadKey, setUploadKey] = useState(Date.now());
+  const [activeFloorplanPreview, setActiveFloorplanPreview] = useState<number | null>(null);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFloorplanUpload(e);
-    setUploadKey(Date.now()); // Reset the input key to clear the field
+  const handleAddTechnicalItem = () => {
+    if (onAddTechnicalItem) onAddTechnicalItem();
   };
 
-  const handleAddItem = () => {
-    onAddTechnicalItem();
+  const handleRemoveTechnicalItem = (id: string) => {
+    if (onRemoveTechnicalItem) onRemoveTechnicalItem(id);
   };
 
-  const handleFloorplanSelect = (id: string, floorplanId: string) => {
-    onUpdateTechnicalItem(id, 'floorplanId', floorplanId);
+  const handleUpdateTechnicalItem = (id: string, field: keyof PropertyTechnicalItem, value: any) => {
+    if (onUpdateTechnicalItem) onUpdateTechnicalItem(id, field, value);
+  };
+
+  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onFloorplanUpload) onFloorplanUpload(e);
+  };
+
+  const handleRemoveFloorplan = (index: number) => {
+    if (onRemoveFloorplan) onRemoveFloorplan(index);
+  };
+
+  const handleUpdateFloorplan = (index: number, field: keyof PropertyFloorplan, value: any) => {
+    if (onUpdateFloorplan) onUpdateFloorplan(index, field, value);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold text-estate-800">Technical Data</h2>
-        <p className="text-sm text-estate-600">
-          Add technical details about rooms and areas with floorplans
-        </p>
-      </div>
+    <div className="space-y-8">
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Technical Details</h3>
+          <Button onClick={handleAddTechnicalItem} variant="outline" size="sm">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Item
+          </Button>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left column - Technical items */}
-        <div className="md:col-span-2 space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Technical Items</h3>
-            <Button variant="outline" size="sm" onClick={handleAddItem}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
+        {technicalItems.length === 0 ? (
+          <div className="text-center p-6 bg-gray-50 rounded-md">
+            <p className="text-gray-500">No technical items added yet.</p>
+            <p className="text-gray-500 text-sm mt-1">
+              Add items like room dimensions, construction materials, etc.
+            </p>
           </div>
-
+        ) : (
           <div className="space-y-4">
-            {technicalItems.length === 0 && (
-              <div className="flex flex-col items-center justify-center p-6 border border-dashed rounded-md">
-                <p className="text-muted-foreground text-center">No technical items added yet.</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={handleAddItem}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Item
-                </Button>
-              </div>
-            )}
-
             {technicalItems.map((item) => (
-              <Card key={item.id} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">
+              <Card key={item.id} className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 text-gray-400 hover:text-red-500"
+                  onClick={() => handleRemoveTechnicalItem(item.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`title-${item.id}`}>Title</Label>
                       <Input
-                        placeholder="Item Title"
+                        id={`title-${item.id}`}
                         value={item.title}
-                        onChange={(e) => onUpdateTechnicalItem(item.id, 'title', e.target.value)}
-                        className="border-0 p-0 text-lg font-semibold focus-visible:ring-0"
+                        onChange={(e) => handleUpdateTechnicalItem(item.id, "title", e.target.value)}
+                        placeholder="e.g., Living Room, Kitchen"
                       />
-                    </CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => onRemoveTechnicalItem(item.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2 space-y-4">
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <Label htmlFor={`size-${item.id}`} className="text-sm">Size (sqm)</Label>
+                    </div>
+                    <div>
+                      <Label htmlFor={`size-${item.id}`}>Size/Dimensions</Label>
                       <Input
                         id={`size-${item.id}`}
-                        placeholder="Size in square meters"
                         value={item.size}
-                        onChange={(e) => onUpdateTechnicalItem(item.id, 'size', e.target.value)}
+                        onChange={(e) => handleUpdateTechnicalItem(item.id, "size", e.target.value)}
+                        placeholder="e.g., 20m², 4x5m"
                       />
                     </div>
-                    <div className="flex-1">
-                      <Label htmlFor={`columns-${item.id}`} className="text-sm">Column Layout</Label>
-                      <Select 
-                        value={String(item.columns || '1')} 
-                        onValueChange={(value) => onUpdateTechnicalItem(item.id, 'columns', parseInt(value))}
-                      >
-                        <SelectTrigger id={`columns-${item.id}`}>
-                          <SelectValue placeholder="Select columns" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">1 Column</SelectItem>
-                          <SelectItem value="2">2 Columns</SelectItem>
-                          <SelectItem value="3">3 Columns</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor={`description-${item.id}`} className="text-sm">Description</Label>
-                    <Textarea
-                      id={`description-${item.id}`}
-                      placeholder="Description"
-                      value={item.description}
-                      onChange={(e) => onUpdateTechnicalItem(item.id, 'description', e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  {item.floorplanId ? (
-                    <div className="w-full">
-                      <div className="mb-2 flex justify-between items-center">
-                        <Label className="text-sm">Selected Floorplan</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleFloorplanSelect(item.id, '')}
-                          className="h-6 text-xs text-muted-foreground"
+                    <div>
+                      <Label htmlFor={`floorplan-${item.id}`}>Floorplan</Label>
+                      <div className="flex gap-2">
+                        <select
+                          id={`floorplan-${item.id}`}
+                          value={item.floorplanId !== null ? item.floorplanId : ""}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? null : e.target.value;
+                            handleUpdateTechnicalItem(item.id, "floorplanId", value);
+                          }}
+                          className="w-full rounded-md border border-input px-3 py-2"
                         >
-                          Change
+                          <option value="">None</option>
+                          {floorplans.map((floorplan, index) => (
+                            <option key={index} value={index.toString()}>
+                              Floorplan {index + 1}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => {
+                            if (item.floorplanId !== null) {
+                              setActiveFloorplanPreview(parseInt(item.floorplanId));
+                            }
+                          }}
+                          disabled={item.floorplanId === null}
+                        >
+                          <LayoutGrid className="h-4 w-4" />
                         </Button>
                       </div>
-                      <div className="border rounded-md overflow-hidden w-full h-40">
-                        {floorplans.map((floorplan, index) => {
-                          if (index.toString() === item.floorplanId) {
-                            return (
-                              <img 
-                                key={index}
-                                src={floorplan.url} 
-                                alt="Selected floorplan" 
-                                className="w-full h-full object-contain"
-                              />
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
                     </div>
-                  ) : (
-                    <Card className="flex items-center justify-center w-full h-28 border-dashed cursor-pointer hover:bg-slate-50 transition-colors">
-                      <div 
-                        className="flex flex-col items-center p-4"
-                        onClick={() => {
-                          if (floorplans.length > 0) {
-                            handleFloorplanSelect(item.id, '0');
-                          }
-                        }}
-                      >
-                        <ImagePlus className="h-8 w-8 text-muted-foreground mb-2" />
-                        <span className="text-sm text-muted-foreground">Select Floorplan</span>
+                    
+                    {/* Columns selector for the floorplan when associated with a technical item */}
+                    {item.floorplanId !== null && (
+                      <div>
+                        <Label htmlFor={`columns-${item.id}`}>Display Columns</Label>
+                        <select
+                          id={`columns-${item.id}`}
+                          value={item.columns || 1}
+                          onChange={(e) => handleUpdateTechnicalItem(item.id, "columns", parseInt(e.target.value))}
+                          className="w-full rounded-md border border-input px-3 py-2"
+                        >
+                          <option value={1}>1 Column</option>
+                          <option value={2}>2 Columns</option>
+                          <option value={3}>3 Columns</option>
+                          <option value={4}>4 Columns</option>
+                        </select>
                       </div>
-                    </Card>
-                  )}
-                </CardFooter>
+                    )}
+                    
+                    <div className="md:col-span-3">
+                      <Label htmlFor={`description-${item.id}`}>Description</Label>
+                      <Textarea
+                        id={`description-${item.id}`}
+                        value={item.description}
+                        onChange={(e) => handleUpdateTechnicalItem(item.id, "description", e.target.value)}
+                        placeholder="Additional details about this area"
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>
+        )}
+      </div>
+
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Floorplans</h3>
+          <Button
+            onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.multiple = true;
+              input.accept = "image/*";
+              input.onchange = handleFloorplanUpload;
+              input.click();
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Upload Floorplans
+          </Button>
         </div>
 
-        {/* Right column - Floorplans */}
-        <div className="md:sticky md:top-4 space-y-4">
-          <h3 className="text-lg font-medium">Floorplans</h3>
-          
-          <div className="grid grid-cols-2 gap-4">
+        {floorplans.length === 0 ? (
+          <div className="text-center p-6 bg-gray-50 rounded-md">
+            <p className="text-gray-500">No floorplans uploaded yet.</p>
+            <p className="text-gray-500 text-sm mt-1">Upload floorplans to link them to technical items.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {floorplans.map((floorplan, index) => (
-              <div key={index} className="relative border rounded-md overflow-hidden group aspect-square">
-                <img 
-                  src={floorplan.url} 
-                  alt={`Floorplan ${index + 1}`} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200"></div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => onRemoveFloorplan(index)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
+              <Card key={index} className="overflow-hidden">
+                <div className="relative">
+                  <img
+                    src={floorplan.url}
+                    alt={`Floorplan ${index + 1}`}
+                    className="w-full h-40 object-contain"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={() => handleRemoveFloorplan(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <CardContent className="p-3">
+                  <div className="text-sm font-medium">Floorplan {index + 1}</div>
+                  <div className="mt-2">
+                    <Label htmlFor={`floorplan-columns-${index}`} className="text-xs">
+                      Default Display Columns
+                    </Label>
+                    <select
+                      id={`floorplan-columns-${index}`}
+                      value={floorplan.columns || 1}
+                      onChange={(e) => handleUpdateFloorplan(index, "columns", parseInt(e.target.value))}
+                      className="w-full text-sm rounded-md border border-input px-2 py-1 mt-1"
+                    >
+                      <option value={1}>1 Column</option>
+                      <option value={2}>2 Columns</option>
+                      <option value={3}>3 Columns</option>
+                      <option value={4}>4 Columns</option>
+                    </select>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-            
-            {/* Upload floorplan card with + icon */}
-            <Card className="aspect-square flex items-center justify-center border-dashed cursor-pointer hover:bg-slate-50 transition-colors">
-              <label htmlFor="upload-floorplan" className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-                <Plus className="h-10 w-10 text-muted-foreground mb-2" />
-                <span className="text-sm text-muted-foreground">Add Floorplan</span>
-                <Input
-                  type="file"
-                  id="upload-floorplan"
-                  key={uploadKey}
-                  accept="image/*"
-                  multiple
-                  onChange={handleUpload}
-                  className="hidden"
-                />
-              </label>
-            </Card>
+          </div>
+        )}
+      </div>
+
+      {activeFloorplanPreview !== null && floorplans[activeFloorplanPreview] && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 max-w-3xl w-full max-h-[90vh] overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Floorplan Preview</h3>
+              <Button variant="ghost" size="sm" onClick={() => setActiveFloorplanPreview(null)}>
+                Close
+              </Button>
+            </div>
+            <img
+              src={floorplans[activeFloorplanPreview].url}
+              alt="Floorplan preview"
+              className="max-w-full max-h-[70vh] object-contain mx-auto"
+            />
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ export function usePropertyFeaturedImage(
   setFormData: (data: PropertyFormData) => void
 ) {
   const handleSetFeaturedImage = (url: string | null) => {
+    console.log("Setting featured image:", url);
     setFormData({
       ...formData,
       featuredImage: url
@@ -13,6 +14,7 @@ export function usePropertyFeaturedImage(
   };
 
   const handleToggleGridImage = (url: string) => {
+    console.log("Toggling grid image:", url);
     // Ensure gridImages is always an array
     const currentGridImages = Array.isArray(formData.gridImages) ? formData.gridImages : [];
     

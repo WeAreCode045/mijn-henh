@@ -14,6 +14,7 @@ import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { usePropertyTechnicalData } from "@/hooks/usePropertyTechnicalData";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { useFeatures } from "@/hooks/useFeatures";
+import { usePropertyImages } from "@/hooks/usePropertyImages";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -74,6 +75,18 @@ export function PropertyTabsWrapper({
     updateFeature
   } = useFeatures(formState, setFormState);
 
+  const {
+    handleImageUpload,
+    handleRemoveImage,
+    handleAreaPhotosUpload,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    handleUpdateFloorplan,
+    handleRemoveAreaPhoto,
+    handleSetFeaturedImage,
+    handleToggleGridImage
+  } = usePropertyImages(formState, setFormState);
+
   // Create a typed wrapper function for setFormState that matches the expected signature
   function setFormData(data: PropertyFormData) {
     console.log("Setting form data:", data);
@@ -124,14 +137,15 @@ export function PropertyTabsWrapper({
           onAreaImageUpload={handleAreaImageUpload}
           onAreaImageRemove={handleAreaImageRemove}
           onAreaImagesSelect={handleAreaImagesSelect}
-          handleImageUpload={(e) => console.log("Image upload", e)}
-          handleAreaPhotosUpload={(e) => console.log("Area photos upload", e)}
-          handleFloorplanUpload={(e) => console.log("Floorplan upload", e)}
-          handleRemoveImage={(index) => console.log("Remove image", index)}
-          handleRemoveAreaPhoto={(index) => console.log("Remove area photo", index)}
-          handleRemoveFloorplan={(index) => console.log("Remove floorplan", index)}
-          handleSetFeaturedImage={(url) => console.log("Set featured image", url)}
-          handleToggleGridImage={(url) => console.log("Toggle grid image", url)}
+          handleImageUpload={handleImageUpload}
+          handleAreaPhotosUpload={handleAreaPhotosUpload}
+          handleFloorplanUpload={handleFloorplanUpload}
+          handleRemoveImage={handleRemoveImage}
+          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+          handleRemoveFloorplan={handleRemoveFloorplan}
+          handleUpdateFloorplan={handleUpdateFloorplan}
+          handleSetFeaturedImage={handleSetFeaturedImage}
+          handleToggleGridImage={handleToggleGridImage}
           onAddTechnicalItem={addTechnicalItem}
           onRemoveTechnicalItem={removeTechnicalItem}
           onUpdateTechnicalItem={updateTechnicalItem}
@@ -154,17 +168,17 @@ export function PropertyTabsWrapper({
           floorplans={property.floorplans || []}
           virtualTourUrl={property.virtualTourUrl}
           youtubeUrl={property.youtubeUrl}
-          onUpload={() => console.log("Upload")}
-          onRemove={() => console.log("Remove")}
-          onFeaturedImageSelect={() => console.log("Select featured image")}
-          onGridImageToggle={() => console.log("Toggle grid image")}
-          onFloorplanUpload={() => console.log("Upload floorplan")}
-          onFloorplanRemove={() => console.log("Remove floorplan")}
-          onFloorplanUpdate={() => console.log("Update floorplan")}
-          onVirtualTourUpdate={() => console.log("Update virtual tour")}
-          onYoutubeUrlUpdate={() => console.log("Update YouTube URL")}
-          onImageUpload={() => console.log("Upload image")}
-          onRemoveImage={() => console.log("Remove image")}
+          onUpload={handleImageUpload}
+          onRemove={handleRemoveImage}
+          onFeaturedImageSelect={handleSetFeaturedImage}
+          onGridImageToggle={handleToggleGridImage}
+          onFloorplanUpload={handleFloorplanUpload}
+          onFloorplanRemove={handleRemoveFloorplan}
+          onFloorplanUpdate={handleUpdateFloorplan}
+          onVirtualTourUpdate={(url) => handleFieldChangeWrapper('virtualTourUrl', url)}
+          onYoutubeUrlUpdate={(url) => handleFieldChangeWrapper('youtubeUrl', url)}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
         />
       </TabsContent>
       

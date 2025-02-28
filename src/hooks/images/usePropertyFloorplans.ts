@@ -37,9 +37,12 @@ export function usePropertyFloorplans(
 
       const newFloorplans = await Promise.all(uploadPromises);
       
+      // Ensure floorplans is an array
+      const currentFloorplans = Array.isArray(formData.floorplans) ? formData.floorplans : [];
+      
       setFormData({
         ...formData,
-        floorplans: [...formData.floorplans, ...newFloorplans]
+        floorplans: [...currentFloorplans, ...newFloorplans]
       });
 
       toast({
@@ -57,13 +60,50 @@ export function usePropertyFloorplans(
   };
 
   const handleRemoveFloorplan = (index: number) => {
+    console.log("Removing floorplan at index:", index);
+    
+    if (!Array.isArray(formData.floorplans) || index < 0 || index >= formData.floorplans.length) {
+      console.error('Invalid floorplan index or floorplans array is not defined');
+      return;
+    }
+    
+    // Update any technical items that reference this floorplan
+    const updatedTechnicalItems = (formData.technicalItems || []).map(item => {
+      // If this technical item references the removed floorplan or any after it (by index)
+      if (item.floorplanId !== null) {
+        const floorplanIndex = parseInt(item.floorplanId);
+        if (floorplanIndex === index) {
+          // This technical item referenced the removed floorplan
+          return { ...item, floorplanId: null };
+        } else if (floorplanIndex > index) {
+          // This technical item referenced a floorplan after the removed one
+          // Decrement the index to maintain correct references
+          return { ...item, floorplanId: (floorplanIndex - 1).toString() };
+        }
+      }
+      return item;
+    });
+    
     setFormData({
       ...formData,
-      floorplans: formData.floorplans.filter((_, i) => i !== index)
+      floorplans: formData.floorplans.filter((_, i) => i !== index),
+      technicalItems: updatedTechnicalItems
+    });
+    
+    toast({
+      title: "Success", 
+      description: "Floorplan removed successfully"
     });
   };
 
   const handleUpdateFloorplan = (index: number, field: keyof PropertyFloorplan, value: any) => {
+    console.log(`Updating floorplan at index ${index}, field ${String(field)}, value:`, value);
+    
+    if (!Array.isArray(formData.floorplans) || index < 0 || index >= formData.floorplans.length) {
+      console.error('Invalid floorplan index or floorplans array is not defined');
+      return;
+    }
+    
     const updatedFloorplans = [...formData.floorplans];
     updatedFloorplans[index] = {
       ...updatedFloorplans[index],

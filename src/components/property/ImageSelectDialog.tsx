@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,6 +22,8 @@ export interface ImageSelectDialogProps {
   buttonIcon?: React.ReactNode;
   maxSelect?: number;
   id?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ImageSelectDialog({
@@ -32,11 +34,26 @@ export function ImageSelectDialog({
   buttonIcon,
   maxSelect,
   id,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
 }: ImageSelectDialogProps) {
   const [selected, setSelected] = useState<string[]>(selectedImageIds);
   const [open, setOpen] = useState(false);
+  
+  // Sync selected state when selectedImageIds prop changes
+  useEffect(() => {
+    setSelected(selectedImageIds);
+  }, [selectedImageIds]);
+  
+  // Sync internal open state with controlled open state
+  useEffect(() => {
+    if (controlledOpen !== undefined) {
+      setOpen(controlledOpen);
+    }
+  }, [controlledOpen]);
 
   const handleToggleSelect = (imageId: string) => {
+    console.log("Toggling selection for image:", imageId);
     if (selected.includes(imageId)) {
       setSelected(selected.filter((id) => id !== imageId));
     } else {
@@ -53,33 +70,47 @@ export function ImageSelectDialog({
   const handleConfirm = () => {
     console.log("Confirming selection:", selected);
     onSelect(selected);
-    setOpen(false);
+    handleOpenChange(false);
   };
 
   const handleCancel = () => {
     console.log("Cancelling selection");
-    setOpen(false);
+    handleOpenChange(false);
+    // Reset selection when cancelling
     setSelected(selectedImageIds);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
+    console.log("Dialog open state changing to:", newOpen);
     setOpen(newOpen);
+    
+    // Call controlled open change handler if provided
+    if (setControlledOpen) {
+      setControlledOpen(newOpen);
+    }
+    
+    // Reset selection when opening the dialog
     if (newOpen) {
-      // Reset selection when opening
       setSelected(selectedImageIds);
     }
   };
 
+  // Only render the trigger if we're not controlled
+  const trigger = controlledOpen === undefined ? (
+    <DialogTrigger asChild>
+      <DialogTriggerButton
+        buttonText={buttonText}
+        buttonIcon={buttonIcon}
+        id={id}
+        onClick={() => handleOpenChange(true)}
+      />
+    </DialogTrigger>
+  ) : null;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <DialogTriggerButton
-          buttonText={buttonText}
-          buttonIcon={buttonIcon}
-          id={id}
-          onClick={() => setOpen(true)}
-        />
-      </DialogTrigger>
+      {trigger}
+      
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Images from Library</DialogTitle>

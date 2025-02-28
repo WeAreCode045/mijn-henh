@@ -5,6 +5,7 @@ import type { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Trash, Edit } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState } from "react";
 
 interface FeaturedImageSectionProps {
   formData: PropertyFormData;
@@ -15,8 +16,19 @@ export function FeaturedImageSection({
   formData, 
   handleSetFeaturedImage 
 }: FeaturedImageSectionProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
   const handleRemoveFeaturedImage = () => {
+    console.log("Removing featured image");
     handleSetFeaturedImage(null);
+  };
+
+  const handleSelectImage = (imageIds: string[]) => {
+    console.log("Selected image IDs:", imageIds);
+    if (imageIds[0]) {
+      const selectedImage = formData.images.find(img => img.id === imageIds[0]);
+      handleSetFeaturedImage(selectedImage?.url || null);
+    }
   };
 
   return (
@@ -53,19 +65,13 @@ export function FeaturedImageSection({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ImageSelectDialog
-                    images={formData.images || []}
-                    selectedImageIds={formData.featuredImage ? [formData.images.find(img => img.url === formData.featuredImage)?.id || ''] : []}
-                    onSelect={(imageIds) => {
-                      if (imageIds[0]) {
-                        const selectedImage = formData.images.find(img => img.id === imageIds[0]);
-                        handleSetFeaturedImage(selectedImage?.url || null);
-                      }
-                    }}
-                    buttonText="Change"
-                    buttonIcon={<Edit className="h-4 w-4" />}
-                    maxSelect={1}
-                  />
+                  <Button
+                    variant="default"
+                    size="icon"
+                    onClick={() => setIsDialogOpen(true)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Change image</p>
@@ -81,20 +87,24 @@ export function FeaturedImageSection({
             <p className="text-sm">Select an image to feature as the main property image</p>
           </div>
           
-          <ImageSelectDialog
-            images={formData.images || []}
-            selectedImageIds={[]}
-            onSelect={(imageIds) => {
-              if (imageIds[0]) {
-                const selectedImage = formData.images.find(img => img.id === imageIds[0]);
-                handleSetFeaturedImage(selectedImage?.url || null);
-              }
-            }}
-            buttonText="Select Featured Image"
-            maxSelect={1}
-          />
+          <Button
+            variant="outline"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            Select Featured Image
+          </Button>
         </div>
       )}
+      
+      <ImageSelectDialog
+        images={formData.images || []}
+        selectedImageIds={formData.featuredImage ? [formData.images.find(img => img.url === formData.featuredImage)?.id || ''] : []}
+        onSelect={handleSelectImage}
+        buttonText="Select Featured Image"
+        maxSelect={1}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </div>
   );
 }
