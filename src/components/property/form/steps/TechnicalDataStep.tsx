@@ -71,9 +71,16 @@ export function TechnicalDataStep({
             const input = document.createElement("input");
             input.type = "file";
             input.accept = "image/*";
+            
+            // Fix: Use a proper type assertion to handle the event correctly
             input.onchange = (e) => {
               if (e && e.target) {
-                handleFileSelect(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                // Create a new synthetic React event to match the expected type
+                const syntheticEvent = {
+                  target: e.target as HTMLInputElement
+                } as React.ChangeEvent<HTMLInputElement>;
+                
+                handleFileSelect(syntheticEvent);
               }
             };
             input.click();

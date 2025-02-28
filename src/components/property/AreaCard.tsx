@@ -127,9 +127,15 @@ export function AreaCard({
                   input.type = "file";
                   input.multiple = true;
                   input.accept = "image/*";
+                  // Fix: Use a proper type assertion to handle the event correctly
                   input.onchange = (e) => {
                     if (e && e.target) {
-                      handleFileUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                      // Create a new synthetic React event to match the expected type
+                      const syntheticEvent = {
+                        target: e.target as HTMLInputElement
+                      } as React.ChangeEvent<HTMLInputElement>;
+                      
+                      handleFileUpload(syntheticEvent);
                     }
                   };
                   input.click();
