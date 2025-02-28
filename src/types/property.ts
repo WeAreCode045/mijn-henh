@@ -46,6 +46,8 @@ export interface PropertyPlaceType {
 export interface PropertyGridImage {
   id: string;
   url: string;
+  caption?: string;
+  sortOrder?: number;
 }
 
 // Agent interface for property

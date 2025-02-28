@@ -21,9 +21,12 @@ export function usePropertyFeaturedImage(
       ? currentGridImages.filter(img => img !== url)
       : [...currentGridImages, url];
     
+    // Limit to max 4 grid images
+    const limitedGridImages = newGridImages.slice(0, 4);
+    
     setFormData({
       ...formData,
-      gridImages: newGridImages
+      gridImages: limitedGridImages
     });
   };
 
