@@ -8,9 +8,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PropertyImage } from "@/types/property";
-import { Check, Plus, Edit } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { ImageGrid } from "./image-select/ImageGrid";
+import { DialogActions } from "./image-select/DialogActions";
+import { DialogTriggerButton } from "./image-select/DialogTriggerButton";
 
 export interface ImageSelectDialogProps {
   images: PropertyImage[];
@@ -19,7 +21,7 @@ export interface ImageSelectDialogProps {
   buttonText: string;
   buttonIcon?: React.ReactNode;
   maxSelect?: number;
-  id?: string; // Add the id property
+  id?: string;
 }
 
 export function ImageSelectDialog({
@@ -29,7 +31,7 @@ export function ImageSelectDialog({
   buttonText,
   buttonIcon,
   maxSelect,
-  id, // Add the id property to the destructured props
+  id,
 }: ImageSelectDialogProps) {
   const [selected, setSelected] = useState<string[]>(selectedImageIds);
   const [open, setOpen] = useState(false);
@@ -53,64 +55,35 @@ export function ImageSelectDialog({
     setOpen(false);
   };
 
+  const handleCancel = () => {
+    setOpen(false);
+    setSelected(selectedImageIds);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {buttonIcon ? (
-          <Button size="icon" variant="secondary" id={id}>
-            {buttonIcon}
-          </Button>
-        ) : (
-          <Card className="flex items-center justify-center w-full h-32 border-dashed cursor-pointer hover:bg-slate-50 transition-colors" id={id}>
-            <div className="flex flex-col items-center p-4">
-              <Plus className="h-8 w-8 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">{buttonText}</span>
-            </div>
-          </Card>
-        )}
+        <DialogTriggerButton
+          buttonText={buttonText}
+          buttonIcon={buttonIcon}
+          id={id}
+        />
       </DialogTrigger>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Images from Library</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-2">
-          {images.map((image) => (
-            <div
-              key={image.id}
-              className={`relative cursor-pointer rounded-md border-2 ${
-                selected.includes(image.id)
-                  ? "border-primary"
-                  : "border-transparent"
-              }`}
-              onClick={() => handleToggleSelect(image.id)}
-            >
-              <div className="aspect-[4/3] relative">
-                <img
-                  src={image.url}
-                  alt=""
-                  className="w-full h-full object-contain absolute inset-0"
-                />
-              </div>
-              {selected.includes(image.id) && (
-                <div className="absolute top-1 right-1 bg-primary text-primary-foreground p-1 rounded-full">
-                  <Check className="w-3 h-3" />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-end gap-2 mt-4">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOpen(false);
-              setSelected(selectedImageIds);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>Confirm</Button>
-        </div>
+        
+        <ImageGrid 
+          images={images} 
+          selected={selected} 
+          onToggleSelect={handleToggleSelect} 
+        />
+        
+        <DialogActions 
+          onCancel={handleCancel} 
+          onConfirm={handleConfirm} 
+        />
       </DialogContent>
     </Dialog>
   );
