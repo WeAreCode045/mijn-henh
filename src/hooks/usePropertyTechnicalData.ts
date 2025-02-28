@@ -13,7 +13,7 @@ export function usePropertyTechnicalData(
       title: "",
       size: "",
       description: "",
-      floorplanId: null,
+      floorplanId: "none", // Changed from null to "none"
       columns: 1 // Default to 1 column
     };
 

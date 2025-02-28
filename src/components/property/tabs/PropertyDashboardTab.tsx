@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,7 +85,6 @@ export function PropertyDashboardTab({
   const [templates, setTemplates] = useState<Template[]>([]);
 
   useEffect(() => {
-    // Fetch agents
     const fetchAgents = async () => {
       const { data, error } = await supabase
         .from('profiles')
@@ -98,7 +96,6 @@ export function PropertyDashboardTab({
       }
     };
     
-    // Fetch templates
     const fetchTemplates = async () => {
       const { data, error } = await supabase
         .from('brochure_templates')
@@ -113,7 +110,6 @@ export function PropertyDashboardTab({
     fetchTemplates();
   }, []);
 
-  // Fetch submissions when opening the dialog
   const handleOpenSubmissions = async () => {
     try {
       const { data, error } = await supabase
@@ -145,7 +141,6 @@ export function PropertyDashboardTab({
       
       if (error) throw error;
       
-      // Update local state
       setSubmissions(prev => 
         prev.map(sub => sub.id === submissionId ? {...sub, is_read: true} : sub)
       );
@@ -165,7 +160,6 @@ export function PropertyDashboardTab({
 
   const handleSaveNotes = async () => {
     try {
-      // TODO: Save notes to the database
       toast({
         description: "Notes saved successfully",
       });
@@ -311,7 +305,7 @@ export function PropertyDashboardTab({
                   <SelectValue placeholder="Select an agent" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {agents.map((agent) => (
                     <SelectItem key={agent.id} value={agent.id}>
                       {agent.full_name}
