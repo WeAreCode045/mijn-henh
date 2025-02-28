@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
-import { v4 as uuidv4 } from "@supabase/supabase-js/dist/module/lib/helpers";
+import { v4 as uuidv4 } from "uuid";
 
 export function usePropertyTechnicalData(
   formData: PropertyFormData,

@@ -6,7 +6,7 @@ import { PropertyDashboardTab } from "./tabs/PropertyDashboardTab";
 import { PropertyContentTab } from "./tabs/PropertyContentTab";
 import { PropertyMediaTab } from "./tabs/PropertyMediaTab";
 import { PropertySettingsTab } from "./tabs/PropertySettingsTab";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { Settings } from "@/types/settings";
 import { usePropertySettings } from "@/hooks/usePropertySettings";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
@@ -31,7 +31,7 @@ export function PropertyTabsWrapper({
   templateInfo
 }: PropertyTabsWrapperProps) {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [formState, setFormState] = useState(property);
+  const [formState, setFormState] = useState<PropertyFormData>(property);
   
   // Hooks for different functionalities
   const { isUpdating, handleSaveObjectId, handleSaveAgent, handleSaveTemplate } = usePropertySettings(
@@ -55,7 +55,12 @@ export function PropertyTabsWrapper({
     addTechnicalItem,
     removeTechnicalItem,
     updateTechnicalItem
-  } = usePropertyTechnicalData(formState, setFormState);
+  } = usePropertyTechnicalData(formState, setFormData);
+
+  // Create a typed wrapper function for setFormState that matches the expected signature
+  function setFormData(data: PropertyFormData) {
+    setFormState(data);
+  }
 
   return (
     <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
