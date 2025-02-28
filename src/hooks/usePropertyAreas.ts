@@ -61,7 +61,7 @@ export function usePropertyAreas(
   };
 
   // Remove an image from an area
-  const removeAreaImage = (areaId: string, imageId: string) => {
+  const handleAreaImageRemove = (areaId: string, imageId: string) => {
     console.log(`Removing image ${imageId} from area ${areaId}`);
     
     setFormData({
@@ -125,7 +125,7 @@ export function usePropertyAreas(
     removeArea,
     updateArea,
     handleAreaImageUpload,
-    removeAreaImage,
+    handleAreaImageRemove,
     handleAreaImagesSelect,
   };
 }

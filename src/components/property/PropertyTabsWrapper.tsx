@@ -60,17 +60,15 @@ export function PropertyTabsWrapper({
   } = usePropertyTechnicalData(formState, setFormState);
 
   const {
-    areas,
     addArea,
     removeArea,
     updateArea,
     handleAreaImageUpload,
-    handleAreaImageRemove,
+    handleAreaImageRemove, // Corrected from removeAreaImage to handleAreaImageRemove
     handleAreaImagesSelect
   } = usePropertyAreas(formState, setFormState);
 
   const {
-    features,
     addFeature,
     removeFeature,
     updateFeature
@@ -118,7 +116,7 @@ export function PropertyTabsWrapper({
           onRemoveArea={removeArea}
           onUpdateArea={updateArea}
           onAreaImageUpload={handleAreaImageUpload}
-          onAreaImageRemove={handleAreaImageRemove}
+          onAreaImageRemove={handleAreaImageRemove} // Corrected the property name
           onAreaImagesSelect={handleAreaImagesSelect}
           handleImageUpload={(e) => console.log("Image upload", e)}
           handleAreaPhotosUpload={(e) => console.log("Area photos upload", e)}
