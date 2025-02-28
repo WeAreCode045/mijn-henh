@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 import { steps } from "@/components/property/form/formSteps";
@@ -34,6 +34,9 @@ interface PropertyContentTabProps {
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (id: string) => void;
+  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   isUpdateMode: boolean;
 }
 
@@ -66,6 +69,9 @@ export function PropertyContentTab({
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
+  onUpdateTechnicalItem,
   isUpdateMode,
 }: PropertyContentTabProps) {
   // Initialize with provided step or default to 1
@@ -147,6 +153,9 @@ export function PropertyContentTab({
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
+        onAddTechnicalItem={onAddTechnicalItem}
+        onRemoveTechnicalItem={onRemoveTechnicalItem}
+        onUpdateTechnicalItem={onUpdateTechnicalItem}
       />
     </div>
   );

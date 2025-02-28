@@ -1,5 +1,5 @@
 
-import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan } from "@/types/property";
+import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan, PropertyTechnicalItem } from "@/types/property";
 import { steps } from "./formSteps";
 
 interface PropertyFormContentProps {
@@ -27,6 +27,9 @@ interface PropertyFormContentProps {
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (id: string) => void;
+  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
 }
 
 export function PropertyFormContent({
@@ -54,6 +57,9 @@ export function PropertyFormContent({
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
+  onUpdateTechnicalItem,
 }: PropertyFormContentProps) {
   
   // Find the step component that corresponds to the current step
@@ -81,15 +87,20 @@ export function PropertyFormContent({
   // Pass all props to the step component based on the type of step
   return (
     <div className="py-4 animate-fadeIn">
-      {step === 4 ? (
-        // FloorplansStep
+      {step === 3 ? (
+        // TechnicalDataStep
         <StepComponent
           floorplans={formData.floorplans || []}
+          technicalItems={formData.technicalItems || []}
+          images={formData.images || []}
           onFloorplanUpload={handleFloorplanUpload}
           onRemoveFloorplan={handleRemoveFloorplan}
           onUpdateFloorplan={handleUpdateFloorplan}
+          onAddTechnicalItem={onAddTechnicalItem}
+          onRemoveTechnicalItem={onRemoveTechnicalItem}
+          onUpdateTechnicalItem={onUpdateTechnicalItem}
         />
-      ) : step === 5 ? (
+      ) : step === 4 ? (
         // AreasStep
         <StepComponent
           areas={formData.areas || []}
@@ -109,7 +120,7 @@ export function PropertyFormContent({
           onRemoveFeature={onRemoveFeature}
           onUpdateFeature={onUpdateFeature}
         />
-      ) : step === 6 ? (
+      ) : step === 5 ? (
         // LocationStep
         <StepComponent
           address={formData.address || ""}

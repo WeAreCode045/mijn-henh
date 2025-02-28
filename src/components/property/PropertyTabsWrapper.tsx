@@ -11,6 +11,7 @@ import { Settings } from "@/types/settings";
 import { usePropertySettings } from "@/hooks/usePropertySettings";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
+import { usePropertyTechnicalData } from "@/hooks/usePropertyTechnicalData";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -30,6 +31,7 @@ export function PropertyTabsWrapper({
   templateInfo
 }: PropertyTabsWrapperProps) {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [formState, setFormState] = useState(property);
   
   // Hooks for different functionalities
   const { isUpdating, handleSaveObjectId, handleSaveAgent, handleSaveTemplate } = usePropertySettings(
@@ -47,6 +49,13 @@ export function PropertyTabsWrapper({
     onSubmit, 
     handleFieldChange 
   } = usePropertyContent();
+
+  const {
+    technicalItems,
+    addTechnicalItem,
+    removeTechnicalItem,
+    updateTechnicalItem
+  } = usePropertyTechnicalData(formState, setFormState);
 
   return (
     <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
@@ -70,7 +79,7 @@ export function PropertyTabsWrapper({
       
       <TabsContent value="content">
         <PropertyContentTab 
-          formData={property}
+          formData={formState}
           onFieldChange={handleFieldChange}
           onAddFeature={() => console.log("Add feature")}
           onRemoveFeature={(id) => console.log("Remove feature", id)}
@@ -89,6 +98,9 @@ export function PropertyTabsWrapper({
           handleRemoveFloorplan={(index) => console.log("Remove floorplan", index)}
           handleSetFeaturedImage={(url) => console.log("Set featured image", url)}
           handleToggleGridImage={(url) => console.log("Toggle grid image", url)}
+          onAddTechnicalItem={addTechnicalItem}
+          onRemoveTechnicalItem={removeTechnicalItem}
+          onUpdateTechnicalItem={updateTechnicalItem}
           isUpdateMode={true}
           currentStep={currentStep}
           handleStepClick={handleStepClick}

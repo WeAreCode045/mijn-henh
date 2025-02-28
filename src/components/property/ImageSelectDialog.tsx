@@ -8,8 +8,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PropertyImage } from "@/types/property";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { useState } from "react";
+import { Card } from "@/components/ui/card";
 
 export interface ImageSelectDialogProps {
   images: PropertyImage[];
@@ -53,16 +54,18 @@ export function ImageSelectDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center">
-          {buttonIcon}
-          {buttonText}
-        </Button>
+        <Card className="flex items-center justify-center w-full h-32 border-dashed cursor-pointer hover:bg-slate-50 transition-colors">
+          <div className="flex flex-col items-center p-4">
+            {buttonIcon || <Plus className="h-8 w-8 text-muted-foreground mb-2" />}
+            <span className="text-sm text-muted-foreground">{buttonText}</span>
+          </div>
+        </Card>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Images from Library</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
+        <div className="grid grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-2">
           {images.map((image) => (
             <div
               key={image.id}
@@ -76,7 +79,7 @@ export function ImageSelectDialog({
               <img
                 src={image.url}
                 alt=""
-                className="w-full h-24 object-cover"
+                className="w-full aspect-square object-cover"
               />
               {selected.includes(image.id) && (
                 <div className="absolute top-1 right-1 bg-primary text-primary-foreground p-1 rounded-full">

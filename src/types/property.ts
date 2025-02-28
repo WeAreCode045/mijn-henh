@@ -20,6 +20,14 @@ export interface PropertyArea {
   columns?: number; // Field for grid column count
 }
 
+export interface PropertyTechnicalItem {
+  id: string;
+  title: string;
+  size: string;
+  description: string;
+  floorplanId: string | null;
+}
+
 export interface PropertyFloorplan {
   url: string;
   columns?: number; // New field for grid column count
@@ -67,6 +75,7 @@ interface BasePropertyData {
   features: PropertyFeature[];
   images: PropertyImage[];
   floorplans: PropertyFloorplan[]; // Updated to structured objects
+  technicalItems?: PropertyTechnicalItem[]; // New field for technical items
   featuredImage: string | null;
   gridImages: string[];
   areas: PropertyArea[];
@@ -115,6 +124,7 @@ export interface PropertySubmitData {
   description: string;
   location_description?: string;
   floorplans: Json; // Updated to Json for structured floorplans
+  technicalItems?: Json; // New field for technical items
   featuredImage: string | null;
   gridImages: string[];
   areaPhotos?: string[];
@@ -149,6 +159,7 @@ export interface PropertyDatabaseData {
   description?: string;
   location_description?: string;
   floorplans?: Json; // Updated to Json for structured floorplans
+  technicalItems?: Json; // New field for technical items
   featuredImage?: string | null;
   gridImages?: string[];
   areaPhotos?: string[];

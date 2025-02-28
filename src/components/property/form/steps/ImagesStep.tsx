@@ -57,7 +57,7 @@ export function ImagesStep({
       {Array.isArray(images) && images.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Uploaded Images</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {images.map((image, index) => (
               <div key={image.id || index} className="relative group border rounded-md overflow-hidden">
                 <img
