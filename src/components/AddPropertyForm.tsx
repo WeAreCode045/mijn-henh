@@ -37,7 +37,7 @@ export function AddPropertyForm() {
     addArea,
     removeArea,
     updateArea,
-    removeAreaImage,
+    handleAreaImageRemove,
     handleAreaImagesSelect
   } = usePropertyAreas(formData, setFormData);
 
@@ -107,7 +107,7 @@ export function AddPropertyForm() {
           onRemoveArea={removeArea}
           onUpdateArea={updateArea}
           onAreaImageUpload={handleAreaImageUpload}
-          onAreaImageRemove={removeAreaImage}
+          onAreaImageRemove={handleAreaImageRemove}
           onAreaImagesSelect={handleAreaImagesSelect}
           handleImageUpload={handleImageUpload}
           handleAreaPhotosUpload={handleAreaPhotosUpload}
