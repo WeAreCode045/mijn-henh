@@ -38,7 +38,7 @@ export const PropertyCardActions = ({
       <Button 
         variant="outline" 
         size="icon"
-        onClick={() => navigate(`/property/${property.id}/webview`)}
+        onClick={() => navigate(`/property/${property.id}`)}
         title="Open Preview"
       >
         <ArrowUpRight className="h-4 w-4" />

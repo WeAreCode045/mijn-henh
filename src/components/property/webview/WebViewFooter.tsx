@@ -27,6 +27,7 @@ export function WebViewFooter({
           size="icon"
           onClick={() => onShare('copy')}
           className="hover:bg-estate-100"
+          title="Share link"
         >
           <Share2 className="w-4 h-4" />
         </Button>
@@ -35,6 +36,7 @@ export function WebViewFooter({
           size="icon"
           onClick={onPrint}
           className="hover:bg-estate-100"
+          title="Print brochure"
         >
           <Printer className="w-4 h-4" />
         </Button>
@@ -47,6 +49,7 @@ export function WebViewFooter({
           onClick={onPrevious}
           disabled={currentPage === 0}
           className="hover:bg-estate-100"
+          title="Previous page"
         >
           <MoveLeft className="w-4 h-4" />
         </Button>
@@ -59,6 +62,7 @@ export function WebViewFooter({
           onClick={onNext}
           disabled={currentPage === totalPages - 1}
           className="hover:bg-estate-100"
+          title="Next page"
         >
           <MoveRight className="w-4 h-4" />
         </Button>

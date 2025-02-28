@@ -65,7 +65,7 @@ const App = () => (
                 </Suspense>
               } />
               
-              {/* Public web view route */}
+              {/* Public web view routes - put these first for priority */}
               <Route
                 path="/property/:id/webview"
                 element={
@@ -75,7 +75,6 @@ const App = () => (
                 }
               />
               
-              {/* Direct property route */}
               <Route
                 path="/property/:id"
                 element={
@@ -85,28 +84,126 @@ const App = () => (
                 }
               />
               
+              {/* Protected admin routes */}
               <Route
-                path="*"
+                path="/"
                 element={
                   <ProtectedRoute>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
                       <main className="flex-1 p-4">
                         <Suspense fallback={<LoadingSpinner />}>
-                          <Routes>
-                            <Route path="/" element={<Index />} />
-                            <Route path="/properties" element={<Properties />} />
-                            <Route path="/property/new" element={<PropertyFormPage />} />
-                            <Route path="/property/:id/edit" element={<PropertyFormPage />} />
-                            <Route path="/settings" element={<Settings />} />
-                            <Route path="/users" element={<Users />} />
-                            <Route path="/templates" element={<Templates />} />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
+                          <Index />
                         </Suspense>
                       </main>
                     </div>
                   </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/properties"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 p-4">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <Properties />
+                        </Suspense>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/property/new"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 p-4">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <PropertyFormPage />
+                        </Suspense>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/property/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 p-4">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <PropertyFormPage />
+                        </Suspense>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 p-4">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <Settings />
+                        </Suspense>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 p-4">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <Users />
+                        </Suspense>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/templates"
+                element={
+                  <ProtectedRoute>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 p-4">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <Templates />
+                        </Suspense>
+                      </main>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* 404 route */}
+              <Route
+                path="*"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <NotFound />
+                  </Suspense>
                 }
               />
             </Routes>

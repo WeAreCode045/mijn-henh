@@ -68,11 +68,11 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
             {error || "We couldn't find the property you're looking for. It may have been removed or the URL is incorrect."}
           </p>
           <div className="flex space-x-4 justify-center">
-            <Button onClick={() => navigate('/')} variant="default">
-              Go Home
-            </Button>
-            <Button onClick={() => navigate('/properties')} variant="outline">
+            <Button onClick={() => navigate('/properties')} variant="default">
               View All Properties
+            </Button>
+            <Button onClick={() => navigate('/')} variant="outline">
+              Go Home
             </Button>
           </div>
         </div>
@@ -109,7 +109,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
         <div className="container mx-auto px-4">
           <PropertyBreadcrumb 
             title={propertyData.title}
-            onBack={() => navigate('/')}
+            onBack={() => navigate('/properties')}
           />
         </div>
       </div>
