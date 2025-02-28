@@ -83,8 +83,8 @@ export function PropertyFormContainer() {
   const deleteProperty = async () => {
     if (!id || !formData) return;
     
-    // Here we could implement the actual delete logic
     try {
+      // Here we could implement the actual delete logic
       // Navigate back to properties list after deletion
       navigate('/properties');
       toast({
