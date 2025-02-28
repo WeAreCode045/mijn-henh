@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PropertyImage } from "@/types/property";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, Edit } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 

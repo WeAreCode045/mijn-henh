@@ -26,30 +26,6 @@ export function ImageSelections({
     onFieldChange('gridImages', updatedGridImages);
   };
 
-  const selectGridImage = () => {
-    // Determine which grid images are already selected
-    const currentGridImageIds = (formData.gridImages || []).map(url => 
-      formData.images.find(img => img.url === url)?.id || ''
-    ).filter(id => id !== '');
-
-    return (
-      <ImageSelectDialog
-        images={formData.images || []}
-        selectedImageIds={currentGridImageIds}
-        onSelect={(imageIds) => {
-          // Limit to 4 grid images
-          const selectedImages = imageIds.slice(0, 4).map(id => {
-            const image = formData.images.find(img => img.id === id);
-            return image?.url;
-          }).filter(Boolean) as string[];
-          onFieldChange('gridImages', selectedImages);
-        }}
-        buttonText="Select Grid Images"
-        maxSelect={4}
-      />
-    );
-  };
-
   // Prepare an array of 4 items for grid display (fill with nulls if needed)
   const gridItems = [...(formData.gridImages || [])];
   while (gridItems.length < 4) {
@@ -184,7 +160,22 @@ export function ImageSelections({
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            {selectGridImage()}
+                            <ImageSelectDialog
+                              images={formData.images || []}
+                              selectedImageIds={(formData.gridImages || []).map(url => 
+                                formData.images.find(img => img.url === url)?.id || ''
+                              ).filter(id => id !== '')}
+                              onSelect={(imageIds) => {
+                                const selectedImages = imageIds.slice(0, 4).map(id => {
+                                  const image = formData.images.find(img => img.id === id);
+                                  return image?.url;
+                                }).filter(Boolean) as string[];
+                                onFieldChange('gridImages', selectedImages);
+                              }}
+                              buttonText=""
+                              buttonIcon={<Edit className="h-4 w-4" />}
+                              maxSelect={4}
+                            />
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Change image</p>
@@ -203,22 +194,55 @@ export function ImageSelections({
                     <button 
                       className="absolute inset-0 w-full h-full opacity-0"
                       onClick={() => {
-                        const dialog = document.querySelector('[data-dialog-id="select-grid-images"]') as HTMLElement;
-                        if (dialog) {
-                          dialog.click();
+                        if (!isGridFull) {
+                          // Open the image selection dialog for this empty slot
+                          document.getElementById(`grid-select-button-${index}`)?.click();
                         }
                       }}
                     />
+                    <div className="hidden">
+                      <ImageSelectDialog
+                        id={`grid-select-button-${index}`}
+                        images={formData.images || []}
+                        selectedImageIds={(formData.gridImages || []).map(url => 
+                          formData.images.find(img => img.url === url)?.id || ''
+                        ).filter(id => id !== '')}
+                        onSelect={(imageIds) => {
+                          const selectedImages = imageIds.slice(0, 4).map(id => {
+                            const image = formData.images.find(img => img.id === id);
+                            return image?.url;
+                          }).filter(Boolean) as string[];
+                          onFieldChange('gridImages', selectedImages);
+                        }}
+                        buttonText=""
+                        buttonIcon={<Plus className="h-4 w-4" />}
+                        maxSelect={4}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
           
-          {/* Show the "Select Grid Images" button only if there are fewer than 4 images */}
+          {/* Show a select button below the grid only if not full */}
           {!isGridFull && (
-            <div className="mt-2">
-              {selectGridImage()}
+            <div className="mt-2 flex justify-center">
+              <ImageSelectDialog
+                images={formData.images || []}
+                selectedImageIds={(formData.gridImages || []).map(url => 
+                  formData.images.find(img => img.url === url)?.id || ''
+                ).filter(id => id !== '')}
+                onSelect={(imageIds) => {
+                  const selectedImages = imageIds.slice(0, 4).map(id => {
+                    const image = formData.images.find(img => img.id === id);
+                    return image?.url;
+                  }).filter(Boolean) as string[];
+                  onFieldChange('gridImages', selectedImages);
+                }}
+                buttonText="Select Grid Images"
+                maxSelect={4}
+              />
             </div>
           )}
         </div>
