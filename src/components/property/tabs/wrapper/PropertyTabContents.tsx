@@ -3,7 +3,6 @@ import { TabsContent } from "@/components/ui/tabs";
 import { DashboardTabContent } from "./DashboardTabContent";
 import { ContentTabContent } from "./ContentTabContent";
 import { MediaTabContent } from "./MediaTabContent";
-import { SettingsTabContent } from "./SettingsTabContent";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 
 interface PropertyTabContentsProps {
@@ -126,6 +125,10 @@ export function PropertyTabContents({
           onDelete={onDelete}
           onGeneratePDF={handleGeneratePDF}
           onWebView={handleWebView}
+          onSaveAgent={handleSaveAgent}
+          onSaveObjectId={handleSaveObjectId}
+          onSaveTemplate={handleSaveTemplate}
+          isUpdating={isUpdating}
         />
       </TabsContent>
       
@@ -180,20 +183,6 @@ export function PropertyTabContents({
           onImageUpload={handleImageUpload}
           onRemoveImage={handleRemoveImage}
           isUploading={isUploading}
-        />
-      </TabsContent>
-      
-      <TabsContent value="settings">
-        <SettingsTabContent
-          propertyId={property.id}
-          objectId={property.object_id}
-          agentId={property.agent_id}
-          templateId={templateInfo?.id}
-          onSaveObjectId={handleSaveObjectId}
-          onSaveAgent={handleSaveAgent}
-          onSaveTemplate={handleSaveTemplate}
-          onDelete={onDelete}
-          isUpdating={isUpdating}
         />
       </TabsContent>
     </>

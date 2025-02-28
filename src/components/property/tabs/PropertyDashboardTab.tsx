@@ -1,14 +1,17 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { FileDown, Globe, Share2, Save, Trash2, Mailbox } from "lucide-react";
+import { FileDown, Globe, Share2, Save, Trash2, Mailbox, User, Tag, FileText } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Code } from "@/components/ui/code";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Submission {
   id: string;
@@ -19,6 +22,16 @@ interface Submission {
   message: string;
   created_at: string;
   is_read: boolean;
+}
+
+interface Agent {
+  id: string;
+  full_name: string;
+}
+
+interface Template {
+  id: string;
+  name: string;
 }
 
 interface PropertyDashboardTabProps {
@@ -35,6 +48,10 @@ interface PropertyDashboardTabProps {
   onDelete: () => void;
   onGeneratePDF: () => void;
   onWebView: () => void;
+  onSaveAgent: (agentId: string) => void;
+  onSaveObjectId: (objectId: string) => void;
+  onSaveTemplate: (templateId: string) => void;
+  isUpdating: boolean;
 }
 
 export function PropertyDashboardTab({
@@ -51,12 +68,50 @@ export function PropertyDashboardTab({
   onDelete,
   onGeneratePDF,
   onWebView,
+  onSaveAgent,
+  onSaveObjectId,
+  onSaveTemplate,
+  isUpdating
 }: PropertyDashboardTabProps) {
   const [notes, setNotes] = useState<string>("");
   const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const { toast } = useToast();
   const apiEndpoint = `${window.location.origin}/api/properties/${id}`;
+  
+  const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
+  const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
+  const [currentTemplateId, setCurrentTemplateId] = useState(templateId || "default");
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+
+  useEffect(() => {
+    // Fetch agents
+    const fetchAgents = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'agent');
+      
+      if (!error && data) {
+        setAgents(data);
+      }
+    };
+    
+    // Fetch templates
+    const fetchTemplates = async () => {
+      const { data, error } = await supabase
+        .from('brochure_templates')
+        .select('id, name');
+      
+      if (!error && data) {
+        setTemplates(data);
+      }
+    };
+    
+    fetchAgents();
+    fetchTemplates();
+  }, []);
 
   // Fetch submissions when opening the dialog
   const handleOpenSubmissions = async () => {
@@ -123,6 +178,18 @@ export function PropertyDashboardTab({
     }
   };
 
+  const handleSaveAgent = () => {
+    onSaveAgent(currentAgentId);
+  };
+
+  const handleSaveObjectId = () => {
+    onSaveObjectId(currentObjectId);
+  };
+  
+  const handleSaveTemplate = () => {
+    onSaveTemplate(currentTemplateId);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -177,29 +244,25 @@ export function PropertyDashboardTab({
               <p className="text-sm font-mono">{id}</p>
             </div>
             
-            <div>
-              <span className="text-sm font-medium">Object ID:</span>
-              <p className="text-sm font-mono">{objectId || 'Not set'}</p>
+            <div className="space-y-2">
+              <Label htmlFor="object-id">Object ID</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="object-id"
+                  value={currentObjectId}
+                  onChange={(e) => setCurrentObjectId(e.target.value)}
+                  placeholder="Enter object ID"
+                />
+                <Button onClick={handleSaveObjectId} disabled={isUpdating} size="sm">
+                  {isUpdating ? "Saving..." : "Save"}
+                </Button>
+              </div>
             </div>
             
             <div>
               <span className="text-sm font-medium">API Endpoint:</span>
               <Code className="text-xs mt-1">{apiEndpoint}</Code>
             </div>
-            
-            {agentName && (
-              <div>
-                <span className="text-sm font-medium">Assigned Agent:</span>
-                <p className="text-sm">{agentName}</p>
-              </div>
-            )}
-            
-            {templateName && (
-              <div>
-                <span className="text-sm font-medium">Brochure Template:</span>
-                <p className="text-sm">{templateName}</p>
-              </div>
-            )}
             
             {createdAt && (
               <div>
@@ -225,6 +288,78 @@ export function PropertyDashboardTab({
             <div className="text-sm text-gray-500 italic">
               No recent activity to display.
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Assigned Agent
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="agent-select">Select Agent</Label>
+              <Select 
+                value={currentAgentId} 
+                onValueChange={setCurrentAgentId}
+              >
+                <SelectTrigger id="agent-select">
+                  <SelectValue placeholder="Select an agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {agents.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {agent.full_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button onClick={handleSaveAgent} disabled={isUpdating}>
+              <Save className="h-4 w-4 mr-2" />
+              {isUpdating ? "Saving..." : "Assign Agent"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Brochure Template
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="template-select">Select Template</Label>
+              <Select 
+                value={currentTemplateId} 
+                onValueChange={setCurrentTemplateId}
+              >
+                <SelectTrigger id="template-select">
+                  <SelectValue placeholder="Select a template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default Template</SelectItem>
+                  {templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button onClick={handleSaveTemplate} disabled={isUpdating}>
+              <Save className="h-4 w-4 mr-2" />
+              {isUpdating ? "Saving..." : "Set Template"}
+            </Button>
           </CardContent>
         </Card>
       </div>

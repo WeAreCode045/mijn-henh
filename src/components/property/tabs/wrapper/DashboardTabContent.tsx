@@ -15,6 +15,10 @@ interface DashboardTabContentProps {
   onDelete: () => Promise<void>;
   onGeneratePDF: () => void;
   onWebView: () => void;
+  onSaveAgent: (agentId: string) => void;
+  onSaveObjectId: (objectId: string) => void;
+  onSaveTemplate: (templateId: string) => void;
+  isUpdating: boolean;
 }
 
 export function DashboardTabContent({
@@ -31,6 +35,10 @@ export function DashboardTabContent({
   onDelete,
   onGeneratePDF,
   onWebView,
+  onSaveAgent,
+  onSaveObjectId,
+  onSaveTemplate,
+  isUpdating,
 }: DashboardTabContentProps) {
   return (
     <PropertyDashboardTab 
@@ -47,6 +55,10 @@ export function DashboardTabContent({
       onDelete={onDelete}
       onGeneratePDF={onGeneratePDF}
       onWebView={onWebView}
+      onSaveAgent={onSaveAgent}
+      onSaveObjectId={onSaveObjectId}
+      onSaveTemplate={onSaveTemplate}
+      isUpdating={isUpdating}
     />
   );
 }
