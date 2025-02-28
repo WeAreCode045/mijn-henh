@@ -18,7 +18,8 @@ export function FeaturedImageSection({
 }: FeaturedImageSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const handleRemoveFeaturedImage = () => {
+  const handleRemoveFeaturedImage = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
     console.log("Removing featured image");
     handleSetFeaturedImage(null);
   };
@@ -52,6 +53,7 @@ export function FeaturedImageSection({
                     variant="destructive" 
                     size="icon" 
                     onClick={handleRemoveFeaturedImage}
+                    type="button"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -68,7 +70,11 @@ export function FeaturedImageSection({
                   <Button
                     variant="default"
                     size="icon"
-                    onClick={() => setIsDialogOpen(true)}
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent default form submission
+                      setIsDialogOpen(true);
+                    }}
+                    type="button"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -89,7 +95,11 @@ export function FeaturedImageSection({
           
           <Button
             variant="outline"
-            onClick={() => setIsDialogOpen(true)}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default form submission
+              setIsDialogOpen(true);
+            }}
+            type="button"
           >
             Select Featured Image
           </Button>

@@ -18,7 +18,8 @@ export function GridImagesSection({
 }: GridImagesSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const handleRemoveGridImage = (indexToRemove: number) => {
+  const handleRemoveGridImage = (indexToRemove: number, e?: React.MouseEvent) => {
+    if (e) e.preventDefault(); // Prevent default form submission
     console.log("Removing grid image at index:", indexToRemove);
     const updatedGridImages = formData.gridImages.filter((_, index) => index !== indexToRemove);
     onFieldChange('gridImages', updatedGridImages);
@@ -53,8 +54,11 @@ export function GridImagesSection({
             key={index}
             imageUrl={imageUrl}
             index={index}
-            onRemove={() => handleRemoveGridImage(index)}
-            onOpenDialog={() => setIsDialogOpen(true)}
+            onRemove={(e) => handleRemoveGridImage(index, e)}
+            onOpenDialog={(e) => {
+              if (e) e.preventDefault();
+              setIsDialogOpen(true);
+            }}
           />
         ))}
       </div>
@@ -63,7 +67,11 @@ export function GridImagesSection({
       <div className="mt-2 flex justify-center">
         <Button 
           variant="outline" 
-          onClick={() => setIsDialogOpen(true)}
+          onClick={(e) => {
+            e.preventDefault(); // Prevent default form submission
+            setIsDialogOpen(true);
+          }}
+          type="button"
           disabled={isGridFull && !formData.gridImages.some(img => img !== null)}
         >
           {isGridFull ? "Modify Grid Images" : "Select Grid Images"}
@@ -88,8 +96,8 @@ export function GridImagesSection({
 interface GridImageItemProps {
   imageUrl: string | null;
   index: number;
-  onRemove: () => void;
-  onOpenDialog: () => void;
+  onRemove: (e?: React.MouseEvent) => void;
+  onOpenDialog: (e?: React.MouseEvent) => void;
 }
 
 function GridImageItem({
@@ -121,6 +129,7 @@ function GridImageItem({
                     variant="destructive" 
                     size="icon" 
                     onClick={onRemove}
+                    type="button"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -138,6 +147,7 @@ function GridImageItem({
                     variant="default"
                     size="icon"
                     onClick={onOpenDialog}
+                    type="button"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -151,7 +161,10 @@ function GridImageItem({
         </>
       ) : (
         // Empty grid cell
-        <div className="w-full h-full flex flex-col justify-center items-center p-2 cursor-pointer" onClick={onOpenDialog}>
+        <div className="w-full h-full flex flex-col justify-center items-center p-2 cursor-pointer" onClick={(e) => {
+          e.preventDefault();
+          onOpenDialog(e);
+        }}>
           <Plus className="h-8 w-8 text-gray-400 mb-2" />
           <span className="text-xs text-gray-500 text-center">Add Grid Image</span>
         </div>

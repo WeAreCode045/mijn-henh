@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Image, Upload } from "lucide-react";
@@ -19,7 +19,7 @@ export function PropertyImagesCard({
   onRemoveImage,
   isUploading = false
 }: PropertyImagesCardProps) {
-  const fileInputRef = useState<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   
   // Create a file input ref to handle file selection
   const handleUploadClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -28,18 +28,6 @@ export function PropertyImagesCard({
     
     if (fileInputRef.current) {
       fileInputRef.current.click();
-    } else {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.multiple = true;
-      input.accept = "image/*";
-      input.onchange = (e) => {
-        // Type assertion to safely convert Event to React.ChangeEvent<HTMLInputElement>
-        if (e && e.target) {
-          onImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-        }
-      };
-      input.click();
     }
   };
 
@@ -71,7 +59,10 @@ export function PropertyImagesCard({
                     />
                     <button
                       type="button"
-                      onClick={() => onRemoveImage(index)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onRemoveImage(index);
+                      }}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -91,7 +82,7 @@ export function PropertyImagesCard({
           <div>
             <input 
               type="file"
-              ref={node => fileInputRef.current = node}
+              ref={fileInputRef}
               style={{ display: 'none' }}
               multiple
               accept="image/*"
