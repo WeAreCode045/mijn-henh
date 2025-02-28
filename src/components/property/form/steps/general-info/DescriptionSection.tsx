@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { PropertyFormData } from "@/types/property";
@@ -20,6 +20,7 @@ export function DescriptionSection({ formData, onFieldChange }: DescriptionSecti
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
+    console.log("Description changed:", value);
     onFieldChange('description', value);
     setCharCount(value?.length || 0);
   };

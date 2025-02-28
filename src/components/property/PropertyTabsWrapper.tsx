@@ -12,6 +12,8 @@ import { usePropertySettings } from "@/hooks/usePropertySettings";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { usePropertyTechnicalData } from "@/hooks/usePropertyTechnicalData";
+import { usePropertyAreas } from "@/hooks/usePropertyAreas";
+import { useFeatures } from "@/hooks/useFeatures";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -55,12 +57,35 @@ export function PropertyTabsWrapper({
     addTechnicalItem,
     removeTechnicalItem,
     updateTechnicalItem
-  } = usePropertyTechnicalData(formState, setFormData);
+  } = usePropertyTechnicalData(formState, setFormState);
+
+  const {
+    areas,
+    addArea,
+    removeArea,
+    updateArea,
+    handleAreaImageUpload,
+    handleAreaImageRemove,
+    handleAreaImagesSelect
+  } = usePropertyAreas(formState, setFormState);
+
+  const {
+    features,
+    addFeature,
+    removeFeature,
+    updateFeature
+  } = useFeatures(formState, setFormState);
 
   // Create a typed wrapper function for setFormState that matches the expected signature
   function setFormData(data: PropertyFormData) {
+    console.log("Setting form data:", data);
     setFormState(data);
   }
+
+  const handleFieldChangeWrapper = (field: keyof PropertyFormData, value: any) => {
+    console.log(`Field changed: ${String(field)} = `, value);
+    handleFieldChange(formState, setFormState, field, value);
+  };
 
   return (
     <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
@@ -85,19 +110,19 @@ export function PropertyTabsWrapper({
       <TabsContent value="content">
         <PropertyContentTab 
           formData={formState}
-          onFieldChange={handleFieldChange}
-          onAddFeature={() => console.log("Add feature")}
-          onRemoveFeature={(id) => console.log("Remove feature", id)}
-          onUpdateFeature={(id, desc) => console.log("Update feature", id, desc)}
-          onAddArea={() => console.log("Add area")}
-          onRemoveArea={(id) => console.log("Remove area", id)}
-          onUpdateArea={(id, field, value) => console.log("Update area", id, field, value)}
-          onAreaImageUpload={(id, files) => console.log("Upload area image", id, files)}
-          onAreaImageRemove={(areaId, imageId) => console.log("Remove area image", areaId, imageId)}
-          onAreaImagesSelect={(areaId, imageIds) => console.log("Select area images", areaId, imageIds)}
-          handleImageUpload={() => console.log("Upload image")}
-          handleAreaPhotosUpload={() => console.log("Upload area photos")}
-          handleFloorplanUpload={() => console.log("Upload floorplan")}
+          onFieldChange={handleFieldChangeWrapper}
+          onAddFeature={addFeature}
+          onRemoveFeature={removeFeature}
+          onUpdateFeature={updateFeature}
+          onAddArea={addArea}
+          onRemoveArea={removeArea}
+          onUpdateArea={updateArea}
+          onAreaImageUpload={handleAreaImageUpload}
+          onAreaImageRemove={handleAreaImageRemove}
+          onAreaImagesSelect={handleAreaImagesSelect}
+          handleImageUpload={(e) => console.log("Image upload", e)}
+          handleAreaPhotosUpload={(e) => console.log("Area photos upload", e)}
+          handleFloorplanUpload={(e) => console.log("Floorplan upload", e)}
           handleRemoveImage={(index) => console.log("Remove image", index)}
           handleRemoveAreaPhoto={(index) => console.log("Remove area photo", index)}
           handleRemoveFloorplan={(index) => console.log("Remove floorplan", index)}

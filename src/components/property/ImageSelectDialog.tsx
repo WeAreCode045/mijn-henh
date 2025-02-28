@@ -1,4 +1,5 @@
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PropertyImage } from "@/types/property";
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ImageGrid } from "./image-select/ImageGrid";
 import { DialogActions } from "./image-select/DialogActions";
@@ -51,22 +51,33 @@ export function ImageSelectDialog({
   };
 
   const handleConfirm = () => {
+    console.log("Confirming selection:", selected);
     onSelect(selected);
     setOpen(false);
   };
 
   const handleCancel = () => {
+    console.log("Cancelling selection");
     setOpen(false);
     setSelected(selectedImageIds);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (newOpen) {
+      // Reset selection when opening
+      setSelected(selectedImageIds);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <DialogTriggerButton
           buttonText={buttonText}
           buttonIcon={buttonIcon}
           id={id}
+          onClick={() => setOpen(true)}
         />
       </DialogTrigger>
       <DialogContent className="max-w-4xl">

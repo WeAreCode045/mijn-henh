@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { PropertyFormData } from "@/types/property";
@@ -9,6 +10,11 @@ interface PropertySpecsProps {
 }
 
 export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
+  const handleChange = (field: keyof PropertyFormData, value: string) => {
+    console.log(`PropertySpecs - ${field} changed to:`, value);
+    onFieldChange(field, value);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -17,7 +23,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           id="bedrooms"
           type="number"
           value={formData.bedrooms || ''}
-          onChange={(e) => onFieldChange('bedrooms', e.target.value)}
+          onChange={(e) => handleChange('bedrooms', e.target.value)}
           placeholder="Number of bedrooms"
         />
       </div>
@@ -27,7 +33,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           id="bathrooms"
           type="number"
           value={formData.bathrooms || ''}
-          onChange={(e) => onFieldChange('bathrooms', e.target.value)}
+          onChange={(e) => handleChange('bathrooms', e.target.value)}
           placeholder="Number of bathrooms"
         />
       </div>
@@ -37,7 +43,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           id="sqft"
           type="text"
           value={formData.sqft || ''}
-          onChange={(e) => onFieldChange('sqft', e.target.value)}
+          onChange={(e) => handleChange('sqft', e.target.value)}
           placeholder="Lot size in square feet"
         />
       </div>
@@ -47,7 +53,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           id="livingArea"
           type="text"
           value={formData.livingArea || ''}
-          onChange={(e) => onFieldChange('livingArea', e.target.value)}
+          onChange={(e) => handleChange('livingArea', e.target.value)}
           placeholder="Living area in square feet"
         />
       </div>
@@ -57,7 +63,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           id="buildYear"
           type="text"
           value={formData.buildYear || ''}
-          onChange={(e) => onFieldChange('buildYear', e.target.value)}
+          onChange={(e) => handleChange('buildYear', e.target.value)}
           placeholder="Year built"
         />
       </div>
@@ -67,7 +73,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           id="energyLabel"
           type="text"
           value={formData.energyLabel || ''}
-          onChange={(e) => onFieldChange('energyLabel', e.target.value)}
+          onChange={(e) => handleChange('energyLabel', e.target.value)}
           placeholder="Energy label"
         />
       </div>

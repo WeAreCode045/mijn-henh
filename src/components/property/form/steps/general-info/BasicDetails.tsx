@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { PropertyFormData } from "@/types/property";
@@ -9,6 +10,11 @@ interface BasicDetailsProps {
 }
 
 export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
+  const handleChange = (field: keyof PropertyFormData, value: string) => {
+    console.log(`BasicDetails - ${field} changed to:`, value);
+    onFieldChange(field, value);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -17,10 +23,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
           id="title"
           type="text"
           value={formData.title || ''}
-          onChange={(e) => {
-            console.log("Title changed to:", e.target.value);
-            onFieldChange('title', e.target.value);
-          }}
+          onChange={(e) => handleChange('title', e.target.value)}
           placeholder="Title"
         />
       </div>
@@ -30,10 +33,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
           id="price"
           type="text"
           value={formData.price || ''}
-          onChange={(e) => {
-            console.log("Price changed to:", e.target.value);
-            onFieldChange('price', e.target.value);
-          }}
+          onChange={(e) => handleChange('price', e.target.value)}
           placeholder="Price"
         />
       </div>
@@ -43,7 +43,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
           id="address"
           type="text"
           value={formData.address || ''}
-          onChange={(e) => onFieldChange('address', e.target.value)}
+          onChange={(e) => handleChange('address', e.target.value)}
           placeholder="Address"
         />
       </div>
@@ -53,7 +53,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
           id="object_id"
           type="text"
           value={formData.object_id || ''}
-          onChange={(e) => onFieldChange('object_id', e.target.value)}
+          onChange={(e) => handleChange('object_id', e.target.value)}
           placeholder="Object ID"
         />
       </div>
