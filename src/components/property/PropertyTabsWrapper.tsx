@@ -123,7 +123,7 @@ export function PropertyTabsWrapper({
   const propertyWithRequiredId: PropertyData = {
     ...formState,
     id: property.id // Ensure id is always present
-  } as PropertyData;
+  };
 
   return (
     <div className="space-y-6">
