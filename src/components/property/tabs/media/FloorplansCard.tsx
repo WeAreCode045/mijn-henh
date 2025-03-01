@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +23,12 @@ export function FloorplansCard({
   onUpdateFloorplanEmbedScript,
 }: FloorplansCardProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [localFloorplans, setLocalFloorplans] = useState<(PropertyFloorplan | string)[]>([]);
+  
+  useEffect(() => {
+    console.log("FloorplansCard - floorplans prop updated:", floorplans);
+    setLocalFloorplans(floorplans);
+  }, [floorplans]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onFloorplanUpload) {
@@ -43,7 +48,6 @@ export function FloorplansCard({
   };
 
   const handleRemoveClick = (e: React.MouseEvent, index: number) => {
-    // Prevent default behavior and propagation to avoid unexpected redirects
     e.preventDefault();
     e.stopPropagation();
     
@@ -58,7 +62,6 @@ export function FloorplansCard({
         <CardTitle className="text-lg font-medium">Floorplans</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Upload button */}
         <div className="flex items-center space-x-2">
           <Button 
             type="button" 
@@ -80,7 +83,6 @@ export function FloorplansCard({
           />
         </div>
 
-        {/* Embed script textarea */}
         <div className="space-y-2">
           <Label htmlFor="floorplan-embed">Floorplan Embed Script</Label>
           <Textarea
@@ -95,13 +97,12 @@ export function FloorplansCard({
           </p>
         </div>
 
-        {/* Display uploaded floorplans */}
-        {floorplans.length > 0 && (
+        {localFloorplans.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {floorplans.map((floorplan, index) => {
+            {localFloorplans.map((floorplan, index) => {
               const url = typeof floorplan === 'string' ? floorplan : floorplan.url;
               return (
-                <div key={index} className="relative group">
+                <div key={`floorplan-${index}-${url}`} className="relative group">
                   <img
                     src={url}
                     alt={`Floorplan ${index + 1}`}

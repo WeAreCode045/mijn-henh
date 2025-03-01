@@ -42,10 +42,17 @@ export function usePropertyFloorplans(
       // Ensure floorplans is an array
       const currentFloorplans = Array.isArray(formData.floorplans) ? formData.floorplans : [];
       
-      setFormData({
+      // Create a completely new object to ensure React detects the state change
+      const updatedFormData = {
         ...formData,
         floorplans: [...currentFloorplans, ...newFloorplans]
-      });
+      };
+      
+      // Log floorplans before and after update for debugging
+      console.log("Before update - floorplans:", currentFloorplans);
+      console.log("After update - floorplans:", updatedFormData.floorplans);
+      
+      setFormData(updatedFormData);
 
       toast({
         title: "Success",
@@ -86,11 +93,21 @@ export function usePropertyFloorplans(
       return item;
     });
     
-    setFormData({
+    // Create a new filtered floorplans array
+    const updatedFloorplans = formData.floorplans.filter((_, i) => i !== index);
+    
+    // Log the floorplans before and after removal for debugging
+    console.log("Before remove - floorplans:", formData.floorplans);
+    console.log("After remove - floorplans:", updatedFloorplans);
+    
+    // Create a completely new object to ensure React detects the state change
+    const updatedFormData = {
       ...formData,
-      floorplans: formData.floorplans.filter((_, i) => i !== index),
+      floorplans: updatedFloorplans,
       technicalItems: updatedTechnicalItems
-    });
+    };
+    
+    setFormData(updatedFormData);
     
     toast({
       title: "Success", 
@@ -106,27 +123,35 @@ export function usePropertyFloorplans(
       return;
     }
     
+    // Create a new copy of the floorplans array
     const updatedFloorplans = [...formData.floorplans];
     updatedFloorplans[index] = {
       ...updatedFloorplans[index],
       [field]: value
     };
     
-    setFormData({
+    // Create a completely new object to ensure React detects the state change
+    const updatedFormData = {
       ...formData,
       floorplans: updatedFloorplans
-    });
+    };
+    
+    setFormData(updatedFormData);
   };
 
   const handleUpdateFloorplanEmbedScript = (script: string) => {
     console.log("Updating floorplan embed script:", script);
-    setFormData({
+    
+    // Create a completely new object to ensure React detects the state change
+    const updatedFormData = {
       ...formData,
       floorplanEmbedScript: script
-    });
+    };
+    
+    setFormData(updatedFormData);
     
     // Log to confirm the update
-    console.log("Updated formData with floorplanEmbedScript:", formData.floorplanEmbedScript);
+    console.log("Updated formData with floorplanEmbedScript:", updatedFormData.floorplanEmbedScript);
   };
 
   return {
