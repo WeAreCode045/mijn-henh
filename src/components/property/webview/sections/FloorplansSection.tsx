@@ -81,6 +81,15 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
       <div className="bg-white/90 p-4 rounded-lg shadow-sm mx-6 relative">
         <h3 className="text-xl font-semibold mb-4">Floorplans</h3>
         
+        {property.floorplanEmbedScript && (
+          <div className="mb-6 w-full">
+            <div 
+              className="w-full h-[400px] rounded-lg overflow-hidden" 
+              dangerouslySetInnerHTML={{ __html: property.floorplanEmbedScript }}
+            />
+          </div>
+        )}
+        
         {floorplanGroups.map((group, groupIndex) => (
           <div key={groupIndex} className="mb-6">
             <div className={`grid grid-cols-${group.columns} gap-4`}>

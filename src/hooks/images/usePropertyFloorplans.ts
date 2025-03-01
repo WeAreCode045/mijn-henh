@@ -116,9 +116,18 @@ export function usePropertyFloorplans(
     });
   };
 
+  const handleUpdateFloorplanEmbedScript = (script: string) => {
+    console.log("Updating floorplan embed script:", script);
+    setFormData({
+      ...formData,
+      floorplanEmbedScript: script
+    });
+  };
+
   return {
     handleFloorplanUpload,
     handleRemoveFloorplan,
-    handleUpdateFloorplan
+    handleUpdateFloorplan,
+    handleUpdateFloorplanEmbedScript
   };
 }

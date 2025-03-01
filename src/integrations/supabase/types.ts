@@ -196,6 +196,7 @@ export type Database = {
           energyLabel: string | null
           featuredImage: string | null
           features: Json | null
+          floorplanEmbedScript: string | null
           floorplans: string[] | null
           garages: string | null
           gridImages: string[] | null
@@ -212,6 +213,7 @@ export type Database = {
           object_id: string | null
           price: string | null
           sqft: string | null
+          template_id: string | null
           title: string | null
           updated_at: string
           virtualTourUrl: string | null
@@ -230,6 +232,7 @@ export type Database = {
           energyLabel?: string | null
           featuredImage?: string | null
           features?: Json | null
+          floorplanEmbedScript?: string | null
           floorplans?: string[] | null
           garages?: string | null
           gridImages?: string[] | null
@@ -246,6 +249,7 @@ export type Database = {
           object_id?: string | null
           price?: string | null
           sqft?: string | null
+          template_id?: string | null
           title?: string | null
           updated_at?: string
           virtualTourUrl?: string | null
@@ -264,6 +268,7 @@ export type Database = {
           energyLabel?: string | null
           featuredImage?: string | null
           features?: Json | null
+          floorplanEmbedScript?: string | null
           floorplans?: string[] | null
           garages?: string | null
           gridImages?: string[] | null
@@ -280,6 +285,7 @@ export type Database = {
           object_id?: string | null
           price?: string | null
           sqft?: string | null
+          template_id?: string | null
           title?: string | null
           updated_at?: string
           virtualTourUrl?: string | null
