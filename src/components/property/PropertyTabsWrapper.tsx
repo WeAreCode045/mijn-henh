@@ -36,7 +36,7 @@ export function PropertyTabsWrapper({
   const { activeTab, setActiveTab } = usePropertyTabs();
   
   // Form state management
-  const { formState, handleFieldChange } = usePropertyFormState(property);
+  const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
   
   // Handle form submission
   const { handleSubmit } = usePropertyFormSubmit();
@@ -81,8 +81,14 @@ export function PropertyTabsWrapper({
     images
   } = usePropertyImages(formState, setFormState);
   
-  // Form steps
-  const { currentStep, handleStepClick, handleNext, handlePrevious } = useFormSteps();
+  // Define autosave function (placeholder for now)
+  const handleAutosave = () => {
+    console.log("Autosaving...");
+    // Actual autosave logic would go here
+  };
+  
+  // Form steps with corrected arguments
+  const { currentStep, handleStepClick, handleNext, handlePrevious } = useFormSteps(formState, handleAutosave, 5);
 
   // Web view functions
   const handleWebView = () => {
@@ -113,13 +119,21 @@ export function PropertyTabsWrapper({
     handleFieldChange('template_id', templateId);
   };
 
+  // Cast property to PropertyData to ensure it has required id
+  const propertyWithRequiredId: PropertyData = {
+    ...formState,
+    id: property.id // Ensure id is always present
+  } as PropertyData;
+
   return (
     <div className="space-y-6">
-      <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
+        <div>{/* Tab content placeholder */}</div>
+      </PropertyTabs>
       
       <PropertyTabContents
         activeTab={activeTab}
-        property={property}
+        property={propertyWithRequiredId}
         formState={formState}
         agentInfo={agentInfo}
         templateInfo={templateInfo}

@@ -1,9 +1,14 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { PropertyFeature, PropertyFormData, PropertyTechnicalItem } from '@/types/property';
 import { steps } from '@/components/property/form/formSteps';
 import { useToast } from '@/components/ui/use-toast';
 
-export function usePropertyContent() {
+export function usePropertyContent(
+  formData: PropertyFormData,
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void
+) {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
 
@@ -39,11 +44,56 @@ export function usePropertyContent() {
     });
   };
 
-  const handleFieldChange = (field: string, value: any) => {
-    console.log(`Field "${field}" changed to:`, value);
-    // This function is just a placeholder as the actual changes
-    // are handled in the parent component
-  };
+  // Feature management functions
+  const addFeature = useCallback(() => {
+    const newFeature: PropertyFeature = {
+      id: uuidv4(),
+      description: ''
+    };
+    
+    const updatedFeatures = [...(formData.features || []), newFeature];
+    onFieldChange('features', updatedFeatures);
+  }, [formData, onFieldChange]);
+
+  const removeFeature = useCallback((id: string) => {
+    const updatedFeatures = formData.features.filter(feature => feature.id !== id);
+    onFieldChange('features', updatedFeatures);
+  }, [formData, onFieldChange]);
+
+  const updateFeature = useCallback((id: string, description: string) => {
+    const updatedFeatures = formData.features.map(feature => 
+      feature.id === id ? { ...feature, description } : feature
+    );
+    onFieldChange('features', updatedFeatures);
+  }, [formData, onFieldChange]);
+
+  // Technical item management functions
+  const addTechnicalItem = useCallback(() => {
+    const newItem: PropertyTechnicalItem = {
+      id: uuidv4(),
+      title: '',
+      size: '',
+      description: '',
+      floorplanId: null
+    };
+    
+    const currentItems = formData.technicalItems || [];
+    onFieldChange('technicalItems', [...currentItems, newItem]);
+  }, [formData, onFieldChange]);
+
+  const removeTechnicalItem = useCallback((id: string) => {
+    const currentItems = formData.technicalItems || [];
+    const updatedItems = currentItems.filter(item => item.id !== id);
+    onFieldChange('technicalItems', updatedItems);
+  }, [formData, onFieldChange]);
+
+  const updateTechnicalItem = useCallback((id: string, field: keyof PropertyTechnicalItem, value: any) => {
+    const currentItems = formData.technicalItems || [];
+    const updatedItems = currentItems.map(item => 
+      item.id === id ? { ...item, [field]: value } : item
+    );
+    onFieldChange('technicalItems', updatedItems);
+  }, [formData, onFieldChange]);
 
   return {
     currentStep,
@@ -51,6 +101,14 @@ export function usePropertyContent() {
     handleNext,
     handlePrevious,
     onSubmit,
-    handleFieldChange
+    handleFieldChange: onFieldChange,
+    // Feature management
+    addFeature,
+    removeFeature,
+    updateFeature,
+    // Technical item management
+    addTechnicalItem,
+    removeTechnicalItem,
+    updateTechnicalItem
   };
 }
