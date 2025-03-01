@@ -31,7 +31,8 @@ export function FloorplansCard({
   
   useEffect(() => {
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
-    setLocalFloorplans([...floorplans]); // Create a new array to ensure re-render
+    // Create a new array copy to ensure React detects the change
+    setLocalFloorplans(Array.isArray(floorplans) ? [...floorplans] : []);
     setFloorplansKey(Date.now()); // Update key to force re-render
   }, [floorplans]);
 
@@ -53,6 +54,7 @@ export function FloorplansCard({
   };
 
   const handleRemoveClick = (e: React.MouseEvent, index: number) => {
+    // Explicitly prevent default behavior to avoid any URL navigation
     e.preventDefault();
     e.stopPropagation();
     
@@ -78,7 +80,10 @@ export function FloorplansCard({
             variant="outline" 
             className="w-full"
             disabled={isLoading}
-            onClick={() => document.getElementById('floorplan-upload')?.click()}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent any default navigation
+              document.getElementById('floorplan-upload')?.click();
+            }}
           >
             <Upload className="h-4 w-4 mr-2" />
             Upload Floorplans

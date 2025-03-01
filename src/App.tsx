@@ -65,9 +65,9 @@ const App = () => (
                 </Suspense>
               } />
               
-              {/* Public web view routes - put these first for priority */}
+              {/* Public web view routes - use explicit path naming to avoid conflicts */}
               <Route
-                path="/property/:id/webview"
+                path="/property/view/:id"
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
                     <PropertyWebView />
@@ -75,8 +75,9 @@ const App = () => (
                 }
               />
               
+              {/* Legacy web view route - modify to be more specific */}
               <Route
-                path="/property/:id"
+                path="/property/:id/webview"
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
                     <PropertyWebView />
@@ -149,6 +150,8 @@ const App = () => (
                 }
               />
               
+              {/* Make sure this route doesn't catch all property/:id routes */}
+              {/* Explicitly use ./* matcher to ensure it doesn't catch other property routes */}
               <Route
                 path="/settings"
                 element={

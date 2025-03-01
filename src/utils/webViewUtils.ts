@@ -16,6 +16,7 @@ export async function getOrCreateWebViewUrl(propertyId: string, objectId: string
     }
 
     if (existingView) {
+      // Use consistent format with /property/view/ path
       return `/property/view/${existingView.object_id}`;
     }
 
@@ -32,10 +33,10 @@ export async function getOrCreateWebViewUrl(propertyId: string, objectId: string
       return null;
     }
 
+    // Use consistent format with /property/view/ path
     return `/property/view/${objectId}`;
   } catch (error) {
     console.error('Unexpected error in getOrCreateWebViewUrl:', error);
     return null;
   }
 }
-
