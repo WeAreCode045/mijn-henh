@@ -1,3 +1,4 @@
+
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -96,6 +97,7 @@ interface BasePropertyData {
   created_at?: string;
   updated_at?: string;
   template_id?: string; // Added template_id property
+  floorplanEmbedScript?: string; // Added floorplanEmbedScript property
 }
 
 // PropertyData requires id
@@ -143,6 +145,7 @@ export interface PropertySubmitData {
   youtubeUrl?: string;
   notes?: string;
   template_id?: string; // Added template_id property
+  floorplanEmbedScript?: string; // Added floorplanEmbedScript property
 }
 
 export interface PropertyDatabaseData {
@@ -178,4 +181,6 @@ export interface PropertyDatabaseData {
   created_at?: string;
   updated_at?: string;
   template_id?: string;
+  floorplanEmbedScript?: string; // Added floorplanEmbedScript property
 }
+

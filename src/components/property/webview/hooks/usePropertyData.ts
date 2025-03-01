@@ -1,17 +1,43 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { transformSupabaseData } from "../utils/transformSupabaseData";
 
 export const usePropertyData = (id?: string, property?: PropertyData) => {
-  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [propertyData, setPropertyData] = useState<PropertyData | null>(property || null);
+  const [isLoading, setIsLoading] = useState<boolean>(!property && !!id);
   const [error, setError] = useState<string | null>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    // Set up the mounted ref
+    isMounted.current = true;
+    
+    return () => {
+      // Clean up - component unmounted
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    // If we already have the property data passed as a prop, use that
+    if (property) {
+      console.log("usePropertyData - Using provided property data:", property);
+      setPropertyData(property);
+      setIsLoading(false);
+      return;
+    }
+
+    // If no id is provided, we can't fetch property data
+    if (!id) {
+      console.log("usePropertyData - No ID provided and no property data");
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchProperty = async () => {
-      if (!id) return;
+      if (!id || !isMounted.current) return;
       
       setIsLoading(true);
       setError(null);
@@ -37,8 +63,10 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
 
           if (uuidError) {
             console.error('Error fetching property by UUID:', uuidError);
-            setError(uuidError.message);
-            setIsLoading(false);
+            if (isMounted.current) {
+              setError(uuidError.message);
+              setIsLoading(false);
+            }
             return;
           }
 
@@ -50,25 +78,28 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         if (data) {
           const transformedData = transformSupabaseData(data);
           console.log("usePropertyData - Transformed property data:", transformedData);
-          setPropertyData(transformedData);
+          
+          if (isMounted.current) {
+            setPropertyData(transformedData);
+            setIsLoading(false);
+          }
         } else {
           console.log("usePropertyData - No property found with ID:", id);
-          setError(`Property not found with ID: ${id}`);
+          if (isMounted.current) {
+            setError(`Property not found with ID: ${id}`);
+            setIsLoading(false);
+          }
         }
       } catch (error) {
         console.error('Error fetching property:', error);
-        setError(error instanceof Error ? error.message : 'Unknown error occurred');
-      } finally {
-        setIsLoading(false);
+        if (isMounted.current) {
+          setError(error instanceof Error ? error.message : 'Unknown error occurred');
+          setIsLoading(false);
+        }
       }
     };
 
-    if (id) {
-      fetchProperty();
-    } else if (property) {
-      console.log("usePropertyData - Using provided property data:", property);
-      setPropertyData(property);
-    }
+    fetchProperty();
   }, [id, property]);
 
   return { propertyData, setPropertyData, isLoading, error };

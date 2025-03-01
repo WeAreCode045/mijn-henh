@@ -101,6 +101,7 @@ export function transformSupabaseData(data: any): PropertyData {
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
-    template_id: data.template_id || undefined
+    template_id: data.template_id || undefined,
+    floorplanEmbedScript: data.floorplanEmbedScript || ''
   };
 }
