@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle, Search, Send } from "lucide-react";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface CommunicationsTabContentProps {
   id: string;
@@ -25,6 +26,7 @@ type Submission = {
   created_at: string;
   is_read: boolean;
   response?: string;
+  response_date?: string;
 };
 
 export function CommunicationsTabContent({ id, title }: CommunicationsTabContentProps) {
@@ -33,7 +35,9 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [responseText, setResponseText] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
+  const { settings } = useAgencySettings();
 
   useEffect(() => {
     fetchSubmissions();
@@ -96,32 +100,95 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
   const handleSendResponse = async () => {
     if (!selectedSubmission || !responseText.trim()) return;
     
+    setIsSending(true);
     try {
-      // Here you'd implement the actual email sending logic
-      // For now, we'll just update the submission with the response
+      // Check if SMTP settings are available
+      const hasSMTPSettings = 
+        settings.smtp_host && 
+        settings.smtp_port && 
+        settings.smtp_username && 
+        settings.smtp_password && 
+        settings.smtp_from_email;
+      
+      let emailError = null;
+      
+      // Send email response using SMTP settings if available
+      if (hasSMTPSettings) {
+        try {
+          await supabase.functions.invoke('send-email-with-smtp', {
+            body: {
+              to: selectedSubmission.email,
+              subject: `RE: Your inquiry about ${title}`,
+              text: responseText,
+              html: `
+                <div>
+                  <p>${responseText.replace(/\n/g, '<br/>')}</p>
+                  <hr/>
+                  <p><small>In response to your message: "${selectedSubmission.message}"</small></p>
+                </div>
+              `,
+              smtpSettings: {
+                host: settings.smtp_host,
+                port: Number(settings.smtp_port),
+                username: settings.smtp_username,
+                password: settings.smtp_password,
+                fromEmail: settings.smtp_from_email,
+                fromName: settings.smtp_from_name || settings.name,
+                secure: settings.smtp_secure || false
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Error sending email:', error);
+          emailError = error;
+        }
+      }
+
+      // Always update the database with the response
+      const response_date = new Date().toISOString();
       await supabase
         .from('property_contact_submissions')
         .update({ 
           response: responseText,
+          response_date: response_date,
           is_read: true
         })
         .eq('id', selectedSubmission.id);
 
-      toast({
-        title: 'Response sent',
-        description: 'Your response has been sent successfully',
-      });
+      if (emailError && !hasSMTPSettings) {
+        toast({
+          title: 'Response saved but not sent',
+          description: 'Email could not be sent. Please configure SMTP settings.',
+          variant: 'warning',
+        });
+      } else if (emailError) {
+        toast({
+          title: 'Response saved but email failed',
+          description: 'Your response has been saved but the email failed to send.',
+          variant: 'warning',
+        });
+      } else {
+        toast({
+          title: 'Response sent',
+          description: 'Your response has been saved and sent to the client',
+        });
+      }
 
       // Update local state
       setSubmissions(subs => 
         subs.map(sub => sub.id === selectedSubmission.id 
-          ? { ...sub, response: responseText, is_read: true } 
+          ? { ...sub, response: responseText, response_date: response_date, is_read: true } 
           : sub)
       );
       
-      // Clear form
+      // Clear form and update selected submission
       setResponseText("");
-      setSelectedSubmission(prev => prev ? { ...prev, response: responseText, is_read: true } : null);
+      setSelectedSubmission(prev => prev ? { 
+        ...prev, 
+        response: responseText, 
+        response_date: response_date,
+        is_read: true 
+      } : null);
       
     } catch (error) {
       console.error('Error sending response:', error);
@@ -130,6 +197,8 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
         description: 'Failed to send your response',
         variant: 'destructive',
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -187,6 +256,7 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
                     className={`p-3 rounded-lg border cursor-pointer transition-colors
                       ${submission.is_read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'}
                       ${selectedSubmission?.id === submission.id ? 'ring-2 ring-primary' : ''}
+                      ${submission.response ? 'border-l-4 border-l-green-500' : ''}
                     `}
                     onClick={() => setSelectedSubmission(submission)}
                   >
@@ -260,7 +330,14 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
               {selectedSubmission.response && (
                 <div>
                   <h3 className="text-sm font-medium mb-2">Your response:</h3>
-                  <div className="bg-gray-50 p-4 rounded-lg border">{selectedSubmission.response}</div>
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                    <p className="whitespace-pre-wrap">{selectedSubmission.response}</p>
+                    {selectedSubmission.response_date && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Sent on {format(new Date(selectedSubmission.response_date), 'dd MMMM yyyy, HH:mm')}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -276,11 +353,20 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
                   />
                   <Button 
                     onClick={handleSendResponse} 
-                    disabled={!responseText.trim()}
+                    disabled={!responseText.trim() || isSending}
                     className="flex items-center gap-2"
                   >
-                    <Send className="h-4 w-4" />
-                    <span>Send Response</span>
+                    {isSending ? (
+                      <>
+                        <Spinner className="h-4 w-4" />
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4" />
+                        <span>Send Response</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               )}

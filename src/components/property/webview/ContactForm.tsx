@@ -60,7 +60,8 @@ export function ContactForm({ property, settings }: ContactFormProps) {
           message: formData.message,
           inquiry_type: 'information',
           agent_id: property.agent_id,
-          is_read: false
+          is_read: false,
+          created_at: new Date().toISOString()
         })
         .select()
         .single();
