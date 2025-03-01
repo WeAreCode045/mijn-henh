@@ -1,5 +1,5 @@
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Info, 
   FileText, 
@@ -15,29 +15,49 @@ interface PropertyTabsProps {
 }
 
 export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsProps) {
+  // Add some console logging to help debug the tab changing
+  const handleTabChange = (value: string) => {
+    console.log("PropertyTabs - Tab changing to:", value);
+    onTabChange(value);
+  };
+
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid grid-cols-4 mb-6">
-        <TabsTrigger value="dashboard" className="flex items-center gap-2">
-          <Info className="h-4 w-4" />
-          <span className="hidden sm:inline">Property Info</span>
-        </TabsTrigger>
-        <TabsTrigger value="content" className="flex items-center gap-2">
-          <FileText className="h-4 w-4" />
-          <span className="hidden sm:inline">Property Data</span>
-        </TabsTrigger>
-        <TabsTrigger value="media" className="flex items-center gap-2">
-          <ImageIcon className="h-4 w-4" />
-          <span className="hidden sm:inline">Media</span>
-        </TabsTrigger>
-        <TabsTrigger value="communications" className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4" />
-          <span className="hidden sm:inline">Communications</span>
-        </TabsTrigger>
-      </TabsList>
+    <TabsList className="grid grid-cols-4 mb-6">
+      <TabsTrigger 
+        value="dashboard" 
+        className="flex items-center gap-2"
+        data-active={activeTab === 'dashboard'}
+      >
+        <Info className="h-4 w-4" />
+        <span className="hidden sm:inline">Property Info</span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="content" 
+        className="flex items-center gap-2"
+        data-active={activeTab === 'content'}
+      >
+        <FileText className="h-4 w-4" />
+        <span className="hidden sm:inline">Property Data</span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="media" 
+        className="flex items-center gap-2"
+        data-active={activeTab === 'media'}
+      >
+        <ImageIcon className="h-4 w-4" />
+        <span className="hidden sm:inline">Media</span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="communications" 
+        className="flex items-center gap-2"
+        data-active={activeTab === 'communications'}
+      >
+        <MessageSquare className="h-4 w-4" />
+        <span className="hidden sm:inline">Communications</span>
+      </TabsTrigger>
       
-      {/* Pass the children directly to make sure TabsContent components render properly */}
+      {/* Render any children passed to this component */}
       {children}
-    </Tabs>
+    </TabsList>
   );
 }

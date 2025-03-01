@@ -1,16 +1,16 @@
-import { TabsContent } from "@/components/ui/tabs";
+
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 
-interface TabContentProps {
+// Common props type to simplify passing data to tab renderers
+interface TabRenderProps {
   activeTab: string;
   property: {
     id: string;
-    object_id?: string;
     title: string;
+    object_id?: string;
     agent_id?: string;
     created_at?: string;
     updated_at?: string;
@@ -20,174 +20,112 @@ interface TabContentProps {
     virtualTourUrl?: string;
     youtubeUrl?: string;
   };
-  formState: PropertyFormData;
+  formState: any;
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
   isUpdating: boolean;
-  handlers: {
-    onSave: () => void;
-    onDelete: () => Promise<void>;
-    handleSaveObjectId: (objectId: string) => void;
-    handleSaveAgent: (agentId: string) => void;
-    handleSaveTemplate: (templateId: string) => void;
-    handleGeneratePDF: () => void;
-    handleWebView: () => void;
-    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-    onAddFeature: () => void;
-    onRemoveFeature: (id: string) => void;
-    onUpdateFeature: (id: string, description: string) => void;
-    onAddArea: () => void;
-    onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageUpload: (areaId: string, files: FileList) => void;
-    onAreaImageRemove: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleRemoveImage: (index: number) => void;
-    isUploading?: boolean;
-    handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleRemoveAreaPhoto: (index: number) => void;
-    handleRemoveFloorplan: (index: number) => void;
-    handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-    handleSetFeaturedImage: (url: string) => void;
-    handleToggleGridImage: (url: string) => void;
-    onAddTechnicalItem?: () => void;
-    onRemoveTechnicalItem?: (id: string) => void;
-    onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
-    currentStep: number;
-    handleStepClick: (step: number) => void;
-    handleNext: () => void;
-    handlePrevious: () => void;
-    onSubmit: () => void;
-  };
+  handlers: any;
 }
 
-/**
- * Renders the Dashboard tab content
- */
-export const renderDashboardTab = (props: TabContentProps) => {
-  const { activeTab, property, agentInfo, templateInfo, isUpdating, handlers } = props;
-  
-  // Only render when the activeTab is 'dashboard'
+export const renderDashboardTab = ({ activeTab, property, agentInfo, templateInfo, isUpdating, handlers }: TabRenderProps) => {
   if (activeTab !== 'dashboard') return null;
   
   return (
-    <TabsContent value="dashboard">
-      <DashboardTabContent 
-        id={property.id}
-        objectId={property.object_id}
-        title={property.title || "Untitled Property"}
-        agentId={property.agent_id}
-        agentName={agentInfo?.name}
-        templateId={templateInfo?.id}
-        templateName={templateInfo?.name}
-        createdAt={property.created_at}
-        updatedAt={property.updated_at}
-        onSave={handlers.onSave}
-        onDelete={handlers.onDelete}
-        onGeneratePDF={handlers.handleGeneratePDF}
-        onWebView={handlers.handleWebView}
-        onSaveAgent={handlers.handleSaveAgent}
-        onSaveObjectId={handlers.handleSaveObjectId}
-        onSaveTemplate={handlers.handleSaveTemplate}
-        isUpdating={isUpdating}
-      />
-    </TabsContent>
+    <DashboardTabContent
+      id={property.id}
+      objectId={property.object_id}
+      title={property.title}
+      agentId={agentInfo?.id}
+      agentName={agentInfo?.name}
+      templateId={templateInfo?.id}
+      templateName={templateInfo?.name}
+      createdAt={property.created_at}
+      updatedAt={property.updated_at}
+      onSave={handlers.onSave}
+      onDelete={handlers.onDelete}
+      onGeneratePDF={handlers.handleGeneratePDF}
+      onWebView={handlers.handleWebView}
+      onSaveAgent={handlers.handleSaveAgent}
+      onSaveObjectId={handlers.handleSaveObjectId}
+      onSaveTemplate={handlers.handleSaveTemplate}
+      isUpdating={isUpdating}
+    />
   );
 };
 
-/**
- * Renders the Content tab
- */
-export const renderContentTab = (props: TabContentProps) => {
-  const { activeTab, formState, handlers } = props;
-  
-  // Only render when the activeTab is 'content'
+export const renderContentTab = ({ activeTab, formState, handlers }: TabRenderProps) => {
   if (activeTab !== 'content') return null;
   
   return (
-    <TabsContent value="content">
-      <ContentTabContent 
-        formData={formState}
-        onFieldChange={handlers.onFieldChange}
-        onAddFeature={handlers.onAddFeature}
-        onRemoveFeature={handlers.onRemoveFeature}
-        onUpdateFeature={handlers.onUpdateFeature}
-        onAddArea={handlers.onAddArea}
-        onRemoveArea={handlers.onRemoveArea}
-        onUpdateArea={handlers.onUpdateArea}
-        onAreaImageUpload={handlers.onAreaImageUpload}
-        onAreaImageRemove={handlers.onAreaImageRemove}
-        onAreaImagesSelect={handlers.onAreaImagesSelect}
-        handleImageUpload={handlers.handleImageUpload}
-        handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
-        handleFloorplanUpload={handlers.handleFloorplanUpload}
-        handleRemoveImage={handlers.handleRemoveImage}
-        handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
-        handleRemoveFloorplan={handlers.handleRemoveFloorplan}
-        handleUpdateFloorplan={handlers.handleUpdateFloorplan}
-        handleSetFeaturedImage={handlers.handleSetFeaturedImage}
-        handleToggleGridImage={handlers.handleToggleGridImage}
-        onAddTechnicalItem={handlers.onAddTechnicalItem}
-        onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
-        onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
-        currentStep={handlers.currentStep}
-        handleStepClick={handlers.handleStepClick}
-        handleNext={handlers.handleNext}
-        handlePrevious={handlers.handlePrevious}
-        onSubmit={handlers.onSubmit}
-      />
-    </TabsContent>
+    <ContentTabContent
+      formData={formState}
+      onFieldChange={handlers.onFieldChange}
+      onAddFeature={handlers.onAddFeature}
+      onRemoveFeature={handlers.onRemoveFeature}
+      onUpdateFeature={handlers.onUpdateFeature}
+      onAddArea={handlers.onAddArea}
+      onRemoveArea={handlers.onRemoveArea}
+      onUpdateArea={handlers.onUpdateArea}
+      onAreaImageUpload={handlers.onAreaImageUpload}
+      onAreaImageRemove={handlers.onAreaImageRemove}
+      onAreaImagesSelect={handlers.onAreaImagesSelect}
+      handleImageUpload={handlers.handleImageUpload}
+      handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
+      handleFloorplanUpload={handlers.handleFloorplanUpload}
+      handleRemoveImage={handlers.handleRemoveImage}
+      handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
+      handleRemoveFloorplan={handlers.handleRemoveFloorplan}
+      handleUpdateFloorplan={handlers.handleUpdateFloorplan}
+      handleSetFeaturedImage={handlers.handleSetFeaturedImage}
+      handleToggleGridImage={handlers.handleToggleGridImage}
+      onAddTechnicalItem={handlers.onAddTechnicalItem}
+      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
+      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
+      currentStep={handlers.currentStep}
+      handleStepClick={handlers.handleStepClick}
+      handleNext={handlers.handleNext}
+      handlePrevious={handlers.handlePrevious}
+      onSubmit={handlers.onSubmit}
+    />
   );
 };
 
-/**
- * Renders the Media tab
- */
-export const renderMediaTab = (props: TabContentProps) => {
-  const { activeTab, property, handlers } = props;
-  
-  // Only render when the activeTab is 'media'
+export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps) => {
   if (activeTab !== 'media') return null;
   
   return (
-    <TabsContent value="media">
-      <MediaTabContent 
-        id={property.id}
-        title={property.title || ""}
-        images={property.images || []}
-        featuredImage={property.featuredImage}
-        gridImages={property.gridImages || []}
-        virtualTourUrl={property.virtualTourUrl}
-        youtubeUrl={property.youtubeUrl}
-        onVirtualTourUpdate={(url) => handlers.onFieldChange('virtualTourUrl', url)}
-        onYoutubeUrlUpdate={(url) => handlers.onFieldChange('youtubeUrl', url)}
-        onImageUpload={handlers.handleImageUpload}
-        onRemoveImage={handlers.handleRemoveImage}
-        onSetFeaturedImage={handlers.handleSetFeaturedImage}
-        onToggleGridImage={handlers.handleToggleGridImage}
-        isUploading={handlers.isUploading}
-      />
-    </TabsContent>
+    <MediaTabContent
+      id={property.id}
+      title={property.title}
+      images={property.images}
+      featuredImage={property.featuredImage}
+      gridImages={property.gridImages}
+      virtualTourUrl={property.virtualTourUrl}
+      youtubeUrl={property.youtubeUrl}
+      floorplans={handlers.formState?.floorplans || []}
+      floorplanEmbedScript={handlers.formState?.floorplanEmbedScript}
+      onVirtualTourUpdate={(url: string) => handlers.onFieldChange('virtualTourUrl', url)}
+      onYoutubeUrlUpdate={(url: string) => handlers.onFieldChange('youtubeUrl', url)}
+      onNotesUpdate={(notes: string) => handlers.onFieldChange('notes', notes)}
+      onFloorplanEmbedScriptUpdate={(script: string) => handlers.onFieldChange('floorplanEmbedScript', script)}
+      onImageUpload={handlers.handleImageUpload}
+      onRemoveImage={handlers.handleRemoveImage}
+      onFloorplanUpload={handlers.handleFloorplanUpload}
+      onRemoveFloorplan={handlers.handleRemoveFloorplan}
+      onSetFeaturedImage={handlers.handleSetFeaturedImage}
+      onToggleGridImage={handlers.handleToggleGridImage}
+      isUploading={handlers.isUploading}
+    />
   );
 };
 
-/**
- * Renders the Communications tab
- */
-export const renderCommunicationsTab = (props: TabContentProps) => {
-  const { activeTab, property } = props;
-  
-  // Only render when the activeTab is 'communications'
+export const renderCommunicationsTab = ({ activeTab, property }: TabRenderProps) => {
   if (activeTab !== 'communications') return null;
   
   return (
-    <TabsContent value="communications">
-      <CommunicationsTabContent 
-        id={property.id}
-        title={property.title || "Untitled Property"}
-      />
-    </TabsContent>
+    <CommunicationsTabContent 
+      id={property.id}
+      title={property.title}
+    />
   );
 };

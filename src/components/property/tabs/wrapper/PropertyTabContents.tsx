@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -145,7 +146,8 @@ export function PropertyTabContents({
     handleStepClick,
     handleNext,
     handlePrevious,
-    onSubmit
+    onSubmit,
+    formState // Added formState to handlers to make it available in renderers
   };
 
   // Common props for all tab renderers
@@ -158,6 +160,9 @@ export function PropertyTabContents({
     isUpdating,
     handlers
   };
+
+  // Debug the active tab to ensure it's being set correctly
+  console.log("PropertyTabContents - Active tab:", activeTab);
 
   return (
     <>
