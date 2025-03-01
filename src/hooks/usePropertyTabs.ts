@@ -29,7 +29,6 @@ export function usePropertyTabs() {
     if (!id) return;
     
     setActiveTab(tab);
-    // Using the actual property ID from params
     navigate(`/property/${id}/${tab}`);
   };
   
@@ -39,7 +38,7 @@ export function usePropertyTabs() {
     if (currentTab !== activeTab) {
       setActiveTab(currentTab);
     }
-  }, [location.pathname]);
+  }, [location.pathname, activeTab]);
   
   return {
     activeTab,

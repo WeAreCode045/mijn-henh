@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -140,6 +141,12 @@ const App = () => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <PropertyWebView />
                 </Suspense>
+              } />
+              
+              <Route path="/property/:id/edit" element={
+                <ProtectedRoute>
+                  <Navigate to={params => `/property/${params.id}/content`} replace />
+                </ProtectedRoute>
               } />
               
               <Route path="/settings" element={
