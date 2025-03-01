@@ -40,17 +40,20 @@ export function usePropertyFloorplans(
       const newFloorplans = await Promise.all(uploadPromises);
       
       // Ensure floorplans is an array
-      const currentFloorplans = Array.isArray(formData.floorplans) ? formData.floorplans : [];
+      const currentFloorplans = Array.isArray(formData.floorplans) ? [...formData.floorplans] : [];
       
-      // Create a completely new object to ensure React detects the state change
-      const updatedFormData = {
-        ...formData,
-        floorplans: [...currentFloorplans, ...newFloorplans]
-      };
+      // Create a completely new array for React state detection
+      const updatedFloorplans = [...currentFloorplans, ...newFloorplans];
       
       // Log floorplans before and after update for debugging
       console.log("Before update - floorplans:", currentFloorplans);
-      console.log("After update - floorplans:", updatedFormData.floorplans);
+      console.log("After update - floorplans:", updatedFloorplans);
+      
+      // Create a completely new object for React state detection
+      const updatedFormData = {
+        ...formData,
+        floorplans: updatedFloorplans
+      };
       
       setFormData(updatedFormData);
 
@@ -93,7 +96,7 @@ export function usePropertyFloorplans(
       return item;
     });
     
-    // Create a new filtered floorplans array
+    // Create a new filtered floorplans array using a direct filter to ensure no references are maintained
     const updatedFloorplans = formData.floorplans.filter((_, i) => i !== index);
     
     // Log the floorplans before and after removal for debugging
@@ -107,6 +110,7 @@ export function usePropertyFloorplans(
       technicalItems: updatedTechnicalItems
     };
     
+    // Set the form data immediately with the updated floorplans
     setFormData(updatedFormData);
     
     toast({

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,9 +26,13 @@ export function FloorplansCard({
   const [isLoading, setIsLoading] = useState(false);
   const [localFloorplans, setLocalFloorplans] = useState<(PropertyFloorplan | string)[]>([]);
   
+  // Use a key to force re-render when floorplans array changes
+  const [floorplansKey, setFloorplansKey] = useState(Date.now());
+  
   useEffect(() => {
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
-    setLocalFloorplans(floorplans);
+    setLocalFloorplans([...floorplans]); // Create a new array to ensure re-render
+    setFloorplansKey(Date.now()); // Update key to force re-render
   }, [floorplans]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +58,11 @@ export function FloorplansCard({
     
     if (onRemoveFloorplan) {
       onRemoveFloorplan(index);
+      
+      // Update local state immediately for faster UI feedback
+      const updatedFloorplans = [...localFloorplans];
+      updatedFloorplans.splice(index, 1);
+      setLocalFloorplans(updatedFloorplans);
     }
   };
 
@@ -98,11 +108,11 @@ export function FloorplansCard({
         </div>
 
         {localFloorplans.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div key={floorplansKey} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {localFloorplans.map((floorplan, index) => {
               const url = typeof floorplan === 'string' ? floorplan : floorplan.url;
               return (
-                <div key={`floorplan-${index}-${url}`} className="relative group">
+                <div key={`floorplan-${index}-${url}-${floorplansKey}`} className="relative group">
                   <img
                     src={url}
                     alt={`Floorplan ${index + 1}`}
