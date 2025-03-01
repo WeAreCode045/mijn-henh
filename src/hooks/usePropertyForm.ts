@@ -28,7 +28,7 @@ const initialFormData: PropertyFormData = {
   latitude: null,
   longitude: null,
   template_id: "default", // Set default template_id
-  floorplanEmbedScript: ""
+  floorplanEmbedScript: "" // Initialize floorplanEmbedScript property
 };
 
 export function usePropertyForm(id: string | undefined, onSubmit?: (data: PropertyFormData) => void) {
