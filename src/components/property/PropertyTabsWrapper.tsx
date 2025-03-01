@@ -14,6 +14,7 @@ import { useFormSteps } from "@/hooks/useFormSteps";
 import { PropertyWebView } from "./PropertyWebView";
 import { usePropertyWebView } from "./webview/usePropertyWebView";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -127,53 +128,57 @@ export function PropertyTabsWrapper({
 
   return (
     <div className="space-y-6">
-      <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
-        <div>{/* Tab content placeholder */}</div>
-      </PropertyTabs>
-      
-      <PropertyTabContents
-        activeTab={activeTab}
-        property={propertyWithRequiredId}
-        formState={formState}
-        agentInfo={agentInfo}
-        templateInfo={templateInfo}
-        isUpdating={false}
-        onSave={onSave}
-        onDelete={onDelete}
-        handleSaveObjectId={handleSaveObjectId}
-        handleSaveAgent={handleSaveAgent}
-        handleSaveTemplate={handleSaveTemplate}
-        handleGeneratePDF={handleGeneratePDF}
-        handleWebView={handleWebView}
-        onFieldChange={handleFieldChange}
-        onAddFeature={addFeature}
-        onRemoveFeature={removeFeature}
-        onUpdateFeature={updateFeature}
-        onAddArea={addArea}
-        onRemoveArea={removeArea}
-        onUpdateArea={updateArea}
-        onAreaImageUpload={handleAreaImageUpload}
-        onAreaImageRemove={handleAreaImageRemove}
-        onAreaImagesSelect={handleAreaImagesSelect}
-        handleImageUpload={handleImageUpload}
-        handleRemoveImage={handleRemoveImage}
-        isUploading={isUploading}
-        handleAreaPhotosUpload={handleAreaPhotosUpload}
-        handleFloorplanUpload={handleFloorplanUpload}
-        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-        handleRemoveFloorplan={handleRemoveFloorplan}
-        handleUpdateFloorplan={handleUpdateFloorplan}
-        handleSetFeaturedImage={handleSetFeaturedImage}
-        handleToggleGridImage={handleToggleGridImage}
-        onAddTechnicalItem={addTechnicalItem}
-        onRemoveTechnicalItem={removeTechnicalItem}
-        onUpdateTechnicalItem={updateTechnicalItem}
-        currentStep={currentStep}
-        handleStepClick={handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
-        onSubmit={onSubmit}
-      />
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+        <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
+          <div>{/* Tab content placeholder */}</div>
+        </PropertyTabs>
+
+        <TabsContent value={activeTab}>
+          <PropertyTabContents
+            activeTab={activeTab}
+            property={propertyWithRequiredId}
+            formState={formState}
+            agentInfo={agentInfo}
+            templateInfo={templateInfo}
+            isUpdating={false}
+            onSave={onSave}
+            onDelete={onDelete}
+            handleSaveObjectId={handleSaveObjectId}
+            handleSaveAgent={handleSaveAgent}
+            handleSaveTemplate={handleSaveTemplate}
+            handleGeneratePDF={handleGeneratePDF}
+            handleWebView={handleWebView}
+            onFieldChange={handleFieldChange}
+            onAddFeature={addFeature}
+            onRemoveFeature={removeFeature}
+            onUpdateFeature={updateFeature}
+            onAddArea={addArea}
+            onRemoveArea={removeArea}
+            onUpdateArea={updateArea}
+            onAreaImageUpload={handleAreaImageUpload}
+            onAreaImageRemove={handleAreaImageRemove}
+            onAreaImagesSelect={handleAreaImagesSelect}
+            handleImageUpload={handleImageUpload}
+            handleRemoveImage={handleRemoveImage}
+            isUploading={isUploading}
+            handleAreaPhotosUpload={handleAreaPhotosUpload}
+            handleFloorplanUpload={handleFloorplanUpload}
+            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+            handleRemoveFloorplan={handleRemoveFloorplan}
+            handleUpdateFloorplan={handleUpdateFloorplan}
+            handleSetFeaturedImage={handleSetFeaturedImage}
+            handleToggleGridImage={handleToggleGridImage}
+            onAddTechnicalItem={addTechnicalItem}
+            onRemoveTechnicalItem={removeTechnicalItem}
+            onUpdateTechnicalItem={updateTechnicalItem}
+            currentStep={currentStep}
+            handleStepClick={handleStepClick}
+            handleNext={handleNext}
+            handlePrevious={handlePrevious}
+            onSubmit={onSubmit}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* WebView Dialog */}
       <Dialog open={webViewOpen} onOpenChange={setWebViewOpen}>
