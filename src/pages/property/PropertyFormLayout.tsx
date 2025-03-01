@@ -23,6 +23,7 @@ interface PropertyFormLayoutProps {
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
   isSubmitting?: boolean;
+  actionButtons?: ReactNode; // Add new prop for action buttons
 }
 
 export function PropertyFormLayout({
@@ -41,7 +42,8 @@ export function PropertyFormLayout({
   images,
   agentInfo,
   templateInfo,
-  isSubmitting
+  isSubmitting,
+  actionButtons
 }: PropertyFormLayoutProps) {
   return (
     <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -51,6 +53,13 @@ export function PropertyFormLayout({
           propertyId={propertyData.id} 
           objectId={propertyData.object_id} 
         />
+
+        {/* Add action buttons above the tabs */}
+        {actionButtons && (
+          <div className="mt-4 mb-2">
+            {actionButtons}
+          </div>
+        )}
 
         <div className="mt-6">
           {children}

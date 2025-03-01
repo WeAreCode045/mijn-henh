@@ -13,6 +13,8 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Save, Trash2 } from "lucide-react";
 
 export function PropertyFormContainer() {
   const { id } = useParams();
@@ -150,6 +152,30 @@ export function PropertyFormContainer() {
       agentInfo={agentInfo}
       templateInfo={templateInfo}
       isSubmitting={isSubmitting}
+      actionButtons={
+        <div className="flex items-center gap-2 mb-4">
+          <Button 
+            variant="default" 
+            onClick={saveProperty} 
+            disabled={isSubmitting}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            Save Property
+          </Button>
+          {id && (
+            <Button 
+              variant="destructive" 
+              onClick={deleteProperty}
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
+          )}
+        </div>
+      }
     >
       <PropertyForm />
     </PropertyFormLayout>
