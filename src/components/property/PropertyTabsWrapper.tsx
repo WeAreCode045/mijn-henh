@@ -180,7 +180,7 @@ export function PropertyTabsWrapper({
         <DialogContent className="max-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
           <div className="flex-1 overflow-auto">
             <PropertyWebView 
-              property={formState} 
+              property={propertyWithRequiredId}
               open={webViewOpen} 
               onOpenChange={setWebViewOpen} 
             />
