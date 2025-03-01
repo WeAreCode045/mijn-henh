@@ -16,12 +16,16 @@ export function usePropertyFormSubmit() {
   const { validatePropertyData } = usePropertyValidation();
   const { updateProperty, createProperty } = usePropertyDatabase();
 
-  const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData, shouldRedirect = false) => {
+    // Prevent the default form submission behavior
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+    
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
     
     if (!validatePropertyData(formData)) {
-      return;
+      return false;
     }
     
     // Prepare data for submission using our utility functions
@@ -73,6 +77,10 @@ export function usePropertyFormSubmit() {
       success = await updateProperty(formData.id, submitData);
     } else {
       success = await createProperty(submitData);
+      // Only redirect to home page after creating a new property if shouldRedirect is true
+      if (success && shouldRedirect) {
+        navigate('/');
+      }
     }
     
     console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");

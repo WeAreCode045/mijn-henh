@@ -112,7 +112,8 @@ export function PropertyFormContainer() {
     setIsSubmitting(true);
     try {
       const event = {} as React.FormEvent;
-      const result = await handleSubmit(event, formData);
+      // Pass false for shouldRedirect to prevent navigation after save
+      const result = await handleSubmit(event, formData, false);
       
       if (result) {
         toast({

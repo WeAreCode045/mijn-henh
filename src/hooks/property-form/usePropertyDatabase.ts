@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +63,6 @@ export function usePropertyDatabase() {
         description: "Property created successfully",
       });
       
-      navigate('/');
       return true;
     } catch (error) {
       console.error('usePropertyDatabase - Error creating property:', error);

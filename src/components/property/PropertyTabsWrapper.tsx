@@ -101,7 +101,8 @@ export function PropertyTabsWrapper({
     if (formEl) {
       // Create a FormEvent object
       const formEvent = new Event('submit', { bubbles: true, cancelable: true }) as unknown as React.FormEvent;
-      handleSubmit(formEvent, formState);
+      // Pass false to prevent redirection
+      handleSubmit(formEvent, formState, false);
     }
   };
 
