@@ -37,7 +37,7 @@ export function PropertyActionsPanel({
     <div className="w-80 shrink-0 space-y-6">
       {propertyData.id && (
         <PropertyActions
-          property={propertyData}
+          propertyId={propertyData.id}
           settings={agencySettings}
           onDelete={onDeleteProperty}
           onSave={onSaveProperty}
