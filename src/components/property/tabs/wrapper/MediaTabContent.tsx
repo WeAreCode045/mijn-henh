@@ -11,10 +11,16 @@ interface MediaTabContentProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  floorplans?: any[];
+  floorplanEmbedScript?: string;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
+  onNotesUpdate?: (notes: string) => void;
+  onFloorplanEmbedScriptUpdate?: (script: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan?: (index: number) => void;
   onSetFeaturedImage?: (imageUrl: string) => void;
   onToggleGridImage?: (imageUrl: string) => void;
   isUploading?: boolean;
@@ -34,10 +40,16 @@ export function MediaTabContent({
   virtualTourUrl,
   youtubeUrl,
   notes,
+  floorplans,
+  floorplanEmbedScript,
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
+  onNotesUpdate,
+  onFloorplanEmbedScriptUpdate,
   onImageUpload,
   onRemoveImage,
+  onFloorplanUpload,
+  onRemoveFloorplan,
   onSetFeaturedImage,
   onToggleGridImage,
   isUploading,
@@ -55,10 +67,16 @@ export function MediaTabContent({
       virtualTourUrl={virtualTourUrl}
       youtubeUrl={youtubeUrl}
       notes={notes}
+      floorplans={floorplans}
+      floorplanEmbedScript={floorplanEmbedScript}
       onVirtualTourUpdate={onVirtualTourUpdate}
       onYoutubeUrlUpdate={onYoutubeUrlUpdate}
+      onNotesUpdate={onNotesUpdate}
+      onFloorplanEmbedScriptUpdate={onFloorplanEmbedScriptUpdate}
       onImageUpload={onUpload || onImageUpload}
       onRemoveImage={onRemoveImage}
+      onFloorplanUpload={onFloorplanUpload}
+      onRemoveFloorplan={onRemoveFloorplan}
       onSetFeaturedImage={onFeaturedImageSelect || onSetFeaturedImage}
       onToggleGridImage={onGridImageToggle || onToggleGridImage}
       isUploading={isUploading}

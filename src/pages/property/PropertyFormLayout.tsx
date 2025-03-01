@@ -22,6 +22,7 @@ interface PropertyFormLayoutProps {
   images: string[]; // This expects string[] not PropertyImage[]
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
+  isSubmitting?: boolean;
 }
 
 export function PropertyFormLayout({
@@ -39,7 +40,8 @@ export function PropertyFormLayout({
   onRemoveImage,
   images,
   agentInfo,
-  templateInfo
+  templateInfo,
+  isSubmitting
 }: PropertyFormLayoutProps) {
   return (
     <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">

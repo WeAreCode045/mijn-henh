@@ -62,7 +62,8 @@ export function usePropertyFormSubmit() {
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      notes: formData.notes
+      notes: formData.notes,
+      floorplanEmbedScript: formData.floorplanEmbedScript
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);

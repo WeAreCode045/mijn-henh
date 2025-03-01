@@ -1,21 +1,20 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Video, Youtube } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface VirtualTourCardProps {
   id: string;
-  virtualTourUrl: string;
-  youtubeUrl: string;
-  notes: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
+  floorplanEmbedScript?: string;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
+  onNotesUpdate?: (notes: string) => void;
+  onFloorplanEmbedScriptUpdate?: (script: string) => void;
 }
 
 export function VirtualTourCard({
@@ -23,106 +22,94 @@ export function VirtualTourCard({
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
+  floorplanEmbedScript = "",
   onVirtualTourUpdate,
-  onYoutubeUrlUpdate
+  onYoutubeUrlUpdate,
+  onNotesUpdate,
+  onFloorplanEmbedScriptUpdate
 }: VirtualTourCardProps) {
-  const [currentVirtualTourUrl, setCurrentVirtualTourUrl] = useState(virtualTourUrl);
-  const [currentYoutubeUrl, setCurrentYoutubeUrl] = useState(youtubeUrl);
-  const [currentNotes, setCurrentNotes] = useState(notes);
-  const [isSaving, setIsSaving] = useState(false);
+  const [localVirtualTourUrl, setLocalVirtualTourUrl] = useState(virtualTourUrl);
+  const [localYoutubeUrl, setLocalYoutubeUrl] = useState(youtubeUrl);
+  const [localNotes, setLocalNotes] = useState(notes);
+  
+  useEffect(() => {
+    setLocalVirtualTourUrl(virtualTourUrl);
+  }, [virtualTourUrl]);
 
-  const handleSaveExternalLinks = async () => {
-    if (!id) return;
-    
-    setIsSaving(true);
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .update({
-          virtualTourUrl: currentVirtualTourUrl,
-          youtubeUrl: currentYoutubeUrl,
-          notes: currentNotes
-        })
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      toast({
-        description: "External links saved successfully",
-      });
-      
-      // Call the update handlers if they exist
-      if (onVirtualTourUpdate) onVirtualTourUpdate(currentVirtualTourUrl);
-      if (onYoutubeUrlUpdate) onYoutubeUrlUpdate(currentYoutubeUrl);
-    } catch (error) {
-      console.error('Error saving external links:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save external links",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+  useEffect(() => {
+    setLocalYoutubeUrl(youtubeUrl);
+  }, [youtubeUrl]);
+
+  useEffect(() => {
+    setLocalNotes(notes);
+  }, [notes]);
+
+  const handleVirtualTourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUrl = e.target.value;
+    setLocalVirtualTourUrl(newUrl);
+    if (onVirtualTourUpdate) {
+      onVirtualTourUpdate(newUrl);
+    }
+  };
+
+  const handleYoutubeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUrl = e.target.value;
+    setLocalYoutubeUrl(newUrl);
+    if (onYoutubeUrlUpdate) {
+      onYoutubeUrlUpdate(newUrl);
+    }
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNotes = e.target.value;
+    setLocalNotes(newNotes);
+    if (onNotesUpdate) {
+      onNotesUpdate(newNotes);
     }
   };
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Video className="h-5 w-5" />
-          Virtual Tour & Videos
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-medium">Virtual Tour & Video</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="virtual-tour">Virtual Tour URL (360° Tour)</Label>
-          <Input 
-            id="virtual-tour" 
-            placeholder="https://example.com/virtual-tour" 
-            value={currentVirtualTourUrl}
-            onChange={(e) => setCurrentVirtualTourUrl(e.target.value)}
+          <Label htmlFor={`virtual-tour-${id}`}>Virtual Tour URL</Label>
+          <Input
+            id={`virtual-tour-${id}`}
+            placeholder="https://my-virtual-tour.com/property123"
+            value={localVirtualTourUrl}
+            onChange={handleVirtualTourChange}
           />
           <p className="text-xs text-muted-foreground">
-            Enter the URL for an external 360° tour (Matterport, etc.)
+            Enter the URL for your Matterport or other virtual tour
           </p>
         </div>
-        
+
         <div className="space-y-2">
-          <Label htmlFor="youtube" className="flex items-center gap-2">
-            <Youtube className="h-4 w-4" /> YouTube Video URL
-          </Label>
-          <Input 
-            id="youtube" 
-            placeholder="https://youtube.com/watch?v=..." 
-            value={currentYoutubeUrl}
-            onChange={(e) => setCurrentYoutubeUrl(e.target.value)}
+          <Label htmlFor={`youtube-${id}`}>YouTube Video URL</Label>
+          <Input
+            id={`youtube-${id}`}
+            placeholder="https://www.youtube.com/watch?v=abcdefg"
+            value={localYoutubeUrl}
+            onChange={handleYoutubeUrlChange}
           />
           <p className="text-xs text-muted-foreground">
-            Enter a YouTube video URL to embed in property views
+            Enter the URL of a YouTube video for this property
           </p>
         </div>
-        
+
         <div className="space-y-2">
-          <Label htmlFor="notes">Property Notes (Internal)</Label>
+          <Label htmlFor={`notes-${id}`}>Notes</Label>
           <Textarea
-            id="notes"
-            placeholder="Add private notes about this property..."
-            value={currentNotes}
-            onChange={(e) => setCurrentNotes(e.target.value)}
-            rows={4}
+            id={`notes-${id}`}
+            placeholder="Additional notes about the property..."
+            className="min-h-[100px]"
+            value={localNotes}
+            onChange={handleNotesChange}
           />
-          <p className="text-xs text-muted-foreground">
-            These notes are for internal use only and won't be shown to clients
-          </p>
         </div>
-        
-        <Button 
-          onClick={handleSaveExternalLinks}
-          disabled={isSaving}
-        >
-          {isSaving ? "Saving..." : "Save External Links"}
-        </Button>
       </CardContent>
     </Card>
   );

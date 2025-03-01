@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +27,8 @@ const initialFormData: PropertyFormData = {
   nearby_places: [],
   latitude: null,
   longitude: null,
-  template_id: "default" // Set default template_id
+  template_id: "default", // Set default template_id
+  floorplanEmbedScript: ""
 };
 
 export function usePropertyForm(id: string | undefined, onSubmit?: (data: PropertyFormData) => void) {
@@ -160,7 +160,8 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
           notes: propertyData.notes || "",
           // Use the casted version to access template_id or use default
           template_id: propertyDataAny.template_id || "default",
-          agent_id: propertyData.agent_id
+          agent_id: propertyData.agent_id,
+          floorplanEmbedScript: propertyData.floorplanEmbedScript || ""
         });
       }
       setIsLoading(false);
