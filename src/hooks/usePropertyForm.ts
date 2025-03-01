@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,7 +162,8 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
           // Use the casted version to access template_id or use default
           template_id: propertyDataAny.template_id || "default",
           agent_id: propertyData.agent_id,
-          floorplanEmbedScript: propertyData.floorplanEmbedScript || ""
+          // Access floorplanEmbedScript from propertyDataAny to avoid TypeScript errors
+          floorplanEmbedScript: propertyDataAny.floorplanEmbedScript || ""
         });
       }
       setIsLoading(false);
