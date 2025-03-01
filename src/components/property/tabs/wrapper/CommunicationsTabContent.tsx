@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -73,12 +72,10 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
         .update({ is_read: true })
         .eq('id', submissionId);
 
-      // Update local state
       setSubmissions(subs => 
         subs.map(sub => sub.id === submissionId ? { ...sub, is_read: true } : sub)
       );
       
-      // Update selected submission if it's the current one
       if (selectedSubmission?.id === submissionId) {
         setSelectedSubmission(prev => prev ? { ...prev, is_read: true } : null);
       }
@@ -102,7 +99,6 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
     
     setIsSending(true);
     try {
-      // Check if SMTP settings are available
       const hasSMTPSettings = 
         settings.smtp_host && 
         settings.smtp_port && 
@@ -112,7 +108,6 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
       
       let emailError = null;
       
-      // Send email response using SMTP settings if available
       if (hasSMTPSettings) {
         try {
           await supabase.functions.invoke('send-email-with-smtp', {
@@ -144,7 +139,6 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
         }
       }
 
-      // Always update the database with the response
       const response_date = new Date().toISOString();
       await supabase
         .from('property_contact_submissions')
@@ -159,13 +153,13 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
         toast({
           title: 'Response saved but not sent',
           description: 'Email could not be sent. Please configure SMTP settings.',
-          variant: 'warning',
+          variant: 'destructive',
         });
       } else if (emailError) {
         toast({
           title: 'Response saved but email failed',
           description: 'Your response has been saved but the email failed to send.',
-          variant: 'warning',
+          variant: 'destructive',
         });
       } else {
         toast({
@@ -174,14 +168,12 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
         });
       }
 
-      // Update local state
       setSubmissions(subs => 
         subs.map(sub => sub.id === selectedSubmission.id 
           ? { ...sub, response: responseText, response_date: response_date, is_read: true } 
           : sub)
       );
       
-      // Clear form and update selected submission
       setResponseText("");
       setSelectedSubmission(prev => prev ? { 
         ...prev, 
