@@ -23,6 +23,15 @@ export interface Settings {
   icon_garages?: string | null;
   icon_energy_class?: string | null;
   
+  // SMTP settings
+  smtp_host?: string | null;
+  smtp_port?: string | null;
+  smtp_username?: string | null;
+  smtp_password?: string | null;
+  smtp_from_email?: string | null;
+  smtp_from_name?: string | null;
+  smtp_secure?: boolean | null;
+  
   // Add property aliases to match AgencySettings expected properties
   primaryColor?: string;
   secondaryColor?: string;

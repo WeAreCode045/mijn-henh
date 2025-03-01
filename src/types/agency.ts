@@ -23,4 +23,13 @@ export interface AgencySettings {
   instagramUrl?: string;
   youtubeUrl?: string;
   facebookUrl?: string;
+  
+  // SMTP settings
+  smtp_host?: string | null;
+  smtp_port?: string | null;
+  smtp_username?: string | null;
+  smtp_password?: string | null;
+  smtp_from_email?: string | null;
+  smtp_from_name?: string | null;
+  smtp_secure?: boolean | null;
 }

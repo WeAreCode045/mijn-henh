@@ -12,7 +12,7 @@ export const useAgencySettings = () => {
   const [settings, setSettings] = useState<AgencySettings>(defaultAgencySettings);
   const { logoPreview, setLogoPreview, handleLogoUpload } = useLogoUpload();
   
-  const { handleChange, handleSelectChange } = useAgencyFormHandlers({ 
+  const { handleChange, handleSelectChange, handleSwitchChange } = useAgencyFormHandlers({ 
     setSettings 
   });
   
@@ -47,6 +47,7 @@ export const useAgencySettings = () => {
     handleSubmit,
     handleChange,
     handleSelectChange,
+    handleSwitchChange,
     handleLogoUpload,
     handlePdfBackgroundUpload,
     handleWebviewBackgroundUpload,

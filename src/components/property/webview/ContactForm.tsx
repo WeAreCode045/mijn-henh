@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,23 +64,36 @@ export function ContactForm({ propertyId, propertyTitle = "", agentId }: Contact
 
       if (error) throw error;
 
-      // Send email notification to agent if agent exists
+      // Send email notification to agent if agent exists, trying the SMTP service first
       if (agentData) {
-        const { error: emailError } = await supabase.functions.invoke('send-agent-notification', {
-          body: {
-            id: submission.id,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            message: formData.message,
-            inquiry_type: formData.inquiryType,
-            property_title: propertyTitle,
-            agent_email: agentData.email,
-            agent_name: agentData.full_name
-          }
-        });
+        try {
+          // Try to use SMTP service first
+          const { error: smtpError } = await supabase.functions.invoke('send-email-with-smtp', {
+            body: {
+              to: agentData.email,
+              subject: `New inquiry for ${propertyTitle || 'property'}`,
+              html: `
+                <h2>New Property Inquiry</h2>
+                <p><strong>Name:</strong> ${formData.name}</p>
+                <p><strong>Email:</strong> ${formData.email}</p>
+                <p><strong>Phone:</strong> ${formData.phone}</p>
+                <p><strong>Inquiry Type:</strong> ${formData.inquiryType}</p>
+                <p><strong>Message:</strong> ${formData.message}</p>
+                <p><strong>Property:</strong> ${propertyTitle || propertyId}</p>
+              `,
+              replyTo: formData.email
+            }
+          });
 
-        if (emailError) throw emailError;
+          // If SMTP fails, fall back to the default notification
+          if (smtpError) {
+            console.warn("SMTP email failed, falling back to default notification:", smtpError);
+            await sendDefaultNotification();
+          }
+        } catch (emailError) {
+          console.warn("SMTP email failed, falling back to default notification:", emailError);
+          await sendDefaultNotification();
+        }
       }
 
       toast({
@@ -96,6 +108,23 @@ export function ContactForm({ propertyId, propertyTitle = "", agentId }: Contact
         title: "Error",
         description: "Er is iets misgegaan bij het verzenden van uw bericht.",
         variant: "destructive"
+      });
+    }
+
+    // Helper function to send the default notification
+    async function sendDefaultNotification() {
+      await supabase.functions.invoke('send-agent-notification', {
+        body: {
+          id: submission.id,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+          inquiry_type: formData.inquiryType,
+          property_title: propertyTitle,
+          agent_email: agentData.email,
+          agent_name: agentData.full_name
+        }
       });
     }
   };

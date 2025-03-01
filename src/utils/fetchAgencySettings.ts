@@ -40,5 +40,13 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     iconLivingSpace: data.icon_living_space || defaultAgencySettings.iconLivingSpace,
     googleMapsApiKey: data.google_maps_api_key || defaultAgencySettings.googleMapsApiKey,
     xmlImportUrl: data.xml_import_url || defaultAgencySettings.xmlImportUrl,
+    // SMTP settings
+    smtp_host: data.smtp_host || null,
+    smtp_port: data.smtp_port || null,
+    smtp_username: data.smtp_username || null,
+    smtp_password: data.smtp_password || null,
+    smtp_from_email: data.smtp_from_email || null,
+    smtp_from_name: data.smtp_from_name || null,
+    smtp_secure: data.smtp_secure || false,
   };
 }

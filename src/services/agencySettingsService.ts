@@ -23,6 +23,14 @@ interface AgencySettingsData {
   instagram_url?: string;
   youtube_url?: string;
   facebook_url?: string;
+  // SMTP settings
+  smtp_host?: string;
+  smtp_port?: string;
+  smtp_username?: string;
+  smtp_password?: string;
+  smtp_from_email?: string;
+  smtp_from_name?: string;
+  smtp_secure?: boolean;
 }
 
 export const agencySettingsService = {
@@ -75,7 +83,15 @@ export const agencySettingsService = {
       xml_import_url: data.xmlImportUrl,
       instagram_url: data.instagramUrl,
       youtube_url: data.youtubeUrl,
-      facebook_url: data.facebookUrl
+      facebook_url: data.facebookUrl,
+      // SMTP settings
+      smtp_host: data.smtp_host,
+      smtp_port: data.smtp_port,
+      smtp_username: data.smtp_username,
+      smtp_password: data.smtp_password,
+      smtp_from_email: data.smtp_from_email,
+      smtp_from_name: data.smtp_from_name,
+      smtp_secure: data.smtp_secure,
     };
 
     const { error } = await supabase

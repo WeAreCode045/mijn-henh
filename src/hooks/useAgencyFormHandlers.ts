@@ -21,8 +21,16 @@ export const useAgencyFormHandlers = ({ setSettings }: UseAgencyFormHandlersProp
     }));
   };
 
+  const handleSwitchChange = (name: string, checked: boolean) => {
+    setSettings((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
   return {
     handleChange,
-    handleSelectChange
+    handleSelectChange,
+    handleSwitchChange
   };
 };

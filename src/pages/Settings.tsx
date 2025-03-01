@@ -16,6 +16,7 @@ const Settings = () => {
     handleSubmit,
     handleChange,
     handleSelectChange,
+    handleSwitchChange,
     handleLogoUpload,
     handlePdfBackgroundUpload,
     handleWebviewBackgroundUpload,
@@ -69,6 +70,7 @@ const Settings = () => {
           <AdvancedTab
             settings={settings}
             onChange={handleChange}
+            onSwitchChange={handleSwitchChange}
           />
         )}
 
