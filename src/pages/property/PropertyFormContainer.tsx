@@ -84,8 +84,13 @@ export function PropertyFormContainer() {
     if (!id || !formData) return;
     
     try {
-      // Here we could implement the actual delete logic
-      // Navigate back to properties list after deletion
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
       navigate('/properties');
       toast({
         title: "Success",
@@ -106,11 +111,15 @@ export function PropertyFormContainer() {
     
     setIsSubmitting(true);
     try {
-      await handleSubmit({} as React.FormEvent, formData);
-      toast({
-        title: "Success",
-        description: "Property saved successfully",
-      });
+      const event = {} as React.FormEvent;
+      const result = await handleSubmit(event, formData);
+      
+      if (result) {
+        toast({
+          title: "Success",
+          description: "Property saved successfully",
+        });
+      }
     } catch (error) {
       console.error("Error saving property:", error);
       toast({
@@ -139,6 +148,7 @@ export function PropertyFormContainer() {
       images={images.map(img => img.url)} // Convert PropertyImage[] to string[] by extracting the URL
       agentInfo={agentInfo}
       templateInfo={templateInfo}
+      isSubmitting={isSubmitting}
     >
       <PropertyForm />
     </PropertyFormLayout>

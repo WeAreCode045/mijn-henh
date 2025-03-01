@@ -13,15 +13,18 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Update data:", JSON.stringify(data));
     
     try {
-      const { error } = await supabase
+      const { error, data: updatedData } = await supabase
         .from('properties')
         .update(data as any)
-        .eq('id', id);
+        .eq('id', id)
+        .select();
         
       if (error) {
         console.error("Supabase update error:", error);
         throw error;
       }
+      
+      console.log("Property updated successfully:", updatedData);
       
       toast({
         title: "Success",
@@ -44,14 +47,17 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Creating new property with data:", JSON.stringify(data));
     
     try {
-      const { error } = await supabase
+      const { error, data: createdData } = await supabase
         .from('properties')
-        .insert(data as any);
+        .insert(data as any)
+        .select();
         
       if (error) {
         console.error("Supabase insert error:", error);
         throw error;
       }
+      
+      console.log("Property created successfully:", createdData);
       
       toast({
         title: "Success",

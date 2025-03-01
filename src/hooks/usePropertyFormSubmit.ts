@@ -57,14 +57,25 @@ export function usePropertyFormSubmit() {
       areas: areasForSubmission,
       nearby_places: nearby_placesJson,
       images: formData.images.map(img => img.url),
-      object_id: formData.object_id
+      object_id: formData.object_id,
+      agent_id: formData.agent_id,
+      template_id: formData.template_id,
+      virtualTourUrl: formData.virtualTourUrl,
+      youtubeUrl: formData.youtubeUrl,
+      notes: formData.notes
     };
     
+    console.log("usePropertyFormSubmit - Final submit data:", submitData);
+    
+    let success = false;
     if (formData.id) {
-      await updateProperty(formData.id, submitData);
+      success = await updateProperty(formData.id, submitData);
     } else {
-      await createProperty(submitData);
+      success = await createProperty(submitData);
     }
+    
+    console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");
+    return success;
   };
 
   return { handleSubmit };
