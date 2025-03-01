@@ -32,7 +32,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
       <Button 
         variant="outline"
         size="sm"
-        onClick={() => navigate(`/property/${propertyId}/webview`)}
+        onClick={onShowWebView}
         className="flex items-center gap-1"
       >
         <ArrowUpRight className="h-4 w-4" />

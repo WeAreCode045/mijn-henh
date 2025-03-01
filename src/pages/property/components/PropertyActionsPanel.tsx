@@ -38,9 +38,8 @@ export function PropertyActionsPanel({
       {propertyData.id && (
         <PropertyActions
           propertyId={propertyData.id}
-          settings={agencySettings}
-          onDelete={onDeleteProperty}
-          onSave={onSaveProperty}
+          onGeneratePDF={() => {}} // Add empty handler for now
+          onShowWebView={() => {}} // Add empty handler for now
         />
       )}
       {isAdmin && (

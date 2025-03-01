@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { generatePropertyPDF } from "@/utils/pdfGenerator";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { usePropertyWebView } from "@/components/property/webview/usePropertyWebView";
 
 export function usePropertyActions(propertyId: string) {
   const navigate = useNavigate();
