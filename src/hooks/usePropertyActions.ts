@@ -18,9 +18,9 @@ export function usePropertyActions(propertyId: string) {
   }, [propertyId]);
 
   const handleWebView = useCallback(() => {
-    // Instead of direct navigation, set state to show inline web view
-    setShowWebView(true);
-  }, [propertyId]);
+    // For direct webview navigation using the real property ID
+    navigate(`/property/${propertyId}/webview`);
+  }, [propertyId, navigate]);
 
   return {
     handleGeneratePDF,

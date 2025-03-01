@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,7 +9,6 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { AppSidebar } from "./components/AppSidebar";
 import { useAuth } from "@/providers/AuthProvider";
 
-// Lazy load pages
 const Index = lazy(() => import("./pages/Index"));
 const Properties = lazy(() => import("./pages/Properties"));
 const PropertyFormPage = lazy(() => import("./pages/PropertyFormPage"));
@@ -30,8 +28,8 @@ const LoadingSpinner = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // Data remains fresh for 1 minute
-      retry: 1, // Only retry failed requests once
+      staleTime: 60 * 1000,
+      retry: 1,
     },
   },
 });
@@ -50,7 +48,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return children;
 }
 
-// Layout wrapper for property routes
 const PropertyLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen flex w-full">
     <AppSidebar />
@@ -71,21 +68,18 @@ const App = () => (
         <Router>
           <SidebarProvider>
             <Routes>
-              {/* Auth route */}
               <Route path="/auth" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <Auth />
                 </Suspense>
               } />
               
-              {/* Public property webview route */}
               <Route path="/property/view/:id" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <PropertyWebView />
                 </Suspense>
               } />
               
-              {/* Main Dashboard */}
               <Route path="/" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -94,7 +88,6 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* Properties List */}
               <Route path="/properties" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -103,7 +96,6 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* New Property Form */}
               <Route path="/property/new" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -112,7 +104,6 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* Property Tabs Routes - New URL Structure */}
               <Route path="/property/:id/dashboard" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -145,21 +136,12 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* Property WebView - New URL Structure */}
               <Route path="/property/:id/webview" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <PropertyWebView />
                 </Suspense>
               } />
               
-              {/* Legacy route for backward compatibility */}
-              <Route path="/property/:id/edit" element={
-                <ProtectedRoute>
-                  <Navigate to="/property/:id/dashboard" replace />
-                </ProtectedRoute>
-              } />
-              
-              {/* Settings */}
               <Route path="/settings" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -168,7 +150,6 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* Users */}
               <Route path="/users" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -177,7 +158,6 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* Templates */}
               <Route path="/templates" element={
                 <ProtectedRoute>
                   <PropertyLayout>
@@ -186,7 +166,6 @@ const App = () => (
                 </ProtectedRoute>
               } />
               
-              {/* 404 route */}
               <Route path="*" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <NotFound />

@@ -29,7 +29,8 @@ export function usePropertyTabs() {
     if (!id) return;
     
     setActiveTab(tab);
-    navigate(`/property/${id}/${tab}`, { replace: true });
+    // Using the actual property ID from params
+    navigate(`/property/${id}/${tab}`);
   };
   
   // Sync with URL path changes
