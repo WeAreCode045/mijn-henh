@@ -51,14 +51,16 @@ export function ContactForm({ property, settings }: ContactFormProps) {
 
       // Save the submission to the database
       const { data: submissionData, error: submissionError } = await supabase
-        .from('form_submissions')
+        .from('property_contact_submissions')
         .insert({
           property_id: property.id,
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
           message: formData.message,
-          status: 'new'
+          inquiry_type: 'information',
+          agent_id: property.agent_id,
+          is_read: false
         })
         .select()
         .single();
@@ -115,8 +117,8 @@ export function ContactForm({ property, settings }: ContactFormProps) {
               property_id: property.id,
               property_title: property.title,
               submission_id: submissionData.id,
-              agent_email: property.agent_email || settings.email,
-              agent_name: property.agent_name || settings.name,
+              agent_email: property.agent?.email || settings.email,
+              agent_name: property.agent?.name || settings.name,
               inquiry_name: formData.name,
               inquiry_email: formData.email,
               inquiry_phone: formData.phone,

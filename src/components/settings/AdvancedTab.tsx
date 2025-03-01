@@ -1,12 +1,12 @@
 
-import { Settings } from "@/types/settings";
+import { AgencySettings } from "@/types/agency";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { XmlImportSettings } from "./XmlImportSettings";
 import { SmtpSettings } from "./SmtpSettings";
 
 interface AdvancedTabProps {
-  settings: Settings;
+  settings: AgencySettings;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSwitchChange?: (name: string, checked: boolean) => void;
 }
@@ -18,8 +18,8 @@ export function AdvancedTab({ settings, onChange, onSwitchChange }: AdvancedTabP
         <Label htmlFor="google_maps_api_key">Google Maps API Key</Label>
         <Input
           id="google_maps_api_key"
-          name="google_maps_api_key"
-          value={settings.google_maps_api_key}
+          name="googleMapsApiKey"
+          value={settings.googleMapsApiKey || ''}
           onChange={onChange}
           type="password"
         />

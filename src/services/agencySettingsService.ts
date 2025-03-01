@@ -85,13 +85,13 @@ export const agencySettingsService = {
       youtube_url: data.youtubeUrl,
       facebook_url: data.facebookUrl,
       // SMTP settings
-      smtp_host: data.smtp_host,
-      smtp_port: data.smtp_port,
-      smtp_username: data.smtp_username,
-      smtp_password: data.smtp_password,
-      smtp_from_email: data.smtp_from_email,
-      smtp_from_name: data.smtp_from_name,
-      smtp_secure: data.smtp_secure,
+      smtp_host: data.smtp_host || null,
+      smtp_port: data.smtp_port || null,
+      smtp_username: data.smtp_username || null,
+      smtp_password: data.smtp_password || null,
+      smtp_from_email: data.smtp_from_email || null,
+      smtp_from_name: data.smtp_from_name || null,
+      smtp_secure: data.smtp_secure || false,
     };
 
     const { error } = await supabase
