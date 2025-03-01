@@ -23,6 +23,7 @@ export function usePropertyFormSubmit() {
     }
     
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
+    console.log("usePropertyFormSubmit - floorplanEmbedScript:", formData.floorplanEmbedScript);
     
     if (!validatePropertyData(formData)) {
       return false;
@@ -67,10 +68,12 @@ export function usePropertyFormSubmit() {
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       notes: formData.notes,
-      floorplanEmbedScript: formData.floorplanEmbedScript
+      // Make sure floorplanEmbedScript is explicitly included
+      floorplanEmbedScript: formData.floorplanEmbedScript || ""
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);
+    console.log("usePropertyFormSubmit - floorplanEmbedScript in submit data:", submitData.floorplanEmbedScript);
     
     let success = false;
     if (formData.id) {

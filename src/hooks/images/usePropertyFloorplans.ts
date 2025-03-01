@@ -10,6 +10,8 @@ export function usePropertyFloorplans(
   const { toast } = useToast();
 
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault(); // Prevent default form submission behavior
+    
     if (!e.target.files?.length) return;
 
     try {
@@ -122,6 +124,9 @@ export function usePropertyFloorplans(
       ...formData,
       floorplanEmbedScript: script
     });
+    
+    // Log to confirm the update
+    console.log("Updated formData with floorplanEmbedScript:", formData.floorplanEmbedScript);
   };
 
   return {

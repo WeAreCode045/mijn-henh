@@ -6,16 +6,24 @@ import type { PropertySubmitData } from "@/types/property";
 
 export function usePropertyDatabase() {
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   const updateProperty = async (id: string, data: PropertySubmitData): Promise<boolean> => {
     console.log("usePropertyDatabase - Updating property with ID:", id);
     console.log("usePropertyDatabase - Update data:", JSON.stringify(data));
     
     try {
+      // Ensure floorplanEmbedScript is included in the update data
+      const updateData = {
+        ...data,
+        floorplanEmbedScript: data.floorplanEmbedScript || ""
+      };
+
+      console.log("usePropertyDatabase - Final update data with floorplanEmbedScript:", 
+                 updateData.floorplanEmbedScript);
+      
       const { error, data: updatedData } = await supabase
         .from('properties')
-        .update(data as any)
+        .update(updateData as any)
         .eq('id', id)
         .select();
         
@@ -47,9 +55,18 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Creating new property with data:", JSON.stringify(data));
     
     try {
+      // Ensure floorplanEmbedScript is included in the create data
+      const createData = {
+        ...data,
+        floorplanEmbedScript: data.floorplanEmbedScript || ""
+      };
+      
+      console.log("usePropertyDatabase - Final create data with floorplanEmbedScript:", 
+                 createData.floorplanEmbedScript);
+      
       const { error, data: createdData } = await supabase
         .from('properties')
-        .insert(data as any)
+        .insert(createData as any)
         .select();
         
       if (error) {

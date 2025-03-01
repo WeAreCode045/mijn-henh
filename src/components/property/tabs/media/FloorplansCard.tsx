@@ -42,6 +42,16 @@ export function FloorplansCard({
     }
   };
 
+  const handleRemoveClick = (e: React.MouseEvent, index: number) => {
+    // Prevent default behavior and propagation to avoid unexpected redirects
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (onRemoveFloorplan) {
+      onRemoveFloorplan(index);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -102,7 +112,8 @@ export function FloorplansCard({
                       variant="destructive"
                       size="icon"
                       className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => onRemoveFloorplan(index)}
+                      onClick={(e) => handleRemoveClick(e, index)}
+                      type="button"
                     >
                       <X className="h-4 w-4" />
                     </Button>
