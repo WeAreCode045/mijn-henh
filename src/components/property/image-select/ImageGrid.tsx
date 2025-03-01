@@ -10,6 +10,14 @@ interface ImageGridProps {
 }
 
 export function ImageGrid({ images, selected, onToggleSelect, singleSelect = false }: ImageGridProps) {
+  const handleImageClick = (imageId: string, e: React.MouseEvent) => {
+    // Prevent default actions and propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
+    onToggleSelect(imageId);
+  };
+  
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-h-[60vh] overflow-y-auto p-2">
       {images.map((image) => (
@@ -20,7 +28,7 @@ export function ImageGrid({ images, selected, onToggleSelect, singleSelect = fal
               ? "border-primary"
               : "border-transparent"
           }`}
-          onClick={() => onToggleSelect(image.id)}
+          onClick={(e) => handleImageClick(image.id, e)}
         >
           <div className="aspect-[4/3] relative">
             <img

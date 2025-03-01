@@ -33,8 +33,9 @@ export function PropertyImagesCard({
   
   // Create a file input ref to handle file selection
   const handleUploadClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent any default form submission
+    // Prevent default actions and propagation
     e.preventDefault();
+    e.stopPropagation();
     
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -46,13 +47,15 @@ export function PropertyImagesCard({
   };
 
   const handleRemoveImage = (index: number, e: React.MouseEvent) => {
-    // Prevent any default form submission
+    // Prevent default actions and propagation
     e.preventDefault();
+    e.stopPropagation();
     onRemoveImage(index);
   };
 
   const handleSetFeatured = (url: string, e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (onSetFeaturedImage) {
       onSetFeaturedImage(url);
     }
@@ -60,6 +63,7 @@ export function PropertyImagesCard({
 
   const handleToggleGrid = (url: string, e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (onToggleGridImage) {
       onToggleGridImage(url);
     }

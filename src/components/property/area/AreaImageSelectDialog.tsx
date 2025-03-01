@@ -21,7 +21,13 @@ export function AreaImageSelectDialog({
   selectedImageIds,
   onUpdate,
 }: AreaImageSelectDialogProps) {
-  const toggleImageSelection = (imageId: string) => {
+  const toggleImageSelection = (imageId: string, e?: React.MouseEvent) => {
+    // Prevent default actions if event is provided
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     const currentSelection = [...selectedImageIds];
     
     if (currentSelection.includes(imageId)) {
@@ -32,6 +38,14 @@ export function AreaImageSelectDialog({
       // Add to selection
       onUpdate([...currentSelection, imageId]);
     }
+  };
+  
+  const handleButtonClick = (e: React.MouseEvent) => {
+    // Prevent default actions
+    e.preventDefault();
+    e.stopPropagation();
+    
+    onOpenChange(false);
   };
   
   return (
@@ -52,7 +66,7 @@ export function AreaImageSelectDialog({
                     relative cursor-pointer border rounded-md overflow-hidden
                     ${isSelected ? "ring-2 ring-primary" : "hover:opacity-80"}
                   `}
-                  onClick={() => toggleImageSelection(image.id)}
+                  onClick={(e) => toggleImageSelection(image.id, e)}
                 >
                   <img
                     src={image.url}
@@ -77,10 +91,10 @@ export function AreaImageSelectDialog({
         </div>
         
         <div className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleButtonClick}>
             Cancel
           </Button>
-          <Button onClick={() => onOpenChange(false)}>
+          <Button onClick={handleButtonClick}>
             Done
           </Button>
         </div>

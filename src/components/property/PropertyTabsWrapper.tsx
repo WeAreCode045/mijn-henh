@@ -1,23 +1,25 @@
 
+import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
-import { PropertyData, PropertyFormData } from "@/types/property";
-import { Settings } from "@/types/settings";
-import { usePropertySettings } from "@/hooks/usePropertySettings";
-import { usePropertyContent } from "@/hooks/usePropertyContent";
-import { usePropertyActions } from "@/hooks/usePropertyActions";
-import { usePropertyTechnicalData } from "@/hooks/usePropertyTechnicalData";
-import { usePropertyAreas } from "@/hooks/usePropertyAreas";
-import { useFeatures } from "@/hooks/useFeatures";
-import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyTabs } from "@/hooks/usePropertyTabs";
-import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
+import { PropertyData, PropertyTechnicalItem } from "@/types/property";
+import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyFormState } from "@/hooks/usePropertyFormState";
+import { usePropertyAreas } from "@/hooks/usePropertyAreas";
+import { usePropertyContent } from "@/hooks/usePropertyContent";
+import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
+import { usePropertyActions } from "@/hooks/usePropertyActions";
+import { usePropertyTabs } from "@/hooks/usePropertyTabs";
+import { useFormSteps } from "@/hooks/useFormSteps";
+import { PropertyWebView } from "./PropertyWebView";
+import { usePropertyWebView } from "./webview/usePropertyWebView";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
-  settings?: Settings | null;
-  onSave: () => void;
-  onDelete: () => Promise<void>;
+  settings: any;
+  onSave?: () => void;
+  onDelete?: () => Promise<void>;
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
 }
@@ -30,50 +32,39 @@ export function PropertyTabsWrapper({
   agentInfo,
   templateInfo
 }: PropertyTabsWrapperProps) {
-  // Tab state management
+  const [webViewOpen, setWebViewOpen] = useState(false);
   const { activeTab, setActiveTab } = usePropertyTabs();
   
   // Form state management
-  const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
+  const { formState, handleFieldChange } = usePropertyFormState(property);
   
-  // Hooks for different functionalities
-  const { isUpdating, handleSaveObjectId, handleSaveAgent, handleSaveTemplate } = usePropertySettings(
-    property.id,
-    onSave
-  );
+  // Handle form submission
+  const { handleSubmit } = usePropertyFormSubmit();
   
-  const { handleGeneratePDF, handleWebView } = usePropertyActions(property.id);
+  // Use property actions
+  const { handleGeneratePDF } = usePropertyActions(property.id);
   
-  const { 
-    currentStep,
-    handleStepClick, 
-    handleNext, 
-    handlePrevious, 
-    onSubmit
-  } = usePropertyContent();
-
+  // Handle property content
   const {
-    technicalItems,
+    addFeature,
+    removeFeature,
+    updateFeature,
     addTechnicalItem,
     removeTechnicalItem,
-    updateTechnicalItem
-  } = usePropertyTechnicalData(formState, setFormState);
-
+    updateTechnicalItem,
+  } = usePropertyContent(formState, handleFieldChange);
+  
+  // Handle property areas
   const {
     addArea,
     removeArea,
     updateArea,
     handleAreaImageUpload,
     handleAreaImageRemove,
-    handleAreaImagesSelect
+    handleAreaImagesSelect,
   } = usePropertyAreas(formState, setFormState);
-
-  const {
-    addFeature,
-    removeFeature,
-    updateFeature
-  } = useFeatures(formState, setFormState);
-
+  
+  // Handle property images
   const {
     handleImageUpload,
     handleRemoveImage,
@@ -84,18 +75,55 @@ export function PropertyTabsWrapper({
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
-    handleToggleGridImage
+    handleToggleGridImage,
+    isInGridImages,
+    isFeaturedImage,
+    images
   } = usePropertyImages(formState, setFormState);
+  
+  // Form steps
+  const { currentStep, handleStepClick, handleNext, handlePrevious } = useFormSteps();
+
+  // Web view functions
+  const handleWebView = () => {
+    setWebViewOpen(true);
+  };
+
+  const onSubmit = () => {
+    const formEl = document.getElementById('propertyForm') as HTMLFormElement;
+    if (formEl) {
+      // Create a FormEvent object
+      const formEvent = new Event('submit', { bubbles: true, cancelable: true }) as unknown as React.FormEvent;
+      handleSubmit(formEvent, formState);
+    }
+  };
+
+  // Handle saving object ID
+  const handleSaveObjectId = (objectId: string) => {
+    handleFieldChange('object_id', objectId);
+  };
+
+  // Handle saving agent
+  const handleSaveAgent = (agentId: string) => {
+    handleFieldChange('agent_id', agentId);
+  };
+
+  // Handle saving template
+  const handleSaveTemplate = (templateId: string) => {
+    handleFieldChange('template_id', templateId);
+  };
 
   return (
-    <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
+    <div className="space-y-6">
+      <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      
       <PropertyTabContents
         activeTab={activeTab}
         property={property}
         formState={formState}
         agentInfo={agentInfo}
         templateInfo={templateInfo}
-        isUpdating={isUpdating}
+        isUpdating={false}
         onSave={onSave}
         onDelete={onDelete}
         handleSaveObjectId={handleSaveObjectId}
@@ -132,6 +160,19 @@ export function PropertyTabsWrapper({
         handlePrevious={handlePrevious}
         onSubmit={onSubmit}
       />
-    </PropertyTabs>
+
+      {/* WebView Dialog */}
+      <Dialog open={webViewOpen} onOpenChange={setWebViewOpen}>
+        <DialogContent className="max-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-auto">
+            <PropertyWebView 
+              property={formState} 
+              open={webViewOpen} 
+              onOpenChange={setWebViewOpen} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

@@ -5,6 +5,8 @@ import { Grid3X3, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageSelectDialog } from "@/components/property/ImageSelectDialog";
 import type { PropertyFormData } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface GridImagesSectionProps {
   formData: PropertyFormData;
@@ -16,6 +18,7 @@ export function GridImagesSection({
   onFieldChange 
 }: GridImagesSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
   
   const gridImages = Array.isArray(formData.gridImages) ? formData.gridImages : [];
   
@@ -24,18 +27,61 @@ export function GridImagesSection({
     .map(url => formData.images.find(img => img.url === url)?.id || '')
     .filter(id => id !== '');
 
-  const handleImagesSelect = (selectedIds: string[]) => {
+  const handleImagesSelect = async (selectedIds: string[]) => {
     // Map selected IDs back to URLs
     const selectedUrls = selectedIds
       .map(id => formData.images.find(img => img.id === id)?.url || '')
       .filter(url => url !== '');
     
+    // Update local state
     onFieldChange('gridImages', selectedUrls);
+    
+    // If we have a property ID, update the database
+    if (formData.id) {
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ gridImages: selectedUrls })
+          .eq('id', formData.id);
+          
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error updating grid images:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update grid images in database",
+          variant: "destructive",
+        });
+        // Continue as local state is already updated
+      }
+    }
   };
 
-  const handleRemoveImage = (url: string) => {
+  const handleRemoveImage = async (url: string) => {
     const updatedGridImages = gridImages.filter(gridUrl => gridUrl !== url);
+    
+    // Update local state
     onFieldChange('gridImages', updatedGridImages);
+    
+    // If we have a property ID, update the database
+    if (formData.id) {
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ gridImages: updatedGridImages })
+          .eq('id', formData.id);
+          
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error removing grid image:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update grid images in database",
+          variant: "destructive",
+        });
+        // Continue as local state is already updated
+      }
+    }
   };
 
   return (

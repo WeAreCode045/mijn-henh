@@ -107,10 +107,26 @@ export function usePropertyMainImages(
       let updatedFeaturedImage = formData.featuredImage;
       if (formData.featuredImage === imageToRemove.url) {
         updatedFeaturedImage = null;
+        
+        // Update featuredImage in the database if we have an ID
+        if (formData.id) {
+          await supabase
+            .from('properties')
+            .update({ featuredImage: null })
+            .eq('id', formData.id);
+        }
       }
       
       // If this was in grid images, remove it
       const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageToRemove.url);
+      
+      // Update gridImages in the database if we have an ID and there's a change
+      if (formData.id && updatedGridImages.length !== (formData.gridImages || []).length) {
+        await supabase
+          .from('properties')
+          .update({ gridImages: updatedGridImages })
+          .eq('id', formData.id);
+      }
 
       // Create a new images array without the removed image
       const updatedImages = formData.images.filter((_, i) => i !== index);
