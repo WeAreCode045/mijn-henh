@@ -102,6 +102,15 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     );
   }
 
+  const handleBackNavigation = () => {
+    // Use the new URL structure
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate('/properties');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white relative">
       {/* Fixed Breadcrumb */}
@@ -109,7 +118,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
         <div className="container mx-auto px-4">
           <PropertyBreadcrumb 
             title={propertyData.title}
-            onBack={() => navigate('/properties')}
+            onBack={handleBackNavigation}
           />
         </div>
       </div>

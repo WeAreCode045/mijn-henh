@@ -38,7 +38,7 @@ export const PropertyCardActions = ({
       <Button 
         variant="outline" 
         size="icon"
-        onClick={() => navigate(`/property/${property.id}`)}
+        onClick={() => navigate(`/property/${property.id}/webview`)}
         title="Open Preview"
       >
         <ArrowUpRight className="h-4 w-4" />
@@ -46,7 +46,7 @@ export const PropertyCardActions = ({
       <Button 
         variant="outline" 
         size="icon"
-        onClick={() => navigate(`/property/${property.id}/edit`)}
+        onClick={() => navigate(`/property/${property.id}/dashboard`)}
         title="Bewerk"
       >
         <Pencil className="h-4 w-4" />
@@ -83,4 +83,4 @@ export const PropertyCardActions = ({
       </Button>
     </div>
   );
-};
+}

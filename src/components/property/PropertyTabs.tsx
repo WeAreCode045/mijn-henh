@@ -7,6 +7,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import { ReactNode } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface PropertyTabsProps {
   activeTab: string;
@@ -15,9 +16,15 @@ interface PropertyTabsProps {
 }
 
 export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsProps) {
-  // Add some console logging to help debug the tab changing
+  const { id } = useParams();
+  const navigate = useNavigate();
+  
+  // Handle tab change by navigating to the new route
   const handleTabChange = (value: string) => {
     console.log("PropertyTabs - Tab changing to:", value);
+    if (id) {
+      navigate(`/property/${id}/${value}`, { replace: true });
+    }
     onTabChange(value);
   };
 
@@ -27,6 +34,7 @@ export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsP
         value="dashboard" 
         className="flex items-center gap-2"
         data-active={activeTab === 'dashboard'}
+        onClick={() => handleTabChange('dashboard')}
       >
         <Info className="h-4 w-4" />
         <span className="hidden sm:inline">Property Info</span>
@@ -35,6 +43,7 @@ export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsP
         value="content" 
         className="flex items-center gap-2"
         data-active={activeTab === 'content'}
+        onClick={() => handleTabChange('content')}
       >
         <FileText className="h-4 w-4" />
         <span className="hidden sm:inline">Property Data</span>
@@ -43,6 +52,7 @@ export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsP
         value="media" 
         className="flex items-center gap-2"
         data-active={activeTab === 'media'}
+        onClick={() => handleTabChange('media')}
       >
         <ImageIcon className="h-4 w-4" />
         <span className="hidden sm:inline">Media</span>
@@ -51,6 +61,7 @@ export function PropertyTabs({ activeTab, onTabChange, children }: PropertyTabsP
         value="communications" 
         className="flex items-center gap-2"
         data-active={activeTab === 'communications'}
+        onClick={() => handleTabChange('communications')}
       >
         <MessageSquare className="h-4 w-4" />
         <span className="hidden sm:inline">Communications</span>

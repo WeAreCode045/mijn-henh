@@ -1,42 +1,44 @@
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 export function usePropertyTabs() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { id } = useParams();
+  const navigate = useNavigate();
   const location = useLocation();
-  const tabParam = searchParams.get('tab');
   
-  // Valid tab values
+  // Valid tab values and their corresponding paths
   const validTabs = ['dashboard', 'content', 'media', 'communications'];
   
-  // Default to dashboard tab if no valid tab is in URL
-  const [activeTab, setActiveTab] = useState(
-    validTabs.includes(tabParam || '') ? tabParam : 'dashboard'
-  );
+  // Extract the current tab from the URL path
+  const getTabFromPath = (path: string): string => {
+    for (const tab of validTabs) {
+      if (path.endsWith(`/${tab}`)) {
+        return tab;
+      }
+    }
+    // If no valid tab is found in the path, default to dashboard
+    return 'dashboard';
+  };
+  
+  // Get the initial active tab from the URL
+  const [activeTab, setActiveTab] = useState(getTabFromPath(location.pathname));
   
   // Update the URL when tab changes
   const handleTabChange = (tab: string) => {
+    if (!id) return;
+    
     setActiveTab(tab);
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev);
-      newParams.set('tab', tab);
-      return newParams;
-    });
+    navigate(`/property/${id}/${tab}`, { replace: true });
   };
   
-  // Sync with URL parameters on mount and when URL changes
+  // Sync with URL path changes
   useEffect(() => {
-    // Check if URL ends with /edit and remove it if needed
-    if (location.pathname.endsWith('/edit')) {
-      const newPath = location.pathname.replace('/edit', '');
-      window.history.replaceState(null, '', newPath + location.search);
+    const currentTab = getTabFromPath(location.pathname);
+    if (currentTab !== activeTab) {
+      setActiveTab(currentTab);
     }
-
-    if (tabParam && validTabs.includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [tabParam, location.pathname]);
+  }, [location.pathname]);
   
   return {
     activeTab,

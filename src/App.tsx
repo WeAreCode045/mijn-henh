@@ -50,6 +50,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return children;
 }
 
+// Layout wrapper for property routes
+const PropertyLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen flex w-full">
+    <AppSidebar />
+    <main className="flex-1 p-4">
+      <Suspense fallback={<LoadingSpinner />}>
+        {children}
+      </Suspense>
+    </main>
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -59,156 +71,127 @@ const App = () => (
         <Router>
           <SidebarProvider>
             <Routes>
+              {/* Auth route */}
               <Route path="/auth" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <Auth />
                 </Suspense>
               } />
               
-              {/* Public web view routes - use explicit path naming to avoid conflicts */}
-              <Route
-                path="/property/view/:id"
-                element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <PropertyWebView />
-                  </Suspense>
-                }
-              />
+              {/* Public property webview route */}
+              <Route path="/property/view/:id" element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <PropertyWebView />
+                </Suspense>
+              } />
               
-              {/* Legacy web view route - modify to be more specific */}
-              <Route
-                path="/property/:id/webview"
-                element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <PropertyWebView />
-                  </Suspense>
-                }
-              />
+              {/* Main Dashboard */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <Index />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              {/* Protected admin routes */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <Index />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              {/* Properties List */}
+              <Route path="/properties" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <Properties />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              <Route
-                path="/properties"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <Properties />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              {/* New Property Form */}
+              <Route path="/property/new" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <PropertyFormPage />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              <Route
-                path="/property/new"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <PropertyFormPage />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              {/* Property Tabs Routes - New URL Structure */}
+              <Route path="/property/:id/dashboard" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <PropertyFormPage />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              <Route
-                path="/property/:id/edit"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <PropertyFormPage />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/property/:id/content" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <PropertyFormPage />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              {/* Make sure this route doesn't catch all property/:id routes */}
-              {/* Explicitly use ./* matcher to ensure it doesn't catch other property routes */}
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <Settings />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/property/:id/media" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <PropertyFormPage />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              <Route
-                path="/users"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <Users />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/property/:id/communications" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <PropertyFormPage />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
-              <Route
-                path="/templates"
-                element={
-                  <ProtectedRoute>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1 p-4">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          <Templates />
-                        </Suspense>
-                      </main>
-                    </div>
-                  </ProtectedRoute>
-                }
-              />
+              {/* Property WebView - New URL Structure */}
+              <Route path="/property/:id/webview" element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <PropertyWebView />
+                </Suspense>
+              } />
+              
+              {/* Legacy route for backward compatibility */}
+              <Route path="/property/:id/edit" element={
+                <ProtectedRoute>
+                  <Navigate to="/property/:id/dashboard" replace />
+                </ProtectedRoute>
+              } />
+              
+              {/* Settings */}
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <Settings />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Users */}
+              <Route path="/users" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <Users />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Templates */}
+              <Route path="/templates" element={
+                <ProtectedRoute>
+                  <PropertyLayout>
+                    <Templates />
+                  </PropertyLayout>
+                </ProtectedRoute>
+              } />
               
               {/* 404 route */}
-              <Route
-                path="*"
-                element={
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <NotFound />
-                  </Suspense>
-                }
-              />
+              <Route path="*" element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <NotFound />
+                </Suspense>
+              } />
             </Routes>
           </SidebarProvider>
         </Router>

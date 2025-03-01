@@ -15,11 +15,11 @@ export function AdvancedTab({ settings, onChange, onSwitchChange }: AdvancedTabP
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="googleMapsApiKey">Google Maps API Key</Label>
+        <Label htmlFor="google_maps_api_key">Google Maps API Key</Label>
         <Input
-          id="googleMapsApiKey"
-          name="googleMapsApiKey"
-          value={settings.googleMapsApiKey}
+          id="google_maps_api_key"
+          name="google_maps_api_key"
+          value={settings.google_maps_api_key}
           onChange={onChange}
           type="password"
         />
