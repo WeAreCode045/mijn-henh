@@ -15,9 +15,13 @@ export function MediaDatabaseFetcher({
   onFetchComplete
 }: MediaDatabaseFetcherProps) {
   useEffect(() => {
+    console.log("MediaDatabaseFetcher - checking if fetch needed", {propertyId, imagesLength: images?.length});
+    
     if (propertyId && (!images || images.length === 0)) {
       const fetchImages = async () => {
         try {
+          console.log("MediaDatabaseFetcher - fetching images for property:", propertyId);
+          
           const { data, error } = await supabase
             .from('property_images')
             .select('id, url')
@@ -25,7 +29,10 @@ export function MediaDatabaseFetcher({
             .eq('type', 'image')
             .order('created_at', { ascending: false });
             
-          if (error) throw error;
+          if (error) {
+            console.error("MediaDatabaseFetcher - Error fetching images:", error);
+            throw error;
+          }
           
           if (data && data.length > 0) {
             // Transform to PropertyImage objects

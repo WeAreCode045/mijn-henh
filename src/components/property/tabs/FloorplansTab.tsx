@@ -10,7 +10,7 @@ import { useState } from "react";
 
 interface FloorplansTabProps {
   id: string;
-  floorplans?: PropertyFloorplan[] | string[];
+  floorplans?: PropertyFloorplan[] | string[] | any[];
   floorplanEmbedScript?: string;
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
@@ -52,7 +52,12 @@ export function FloorplansTab({
   };
 
   const handleDatabaseFloorplansFetched = (dbFloorplans: PropertyFloorplan[]) => {
-    setParsedFloorplans(dbFloorplans);
+    setParsedFloorplans(prevFloorplans => {
+      // Merge with any existing floorplans, avoiding duplicates by URL
+      const existingUrls = prevFloorplans.map(f => f.url);
+      const newFloorplans = dbFloorplans.filter(f => !existingUrls.includes(f.url));
+      return [...prevFloorplans, ...newFloorplans];
+    });
     setFloorplansKey(Date.now()); // Force re-render
   };
 

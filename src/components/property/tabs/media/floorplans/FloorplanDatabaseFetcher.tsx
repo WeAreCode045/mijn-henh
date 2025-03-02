@@ -15,9 +15,13 @@ export function FloorplanDatabaseFetcher({
   onFetchComplete
 }: FloorplanDatabaseFetcherProps) {
   useEffect(() => {
+    console.log("FloorplanDatabaseFetcher - checking if fetch needed", {propertyId, floorplanLength: floorplans?.length});
+    
     if (propertyId && (!floorplans || floorplans.length === 0)) {
       const fetchFloorplans = async () => {
         try {
+          console.log("FloorplanDatabaseFetcher - fetching floorplans for property:", propertyId);
+          
           const { data, error } = await supabase
             .from('property_images')
             .select('id, url')
@@ -25,7 +29,10 @@ export function FloorplanDatabaseFetcher({
             .eq('type', 'floorplan')
             .order('created_at', { ascending: false });
             
-          if (error) throw error;
+          if (error) {
+            console.error("FloorplanDatabaseFetcher - Error fetching floorplans:", error);
+            throw error;
+          }
           
           if (data && data.length > 0) {
             // Transform to simple PropertyFloorplan objects with explicit type casting

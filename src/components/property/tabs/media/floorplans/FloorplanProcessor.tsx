@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { PropertyFloorplan } from "@/types/property";
 
 interface FloorplanProcessorProps {
-  floorplans: PropertyFloorplan[] | string[];
+  floorplans: PropertyFloorplan[] | string[] | any[];
   propertyId?: string;
   onProcessed: (processed: PropertyFloorplan[]) => void;
 }

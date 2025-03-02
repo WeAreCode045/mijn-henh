@@ -71,21 +71,25 @@ export function useMediaUpload(
       // Update form state
       setFormData(updatedFormData);
       
-      // If the property exists in the database, save images immediately
+      // If the property is already saved in the database, update it immediately
       if (formData.id) {
-        // Add images to the property_images table for tracking
-        for (const image of newImages) {
-          const { error } = await supabase
-            .from('property_images')
-            .insert({
-              property_id: formData.id,
-              url: image.url,
-              type: 'image' // Set type as 'image' to distinguish from floorplans
-            });
-            
-          if (error) {
-            console.error('Error adding image to database:', error);
+        try {
+          // Add images to the property_images table for tracking
+          for (const image of newImages) {
+            const { error } = await supabase
+              .from('property_images')
+              .insert({
+                property_id: formData.id,
+                url: image.url,
+                type: 'image' // Set type as 'image' to distinguish from floorplans
+              });
+              
+            if (error) {
+              console.error('Error adding image to database:', error);
+            }
           }
+        } catch (error) {
+          console.error('Exception updating images in database:', error);
         }
       }
       
@@ -161,7 +165,8 @@ export function useMediaUpload(
           .from('property_images')
           .delete()
           .eq('url', imageToRemove.url)
-          .eq('property_id', formData.id);
+          .eq('property_id', formData.id)
+          .eq('type', 'image');
           
         if (error) {
           console.error('Error removing image from database:', error);
@@ -182,15 +187,21 @@ export function useMediaUpload(
     if (!propertyId) return [];
     
     try {
+      console.log("Fetching images for property:", propertyId);
+      
       const { data, error } = await supabase
         .from('property_images')
-        .select('*')
+        .select('id, url')
         .eq('property_id', propertyId)
-        .eq('type', 'image') // Only get 'image' type, not floorplans
+        .eq('type', 'image')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching images:", error);
+        throw error;
+      }
       
+      console.log("Fetched images:", data);
       return data || [];
     } catch (error) {
       console.error('Error fetching property images:', error);

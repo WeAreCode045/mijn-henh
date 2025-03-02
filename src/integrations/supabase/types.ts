@@ -428,18 +428,21 @@ export type Database = {
           created_at: string
           id: string
           property_id: string | null
+          type: string | null
           url: string
         }
         Insert: {
           created_at?: string
           id?: string
           property_id?: string | null
+          type?: string | null
           url: string
         }
         Update: {
           created_at?: string
           id?: string
           property_id?: string | null
+          type?: string | null
           url?: string
         }
         Relationships: [
