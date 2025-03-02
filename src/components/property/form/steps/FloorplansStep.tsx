@@ -48,6 +48,7 @@ export function FloorplansStep({
   };
 
   const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    console.log("FloorplansStep: updating embed script:", e.target.value);
     onFieldChange('floorplanEmbedScript', e.target.value);
   };
 
@@ -83,7 +84,7 @@ export function FloorplansStep({
           {/* Uploader component - This should always be visible */}
           <FloorplanUploader isLoading={isUploading} onUpload={handleFloorplanUpload} />
           
-          {/* Embed script component */}
+          {/* Embed script component - make sure it gets the current script value */}
           <FloorplanEmbed 
             embedScript={formData.floorplanEmbedScript || ''} 
             onChange={handleEmbedScriptChange} 
