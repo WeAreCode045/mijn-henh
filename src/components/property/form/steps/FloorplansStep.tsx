@@ -7,6 +7,7 @@ import { FloorplanEmbed } from "../../tabs/media/floorplans/FloorplanEmbed";
 import { FloorplanProcessor } from "../../tabs/media/floorplans/FloorplanProcessor";
 import { useState, useEffect } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FloorplansStepProps {
   formData: PropertyFormData;
@@ -27,18 +28,21 @@ export function FloorplansStep({
 }: FloorplansStepProps) {
   const [parsedFloorplans, setParsedFloorplans] = useState(formData?.floorplans || []);
   const [floorplansKey, setFloorplansKey] = useState(Date.now());
+  const [isProcessing, setIsProcessing] = useState(true);
 
   // Update parsed floorplans when formData.floorplans changes
   useEffect(() => {
     console.log("FloorplansStep: formData.floorplans updated", formData?.floorplans);
     setParsedFloorplans(formData?.floorplans || []);
     setFloorplansKey(Date.now());
+    setIsProcessing(false);
   }, [formData?.floorplans]);
 
   const handleFloorplansProcessed = (processed: any[]) => {
     console.log("FloorplansStep: floorplans processed", processed);
     setParsedFloorplans(processed);
     setFloorplansKey(Date.now());
+    setIsProcessing(false);
   };
 
   const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -75,7 +79,7 @@ export function FloorplansStep({
             onProcessed={handleFloorplansProcessed} 
           />
           
-          {/* Uploader component */}
+          {/* Uploader component - This should always be visible */}
           <FloorplanUploader isLoading={isUploading} onUpload={handleFloorplanUpload} />
           
           {/* Embed script component */}
@@ -84,13 +88,20 @@ export function FloorplansStep({
             onChange={handleEmbedScriptChange} 
           />
 
-          {/* Display uploaded floorplans */}
-          <FloorplanGrid 
-            floorplans={parsedFloorplans} 
-            gridKey={floorplansKey} 
-            onRemoveFloorplan={handleRemoveFloorplan} 
-            onUpdateFloorplan={handleUpdateFloorplan}
-          />
+          {/* Display uploaded floorplans or loading state */}
+          {isProcessing ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-40 w-full" />
+            </div>
+          ) : (
+            <FloorplanGrid 
+              floorplans={parsedFloorplans} 
+              gridKey={floorplansKey} 
+              onRemoveFloorplan={handleRemoveFloorplan} 
+              onUpdateFloorplan={handleUpdateFloorplan}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

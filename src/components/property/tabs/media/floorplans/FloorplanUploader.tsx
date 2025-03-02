@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FloorplanUploaderProps {
   isLoading: boolean;
@@ -20,8 +21,17 @@ export function FloorplanUploader({ isLoading, onUpload }: FloorplanUploaderProp
           document.getElementById('floorplan-upload')?.click();
         }}
       >
-        <Upload className="h-4 w-4 mr-2" />
-        Upload Floorplans
+        {isLoading ? (
+          <>
+            <Spinner className="h-4 w-4 mr-2" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Floorplans
+          </>
+        )}
       </Button>
       <input
         id="floorplan-upload"
@@ -30,6 +40,7 @@ export function FloorplanUploader({ isLoading, onUpload }: FloorplanUploaderProp
         multiple
         className="hidden"
         onChange={onUpload}
+        disabled={isLoading}
       />
     </div>
   );
