@@ -25,7 +25,11 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     if (isLegacyFormat) {
       return [{
         columns: 1,
-        plans: (floorplans as unknown as string[]).map((url: string) => ({ url, columns: 1 }))
+        plans: (floorplans as unknown as string[]).map((url: string) => ({ 
+          id: crypto.randomUUID(),
+          url, 
+          columns: 1 
+        }))
       }];
     }
     
@@ -94,7 +98,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
             <div className={`grid grid-cols-${group.columns} gap-4`}>
               {group.plans.map((plan, index) => (
                 <div 
-                  key={plan.id || index} 
+                  key={plan.id || `floorplan-${groupIndex}-${index}`} 
                   className="w-full cursor-pointer shadow-md rounded-lg overflow-hidden" 
                   onClick={() => handleImageClick(plan.url)}
                 >

@@ -60,11 +60,6 @@ export function FloorplansCard({
     
     if (onRemoveFloorplan) {
       onRemoveFloorplan(index);
-      
-      // Update local state immediately for faster UI feedback
-      const updatedFloorplans = [...localFloorplans];
-      updatedFloorplans.splice(index, 1);
-      setLocalFloorplans(updatedFloorplans);
     }
   };
 
@@ -116,8 +111,10 @@ export function FloorplansCard({
           <div key={floorplansKey} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {localFloorplans.map((floorplan, index) => {
               const url = typeof floorplan === 'string' ? floorplan : floorplan.url;
+              const id = typeof floorplan === 'string' ? `floorplan-string-${index}` : floorplan.id || `floorplan-object-${index}`;
+              
               return (
-                <div key={`floorplan-${index}-${url}-${floorplansKey}`} className="relative group">
+                <div key={`${id}-${floorplansKey}`} className="relative group">
                   <img
                     src={url}
                     alt={`Floorplan ${index + 1}`}

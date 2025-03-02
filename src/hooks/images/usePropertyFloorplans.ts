@@ -128,6 +128,41 @@ export function usePropertyFloorplans(
     // Set the form data immediately with the updated floorplans
     setFormData(updatedFormData);
     
+    // If the property is already saved in the database, update it immediately
+    if (formData.id) {
+      try {
+        // Prepare the data for database update
+        const floorplansForDb = updatedFloorplans.map(fp => {
+          if (typeof fp === 'string') return fp;
+          return JSON.stringify({
+            id: fp.id,
+            url: fp.url,
+            filePath: fp.filePath || '',
+            columns: fp.columns || 1
+          });
+        });
+        
+        // Update the database directly
+        const { error } = await supabase
+          .from('properties')
+          .update({ floorplans: floorplansForDb })
+          .eq('id', formData.id);
+          
+        if (error) {
+          console.error('Error updating floorplans in database:', error);
+          toast({
+            title: "Error", 
+            description: "Failed to update database with removed floorplan",
+            variant: "destructive"
+          });
+        } else {
+          console.log("Database updated successfully with removed floorplan");
+        }
+      } catch (error) {
+        console.error('Exception updating floorplans in database:', error);
+      }
+    }
+    
     toast({
       title: "Success", 
       description: "Floorplan removed successfully"

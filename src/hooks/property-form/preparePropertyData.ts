@@ -19,25 +19,28 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[]): Json[] {
 /**
  * Transforms floorplan objects array into JSON for database storage
  */
-export function prepareFloorplansForFormSubmission(floorplans: any[] | undefined) {
+export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan[] | undefined) {
   if (!floorplans || !Array.isArray(floorplans)) {
     return [];
   }
   
-  return floorplans.map(floorplan => {
-    // If it's a string, it's already in the right format
-    if (typeof floorplan === 'string') {
-      return floorplan;
-    }
-    
-    // Otherwise, convert it to JSON
-    return JSON.stringify({
-      id: floorplan.id || crypto.randomUUID(), // Ensure we preserve or create an ID
-      url: floorplan.url,
-      filePath: floorplan.filePath || '',   // Preserve file path for storage operations
-      columns: floorplan.columns || 1
+  // Filter out any undefined or null values to ensure we only process valid floorplans
+  return floorplans
+    .filter(floorplan => floorplan && (typeof floorplan === 'string' || floorplan.id))
+    .map(floorplan => {
+      // If it's a string, it's already in the right format
+      if (typeof floorplan === 'string') {
+        return floorplan;
+      }
+      
+      // Otherwise, convert it to JSON
+      return JSON.stringify({
+        id: floorplan.id || crypto.randomUUID(), // Ensure we preserve or create an ID
+        url: floorplan.url,
+        filePath: floorplan.filePath || '',   // Preserve file path for storage operations
+        columns: floorplan.columns || 1
+      });
     });
-  });
 }
 
 /**
