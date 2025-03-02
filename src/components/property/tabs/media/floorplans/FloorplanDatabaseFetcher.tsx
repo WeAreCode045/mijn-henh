@@ -37,9 +37,13 @@ export function FloorplanDatabaseFetcher({
             
             console.log("FloorplanDatabaseFetcher - Fetched floorplans from DB:", dbFloorplans);
             onFetchComplete(dbFloorplans);
+          } else {
+            console.log("FloorplanDatabaseFetcher - No floorplans found in DB");
+            onFetchComplete([]);
           }
         } catch (error) {
           console.error("Error fetching floorplans from database:", error);
+          onFetchComplete([]);
         }
       };
       

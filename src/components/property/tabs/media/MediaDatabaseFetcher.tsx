@@ -36,9 +36,13 @@ export function MediaDatabaseFetcher({
             
             console.log("MediaDatabaseFetcher - Fetched images from DB:", dbImages);
             onFetchComplete(dbImages);
+          } else {
+            console.log("MediaDatabaseFetcher - No images found in DB");
+            onFetchComplete([]);
           }
         } catch (error) {
           console.error("Error fetching images from database:", error);
+          onFetchComplete([]);
         }
       };
       

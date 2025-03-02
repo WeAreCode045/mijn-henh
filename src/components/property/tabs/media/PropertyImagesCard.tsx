@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UploadIcon, Trash2Icon } from "lucide-react";
+import { UploadIcon, Trash2Icon, Star, Grid2X2 } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { useState } from "react";
 
@@ -12,6 +12,8 @@ interface PropertyImagesCardProps {
   featuredImage?: string | null;
   gridImages?: string[];
   isUploading?: boolean;
+  onSetFeaturedImage?: (url: string) => void;
+  onToggleGridImage?: (url: string) => void;
 }
 
 export function PropertyImagesCard({
@@ -21,6 +23,8 @@ export function PropertyImagesCard({
   featuredImage,
   gridImages = [],
   isUploading = false,
+  onSetFeaturedImage,
+  onToggleGridImage,
 }: PropertyImagesCardProps) {
   // File input ref
   const [uploading, setUploading] = useState(isUploading);
@@ -30,6 +34,16 @@ export function PropertyImagesCard({
     onImageUpload(e);
     // Reset the file input value
     e.target.value = '';
+  };
+
+  // Check if an image is the featured image
+  const isFeaturedImage = (url: string): boolean => {
+    return featuredImage === url;
+  };
+
+  // Check if an image is in grid images
+  const isInGridImages = (url: string): boolean => {
+    return gridImages.includes(url);
   };
 
   return (
