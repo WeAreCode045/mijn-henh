@@ -12,6 +12,7 @@ interface FloorplansStepProps {
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan: (index: number) => void;
+  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
   isUploading?: boolean;
 }
 
@@ -20,6 +21,7 @@ export function FloorplansStep({
   onFieldChange,
   handleFloorplanUpload,
   handleRemoveFloorplan,
+  handleUpdateFloorplan,
   isUploading = false
 }: FloorplansStepProps) {
   const [parsedFloorplans, setParsedFloorplans] = useState(formData?.floorplans || []);
@@ -51,7 +53,7 @@ export function FloorplansStep({
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Property Floorplans</h3>
       <p className="text-muted-foreground text-sm">
-        Upload floorplans for your property. These will be stored in the floorplans folder.
+        Upload floorplans for your property. These will be shown in the property listing and brochure.
       </p>
       
       <Card>
@@ -80,6 +82,7 @@ export function FloorplansStep({
             floorplans={parsedFloorplans} 
             gridKey={floorplansKey} 
             onRemoveFloorplan={handleRemoveFloorplan} 
+            onUpdateFloorplan={handleUpdateFloorplan}
           />
         </CardContent>
       </Card>

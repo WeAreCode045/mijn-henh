@@ -29,6 +29,7 @@ interface ContentTabContentProps {
   handleNext: () => void;
   handlePrevious: () => void;
   onSubmit: () => void;
+  isUploading?: boolean;
 }
 
 export function ContentTabContent({
@@ -57,7 +58,8 @@ export function ContentTabContent({
   handleStepClick,
   handleNext,
   handlePrevious,
-  onSubmit
+  onSubmit,
+  isUploading
 }: ContentTabContentProps) {
   return (
     <PropertyContentTab 
@@ -88,6 +90,7 @@ export function ContentTabContent({
       handleNext={handleNext}
       handlePrevious={handlePrevious}
       onSubmit={onSubmit}
+      isUploading={isUploading}
     />
   );
 }

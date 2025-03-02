@@ -85,6 +85,7 @@ export const renderContentTab = ({ activeTab, formState, handlers }: TabRenderPr
       handleNext={handlers.handleNext}
       handlePrevious={handlers.handlePrevious}
       onSubmit={handlers.onSubmit}
+      isUploading={handlers.isUploading}
     />
   );
 };
