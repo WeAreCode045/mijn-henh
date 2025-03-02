@@ -11,6 +11,7 @@ interface PropertyFloorplanTabProps {
   onRemove?: (index: number) => void;
   onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan: (index: number) => void;
+  isUploading?: boolean; // Added this missing property to fix the TypeScript error
 }
 
 export function PropertyFloorplanTab({
@@ -20,6 +21,7 @@ export function PropertyFloorplanTab({
   floorplans,
   onFloorplanUpload,
   onRemoveFloorplan,
+  isUploading, // Added this parameter to the component
 }: PropertyFloorplanTabProps) {
   // Use either Floorplan or floorplans prop, defaulting to an empty array
   const floorplansData = floorplans || Floorplan || [];
@@ -32,6 +34,7 @@ export function PropertyFloorplanTab({
         floorplans={floorplansData}
         onFloorplanUpload={onFloorplanUpload}
         onFloorplanRemove={onRemoveFloorplan}
+        isUploading={isUploading} // Pass the isUploading prop to the PropertyFloorplanCard
       />
     </div>
   );

@@ -38,7 +38,7 @@ export function FloorplanTabContent({
       Floorplan={effectiveFloorplans}
       onFloorplanUpload={effectiveFloorplanUpload}
       onRemoveFloorplan={onRemoveFloorplan}
-      isUploading={isUploading}
+      isUploading={isUploading} // Pass the isUploading prop
     />
   );
 }
