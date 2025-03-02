@@ -1,9 +1,8 @@
-
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
-import { FloorplansTab } from "../PropertyFloorplansTab"; // Corrected import path
+import { FloorplansTab } from "../FloorplansTab";
 
 // Common props type to simplify passing data to tab renderers
 interface TabRenderProps {
