@@ -12,7 +12,7 @@ export function usePropertyTabs() {
   
   // Extract the current tab from the URL path
   const getTabFromPath = (path: string): string => {
-    // Check if the path ends with one of our valid tabs
+    // Check if the path includes one of our valid tabs
     for (const tab of validTabs) {
       if (path.includes(`/${tab}`)) {
         return tab;
@@ -30,7 +30,7 @@ export function usePropertyTabs() {
     if (!id) return;
     
     setActiveTab(tab);
-    // Fixed: We should navigate to this route instead of changing the URL directly
+    // Navigate to the correct route
     navigate(`/property/${id}/${tab}`);
   };
   
