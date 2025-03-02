@@ -28,10 +28,14 @@ export function GridImagesSection({
     .filter(id => id !== '');
 
   const handleImagesSelect = async (selectedIds: string[]) => {
+    console.log("Selected grid image IDs:", selectedIds);
+    
     // Map selected IDs back to URLs
     const selectedUrls = selectedIds
       .map(id => formData.images.find(img => img.id === id)?.url || '')
       .filter(url => url !== '');
+    
+    console.log("Selected grid image URLs:", selectedUrls);
     
     // Update local state
     onFieldChange('gridImages', selectedUrls);
@@ -45,6 +49,11 @@ export function GridImagesSection({
           .eq('id', formData.id);
           
         if (error) throw error;
+        
+        toast({
+          title: "Success",
+          description: "Grid images updated successfully",
+        });
       } catch (error) {
         console.error('Error updating grid images:', error);
         toast({
@@ -52,9 +61,10 @@ export function GridImagesSection({
           description: "Failed to update grid images in database",
           variant: "destructive",
         });
-        // Continue as local state is already updated
       }
     }
+    
+    setIsDialogOpen(false);
   };
 
   const handleRemoveImage = async (url: string) => {
@@ -72,6 +82,11 @@ export function GridImagesSection({
           .eq('id', formData.id);
           
         if (error) throw error;
+        
+        toast({
+          title: "Success",
+          description: "Image removed from grid",
+        });
       } catch (error) {
         console.error('Error removing grid image:', error);
         toast({
@@ -79,7 +94,6 @@ export function GridImagesSection({
           description: "Failed to update grid images in database",
           variant: "destructive",
         });
-        // Continue as local state is already updated
       }
     }
   };

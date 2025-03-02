@@ -17,6 +17,7 @@ export function DialogActions({ onCancel, onConfirm }: DialogActionsProps) {
   const handleConfirm = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Confirm button clicked in DialogActions");
     onConfirm();
   };
 

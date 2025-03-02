@@ -5,6 +5,7 @@ import { ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageSelectDialog } from "@/components/property/ImageSelectDialog";
 import type { PropertyFormData } from "@/types/property";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FeaturedImageSectionProps {
   formData: PropertyFormData;
@@ -16,20 +17,31 @@ export function FeaturedImageSection({
   handleSetFeaturedImage 
 }: FeaturedImageSectionProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleImageSelect = (selectedIds: string[]) => {
+    console.log("Selected image IDs in FeaturedImageSection:", selectedIds);
     if (selectedIds.length > 0) {
       // Find the selected image in the images array
       const selectedImage = formData.images.find(img => img.id === selectedIds[0]);
       if (selectedImage) {
         console.log("Setting featured image to:", selectedImage.url);
         handleSetFeaturedImage(selectedImage.url);
+        toast({
+          title: "Success",
+          description: "Featured image updated successfully",
+        });
       }
     }
+    setIsDialogOpen(false);
   };
 
   const handleRemoveImage = () => {
     handleSetFeaturedImage(null);
+    toast({
+      title: "Success",
+      description: "Featured image removed",
+    });
   };
 
   // Find the ID of the currently featured image

@@ -80,14 +80,13 @@ export function ImageSelectDialog({
   const handleConfirm = () => {
     console.log("Confirming selection:", selected);
     onSelect(selected);
-    handleOpenChange(false);
   };
 
   const handleCancel = () => {
     console.log("Cancelling selection");
-    handleOpenChange(false);
     // Reset selection when cancelling
     setSelected(selectedImageIds);
+    handleOpenChange(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {

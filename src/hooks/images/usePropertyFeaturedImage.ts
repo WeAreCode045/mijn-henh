@@ -9,7 +9,9 @@ export function usePropertyFeaturedImage(
 ) {
   const { toast } = useToast();
 
-  const handleSetFeaturedImage = async (url: string) => {
+  const handleSetFeaturedImage = async (url: string | null) => {
+    console.log("handleSetFeaturedImage called with url:", url);
+    
     // Update the form data with the new featured image
     setFormData({
       ...formData,
@@ -19,22 +21,23 @@ export function usePropertyFeaturedImage(
     // If we have a property ID, update the database
     if (formData.id) {
       try {
+        console.log("Updating featured image in database for property:", formData.id);
         const { error } = await supabase
           .from('properties')
           .update({ featuredImage: url })
           .eq('id', formData.id);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating featured image in database:", error);
+          throw error;
+        }
+        
+        console.log("Successfully updated featured image in database");
       } catch (error) {
         console.error('Error updating featured image:', error);
         // Continue without showing error to user as local state is already updated
       }
     }
-    
-    toast({
-      title: "Success",
-      description: "Featured image updated",
-    });
   };
 
   const handleToggleGridImage = async (url: string) => {
