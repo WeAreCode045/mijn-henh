@@ -73,7 +73,7 @@ export function FloorplansCard({
         
         <FloorplanDatabaseFetcher
           propertyId={propertyId}
-          floorplans={floorplans}
+          floorplans={parsedFloorplans}
           onFetchComplete={handleDatabaseFloorplansFetched}
         />
 

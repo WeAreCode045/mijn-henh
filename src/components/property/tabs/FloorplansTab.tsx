@@ -72,7 +72,7 @@ export function FloorplansTab({
           
           <FloorplanDatabaseFetcher
             propertyId={id}
-            floorplans={floorplans}
+            floorplans={parsedFloorplans}
             onFetchComplete={handleDatabaseFloorplansFetched}
           />
 
