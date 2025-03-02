@@ -40,6 +40,14 @@ export function useSubmissions(propertyId: string) {
 
       if (error) throw error;
       setSubmissions(data || []);
+      
+      // If there's a selectedSubmission, update it with the latest data
+      if (selectedSubmission) {
+        const updated = data?.find(sub => sub.id === selectedSubmission.id);
+        if (updated) {
+          setSelectedSubmission(updated);
+        }
+      }
     } catch (error) {
       console.error('Error fetching submissions:', error);
       toast({
@@ -127,7 +135,7 @@ export function useSubmissions(propertyId: string) {
       }
 
       const response_date = new Date().toISOString();
-      await supabase
+      const { error } = await supabase
         .from('property_contact_submissions')
         .update({ 
           response: responseText,
@@ -135,6 +143,11 @@ export function useSubmissions(propertyId: string) {
           is_read: true
         })
         .eq('id', selectedSubmission.id);
+
+      if (error) throw error;
+
+      // After saving the response, refresh the submission data
+      await fetchSubmissions();
 
       if (emailError && !hasSMTPSettings) {
         toast({
@@ -155,12 +168,14 @@ export function useSubmissions(propertyId: string) {
         });
       }
 
+      // Update the submissions list
       setSubmissions(subs => 
         subs.map(sub => sub.id === selectedSubmission.id 
           ? { ...sub, response: responseText, response_date: response_date, is_read: true } 
           : sub)
       );
       
+      // Update the selected submission
       setSelectedSubmission(prev => prev ? { 
         ...prev, 
         response: responseText, 

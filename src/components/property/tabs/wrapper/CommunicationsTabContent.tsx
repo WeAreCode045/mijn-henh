@@ -2,6 +2,7 @@
 import { SubmissionsList } from "../communications/SubmissionsList";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
 import { useSubmissions } from "../communications/useSubmissions";
+import { useToast } from "@/hooks/use-toast";
 
 interface CommunicationsTabContentProps {
   id: string;
@@ -9,6 +10,7 @@ interface CommunicationsTabContentProps {
 }
 
 export function CommunicationsTabContent({ id, title }: CommunicationsTabContentProps) {
+  const { toast } = useToast();
   const {
     submissions,
     isLoading,
@@ -19,7 +21,20 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
   } = useSubmissions(id);
 
   const handleSendResponseWrapper = async (responseText: string) => {
-    await handleSendResponse(responseText);
+    try {
+      await handleSendResponse(responseText);
+      toast({
+        title: "Response sent",
+        description: "Your response has been sent successfully."
+      });
+    } catch (error) {
+      console.error("Error sending response:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send response. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
