@@ -36,7 +36,7 @@ export function FloorplansCard({
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
     
     try {
-      // Fix: Avoid the recursive type instantiation by using a simple type guard
+      // Fix: Create a new array to avoid recursive type instantiation
       const processedFloorplans: PropertyFloorplan[] = [];
       
       if (Array.isArray(floorplans)) {
@@ -56,7 +56,7 @@ export function FloorplansCard({
             }
           } else {
             // Already an object
-            processedFloorplans.push(floorplan);
+            processedFloorplans.push(floorplan as PropertyFloorplan);
           }
         });
       }
