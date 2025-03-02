@@ -6,6 +6,7 @@ import { FloorplanUploader } from "../../tabs/media/floorplans/FloorplanUploader
 import { FloorplanEmbed } from "../../tabs/media/floorplans/FloorplanEmbed";
 import { FloorplanProcessor } from "../../tabs/media/floorplans/FloorplanProcessor";
 import { useState, useEffect } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FloorplansStepProps {
   formData: PropertyFormData;
@@ -44,9 +45,15 @@ export function FloorplansStep({
     onFieldChange('floorplanEmbedScript', e.target.value);
   };
 
+  // Don't show loading message if formData exists, even if floorplans aren't defined yet
   if (!formData) {
     console.error("FloorplansStep: No formData provided");
-    return <div>Loading form data...</div>;
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Spinner className="h-8 w-8 border-4" /> 
+        <span className="ml-3">Loading form data...</span>
+      </div>
+    );
   }
 
   return (
