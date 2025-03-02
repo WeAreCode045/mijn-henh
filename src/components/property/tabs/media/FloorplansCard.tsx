@@ -36,22 +36,30 @@ export function FloorplansCard({
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
     
     try {
-      // Process floorplans from different possible formats
-      const processedFloorplans = Array.isArray(floorplans) 
-        ? floorplans.map((floorplan, index) => {
-            if (typeof floorplan === 'string') {
-              try {
-                // Try to parse as JSON string
-                return JSON.parse(floorplan);
-              } catch (e) {
-                // If parsing fails, it's a plain URL string
-                return { id: `floorplan-${index}`, url: floorplan, columns: 1 };
-              }
+      // Fix: Avoid the recursive type instantiation by using a simple type guard
+      const processedFloorplans: PropertyFloorplan[] = [];
+      
+      if (Array.isArray(floorplans)) {
+        floorplans.forEach((floorplan, index) => {
+          if (typeof floorplan === 'string') {
+            try {
+              // Try to parse as JSON string
+              const parsed = JSON.parse(floorplan);
+              processedFloorplans.push(parsed);
+            } catch (e) {
+              // If parsing fails, it's a plain URL string
+              processedFloorplans.push({ 
+                id: `floorplan-${index}`, 
+                url: floorplan, 
+                columns: 1 
+              });
             }
+          } else {
             // Already an object
-            return floorplan;
-          })
-        : [];
+            processedFloorplans.push(floorplan);
+          }
+        });
+      }
         
       console.log("FloorplansCard - Processed floorplans:", processedFloorplans);
       setParsedFloorplans(processedFloorplans);
@@ -94,7 +102,7 @@ export function FloorplansCard({
       
       fetchFloorplans();
     }
-  }, [propertyId]);
+  }, [propertyId, floorplans]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onFloorplanUpload) {

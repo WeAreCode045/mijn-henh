@@ -1,14 +1,19 @@
 
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyFloorplan } from "@/types/property";
 import { prepareFloorplansForFormSubmission } from "../property-form/preparePropertyData";
+import { useFloorplanDatabase } from "./floorplans/useFloorplanDatabase";
+import { useFloorplanStorage } from "./floorplans/useFloorplanStorage";
+import { useFloorplanEmbed } from "./floorplans/useFloorplanEmbed";
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
   const { toast } = useToast();
+  const { addFloorplanToDatabase, removeFloorplanFromDatabase, updatePropertyFloorplans } = useFloorplanDatabase();
+  const { uploadFloorplanFile, deleteFloorplanFile } = useFloorplanStorage();
+  const { handleUpdateFloorplanEmbedScript } = useFloorplanEmbed(formData, setFormData);
 
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault(); // Prevent default form submission behavior
@@ -18,24 +23,14 @@ export function usePropertyFloorplans(
     try {
       const files = Array.from(e.target.files);
       const uploadPromises = files.map(async (file) => {
-        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
-        const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
-        const filePath = `properties/${formData.id || 'new'}/floorplans/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('properties')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('properties')
-          .getPublicUrl(filePath);
+        const uploadResult = await uploadFloorplanFile(file, formData.id || 'new');
+        
+        if (!uploadResult.success) throw new Error("Failed to upload file");
 
         return {
           id: crypto.randomUUID(), // Generate a unique ID for the floorplan
-          url: publicUrl,
-          filePath: filePath, // Store the file path for deletion later
+          url: uploadResult.url,
+          filePath: uploadResult.filePath, // Store the file path for deletion later
           columns: 1 // Default to 1 column
         };
       });
@@ -69,13 +64,9 @@ export function usePropertyFloorplans(
           console.log("Updating database with new floorplans:", floorplansForDb);
           
           // Update the database directly
-          const { error } = await supabase
-            .from('properties')
-            .update({ floorplans: floorplansForDb })
-            .eq('id', formData.id);
+          const updateSuccess = await updatePropertyFloorplans(formData.id, floorplansForDb);
             
-          if (error) {
-            console.error('Error updating floorplans in database after upload:', error);
+          if (!updateSuccess) {
             toast({
               title: "Warning", 
               description: "Floorplans uploaded but database update failed. Please save the property.",
@@ -86,17 +77,7 @@ export function usePropertyFloorplans(
             
             // Add floorplans to property_images table for proper tracking
             for (const floorplan of newFloorplans) {
-              const { error: imageError } = await supabase
-                .from('property_images')
-                .insert({
-                  property_id: formData.id,
-                  url: floorplan.url,
-                  type: 'floorplan' // Add type to distinguish floorplans from regular images
-                });
-                
-              if (imageError) {
-                console.error('Error adding floorplan to property_images table:', imageError);
-              }
+              await addFloorplanToDatabase(formData.id, floorplan);
             }
           }
         } catch (error) {
@@ -130,21 +111,7 @@ export function usePropertyFloorplans(
     const floorplanToRemove = formData.floorplans[index];
     
     // Delete the file from storage if filePath exists
-    if (floorplanToRemove.filePath) {
-      try {
-        const { error } = await supabase.storage
-          .from('properties')
-          .remove([floorplanToRemove.filePath]);
-          
-        if (error) {
-          console.error('Error deleting floorplan file:', error);
-          // Continue with the process even if file deletion fails
-        }
-      } catch (err) {
-        console.error('Error in file deletion process:', err);
-        // Continue with the process even if file deletion fails
-      }
-    }
+    await deleteFloorplanFile(floorplanToRemove.filePath);
     
     // Update any technical items that reference this floorplan
     const updatedTechnicalItems = (formData.technicalItems || []).map(item => {
@@ -182,13 +149,9 @@ export function usePropertyFloorplans(
         console.log("Updating database with removed floorplan, new data:", floorplansForDb);
         
         // Update the database directly
-        const { error } = await supabase
-          .from('properties')
-          .update({ floorplans: floorplansForDb })
-          .eq('id', formData.id);
+        const updateSuccess = await updatePropertyFloorplans(formData.id, floorplansForDb);
           
-        if (error) {
-          console.error('Error updating floorplans in database:', error);
+        if (!updateSuccess) {
           toast({
             title: "Error", 
             description: "Failed to update database with removed floorplan",
@@ -199,15 +162,7 @@ export function usePropertyFloorplans(
           
           // Remove the floorplan from property_images if it exists
           if (floorplanToRemove.url) {
-            const { error: deleteError } = await supabase
-              .from('property_images')
-              .delete()
-              .eq('url', floorplanToRemove.url)
-              .eq('property_id', formData.id);
-              
-            if (deleteError) {
-              console.error('Error removing floorplan from property_images table:', deleteError);
-            }
+            await removeFloorplanFromDatabase(formData.id, floorplanToRemove.url);
           }
         }
       } catch (error) {
@@ -243,21 +198,6 @@ export function usePropertyFloorplans(
     };
     
     setFormData(updatedFormData);
-  };
-
-  const handleUpdateFloorplanEmbedScript = (script: string) => {
-    console.log("Updating floorplan embed script:", script);
-    
-    // Create a completely new object to ensure React detects the state change
-    const updatedFormData = {
-      ...formData,
-      floorplanEmbedScript: script
-    };
-    
-    setFormData(updatedFormData);
-    
-    // Log to confirm the update
-    console.log("Updated formData with floorplanEmbedScript:", updatedFormData.floorplanEmbedScript);
   };
 
   return {
