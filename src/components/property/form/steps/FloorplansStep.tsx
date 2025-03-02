@@ -5,7 +5,7 @@ import { FloorplanGrid } from "../../tabs/media/floorplans/FloorplanGrid";
 import { FloorplanUploader } from "../../tabs/media/floorplans/FloorplanUploader";
 import { FloorplanEmbed } from "../../tabs/media/floorplans/FloorplanEmbed";
 import { FloorplanProcessor } from "../../tabs/media/floorplans/FloorplanProcessor";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FloorplansStepProps {
   formData: PropertyFormData;
@@ -25,7 +25,15 @@ export function FloorplansStep({
   const [parsedFloorplans, setParsedFloorplans] = useState(formData.floorplans || []);
   const [floorplansKey, setFloorplansKey] = useState(Date.now());
 
+  // Update parsed floorplans when formData.floorplans changes
+  useEffect(() => {
+    console.log("FloorplansStep: formData.floorplans updated", formData.floorplans);
+    setParsedFloorplans(formData.floorplans || []);
+    setFloorplansKey(Date.now());
+  }, [formData.floorplans]);
+
   const handleFloorplansProcessed = (processed: any[]) => {
+    console.log("FloorplansStep: floorplans processed", processed);
     setParsedFloorplans(processed);
     setFloorplansKey(Date.now());
   };
@@ -49,7 +57,7 @@ export function FloorplansStep({
           {/* Process the floorplans data for display */}
           <FloorplanProcessor 
             floorplans={formData.floorplans || []} 
-            propertyId={formData.id}
+            propertyId={formData.id || 'new'}
             onProcessed={handleFloorplansProcessed} 
           />
           

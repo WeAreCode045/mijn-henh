@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
@@ -75,6 +75,28 @@ export function PropertyContentTab({
   
   // Use external state if provided, otherwise use internal state
   const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
+  
+  // Log the current step for debugging
+  console.log("PropertyContentTab - Current step:", currentStep);
+  
+  // Wrapped functions to prevent event bubbling and redirection
+  const safeAddTechnicalItem = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (onAddTechnicalItem) {
+      console.log("Adding technical item");
+      onAddTechnicalItem();
+    }
+  };
+  
+  const safeRemoveTechnicalItem = (id: string) => {
+    if (onRemoveTechnicalItem) {
+      console.log("Removing technical item", id);
+      onRemoveTechnicalItem(id);
+    }
+  };
   
   // Internal handlers if external ones aren't provided
   const handleStepClick = (step: number) => {
@@ -152,8 +174,8 @@ export function PropertyContentTab({
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
-        onAddTechnicalItem={onAddTechnicalItem}
-        onRemoveTechnicalItem={onRemoveTechnicalItem}
+        onAddTechnicalItem={safeAddTechnicalItem}
+        onRemoveTechnicalItem={safeRemoveTechnicalItem}
         onUpdateTechnicalItem={onUpdateTechnicalItem}
         // Add dummy functions for backward compatibility
         handleSetFeaturedImage={handleSetFeaturedImage}

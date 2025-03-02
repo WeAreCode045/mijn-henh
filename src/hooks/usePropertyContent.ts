@@ -68,7 +68,15 @@ export function usePropertyContent(
   }, [formData, onFieldChange]);
 
   // Technical item management functions
-  const addTechnicalItem = useCallback(() => {
+  const addTechnicalItem = useCallback((e?: React.MouseEvent) => {
+    // Prevent default behavior to avoid form submission
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log("usePropertyContent - Adding new technical item");
+    
     const newItem: PropertyTechnicalItem = {
       id: uuidv4(),
       title: '',

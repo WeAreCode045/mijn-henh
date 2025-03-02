@@ -29,6 +29,18 @@ export function TechnicalDataContainer({
   const items = technicalItems.length > 0 ? technicalItems : (formData?.technicalItems || []);
   const availableFloorplans = floorplans.length > 0 ? floorplans : (formData?.floorplans || []);
   
+  // Prevent default behavior which might cause redirection
+  const handleAddItem = (e: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    if (onAddTechnicalItem) {
+      onAddTechnicalItem();
+    }
+  };
+  
   return (
     <div className="space-y-4">
       {/* Map Image Upload - Only show if formData is available */}
@@ -45,7 +57,7 @@ export function TechnicalDataContainer({
       <TechnicalItemsList
         items={items}
         floorplans={availableFloorplans}
-        onAdd={onAddTechnicalItem || (() => {})}
+        onAdd={handleAddItem}
         onRemove={onRemoveTechnicalItem || (() => {})}
         onUpdate={onUpdateTechnicalItem || (() => {})}
       />

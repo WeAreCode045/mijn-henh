@@ -112,6 +112,18 @@ export function PropertyTabContents({
   handleSetFeaturedImage,
   handleToggleGridImage
 }: PropertyTabContentsProps) {
+  // Create wrapped versions of handlers to prevent default behavior
+  const safeAddTechnicalItem = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (onAddTechnicalItem) {
+      console.log("PropertyTabContents - Adding technical item");
+      onAddTechnicalItem();
+    }
+  };
+
   // Organize all handler functions into a single object
   const handlers = {
     onSave,
@@ -139,7 +151,8 @@ export function PropertyTabContents({
     handleRemoveAreaPhoto,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    onAddTechnicalItem,
+    // Use the wrapped version of onAddTechnicalItem
+    onAddTechnicalItem: safeAddTechnicalItem,
     onRemoveTechnicalItem,
     onUpdateTechnicalItem,
     currentStep,
