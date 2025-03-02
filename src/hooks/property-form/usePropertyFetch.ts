@@ -1,20 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyImage } from "@/types/property";
-import { 
-  transformFeatures, 
-  transformAreas, 
-  transformFloorplans, 
-  transformNearbyPlaces 
-} from "./propertyDataTransformer";
 import { initialFormData } from "./initialFormData";
+import type { PropertyFormData } from "@/types/property";
+import { transformFeatures, transformAreas, transformFloorplans, transformNearbyPlaces } from "./propertyDataTransformer";
 
 export function usePropertyFetch(id: string | undefined) {
-  const { toast } = useToast();
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
-  const [isLoading, setIsLoading] = useState(id ? true : false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -23,86 +16,47 @@ export function usePropertyFetch(id: string | undefined) {
   }, [id]);
 
   const fetchPropertyData = async (propertyId: string) => {
+    setIsLoading(true);
+    
     try {
-      const { data: propertyData, error } = await supabase
+      const { data, error } = await supabase
         .from('properties')
-        .select('*, property_images(id, url)')
+        .select('*')
         .eq('id', propertyId)
         .single();
-
+        
       if (error) {
-        console.error('Fetch error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load property data",
-          variant: "destructive",
-        });
-        return;
+        throw error;
       }
-
-      if (propertyData) {
-        const features = transformFeatures(propertyData.features || []);
-        const areas = transformAreas(propertyData.areas || []);
+      
+      if (data) {
+        console.log("Fetched property data:", data);
         
-        console.log("Loaded areas with columns:", areas);
-
-        // Transform floorplans from database format to PropertyFloorplan[]
-        const floorplans = transformFloorplans(propertyData.floorplans || []);
+        // Transform the properties as needed
+        const transformedFeatures = transformFeatures(Array.isArray(data.features) ? data.features : []);
+        const transformedAreas = transformAreas(Array.isArray(data.areas) ? data.areas : []);
+        const transformedFloorplans = transformFloorplans(data.floorplans || []);
+        const transformedNearbyPlaces = transformNearbyPlaces(Array.isArray(data.nearby_places) ? data.nearby_places : []);
         
-        console.log("Loaded floorplans:", floorplans);
-
-        const nearbyPlaces = transformNearbyPlaces(propertyData.nearby_places || []);
-        const images: PropertyImage[] = propertyData.property_images || [];
-
-        // Cast propertyData to any to allow accessing template_id since it might not be in the type
-        const propertyDataAny = propertyData as any;
-
+        // Update form data with fetched property data
         setFormData({
-          id: propertyData.id,
-          title: propertyData.title || "",
-          price: propertyData.price || "",
-          address: propertyData.address || "",
-          bedrooms: propertyData.bedrooms || "",
-          bathrooms: propertyData.bathrooms || "",
-          sqft: propertyData.sqft || "",
-          livingArea: propertyData.livingArea || "",
-          buildYear: propertyData.buildYear || "",
-          garages: propertyData.garages || "",
-          energyLabel: propertyData.energyLabel || "",
-          hasGarden: Boolean(propertyData.hasGarden),
-          description: propertyData.description || "",
-          location_description: propertyData.location_description || "",
-          features: features,
-          images: images,
-          floorplans: floorplans,
-          featuredImage: propertyData.featuredImage,
-          gridImages: Array.isArray(propertyData.gridImages) ? propertyData.gridImages : [],
-          areas: areas,
-          map_image: propertyData.map_image || null,
-          nearby_places: nearbyPlaces,
-          latitude: propertyData.latitude || null,
-          longitude: propertyData.longitude || null,
-          areaPhotos: propertyData.areaPhotos || [],
-          created_at: propertyData.created_at,
-          updated_at: propertyData.updated_at,
-          virtualTourUrl: propertyData.virtualTourUrl || "",
-          youtubeUrl: propertyData.youtubeUrl || "",
-          notes: propertyData.notes || "",
-          // Use the casted version to access template_id or use default
-          template_id: propertyDataAny.template_id || "default",
-          agent_id: propertyData.agent_id,
-          // Access floorplanEmbedScript from propertyDataAny to avoid TypeScript errors
-          floorplanEmbedScript: propertyDataAny.floorplanEmbedScript || ""
+          ...initialFormData,
+          ...data,
+          id: propertyId,
+          features: transformedFeatures,
+          areas: transformedAreas,
+          floorplans: transformedFloorplans,
+          nearby_places: transformedNearbyPlaces,
+          // Convert null values to empty strings or arrays as needed
+          images: data.images?.map((url: string) => ({ id: crypto.randomUUID(), url })) || [],
+          gridImages: data.gridImages || [],
+          // Ensure the floorplanEmbedScript is set
+          floorplanEmbedScript: data.floorplanEmbedScript || ""
         });
       }
-      setIsLoading(false);
     } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load property data",
-        variant: "destructive",
-      });
+      console.error("Error fetching property data:", error);
+    } finally {
       setIsLoading(false);
     }
   };
