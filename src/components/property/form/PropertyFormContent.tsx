@@ -22,7 +22,7 @@ interface PropertyFormContentProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
-  handleSetFeaturedImage: (url: string) => void;
+  handleSetFeaturedImage: (url: string | null) => void;
   handleToggleGridImage: (url: string) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
@@ -64,6 +64,9 @@ export function PropertyFormContent({
   
   // Find the step component that corresponds to the current step
   const StepComponent = steps.find(s => s.id === step)?.component;
+  
+  // Verify that handleSetFeaturedImage is a function
+  console.log("PropertyFormContent - handleSetFeaturedImage type:", typeof handleSetFeaturedImage);
   
   // Add defensive check
   if (!StepComponent) {
@@ -134,6 +137,14 @@ export function PropertyFormContent({
           onFetchLocationData={onFetchLocationData}
           onRemoveNearbyPlace={onRemoveNearbyPlace}
         />
+      ) : step === 1 ? (
+        // GeneralInfoStep - special handling for step 1
+        <StepComponent
+          formData={formData}
+          onFieldChange={onFieldChange}
+          handleSetFeaturedImage={handleSetFeaturedImage}
+          onSetFeaturedImage={handleSetFeaturedImage} // Add alternative prop name
+        />
       ) : (
         // Other steps
         <StepComponent
@@ -156,6 +167,7 @@ export function PropertyFormContent({
           onAreaPhotosUpload={handleAreaPhotosUpload}
           onRemoveAreaPhoto={handleRemoveAreaPhoto}
           onSetFeaturedImage={handleSetFeaturedImage}
+          handleSetFeaturedImage={handleSetFeaturedImage}
           onToggleGridImage={handleToggleGridImage}
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}

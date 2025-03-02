@@ -21,32 +21,58 @@ export function FeaturedImageSection({
 
   const handleImageSelect = (selectedIds: string[]) => {
     console.log("Selected image IDs in FeaturedImageSection:", selectedIds);
-    if (selectedIds.length > 0) {
-      // Find the selected image in the images array
-      const selectedImage = formData.images.find(img => img.id === selectedIds[0]);
-      if (selectedImage) {
-        console.log("Setting featured image to:", selectedImage.url);
-        // Ensure handleSetFeaturedImage is a function before calling it
-        if (typeof handleSetFeaturedImage === 'function') {
-          handleSetFeaturedImage(selectedImage.url);
-          toast({
-            title: "Success",
-            description: "Featured image updated successfully",
-          });
-        } else {
-          console.error("handleSetFeaturedImage is not a function:", handleSetFeaturedImage);
-          toast({
-            title: "Error",
-            description: "Failed to update featured image. Please try again.",
-            variant: "destructive"
-          });
-        }
-      }
+    
+    if (!selectedIds || selectedIds.length === 0) {
+      console.log("No images selected, skipping");
+      return;
     }
-    setIsDialogOpen(false);
+    
+    // Find the selected image in the images array
+    const selectedImage = formData.images.find(img => img.id === selectedIds[0]);
+    
+    if (!selectedImage) {
+      console.error("Selected image not found in formData.images");
+      toast({
+        title: "Error",
+        description: "Selected image not found. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log("Setting featured image to:", selectedImage.url);
+    
+    // Ensure handleSetFeaturedImage is properly defined
+    if (typeof handleSetFeaturedImage !== 'function') {
+      console.error("handleSetFeaturedImage is not a function:", handleSetFeaturedImage);
+      toast({
+        title: "Error",
+        description: "Failed to update featured image. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Call the function to set the featured image
+    handleSetFeaturedImage(selectedImage.url);
+    
+    toast({
+      title: "Success",
+      description: "Featured image updated successfully",
+    });
   };
 
   const handleRemoveImage = () => {
+    if (typeof handleSetFeaturedImage !== 'function') {
+      console.error("handleSetFeaturedImage is not a function:", handleSetFeaturedImage);
+      toast({
+        title: "Error",
+        description: "Failed to remove featured image. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     handleSetFeaturedImage(null);
     toast({
       title: "Success",

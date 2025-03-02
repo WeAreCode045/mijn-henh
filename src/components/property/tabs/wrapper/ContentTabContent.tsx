@@ -21,7 +21,7 @@ interface ContentTabContentProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  handleSetFeaturedImage: (url: string) => void;
+  handleSetFeaturedImage: (url: string | null) => void; // Ensure this type is correct
   handleToggleGridImage: (url: string) => void;
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
@@ -63,6 +63,9 @@ export function ContentTabContent({
   handlePrevious,
   onSubmit
 }: ContentTabContentProps) {
+  // Verify that handleSetFeaturedImage is a function
+  console.log("ContentTabContent - handleSetFeaturedImage type:", typeof handleSetFeaturedImage);
+  
   return (
     <PropertyContentTab 
       formData={formData}

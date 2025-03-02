@@ -15,6 +15,9 @@ export function ImageSelections({
   onFieldChange, 
   handleSetFeaturedImage 
 }: ImageSelectionsProps) {
+  // Verify that handleSetFeaturedImage is a function
+  console.log("ImageSelections - handleSetFeaturedImage type:", typeof handleSetFeaturedImage);
+  
   return (
     <div className="space-y-4">
       <Label className="text-lg font-medium">Media Selection</Label>

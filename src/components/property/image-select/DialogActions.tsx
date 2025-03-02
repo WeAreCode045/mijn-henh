@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DialogActionsProps {
   onCancel: () => void;
@@ -8,25 +9,41 @@ interface DialogActionsProps {
 }
 
 export function DialogActions({ onCancel, onConfirm }: DialogActionsProps) {
+  const { toast } = useToast();
+
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (typeof onCancel === 'function') {
-      onCancel();
-    } else {
+    
+    if (typeof onCancel !== 'function') {
       console.error("onCancel is not a function:", onCancel);
+      toast({
+        title: "Error",
+        description: "An error occurred while processing your request.",
+        variant: "destructive"
+      });
+      return;
     }
+    
+    onCancel();
   };
 
   const handleConfirm = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     console.log("Confirm button clicked in DialogActions");
-    if (typeof onConfirm === 'function') {
-      onConfirm();
-    } else {
+    
+    if (typeof onConfirm !== 'function') {
       console.error("onConfirm is not a function:", onConfirm);
+      toast({
+        title: "Error",
+        description: "An error occurred while processing your request.",
+        variant: "destructive"
+      });
+      return;
     }
+    
+    onConfirm();
   };
 
   return (

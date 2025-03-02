@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { ImageGrid } from "./image-select/ImageGrid";
 import { DialogActions } from "./image-select/DialogActions";
 import { DialogTriggerButton } from "./image-select/DialogTriggerButton";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface ImageSelectDialogProps {
   images: PropertyImage[];
@@ -42,6 +43,7 @@ export function ImageSelectDialog({
 }: ImageSelectDialogProps) {
   const [selected, setSelected] = useState<string[]>(selectedImageIds);
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
   
   // Sync selected state when selectedImageIds prop changes
   useEffect(() => {
@@ -79,12 +81,23 @@ export function ImageSelectDialog({
 
   const handleConfirm = () => {
     console.log("Confirming selection:", selected);
-    // Ensure onSelect is a function before calling it
-    if (typeof onSelect === 'function') {
-      onSelect(selected);
-    } else {
+    
+    // Verify onSelect is a function before calling it
+    if (typeof onSelect !== 'function') {
       console.error("onSelect is not a function:", onSelect);
+      toast({
+        title: "Error",
+        description: "An error occurred while processing your selection.",
+        variant: "destructive"
+      });
+      handleOpenChange(false);
+      return;
     }
+    
+    // Call the onSelect function
+    onSelect(selected);
+    
+    // Close the dialog
     handleOpenChange(false);
   };
 
