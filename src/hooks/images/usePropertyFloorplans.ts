@@ -83,6 +83,20 @@ export function usePropertyFloorplans(
             });
           } else {
             console.log("Database updated successfully with new floorplans");
+            
+            // Add floorplans to property_images table for proper tracking
+            for (const floorplan of newFloorplans) {
+              const { error: imageError } = await supabase
+                .from('property_images')
+                .insert({
+                  property_id: formData.id,
+                  url: floorplan.url
+                });
+                
+              if (imageError) {
+                console.error('Error adding floorplan to property_images table:', imageError);
+              }
+            }
           }
         } catch (error) {
           console.error('Exception updating floorplans in database after upload:', error);
@@ -181,6 +195,19 @@ export function usePropertyFloorplans(
           });
         } else {
           console.log("Database updated successfully with removed floorplan");
+          
+          // Remove the floorplan from property_images if it exists
+          if (floorplanToRemove.url) {
+            const { error: deleteError } = await supabase
+              .from('property_images')
+              .delete()
+              .eq('url', floorplanToRemove.url)
+              .eq('property_id', formData.id);
+              
+            if (deleteError) {
+              console.error('Error removing floorplan from property_images table:', deleteError);
+            }
+          }
         }
       } catch (error) {
         console.error('Exception updating floorplans in database:', error);
