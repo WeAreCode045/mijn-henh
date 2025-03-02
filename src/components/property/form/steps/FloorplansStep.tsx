@@ -32,13 +32,16 @@ export function FloorplansStep({
 
   // Update parsed floorplans when formData.floorplans changes
   useEffect(() => {
-    if (formData && formData.floorplans) {
-      console.log("FloorplansStep: formData.floorplans updated", formData.floorplans);
+    if (formData) {
+      console.log("FloorplansStep: formData.floorplans updated", formData.floorplans || []);
       setParsedFloorplans(formData.floorplans || []);
       setFloorplansKey(Date.now());
+      setIsProcessing(false);
+    } else {
+      console.log("FloorplansStep: formData is null or undefined");
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
-  }, [formData?.floorplans]);
+  }, [formData?.floorplans, formData]);
 
   const handleFloorplansProcessed = (processed: any[]) => {
     console.log("FloorplansStep: floorplans processed", processed);

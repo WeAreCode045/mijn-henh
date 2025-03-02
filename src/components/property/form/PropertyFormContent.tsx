@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan, PropertyTechnicalItem } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -86,15 +85,26 @@ export function PropertyFormContent({
     );
   }
 
+  // Ensure all arrays exist in formData to prevent null reference errors
+  const safeFormData = {
+    ...formData,
+    features: formData.features || [],
+    images: formData.images || [],
+    floorplans: formData.floorplans || [],
+    areas: formData.areas || [],
+    technicalItems: formData.technicalItems || [],
+    nearby_places: formData.nearby_places || []
+  };
+
   // Pass all props to the step component based on the type of step
   return (
     <div className="py-4 animate-fadeIn">
       {step === 3 ? (
         // TechnicalDataStep
         <StepComponent
-          floorplans={formData.floorplans || []}
-          technicalItems={formData.technicalItems || []}
-          images={formData.images || []}
+          floorplans={safeFormData.floorplans}
+          technicalItems={safeFormData.technicalItems}
+          images={safeFormData.images}
           onFloorplanUpload={handleFloorplanUpload}
           onRemoveFloorplan={handleRemoveFloorplan}
           onUpdateFloorplan={handleUpdateFloorplan}
@@ -106,8 +116,8 @@ export function PropertyFormContent({
       ) : step === 4 ? (
         // AreasStep
         <StepComponent
-          areas={formData.areas || []}
-          images={formData.images || []}
+          areas={safeFormData.areas}
+          images={safeFormData.images}
           onAddArea={onAddArea}
           onRemoveArea={onRemoveArea}
           onUpdateArea={onUpdateArea}
@@ -119,7 +129,7 @@ export function PropertyFormContent({
       ) : step === 2 ? (
         // FeaturesStep
         <StepComponent
-          features={formData.features || []}
+          features={safeFormData.features}
           onAddFeature={onAddFeature}
           onRemoveFeature={onRemoveFeature}
           onUpdateFeature={onUpdateFeature}
@@ -127,12 +137,12 @@ export function PropertyFormContent({
       ) : step === 5 ? (
         // LocationStep
         <StepComponent
-          address={formData.address || ""}
-          latitude={formData.latitude}
-          longitude={formData.longitude}
-          location_description={formData.location_description}
-          map_image={formData.map_image}
-          nearby_places={formData.nearby_places}
+          address={safeFormData.address || ""}
+          latitude={safeFormData.latitude}
+          longitude={safeFormData.longitude}
+          location_description={safeFormData.location_description}
+          map_image={safeFormData.map_image}
+          nearby_places={safeFormData.nearby_places}
           onFieldChange={onFieldChange}
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}
@@ -142,7 +152,7 @@ export function PropertyFormContent({
       ) : step === 1 ? (
         // GeneralInfoStep - special handling for step 1
         <StepComponent
-          formData={formData}
+          formData={safeFormData}
           onFieldChange={onFieldChange}
           handleSetFeaturedImage={handleSetFeaturedImage}
           onSetFeaturedImage={handleSetFeaturedImage} // Add alternative prop name
@@ -151,7 +161,7 @@ export function PropertyFormContent({
       ) : step === 6 ? (
         // FloorplansStep - specific handling for FloorplansStep
         <StepComponent
-          formData={formData}
+          formData={safeFormData}
           onFieldChange={onFieldChange}
           handleFloorplanUpload={handleFloorplanUpload}
           handleRemoveFloorplan={handleRemoveFloorplan}
@@ -161,7 +171,7 @@ export function PropertyFormContent({
       ) : (
         // Other steps
         <StepComponent
-          formData={formData}
+          formData={safeFormData}
           onFieldChange={onFieldChange}
           onAddFeature={onAddFeature}
           onRemoveFeature={onRemoveFeature}
