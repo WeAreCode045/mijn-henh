@@ -2,6 +2,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyFloorplan } from "@/types/property";
+import { prepareFloorplansForFormSubmission } from "../property-form/preparePropertyData";
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
@@ -58,6 +59,35 @@ export function usePropertyFloorplans(
       };
       
       setFormData(updatedFormData);
+      
+      // If the property is already saved in the database, update it immediately
+      if (formData.id) {
+        try {
+          // Prepare the floorplans for database update using our utility function
+          const floorplansForDb = prepareFloorplansForFormSubmission(updatedFloorplans);
+          
+          console.log("Updating database with new floorplans:", floorplansForDb);
+          
+          // Update the database directly
+          const { error } = await supabase
+            .from('properties')
+            .update({ floorplans: floorplansForDb })
+            .eq('id', formData.id);
+            
+          if (error) {
+            console.error('Error updating floorplans in database after upload:', error);
+            toast({
+              title: "Warning", 
+              description: "Floorplans uploaded but database update failed. Please save the property.",
+              variant: "destructive"
+            });
+          } else {
+            console.log("Database updated successfully with new floorplans");
+          }
+        } catch (error) {
+          console.error('Exception updating floorplans in database after upload:', error);
+        }
+      }
 
       toast({
         title: "Success",
@@ -131,16 +161,10 @@ export function usePropertyFloorplans(
     // If the property is already saved in the database, update it immediately
     if (formData.id) {
       try {
-        // Prepare the data for database update
-        const floorplansForDb = updatedFloorplans.map(fp => {
-          if (typeof fp === 'string') return fp;
-          return JSON.stringify({
-            id: fp.id,
-            url: fp.url,
-            filePath: fp.filePath || '',
-            columns: fp.columns || 1
-          });
-        });
+        // Prepare the data for database update using our utility function
+        const floorplansForDb = prepareFloorplansForFormSubmission(updatedFloorplans);
+        
+        console.log("Updating database with removed floorplan, new data:", floorplansForDb);
         
         // Update the database directly
         const { error } = await supabase

@@ -24,16 +24,39 @@ export function FloorplansCard({
   onUpdateFloorplanEmbedScript,
 }: FloorplansCardProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [localFloorplans, setLocalFloorplans] = useState<(PropertyFloorplan | string)[]>([]);
+  const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
   
   // Use a key to force re-render when floorplans array changes
   const [floorplansKey, setFloorplansKey] = useState(Date.now());
   
   useEffect(() => {
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
-    // Create a new array copy to ensure React detects the change
-    setLocalFloorplans(Array.isArray(floorplans) ? [...floorplans] : []);
-    setFloorplansKey(Date.now()); // Update key to force re-render
+    
+    try {
+      // Process floorplans from different possible formats
+      const processedFloorplans = Array.isArray(floorplans) 
+        ? floorplans.map((floorplan, index) => {
+            if (typeof floorplan === 'string') {
+              try {
+                // Try to parse as JSON string
+                return JSON.parse(floorplan);
+              } catch (e) {
+                // If parsing fails, it's a plain URL string
+                return { id: `floorplan-${index}`, url: floorplan, columns: 1 };
+              }
+            }
+            // Already an object
+            return floorplan;
+          })
+        : [];
+        
+      console.log("FloorplansCard - Processed floorplans:", processedFloorplans);
+      setParsedFloorplans(processedFloorplans);
+      setFloorplansKey(Date.now()); // Update key to force re-render
+    } catch (error) {
+      console.error("Error processing floorplans:", error);
+      setParsedFloorplans([]);
+    }
   }, [floorplans]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,33 +130,28 @@ export function FloorplansCard({
           </p>
         </div>
 
-        {localFloorplans.length > 0 && (
+        {parsedFloorplans.length > 0 && (
           <div key={floorplansKey} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {localFloorplans.map((floorplan, index) => {
-              const url = typeof floorplan === 'string' ? floorplan : floorplan.url;
-              const id = typeof floorplan === 'string' ? `floorplan-string-${index}` : floorplan.id || `floorplan-object-${index}`;
-              
-              return (
-                <div key={`${id}-${floorplansKey}`} className="relative group">
-                  <img
-                    src={url}
-                    alt={`Floorplan ${index + 1}`}
-                    className="w-full h-auto max-h-[200px] object-contain border rounded-md bg-slate-50"
-                  />
-                  {onRemoveFloorplan && (
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => handleRemoveClick(e, index)}
-                      type="button"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
+            {parsedFloorplans.map((floorplan, index) => (
+              <div key={`${floorplan.id || `floorplan-${index}`}-${floorplansKey}`} className="relative group">
+                <img
+                  src={floorplan.url}
+                  alt={`Floorplan ${index + 1}`}
+                  className="w-full h-auto max-h-[200px] object-contain border rounded-md bg-slate-50"
+                />
+                {onRemoveFloorplan && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => handleRemoveClick(e, index)}
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

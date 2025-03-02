@@ -1,11 +1,37 @@
 
 import { WebViewSectionProps } from "../types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImagePreviewDialog } from "../components/ImagePreviewDialog";
 import { PropertyFloorplan } from "@/types/property";
 
 export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
+
+  useEffect(() => {
+    // Parse floorplans when the component mounts or when property.floorplans changes
+    if (property.floorplans && Array.isArray(property.floorplans)) {
+      try {
+        const parsed = property.floorplans.map(floorplan => {
+          if (typeof floorplan === 'string') {
+            try {
+              // Try to parse as JSON string
+              return JSON.parse(floorplan);
+            } catch (e) {
+              // If parsing fails, it's a plain URL string
+              return { id: crypto.randomUUID(), url: floorplan, columns: 1 };
+            }
+          }
+          // Already an object
+          return floorplan;
+        });
+        console.log("FloorplansSection - Parsed floorplans:", parsed);
+        setParsedFloorplans(parsed);
+      } catch (error) {
+        console.error("Error parsing floorplans:", error);
+      }
+    }
+  }, [property.floorplans]);
 
   const handleImageClick = (image: string) => {
     setSelectedImage(image);
@@ -16,58 +42,47 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   };
 
   const getFloorplansByColumns = () => {
-    const floorplans = property.floorplans || [];
-    const technicalItems = property.technicalItems || [];
-    
-    // Check if using the legacy format (array of strings)
-    const isLegacyFormat = floorplans.length > 0 && typeof floorplans[0] === 'string';
-    
-    if (isLegacyFormat) {
-      return [{
-        columns: 1,
-        plans: (floorplans as unknown as string[]).map((url: string) => ({ 
-          id: crypto.randomUUID(),
-          url, 
-          columns: 1 
-        }))
-      }];
+    if (!parsedFloorplans.length) {
+      return [];
     }
     
-    // Using the new format (array of objects with url and columns)
+    // Group floorplans by column count
     const resultGroups: { [key: number]: PropertyFloorplan[] } = {};
     
-    technicalItems.forEach(item => {
-      if (item.floorplanId !== null && item.floorplanId !== '') {
-        const floorplan = floorplans.find(fp => fp.id === item.floorplanId);
-        
-        if (floorplan) {
-          const columns = item.columns || 1;
-          if (!resultGroups[columns]) {
-            resultGroups[columns] = [];
+    // First, check for technical items with floorplanId references
+    if (property.technicalItems && Array.isArray(property.technicalItems)) {
+      property.technicalItems.forEach(item => {
+        if (item.floorplanId) {
+          const floorplan = parsedFloorplans.find(fp => fp.id === item.floorplanId);
+          
+          if (floorplan) {
+            const columns = item.columns || 1;
+            if (!resultGroups[columns]) {
+              resultGroups[columns] = [];
+            }
+            resultGroups[columns].push({
+              ...floorplan,
+              columns
+            });
           }
-          resultGroups[columns].push({
-            ...floorplan,
-            columns
-          });
         }
-      }
-    });
+      });
+    }
     
-    // For any floorplans not linked to a technical item, put them in the 1-column group
-    floorplans.forEach((plan) => {
+    // For floorplans not linked to technical items, group by their own column value
+    parsedFloorplans.forEach(plan => {
       // Check if this floorplan is already assigned to a technical item
-      const isAssigned = technicalItems.some(item => 
-        item.floorplanId !== null && item.floorplanId === plan.id
-      );
+      const isAssigned = property.technicalItems && Array.isArray(property.technicalItems) && 
+        property.technicalItems.some(item => 
+          item.floorplanId === plan.id
+        );
       
       if (!isAssigned) {
-        if (!resultGroups[1]) {
-          resultGroups[1] = [];
+        const columns = plan.columns || 1;
+        if (!resultGroups[columns]) {
+          resultGroups[columns] = [];
         }
-        resultGroups[1].push({
-          ...plan,
-          columns: 1
-        });
+        resultGroups[columns].push(plan);
       }
     });
     
@@ -78,6 +93,10 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   };
 
   const floorplanGroups = getFloorplansByColumns();
+
+  if (!parsedFloorplans.length && !property.floorplanEmbedScript) {
+    return null;
+  }
 
   return (
     <div className="space-y-6 pb-24 relative">

@@ -24,8 +24,10 @@ export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan
     return [];
   }
   
+  console.log("prepareFloorplansForFormSubmission - input:", floorplans);
+  
   // Filter out any undefined or null values to ensure we only process valid floorplans
-  return floorplans
+  const preparedFloorplans = floorplans
     .filter(floorplan => floorplan && (typeof floorplan === 'string' || floorplan.id))
     .map(floorplan => {
       // If it's a string, it's already in the right format
@@ -34,13 +36,18 @@ export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan
       }
       
       // Otherwise, convert it to JSON
-      return JSON.stringify({
+      const floorplanData = {
         id: floorplan.id || crypto.randomUUID(), // Ensure we preserve or create an ID
         url: floorplan.url,
         filePath: floorplan.filePath || '',   // Preserve file path for storage operations
         columns: floorplan.columns || 1
-      });
+      };
+      
+      return JSON.stringify(floorplanData);
     });
+    
+  console.log("prepareFloorplansForFormSubmission - output:", preparedFloorplans);
+  return preparedFloorplans;
 }
 
 /**
