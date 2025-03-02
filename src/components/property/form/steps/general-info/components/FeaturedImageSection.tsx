@@ -22,6 +22,7 @@ export function FeaturedImageSection({
       // Find the selected image in the images array
       const selectedImage = formData.images.find(img => img.id === selectedIds[0]);
       if (selectedImage) {
+        console.log("Setting featured image to:", selectedImage.url);
         handleSetFeaturedImage(selectedImage.url);
       }
     }
@@ -30,6 +31,11 @@ export function FeaturedImageSection({
   const handleRemoveImage = () => {
     handleSetFeaturedImage(null);
   };
+
+  // Find the ID of the currently featured image
+  const featuredImageId = formData.featuredImage ? 
+    formData.images.find(img => img.url === formData.featuredImage)?.id : 
+    undefined;
 
   return (
     <div>
@@ -68,7 +74,7 @@ export function FeaturedImageSection({
 
       <ImageSelectDialog
         images={formData.images || []}
-        selectedImageIds={formData.featuredImage ? [formData.images.find(img => img.url === formData.featuredImage)?.id || ''] : []}
+        selectedImageIds={featuredImageId ? [featuredImageId] : []}
         onSelect={handleImageSelect}
         buttonText="Select Featured Image"
         maxSelect={1}

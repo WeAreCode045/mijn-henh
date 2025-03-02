@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { PropertyImage } from "@/types/property";
 import { Card } from "@/components/ui/card";
@@ -123,6 +124,11 @@ export function ImageSelectDialog({
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Select Images from Library</DialogTitle>
+          <DialogDescription>
+            {singleSelect 
+              ? "Choose an image to use as featured image." 
+              : `Select up to ${maxSelect || 'multiple'} images.`}
+          </DialogDescription>
         </DialogHeader>
         
         <ImageGrid 

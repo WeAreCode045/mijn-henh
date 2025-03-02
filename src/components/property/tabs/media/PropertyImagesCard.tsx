@@ -86,15 +86,46 @@ export function PropertyImagesCard({
                     />
                   </div>
                   
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onRemoveImage(index)}
-                  >
-                    <Trash2Icon className="w-4 h-4" />
-                  </Button>
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    {/* Featured image toggle */}
+                    {onSetFeaturedImage && (
+                      <Button
+                        type="button"
+                        variant={isFeaturedImage(image.url) ? "default" : "outline"}
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => onSetFeaturedImage(image.url)}
+                        title="Set as featured image"
+                      >
+                        <Star className="w-4 h-4" fill={isFeaturedImage(image.url) ? "currentColor" : "none"} />
+                      </Button>
+                    )}
+                    
+                    {/* Grid image toggle */}
+                    {onToggleGridImage && (
+                      <Button
+                        type="button"
+                        variant={isInGridImages(image.url) ? "default" : "outline"}
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => onToggleGridImage(image.url)}
+                        title="Toggle grid image"
+                      >
+                        <Grid2X2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                    
+                    {/* Delete button */}
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => onRemoveImage(index)}
+                    >
+                      <Trash2Icon className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             ) : (

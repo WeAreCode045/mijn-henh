@@ -10,11 +10,13 @@ interface DialogActionsProps {
 export function DialogActions({ onCancel, onConfirm }: DialogActionsProps) {
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     onCancel();
   };
 
   const handleConfirm = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     onConfirm();
   };
 
@@ -27,7 +29,12 @@ export function DialogActions({ onCancel, onConfirm }: DialogActionsProps) {
       >
         Cancel
       </Button>
-      <Button onClick={handleConfirm} type="button">Confirm</Button>
+      <Button 
+        onClick={handleConfirm} 
+        type="button"
+      >
+        Confirm
+      </Button>
     </div>
   );
 }
