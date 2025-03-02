@@ -1,7 +1,6 @@
 
 import type { PropertyFormData, PropertyFloorplan } from "@/types/property";
 import { usePropertyAreaPhotos } from "./images/usePropertyAreaPhotos";
-import { usePropertyFeaturedImage } from "./images/usePropertyFeaturedImage";
 import { useMediaUpload } from "./useMediaUpload";
 import { useFloorplanUpload } from "./useFloorplanUpload";
 import { useFloorplanUpdateHandler } from "./images/floorplans/useFloorplanUpdateHandler";
@@ -32,9 +31,6 @@ export function usePropertyImages(
   
   // Keep existing area photos hooks 
   const { handleAreaPhotosUpload, handleRemoveAreaPhoto } = usePropertyAreaPhotos(formData, setFormData);
-  
-  // Keep existing featured image hooks
-  const { handleSetFeaturedImage, handleToggleGridImage, isInGridImages, isFeaturedImage } = usePropertyFeaturedImage(formData, setFormData);
 
   // Load media when property ID changes
   useEffect(() => {
@@ -81,10 +77,14 @@ export function usePropertyImages(
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto,
     
-    // Featured image handling
-    handleSetFeaturedImage,
-    handleToggleGridImage,
-    isInGridImages,
-    isFeaturedImage
+    // Provide dummy functions for backward compatibility
+    handleSetFeaturedImage: () => {
+      console.warn("Featured image functionality has been removed");
+    },
+    handleToggleGridImage: () => {
+      console.warn("Grid image functionality has been removed");
+    },
+    isInGridImages: () => false,
+    isFeaturedImage: () => false
   };
 }

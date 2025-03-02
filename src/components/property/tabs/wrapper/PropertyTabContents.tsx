@@ -18,8 +18,6 @@ interface PropertyTabContentsProps {
     created_at?: string;
     updated_at?: string;
     images: any[];
-    featuredImage: string | null;
-    gridImages: string[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
   };
@@ -54,8 +52,6 @@ interface PropertyTabContentsProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  handleSetFeaturedImage: (url: string) => void;
-  handleToggleGridImage: (url: string) => void;
   // Technical data props
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
@@ -100,8 +96,6 @@ export function PropertyTabContents({
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
   handleUpdateFloorplan,
-  handleSetFeaturedImage,
-  handleToggleGridImage,
   onAddTechnicalItem,
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
@@ -138,8 +132,6 @@ export function PropertyTabContents({
     handleRemoveAreaPhoto,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    handleSetFeaturedImage,
-    handleToggleGridImage,
     onAddTechnicalItem,
     onRemoveTechnicalItem,
     onUpdateTechnicalItem,

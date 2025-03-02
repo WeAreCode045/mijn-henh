@@ -29,8 +29,6 @@ interface PropertyContentTabProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  handleSetFeaturedImage: (url: string) => void;
-  handleToggleGridImage: (url: string) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -64,8 +62,6 @@ export function PropertyContentTab({
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
   handleUpdateFloorplan,
-  handleSetFeaturedImage,
-  handleToggleGridImage,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
@@ -149,8 +145,6 @@ export function PropertyContentTab({
         handleRemoveAreaPhoto={handleRemoveAreaPhoto}
         handleRemoveFloorplan={handleRemoveFloorplan}
         handleUpdateFloorplan={handleUpdateFloorplan}
-        handleSetFeaturedImage={handleSetFeaturedImage}
-        handleToggleGridImage={handleToggleGridImage}
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}

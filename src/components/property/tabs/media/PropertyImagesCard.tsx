@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UploadIcon, Trash2Icon, Star, Grid2X2 } from "lucide-react";
+import { UploadIcon, Trash2Icon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { useState } from "react";
 
@@ -9,22 +9,14 @@ interface PropertyImagesCardProps {
   images: PropertyImage[];
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  featuredImage?: string | null;
-  gridImages?: string[];
   isUploading?: boolean;
-  onSetFeaturedImage?: (url: string) => void;
-  onToggleGridImage?: (url: string) => void;
 }
 
 export function PropertyImagesCard({
   images = [],
   onImageUpload,
   onRemoveImage,
-  featuredImage,
-  gridImages = [],
   isUploading = false,
-  onSetFeaturedImage,
-  onToggleGridImage,
 }: PropertyImagesCardProps) {
   // File input ref
   const [uploading, setUploading] = useState(isUploading);
@@ -34,16 +26,6 @@ export function PropertyImagesCard({
     onImageUpload(e);
     // Reset the file input value
     e.target.value = '';
-  };
-
-  // Check if an image is the featured image
-  const isFeaturedImage = (url: string): boolean => {
-    return featuredImage === url;
-  };
-
-  // Check if an image is in grid images
-  const isInGridImages = (url: string): boolean => {
-    return gridImages.includes(url);
   };
 
   return (
@@ -87,34 +69,6 @@ export function PropertyImagesCard({
                   </div>
                   
                   <div className="absolute top-2 right-2 flex gap-1">
-                    {/* Featured image toggle */}
-                    {onSetFeaturedImage && (
-                      <Button
-                        type="button"
-                        variant={isFeaturedImage(image.url) ? "default" : "outline"}
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => onSetFeaturedImage(image.url)}
-                        title="Set as featured image"
-                      >
-                        <Star className="w-4 h-4" fill={isFeaturedImage(image.url) ? "currentColor" : "none"} />
-                      </Button>
-                    )}
-                    
-                    {/* Grid image toggle */}
-                    {onToggleGridImage && (
-                      <Button
-                        type="button"
-                        variant={isInGridImages(image.url) ? "default" : "outline"}
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => onToggleGridImage(image.url)}
-                        title="Toggle grid image"
-                      >
-                        <Grid2X2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                    
                     {/* Delete button */}
                     <Button
                       type="button"

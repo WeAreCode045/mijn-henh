@@ -9,8 +9,6 @@ interface PropertyMediaTabProps {
   id: string;
   title: string;
   images: PropertyImage[];
-  featuredImage: string | null;
-  gridImages: string[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
@@ -19,8 +17,6 @@ interface PropertyMediaTabProps {
   onNotesUpdate?: (notes: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  onSetFeaturedImage?: (url: string) => void;
-  onToggleGridImage?: (url: string) => void;
   isUploading?: boolean;
 }
 
@@ -28,8 +24,6 @@ export function PropertyMediaTab({
   id,
   title,
   images = [],
-  featuredImage,
-  gridImages = [],
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
@@ -38,8 +32,6 @@ export function PropertyMediaTab({
   onNotesUpdate,
   onImageUpload,
   onRemoveImage,
-  onSetFeaturedImage,
-  onToggleGridImage,
   isUploading = false,
 }: PropertyMediaTabProps) {
   const [mediaImages, setMediaImages] = useState<PropertyImage[]>(images);
@@ -61,11 +53,7 @@ export function PropertyMediaTab({
         images={mediaImages || images}
         onImageUpload={onImageUpload}
         onRemoveImage={onRemoveImage}
-        featuredImage={featuredImage}
-        gridImages={gridImages}
         isUploading={isUploading}
-        onSetFeaturedImage={onSetFeaturedImage}
-        onToggleGridImage={onToggleGridImage}
       />
 
       <VirtualTourCard 
