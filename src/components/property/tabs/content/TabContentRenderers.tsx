@@ -93,7 +93,7 @@ export const renderContentTab = ({ activeTab, formState, handlers }: TabRenderPr
 export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps) => {
   if (activeTab !== 'media') return null;
   
-  // Remove the activeSubTab prop that was being passed to MediaTabContent
+  // Make sure we're not passing activeSubTab to MediaTabContent
   return (
     <MediaTabContent
       id={property.id}

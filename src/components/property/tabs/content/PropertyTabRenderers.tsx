@@ -8,8 +8,7 @@ import { MediaTabContent } from "../wrapper/MediaTabContent";
 export function renderMediaTab(tabProps: any) {
   if (tabProps.activeTab !== 'media' && tabProps.activeTab !== 'floorplans') return null;
 
-  const activeSubTab = tabProps.activeTab === 'floorplans' ? 'floorplans' : 'media';
-
+  // Remove the activeSubTab prop since it doesn't exist in the MediaTabContent interface
   return (
     <MediaTabContent
       id={tabProps.property.id}
@@ -33,7 +32,6 @@ export function renderMediaTab(tabProps: any) {
       onSetFeaturedImage={tabProps.handlers.handleSetFeaturedImage}
       onToggleGridImage={tabProps.handlers.handleToggleGridImage}
       isUploading={tabProps.handlers.isUploading}
-      activeSubTab={activeSubTab}
     />
   );
 }
