@@ -15,9 +15,6 @@ export function useFloorplanEmbed(
     };
     
     setFormData(updatedFormData);
-    
-    // Log to confirm the update
-    console.log("Updated formData with floorplanEmbedScript:", updatedFormData.floorplanEmbedScript);
   };
 
   return {
