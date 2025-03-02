@@ -40,22 +40,34 @@ export function transformSupabaseData(data: any): PropertyData {
             // Try to parse as JSON string
             const parsedFloorplan = JSON.parse(floorplan);
             return {
+              id: parsedFloorplan.id || crypto.randomUUID(),
               url: parsedFloorplan.url || '',
+              filePath: parsedFloorplan.filePath || '',
               columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
             };
           } catch (e) {
             // If parsing fails, treat as a simple URL string
-            return { url: floorplan, columns: 1 };
+            return { 
+              id: crypto.randomUUID(),
+              url: floorplan, 
+              columns: 1 
+            };
           }
         } else if (typeof floorplan === 'object' && floorplan !== null) {
           // If it's already an object
           return {
+            id: floorplan.id || crypto.randomUUID(),
             url: floorplan.url || '',
+            filePath: floorplan.filePath || '',
             columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
           };
         }
         // Default case
-        return { url: '', columns: 1 };
+        return { 
+          id: crypto.randomUUID(),
+          url: '', 
+          columns: 1 
+        };
       }).filter(f => f.url) // Filter out items with empty URLs
     : [];
 

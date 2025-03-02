@@ -32,7 +32,9 @@ export function usePropertyFloorplans(
           .getPublicUrl(filePath);
 
         return {
+          id: crypto.randomUUID(), // Generate a unique ID for the floorplan
           url: publicUrl,
+          filePath: filePath, // Store the file path for deletion later
           columns: 1 // Default to 1 column
         };
       });
@@ -71,7 +73,7 @@ export function usePropertyFloorplans(
     }
   };
 
-  const handleRemoveFloorplan = (index: number) => {
+  const handleRemoveFloorplan = async (index: number) => {
     console.log("Removing floorplan at index:", index);
     
     if (!Array.isArray(formData.floorplans) || index < 0 || index >= formData.floorplans.length) {
@@ -79,19 +81,32 @@ export function usePropertyFloorplans(
       return;
     }
     
+    // Get the floorplan to remove
+    const floorplanToRemove = formData.floorplans[index];
+    
+    // Delete the file from storage if filePath exists
+    if (floorplanToRemove.filePath) {
+      try {
+        const { error } = await supabase.storage
+          .from('properties')
+          .remove([floorplanToRemove.filePath]);
+          
+        if (error) {
+          console.error('Error deleting floorplan file:', error);
+          // Continue with the process even if file deletion fails
+        }
+      } catch (err) {
+        console.error('Error in file deletion process:', err);
+        // Continue with the process even if file deletion fails
+      }
+    }
+    
     // Update any technical items that reference this floorplan
     const updatedTechnicalItems = (formData.technicalItems || []).map(item => {
-      // If this technical item references the removed floorplan or any after it (by index)
-      if (item.floorplanId !== null) {
-        const floorplanIndex = parseInt(item.floorplanId);
-        if (floorplanIndex === index) {
-          // This technical item referenced the removed floorplan
-          return { ...item, floorplanId: null };
-        } else if (floorplanIndex > index) {
-          // This technical item referenced a floorplan after the removed one
-          // Decrement the index to maintain correct references
-          return { ...item, floorplanId: (floorplanIndex - 1).toString() };
-        }
+      // If this technical item references the removed floorplan
+      if (item.floorplanId === floorplanToRemove.id) {
+        // This technical item referenced the removed floorplan
+        return { ...item, floorplanId: null };
       }
       return item;
     });

@@ -90,22 +90,36 @@ export function usePropertyForm(id: string | undefined, onSubmit?: (data: Proper
                 // Try to parse as JSON if it's a stringified object
                 const parsedFloorplan = JSON.parse(floorplan);
                 return {
+                  id: parsedFloorplan.id || crypto.randomUUID(),
                   url: parsedFloorplan.url || '',
+                  filePath: parsedFloorplan.filePath || '', 
                   columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
                 };
               } catch (e) {
                 // If parsing fails, treat it as a plain URL string
-                return { url: floorplan, columns: 1 };
+                return { 
+                  id: crypto.randomUUID(),
+                  url: floorplan, 
+                  filePath: '', 
+                  columns: 1 
+                };
               }
             } else if (typeof floorplan === 'object' && floorplan !== null) {
               // If it's already an object
               return {
+                id: floorplan.id || crypto.randomUUID(),
                 url: floorplan.url || '',
+                filePath: floorplan.filePath || '',
                 columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
               };
             } else {
               // Fallback for any other case
-              return { url: '', columns: 1 };
+              return { 
+                id: crypto.randomUUID(),
+                url: '', 
+                filePath: '',
+                columns: 1 
+              };
             }
           }).filter(f => f.url); // Filter out any items with empty URLs
         }

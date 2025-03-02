@@ -1,4 +1,3 @@
-
 import type { PropertyArea, PropertyFloorplan } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 
@@ -20,14 +19,25 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[]): Json[] {
 /**
  * Transforms floorplan objects array into JSON for database storage
  */
-export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan[]): Json {
-  if (!floorplans || !Array.isArray(floorplans)) return [];
+export function prepareFloorplansForFormSubmission(floorplans: any[] | undefined) {
+  if (!floorplans || !Array.isArray(floorplans)) {
+    return [];
+  }
   
-  // Convert floorplan objects to proper format for database
-  return floorplans.map(floorplan => ({
-    url: floorplan.url,
-    columns: floorplan.columns || 1 // Default to 1 column if not specified
-  }));
+  return floorplans.map(floorplan => {
+    // If it's a string, it's already in the right format
+    if (typeof floorplan === 'string') {
+      return floorplan;
+    }
+    
+    // Otherwise, convert it to JSON
+    return JSON.stringify({
+      id: floorplan.id || crypto.randomUUID(), // Ensure we preserve or create an ID
+      url: floorplan.url,
+      filePath: floorplan.filePath || '',   // Preserve file path for storage operations
+      columns: floorplan.columns || 1
+    });
+  });
 }
 
 /**

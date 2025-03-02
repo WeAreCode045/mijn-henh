@@ -34,8 +34,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     
     technicalItems.forEach(item => {
       if (item.floorplanId !== null && item.floorplanId !== '') {
-        const floorplanIndex = parseInt(item.floorplanId);
-        const floorplan = floorplans[floorplanIndex];
+        const floorplan = floorplans.find(fp => fp.id === item.floorplanId);
         
         if (floorplan) {
           const columns = item.columns || 1;
@@ -51,10 +50,10 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     });
     
     // For any floorplans not linked to a technical item, put them in the 1-column group
-    floorplans.forEach((plan, index) => {
+    floorplans.forEach((plan) => {
       // Check if this floorplan is already assigned to a technical item
       const isAssigned = technicalItems.some(item => 
-        item.floorplanId !== null && parseInt(item.floorplanId) === index
+        item.floorplanId !== null && item.floorplanId === plan.id
       );
       
       if (!isAssigned) {
@@ -95,7 +94,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
             <div className={`grid grid-cols-${group.columns} gap-4`}>
               {group.plans.map((plan, index) => (
                 <div 
-                  key={index} 
+                  key={plan.id || index} 
                   className="w-full cursor-pointer shadow-md rounded-lg overflow-hidden" 
                   onClick={() => handleImageClick(plan.url)}
                 >
