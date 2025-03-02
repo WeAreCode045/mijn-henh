@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFloorplan } from "@/types/property";
 
 interface FloorplanDatabaseFetcherProps {
   propertyId?: string;
-  floorplans?: PropertyFloorplan[] | string[];
+  floorplans?: PropertyFloorplan[];
   onFetchComplete: (floorplans: PropertyFloorplan[]) => void;
 }
 
@@ -20,7 +20,7 @@ export function FloorplanDatabaseFetcher({
         try {
           const { data, error } = await supabase
             .from('property_images')
-            .select('*')
+            .select('id, url')
             .eq('property_id', propertyId)
             .eq('type', 'floorplan')
             .order('created_at', { ascending: false });
