@@ -46,7 +46,12 @@ export function FloorplansCard({
             try {
               // Try to parse as JSON string
               const parsed = JSON.parse(floorplan);
-              processedFloorplans.push(parsed);
+              processedFloorplans.push({
+                id: parsed.id || `floorplan-${i}`,
+                url: parsed.url,
+                filePath: parsed.filePath,
+                columns: parsed.columns || 1
+              });
             } catch (e) {
               // If parsing fails, it's a plain URL string
               processedFloorplans.push({ 
@@ -56,12 +61,12 @@ export function FloorplansCard({
               });
             }
           } else {
-            // Already an object - explicitly type cast to PropertyFloorplan
-            const typedFloorplan = floorplan as PropertyFloorplan;
+            // Already an object - explicitly type cast and create a new object
+            const typedFloorplan = floorplan as unknown as any;
             processedFloorplans.push({
               id: typedFloorplan.id || `floorplan-obj-${i}`,
-              url: typedFloorplan.url,
-              filePath: typedFloorplan.filePath,
+              url: typedFloorplan.url || '',
+              filePath: typedFloorplan.filePath || undefined,
               columns: typedFloorplan.columns || 1
             });
           }
