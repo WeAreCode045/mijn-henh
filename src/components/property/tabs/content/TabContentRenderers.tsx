@@ -3,7 +3,7 @@ import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
-import { FloorplansTab } from "../FloorplansTab";
+import { FloorplansTab } from "../FloorplansTab"; // Make sure this path is correct
 
 // Common props type to simplify passing data to tab renderers
 interface TabRenderProps {
@@ -115,14 +115,14 @@ export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps
   );
 };
 
-export const renderFloorplansTab = ({ activeTab, property, handlers }: TabRenderProps) => {
+export const renderFloorplansTab = ({ activeTab, property, handlers, formState }: TabRenderProps) => {
   if (activeTab !== 'floorplans') return null;
   
   return (
     <FloorplansTab
       id={property.id}
-      floorplans={handlers.formState?.floorplans || []}
-      floorplanEmbedScript={handlers.formState?.floorplanEmbedScript}
+      floorplans={formState?.floorplans || []}
+      floorplanEmbedScript={formState?.floorplanEmbedScript}
       onFloorplanUpload={handlers.handleFloorplanUpload}
       onRemoveFloorplan={handlers.handleRemoveFloorplan}
       onFloorplanEmbedScriptUpdate={(script: string) => handlers.onFieldChange('floorplanEmbedScript', script)}
