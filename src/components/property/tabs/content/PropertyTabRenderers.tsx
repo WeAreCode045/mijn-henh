@@ -6,9 +6,8 @@ import { FloorplansTab } from "../FloorplansTab";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 
 export function renderMediaTab(tabProps: any) {
-  if (tabProps.activeTab !== 'media' && tabProps.activeTab !== 'floorplans') return null;
+  if (tabProps.activeTab !== 'media') return null;
 
-  // Remove the activeSubTab prop since it doesn't exist in the MediaTabContent interface
   return (
     <MediaTabContent
       id={tabProps.property.id}
@@ -16,19 +15,14 @@ export function renderMediaTab(tabProps: any) {
       images={tabProps.formState.images || []}
       featuredImage={tabProps.formState.featuredImage}
       gridImages={tabProps.formState.gridImages || []}
-      floorplans={tabProps.formState.floorplans || []}
-      floorplanEmbedScript={tabProps.formState.floorplanEmbedScript || ""}
       virtualTourUrl={tabProps.formState.virtualTourUrl}
       youtubeUrl={tabProps.formState.youtubeUrl}
       notes={tabProps.formState.notes}
       onVirtualTourUpdate={(url) => tabProps.handlers.onFieldChange('virtualTourUrl', url)}
       onYoutubeUrlUpdate={(url) => tabProps.handlers.onFieldChange('youtubeUrl', url)}
       onNotesUpdate={(notes) => tabProps.handlers.onFieldChange('notes', notes)}
-      onFloorplanEmbedScriptUpdate={(script) => tabProps.handlers.onFieldChange('floorplanEmbedScript', script)}
       onImageUpload={tabProps.handlers.handleImageUpload}
       onRemoveImage={tabProps.handlers.handleRemoveImage}
-      onFloorplanUpload={tabProps.handlers.handleFloorplanUpload}
-      onRemoveFloorplan={tabProps.handlers.handleRemoveFloorplan}
       onSetFeaturedImage={tabProps.handlers.handleSetFeaturedImage}
       onToggleGridImage={tabProps.handlers.handleToggleGridImage}
       isUploading={tabProps.handlers.isUploading}
@@ -43,6 +37,22 @@ export function renderDashboardTab(tabProps: any) {
 
 export function renderContentTab(tabProps: any) {
   // Implementation from original file
+}
+
+export function renderFloorplansTab(tabProps: any) {
+  if (tabProps.activeTab !== 'floorplans') return null;
+  
+  return (
+    <FloorplansTab
+      id={tabProps.property.id}
+      floorplans={tabProps.formState?.floorplans || []}
+      floorplanEmbedScript={tabProps.formState?.floorplanEmbedScript}
+      onFloorplanUpload={tabProps.handlers.handleFloorplanUpload}
+      onRemoveFloorplan={tabProps.handlers.handleRemoveFloorplan}
+      onFloorplanEmbedScriptUpdate={(script) => tabProps.handlers.onFieldChange('floorplanEmbedScript', script)}
+      isUploading={tabProps.handlers.isUploading}
+    />
+  );
 }
 
 export function renderCommunicationsTab(tabProps: any) {
