@@ -79,7 +79,13 @@ export function ImageSelectDialog({
 
   const handleConfirm = () => {
     console.log("Confirming selection:", selected);
-    onSelect(selected);
+    // Ensure onSelect is a function before calling it
+    if (typeof onSelect === 'function') {
+      onSelect(selected);
+    } else {
+      console.error("onSelect is not a function:", onSelect);
+    }
+    handleOpenChange(false);
   };
 
   const handleCancel = () => {

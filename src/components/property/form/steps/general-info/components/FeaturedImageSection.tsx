@@ -26,11 +26,21 @@ export function FeaturedImageSection({
       const selectedImage = formData.images.find(img => img.id === selectedIds[0]);
       if (selectedImage) {
         console.log("Setting featured image to:", selectedImage.url);
-        handleSetFeaturedImage(selectedImage.url);
-        toast({
-          title: "Success",
-          description: "Featured image updated successfully",
-        });
+        // Ensure handleSetFeaturedImage is a function before calling it
+        if (typeof handleSetFeaturedImage === 'function') {
+          handleSetFeaturedImage(selectedImage.url);
+          toast({
+            title: "Success",
+            description: "Featured image updated successfully",
+          });
+        } else {
+          console.error("handleSetFeaturedImage is not a function:", handleSetFeaturedImage);
+          toast({
+            title: "Error",
+            description: "Failed to update featured image. Please try again.",
+            variant: "destructive"
+          });
+        }
       }
     }
     setIsDialogOpen(false);

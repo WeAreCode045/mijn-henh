@@ -11,14 +11,22 @@ export function DialogActions({ onCancel, onConfirm }: DialogActionsProps) {
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onCancel();
+    if (typeof onCancel === 'function') {
+      onCancel();
+    } else {
+      console.error("onCancel is not a function:", onCancel);
+    }
   };
 
   const handleConfirm = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     console.log("Confirm button clicked in DialogActions");
-    onConfirm();
+    if (typeof onConfirm === 'function') {
+      onConfirm();
+    } else {
+      console.error("onConfirm is not a function:", onConfirm);
+    }
   };
 
   return (
