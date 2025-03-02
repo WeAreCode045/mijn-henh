@@ -2,7 +2,8 @@
 import { PropertyImage } from "@/types/property";
 import { PropertyImagesCard } from "./media/PropertyImagesCard";
 import { VirtualTourCard } from "./media/VirtualTourCard";
-import { FloorplansCard } from "./media/FloorplansCard";
+import { MediaDatabaseFetcher } from "./media/MediaDatabaseFetcher";
+import { useState } from "react";
 
 interface PropertyMediaTabProps {
   id: string;
@@ -13,18 +14,11 @@ interface PropertyMediaTabProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  floorplans?: any[];
-  floorplanEmbedScript?: string;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onNotesUpdate?: (notes: string) => void;
-  onFloorplanEmbedScriptUpdate?: (script: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan?: (index: number) => void;
-  onSetFeaturedImage?: (imageUrl: string) => void;
-  onToggleGridImage?: (imageUrl: string) => void;
   isUploading?: boolean;
 }
 
@@ -37,40 +31,35 @@ export function PropertyMediaTab({
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
-  floorplans = [],
-  floorplanEmbedScript = "",
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
   onNotesUpdate,
-  onFloorplanEmbedScriptUpdate,
   onImageUpload,
   onRemoveImage,
-  onFloorplanUpload,
-  onRemoveFloorplan,
-  onSetFeaturedImage,
-  onToggleGridImage,
   isUploading = false,
 }: PropertyMediaTabProps) {
+  const [mediaImages, setMediaImages] = useState<PropertyImage[]>(images);
+
+  const handleFetchComplete = (fetchedImages: PropertyImage[]) => {
+    setMediaImages(fetchedImages);
+  };
+
   return (
     <div className="space-y-6">
-      <PropertyImagesCard 
+      {/* Hidden database fetcher component */}
+      <MediaDatabaseFetcher
+        propertyId={id}
         images={images}
+        onFetchComplete={handleFetchComplete}
+      />
+
+      <PropertyImagesCard 
+        images={mediaImages || images}
         onImageUpload={onImageUpload}
         onRemoveImage={onRemoveImage}
-        onSetFeaturedImage={onSetFeaturedImage}
-        onToggleGridImage={onToggleGridImage}
         featuredImage={featuredImage}
         gridImages={gridImages}
         isUploading={isUploading}
-      />
-
-      <FloorplansCard
-        floorplans={floorplans}
-        floorplanEmbedScript={floorplanEmbedScript}
-        onFloorplanUpload={onFloorplanUpload}
-        onRemoveFloorplan={onRemoveFloorplan}
-        onUpdateFloorplanEmbedScript={onFloorplanEmbedScriptUpdate}
-        propertyId={id} // Pass the property ID for direct database access
       />
 
       <VirtualTourCard 
