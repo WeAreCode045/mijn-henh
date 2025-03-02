@@ -4,15 +4,19 @@ import { ImageIcon, FileTextIcon, MessageSquareIcon, GaugeIcon, LayoutIcon } fro
 
 interface PropertyTabsProps {
   activeTab: string;
-  handleTabChange: (tab: string) => void;
+  onTabChange?: (tab: string) => void;
+  handleTabChange?: (tab: string) => void;
   children: React.ReactNode;
 }
 
-export function PropertyTabs({ activeTab, handleTabChange, children }: PropertyTabsProps) {
+export function PropertyTabs({ activeTab, handleTabChange, onTabChange, children }: PropertyTabsProps) {
+  // Use onTabChange for backward compatibility
+  const handleChange = handleTabChange || onTabChange;
+  
   return (
     <Tabs
       value={activeTab}
-      onValueChange={handleTabChange}
+      onValueChange={handleChange}
       className="w-full"
     >
       <TabsList className="mb-8">

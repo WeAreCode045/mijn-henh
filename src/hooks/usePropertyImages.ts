@@ -3,6 +3,7 @@ import { usePropertyAreaPhotos } from "./images/usePropertyAreaPhotos";
 import { usePropertyFeaturedImage } from "./images/usePropertyFeaturedImage";
 import { useMediaUpload } from "./useMediaUpload";
 import { useFloorplanUpload } from "./useFloorplanUpload";
+import { useFloorplanUpdateHandler } from "./images/floorplans/useFloorplanUpdateHandler";
 import { useEffect } from "react";
 
 export function usePropertyImages(
@@ -25,6 +26,9 @@ export function usePropertyImages(
     fetchFloorplans, 
     floorplans 
   } = useFloorplanUpload(formData, setFormData);
+  
+  // Add the floorplan update handler
+  const { handleUpdateFloorplan } = useFloorplanUpdateHandler(formData, setFormData);
   
   // Keep existing area photos hooks 
   const { handleAreaPhotosUpload, handleRemoveAreaPhoto } = usePropertyAreaPhotos(formData, setFormData);
@@ -68,6 +72,7 @@ export function usePropertyImages(
     // Floorplan handling
     handleFloorplanUpload,
     handleRemoveFloorplan,
+    handleUpdateFloorplan,
     handleUpdateFloorplanEmbedScript,
     fetchFloorplans,
     

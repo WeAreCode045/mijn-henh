@@ -130,7 +130,7 @@ export function PropertyTabsWrapper({
   return (
     <div className="space-y-6">
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-        <PropertyTabs activeTab={activeTab} onTabChange={setActiveTab}>
+        <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
           <div>{/* Tab content placeholder */}</div>
         </PropertyTabs>
 

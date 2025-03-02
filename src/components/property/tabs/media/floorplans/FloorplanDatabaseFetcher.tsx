@@ -5,7 +5,7 @@ import { PropertyFloorplan } from "@/types/property";
 
 interface FloorplanDatabaseFetcherProps {
   propertyId?: string;
-  floorplans: PropertyFloorplan[] | string[] | undefined;
+  floorplans?: PropertyFloorplan[] | string[];
   onFetchComplete: (floorplans: PropertyFloorplan[]) => void;
 }
 

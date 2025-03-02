@@ -5,7 +5,7 @@ import { PropertyImage } from "@/types/property";
 
 interface MediaDatabaseFetcherProps {
   propertyId?: string;
-  images: PropertyImage[] | undefined;
+  images?: PropertyImage[];
   onFetchComplete: (images: PropertyImage[]) => void;
 }
 
