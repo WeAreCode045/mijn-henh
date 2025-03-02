@@ -3,7 +3,6 @@ import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
-import { FloorplansTab } from "../FloorplansTab";
 
 // Common props type to simplify passing data to tab renderers
 interface TabRenderProps {
@@ -108,33 +107,6 @@ export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps
       isUploading={handlers.isUploading}
     />
   );
-};
-
-export const renderFloorplansTab = ({ activeTab, property, handlers, formState }: TabRenderProps) => {
-  if (activeTab !== 'floorplans') return null;
-  
-  // Use try-catch to help debug any rendering issues
-  try {
-    console.log("Rendering floorplans tab with data:", { 
-      propertyId: property.id, 
-      floorplans: formState?.floorplans || [] 
-    });
-    
-    return (
-      <FloorplansTab
-        id={property.id}
-        floorplans={formState?.floorplans || []}
-        floorplanEmbedScript={formState?.floorplanEmbedScript}
-        onFloorplanUpload={handlers.handleFloorplanUpload}
-        onRemoveFloorplan={handlers.handleRemoveFloorplan}
-        onFloorplanEmbedScriptUpdate={(script: string) => handlers.onFieldChange('floorplanEmbedScript', script)}
-        isUploading={handlers.isUploading}
-      />
-    );
-  } catch (error) {
-    console.error("Error rendering FloorplansTab:", error);
-    return <div>Error loading floorplans tab. Please check console for details.</div>;
-  }
 };
 
 export const renderCommunicationsTab = ({ activeTab, property }: TabRenderProps) => {

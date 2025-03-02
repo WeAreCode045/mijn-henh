@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ImageIcon, FileTextIcon, MessageSquareIcon, GaugeIcon, LayoutIcon } from "lucide-react";
+import { ImageIcon, FileTextIcon, MessageSquareIcon, GaugeIcon } from "lucide-react";
 
 interface PropertyTabsProps {
   activeTab: string;
@@ -33,11 +33,6 @@ export function PropertyTabs({ activeTab, handleTabChange, onTabChange, children
         <TabsTrigger value="media" className="flex gap-2">
           <ImageIcon className="w-4 h-4" />
           <span className="hidden sm:inline">Media</span>
-        </TabsTrigger>
-        
-        <TabsTrigger value="floorplans" className="flex gap-2">
-          <LayoutIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Floorplans</span>
         </TabsTrigger>
         
         <TabsTrigger value="communications" className="flex gap-2">
