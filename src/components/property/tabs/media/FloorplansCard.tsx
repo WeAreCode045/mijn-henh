@@ -36,11 +36,12 @@ export function FloorplansCard({
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
     
     try {
-      // Fix: Create a new array to avoid recursive type instantiation
+      // Create a new array to avoid recursive type instantiation
       const processedFloorplans: PropertyFloorplan[] = [];
       
       if (Array.isArray(floorplans)) {
-        floorplans.forEach((floorplan, index) => {
+        for (let i = 0; i < floorplans.length; i++) {
+          const floorplan = floorplans[i];
           if (typeof floorplan === 'string') {
             try {
               // Try to parse as JSON string
@@ -49,16 +50,22 @@ export function FloorplansCard({
             } catch (e) {
               // If parsing fails, it's a plain URL string
               processedFloorplans.push({ 
-                id: `floorplan-${index}`, 
+                id: `floorplan-${i}`, 
                 url: floorplan, 
                 columns: 1 
               });
             }
           } else {
-            // Already an object
-            processedFloorplans.push(floorplan as PropertyFloorplan);
+            // Already an object - explicitly type cast to PropertyFloorplan
+            const typedFloorplan = floorplan as PropertyFloorplan;
+            processedFloorplans.push({
+              id: typedFloorplan.id || `floorplan-obj-${i}`,
+              url: typedFloorplan.url,
+              filePath: typedFloorplan.filePath,
+              columns: typedFloorplan.columns || 1
+            });
           }
-        });
+        }
       }
         
       console.log("FloorplansCard - Processed floorplans:", processedFloorplans);
