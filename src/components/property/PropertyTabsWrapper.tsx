@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
@@ -14,7 +13,7 @@ import { useFormSteps } from "@/hooks/useFormSteps";
 import { PropertyWebView } from "./PropertyWebView";
 import { usePropertyWebView } from "./webview/usePropertyWebView";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -35,6 +34,7 @@ export function PropertyTabsWrapper({
 }: PropertyTabsWrapperProps) {
   const [webViewOpen, setWebViewOpen] = useState(false);
   const { activeTab, setActiveTab } = usePropertyTabs();
+  console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
   // Form state management
   const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
@@ -129,12 +129,8 @@ export function PropertyTabsWrapper({
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
-          <div>{/* Tab content placeholder */}</div>
-        </PropertyTabs>
-
-        <TabsContent value={activeTab}>
           <PropertyTabContents
             activeTab={activeTab}
             property={propertyWithRequiredId}
@@ -178,7 +174,7 @@ export function PropertyTabsWrapper({
             handlePrevious={handlePrevious}
             onSubmit={onSubmit}
           />
-        </TabsContent>
+        </PropertyTabs>
       </Tabs>
 
       {/* WebView Dialog */}

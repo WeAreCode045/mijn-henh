@@ -46,35 +46,10 @@ export function PropertyTabs({ activeTab, handleTabChange, onTabChange, children
         </TabsTrigger>
       </TabsList>
       
-      {activeTab === 'dashboard' && (
-        <TabsContent value="dashboard">
-          {children}
-        </TabsContent>
-      )}
-      
-      {activeTab === 'content' && (
-        <TabsContent value="content">
-          {children}
-        </TabsContent>
-      )}
-      
-      {activeTab === 'media' && (
-        <TabsContent value="media">
-          {children}
-        </TabsContent>
-      )}
-      
-      {activeTab === 'floorplans' && (
-        <TabsContent value="floorplans">
-          {children}
-        </TabsContent>
-      )}
-      
-      {activeTab === 'communications' && (
-        <TabsContent value="communications">
-          {children}
-        </TabsContent>
-      )}
+      {/* Render all tab content at once but only display the active one */}
+      <TabsContent value={activeTab} forceMount>
+        {children}
+      </TabsContent>
     </Tabs>
   );
 }

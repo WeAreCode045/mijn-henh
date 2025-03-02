@@ -1,3 +1,4 @@
+
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
@@ -119,6 +120,11 @@ export const renderFloorplansTab = ({ activeTab, property, handlers, formState }
   
   // Use try-catch to help debug any rendering issues
   try {
+    console.log("Rendering floorplans tab with data:", { 
+      propertyId: property.id, 
+      floorplans: formState?.floorplans || [] 
+    });
+    
     return (
       <FloorplansTab
         id={property.id}
