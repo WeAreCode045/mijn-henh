@@ -35,51 +35,49 @@ export function FloorplansCard({
   useEffect(() => {
     console.log("FloorplansCard - floorplans prop updated:", floorplans);
     
-    try {
-      // Create a new array to avoid recursive type instantiation
-      const processedFloorplans: PropertyFloorplan[] = [];
-      
-      if (Array.isArray(floorplans)) {
-        for (let i = 0; i < floorplans.length; i++) {
-          const floorplan = floorplans[i];
-          if (typeof floorplan === 'string') {
-            try {
-              // Try to parse as JSON string
-              const parsed = JSON.parse(floorplan);
-              processedFloorplans.push({
-                id: parsed.id || `floorplan-${i}`,
-                url: parsed.url,
-                filePath: parsed.filePath,
-                columns: parsed.columns || 1
-              });
-            } catch (e) {
-              // If parsing fails, it's a plain URL string
-              processedFloorplans.push({ 
-                id: `floorplan-${i}`, 
-                url: floorplan, 
-                columns: 1 
-              });
-            }
-          } else {
-            // Already an object - explicitly type cast and create a new object
-            const typedFloorplan = floorplan as unknown as any;
-            processedFloorplans.push({
-              id: typedFloorplan.id || `floorplan-obj-${i}`,
-              url: typedFloorplan.url || '',
-              filePath: typedFloorplan.filePath || undefined,
-              columns: typedFloorplan.columns || 1
+    // Create a completely new array to avoid any recursive references
+    const processed: PropertyFloorplan[] = [];
+    
+    if (Array.isArray(floorplans)) {
+      // Use a traditional for loop to avoid any map/reduce issues with type recursion
+      for (let i = 0; i < floorplans.length; i++) {
+        const item = floorplans[i];
+        
+        if (typeof item === 'string') {
+          try {
+            // Try to parse string as JSON
+            const parsed = JSON.parse(item);
+            processed.push({
+              id: parsed.id || `floorplan-${i}`,
+              url: parsed.url || '',
+              filePath: parsed.filePath || '',
+              columns: typeof parsed.columns === 'number' ? parsed.columns : 1
+            });
+          } catch (e) {
+            // If not valid JSON, treat as URL string
+            processed.push({
+              id: `floorplan-${i}`,
+              url: item,
+              columns: 1
             });
           }
+        } else if (item && typeof item === 'object') {
+          // For object types, create a new object with only the properties we need
+          // This prevents TypeScript from trying to instantiate the full type recursively
+          const floorplan = item as any;
+          processed.push({
+            id: floorplan.id || `floorplan-obj-${i}`,
+            url: floorplan.url || '',
+            filePath: floorplan.filePath || '',
+            columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
+          });
         }
       }
-        
-      console.log("FloorplansCard - Processed floorplans:", processedFloorplans);
-      setParsedFloorplans(processedFloorplans);
-      setFloorplansKey(Date.now()); // Update key to force re-render
-    } catch (error) {
-      console.error("Error processing floorplans:", error);
-      setParsedFloorplans([]);
     }
+      
+    console.log("FloorplansCard - Processed floorplans:", processed);
+    setParsedFloorplans(processed);
+    setFloorplansKey(Date.now()); // Update key to force re-render
   }, [floorplans]);
 
   // Fetch floorplans from database if propertyId is provided and floorplans is empty
