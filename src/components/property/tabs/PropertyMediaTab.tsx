@@ -70,6 +70,7 @@ export function PropertyMediaTab({
         onFloorplanUpload={onFloorplanUpload}
         onRemoveFloorplan={onRemoveFloorplan}
         onUpdateFloorplanEmbedScript={onFloorplanEmbedScriptUpdate}
+        propertyId={id} // Pass the property ID for direct database access
       />
 
       <VirtualTourCard 

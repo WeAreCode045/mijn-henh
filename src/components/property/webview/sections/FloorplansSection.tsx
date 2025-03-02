@@ -3,13 +3,46 @@ import { WebViewSectionProps } from "../types";
 import { useState, useEffect } from "react";
 import { ImagePreviewDialog } from "../components/ImagePreviewDialog";
 import { PropertyFloorplan } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
 
 export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
 
   useEffect(() => {
-    // Parse floorplans when the component mounts or when property.floorplans changes
+    // Check if we need to fetch floorplans from the property_images table
+    const fetchFloorplansFromDb = async () => {
+      if (property.id) {
+        try {
+          const { data, error } = await supabase
+            .from('property_images')
+            .select('*')
+            .eq('property_id', property.id)
+            .eq('type', 'floorplan');
+            
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            const dbFloorplans = data.map(item => ({
+              id: item.id,
+              url: item.url,
+              columns: 1
+            }));
+            
+            setParsedFloorplans(prevFloorplans => {
+              // Merge with any existing floorplans, avoiding duplicates
+              const existingUrls = prevFloorplans.map(f => f.url);
+              const newFloorplans = dbFloorplans.filter(f => !existingUrls.includes(f.url));
+              return [...prevFloorplans, ...newFloorplans];
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching floorplans from DB:', error);
+        }
+      }
+    };
+    
+    // First parse any floorplans in the property object
     if (property.floorplans && Array.isArray(property.floorplans)) {
       try {
         const parsed = property.floorplans.map(floorplan => {
@@ -31,7 +64,10 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
         console.error("Error parsing floorplans:", error);
       }
     }
-  }, [property.floorplans]);
+    
+    // Then fetch any additional floorplans from the database
+    fetchFloorplansFromDb();
+  }, [property.floorplans, property.id]);
 
   const handleImageClick = (image: string) => {
     setSelectedImage(image);

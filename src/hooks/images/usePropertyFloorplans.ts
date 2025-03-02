@@ -90,7 +90,8 @@ export function usePropertyFloorplans(
                 .from('property_images')
                 .insert({
                   property_id: formData.id,
-                  url: floorplan.url
+                  url: floorplan.url,
+                  type: 'floorplan' // Add type to distinguish floorplans from regular images
                 });
                 
               if (imageError) {

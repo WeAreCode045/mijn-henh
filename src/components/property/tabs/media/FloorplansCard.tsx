@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { PropertyFloorplan } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FloorplansCardProps {
   floorplans: PropertyFloorplan[] | string[];
@@ -14,6 +15,7 @@ interface FloorplansCardProps {
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
   onUpdateFloorplanEmbedScript?: (script: string) => void;
+  propertyId?: string; // Add property ID to fetch floorplans directly if needed
 }
 
 export function FloorplansCard({
@@ -22,6 +24,7 @@ export function FloorplansCard({
   onFloorplanUpload,
   onRemoveFloorplan,
   onUpdateFloorplanEmbedScript,
+  propertyId,
 }: FloorplansCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
@@ -58,6 +61,40 @@ export function FloorplansCard({
       setParsedFloorplans([]);
     }
   }, [floorplans]);
+
+  // Fetch floorplans from database if propertyId is provided and floorplans is empty
+  useEffect(() => {
+    if (propertyId && (!floorplans || floorplans.length === 0)) {
+      const fetchFloorplans = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('property_images')
+            .select('*')
+            .eq('property_id', propertyId)
+            .eq('type', 'floorplan')
+            .order('created_at', { ascending: false });
+            
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            const dbFloorplans = data.map(item => ({
+              id: item.id,
+              url: item.url,
+              columns: 1
+            }));
+            
+            console.log("FloorplansCard - Fetched floorplans from DB:", dbFloorplans);
+            setParsedFloorplans(dbFloorplans);
+            setFloorplansKey(Date.now()); // Force re-render
+          }
+        } catch (error) {
+          console.error("Error fetching floorplans from database:", error);
+        }
+      };
+      
+      fetchFloorplans();
+    }
+  }, [propertyId]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onFloorplanUpload) {
