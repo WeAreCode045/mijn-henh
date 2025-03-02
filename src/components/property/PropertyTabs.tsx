@@ -46,25 +46,35 @@ export function PropertyTabs({ activeTab, handleTabChange, onTabChange, children
         </TabsTrigger>
       </TabsList>
       
-      <TabsContent value="dashboard">
-        {activeTab === 'dashboard' && children}
-      </TabsContent>
+      {activeTab === 'dashboard' && (
+        <TabsContent value="dashboard">
+          {children}
+        </TabsContent>
+      )}
       
-      <TabsContent value="content">
-        {activeTab === 'content' && children}
-      </TabsContent>
+      {activeTab === 'content' && (
+        <TabsContent value="content">
+          {children}
+        </TabsContent>
+      )}
       
-      <TabsContent value="media">
-        {activeTab === 'media' && children}
-      </TabsContent>
+      {activeTab === 'media' && (
+        <TabsContent value="media">
+          {children}
+        </TabsContent>
+      )}
       
-      <TabsContent value="floorplans">
-        {activeTab === 'floorplans' && children}
-      </TabsContent>
+      {activeTab === 'floorplans' && (
+        <TabsContent value="floorplans">
+          {children}
+        </TabsContent>
+      )}
       
-      <TabsContent value="communications">
-        {activeTab === 'communications' && children}
-      </TabsContent>
+      {activeTab === 'communications' && (
+        <TabsContent value="communications">
+          {children}
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

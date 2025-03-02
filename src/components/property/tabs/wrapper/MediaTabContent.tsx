@@ -1,9 +1,6 @@
 
 import { PropertyMediaTab } from "../PropertyMediaTab";
-import { FloorplansTab } from "../FloorplansTab";
 import { PropertyImage } from "@/types/property";
-import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface MediaTabContentProps {
   id: string;
@@ -14,16 +11,11 @@ interface MediaTabContentProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  floorplans?: any[];
-  floorplanEmbedScript?: string;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onNotesUpdate?: (notes: string) => void;
-  onFloorplanEmbedScriptUpdate?: (script: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan?: (index: number) => void;
   onSetFeaturedImage?: (imageUrl: string) => void;
   onToggleGridImage?: (imageUrl: string) => void;
   isUploading?: boolean;
@@ -43,16 +35,11 @@ export function MediaTabContent({
   virtualTourUrl,
   youtubeUrl,
   notes,
-  floorplans,
-  floorplanEmbedScript,
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
   onNotesUpdate,
-  onFloorplanEmbedScriptUpdate,
   onImageUpload,
   onRemoveImage,
-  onFloorplanUpload,
-  onRemoveFloorplan,
   onSetFeaturedImage,
   onToggleGridImage,
   isUploading,
@@ -64,49 +51,25 @@ export function MediaTabContent({
   const effectiveImageUpload = onUpload || onImageUpload;
   const effectiveSetFeaturedImage = onFeaturedImageSelect || onSetFeaturedImage;
   const effectiveToggleGridImage = onGridImageToggle || onToggleGridImage;
-  
-  // Add local state for the active media subtab
-  const [activeMediaTab, setActiveMediaTab] = useState<string>("images");
 
   return (
-    <Tabs defaultValue="images" value={activeMediaTab} onValueChange={setActiveMediaTab} className="w-full">
-      <TabsList className="mb-4">
-        <TabsTrigger value="images">Images</TabsTrigger>
-        <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="images">
-        <PropertyMediaTab
-          id={id}
-          title={title}
-          images={images}
-          featuredImage={featuredImage}
-          gridImages={gridImages}
-          virtualTourUrl={virtualTourUrl}
-          youtubeUrl={youtubeUrl}
-          notes={notes}
-          onVirtualTourUpdate={onVirtualTourUpdate}
-          onYoutubeUrlUpdate={onYoutubeUrlUpdate}
-          onNotesUpdate={onNotesUpdate}
-          onImageUpload={effectiveImageUpload}
-          onRemoveImage={onRemoveImage}
-          onSetFeaturedImage={effectiveSetFeaturedImage}
-          onToggleGridImage={effectiveToggleGridImage}
-          isUploading={isUploading}
-        />
-      </TabsContent>
-      
-      <TabsContent value="floorplans">
-        <FloorplansTab
-          id={id}
-          floorplans={floorplans}
-          floorplanEmbedScript={floorplanEmbedScript}
-          onFloorplanUpload={onFloorplanUpload}
-          onRemoveFloorplan={onRemoveFloorplan}
-          onFloorplanEmbedScriptUpdate={onFloorplanEmbedScriptUpdate}
-          isUploading={isUploading}
-        />
-      </TabsContent>
-    </Tabs>
+    <PropertyMediaTab
+      id={id}
+      title={title}
+      images={images}
+      featuredImage={featuredImage}
+      gridImages={gridImages}
+      virtualTourUrl={virtualTourUrl}
+      youtubeUrl={youtubeUrl}
+      notes={notes}
+      onVirtualTourUpdate={onVirtualTourUpdate}
+      onYoutubeUrlUpdate={onYoutubeUrlUpdate}
+      onNotesUpdate={onNotesUpdate}
+      onImageUpload={effectiveImageUpload}
+      onRemoveImage={onRemoveImage}
+      onSetFeaturedImage={effectiveSetFeaturedImage}
+      onToggleGridImage={effectiveToggleGridImage}
+      isUploading={isUploading}
+    />
   );
 }

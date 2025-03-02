@@ -4,6 +4,7 @@ import {
   renderDashboardTab, 
   renderContentTab, 
   renderMediaTab,
+  renderFloorplansTab,
   renderCommunicationsTab
 } from "../content/TabContentRenderers";
 
@@ -169,6 +170,7 @@ export function PropertyTabContents({
       {renderDashboardTab(tabProps)}
       {renderContentTab(tabProps)}
       {renderMediaTab(tabProps)}
+      {renderFloorplansTab(tabProps)}
       {renderCommunicationsTab(tabProps)}
     </>
   );

@@ -3,6 +3,7 @@ import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
+import { FloorplansTab } from "../FloorplansTab";
 
 // Common props type to simplify passing data to tab renderers
 interface TabRenderProps {
@@ -93,7 +94,6 @@ export const renderContentTab = ({ activeTab, formState, handlers }: TabRenderPr
 export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps) => {
   if (activeTab !== 'media') return null;
   
-  // Make sure we're not passing activeSubTab to MediaTabContent
   return (
     <MediaTabContent
       id={property.id}
@@ -103,18 +103,29 @@ export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps
       gridImages={property.gridImages}
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
-      floorplans={handlers.formState?.floorplans || []}
-      floorplanEmbedScript={handlers.formState?.floorplanEmbedScript}
       onVirtualTourUpdate={(url: string) => handlers.onFieldChange('virtualTourUrl', url)}
       onYoutubeUrlUpdate={(url: string) => handlers.onFieldChange('youtubeUrl', url)}
       onNotesUpdate={(notes: string) => handlers.onFieldChange('notes', notes)}
-      onFloorplanEmbedScriptUpdate={(script: string) => handlers.onFieldChange('floorplanEmbedScript', script)}
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
-      onFloorplanUpload={handlers.handleFloorplanUpload}
-      onRemoveFloorplan={handlers.handleRemoveFloorplan}
       onSetFeaturedImage={handlers.handleSetFeaturedImage}
       onToggleGridImage={handlers.handleToggleGridImage}
+      isUploading={handlers.isUploading}
+    />
+  );
+};
+
+export const renderFloorplansTab = ({ activeTab, property, handlers }: TabRenderProps) => {
+  if (activeTab !== 'floorplans') return null;
+  
+  return (
+    <FloorplansTab
+      id={property.id}
+      floorplans={handlers.formState?.floorplans || []}
+      floorplanEmbedScript={handlers.formState?.floorplanEmbedScript}
+      onFloorplanUpload={handlers.handleFloorplanUpload}
+      onRemoveFloorplan={handlers.handleRemoveFloorplan}
+      onFloorplanEmbedScriptUpdate={(script: string) => handlers.onFieldChange('floorplanEmbedScript', script)}
       isUploading={handlers.isUploading}
     />
   );
