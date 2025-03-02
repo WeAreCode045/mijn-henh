@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
@@ -127,13 +128,20 @@ export function PropertyTabsWrapper({
     id: property.id // Ensure id is always present
   };
 
+  // Add back required properties for type compatibility
+  const propertyWithMissingProps = {
+    ...propertyWithRequiredId,
+    featuredImage: propertyWithRequiredId.featuredImage || null,
+    gridImages: propertyWithRequiredId.gridImages || []
+  };
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
           <PropertyTabContents
             activeTab={activeTab}
-            property={propertyWithRequiredId}
+            property={propertyWithMissingProps}
             formState={formState}
             agentInfo={agentInfo}
             templateInfo={templateInfo}
@@ -182,7 +190,7 @@ export function PropertyTabsWrapper({
         <DialogContent className="max-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
           <div className="flex-1 overflow-auto">
             <PropertyWebView 
-              property={propertyWithRequiredId}
+              property={propertyWithMissingProps}
               open={webViewOpen} 
               onOpenChange={setWebViewOpen} 
             />

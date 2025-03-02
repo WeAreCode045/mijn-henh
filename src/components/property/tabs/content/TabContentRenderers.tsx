@@ -16,8 +16,6 @@ interface TabRenderProps {
     created_at?: string;
     updated_at?: string;
     images: any[];
-    featuredImage: string | null;
-    gridImages: string[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
   };
@@ -77,8 +75,6 @@ export const renderContentTab = ({ activeTab, formState, handlers }: TabRenderPr
       handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
       handleRemoveFloorplan={handlers.handleRemoveFloorplan}
       handleUpdateFloorplan={handlers.handleUpdateFloorplan}
-      handleSetFeaturedImage={handlers.handleSetFeaturedImage}
-      handleToggleGridImage={handlers.handleToggleGridImage}
       onAddTechnicalItem={handlers.onAddTechnicalItem}
       onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
       onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
@@ -99,8 +95,6 @@ export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps
       id={property.id}
       title={property.title}
       images={property.images}
-      featuredImage={property.featuredImage}
-      gridImages={property.gridImages}
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
       onVirtualTourUpdate={(url: string) => handlers.onFieldChange('virtualTourUrl', url)}
@@ -108,8 +102,6 @@ export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps
       onNotesUpdate={(notes: string) => handlers.onFieldChange('notes', notes)}
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
-      onSetFeaturedImage={handlers.handleSetFeaturedImage}
-      onToggleGridImage={handlers.handleToggleGridImage}
       isUploading={handlers.isUploading}
     />
   );

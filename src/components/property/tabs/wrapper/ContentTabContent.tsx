@@ -21,8 +21,6 @@ interface ContentTabContentProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  handleSetFeaturedImage: (url: string | null) => void; // Ensure this type is correct
-  handleToggleGridImage: (url: string) => void;
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
@@ -52,8 +50,6 @@ export function ContentTabContent({
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
   handleUpdateFloorplan,
-  handleSetFeaturedImage,
-  handleToggleGridImage,
   onAddTechnicalItem,
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
@@ -63,9 +59,6 @@ export function ContentTabContent({
   handlePrevious,
   onSubmit
 }: ContentTabContentProps) {
-  // Verify that handleSetFeaturedImage is a function
-  console.log("ContentTabContent - handleSetFeaturedImage type:", typeof handleSetFeaturedImage);
-  
   return (
     <PropertyContentTab 
       formData={formData}
@@ -86,8 +79,6 @@ export function ContentTabContent({
       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
       handleRemoveFloorplan={handleRemoveFloorplan}
       handleUpdateFloorplan={handleUpdateFloorplan}
-      handleSetFeaturedImage={handleSetFeaturedImage}
-      handleToggleGridImage={handleToggleGridImage}
       onAddTechnicalItem={onAddTechnicalItem}
       onRemoveTechnicalItem={onRemoveTechnicalItem}
       onUpdateTechnicalItem={onUpdateTechnicalItem}

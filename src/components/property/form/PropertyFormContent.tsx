@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan, PropertyTechnicalItem } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -64,9 +63,6 @@ export function PropertyFormContent({
   
   // Find the step component that corresponds to the current step
   const StepComponent = steps.find(s => s.id === step)?.component;
-  
-  // Verify that handleSetFeaturedImage is a function
-  console.log("PropertyFormContent - handleSetFeaturedImage type:", typeof handleSetFeaturedImage);
   
   // Add defensive check
   if (!StepComponent) {
