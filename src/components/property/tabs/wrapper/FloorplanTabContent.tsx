@@ -1,10 +1,12 @@
+
 import { PropertyFloorplanTab } from "../PropertyFloorplanTab";
 import { PropertyFloorplan } from "@/types/property";
 
 interface FloorplanTabContentProps {
   id: string;
   title: string;
-  Floorplan: PropertyFloorplan[];
+  Floorplan?: PropertyFloorplan[];
+  floorplans?: PropertyFloorplan[];
   onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan: (index: number) => void;
   isUploading?: boolean;
@@ -16,6 +18,7 @@ export function FloorplanTabContent({
   id,
   title,
   Floorplan,
+  floorplans,
   onFloorplanUpload,
   onRemoveFloorplan,
   isUploading,
@@ -23,15 +26,19 @@ export function FloorplanTabContent({
 }: FloorplanTabContentProps) {
   // Use aliases if provided, fall back to original props
   const effectiveFloorplanUpload = onUpload || onFloorplanUpload;
+  const effectiveFloorplans = floorplans || Floorplan || [];
+  
+  console.log("FloorplanTabContent - Rendering with floorplans:", effectiveFloorplans);
 
   return (
     <PropertyFloorplanTab
       id={id}
       title={title}
-      Floorplan={Floorplan}
+      floorplans={effectiveFloorplans}
+      Floorplan={effectiveFloorplans}
       onFloorplanUpload={effectiveFloorplanUpload}
       onRemoveFloorplan={onRemoveFloorplan}
       isUploading={isUploading}
-      />
+    />
   );
 }

@@ -22,15 +22,15 @@ export function FloorplansStep({
   handleRemoveFloorplan,
   isUploading = false
 }: FloorplansStepProps) {
-  const [parsedFloorplans, setParsedFloorplans] = useState(formData.floorplans || []);
+  const [parsedFloorplans, setParsedFloorplans] = useState(formData?.floorplans || []);
   const [floorplansKey, setFloorplansKey] = useState(Date.now());
 
   // Update parsed floorplans when formData.floorplans changes
   useEffect(() => {
-    console.log("FloorplansStep: formData.floorplans updated", formData.floorplans);
-    setParsedFloorplans(formData.floorplans || []);
+    console.log("FloorplansStep: formData.floorplans updated", formData?.floorplans);
+    setParsedFloorplans(formData?.floorplans || []);
     setFloorplansKey(Date.now());
-  }, [formData.floorplans]);
+  }, [formData?.floorplans]);
 
   const handleFloorplansProcessed = (processed: any[]) => {
     console.log("FloorplansStep: floorplans processed", processed);
@@ -41,6 +41,11 @@ export function FloorplansStep({
   const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onFieldChange('floorplanEmbedScript', e.target.value);
   };
+
+  if (!formData) {
+    console.error("FloorplansStep: No formData provided");
+    return <div>Loading form data...</div>;
+  }
 
   return (
     <div className="space-y-6">

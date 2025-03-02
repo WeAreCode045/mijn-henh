@@ -5,7 +5,8 @@ import { PropertyFloorplanCard } from "./floorplans/PropertyFloorplanCard";
 interface PropertyFloorplanTabProps {
   id: string;
   title: string;
-  Floorplan: PropertyFloorplan[];
+  Floorplan?: PropertyFloorplan[];
+  floorplans?: PropertyFloorplan[];
   onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove?: (index: number) => void;
   onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -13,15 +14,24 @@ interface PropertyFloorplanTabProps {
 }
 
 export function PropertyFloorplanTab({
+  id,
+  title,
+  Floorplan,
+  floorplans,
   onFloorplanUpload,
   onRemoveFloorplan,
 }: PropertyFloorplanTabProps) {
+  // Use either Floorplan or floorplans prop, defaulting to an empty array
+  const floorplansData = floorplans || Floorplan || [];
+  
+  console.log("PropertyFloorplanTab - Rendering with floorplans:", floorplansData);
+  
   return (
     <div className="space-y-6">
       <PropertyFloorplanCard 
-        Floorplan={Floorplan}
+        floorplans={floorplansData}
         onFloorplanUpload={onFloorplanUpload}
-        onRemoveFloorplan={onRemoveFloorplan}
+        onFloorplanRemove={onRemoveFloorplan}
       />
     </div>
   );

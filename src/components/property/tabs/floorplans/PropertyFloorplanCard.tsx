@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Image } from "lucide-react";
@@ -19,6 +18,8 @@ export function PropertyFloorplanCard({
   onFloorplanRemove,
   onFloorplanUpdate
 }: FloorplanCardProps) {
+  console.log("PropertyFloorplanCard - Received floorplans:", floorplans);
+  
   return (
     <Card>
       <CardHeader>
