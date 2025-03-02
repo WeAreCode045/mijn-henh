@@ -114,6 +114,10 @@ export function PropertyContentTab({
     }
   };
 
+  // Dummy functions for backward compatibility
+  const handleSetFeaturedImage = () => console.warn("Featured image functionality has been removed");
+  const handleToggleGridImage = () => console.warn("Grid image functionality has been removed");
+
   return (
     <div className="space-y-4">
       <FormStepNavigation
@@ -151,9 +155,9 @@ export function PropertyContentTab({
         onAddTechnicalItem={onAddTechnicalItem}
         onRemoveTechnicalItem={onRemoveTechnicalItem}
         onUpdateTechnicalItem={onUpdateTechnicalItem}
-        // Add no-op functions for compatibility
-        handleSetFeaturedImage={() => console.warn("Featured image functionality has been removed")}
-        handleToggleGridImage={() => console.warn("Grid image functionality has been removed")}
+        // Add dummy functions for backward compatibility
+        handleSetFeaturedImage={handleSetFeaturedImage}
+        handleToggleGridImage={handleToggleGridImage}
       />
     </div>
   );

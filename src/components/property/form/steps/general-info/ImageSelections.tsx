@@ -1,7 +1,6 @@
 
 import { Label } from "@/components/ui/label";
 import type { PropertyFormData } from "@/types/property";
-import { GridImagesSection } from "./components/GridImagesSection";
 
 interface ImageSelectionsProps {
   formData: PropertyFormData;
@@ -14,15 +13,11 @@ export function ImageSelections({
 }: ImageSelectionsProps) {
   return (
     <div className="space-y-4">
-      <Label className="text-lg font-medium">Media Selection</Label>
-      
-      <div className="grid grid-cols-1 gap-6">
-        {/* Grid Images Column (converted to full width) */}
-        <GridImagesSection 
-          formData={formData} 
-          onFieldChange={onFieldChange} 
-        />
+      <Label className="text-lg font-medium">Image Selection</Label>
+      <div className="text-muted-foreground text-sm">
+        Please use the Media tab to manage property images.
       </div>
     </div>
   );
 }
+

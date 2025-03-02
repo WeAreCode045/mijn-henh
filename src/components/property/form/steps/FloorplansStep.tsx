@@ -1,110 +1,75 @@
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PropertyFormData } from "@/types/property";
+import { FloorplanGrid } from "../../tabs/media/floorplans/FloorplanGrid";
+import { FloorplanUploader } from "../../tabs/media/floorplans/FloorplanUploader";
+import { FloorplanEmbed } from "../../tabs/media/floorplans/FloorplanEmbed";
+import { FloorplanProcessor } from "../../tabs/media/floorplans/FloorplanProcessor";
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Upload } from "lucide-react";
-import { PropertyFloorplan } from "@/types/property";
 
 interface FloorplansStepProps {
-  floorplans: PropertyFloorplan[];
-  onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan: (index: number) => void;
-  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  formData: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export function FloorplansStep({
-  floorplans = [], // Add default empty array
-  onFloorplanUpload,
-  onRemoveFloorplan,
-  onUpdateFloorplan
+  formData,
+  onFieldChange,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  isUploading = false
 }: FloorplansStepProps) {
-  const [uploadKey, setUploadKey] = useState(Date.now());
-  console.log("FloorplansStep rendering with floorplans:", floorplans);
+  const [parsedFloorplans, setParsedFloorplans] = useState(formData.floorplans || []);
+  const [floorplansKey, setFloorplansKey] = useState(Date.now());
 
-  // Reset the upload field after a successful upload
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFloorplanUpload(e);
-    setUploadKey(Date.now()); // Reset the input key to clear the field
+  const handleFloorplansProcessed = (processed: any[]) => {
+    setParsedFloorplans(processed);
+    setFloorplansKey(Date.now());
+  };
+
+  const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onFieldChange('floorplanEmbedScript', e.target.value);
   };
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold text-estate-800">Floorplans</h2>
-        <p className="text-sm text-estate-600">
-          Upload floorplan images to showcase your property's layout
-        </p>
-      </div>
+      <h3 className="text-lg font-medium">Property Floorplans</h3>
+      <p className="text-muted-foreground text-sm">
+        Upload floorplans for your property. These will be stored in the floorplans folder.
+      </p>
+      
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-md">Upload Floorplans</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Process the floorplans data for display */}
+          <FloorplanProcessor 
+            floorplans={formData.floorplans || []} 
+            propertyId={formData.id}
+            onProcessed={handleFloorplansProcessed} 
+          />
+          
+          {/* Uploader component */}
+          <FloorplanUploader isLoading={isUploading} onUpload={handleFloorplanUpload} />
+          
+          {/* Embed script component */}
+          <FloorplanEmbed 
+            embedScript={formData.floorplanEmbedScript || ''} 
+            onChange={handleEmbedScriptChange} 
+          />
 
-      <div className="border p-4 rounded-md bg-slate-50">
-        <Label htmlFor="floorplans" className="block mb-2">
-          Upload Floorplans
-        </Label>
-        <Input
-          type="file"
-          id="floorplans"
-          key={uploadKey}
-          accept="image/*"
-          multiple
-          onChange={handleUpload}
-          className="mb-4"
-        />
-        <p className="text-xs text-muted-foreground">
-          Supported formats: JPG, PNG, WebP. Maximum size: 10MB per file.
-        </p>
-      </div>
-
-      {floorplans && floorplans.length > 0 ? (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Uploaded Floorplans</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {floorplans.map((floorplan, index) => (
-              <div key={index} className="relative border rounded-md p-3 bg-white">
-                <div className="flex flex-col space-y-3">
-                  <div className="relative aspect-video">
-                    <img 
-                      src={floorplan.url} 
-                      alt={`Floorplan ${index + 1}`} 
-                      className="w-full h-full object-contain rounded-md"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-1 right-1 h-6 w-6"
-                      onClick={() => onRemoveFloorplan(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Label className="flex-shrink-0">Columns:</Label>
-                    <Select
-                      value={String(floorplan.columns || 1)}
-                      onValueChange={(value) => onUpdateFloorplan && onUpdateFloorplan(index, 'columns', parseInt(value))}
-                    >
-                      <SelectTrigger className="w-24">
-                        <SelectValue placeholder="Columns" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                        <SelectItem value="3">3</SelectItem>
-                        <SelectItem value="4">4</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center p-6 border border-dashed rounded-md">
-          <p className="text-muted-foreground text-center">No floorplans uploaded yet.</p>
-        </div>
-      )}
+          {/* Display uploaded floorplans */}
+          <FloorplanGrid 
+            floorplans={parsedFloorplans} 
+            gridKey={floorplansKey} 
+            onRemoveFloorplan={handleRemoveFloorplan} 
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
