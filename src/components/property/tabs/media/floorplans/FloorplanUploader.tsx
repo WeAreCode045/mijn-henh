@@ -24,12 +24,12 @@ export function FloorplanUploader({ isLoading, onUpload }: FloorplanUploaderProp
         {isLoading ? (
           <>
             <Spinner className="h-4 w-4 mr-2" />
-            Uploading...
+            <span>Uploading...</span>
           </>
         ) : (
           <>
             <Upload className="h-4 w-4 mr-2" />
-            Upload Floorplans
+            <span>Upload Floorplans</span>
           </>
         )}
       </Button>
