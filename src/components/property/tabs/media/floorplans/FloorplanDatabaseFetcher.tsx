@@ -28,14 +28,12 @@ export function FloorplanDatabaseFetcher({
           if (error) throw error;
           
           if (data && data.length > 0) {
-            // Transform to simple PropertyFloorplan objects to avoid deep nesting
-            const dbFloorplans: PropertyFloorplan[] = data.map(item => {
-              return {
-                id: item.id,
-                url: item.url,
-                columns: 1
-              };
-            });
+            // Transform to simple PropertyFloorplan objects with explicit type casting
+            const dbFloorplans: PropertyFloorplan[] = data.map(item => ({
+              id: item.id,
+              url: item.url,
+              columns: 1
+            }));
             
             console.log("FloorplanDatabaseFetcher - Fetched floorplans from DB:", dbFloorplans);
             onFetchComplete(dbFloorplans);
