@@ -21,11 +21,13 @@ export function PropertyFeatures({
 }: PropertyFeaturesProps) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log("Adding new feature");
     onAdd();
   };
 
   const handleRemove = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
+    console.log("Removing feature with ID:", id);
     onRemove(id);
   };
 
@@ -37,15 +39,15 @@ export function PropertyFeatures({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label>Kenmerken</Label>
+        <Label>Features</Label>
         <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
           <PlusCircle className="w-4 h-4 mr-2" />
-          Kenmerk Toevoegen
+          Add Feature
         </Button>
       </div>
       {features.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">
-          Nog geen kenmerken toegevoegd. Klik op de knop hierboven om te beginnen.
+          No features added yet. Click the button above to add features.
         </p>
       ) : (
         features.map((feature) => (
@@ -53,7 +55,7 @@ export function PropertyFeatures({
             <Input
               value={feature.description}
               onChange={(e) => handleUpdate(feature.id, e.target.value)}
-              placeholder="Voer kenmerk in"
+              placeholder="Enter feature"
             />
             <Button
               type="button"

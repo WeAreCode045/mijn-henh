@@ -10,6 +10,7 @@ export function usePropertyDatabase() {
   const updateProperty = async (id: string, data: PropertySubmitData): Promise<boolean> => {
     console.log("usePropertyDatabase - Updating property with ID:", id);
     console.log("usePropertyDatabase - Update data:", JSON.stringify(data));
+    console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
       // Ensure floorplanEmbedScript is included in the update data
@@ -53,6 +54,7 @@ export function usePropertyDatabase() {
   
   const createProperty = async (data: PropertySubmitData): Promise<boolean> => {
     console.log("usePropertyDatabase - Creating new property with data:", JSON.stringify(data));
+    console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
       // Ensure floorplanEmbedScript is included in the create data

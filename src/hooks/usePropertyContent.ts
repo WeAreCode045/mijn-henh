@@ -46,24 +46,31 @@ export function usePropertyContent(
 
   // Feature management functions
   const addFeature = useCallback(() => {
+    console.log("usePropertyContent - Adding new feature");
     const newFeature: PropertyFeature = {
       id: uuidv4(),
       description: ''
     };
     
+    // Make sure to clone the existing features array or create a new one if it doesn't exist
     const updatedFeatures = [...(formData.features || []), newFeature];
+    console.log("usePropertyContent - Updated features:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
   }, [formData, onFieldChange]);
 
   const removeFeature = useCallback((id: string) => {
-    const updatedFeatures = formData.features.filter(feature => feature.id !== id);
+    console.log("usePropertyContent - Removing feature with ID:", id);
+    const updatedFeatures = (formData.features || []).filter(feature => feature.id !== id);
+    console.log("usePropertyContent - Updated features after removal:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
   }, [formData, onFieldChange]);
 
   const updateFeature = useCallback((id: string, description: string) => {
-    const updatedFeatures = formData.features.map(feature => 
+    console.log("usePropertyContent - Updating feature with ID:", id, "New description:", description);
+    const updatedFeatures = (formData.features || []).map(feature => 
       feature.id === id ? { ...feature, description } : feature
     );
+    console.log("usePropertyContent - Updated features after update:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
   }, [formData, onFieldChange]);
 

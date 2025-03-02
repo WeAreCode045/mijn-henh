@@ -23,6 +23,7 @@ export function usePropertyFormSubmit() {
     }
     
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
+    console.log("usePropertyFormSubmit - Features to submit:", formData.features);
     console.log("usePropertyFormSubmit - floorplanEmbedScript:", formData.floorplanEmbedScript);
     
     if (!validatePropertyData(formData)) {
@@ -37,6 +38,7 @@ export function usePropertyFormSubmit() {
     
     console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
     console.log("usePropertyFormSubmit - Form submission - floorplans:", floorplansForSubmission);
+    console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
     
     const submitData: PropertySubmitData = {
       title: formData.title,
@@ -73,7 +75,7 @@ export function usePropertyFormSubmit() {
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);
-    console.log("usePropertyFormSubmit - floorplanEmbedScript in submit data:", submitData.floorplanEmbedScript);
+    console.log("usePropertyFormSubmit - Final features data:", submitData.features);
     
     let success = false;
     if (formData.id) {

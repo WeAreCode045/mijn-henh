@@ -19,6 +19,11 @@ export function FeaturesStep({
   
   return (
     <div className="space-y-6">
+      <h2 className="text-xl font-semibold mb-4">Property Features</h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Add all the distinctive features that make this property stand out.
+      </p>
+      
       <PropertyFeatures
         features={features || []} // Ensure we always pass an array
         onAdd={onAddFeature}
