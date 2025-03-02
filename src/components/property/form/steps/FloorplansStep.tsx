@@ -26,15 +26,17 @@ export function FloorplansStep({
   handleUpdateFloorplan,
   isUploading = false
 }: FloorplansStepProps) {
-  const [parsedFloorplans, setParsedFloorplans] = useState(formData?.floorplans || []);
+  const [parsedFloorplans, setParsedFloorplans] = useState<any[]>([]);
   const [floorplansKey, setFloorplansKey] = useState(Date.now());
   const [isProcessing, setIsProcessing] = useState(true);
 
   // Update parsed floorplans when formData.floorplans changes
   useEffect(() => {
-    console.log("FloorplansStep: formData.floorplans updated", formData?.floorplans);
-    setParsedFloorplans(formData?.floorplans || []);
-    setFloorplansKey(Date.now());
+    if (formData && formData.floorplans) {
+      console.log("FloorplansStep: formData.floorplans updated", formData.floorplans);
+      setParsedFloorplans(formData.floorplans || []);
+      setFloorplansKey(Date.now());
+    }
     setIsProcessing(false);
   }, [formData?.floorplans]);
 
@@ -49,13 +51,12 @@ export function FloorplansStep({
     onFieldChange('floorplanEmbedScript', e.target.value);
   };
 
-  // Don't show loading message if formData exists, even if floorplans aren't defined yet
+  // If formData is completely missing or not loaded yet
   if (!formData) {
-    console.error("FloorplansStep: No formData provided");
     return (
-      <div className="flex justify-center items-center h-40">
-        <Spinner className="h-8 w-8 border-4" /> 
-        <span className="ml-3">Loading form data...</span>
+      <div className="flex flex-col items-center justify-center h-40 space-y-4">
+        <Spinner className="h-8 w-8 border-4" />
+        <span className="text-muted-foreground">Loading form data...</span>
       </div>
     );
   }

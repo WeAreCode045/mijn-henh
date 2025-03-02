@@ -148,6 +148,16 @@ export function PropertyFormContent({
           onSetFeaturedImage={handleSetFeaturedImage} // Add alternative prop name
           isUploading={isUploading}
         />
+      ) : step === 6 ? (
+        // FloorplansStep - specific handling for FloorplansStep
+        <StepComponent
+          formData={formData}
+          onFieldChange={onFieldChange}
+          handleFloorplanUpload={handleFloorplanUpload}
+          handleRemoveFloorplan={handleRemoveFloorplan}
+          handleUpdateFloorplan={handleUpdateFloorplan}
+          isUploading={isUploading}
+        />
       ) : (
         // Other steps
         <StepComponent
