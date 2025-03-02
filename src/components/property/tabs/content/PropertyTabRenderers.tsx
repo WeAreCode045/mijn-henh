@@ -13,8 +13,6 @@ export function renderMediaTab(tabProps: any) {
       id={tabProps.property.id}
       title={tabProps.property.title}
       images={tabProps.formState.images || []}
-      featuredImage={tabProps.formState.featuredImage}
-      gridImages={tabProps.formState.gridImages || []}
       virtualTourUrl={tabProps.formState.virtualTourUrl}
       youtubeUrl={tabProps.formState.youtubeUrl}
       notes={tabProps.formState.notes}
@@ -23,8 +21,6 @@ export function renderMediaTab(tabProps: any) {
       onNotesUpdate={(notes) => tabProps.handlers.onFieldChange('notes', notes)}
       onImageUpload={tabProps.handlers.handleImageUpload}
       onRemoveImage={tabProps.handlers.handleRemoveImage}
-      onSetFeaturedImage={tabProps.handlers.handleSetFeaturedImage}
-      onToggleGridImage={tabProps.handlers.handleToggleGridImage}
       isUploading={tabProps.handlers.isUploading}
     />
   );
@@ -33,10 +29,14 @@ export function renderMediaTab(tabProps: any) {
 // Add other renderers as needed from the original file
 export function renderDashboardTab(tabProps: any) {
   // Implementation from original file
+  if (tabProps.activeTab !== 'dashboard') return null;
+  return null; // Placeholder
 }
 
 export function renderContentTab(tabProps: any) {
   // Implementation from original file
+  if (tabProps.activeTab !== 'content') return null;
+  return null; // Placeholder
 }
 
 export function renderFloorplansTab(tabProps: any) {
@@ -57,4 +57,6 @@ export function renderFloorplansTab(tabProps: any) {
 
 export function renderCommunicationsTab(tabProps: any) {
   // Implementation from original file
+  if (tabProps.activeTab !== 'communications') return null;
+  return null; // Placeholder
 }

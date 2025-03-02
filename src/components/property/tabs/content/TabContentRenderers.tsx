@@ -16,8 +16,11 @@ interface TabRenderProps {
     created_at?: string;
     updated_at?: string;
     images: any[];
+    featuredImage?: string; // Made optional
+    gridImages?: string[]; // Made optional
     virtualTourUrl?: string;
     youtubeUrl?: string;
+    notes?: string;
   };
   formState: any;
   agentInfo?: { id: string; name: string } | null;

@@ -20,6 +20,7 @@ interface PropertyTabContentsProps {
     images: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
+    notes?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
@@ -62,6 +63,9 @@ interface PropertyTabContentsProps {
   handleNext: () => void;
   handlePrevious: () => void;
   onSubmit: () => void;
+  // Legacy props (for backward compatibility)
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleGridImage?: (url: string) => void;
 }
 
 export function PropertyTabContents({
@@ -103,7 +107,10 @@ export function PropertyTabContents({
   handleStepClick,
   handleNext,
   handlePrevious,
-  onSubmit
+  onSubmit,
+  // Add optional props for backward compatibility
+  handleSetFeaturedImage,
+  handleToggleGridImage
 }: PropertyTabContentsProps) {
   // Organize all handler functions into a single object
   const handlers = {
@@ -140,13 +147,21 @@ export function PropertyTabContents({
     handleNext,
     handlePrevious,
     onSubmit,
-    formState // Added formState to handlers to make it available in renderers
+    formState, // Added formState to handlers to make it available in renderers
+    // Add dummy functions for backward compatibility
+    handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Featured image functionality has been removed")),
+    handleToggleGridImage: handleToggleGridImage || (() => console.warn("Grid image functionality has been removed"))
   };
 
   // Common props for all tab renderers
   const tabProps = {
     activeTab,
-    property,
+    property: {
+      ...property,
+      // Add missing properties that might be expected by renderers
+      featuredImage: "",
+      gridImages: []
+    },
     formState,
     agentInfo,
     templateInfo,
