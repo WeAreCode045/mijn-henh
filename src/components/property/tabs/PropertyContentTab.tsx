@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -36,6 +35,7 @@ interface PropertyContentTabProps {
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   isUpdateMode: boolean;
+  isUploading?: boolean;
 }
 
 export function PropertyContentTab({
@@ -69,17 +69,14 @@ export function PropertyContentTab({
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
   isUpdateMode,
+  isUploading,
 }: PropertyContentTabProps) {
-  // Initialize with provided step or default to 1
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   
-  // Use external state if provided, otherwise use internal state
   const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
   
-  // Log the current step for debugging
   console.log("PropertyContentTab - Current step:", currentStep);
   
-  // Wrapped functions to prevent event bubbling and redirection
   const safeAddTechnicalItem = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
@@ -98,7 +95,6 @@ export function PropertyContentTab({
     }
   };
   
-  // Internal handlers if external ones aren't provided
   const handleStepClick = (step: number) => {
     console.log("Step clicked in PropertyContentTab:", step);
     if (externalHandleStepClick) {
@@ -132,11 +128,9 @@ export function PropertyContentTab({
       externalOnSubmit();
     } else {
       console.log("Form submitted in PropertyContentTab");
-      // Default submission behavior if needed
     }
   };
 
-  // Dummy functions for backward compatibility
   const handleSetFeaturedImage = () => console.warn("Featured image functionality has been removed");
   const handleToggleGridImage = () => console.warn("Grid image functionality has been removed");
 
@@ -177,9 +171,9 @@ export function PropertyContentTab({
         onAddTechnicalItem={safeAddTechnicalItem}
         onRemoveTechnicalItem={safeRemoveTechnicalItem}
         onUpdateTechnicalItem={onUpdateTechnicalItem}
-        // Add dummy functions for backward compatibility
         handleSetFeaturedImage={handleSetFeaturedImage}
         handleToggleGridImage={handleToggleGridImage}
+        isUploading={isUploading}
       />
     </div>
   );

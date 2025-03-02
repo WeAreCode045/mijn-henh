@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan, PropertyTechnicalItem } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -29,6 +30,7 @@ interface PropertyFormContentProps {
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
+  isUploading?: boolean;
 }
 
 export function PropertyFormContent({
@@ -59,6 +61,7 @@ export function PropertyFormContent({
   onAddTechnicalItem,
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
+  isUploading,
 }: PropertyFormContentProps) {
   
   // Find the step component that corresponds to the current step
@@ -98,6 +101,7 @@ export function PropertyFormContent({
           onAddTechnicalItem={onAddTechnicalItem}
           onRemoveTechnicalItem={onRemoveTechnicalItem}
           onUpdateTechnicalItem={onUpdateTechnicalItem}
+          isUploading={isUploading}
         />
       ) : step === 4 ? (
         // AreasStep
@@ -110,6 +114,7 @@ export function PropertyFormContent({
           onAreaImageUpload={onAreaImageUpload}
           onAreaImageRemove={onAreaImageRemove}
           onAreaImagesSelect={onAreaImagesSelect}
+          isUploading={isUploading}
         />
       ) : step === 2 ? (
         // FeaturesStep
@@ -132,6 +137,7 @@ export function PropertyFormContent({
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}
           onRemoveNearbyPlace={onRemoveNearbyPlace}
+          isUploading={isUploading}
         />
       ) : step === 1 ? (
         // GeneralInfoStep - special handling for step 1
@@ -140,6 +146,7 @@ export function PropertyFormContent({
           onFieldChange={onFieldChange}
           handleSetFeaturedImage={handleSetFeaturedImage}
           onSetFeaturedImage={handleSetFeaturedImage} // Add alternative prop name
+          isUploading={isUploading}
         />
       ) : (
         // Other steps
@@ -168,6 +175,7 @@ export function PropertyFormContent({
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}
           onRemoveNearbyPlace={onRemoveNearbyPlace}
+          isUploading={isUploading}
         />
       )}
     </div>

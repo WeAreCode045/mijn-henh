@@ -7,12 +7,14 @@ interface FloorplanGridProps {
   floorplans: PropertyFloorplan[];
   gridKey: number;
   onRemoveFloorplan?: (index: number) => void;
+  onUpdateFloorplan?: (index: number, field: any, value: any) => void;
 }
 
 export function FloorplanGrid({ 
   floorplans, 
   gridKey, 
-  onRemoveFloorplan 
+  onRemoveFloorplan,
+  onUpdateFloorplan
 }: FloorplanGridProps) {
   const handleRemoveClick = (e: React.MouseEvent, index: number) => {
     // Explicitly prevent default behavior to avoid any URL navigation
