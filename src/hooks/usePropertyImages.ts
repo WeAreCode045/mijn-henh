@@ -1,3 +1,4 @@
+
 import type { PropertyFormData, PropertyFloorplan } from "@/types/property";
 import { usePropertyAreaPhotos } from "./images/usePropertyAreaPhotos";
 import { usePropertyFeaturedImage } from "./images/usePropertyFeaturedImage";
@@ -23,8 +24,7 @@ export function usePropertyImages(
     handleFloorplanUpload, 
     handleRemoveFloorplan, 
     handleUpdateFloorplanEmbedScript, 
-    fetchFloorplans, 
-    floorplans 
+    fetchFloorplans
   } = useFloorplanUpload(formData, setFormData);
   
   // Add the floorplan update handler
@@ -75,6 +75,7 @@ export function usePropertyImages(
     handleUpdateFloorplan,
     handleUpdateFloorplanEmbedScript,
     fetchFloorplans,
+    floorplans: formData?.floorplans || [],
     
     // Area photos handling
     handleAreaPhotosUpload,
