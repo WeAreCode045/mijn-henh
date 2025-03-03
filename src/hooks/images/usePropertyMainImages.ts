@@ -1,208 +1,125 @@
-
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyImage, PropertyFormData } from "@/types/property";
 
 export function usePropertyMainImages(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
-  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
-
-  // This function handles file uploads for main property images
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  
+  // Set featured image
+  const handleSetFeaturedImage = async (url: string | null) => {
+    console.log("Setting featured image:", url);
     
-    setIsUploading(true);
-    
-    try {
-      const files = Array.from(e.target.files);
-      const uploadPromises = files.map(async (file) => {
-        // Sanitize the file name to remove non-ASCII characters
-        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
-        
-        // Create a unique file name with UUID to prevent collisions
-        const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
-        
-        // Define the file path in the storage bucket
-        const filePath = `properties/${formData.id || 'new'}/images/${fileName}`;
-        
-        // Upload the file to Supabase storage
-        const { error: uploadError } = await supabase.storage
-          .from('properties')
-          .upload(filePath, file);
-          
-        if (uploadError) throw uploadError;
-        
-        // Get the public URL for the uploaded file
-        const { data: { publicUrl } } = supabase.storage
-          .from('properties')
-          .getPublicUrl(filePath);
-          
-        // Return a new PropertyImage object
-        return {
-          id: crypto.randomUUID(),
-          url: publicUrl,
-          filePath // Store the file path for potential deletion later
-        };
-      });
-      
-      // Wait for all uploads to complete
-      const newImages = await Promise.all(uploadPromises);
-      
-      // Create a new array with all existing and new images
-      // Ensure images is an array even if it's not defined in formData
-      const currentImages = Array.isArray(formData.images) ? formData.images : [];
-      const updatedImages = [...currentImages, ...newImages];
-      
-      // Log for debugging
-      console.log("Previous images:", currentImages);
-      console.log("New images:", newImages);
-      console.log("Updated images:", updatedImages);
-      
-      // Create a completely new object for React state detection
-      const updatedFormData = {
-        ...formData,
-        images: updatedImages
-      };
-      
-      // Update form state
-      setFormData(updatedFormData);
-      
-      // If the property exists in the database, save images immediately
-      if (formData.id) {
-        // Add images to the property_images table for tracking
-        for (const image of newImages) {
-          const { error } = await supabase
-            .from('property_images')
-            .insert({
-              property_id: formData.id,
-              url: image.url,
-              type: 'image' // Set type as 'image' to distinguish from floorplans
-            });
-            
-          if (error) {
-            console.error('Error adding image to database:', error);
-          }
-        }
-      }
-      
-      toast({
-        title: "Success",
-        description: `${newImages.length} image${newImages.length === 1 ? '' : 's'} uploaded successfully`,
-      });
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload images",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  // This function handles the removal of images
-  const handleRemoveImage = async (index: number) => {
-    // Ensure images array exists
-    if (!Array.isArray(formData.images) || index < 0 || index >= formData.images.length) {
-      console.error('Invalid image index or images array is not defined');
-      return;
-    }
-    
-    // Get the image to be removed
-    const imageToRemove = formData.images[index];
-    
-    // Create a copy of the images array without the removed image
-    const updatedImages = formData.images.filter((_, i) => i !== index);
-    
-    // Update the featured image if it was removed
-    let updatedFeaturedImage = formData.featuredImage;
-    if (formData.featuredImage === imageToRemove.url) {
-      updatedFeaturedImage = null;
-    }
-    
-    // Update grid images if they include the removed image
-    const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageToRemove.url);
-    
-    // Create an updated form data object
+    // Update form data
     const updatedFormData = {
       ...formData,
-      images: updatedImages,
-      featuredImage: updatedFeaturedImage,
+      featuredImage: url
+    };
+    
+    setFormData(updatedFormData);
+    
+    // Update in database if we have a property ID
+    if (formData.id) {
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ featuredImage: url })
+          .eq('id', formData.id);
+          
+        if (error) {
+          console.error("Error updating featured image in database:", error);
+          toast({
+            title: "Error",
+            description: "Failed to update featured image in database",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        toast({
+          title: "Success",
+          description: "Featured image updated successfully",
+        });
+      } catch (error) {
+        console.error("Error updating featured image:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update featured image",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  // Toggle grid image (add or remove)
+  const handleToggleGridImage = async (url: string) => {
+    console.log("Toggling grid image:", url);
+    
+    // Get current grid images
+    const currentGridImages = [...(formData.gridImages || [])];
+    
+    let updatedGridImages: string[];
+    
+    // If image is already in grid, remove it
+    if (currentGridImages.includes(url)) {
+      updatedGridImages = currentGridImages.filter(imageUrl => imageUrl !== url);
+    } else {
+      // Otherwise add it (max 4)
+      if (currentGridImages.length >= 4) {
+        toast({
+          title: "Warning",
+          description: "You can only select up to 4 grid images.",
+        });
+        return;
+      }
+      updatedGridImages = [...currentGridImages, url];
+    }
+    
+    // Update form data
+    const updatedFormData = {
+      ...formData,
       gridImages: updatedGridImages
     };
     
-    // Update the form state
     setFormData(updatedFormData);
     
-    // Attempt to delete the file from storage if file path exists
-    if (imageToRemove.filePath) {
-      try {
-        const { error } = await supabase.storage
-          .from('properties')
-          .remove([imageToRemove.filePath]);
-          
-        if (error) {
-          console.error('Error deleting image from storage:', error);
-        }
-      } catch (error) {
-        console.error('Error in file deletion process:', error);
-      }
-    }
-    
-    // If property exists in database, update the property_images table
-    if (formData.id && imageToRemove.url) {
+    // Update in database if we have a property ID
+    if (formData.id) {
       try {
         const { error } = await supabase
-          .from('property_images')
-          .delete()
-          .eq('url', imageToRemove.url)
-          .eq('property_id', formData.id);
+          .from('properties')
+          .update({ gridImages: updatedGridImages })
+          .eq('id', formData.id);
           
         if (error) {
-          console.error('Error removing image from database:', error);
+          console.error("Error updating grid images in database:", error);
+          toast({
+            title: "Error",
+            description: "Failed to update grid images in database",
+            variant: "destructive"
+          });
+          return;
         }
+        
+        toast({
+          title: "Success",
+          description: "Grid images updated successfully",
+        });
       } catch (error) {
-        console.error('Error removing image from database:', error);
+        console.error("Error updating grid images:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update grid images",
+          variant: "destructive"
+        });
       }
     }
-    
-    toast({
-      title: "Success",
-      description: "Image removed successfully",
-    });
   };
-
-  // When fetching images, get them from property_images table and filter out floorplans
-  const fetchImages = async (propertyId: string) => {
-    if (!propertyId) return [];
-    
-    try {
-      const { data, error } = await supabase
-        .from('property_images')
-        .select('*')
-        .eq('property_id', propertyId)
-        .eq('type', 'image') // Only get 'image' type, not floorplans
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching property images:', error);
-      return [];
-    }
-  };
-
+  
   return {
-    handleImageUpload,
-    handleRemoveImage,
-    isUploading,
-    fetchImages,
-    images: formData?.images || []
+    handleSetFeaturedImage,
+    handleToggleGridImage
   };
 }

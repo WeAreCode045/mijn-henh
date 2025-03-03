@@ -149,6 +149,7 @@ export function PropertyFormContent({
           formData={formData}
           onFieldChange={onFieldChange}
           handleSetFeaturedImage={handleSetFeaturedImage}
+          handleToggleGridImage={handleToggleGridImage}
           onSetFeaturedImage={handleSetFeaturedImage} // Add alternative prop name
           isUploading={isUploading}
         />
@@ -176,6 +177,7 @@ export function PropertyFormContent({
           onSetFeaturedImage={handleSetFeaturedImage}
           handleSetFeaturedImage={handleSetFeaturedImage}
           onToggleGridImage={handleToggleGridImage}
+          handleToggleGridImage={handleToggleGridImage}
           onMapImageDelete={handleMapImageDelete}
           onFetchLocationData={onFetchLocationData}
           onRemoveNearbyPlace={onRemoveNearbyPlace}

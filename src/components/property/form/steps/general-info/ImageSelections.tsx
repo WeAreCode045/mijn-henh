@@ -1,162 +1,174 @@
 
+import { useState } from "react";
+import { PropertyFormData, PropertyImage } from "@/types/property";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import type { PropertyFormData, PropertyImage } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, ImageIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ImageGrid } from "@/components/property/image-select/ImageGrid";
+import { DialogTriggerButton } from "@/components/property/image-select/DialogTriggerButton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 interface ImageSelectionsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
 }
 
-export function ImageSelections({ 
-  formData, 
-  onFieldChange
-}: ImageSelectionsProps) {
-  // Get all available images
+export function ImageSelections({ formData, onFieldChange }: ImageSelectionsProps) {
+  const [openFeaturedDialog, setOpenFeaturedDialog] = useState(false);
+  const [openGridDialog, setOpenGridDialog] = useState(false);
+  
+  // Ensure arrays exist
   const images = formData.images || [];
-
+  
   // Handle featured image selection
-  const handleSelectFeaturedImage = (image: PropertyImage) => {
-    onFieldChange('featuredImage', image.url);
+  const handleFeaturedImageSelect = (imageUrl: string) => {
+    console.log("Selected featured image:", imageUrl);
+    onFieldChange('featuredImage', imageUrl);
+    setOpenFeaturedDialog(false);
   };
-
-  // Handle grid image selection/deselection
-  const handleToggleGridImage = (image: PropertyImage) => {
-    const currentGridImages = formData.gridImages || [];
+  
+  // Handle grid image selection/toggle
+  const handleGridImageToggle = (imageUrl: string) => {
+    const currentGridImages = [...(formData.gridImages || [])];
     
-    // Check if image is already in gridImages
-    const imageIndex = currentGridImages.indexOf(image.url);
-    
-    // If image is already selected, remove it
-    if (imageIndex !== -1) {
-      const updatedGridImages = [...currentGridImages];
-      updatedGridImages.splice(imageIndex, 1);
+    // If image is already in grid, remove it
+    if (currentGridImages.includes(imageUrl)) {
+      const updatedGridImages = currentGridImages.filter(url => url !== imageUrl);
+      console.log("Removed image from grid:", imageUrl);
+      console.log("Updated grid images:", updatedGridImages);
       onFieldChange('gridImages', updatedGridImages);
-    } 
-    // If image is not selected and we have less than 4 images, add it
-    else if (currentGridImages.length < 4) {
-      onFieldChange('gridImages', [...currentGridImages, image.url]);
+    } else {
+      // If we already have 4 images, don't add more
+      if (currentGridImages.length >= 4) {
+        console.log("Cannot add more than 4 grid images");
+        return;
+      }
+      // Add the image to the grid
+      const updatedGridImages = [...currentGridImages, imageUrl];
+      console.log("Added image to grid:", imageUrl);
+      console.log("Updated grid images:", updatedGridImages);
+      onFieldChange('gridImages', updatedGridImages);
     }
   };
 
-  // Check if an image is the featured image
-  const isFeaturedImage = (image: PropertyImage) => {
-    return formData.featuredImage === image.url;
+  // Remove a grid image
+  const handleRemoveGridImage = (index: number) => {
+    const updatedGridImages = [...(formData.gridImages || [])];
+    updatedGridImages.splice(index, 1);
+    console.log("Removed grid image at index:", index);
+    console.log("Updated grid images:", updatedGridImages);
+    onFieldChange('gridImages', updatedGridImages);
   };
 
-  // Check if an image is in the grid images
-  const isGridImage = (image: PropertyImage) => {
-    return (formData.gridImages || []).includes(image.url);
+  // Remove featured image
+  const handleRemoveFeaturedImage = () => {
+    console.log("Removing featured image");
+    onFieldChange('featuredImage', null);
   };
-
-  // Grid images count
-  const gridImagesCount = (formData.gridImages || []).length;
-  const featuredImageSelected = !!formData.featuredImage;
-
-  if (images.length === 0) {
-    return (
-      <div className="space-y-4">
-        <Label className="text-lg font-medium">Image Selection</Label>
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
-          <p className="text-muted-foreground text-sm">
-            Please upload images in the Media tab first to select featured and grid images.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <Label className="text-lg font-medium">Featured Image</Label>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select one image to be used as the featured image on coverpage and property listings.
+      {/* Featured Image Section */}
+      <div className="space-y-2">
+        <Label>Featured Image</Label>
+        <p className="text-sm text-gray-500">
+          Select one image to be featured on the property card, PDF cover, and web view.
         </p>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {images.map((image) => (
-            <div 
-              key={`featured-${image.id}`}
-              className={cn(
-                "relative border rounded-md overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all",
-                isFeaturedImage(image) && "ring-2 ring-primary"
-              )}
-              onClick={() => handleSelectFeaturedImage(image)}
+        {formData.featuredImage ? (
+          <div className="relative w-full h-64 bg-gray-100 rounded-md overflow-hidden">
+            <img 
+              src={formData.featuredImage} 
+              alt="Featured" 
+              className="w-full h-full object-cover"
+            />
+            <Button 
+              variant="destructive" 
+              size="icon" 
+              className="absolute top-2 right-2"
+              onClick={handleRemoveFeaturedImage}
             >
-              <div className="aspect-square">
-                <img 
-                  src={image.url} 
-                  alt="Property" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
-              {isFeaturedImage(image) && (
-                <div className="absolute top-2 right-2 bg-primary text-white p-1 rounded-full">
-                  <Check className="h-4 w-4" />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        
-        {featuredImageSelected && (
-          <Button 
-            variant="outline" 
-            className="mt-2" 
-            onClick={() => onFieldChange('featuredImage', null)}
-          >
-            Clear Featured Image
-          </Button>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <DialogTriggerButton 
+            onClick={() => setOpenFeaturedDialog(true)}
+            label="Select Featured Image"
+          />
         )}
+        
+        <Dialog open={openFeaturedDialog} onOpenChange={setOpenFeaturedDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Select Featured Image</DialogTitle>
+            </DialogHeader>
+            <ImageGrid 
+              images={images.map(img => img.url)}
+              selected={formData.featuredImage ? [formData.featuredImage] : []}
+              onSelect={handleFeaturedImageSelect}
+              selectionMode="single"
+            />
+          </DialogContent>
+        </Dialog>
       </div>
       
-      <div className="mt-8">
-        <Label className="text-lg font-medium">Grid Images</Label>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select up to 4 images to be displayed in the grid on the coverpage. {gridImagesCount}/4 selected.
+      {/* Grid Images Section */}
+      <div className="space-y-2">
+        <Label>Grid Images (max 4)</Label>
+        <p className="text-sm text-gray-500">
+          Select up to 4 images to appear in the grid on the property card, PDF cover, and web view.
         </p>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {images.map((image) => (
-            <div 
-              key={`grid-${image.id}`}
-              className={cn(
-                "relative border rounded-md overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all",
-                isGridImage(image) && "ring-2 ring-primary"
-              )}
-              onClick={() => handleToggleGridImage(image)}
-            >
-              <div className="aspect-square">
+        {formData.gridImages && formData.gridImages.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {formData.gridImages.map((imageUrl, index) => (
+              <div key={index} className="relative h-32 bg-gray-100 rounded-md overflow-hidden">
                 <img 
-                  src={image.url} 
-                  alt="Property" 
+                  src={imageUrl} 
+                  alt={`Grid ${index + 1}`} 
                   className="w-full h-full object-cover"
                 />
+                <Button 
+                  variant="destructive" 
+                  size="icon" 
+                  className="absolute top-2 right-2"
+                  onClick={() => handleRemoveGridImage(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              
-              {isGridImage(image) && (
-                <div className="absolute top-2 right-2 bg-primary text-white p-1 rounded-full">
-                  <Check className="h-4 w-4" />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        
-        {gridImagesCount > 0 && (
-          <Button 
-            variant="outline" 
-            className="mt-2" 
-            onClick={() => onFieldChange('gridImages', [])}
-          >
-            Clear Grid Images
-          </Button>
+            ))}
+            {formData.gridImages.length < 4 && (
+              <DialogTriggerButton 
+                onClick={() => setOpenGridDialog(true)}
+                label="Add Grid Image"
+                className="h-32"
+              />
+            )}
+          </div>
+        ) : (
+          <DialogTriggerButton 
+            onClick={() => setOpenGridDialog(true)}
+            label="Select Grid Images"
+          />
         )}
+        
+        <Dialog open={openGridDialog} onOpenChange={setOpenGridDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Select Grid Images (max 4)</DialogTitle>
+            </DialogHeader>
+            <ImageGrid 
+              images={images.map(img => img.url)}
+              selected={formData.gridImages || []}
+              onSelect={handleGridImageToggle}
+              selectionMode="multiple"
+              maxSelections={4}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

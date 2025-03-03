@@ -10,6 +10,8 @@ interface GeneralInfoStepProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onSetFeaturedImage?: (url: string | null) => void;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleGridImage?: (url: string) => void;
   isUploading?: boolean;
 }
 
@@ -17,8 +19,27 @@ export function GeneralInfoStep({
   formData, 
   onFieldChange,
   onSetFeaturedImage,
+  handleSetFeaturedImage,
+  handleToggleGridImage,
   isUploading = false
 }: GeneralInfoStepProps) {
+  // Use either the provided handler or pass through to onFieldChange
+  const setFeaturedImage = handleSetFeaturedImage || onSetFeaturedImage || ((url: string | null) => {
+    onFieldChange('featuredImage', url);
+  });
+  
+  // Default grid image toggle if not provided
+  const toggleGridImage = handleToggleGridImage || ((url: string) => {
+    const currentGridImages = [...(formData.gridImages || [])];
+    
+    if (currentGridImages.includes(url)) {
+      onFieldChange('gridImages', currentGridImages.filter(i => i !== url));
+    } else {
+      if (currentGridImages.length >= 4) return;
+      onFieldChange('gridImages', [...currentGridImages, url]);
+    }
+  });
+
   return (
     <div className="space-y-6">
       <Card>
