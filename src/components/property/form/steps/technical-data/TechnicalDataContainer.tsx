@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileImage, Upload, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TechnicalDataContainerProps {
   formData?: PropertyFormData;
@@ -40,6 +42,7 @@ export function TechnicalDataContainer({
   isUploading
 }: TechnicalDataContainerProps) {
   const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
   
   // Handle standalone floorplan upload - not tied to a technical item
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +55,57 @@ export function TechnicalDataContainer({
       setUploading(false);
       // Reset the file input
       e.target.value = '';
+    }
+  };
+
+  // Enhanced floorplan removal function
+  const handleRemoveFloorplan = async (index: number) => {
+    // First call the provided removal handler which handles storage deletion
+    if (onRemoveFloorplan) {
+      await onRemoveFloorplan(index);
+    }
+
+    // Let's also make sure database records are cleaned up
+    // Especially if we're dealing with an existing property
+    if (formData?.id && floorplans && floorplans[index]) {
+      try {
+        const floorplanToRemove = floorplans[index];
+        const url = floorplanToRemove.url;
+
+        // Remove the record from property_images table if it exists
+        if (url) {
+          const { error } = await supabase
+            .from('property_images')
+            .delete()
+            .eq('url', url)
+            .eq('property_id', formData.id);
+            
+          if (error) {
+            console.error('Error removing floorplan from database:', error);
+            toast({
+              title: "Warning",
+              description: "The floorplan was removed but there might be database records that weren't fully cleaned up.",
+              variant: "destructive"
+            });
+          }
+        }
+
+        // Check if any technical items reference this floorplan and update them
+        if (technicalItems && floorplanToRemove.id) {
+          const updatedTechnicalItems = technicalItems.map(item => {
+            if (item.floorplanId === floorplanToRemove.id) {
+              return { ...item, floorplanId: null };
+            }
+            return item;
+          });
+          
+          if (onFieldChange) {
+            onFieldChange('technicalItems', updatedTechnicalItems);
+          }
+        }
+      } catch (error) {
+        console.error('Error cleaning up floorplan database references:', error);
+      }
     }
   };
   
@@ -106,12 +160,17 @@ export function TechnicalDataContainer({
                     src={floorplan.url} 
                     alt={`Floorplan ${index + 1}`} 
                     className="w-full h-auto aspect-square object-cover rounded-md border"
+                    onError={(e) => {
+                      // Handle broken images
+                      e.currentTarget.src = '/placeholder.svg';
+                      e.currentTarget.classList.add('border-red-500');
+                    }}
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
                     <Button 
                       variant="destructive" 
                       size="sm" 
-                      onClick={() => onRemoveFloorplan && onRemoveFloorplan(index)}
+                      onClick={() => handleRemoveFloorplan(index)}
                       type="button"
                       className="flex items-center gap-1"
                     >

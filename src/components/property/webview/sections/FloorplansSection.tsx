@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
+  const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     // Check if we need to fetch floorplans from the property_images table
@@ -77,8 +78,19 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     setSelectedImage(null);
   };
 
+  const handleImageError = (url: string) => {
+    setLoadErrors(prev => ({ ...prev, [url]: true }));
+  };
+
   const getFloorplansByColumns = () => {
     if (!parsedFloorplans.length) {
+      return [];
+    }
+    
+    // Filter out floorplans with load errors
+    const validFloorplans = parsedFloorplans.filter(plan => !loadErrors[plan.url]);
+    
+    if (!validFloorplans.length) {
       return [];
     }
     
@@ -89,7 +101,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     if (property.technicalItems && Array.isArray(property.technicalItems)) {
       property.technicalItems.forEach(item => {
         if (item.floorplanId) {
-          const floorplan = parsedFloorplans.find(fp => fp.id === item.floorplanId);
+          const floorplan = validFloorplans.find(fp => fp.id === item.floorplanId);
           
           if (floorplan) {
             const columns = item.columns || 1;
@@ -106,7 +118,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     }
     
     // For floorplans not linked to technical items, group by their own column value
-    parsedFloorplans.forEach(plan => {
+    validFloorplans.forEach(plan => {
       // Check if this floorplan is already assigned to a technical item
       const isAssigned = property.technicalItems && Array.isArray(property.technicalItems) && 
         property.technicalItems.some(item => 
@@ -130,7 +142,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
 
   const floorplanGroups = getFloorplansByColumns();
 
-  if (!parsedFloorplans.length && !property.floorplanEmbedScript) {
+  if ((!parsedFloorplans.length || parsedFloorplans.every(plan => loadErrors[plan.url])) && !property.floorplanEmbedScript) {
     return null;
   }
 
@@ -161,6 +173,7 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
                     src={plan.url}
                     alt={`Floorplan ${groupIndex + 1}-${index + 1}`}
                     className="w-full h-auto object-contain max-h-[400px]"
+                    onError={() => handleImageError(plan.url)}
                   />
                 </div>
               ))}
