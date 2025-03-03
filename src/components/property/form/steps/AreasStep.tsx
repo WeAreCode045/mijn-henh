@@ -26,11 +26,19 @@ export function AreasStep({
   console.log("AreasStep rendering with areas:", areas);
   console.log("AreasStep images:", images);
   
+  const handleAddArea = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    onAddArea();
+  };
+  
   return (
     <PropertyAreas
       areas={areas || []}
       images={images || []}
-      onAdd={onAddArea}
+      onAdd={handleAddArea}
       onRemove={onRemoveArea}
       onUpdate={onUpdateArea}
       onImageUpload={onAreaImageUpload}

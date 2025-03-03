@@ -32,11 +32,17 @@ export function PropertyAreas({
     console.log("PropertyAreas - Available images:", images);
   }, [areas, images]);
 
+  const handleAddArea = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAdd();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-estate-800">Property Areas</h2>
-        <Button onClick={onAdd} size="sm" className="flex items-center">
+        <Button onClick={handleAddArea} size="sm" className="flex items-center" type="button">
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Area
         </Button>

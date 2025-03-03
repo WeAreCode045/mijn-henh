@@ -91,10 +91,10 @@ export function AreaImageSelectDialog({
         </div>
         
         <div className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" onClick={handleButtonClick}>
+          <Button variant="outline" onClick={handleButtonClick} type="button">
             Cancel
           </Button>
-          <Button onClick={handleButtonClick}>
+          <Button onClick={handleButtonClick} type="button">
             Done
           </Button>
         </div>

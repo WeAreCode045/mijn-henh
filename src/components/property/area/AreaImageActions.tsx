@@ -19,8 +19,13 @@ export function AreaImageActions({
         <Button
           variant="outline"
           size="sm"
-          onClick={onSelectClick}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSelectClick();
+          }}
           className="flex items-center"
+          type="button"
         >
           <Edit className="mr-1 h-3 w-3" />
           Select Images
@@ -28,8 +33,13 @@ export function AreaImageActions({
         <Button
           variant="outline"
           size="sm"
-          onClick={onUploadClick}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onUploadClick();
+          }}
           className="flex items-center"
+          type="button"
         >
           <ImageIcon className="mr-1 h-3 w-3" />
           Upload
