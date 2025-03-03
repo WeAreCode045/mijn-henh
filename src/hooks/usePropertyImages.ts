@@ -5,6 +5,7 @@ import { useMediaUpload } from "./useMediaUpload";
 import { useFloorplanUpload } from "./useFloorplanUpload";
 import { useFloorplanUpdateHandler } from "./images/floorplans/useFloorplanUpdateHandler";
 import { useEffect } from "react";
+import { transformFloorplans } from "./property-form/propertyDataTransformer";
 
 export function usePropertyImages(
   formData: PropertyFormData,
@@ -42,6 +43,9 @@ export function usePropertyImages(
         // Load floorplans
         const floorplanData = await fetchFloorplans(formData.id);
         
+        // Transform floorplans to ensure they follow the PropertyFloorplan interface
+        const processedFloorplans = transformFloorplans(floorplanData);
+        
         // Update form data with fetched media
         setFormData({
           ...formData,
@@ -49,7 +53,7 @@ export function usePropertyImages(
             id: img.id,
             url: img.url
           })),
-          floorplans: floorplanData
+          floorplans: processedFloorplans
         });
       };
       
