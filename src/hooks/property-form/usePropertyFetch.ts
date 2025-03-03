@@ -50,7 +50,7 @@ export function usePropertyFetch(id: string | undefined) {
           // Convert null values to empty strings or arrays as needed
           images: data.images?.map((url: string) => ({ id: crypto.randomUUID(), url })) || [],
           gridImages: data.gridImages || [],
-          // Ensure the floorplanEmbedScript is set
+          // Ensure the floorplanEmbedScript is set correctly
           floorplanEmbedScript: data.floorplanEmbedScript || ""
         });
       }

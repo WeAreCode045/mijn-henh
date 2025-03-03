@@ -1,108 +1,58 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFormData } from "@/types/property";
-import { FloorplanGrid } from "../../tabs/media/floorplans/FloorplanGrid";
-import { FloorplanUploader } from "../../tabs/media/floorplans/FloorplanUploader";
-import { FloorplanEmbed } from "../../tabs/media/floorplans/FloorplanEmbed";
-import { FloorplanProcessor } from "../../tabs/media/floorplans/FloorplanProcessor";
-import { useState, useEffect } from "react";
-import { Spinner } from "@/components/ui/spinner";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface FloorplansStepProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  isUploading?: boolean;
 }
 
 export function FloorplansStep({
   formData,
-  onFieldChange,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  handleUpdateFloorplan,
-  isUploading = false
+  onFieldChange
 }: FloorplansStepProps) {
-  const [parsedFloorplans, setParsedFloorplans] = useState<any[]>([]);
-  const [floorplansKey, setFloorplansKey] = useState(Date.now());
-  const [isProcessing, setIsProcessing] = useState(true);
-
-  // Update parsed floorplans when formData.floorplans changes
-  useEffect(() => {
-    if (formData && formData.floorplans) {
-      console.log("FloorplansStep: formData.floorplans updated", formData.floorplans);
-      setParsedFloorplans(formData.floorplans || []);
-      setFloorplansKey(Date.now());
-    }
-    setIsProcessing(false);
-  }, [formData?.floorplans]);
-
-  const handleFloorplansProcessed = (processed: any[]) => {
-    console.log("FloorplansStep: floorplans processed", processed);
-    setParsedFloorplans(processed);
-    setFloorplansKey(Date.now());
-    setIsProcessing(false);
-  };
-
   const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    console.log("FloorplansStep: updating embed script:", e.target.value);
     onFieldChange('floorplanEmbedScript', e.target.value);
   };
-
-  // If formData is completely missing or not loaded yet
-  if (!formData) {
-    return (
-      <div className="flex flex-col items-center justify-center h-40 space-y-4">
-        <Spinner className="h-8 w-8 border-4" />
-        <span className="text-muted-foreground">Loading form data...</span>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Property Floorplans</h3>
       <p className="text-muted-foreground text-sm">
-        Upload floorplans for your property. These will be shown in the property listing and brochure.
+        Paste an embed code from Matterport, iGuide, or other 3D tour providers to display interactive floorplans.
       </p>
       
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-md">Upload Floorplans</CardTitle>
+          <CardTitle className="text-md">Interactive Floorplan Embed</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Process the floorplans data for display */}
-          <FloorplanProcessor 
-            floorplans={formData.floorplans || []} 
-            propertyId={formData.id || 'new'}
-            onProcessed={handleFloorplansProcessed} 
-          />
-          
-          {/* Uploader component - This should always be visible */}
-          <FloorplanUploader isLoading={isUploading} onUpload={handleFloorplanUpload} />
-          
-          {/* Embed script component - make sure it gets the current script value */}
-          <FloorplanEmbed 
-            embedScript={formData.floorplanEmbedScript || ''} 
-            onChange={handleEmbedScriptChange} 
-          />
-
-          {/* Display uploaded floorplans or loading state */}
-          {isProcessing ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <Skeleton className="h-40 w-full" />
-              <Skeleton className="h-40 w-full" />
-            </div>
-          ) : (
-            <FloorplanGrid 
-              floorplans={parsedFloorplans} 
-              gridKey={floorplansKey} 
-              onRemoveFloorplan={handleRemoveFloorplan} 
-              onUpdateFloorplan={handleUpdateFloorplan}
+          <div className="space-y-2">
+            <Label htmlFor="floorplan-embed">Floorplan Embed Script</Label>
+            <Textarea
+              id="floorplan-embed"
+              placeholder="Paste your 3D/virtual floorplan embed script here..."
+              className="min-h-[150px] font-mono text-xs"
+              value={formData.floorplanEmbedScript || ''}
+              onChange={handleEmbedScriptChange}
             />
+            <p className="text-xs text-muted-foreground">
+              Paste embed code from Matterport, iGuide, or other 3D tour providers. This will be displayed on the property webview.
+            </p>
+          </div>
+
+          {formData.floorplanEmbedScript && (
+            <div className="mt-6 space-y-2">
+              <Label>Preview</Label>
+              <div className="w-full h-[400px] border rounded-md overflow-hidden bg-gray-50">
+                <div 
+                  className="w-full h-full" 
+                  dangerouslySetInnerHTML={{ __html: formData.floorplanEmbedScript }}
+                />
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
