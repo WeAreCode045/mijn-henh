@@ -14,11 +14,12 @@ interface Template {
 
 interface TemplateCardProps {
   templateId?: string;
+  templateName?: string;
   onSaveTemplate: (templateId: string) => void;
-  isUpdating: boolean;
+  isUpdating?: boolean;
 }
 
-export function TemplateCard({ templateId, onSaveTemplate, isUpdating }: TemplateCardProps) {
+export function TemplateCard({ templateId, templateName, onSaveTemplate, isUpdating = false }: TemplateCardProps) {
   const [currentTemplateId, setCurrentTemplateId] = useState(templateId || "default");
   const [templates, setTemplates] = useState<Template[]>([]);
 

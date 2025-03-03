@@ -44,6 +44,9 @@ export function PropertyDashboardTab({
   onSaveTemplate,
   isUpdating = false
 }: PropertyDashboardTabProps) {
+  // Construct the API endpoint with the proper ID
+  const apiEndpoint = `/api/properties/${id}`;
+  
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -53,25 +56,28 @@ export function PropertyDashboardTab({
           title={title}
           createdAt={createdAt}
           updatedAt={updatedAt}
-          onSave={onSave}
-          onDelete={onDelete}
+          apiEndpoint={apiEndpoint}
+          onSaveObjectId={onSaveObjectId || (() => {})}
+          isUpdating={isUpdating}
           onGeneratePDF={onGeneratePDF}
           onWebView={onWebView}
-          onSaveObjectId={onSaveObjectId}
-          isUpdating={isUpdating}
+          onSave={onSave}
+          onDelete={onDelete}
         />
         
         <div className="space-y-6">
           <AgentCard
             agentId={agentId}
             agentName={agentName}
-            onSaveAgent={onSaveAgent}
+            onSaveAgent={onSaveAgent || (() => {})}
+            isUpdating={isUpdating}
           />
           
           <TemplateCard
             templateId={templateId}
             templateName={templateName}
-            onSaveTemplate={onSaveTemplate}
+            onSaveTemplate={onSaveTemplate || (() => {})}
+            isUpdating={isUpdating}
           />
         </div>
       </div>

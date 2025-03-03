@@ -10,21 +10,31 @@ import { useState } from "react";
 interface PropertyDetailsCardProps {
   id: string;
   objectId?: string;
+  title?: string;
   createdAt?: string;
   updatedAt?: string;
   apiEndpoint: string;
   onSaveObjectId: (objectId: string) => void;
   isUpdating: boolean;
+  onGeneratePDF?: () => void;
+  onWebView?: () => void;
+  onSave?: () => void;
+  onDelete?: () => Promise<void>;
 }
 
 export function PropertyDetailsCard({
   id,
   objectId,
+  title,
   createdAt,
   updatedAt,
   apiEndpoint,
   onSaveObjectId,
-  isUpdating
+  isUpdating,
+  onGeneratePDF,
+  onWebView,
+  onSave,
+  onDelete
 }: PropertyDetailsCardProps) {
   const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
 

@@ -2,7 +2,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { PropertyWebView } from "../../PropertyWebView";
 import { PropertyData } from "@/types/property";
-import { useState } from "react";
 
 interface PropertyWebViewDialogProps {
   propertyData: PropertyData;

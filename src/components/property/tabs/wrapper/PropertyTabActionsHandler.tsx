@@ -7,6 +7,7 @@ interface PropertyTabActionsHandlerProps {
   propertyId: string;
   children: (props: {
     webViewOpen: boolean;
+    setWebViewOpen: (open: boolean) => void;
     handleGeneratePDF: () => void;
     handleOpenWebView: (e?: React.MouseEvent) => void;
   }) => React.ReactNode;
@@ -24,6 +25,7 @@ export function PropertyTabActionsHandler({ propertyId, children }: PropertyTabA
 
   return children({
     webViewOpen,
+    setWebViewOpen,
     handleGeneratePDF,
     handleOpenWebView
   });

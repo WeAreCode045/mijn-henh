@@ -14,11 +14,12 @@ interface Agent {
 
 interface AgentCardProps {
   agentId?: string;
+  agentName?: string;
   onSaveAgent: (agentId: string) => void;
-  isUpdating: boolean;
+  isUpdating?: boolean;
 }
 
-export function AgentCard({ agentId, onSaveAgent, isUpdating }: AgentCardProps) {
+export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false }: AgentCardProps) {
   const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
   const [agents, setAgents] = useState<Agent[]>([]);
 
