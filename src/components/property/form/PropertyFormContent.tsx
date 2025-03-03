@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan, PropertyTechnicalItem } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -153,10 +152,6 @@ export function PropertyFormContent({
         <StepComponent
           formData={formData}
           onFieldChange={onFieldChange}
-          handleFloorplanUpload={handleFloorplanUpload}
-          handleRemoveFloorplan={handleRemoveFloorplan}
-          handleUpdateFloorplan={handleUpdateFloorplan}
-          isUploading={isUploading}
         />
       ) : (
         // Other steps

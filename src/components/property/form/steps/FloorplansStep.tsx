@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFormData } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from "react";
 
 interface FloorplansStepProps {
   formData: PropertyFormData;
@@ -13,8 +14,17 @@ export function FloorplansStep({
   formData,
   onFieldChange
 }: FloorplansStepProps) {
+  const [embedScript, setEmbedScript] = useState<string>(formData.floorplanEmbedScript || '');
+
+  useEffect(() => {
+    // Update local state when formData changes externally
+    setEmbedScript(formData.floorplanEmbedScript || '');
+  }, [formData.floorplanEmbedScript]);
+
   const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onFieldChange('floorplanEmbedScript', e.target.value);
+    const newValue = e.target.value;
+    setEmbedScript(newValue);
+    onFieldChange('floorplanEmbedScript', newValue);
   };
 
   return (
@@ -35,7 +45,7 @@ export function FloorplansStep({
               id="floorplan-embed"
               placeholder="Paste your 3D/virtual floorplan embed script here..."
               className="min-h-[150px] font-mono text-xs"
-              value={formData.floorplanEmbedScript || ''}
+              value={embedScript}
               onChange={handleEmbedScriptChange}
             />
             <p className="text-xs text-muted-foreground">
@@ -43,13 +53,13 @@ export function FloorplansStep({
             </p>
           </div>
 
-          {formData.floorplanEmbedScript && (
+          {embedScript && (
             <div className="mt-6 space-y-2">
               <Label>Preview</Label>
               <div className="w-full h-[400px] border rounded-md overflow-hidden bg-gray-50">
                 <div 
                   className="w-full h-full" 
-                  dangerouslySetInnerHTML={{ __html: formData.floorplanEmbedScript }}
+                  dangerouslySetInnerHTML={{ __html: embedScript }}
                 />
               </div>
             </div>
