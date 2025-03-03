@@ -2,7 +2,7 @@
 import { PropertyImage } from "@/types/property";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AreaImageGridProps {
   areaImages: PropertyImage[];
@@ -14,7 +14,9 @@ interface AreaImageGridProps {
 export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemove }: AreaImageGridProps) {
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   
-  console.log(`AreaImageGrid for ${areaId} (${areaTitle}) - images:`, areaImages);
+  useEffect(() => {
+    console.log(`AreaImageGrid for ${areaId} (${areaTitle}) - received ${areaImages.length} images:`, areaImages);
+  }, [areaImages, areaId, areaTitle]);
   
   // Filter out images with load errors
   const validAreaImages = areaImages.filter(image => !imageLoadErrors[image.id]);
@@ -25,6 +27,9 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
       ...prev,
       [imageId]: true
     }));
+    
+    // Optionally, we could also remove the image from the area here
+    // onImageRemove(areaId, imageId);
   };
 
   if (!validAreaImages || validAreaImages.length === 0) {

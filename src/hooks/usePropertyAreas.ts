@@ -43,17 +43,16 @@ export function usePropertyAreas(
   const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
     console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
     
-    setFormData({
-      ...formData,
-      areas: formData.areas.map(area => 
-        area.id === id ? { ...area, [field]: value } : area
-      ),
-    });
-    
-    // Log the updated areas for debugging
     const updatedAreas = formData.areas.map(area => 
       area.id === id ? { ...area, [field]: value } : area
     );
+    
+    setFormData({
+      ...formData,
+      areas: updatedAreas,
+    });
+    
+    // Log the updated areas for debugging
     console.log("Areas after update:", updatedAreas);
   };
 
@@ -109,14 +108,23 @@ export function usePropertyAreas(
       });
       
       const newImages = await Promise.all(uploadPromises);
+      console.log("Uploaded new images:", newImages);
       
-      // Add the new images to the form data
-      const updatedImages = [...(formData.images || []), ...newImages];
+      // Find the area to update
+      const areaToUpdate = formData.areas.find(area => area.id === areaId);
+      
+      if (!areaToUpdate) {
+        console.error(`Area with ID ${areaId} not found`);
+        throw new Error(`Area with ID ${areaId} not found`);
+      }
       
       // Add the new image IDs to the area
+      const updatedImageIds = [...(areaToUpdate.imageIds || []), ...newImages.map(img => img.id)];
+      console.log(`Updating area ${areaId} with new imageIds:`, updatedImageIds);
+      
+      // Create updated areas array with the new imageIds
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          const updatedImageIds = [...(area.imageIds || []), ...newImages.map(img => img.id)];
           return {
             ...area,
             imageIds: updatedImageIds
@@ -124,6 +132,9 @@ export function usePropertyAreas(
         }
         return area;
       });
+      
+      // Add the new images to the form data images array
+      const updatedImages = [...(formData.images || []), ...newImages];
       
       // Update form data with both new images and updated area
       setFormData({
@@ -134,7 +145,7 @@ export function usePropertyAreas(
       
       toast({
         title: "Success",
-        description: `Uploaded ${newImages.length} images to ${areaId}`,
+        description: `Uploaded ${newImages.length} images to ${areaToUpdate.title || areaId}`,
       });
       
     } catch (error) {
@@ -157,12 +168,19 @@ export function usePropertyAreas(
       // Find the image to get its URL
       const imageToRemove = formData.images.find(img => img.id === imageId);
       
+      if (!imageToRemove) {
+        console.error(`Image with ID ${imageId} not found`);
+        throw new Error(`Image with ID ${imageId} not found`);
+      }
+      
       // First update the area's imageIds in the local state
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
+          const updatedImageIds = (area.imageIds || []).filter(id => id !== imageId);
+          console.log(`Updating area ${areaId} imageIds after removal:`, updatedImageIds);
           return {
             ...area,
-            imageIds: (area.imageIds || []).filter(id => id !== imageId)
+            imageIds: updatedImageIds
           };
         }
         return area;
@@ -178,11 +196,16 @@ export function usePropertyAreas(
       if (formData.id && imageToRemove) {
         // Try to remove from property_images table
         // Note: We don't remove from storage to avoid breaking other references
-        await supabase
+        const { error } = await supabase
           .from('property_images')
           .delete()
           .eq('id', imageId)
           .eq('property_id', formData.id);
+          
+        if (error) {
+          console.error('Error removing image from database:', error);
+          throw error;
+        }
       }
       
       toast({
@@ -204,22 +227,26 @@ export function usePropertyAreas(
   const handleAreaImagesSelect = (areaId: string, imageIds: string[]) => {
     console.log(`Selecting images for area ${areaId}, imageIds:`, imageIds);
     
+    const updatedAreas = formData.areas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          imageIds: imageIds,
+        };
+      }
+      return area;
+    });
+    
     setFormData({
       ...formData,
-      areas: formData.areas.map(area => {
-        if (area.id === areaId) {
-          return {
-            ...area,
-            imageIds: imageIds,
-          };
-        }
-        return area;
-      }),
+      areas: updatedAreas,
     });
+    
+    const areaTitle = formData.areas.find(a => a.id === areaId)?.title || 'area';
     
     toast({
       title: "Success",
-      description: `Updated images for "${formData.areas.find(a => a.id === areaId)?.title || 'area'}"`,
+      description: `Updated images for "${areaTitle}"`,
     });
   };
 
