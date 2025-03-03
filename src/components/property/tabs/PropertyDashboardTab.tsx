@@ -45,8 +45,8 @@ interface PropertyDashboardTabProps {
   updatedAt?: string;
   onSave: () => void;
   onDelete: () => void;
-  onGeneratePDF: () => void;
-  onWebView: () => void;
+  onGeneratePDF: (e: React.MouseEvent) => void;
+  onWebView: (e: React.MouseEvent) => void;
   onSaveAgent: (agentId: string) => void;
   onSaveObjectId: (objectId: string) => void;
   onSaveTemplate: (templateId: string) => void;
@@ -172,15 +172,18 @@ export function PropertyDashboardTab({
     }
   };
 
-  const handleSaveAgent = () => {
+  const handleSaveAgent = (e: React.MouseEvent) => {
+    e.preventDefault();
     onSaveAgent(currentAgentId);
   };
 
-  const handleSaveObjectId = () => {
+  const handleSaveObjectId = (e: React.MouseEvent) => {
+    e.preventDefault();
     onSaveObjectId(currentObjectId);
   };
   
-  const handleSaveTemplate = () => {
+  const handleSaveTemplate = (e: React.MouseEvent) => {
+    e.preventDefault();
     onSaveTemplate(currentTemplateId);
   };
 

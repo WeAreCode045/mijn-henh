@@ -9,7 +9,12 @@ export function usePropertyActions(propertyId: string) {
   const navigate = useNavigate();
   const [showWebView, setShowWebView] = useState(false);
 
-  const handleGeneratePDF = useCallback(async (property?: PropertyData, settings?: AgencySettings) => {
+  const handleGeneratePDF = useCallback(async (e?: React.MouseEvent, property?: PropertyData, settings?: AgencySettings) => {
+    // Prevent default form submission if event is provided
+    if (e) {
+      e.preventDefault();
+    }
+
     if (property && settings) {
       await generatePropertyPDF(property, settings);
     } else {
@@ -17,7 +22,12 @@ export function usePropertyActions(propertyId: string) {
     }
   }, [propertyId]);
 
-  const handleWebView = useCallback(() => {
+  const handleWebView = useCallback((e?: React.MouseEvent) => {
+    // Prevent default form submission if event is provided
+    if (e) {
+      e.preventDefault();
+    }
+    
     // For direct webview navigation using the real property ID
     navigate(`/property/${propertyId}/webview`);
   }, [propertyId, navigate]);

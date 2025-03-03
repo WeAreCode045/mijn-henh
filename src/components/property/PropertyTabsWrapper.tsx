@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
@@ -44,7 +43,7 @@ export function PropertyTabsWrapper({
   const { handleSubmit } = usePropertyFormSubmit();
   
   // Use property actions
-  const { handleGeneratePDF } = usePropertyActions(property.id);
+  const { handleGeneratePDF, handleWebView } = usePropertyActions(property.id);
   
   // Handle property content
   const {
@@ -93,7 +92,8 @@ export function PropertyTabsWrapper({
   const { currentStep, handleStepClick, handleNext, handlePrevious } = useFormSteps(formState, handleAutosave, 5);
 
   // Web view functions
-  const handleWebView = () => {
+  const handleOpenWebView = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     setWebViewOpen(true);
   };
 
@@ -152,7 +152,7 @@ export function PropertyTabsWrapper({
             handleSaveAgent={handleSaveAgent}
             handleSaveTemplate={handleSaveTemplate}
             handleGeneratePDF={handleGeneratePDF}
-            handleWebView={handleWebView}
+            handleWebView={handleOpenWebView}
             onFieldChange={handleFieldChange}
             onAddFeature={addFeature}
             onRemoveFeature={removeFeature}
