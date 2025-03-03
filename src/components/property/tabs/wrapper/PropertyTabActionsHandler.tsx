@@ -1,5 +1,4 @@
 
-import { PropertyData } from "@/types/property";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { useState } from "react";
 

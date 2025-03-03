@@ -31,7 +31,7 @@ export function PropertyTabsWrapper({
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
-        {({ webViewOpen, handleGeneratePDF, handleOpenWebView }) => (
+        {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
           <PropertyFormManager property={property}>
             {({ 
               formState, 
