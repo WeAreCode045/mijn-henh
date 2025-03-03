@@ -1,6 +1,6 @@
 
 import { ID, Query } from 'appwrite';
-import { appwriteDatabases, DATABASE_ID, COLLECTIONS } from '@/integrations/appwrite/client';
+import { appwriteDatabases, DATABASE_ID, COLLECTIONS, appwriteStorage, BUCKETS } from '@/integrations/appwrite/client';
 
 // Helper function to fetch a single document
 export async function getDocument(collection: string, documentId: string) {

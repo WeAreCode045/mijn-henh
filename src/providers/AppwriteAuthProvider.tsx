@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { appwriteAccount } from "@/integrations/appwrite/client";
+import { appwriteAccount, appwriteClient, appwriteDatabases, DATABASE_ID, COLLECTIONS } from "@/integrations/appwrite/client";
 import { Models } from "appwrite";
 
 interface AppwriteAuthContextType {

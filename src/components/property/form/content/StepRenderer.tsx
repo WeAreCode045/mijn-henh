@@ -80,7 +80,9 @@ export function StepRenderer({
     );
   }
 
+  // When passing props to StepComponent, make sure to include the 'step' property
   return <StepComponent {...getStepProps(step, {
+    step,  // Add the step property here
     formData,
     onFieldChange,
     onAddFeature,
