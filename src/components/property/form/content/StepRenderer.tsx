@@ -108,21 +108,22 @@ export function StepRenderer({
     onRemoveTechnicalItem,
     onUpdateTechnicalItem,
     isUploading,
-    step // Add the missing step property here
+    step // Add step property for completeness
   })} />;
 }
 
 // Helper function to get the appropriate props for the current step
 function getStepProps(step: number, allProps: StepRendererProps): any {
-  // Ensure formData exists in all cases
+  // Ensure formData exists in all cases and has proper defaults
   const safeFormData = {
     ...allProps.formData,
-    features: allProps.formData.features || [],
-    images: allProps.formData.images || [],
-    floorplans: allProps.formData.floorplans || [],
-    areas: allProps.formData.areas || [],
-    technicalItems: allProps.formData.technicalItems || [],
-    nearby_places: allProps.formData.nearby_places || []
+    features: allProps.formData?.features || [],
+    images: allProps.formData?.images || [],
+    floorplans: allProps.formData?.floorplans || [],
+    areas: allProps.formData?.areas || [],
+    technicalItems: allProps.formData?.technicalItems || [],
+    nearby_places: allProps.formData?.nearby_places || [],
+    location_description: allProps.formData?.location_description || ''
   };
 
   // Common props that all steps might need
@@ -136,6 +137,7 @@ function getStepProps(step: number, allProps: StepRendererProps): any {
   switch (step) {
     case 3: // TechnicalDataStep
       return {
+        formData: safeFormData, // Pass the entire formData to ensure all needed fields are available
         floorplans: safeFormData.floorplans,
         technicalItems: safeFormData.technicalItems,
         images: safeFormData.images,
@@ -145,10 +147,12 @@ function getStepProps(step: number, allProps: StepRendererProps): any {
         onAddTechnicalItem: allProps.onAddTechnicalItem,
         onRemoveTechnicalItem: allProps.onRemoveTechnicalItem,
         onUpdateTechnicalItem: allProps.onUpdateTechnicalItem,
+        onFieldChange: allProps.onFieldChange,
         isUploading: allProps.isUploading
       };
     case 4: // AreasStep
       return {
+        formData: safeFormData, // Pass complete formData
         areas: safeFormData.areas,
         images: safeFormData.images,
         onAddArea: allProps.onAddArea,
@@ -157,17 +161,21 @@ function getStepProps(step: number, allProps: StepRendererProps): any {
         onAreaImageUpload: allProps.onAreaImageUpload,
         onAreaImageRemove: allProps.onAreaImageRemove,
         onAreaImagesSelect: allProps.onAreaImagesSelect,
+        onFieldChange: allProps.onFieldChange,
         isUploading: allProps.isUploading
       };
     case 2: // FeaturesStep
       return {
+        formData: safeFormData, // Pass complete formData
         features: safeFormData.features,
         onAddFeature: allProps.onAddFeature,
         onRemoveFeature: allProps.onRemoveFeature,
-        onUpdateFeature: allProps.onUpdateFeature
+        onUpdateFeature: allProps.onUpdateFeature,
+        onFieldChange: allProps.onFieldChange
       };
     case 5: // LocationStep
       return {
+        formData: safeFormData, // Pass complete formData
         address: safeFormData.address || "",
         latitude: safeFormData.latitude,
         longitude: safeFormData.longitude,
@@ -199,6 +207,9 @@ function getStepProps(step: number, allProps: StepRendererProps): any {
       };
     default:
       // For any other steps, return all props
-      return allProps;
+      return {
+        ...allProps,
+        formData: safeFormData
+      };
   }
 }

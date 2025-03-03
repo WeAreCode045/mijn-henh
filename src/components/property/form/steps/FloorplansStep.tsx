@@ -30,18 +30,26 @@ export function FloorplansStep({
   const [floorplansKey, setFloorplansKey] = useState(Date.now());
   const [isProcessing, setIsProcessing] = useState(true);
 
-  // Update parsed floorplans when formData.floorplans changes
+  // Log the formData received
   useEffect(() => {
+    console.log("FloorplansStep: formData received", formData);
+    console.log("FloorplansStep: floorplans data", formData?.floorplans || []);
+    
     if (formData) {
-      console.log("FloorplansStep: formData.floorplans updated", formData.floorplans || []);
-      setParsedFloorplans(formData.floorplans || []);
+      // Ensure floorplans exist and are properly formatted
+      const safeFloorplans = Array.isArray(formData.floorplans) ? formData.floorplans : [];
+      console.log("FloorplansStep: safe floorplans", safeFloorplans);
+      
+      // Set the parsed floorplans
+      setParsedFloorplans(safeFloorplans);
       setFloorplansKey(Date.now());
       setIsProcessing(false);
     } else {
       console.log("FloorplansStep: formData is null or undefined");
+      setParsedFloorplans([]);
       setIsProcessing(false);
     }
-  }, [formData?.floorplans, formData]);
+  }, [formData]);
 
   const handleFloorplansProcessed = (processed: any[]) => {
     console.log("FloorplansStep: floorplans processed", processed);
@@ -65,6 +73,9 @@ export function FloorplansStep({
     );
   }
 
+  // Ensure floorplanEmbedScript has a default value
+  const embedScript = formData.floorplanEmbedScript || '';
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Property Floorplans</h3>
@@ -77,9 +88,17 @@ export function FloorplansStep({
           <CardTitle className="text-md">Upload Floorplans</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Debug info */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="p-2 text-xs bg-gray-100 rounded mb-2">
+              <p>Property ID: {formData.id || 'new'}</p>
+              <p>Floorplans count: {Array.isArray(formData.floorplans) ? formData.floorplans.length : 0}</p>
+            </div>
+          )}
+          
           {/* Process the floorplans data for display */}
           <FloorplanProcessor 
-            floorplans={formData.floorplans || []} 
+            floorplans={Array.isArray(formData.floorplans) ? formData.floorplans : []} 
             propertyId={formData.id || 'new'}
             onProcessed={handleFloorplansProcessed} 
           />
@@ -89,7 +108,7 @@ export function FloorplansStep({
           
           {/* Embed script component - make sure it gets the current script value */}
           <FloorplanEmbed 
-            embedScript={formData.floorplanEmbedScript || ''} 
+            embedScript={embedScript} 
             onChange={handleEmbedScriptChange} 
           />
 
