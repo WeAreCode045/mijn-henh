@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PropertyFormData, PropertyImage } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ImageGrid } from "@/components/property/image-select/ImageGrid";
@@ -95,7 +95,7 @@ export function ImageSelections({ formData, onFieldChange }: ImageSelectionsProp
         ) : (
           <DialogTriggerButton 
             onClick={() => setOpenFeaturedDialog(true)}
-            label="Select Featured Image"
+            buttonText="Select Featured Image"
           />
         )}
         
@@ -143,7 +143,7 @@ export function ImageSelections({ formData, onFieldChange }: ImageSelectionsProp
             {formData.gridImages.length < 4 && (
               <DialogTriggerButton 
                 onClick={() => setOpenGridDialog(true)}
-                label="Add Grid Image"
+                buttonText="Add Grid Image"
                 className="h-32"
               />
             )}
@@ -151,7 +151,7 @@ export function ImageSelections({ formData, onFieldChange }: ImageSelectionsProp
         ) : (
           <DialogTriggerButton 
             onClick={() => setOpenGridDialog(true)}
-            label="Select Grid Images"
+            buttonText="Select Grid Images"
           />
         )}
         

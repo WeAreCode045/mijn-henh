@@ -24,14 +24,14 @@ export function usePropertyImages(
   const { 
     handleAreaPhotosUpload, 
     handleRemoveAreaPhoto
-  } = usePropertyAreaPhotos(formData, setFormData, setIsUploading);
+  } = usePropertyAreaPhotos(formData, setFormData);
   
   // Handlers for floorplans
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
     handleUpdateFloorplan
-  } = usePropertyFloorplans(formData, setFormData, setIsUploading);
+  } = usePropertyFloorplans(formData, setFormData);
   
   // Handlers for featured and grid images
   const {

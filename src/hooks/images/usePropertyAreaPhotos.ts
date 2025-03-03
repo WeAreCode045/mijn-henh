@@ -1,15 +1,20 @@
+
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from "@/types/property";
+import { useState } from "react";
 
 export function usePropertyAreaPhotos(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleAreaPhotosUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
+    
+    setIsUploading(true);
 
     try {
       const files = Array.from(e.target.files);
@@ -66,6 +71,8 @@ export function usePropertyAreaPhotos(
         description: "Failed to upload area photos",
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -79,5 +86,6 @@ export function usePropertyAreaPhotos(
   return {
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto,
+    isUploading
   };
 }

@@ -4,11 +4,14 @@ import { useFloorplanUploadHandler } from "./floorplans/useFloorplanUploadHandle
 import { useFloorplanRemoveHandler } from "./floorplans/useFloorplanRemoveHandler";
 import { useFloorplanUpdateHandler } from "./floorplans/useFloorplanUpdateHandler";
 import { useFloorplanEmbed } from "./floorplans/useFloorplanEmbed";
+import { useState } from "react";
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
+  const [isUploading, setIsUploading] = useState(false);
+  
   // Use the separate hooks for each functionality
   const { handleFloorplanUpload } = useFloorplanUploadHandler(formData, setFormData);
   const { handleRemoveFloorplan } = useFloorplanRemoveHandler(formData, setFormData);
@@ -19,6 +22,7 @@ export function usePropertyFloorplans(
     handleFloorplanUpload,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    handleUpdateFloorplanEmbedScript
+    handleUpdateFloorplanEmbedScript,
+    isUploading
   };
 }
