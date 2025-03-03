@@ -56,7 +56,16 @@ export const useAgencySubmit = ({ settings, setSettings, logoPreview }: UseAgenc
           xml_import_url: settings.xmlImportUrl,
           instagram_url: settings.instagramUrl,
           youtube_url: settings.youtubeUrl,
-          facebook_url: settings.facebookUrl
+          facebook_url: settings.facebookUrl,
+          
+          // Add Appwrite settings
+          appwrite_endpoint: settings.appwrite_endpoint,
+          appwrite_project_id: settings.appwrite_project_id,
+          appwrite_database_id: settings.appwrite_database_id,
+          appwrite_collection_properties_id: settings.appwrite_collection_properties_id,
+          appwrite_collection_agents_id: settings.appwrite_collection_agents_id,
+          appwrite_collection_templates_id: settings.appwrite_collection_templates_id,
+          appwrite_storage_bucket_id: settings.appwrite_storage_bucket_id
         };
         await agencySettingsService.createSettings(createData);
       }

@@ -1,5 +1,5 @@
 
-export type SettingsTab = "agency" | "design" | "advanced";
+export type SettingsTab = "agency" | "design" | "advanced" | "appwrite";
 
 export interface Settings {
   name: string;
@@ -31,6 +31,15 @@ export interface Settings {
   smtp_from_email?: string | null;
   smtp_from_name?: string | null;
   smtp_secure?: boolean | null;
+  
+  // Appwrite settings
+  appwrite_endpoint?: string | null;
+  appwrite_project_id?: string | null;
+  appwrite_database_id?: string | null;
+  appwrite_collection_properties_id?: string | null;
+  appwrite_collection_agents_id?: string | null;
+  appwrite_collection_templates_id?: string | null;
+  appwrite_storage_bucket_id?: string | null;
   
   // Add property aliases to match AgencySettings expected properties
   primaryColor?: string;

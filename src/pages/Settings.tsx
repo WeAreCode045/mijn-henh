@@ -6,6 +6,7 @@ import { SettingsTab } from "@/types/settings";
 import { AgencyTab } from "@/components/settings/AgencyTab";
 import { DesignTab } from "@/components/settings/DesignTab";
 import { AdvancedTab } from "@/components/settings/AdvancedTab";
+import { AppwriteSettings } from "@/components/settings/AppwriteSettings";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>("agency");
@@ -25,7 +26,7 @@ const Settings = () => {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         <Button 
           onClick={() => setActiveTab("agency")} 
           variant={activeTab === "agency" ? "default" : "outline"}
@@ -43,6 +44,12 @@ const Settings = () => {
           variant={activeTab === "advanced" ? "default" : "outline"}
         >
           Advanced
+        </Button>
+        <Button 
+          onClick={() => setActiveTab("appwrite")} 
+          variant={activeTab === "appwrite" ? "default" : "outline"}
+        >
+          Appwrite
         </Button>
       </div>
 
@@ -71,6 +78,13 @@ const Settings = () => {
             settings={settings}
             onChange={handleChange}
             onSwitchChange={handleSwitchChange}
+          />
+        )}
+        
+        {activeTab === "appwrite" && (
+          <AppwriteSettings
+            settings={settings}
+            onChange={handleChange}
           />
         )}
 
