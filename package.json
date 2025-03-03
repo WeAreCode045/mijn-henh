@@ -53,6 +53,7 @@
     "@types/blob-stream": "^0.1.33",
     "@types/jspdf": "^2.0.0",
     "@types/uuid": "^10.0.0",
+    "appwrite": "^17.0.0",
     "blob-stream": "^0.1.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
