@@ -8,18 +8,9 @@ export interface UseAgencyFormHandlersProps {
 export const useAgencyFormHandlers = ({ setSettings }: UseAgencyFormHandlersProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-    
-    // Map field names to settings properties if needed
-    let settingsField = name;
-    
-    if (name.startsWith('appwrite_')) {
-      // Handle Appwrite fields
-      settingsField = name;
-    }
-    
     setSettings((prev) => ({
       ...prev,
-      [settingsField]: type === 'number' ? parseInt(value) : value,
+      [name]: type === 'number' ? parseInt(value) : value,
     }));
   };
 
