@@ -66,10 +66,8 @@ export function AreaCard({
     }
   };
 
-  const handleUploadClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  // Modified to have a wrapper function that doesn't require an event parameter
+  const handleUploadClick = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.multiple = true;
