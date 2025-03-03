@@ -135,6 +135,9 @@ export function ImageSelectDialog({
     </DialogTrigger>
   ) : null;
 
+  // Fix: Extract image URLs for the ImageGrid component
+  const imageUrls = images.map(img => img.url);
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger}
@@ -150,10 +153,10 @@ export function ImageSelectDialog({
         </DialogHeader>
         
         <ImageGrid 
-          images={images} 
+          images={imageUrls} 
           selected={selected} 
-          onToggleSelect={handleToggleSelect} 
-          singleSelect={singleSelect}
+          onSelect={handleToggleSelect} 
+          selectionMode={singleSelect ? "single" : "multiple"}
         />
         
         <DialogActions 
