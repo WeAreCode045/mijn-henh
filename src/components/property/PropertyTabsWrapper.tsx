@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
@@ -11,7 +12,6 @@ import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { usePropertyTabs } from "@/hooks/usePropertyTabs";
 import { useFormSteps } from "@/hooks/useFormSteps";
 import { PropertyWebView } from "./PropertyWebView";
-import { usePropertyWebView } from "./webview/usePropertyWebView";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs } from "@/components/ui/tabs";
 
