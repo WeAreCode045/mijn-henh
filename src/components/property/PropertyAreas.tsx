@@ -15,6 +15,7 @@ interface PropertyAreasProps {
   onImageUpload: (id: string, files: FileList) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  isUploading?: boolean;
 }
 
 export function PropertyAreas({
@@ -26,6 +27,7 @@ export function PropertyAreas({
   onImageUpload,
   onImageRemove,
   onImagesSelect,
+  isUploading,
 }: PropertyAreasProps) {
   useEffect(() => {
     console.log("PropertyAreas - Current areas with columns:", areas);
@@ -42,7 +44,13 @@ export function PropertyAreas({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-estate-800">Property Areas</h2>
-        <Button onClick={handleAddArea} size="sm" className="flex items-center" type="button">
+        <Button 
+          onClick={handleAddArea} 
+          size="sm" 
+          className="flex items-center" 
+          type="button"
+          disabled={isUploading}
+        >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Area
         </Button>

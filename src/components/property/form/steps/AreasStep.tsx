@@ -11,6 +11,7 @@ interface AreasStepProps {
   onAreaImageUpload: (id: string, files: FileList) => void;
   onAreaImageRemove: (id: string, imageId: string) => void;
   onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
+  isUploading?: boolean;
 }
 
 export function AreasStep({
@@ -22,6 +23,7 @@ export function AreasStep({
   onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
+  isUploading
 }: AreasStepProps) {
   console.log("AreasStep rendering with areas:", areas);
   console.log("AreasStep images:", images);
@@ -44,6 +46,7 @@ export function AreasStep({
       onImageUpload={onAreaImageUpload}
       onImageRemove={onAreaImageRemove}
       onImagesSelect={onAreaImagesSelect}
+      isUploading={isUploading}
     />
   );
 }

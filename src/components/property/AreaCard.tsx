@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
 import { AreaImageGrid } from "./AreaImageGrid";
@@ -29,14 +29,23 @@ export function AreaCard({
   onImagesSelect,
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
   
-  // Get area images based on imageIds
-  const areaImages = (area.imageIds || [])
-    .map(id => images.find(img => img.id === id))
-    .filter(Boolean) as PropertyImage[];
-  
-  console.log(`AreaCard ${area.id} - imageIds:`, area.imageIds);
-  console.log(`AreaCard ${area.id} - found images:`, areaImages);
+  // Get area images based on imageIds whenever area or images change
+  useEffect(() => {
+    if (area && area.imageIds && images && images.length > 0) {
+      const foundImages = (area.imageIds || [])
+        .map(id => images.find(img => img.id === id))
+        .filter(Boolean) as PropertyImage[];
+      
+      console.log(`AreaCard ${area.id} - imageIds:`, area.imageIds);
+      console.log(`AreaCard ${area.id} - found images:`, foundImages);
+      
+      setAreaImages(foundImages);
+    } else {
+      setAreaImages([]);
+    }
+  }, [area, area.imageIds, images]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -66,7 +75,7 @@ export function AreaCard({
     }
   };
 
-  // Modified to have a wrapper function that doesn't require an event parameter
+  // Function for upload button click that doesn't require an event parameter
   const handleUploadClick = () => {
     const input = document.createElement("input");
     input.type = "file";

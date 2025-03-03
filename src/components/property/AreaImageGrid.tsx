@@ -2,6 +2,7 @@
 import { PropertyImage } from "@/types/property";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface AreaImageGridProps {
   areaImages: PropertyImage[];
@@ -11,9 +12,22 @@ interface AreaImageGridProps {
 }
 
 export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemove }: AreaImageGridProps) {
+  const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
+  
   console.log(`AreaImageGrid for ${areaId} (${areaTitle}) - images:`, areaImages);
   
-  if (!areaImages || areaImages.length === 0) {
+  // Filter out images with load errors
+  const validAreaImages = areaImages.filter(image => !imageLoadErrors[image.id]);
+  
+  const handleImageError = (imageId: string) => {
+    console.log(`Image loading error for ${imageId} in area ${areaId}`);
+    setImageLoadErrors(prev => ({
+      ...prev,
+      [imageId]: true
+    }));
+  };
+
+  if (!validAreaImages || validAreaImages.length === 0) {
     return (
       <div className="text-center py-6 bg-gray-50 rounded-md text-gray-500 text-sm">
         No images added to this area yet
@@ -23,12 +37,13 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-      {areaImages.map((image) => (
+      {validAreaImages.map((image) => (
         <div key={image.id} className="relative group">
           <img
             src={image.url}
             alt={areaTitle}
             className="w-full h-24 object-cover rounded-md"
+            onError={() => handleImageError(image.id)}
           />
           <Button
             type="button"
