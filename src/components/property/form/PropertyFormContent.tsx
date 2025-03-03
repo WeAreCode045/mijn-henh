@@ -29,6 +29,7 @@ interface PropertyFormContentProps {
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
+  onTechnicalItemFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>, technicalItemId: string) => void;
   isUploading?: boolean;
 }
 
@@ -60,6 +61,7 @@ export function PropertyFormContent({
   onAddTechnicalItem,
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
+  onTechnicalItemFloorplanUpload,
   isUploading,
 }: PropertyFormContentProps) {
   
@@ -100,6 +102,7 @@ export function PropertyFormContent({
           onAddTechnicalItem={onAddTechnicalItem}
           onRemoveTechnicalItem={onRemoveTechnicalItem}
           onUpdateTechnicalItem={onUpdateTechnicalItem}
+          onTechnicalItemFloorplanUpload={onTechnicalItemFloorplanUpload}
           isUploading={isUploading}
         />
       ) : step === 4 ? (
@@ -146,12 +149,6 @@ export function PropertyFormContent({
           handleSetFeaturedImage={handleSetFeaturedImage}
           onSetFeaturedImage={handleSetFeaturedImage} // Add alternative prop name
           isUploading={isUploading}
-        />
-      ) : step === 6 ? (
-        // FloorplansStep - specific handling for FloorplansStep
-        <StepComponent
-          formData={formData}
-          onFieldChange={onFieldChange}
         />
       ) : (
         // Other steps

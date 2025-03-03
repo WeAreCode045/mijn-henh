@@ -5,7 +5,7 @@ import type { PropertyFormData } from "@/types/property";
 export function useFormSteps(
   formData: PropertyFormData, 
   onAutosave: () => void,
-  maxSteps: number = 6  // Updated to 6 to include FloorplansStep
+  maxSteps: number = 5  // Updated to 5 after removing FloorplansStep
 ) {
   const [currentStep, setCurrentStep] = useState(1);
 

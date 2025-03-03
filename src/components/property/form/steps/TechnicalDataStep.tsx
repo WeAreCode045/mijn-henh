@@ -15,6 +15,8 @@ interface TechnicalDataStepProps {
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
   onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  onTechnicalItemFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>, technicalItemId: string) => void;
+  isUploading?: boolean;
 }
 
 export function TechnicalDataStep(props: TechnicalDataStepProps) {

@@ -11,6 +11,7 @@ interface TechnicalItemsListProps {
   onAdd: (e: React.MouseEvent) => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>, technicalItemId: string) => void;
 }
 
 export function TechnicalItemsList({ 
@@ -18,7 +19,8 @@ export function TechnicalItemsList({
   floorplans = [],
   onAdd, 
   onRemove, 
-  onUpdate 
+  onUpdate,
+  onFloorplanUpload
 }: TechnicalItemsListProps) {
   // Helper to prevent default form submission behavior
   const handleRemoveItem = (e: React.MouseEvent, id: string) => {
@@ -57,6 +59,7 @@ export function TechnicalItemsList({
                 floorplans={floorplans}
                 onUpdate={onUpdate}
                 onRemove={(e) => handleRemoveItem(e, item.id)}
+                onFloorplanUpload={onFloorplanUpload}
               />
             ))}
           </div>

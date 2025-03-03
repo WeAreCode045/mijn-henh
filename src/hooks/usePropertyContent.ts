@@ -7,7 +7,8 @@ import { useToast } from '@/components/ui/use-toast';
 
 export function usePropertyContent(
   formData: PropertyFormData,
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void,
+  handleFloorplanUpload?: (file: File) => Promise<{id: string, url: string, filePath?: string}>
 ) {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
@@ -110,6 +111,43 @@ export function usePropertyContent(
     onFieldChange('technicalItems', updatedItems);
   }, [formData, onFieldChange]);
 
+  // Handle floorplan upload for technical items
+  const handleTechnicalItemFloorplanUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>, technicalItemId: string) => {
+    if (!handleFloorplanUpload || !e.target.files || e.target.files.length === 0) return;
+    
+    try {
+      const file = e.target.files[0];
+      const result = await handleFloorplanUpload(file);
+      
+      // If we have a result with ID and URL
+      if (result?.id && result?.url) {
+        // Add the floorplan to the floorplans array if it doesn't exist yet
+        const existingFloorplans = [...(formData.floorplans || [])];
+        const floorplanExists = existingFloorplans.some(f => f.id === result.id);
+        
+        if (!floorplanExists) {
+          // Add the new floorplan
+          onFieldChange('floorplans', [...existingFloorplans, result]);
+        }
+        
+        // Update the technical item to reference this floorplan
+        updateTechnicalItem(technicalItemId, 'floorplanId', result.id);
+        
+        toast({
+          title: "Success",
+          description: "Floorplan image uploaded successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading floorplan for technical item:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload floorplan image.",
+        variant: "destructive",
+      });
+    }
+  }, [formData, onFieldChange, updateTechnicalItem, handleFloorplanUpload, toast]);
+
   return {
     currentStep,
     handleStepClick,
@@ -124,6 +162,7 @@ export function usePropertyContent(
     // Technical item management
     addTechnicalItem,
     removeTechnicalItem,
-    updateTechnicalItem
+    updateTechnicalItem,
+    handleTechnicalItemFloorplanUpload
   };
 }

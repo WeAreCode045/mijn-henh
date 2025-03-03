@@ -22,7 +22,7 @@ export function usePropertyImages(
   const { 
     handleFloorplanUpload, 
     handleRemoveFloorplan, 
-    handleUpdateFloorplanEmbedScript, 
+    handleTechnicalItemFloorplanUpload, 
     fetchFloorplans
   } = useFloorplanUpload(formData, setFormData);
   
@@ -69,7 +69,7 @@ export function usePropertyImages(
     handleFloorplanUpload,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    handleUpdateFloorplanEmbedScript,
+    handleTechnicalItemFloorplanUpload,
     fetchFloorplans,
     floorplans: formData?.floorplans || [],
     
