@@ -1,5 +1,5 @@
 
-import { PropertyDashboardTab } from "../PropertyDashboardTab";
+import { PropertyDashboardTab } from "../dashboard";
 
 interface DashboardTabContentProps {
   id: string;
