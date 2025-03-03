@@ -58,7 +58,8 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
           }
           // Already an object
           return floorplan;
-        });
+        }).filter(floorplan => floorplan && floorplan.url); // Filter out empty or invalid floorplans
+        
         console.log("FloorplansSection - Parsed floorplans:", parsed);
         setParsedFloorplans(parsed);
       } catch (error) {
@@ -88,7 +89,11 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     }
     
     // Filter out floorplans with load errors
-    const validFloorplans = parsedFloorplans.filter(plan => !loadErrors[plan.url]);
+    const validFloorplans = parsedFloorplans.filter(plan => 
+      plan && 
+      plan.url && 
+      !loadErrors[plan.url]
+    );
     
     if (!validFloorplans.length) {
       return [];
@@ -141,8 +146,9 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
   };
 
   const floorplanGroups = getFloorplansByColumns();
-
-  if ((!parsedFloorplans.length || parsedFloorplans.every(plan => loadErrors[plan.url])) && !property.floorplanEmbedScript) {
+  
+  // Don't render anything if there are no valid floorplans and no embed script
+  if ((!parsedFloorplans.length || parsedFloorplans.every(plan => !plan.url || loadErrors[plan.url])) && !property.floorplanEmbedScript) {
     return null;
   }
 
@@ -160,26 +166,34 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
           </div>
         )}
         
-        {floorplanGroups.map((group, groupIndex) => (
-          <div key={groupIndex} className="mb-6">
-            <div className={`grid grid-cols-${group.columns} gap-4`}>
-              {group.plans.map((plan, index) => (
-                <div 
-                  key={plan.id || `floorplan-${groupIndex}-${index}`} 
-                  className="w-full cursor-pointer shadow-md rounded-lg overflow-hidden" 
-                  onClick={() => handleImageClick(plan.url)}
-                >
-                  <img
-                    src={plan.url}
-                    alt={`Floorplan ${groupIndex + 1}-${index + 1}`}
-                    className="w-full h-auto object-contain max-h-[400px]"
-                    onError={() => handleImageError(plan.url)}
-                  />
-                </div>
-              ))}
+        {floorplanGroups.length > 0 ? (
+          floorplanGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="mb-6">
+              <div className={`grid grid-cols-${group.columns} gap-4`}>
+                {group.plans.map((plan, index) => (
+                  <div 
+                    key={plan.id || `floorplan-${groupIndex}-${index}`} 
+                    className="w-full cursor-pointer shadow-md rounded-lg overflow-hidden" 
+                    onClick={() => handleImageClick(plan.url)}
+                  >
+                    <img
+                      src={plan.url}
+                      alt={`Floorplan ${groupIndex + 1}-${index + 1}`}
+                      className="w-full h-auto object-contain max-h-[400px]"
+                      onError={() => handleImageError(plan.url)}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          !property.floorplanEmbedScript && (
+            <div className="text-center py-6 bg-gray-50 rounded-md text-gray-500">
+              No floorplans available
+            </div>
+          )
+        )}
       </div>
 
       {/* Image preview dialog */}

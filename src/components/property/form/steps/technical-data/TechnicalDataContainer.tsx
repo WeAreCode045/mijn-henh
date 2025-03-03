@@ -42,6 +42,7 @@ export function TechnicalDataContainer({
   isUploading
 }: TechnicalDataContainerProps) {
   const [uploading, setUploading] = useState(false);
+  const [invalidImageUrls, setInvalidImageUrls] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   
   // Handle standalone floorplan upload - not tied to a technical item
@@ -56,6 +57,15 @@ export function TechnicalDataContainer({
       // Reset the file input
       e.target.value = '';
     }
+  };
+
+  // Track invalid image URLs
+  const handleImageError = (url: string) => {
+    setInvalidImageUrls(prev => {
+      const updated = new Set(prev);
+      updated.add(url);
+      return updated;
+    });
   };
 
   // Enhanced floorplan removal function
@@ -108,6 +118,13 @@ export function TechnicalDataContainer({
       }
     }
   };
+
+  // Filter out invalid floorplans
+  const validFloorplans = floorplans.filter(floorplan => 
+    floorplan && 
+    floorplan.url && 
+    !invalidImageUrls.has(floorplan.url)
+  );
   
   return (
     <div className="space-y-6">
@@ -152,19 +169,15 @@ export function TechnicalDataContainer({
           </div>
           
           {/* Display uploaded floorplans */}
-          {floorplans && floorplans.length > 0 && (
+          {validFloorplans && validFloorplans.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              {floorplans.map((floorplan, index) => (
+              {validFloorplans.map((floorplan, index) => (
                 <div key={floorplan.id || `floorplan-${index}`} className="relative group">
                   <img 
                     src={floorplan.url} 
                     alt={`Floorplan ${index + 1}`} 
                     className="w-full h-auto aspect-square object-cover rounded-md border"
-                    onError={(e) => {
-                      // Handle broken images
-                      e.currentTarget.src = '/placeholder.svg';
-                      e.currentTarget.classList.add('border-red-500');
-                    }}
+                    onError={() => handleImageError(floorplan.url)}
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
                     <Button 
@@ -181,6 +194,10 @@ export function TechnicalDataContainer({
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="text-center py-6 bg-gray-50 rounded-md text-gray-500">
+              No floorplans uploaded yet
+            </div>
           )}
         </CardContent>
       </Card>
@@ -188,7 +205,7 @@ export function TechnicalDataContainer({
       {/* Technical items section */}
       <TechnicalItemsList 
         items={technicalItems} 
-        floorplans={floorplans}
+        floorplans={validFloorplans}
         onAdd={onAddTechnicalItem || (() => {})} 
         onRemove={onRemoveTechnicalItem || (() => {})} 
         onUpdate={onUpdateTechnicalItem || (() => {})}
