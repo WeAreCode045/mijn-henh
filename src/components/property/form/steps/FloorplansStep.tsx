@@ -14,12 +14,15 @@ export function FloorplansStep({
   formData,
   onFieldChange
 }: FloorplansStepProps) {
-  const [embedScript, setEmbedScript] = useState<string>(formData.floorplanEmbedScript || '');
+  // Default to empty string if formData or floorplanEmbedScript is undefined
+  const [embedScript, setEmbedScript] = useState<string>('');
 
   useEffect(() => {
-    // Update local state when formData changes externally
-    setEmbedScript(formData.floorplanEmbedScript || '');
-  }, [formData.floorplanEmbedScript]);
+    // Safely update local state when formData changes externally
+    if (formData && formData.floorplanEmbedScript !== undefined) {
+      setEmbedScript(formData.floorplanEmbedScript);
+    }
+  }, [formData]);
 
   const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;

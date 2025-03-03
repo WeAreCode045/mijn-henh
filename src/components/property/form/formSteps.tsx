@@ -41,14 +41,14 @@ export const steps: FormStep[] = [
   },
   {
     id: 5,
-    title: "Floorplans",
-    component: FloorplansStep,
-    icon: <FileImage className="h-4 w-4" />,
-  },
-  {
-    id: 6,
     title: "Location",
     component: LocationStep,
     icon: <MapPin className="h-4 w-4" />,
+  },
+  {
+    id: 6,
+    title: "Floorplans",
+    component: FloorplansStep,
+    icon: <FileImage className="h-4 w-4" />,
   },
 ];
