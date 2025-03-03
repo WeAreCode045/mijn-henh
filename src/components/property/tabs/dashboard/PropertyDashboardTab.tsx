@@ -4,6 +4,8 @@ import { TemplateCard } from "./cards/TemplateCard";
 import { AgentCard } from "./cards/AgentCard";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
+import { Button } from "@/components/ui/button";
+import { FileDown, Globe } from "lucide-react";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -18,7 +20,7 @@ interface PropertyDashboardTabProps {
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   onGeneratePDF?: () => void;
-  onWebView?: () => void;
+  onWebView?: (e?: React.MouseEvent) => void;
   onSaveAgent?: (agentId: string) => void;
   onSaveObjectId?: (objectId: string) => void;
   onSaveTemplate?: (templateId: string) => void;
@@ -49,6 +51,24 @@ export function PropertyDashboardTab({
   
   return (
     <div className="space-y-8">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">{title}</h2>
+        <div className="flex gap-2">
+          {onWebView && (
+            <Button variant="outline" size="sm" onClick={onWebView} title="Web View">
+              <Globe className="h-4 w-4 mr-2" />
+              Web View
+            </Button>
+          )}
+          {onGeneratePDF && (
+            <Button variant="outline" size="sm" onClick={onGeneratePDF} title="Generate PDF">
+              <FileDown className="h-4 w-4 mr-2" />
+              Generate PDF
+            </Button>
+          )}
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <PropertyDetailsCard
           id={id}

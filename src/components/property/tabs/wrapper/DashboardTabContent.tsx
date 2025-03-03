@@ -14,7 +14,7 @@ interface DashboardTabContentProps {
   onSave: () => void;
   onDelete: () => Promise<void>;
   onGeneratePDF: () => void;
-  onWebView: () => void;
+  onWebView: (e?: React.MouseEvent) => void;
   onSaveAgent: (agentId: string) => void;
   onSaveObjectId: (objectId: string) => void;
   onSaveTemplate: (templateId: string) => void;
