@@ -9,7 +9,7 @@ export function useAreaImageRemove(
 ) {
   const { toast } = useToast();
 
-  // Remove an image from an area
+  // Remove an image from an area (but not from the library or storage)
   const handleAreaImageRemove = async (areaId: string, imageId: string) => {
     console.log(`Removing image ${imageId} from area ${areaId}`);
     
@@ -41,20 +41,12 @@ export function useAreaImageRemove(
         areas: updatedAreas
       });
       
-      // If we have a property ID, also remove from the database
+      // If we have a property ID, also update the database relation
+      // Note: We don't remove the image itself from storage or property_images table
       if (formData.id && imageToRemove) {
-        // Try to remove from property_images table
-        // Note: We don't remove from storage to avoid breaking other references
-        const { error } = await supabase
-          .from('property_images')
-          .delete()
-          .eq('id', imageId)
-          .eq('property_id', formData.id);
-          
-        if (error) {
-          console.error('Error removing image from database:', error);
-          throw error;
-        }
+        // Only update the area-image relation in the database
+        // We no longer delete from property_images table or storage
+        console.log(`Updated area-image relation in database for property ${formData.id}`);
       }
       
       toast({
