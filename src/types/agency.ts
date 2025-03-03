@@ -32,13 +32,4 @@ export interface AgencySettings {
   smtp_from_email?: string | null;
   smtp_from_name?: string | null;
   smtp_secure?: boolean | null;
-
-  // Appwrite settings
-  appwrite_endpoint?: string | null;
-  appwrite_project_id?: string | null;
-  appwrite_database_id?: string | null;
-  appwrite_properties_collection_id?: string | null;
-  appwrite_agents_collection_id?: string | null;
-  appwrite_templates_collection_id?: string | null;
-  appwrite_storage_bucket_id?: string | null;
 }

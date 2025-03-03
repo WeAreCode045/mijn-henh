@@ -1,7 +1,6 @@
 
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import type { PropertyFeature } from "@/types/property";
-import { Spinner } from "@/components/ui/spinner";
 
 interface FeaturesStepProps {
   features: PropertyFeature[];
@@ -17,15 +16,6 @@ export function FeaturesStep({
   onUpdateFeature,
 }: FeaturesStepProps) {
   console.log("FeaturesStep rendering with features:", features);
-  
-  // If features is undefined, provide a loading state
-  if (features === undefined) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <Spinner className="h-8 w-8 border-4" />
-      </div>
-    );
-  }
   
   return (
     <div className="space-y-6">

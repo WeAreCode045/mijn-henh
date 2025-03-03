@@ -1,52 +1,40 @@
 
 import { AgencySettings } from "@/types/agency";
-import { SmtpSettings } from "./SmtpSettings";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { XmlImportSettings } from "./XmlImportSettings";
-import { AppwriteSettings } from "./AppwriteSettings";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SmtpSettings } from "./SmtpSettings";
 
 interface AdvancedTabProps {
   settings: AgencySettings;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSwitchChange: (name: string, checked: boolean) => void;
+  onSwitchChange?: (name: string, checked: boolean) => void;
 }
 
-export function AdvancedTab({ 
-  settings, 
-  onChange, 
-  onSwitchChange 
-}: AdvancedTabProps) {
+export function AdvancedTab({ settings, onChange, onSwitchChange }: AdvancedTabProps) {
   return (
-    <div className="space-y-8">
-      <Tabs defaultValue="smtp" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="smtp">Email Settings</TabsTrigger>
-          <TabsTrigger value="xml">XML Import</TabsTrigger>
-          <TabsTrigger value="appwrite">Appwrite</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="smtp" className="space-y-6 pt-4">
-          <SmtpSettings 
-            settings={settings} 
-            onChange={onChange} 
-            onSwitchChange={onSwitchChange} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="xml" className="space-y-6 pt-4">
-          <XmlImportSettings 
-            settings={settings} 
-            onChange={onChange} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="appwrite" className="space-y-6 pt-4">
-          <AppwriteSettings 
-            settings={settings} 
-            onChange={onChange} 
-          />
-        </TabsContent>
-      </Tabs>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="google_maps_api_key">Google Maps API Key</Label>
+        <Input
+          id="google_maps_api_key"
+          name="googleMapsApiKey"
+          value={settings.googleMapsApiKey || ''}
+          onChange={onChange}
+          type="password"
+        />
+      </div>
+      
+      <SmtpSettings
+        settings={settings}
+        onChange={onChange}
+        onSwitchChange={onSwitchChange || ((name, checked) => {})}
+      />
+      
+      <XmlImportSettings
+        settings={settings}
+        onChange={onChange}
+      />
     </div>
   );
 }

@@ -20,14 +20,5 @@ export const defaultAgencySettings: AgencySettings = {
   xmlImportUrl: "",
   instagramUrl: "",
   youtubeUrl: "",
-  facebookUrl: "",
-  
-  // Appwrite default settings
-  appwrite_endpoint: "https://cloud.appwrite.io/v1",
-  appwrite_project_id: "",
-  appwrite_database_id: "",
-  appwrite_properties_collection_id: "",
-  appwrite_agents_collection_id: "",
-  appwrite_templates_collection_id: "",
-  appwrite_storage_bucket_id: ""
+  facebookUrl: ""
 };

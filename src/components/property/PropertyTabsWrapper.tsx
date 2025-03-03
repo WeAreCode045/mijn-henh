@@ -1,7 +1,8 @@
 
+import { useState } from "react";
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyTechnicalItem } from "@/types/property";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
@@ -10,9 +11,9 @@ import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { usePropertyTabs } from "@/hooks/usePropertyTabs";
 import { useFormSteps } from "@/hooks/useFormSteps";
-import { usePropertyWebViewDialog } from "@/hooks/usePropertyWebViewDialog";
-import { PropertyWebViewDialog } from "./PropertyWebViewDialog";
-import { usePropertyAgentAndTemplate } from "@/hooks/usePropertyAgentAndTemplate";
+import { PropertyWebView } from "./PropertyWebView";
+import { usePropertyWebView } from "./webview/usePropertyWebView";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs } from "@/components/ui/tabs";
 
 interface PropertyTabsWrapperProps {
@@ -29,16 +30,15 @@ export function PropertyTabsWrapper({
   settings,
   onSave,
   onDelete,
+  agentInfo,
+  templateInfo
 }: PropertyTabsWrapperProps) {
-  // Use custom hooks to organize functionality
+  const [webViewOpen, setWebViewOpen] = useState(false);
   const { activeTab, setActiveTab } = usePropertyTabs();
-  const { webViewOpen, setWebViewOpen, handleWebView } = usePropertyWebViewDialog();
+  console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
   // Form state management
   const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
-  
-  // Fetch agent and template info
-  const { agentInfo, templateInfo } = usePropertyAgentAndTemplate(formState);
   
   // Handle form submission
   const { handleSubmit } = usePropertyFormSubmit();
@@ -78,34 +78,46 @@ export function PropertyTabsWrapper({
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleGridImage,
+    isInGridImages,
+    isFeaturedImage,
+    images
   } = usePropertyImages(formState, setFormState);
   
-  // Define autosave function
+  // Define autosave function (placeholder for now)
   const handleAutosave = () => {
     console.log("Autosaving...");
+    // Actual autosave logic would go here
   };
   
-  // Form steps
+  // Form steps with corrected arguments
   const { currentStep, handleStepClick, handleNext, handlePrevious } = useFormSteps(formState, handleAutosave, 5);
 
-  // Form submission handler
+  // Web view functions
+  const handleWebView = () => {
+    setWebViewOpen(true);
+  };
+
   const onSubmit = () => {
     const formEl = document.getElementById('propertyForm') as HTMLFormElement;
     if (formEl) {
+      // Create a FormEvent object
       const formEvent = new Event('submit', { bubbles: true, cancelable: true }) as unknown as React.FormEvent;
+      // Pass false to prevent redirection
       handleSubmit(formEvent, formState, false);
     }
   };
 
-  // Field change handlers
+  // Handle saving object ID
   const handleSaveObjectId = (objectId: string) => {
     handleFieldChange('object_id', objectId);
   };
 
+  // Handle saving agent
   const handleSaveAgent = (agentId: string) => {
     handleFieldChange('agent_id', agentId);
   };
 
+  // Handle saving template
   const handleSaveTemplate = (templateId: string) => {
     handleFieldChange('template_id', templateId);
   };
@@ -173,12 +185,18 @@ export function PropertyTabsWrapper({
         </PropertyTabs>
       </Tabs>
 
-      {/* Web View Dialog */}
-      <PropertyWebViewDialog 
-        property={propertyWithMissingProps} 
-        open={webViewOpen} 
-        onOpenChange={setWebViewOpen} 
-      />
+      {/* WebView Dialog */}
+      <Dialog open={webViewOpen} onOpenChange={setWebViewOpen}>
+        <DialogContent className="max-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-auto">
+            <PropertyWebView 
+              property={propertyWithMissingProps}
+              open={webViewOpen} 
+              onOpenChange={setWebViewOpen} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

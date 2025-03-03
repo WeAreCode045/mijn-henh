@@ -16,22 +16,6 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
 
   if (!data) return null;
 
-  // Check for Appwrite settings in localStorage (temporary solution)
-  let appwriteSettings = {};
-  try {
-    if (typeof window !== 'undefined') {
-      const savedSettings = localStorage.getItem('appwrite_settings');
-      if (savedSettings) {
-        appwriteSettings = JSON.parse(savedSettings);
-        console.log("Found Appwrite settings in localStorage:", appwriteSettings);
-      }
-    }
-  } catch (e) {
-    console.error("Error parsing Appwrite settings from localStorage:", e);
-  }
-
-  // Update Supabase database to include Appwrite fields if needed
-  // This is a workaround until the database schema is updated
   return {
     id: String(data.id),
     name: data.name || defaultAgencySettings.name,
@@ -41,9 +25,9 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     primaryColor: data.primary_color || defaultAgencySettings.primaryColor,
     secondaryColor: data.secondary_color || defaultAgencySettings.secondaryColor,
     logoUrl: data.logo_url,
-    pdfBackgroundUrl: data.description_background_url,
-    webviewBackgroundUrl: data.description_background_url,
-    webviewBgImage: data.description_background_url,
+    pdfBackgroundUrl: data.description_background_url, // Updated to use existing column
+    webviewBackgroundUrl: data.description_background_url, // Using the same column for now
+    webviewBgImage: data.description_background_url, // Added this line
     instagramUrl: data.instagram_url || defaultAgencySettings.instagramUrl,
     youtubeUrl: data.youtube_url || defaultAgencySettings.youtubeUrl,
     facebookUrl: data.facebook_url || defaultAgencySettings.facebookUrl,
@@ -56,7 +40,6 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     iconLivingSpace: data.icon_living_space || defaultAgencySettings.iconLivingSpace,
     googleMapsApiKey: data.google_maps_api_key || defaultAgencySettings.googleMapsApiKey,
     xmlImportUrl: data.xml_import_url || defaultAgencySettings.xmlImportUrl,
-    
     // SMTP settings
     smtp_host: data.smtp_host || null,
     smtp_port: data.smtp_port || null,
@@ -65,14 +48,5 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtp_from_email: data.smtp_from_email || null,
     smtp_from_name: data.smtp_from_name || null,
     smtp_secure: data.smtp_secure || false,
-    
-    // Appwrite settings - get from localStorage if available, otherwise use defaults
-    appwrite_endpoint: (appwriteSettings as any).appwrite_endpoint || defaultAgencySettings.appwrite_endpoint,
-    appwrite_project_id: (appwriteSettings as any).appwrite_project_id || defaultAgencySettings.appwrite_project_id,
-    appwrite_database_id: (appwriteSettings as any).appwrite_database_id || defaultAgencySettings.appwrite_database_id,
-    appwrite_properties_collection_id: (appwriteSettings as any).appwrite_properties_collection_id || defaultAgencySettings.appwrite_properties_collection_id,
-    appwrite_agents_collection_id: (appwriteSettings as any).appwrite_agents_collection_id || defaultAgencySettings.appwrite_agents_collection_id,
-    appwrite_templates_collection_id: (appwriteSettings as any).appwrite_templates_collection_id || defaultAgencySettings.appwrite_templates_collection_id,
-    appwrite_storage_bucket_id: (appwriteSettings as any).appwrite_storage_bucket_id || defaultAgencySettings.appwrite_storage_bucket_id
   };
 }
