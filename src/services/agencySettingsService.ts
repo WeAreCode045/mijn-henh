@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySettings } from "@/types/agency";
 
@@ -10,7 +9,7 @@ interface AgencySettingsData {
   primary_color: string;
   secondary_color: string;
   logo_url?: string;
-  description_background_url?: string; // Updated to use existing column
+  description_background_url?: string;
   icon_build_year: string;
   icon_bedrooms: string;
   icon_bathrooms: string;
@@ -31,6 +30,14 @@ interface AgencySettingsData {
   smtp_from_email?: string;
   smtp_from_name?: string;
   smtp_secure?: boolean;
+  // Appwrite settings
+  appwrite_endpoint?: string;
+  appwrite_project_id?: string;
+  appwrite_database_id?: string;
+  appwrite_properties_collection_id?: string;
+  appwrite_agents_collection_id?: string;
+  appwrite_templates_collection_id?: string;
+  appwrite_storage_bucket_id?: string;
 }
 
 export const agencySettingsService = {
@@ -71,7 +78,7 @@ export const agencySettingsService = {
       primary_color: data.primaryColor,
       secondary_color: data.secondaryColor,
       logo_url: data.logoUrl,
-      description_background_url: data.pdfBackgroundUrl || data.webviewBackgroundUrl, // Store both in the same field
+      description_background_url: data.pdfBackgroundUrl || data.webviewBackgroundUrl,
       icon_build_year: data.iconBuildYear,
       icon_bedrooms: data.iconBedrooms,
       icon_bathrooms: data.iconBathrooms,
@@ -92,6 +99,14 @@ export const agencySettingsService = {
       smtp_from_email: data.smtp_from_email || null,
       smtp_from_name: data.smtp_from_name || null,
       smtp_secure: data.smtp_secure || false,
+      // Appwrite settings
+      appwrite_endpoint: data.appwrite_endpoint || null,
+      appwrite_project_id: data.appwrite_project_id || null,
+      appwrite_database_id: data.appwrite_database_id || null,
+      appwrite_properties_collection_id: data.appwrite_properties_collection_id || null,
+      appwrite_agents_collection_id: data.appwrite_agents_collection_id || null,
+      appwrite_templates_collection_id: data.appwrite_templates_collection_id || null,
+      appwrite_storage_bucket_id: data.appwrite_storage_bucket_id || null
     };
 
     const { error } = await supabase

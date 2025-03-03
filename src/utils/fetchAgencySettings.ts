@@ -25,9 +25,9 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     primaryColor: data.primary_color || defaultAgencySettings.primaryColor,
     secondaryColor: data.secondary_color || defaultAgencySettings.secondaryColor,
     logoUrl: data.logo_url,
-    pdfBackgroundUrl: data.description_background_url, // Updated to use existing column
-    webviewBackgroundUrl: data.description_background_url, // Using the same column for now
-    webviewBgImage: data.description_background_url, // Added this line
+    pdfBackgroundUrl: data.description_background_url,
+    webviewBackgroundUrl: data.description_background_url,
+    webviewBgImage: data.description_background_url,
     instagramUrl: data.instagram_url || defaultAgencySettings.instagramUrl,
     youtubeUrl: data.youtube_url || defaultAgencySettings.youtubeUrl,
     facebookUrl: data.facebook_url || defaultAgencySettings.facebookUrl,
@@ -40,6 +40,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     iconLivingSpace: data.icon_living_space || defaultAgencySettings.iconLivingSpace,
     googleMapsApiKey: data.google_maps_api_key || defaultAgencySettings.googleMapsApiKey,
     xmlImportUrl: data.xml_import_url || defaultAgencySettings.xmlImportUrl,
+    
     // SMTP settings
     smtp_host: data.smtp_host || null,
     smtp_port: data.smtp_port || null,
@@ -48,5 +49,14 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtp_from_email: data.smtp_from_email || null,
     smtp_from_name: data.smtp_from_name || null,
     smtp_secure: data.smtp_secure || false,
+    
+    // Appwrite settings
+    appwrite_endpoint: data.appwrite_endpoint || defaultAgencySettings.appwrite_endpoint,
+    appwrite_project_id: data.appwrite_project_id || defaultAgencySettings.appwrite_project_id,
+    appwrite_database_id: data.appwrite_database_id || defaultAgencySettings.appwrite_database_id,
+    appwrite_properties_collection_id: data.appwrite_properties_collection_id || defaultAgencySettings.appwrite_properties_collection_id,
+    appwrite_agents_collection_id: data.appwrite_agents_collection_id || defaultAgencySettings.appwrite_agents_collection_id,
+    appwrite_templates_collection_id: data.appwrite_templates_collection_id || defaultAgencySettings.appwrite_templates_collection_id,
+    appwrite_storage_bucket_id: data.appwrite_storage_bucket_id || defaultAgencySettings.appwrite_storage_bucket_id
   };
 }
