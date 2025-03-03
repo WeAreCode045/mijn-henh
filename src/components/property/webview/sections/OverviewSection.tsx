@@ -1,5 +1,6 @@
 
 import { WebViewSectionProps } from "../types";
+import { WebViewImageGrid } from "../WebViewImageGrid";
 
 export function OverviewSection({ property, settings }: WebViewSectionProps) {
   // Format price with thousand separators
@@ -16,14 +17,19 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
     return "€ " + numericPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
+  // Get the image to display (featured image, first grid image, or first regular image)
+  const mainImage = property.featuredImage || 
+                   (property.gridImages?.length > 0 ? property.gridImages[0] : null) ||
+                   (property.images?.length > 0 ? property.images[0].url : null);
+
   return (
     <div className="space-y-4 pb-24">
       <div className="space-y-4 mt-2">
-        {property.images && property.images.length > 0 && (
+        {mainImage && (
           <>
             <div className="relative px-6">
               <img
-                src={property.images[0].url}
+                src={mainImage}
                 alt={property.title}
                 className="w-full h-[400px] object-cover rounded-lg shadow-lg"
               />
@@ -42,6 +48,23 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               </span>
             </div>
           </>
+        )}
+        
+        {/* Grid images */}
+        {property.gridImages && property.gridImages.length > 0 && (
+          <div className="px-6 mt-4">
+            <div className="grid grid-cols-2 gap-2">
+              {property.gridImages.slice(0, 4).map((imageUrl, index) => (
+                <div key={index} className="aspect-square rounded-md overflow-hidden">
+                  <img 
+                    src={imageUrl} 
+                    alt={`Property ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>

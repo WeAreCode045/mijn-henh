@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { getOrCreateWebViewUrl } from "@/utils/webViewUtils";
@@ -98,26 +99,28 @@ export const PropertyCard = ({
     navigate(`/property/${property.id}/edit`);
   };
 
+  // Get the main display image (featured image first, then first regular image)
+  const displayImage = property.featuredImage || 
+                      (property.images?.length > 0 ? property.images[0].url : '/placeholder.svg');
+
   return (
     <>
       <Card key={property.id} className="p-6 space-y-6 relative group cursor-pointer hover:shadow-lg transition-shadow" onClick={handleCardClick}>
-        {(property.images?.[0]?.url || property.featuredImage) && (
-          <div className="relative">
-            <img
-              src={property.images?.[0]?.url || property.featuredImage || '/placeholder.svg'}
-              alt={property.title}
-              className="w-full h-48 object-cover rounded-lg"
+        <div className="relative">
+          <img
+            src={displayImage}
+            alt={property.title}
+            className="w-full h-48 object-cover rounded-lg"
+          />
+          {webViewUrl && (
+            <PropertyQROverlay
+              webViewUrl={webViewUrl}
+              showQR={showQR}
+              onMouseEnter={() => setShowQR(true)}
+              onMouseLeave={() => setShowQR(false)}
             />
-            {webViewUrl && (
-              <PropertyQROverlay
-                webViewUrl={webViewUrl}
-                showQR={showQR}
-                onMouseEnter={() => setShowQR(true)}
-                onMouseLeave={() => setShowQR(false)}
-              />
-            )}
-          </div>
-        )}
+          )}
+        </div>
 
         <div>
           <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
