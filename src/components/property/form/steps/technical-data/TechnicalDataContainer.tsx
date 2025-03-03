@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileImage, Upload } from "lucide-react";
+import { FileImage, Upload, Trash2 } from "lucide-react";
 
 interface TechnicalDataContainerProps {
   formData?: PropertyFormData;
@@ -98,8 +98,8 @@ export function TechnicalDataContainer({
           </div>
           
           {/* Display uploaded floorplans */}
-          {floorplans.length > 0 && (
-            <div className="grid grid-cols-3 gap-4 mt-4">
+          {floorplans && floorplans.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {floorplans.map((floorplan, index) => (
                 <div key={floorplan.id || `floorplan-${index}`} className="relative group">
                   <img 
@@ -107,13 +107,15 @@ export function TechnicalDataContainer({
                     alt={`Floorplan ${index + 1}`} 
                     className="w-full h-auto aspect-square object-cover rounded-md border"
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
                     <Button 
                       variant="destructive" 
                       size="sm" 
                       onClick={() => onRemoveFloorplan && onRemoveFloorplan(index)}
                       type="button"
+                      className="flex items-center gap-1"
                     >
+                      <Trash2 className="h-4 w-4" />
                       Remove
                     </Button>
                   </div>

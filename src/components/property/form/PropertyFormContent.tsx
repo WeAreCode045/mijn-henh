@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyArea, PropertyFeature, PropertyFloorplan, PropertyTechnicalItem } from "@/types/property";
 import { steps } from "./formSteps";
 
@@ -93,6 +94,7 @@ export function PropertyFormContent({
       {step === 3 ? (
         // TechnicalDataStep
         <StepComponent
+          formData={formData}
           floorplans={formData.floorplans || []}
           technicalItems={formData.technicalItems || []}
           images={formData.images || []}
