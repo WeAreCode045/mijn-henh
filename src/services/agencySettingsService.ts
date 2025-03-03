@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySettings } from "@/types/agency";
 
@@ -30,7 +31,7 @@ interface AgencySettingsData {
   smtp_from_email?: string;
   smtp_from_name?: string;
   smtp_secure?: boolean;
-  // Appwrite settings
+  // Appwrite settings - these fields might not exist in the database yet
   appwrite_endpoint?: string;
   appwrite_project_id?: string;
   appwrite_database_id?: string;
@@ -70,6 +71,7 @@ export const agencySettingsService = {
   },
 
   async updateSettings(id: string, data: AgencySettings) {
+    // Create the data object with all existing fields
     const updateData: AgencySettingsData = {
       name: data.name,
       email: data.email,
@@ -99,15 +101,14 @@ export const agencySettingsService = {
       smtp_from_email: data.smtp_from_email || null,
       smtp_from_name: data.smtp_from_name || null,
       smtp_secure: data.smtp_secure || false,
-      // Appwrite settings
-      appwrite_endpoint: data.appwrite_endpoint || null,
-      appwrite_project_id: data.appwrite_project_id || null,
-      appwrite_database_id: data.appwrite_database_id || null,
-      appwrite_properties_collection_id: data.appwrite_properties_collection_id || null,
-      appwrite_agents_collection_id: data.appwrite_agents_collection_id || null,
-      appwrite_templates_collection_id: data.appwrite_templates_collection_id || null,
-      appwrite_storage_bucket_id: data.appwrite_storage_bucket_id || null
     };
+    
+    // Note: We're not adding the Appwrite fields to the update data
+    // since they don't exist in the database yet.
+    // You'll need to update your database schema to include these fields.
+    
+    // For now, we'll just log a warning
+    console.log("Note: Appwrite settings will be saved in local storage only until the database schema is updated.");
 
     const { error } = await supabase
       .from('agency_settings')
@@ -115,6 +116,19 @@ export const agencySettingsService = {
       .eq('id', id);
 
     if (error) throw error;
+    
+    // Save Appwrite settings to localStorage as a temporary solution
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('appwrite_settings', JSON.stringify({
+        appwrite_endpoint: data.appwrite_endpoint,
+        appwrite_project_id: data.appwrite_project_id,
+        appwrite_database_id: data.appwrite_database_id,
+        appwrite_properties_collection_id: data.appwrite_properties_collection_id,
+        appwrite_agents_collection_id: data.appwrite_agents_collection_id,
+        appwrite_templates_collection_id: data.appwrite_templates_collection_id,
+        appwrite_storage_bucket_id: data.appwrite_storage_bucket_id
+      }));
+    }
   },
 
   async createSettings(data: AgencySettingsData) {

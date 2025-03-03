@@ -107,7 +107,8 @@ export function StepRenderer({
     onAddTechnicalItem,
     onRemoveTechnicalItem,
     onUpdateTechnicalItem,
-    isUploading
+    isUploading,
+    step // Add the missing step property here
   })} />;
 }
 

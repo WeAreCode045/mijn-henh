@@ -16,6 +16,8 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
 
   if (!data) return null;
 
+  // Update Supabase database to include Appwrite fields if needed
+  // This is a workaround until the database schema is updated
   return {
     id: String(data.id),
     name: data.name || defaultAgencySettings.name,
@@ -50,13 +52,13 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtp_from_name: data.smtp_from_name || null,
     smtp_secure: data.smtp_secure || false,
     
-    // Appwrite settings
-    appwrite_endpoint: data.appwrite_endpoint || defaultAgencySettings.appwrite_endpoint,
-    appwrite_project_id: data.appwrite_project_id || defaultAgencySettings.appwrite_project_id,
-    appwrite_database_id: data.appwrite_database_id || defaultAgencySettings.appwrite_database_id,
-    appwrite_properties_collection_id: data.appwrite_properties_collection_id || defaultAgencySettings.appwrite_properties_collection_id,
-    appwrite_agents_collection_id: data.appwrite_agents_collection_id || defaultAgencySettings.appwrite_agents_collection_id,
-    appwrite_templates_collection_id: data.appwrite_templates_collection_id || defaultAgencySettings.appwrite_templates_collection_id,
-    appwrite_storage_bucket_id: data.appwrite_storage_bucket_id || defaultAgencySettings.appwrite_storage_bucket_id
+    // Appwrite settings - use default values since these fields don't exist in the database yet
+    appwrite_endpoint: defaultAgencySettings.appwrite_endpoint,
+    appwrite_project_id: defaultAgencySettings.appwrite_project_id,
+    appwrite_database_id: defaultAgencySettings.appwrite_database_id,
+    appwrite_properties_collection_id: defaultAgencySettings.appwrite_properties_collection_id,
+    appwrite_agents_collection_id: defaultAgencySettings.appwrite_agents_collection_id,
+    appwrite_templates_collection_id: defaultAgencySettings.appwrite_templates_collection_id,
+    appwrite_storage_bucket_id: defaultAgencySettings.appwrite_storage_bucket_id
   };
 }
