@@ -43,8 +43,10 @@ export function AreaCard({
     console.log(`AreaCard ${area.id} - Finding images for imageIds:`, imageIds);
     
     if (imageIds.length > 0) {
+      // Find corresponding image objects for each ID
       const foundImages = images.filter(img => imageIds.includes(img.id));
-      console.log(`AreaCard ${area.id} - Found ${foundImages.length} images:`, foundImages);
+      console.log(`AreaCard ${area.id} - Found ${foundImages.length} images from ${imageIds.length} imageIds`);
+      console.log(`Found image details:`, foundImages);
       setAreaImages(foundImages);
     } else {
       console.log(`AreaCard ${area.id} - No imageIds available or empty array`);
@@ -127,12 +129,15 @@ export function AreaCard({
             onUploadClick={handleUploadClick}
           />
           
-          <AreaImageGrid
-            areaImages={areaImages}
-            areaId={area.id}
-            areaTitle={area.title}
-            onImageRemove={onImageRemove}
-          />
+          <div className="mt-2">
+            <p className="text-sm font-medium mb-2">Selected Images ({areaImages.length})</p>
+            <AreaImageGrid
+              areaImages={areaImages}
+              areaId={area.id}
+              areaTitle={area.title}
+              onImageRemove={onImageRemove}
+            />
+          </div>
         </div>
       </CardContent>
       

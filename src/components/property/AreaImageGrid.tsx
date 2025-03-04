@@ -43,13 +43,13 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
       {validAreaImages.map((image) => (
         <div key={image.id} className="relative group">
           <img
             src={image.url}
             alt={`${areaTitle} - ${image.id}`}
-            className="w-full h-24 object-cover rounded-md"
+            className="w-full h-32 object-cover rounded-md"
             onError={() => handleImageError(image.id)}
           />
           <Button

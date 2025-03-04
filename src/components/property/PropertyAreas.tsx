@@ -46,6 +46,12 @@ export function PropertyAreas({
     onAdd();
   };
 
+  // Make sure all areas have imageIds as arrays
+  const normalizedAreas = areas.map(area => ({
+    ...area,
+    imageIds: Array.isArray(area.imageIds) ? area.imageIds : []
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -62,17 +68,14 @@ export function PropertyAreas({
         </Button>
       </div>
 
-      {!areas || areas.length === 0 ? (
+      {!normalizedAreas || normalizedAreas.length === 0 ? (
         <EmptyAreaMessage />
       ) : (
         <div className="space-y-6">
-          {areas.map((area) => (
+          {normalizedAreas.map((area) => (
             <AreaCard
               key={area.id}
-              area={{
-                ...area,
-                imageIds: Array.isArray(area.imageIds) ? area.imageIds : [] // Ensure imageIds is always an array
-              }}
+              area={area}
               images={images}
               onRemove={onRemove}
               onUpdate={onUpdate}

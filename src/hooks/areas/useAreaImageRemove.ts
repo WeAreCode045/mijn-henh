@@ -64,6 +64,20 @@ export function useAreaImageRemove(
           console.error('Error updating property areas in database:', updateError);
           throw updateError;
         }
+        
+        // Also check if we need to update any relationships in the area_images table
+        try {
+          // This isn't critical functionality, so we don't throw if it fails
+          await supabase
+            .from('area_images')
+            .delete()
+            .match({
+              area_id: areaId,
+              image_id: imageId
+            });
+        } catch (relationError) {
+          console.error('Error updating area_images relationship (non-critical):', relationError);
+        }
       }
       
       toast({
