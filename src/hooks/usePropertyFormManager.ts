@@ -47,6 +47,7 @@ export function usePropertyFormManager(property: PropertyData) {
   );
   
   // Property areas management
+  // Pass handleFieldChangeWithTracking for field changes in areas
   const {
     addArea,
     removeArea,
@@ -56,7 +57,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleAreaImagesSelect,
   } = usePropertyAreas(
     formState, 
-    handleFieldChangeWithTracking
+    setFormStateWithTracking // Use setFormStateWithTracking here instead
   );
   
   // Property images management - use setFormStateWithTracking instead of setFormState

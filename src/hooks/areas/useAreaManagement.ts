@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import type { PropertyArea, PropertyFormData } from '@/types/property';
+import { Dispatch, SetStateAction } from 'react';
 
 export function useAreaManagement(
   formData: PropertyFormData,
-  setFormData: React.Dispatch<React.SetStateAction<PropertyFormData>>
+  setFormData: Dispatch<SetStateAction<PropertyFormData>>
 ) {
   const { toast } = useToast();
 
@@ -21,37 +22,39 @@ export function useAreaManagement(
     
     console.log("Adding new area with default columns:", newArea);
     
-    setFormData({
-      ...formData,
-      areas: [...(formData.areas || []), newArea],
-    });
+    setFormData(prevData => ({
+      ...prevData,
+      areas: [...(prevData.areas || []), newArea],
+    }));
   };
 
   // Remove an area from the property
   const removeArea = (id: string) => {
     console.log(`Removing area ${id}`);
     
-    setFormData({
-      ...formData,
-      areas: formData.areas.filter(area => area.id !== id),
-    });
+    setFormData(prevData => ({
+      ...prevData,
+      areas: prevData.areas.filter(area => area.id !== id),
+    }));
   };
 
   // Update a specific field of an area
   const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
     console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
     
-    const updatedAreas = formData.areas.map(area => 
-      area.id === id ? { ...area, [field]: value } : area
-    );
-    
-    setFormData({
-      ...formData,
-      areas: updatedAreas,
+    setFormData(prevData => {
+      const updatedAreas = prevData.areas.map(area => 
+        area.id === id ? { ...area, [field]: value } : area
+      );
+      
+      return {
+        ...prevData,
+        areas: updatedAreas,
+      };
     });
     
     // Log the updated areas for debugging
-    console.log("Areas after update:", updatedAreas);
+    console.log("Areas after update - request sent");
   };
 
   return {
