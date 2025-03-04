@@ -22,15 +22,15 @@ export function usePropertyCoverImages(
       });
 
       if (formData.id) {
-        // Update in database
+        // Update in database - use is_main instead of is_featured
         await supabase
           .from('property_images')
-          .update({ is_featured: false })
+          .update({ is_main: false })
           .eq('property_id', formData.id);
 
         await supabase
           .from('property_images')
-          .update({ is_featured: true })
+          .update({ is_main: true })
           .eq('property_id', formData.id)
           .eq('url', url);
       }
@@ -72,10 +72,10 @@ export function usePropertyCoverImages(
       });
 
       if (formData.id) {
-        // Update in database
+        // Update in database - use is_featured_image instead of is_grid_image
         await supabase
           .from('property_images')
-          .update({ is_grid_image: !isInCover })
+          .update({ is_featured_image: !isInCover })
           .eq('property_id', formData.id)
           .eq('url', url);
       }
