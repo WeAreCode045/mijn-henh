@@ -36,7 +36,9 @@ export function AreaCard({
     if (area && area.imageIds && images && images.length > 0) {
       console.log(`AreaCard ${area.id} - Finding images for imageIds:`, area.imageIds);
       
-      const foundImages = images.filter(img => area.imageIds.includes(img.id));
+      // Make sure area.imageIds is an array before filtering
+      const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
+      const foundImages = images.filter(img => imageIds.includes(img.id));
       
       console.log(`AreaCard ${area.id} - Found ${foundImages.length} images:`, foundImages);
       
@@ -45,7 +47,7 @@ export function AreaCard({
       console.log(`AreaCard ${area.id} - No imageIds or no images available`);
       setAreaImages([]);
     }
-  }, [area, area.imageIds, images]);
+  }, [area, images, area.imageIds]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -136,7 +138,7 @@ export function AreaCard({
         onOpenChange={setIsSelectDialogOpen}
         images={images}
         areaTitle={area.title}
-        selectedImageIds={area.imageIds || []}
+        selectedImageIds={Array.isArray(area.imageIds) ? area.imageIds : []}
         onUpdate={handleUpdateImageIds}
       />
     </Card>

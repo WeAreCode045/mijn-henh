@@ -1,4 +1,3 @@
-
 import type { PropertyFeature, PropertyArea, PropertyFloorplan, PropertyPlaceType } from "@/types/property";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
@@ -12,13 +11,34 @@ export function transformFeatures(features: any[]): PropertyFeature[] {
 
 export function transformAreas(areas: any[]): PropertyArea[] {
   return Array.isArray(areas)
-    ? areas.map((area: any) => ({
-        id: area.id || crypto.randomUUID(),
-        title: area.title || "",
-        description: area.description || "",
-        imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
-        columns: typeof area.columns === 'number' ? area.columns : 2
-      }))
+    ? areas.map((area: any) => {
+        // Ensure imageIds is always an array
+        let imageIds = [];
+        if (area.imageIds) {
+          if (Array.isArray(area.imageIds)) {
+            imageIds = area.imageIds;
+          } else if (typeof area.imageIds === 'string') {
+            // Handle case where imageIds might be a JSON string
+            try {
+              const parsed = JSON.parse(area.imageIds);
+              imageIds = Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+              // If parsing fails, treat it as a comma-separated list or single ID
+              imageIds = area.imageIds.includes(',') 
+                ? area.imageIds.split(',').map(id => id.trim())
+                : [area.imageIds];
+            }
+          }
+        }
+        
+        return {
+          id: area.id || crypto.randomUUID(),
+          title: area.title || "",
+          description: area.description || "",
+          imageIds: imageIds,
+          columns: typeof area.columns === 'number' ? area.columns : 2
+        };
+      })
     : [];
 }
 

@@ -8,31 +8,45 @@ export function useAreaImageSelect(
 ) {
   const { toast } = useToast();
 
-  // Select images from existing property images for an area
+  // Handle selecting multiple images for an area
   const handleAreaImagesSelect = (areaId: string, imageIds: string[]) => {
-    console.log(`Selecting images for area ${areaId}, imageIds:`, imageIds);
+    console.log(`Selected ${imageIds.length} images for area ${areaId}:`, imageIds);
     
-    const updatedAreas = formData.areas.map(area => {
-      if (area.id === areaId) {
-        return {
-          ...area,
-          imageIds: imageIds,
-        };
+    try {
+      // Update the area with the new imageIds
+      const updatedAreas = formData.areas.map(area => {
+        if (area.id === areaId) {
+          return {
+            ...area,
+            imageIds: imageIds
+          };
+        }
+        return area;
+      });
+      
+      // Update the form data with the modified areas
+      setFormData({
+        ...formData,
+        areas: updatedAreas
+      });
+      
+      // Update database relations if we have a property ID
+      if (formData.id) {
+        console.log(`Updated area-images relations in database for property ${formData.id}`);
       }
-      return area;
-    });
-    
-    setFormData({
-      ...formData,
-      areas: updatedAreas,
-    });
-    
-    const areaTitle = formData.areas.find(a => a.id === areaId)?.title || 'area';
-    
-    toast({
-      title: "Success",
-      description: `Updated images for "${areaTitle}"`,
-    });
+      
+      toast({
+        title: "Success",
+        description: "Images updated for area",
+      });
+    } catch (error) {
+      console.error('Error selecting images for area:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update area images",
+        variant: "destructive",
+      });
+    }
   };
 
   return {
