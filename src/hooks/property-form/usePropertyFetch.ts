@@ -65,11 +65,11 @@ export function usePropertyFetch(id: string | undefined) {
         }
         
         const featuredImages = allImages
-          ? allImages.filter(img => img.is_grid_image).map(img => img.url)
+          ? allImages.filter(img => img.is_featured_image).map(img => img.url)
           : [];
           
         const featuredImage = allImages
-          ? allImages.find(img => img.is_featured)?.url || null
+          ? allImages.find(img => img.is_main)?.url || null
           : null;
         
         setFormData({
@@ -88,8 +88,8 @@ export function usePropertyFetch(id: string | undefined) {
                 id: img.id, 
                 url: img.url,
                 area: img.area,
-                is_featured: img.is_featured,
-                is_grid_image: img.is_grid_image
+                is_main: img.is_main,
+                is_featured_image: img.is_featured_image
               })) 
             : [],
           floorplanEmbedScript: data.floorplanEmbedScript || ""

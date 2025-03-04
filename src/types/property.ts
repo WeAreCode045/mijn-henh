@@ -12,8 +12,8 @@ export interface PropertyImage {
   property_id?: string;
   created_at?: string;
   type?: string;
-  is_featured?: boolean; // Added for featured image flag
-  is_grid_image?: boolean; // Added for grid image flag
+  is_main?: boolean; // Updated from is_featured to is_main
+  is_featured_image?: boolean; // Updated from is_grid_image to is_featured_image
   [key: string]: string | boolean | null | undefined; // Updated index signature to include boolean
 }
 

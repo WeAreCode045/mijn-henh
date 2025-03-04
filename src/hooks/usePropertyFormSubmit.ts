@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import type { PropertyFormData, PropertySubmitData } from "@/types/property";
@@ -81,14 +82,14 @@ export function usePropertyFormSubmit() {
         try {
           await supabase
             .from('property_images')
-            .update({ is_featured: false, is_grid_image: false })
+            .update({ is_main: false, is_featured_image: false })
             .eq('property_id', formData.id);
           
           if (formData.featuredImage) {
             console.log("Setting main image in database:", formData.featuredImage);
             const { error } = await supabase
               .from('property_images')
-              .update({ is_featured: true })
+              .update({ is_main: true })
               .eq('property_id', formData.id)
               .eq('url', formData.featuredImage);
               
@@ -102,7 +103,7 @@ export function usePropertyFormSubmit() {
               console.log("Setting featured image in database:", imageUrl);
               const { error } = await supabase
                 .from('property_images')
-                .update({ is_grid_image: true })
+                .update({ is_featured_image: true })
                 .eq('property_id', formData.id)
                 .eq('url', imageUrl);
                 
@@ -158,8 +159,8 @@ export function usePropertyFormSubmit() {
                 .insert({
                   property_id: newProperty.id,
                   url: imageUrl,
-                  is_featured: formData.featuredImage === imageUrl,
-                  is_grid_image: formData.featuredImages?.includes(imageUrl) || false,
+                  is_main: formData.featuredImage === imageUrl,
+                  is_featured_image: formData.featuredImages?.includes(imageUrl) || false,
                   type: 'image'
                 });
             }

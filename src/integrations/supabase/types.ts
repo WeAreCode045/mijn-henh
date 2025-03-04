@@ -393,8 +393,8 @@ export type Database = {
           area: string | null
           created_at: string
           id: string
-          is_featured: boolean | null
-          is_grid_image: boolean | null
+          is_featured_image: boolean | null
+          is_main: boolean | null
           property_id: string | null
           type: string | null
           url: string
@@ -403,8 +403,8 @@ export type Database = {
           area?: string | null
           created_at?: string
           id?: string
-          is_featured?: boolean | null
-          is_grid_image?: boolean | null
+          is_featured_image?: boolean | null
+          is_main?: boolean | null
           property_id?: string | null
           type?: string | null
           url: string
@@ -413,8 +413,8 @@ export type Database = {
           area?: string | null
           created_at?: string
           id?: string
-          is_featured?: boolean | null
-          is_grid_image?: boolean | null
+          is_featured_image?: boolean | null
+          is_main?: boolean | null
           property_id?: string | null
           type?: string | null
           url?: string

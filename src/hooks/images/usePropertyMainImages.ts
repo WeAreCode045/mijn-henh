@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
@@ -17,17 +18,17 @@ export function usePropertyMainImages(
     
     setIsUpdating(true);
     try {
-      // First, unmark all images as featured
+      // First, unmark all images as main
       await supabase
         .from('property_images')
-        .update({ is_featured: false })
+        .update({ is_main: false })
         .eq('property_id', formData.id);
       
       if (url) {
-        // Mark the selected image as featured
+        // Mark the selected image as main
         await supabase
           .from('property_images')
-          .update({ is_featured: true })
+          .update({ is_main: true })
           .eq('property_id', formData.id)
           .eq('url', url);
           
@@ -42,7 +43,7 @@ export function usePropertyMainImages(
           description: "Main image updated successfully."
         });
       } else {
-        // If url is null, just clear the featured image
+        // If url is null, just clear the main image
         setFormData(prevState => ({
           ...prevState,
           featuredImage: null
@@ -60,7 +61,7 @@ export function usePropertyMainImages(
     }
   };
 
-  // Toggle whether an image is in the featured images (previously cover images)
+  // Toggle whether an image is in the featured images collection
   const handleToggleFeaturedImage = async (url: string) => {
     if (!formData.id) return;
     
@@ -69,14 +70,14 @@ export function usePropertyMainImages(
       // Check if the image is already in the featured images
       const isInFeatured = formData.featuredImages?.includes(url) || false;
       
-      // Toggle the is_grid_image flag in the database (keeping the database field name for now)
+      // Toggle the is_featured_image flag in the database
       await supabase
         .from('property_images')
-        .update({ is_grid_image: !isInFeatured })
+        .update({ is_featured_image: !isInFeatured })
         .eq('property_id', formData.id)
         .eq('url', url);
       
-      // Update local state with the new terminology
+      // Update local state
       setFormData(prevState => {
         const currentFeaturedImages = prevState.featuredImages || [];
         const updatedFeaturedImages = isInFeatured

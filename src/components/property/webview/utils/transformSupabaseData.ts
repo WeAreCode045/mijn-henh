@@ -1,4 +1,3 @@
-
 import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
@@ -38,6 +37,7 @@ export interface SupabasePropertyData {
     property_id: string;
     is_featured: boolean;
     is_grid_image: boolean;
+    is_main: boolean;
     type: string;
     area: string | null;
   }[];
@@ -73,13 +73,13 @@ export function transformSupabaseData(
           area: img.area,
         });
 
-        // Check if this is the featured image
-        if (img.is_featured) {
+        // Check if this is the main image (previously featured)
+        if (img.is_main) {
           featuredImage = img.url;
         }
 
-        // Check if this is a grid/featured image
-        if (img.is_grid_image) {
+        // Check if this is a featured image (previously grid image)
+        if (img.is_featured_image) {
           featuredImages.push(img.url);
         }
       }
