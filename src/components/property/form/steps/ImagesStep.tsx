@@ -31,6 +31,13 @@ export function ImagesStep({
   handleToggleGridImage,
   isUploading
 }: ImagesStepProps) {
+  // Helper function to safely get the URL from an image
+  const getImageUrl = (image: any): string => {
+    if (typeof image === 'string') return image;
+    if (image && typeof image === 'object' && 'url' in image) return image.url;
+    return '';
+  };
+  
   return (
     <div className="space-y-6">
       <Card>
@@ -47,17 +54,20 @@ export function ImagesStep({
             
             {formData.images && formData.images.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {formData.images.map((image, index) => (
-                  <ImagePreview
-                    key={index}
-                    url={typeof image === 'string' ? image : image.url}
-                    onRemove={() => handleRemoveImage && handleRemoveImage(index)}
-                    isFeatured={formData.featuredImage === (typeof image === 'string' ? image : image.url)}
-                    onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(typeof image === 'string' ? image : image.url) : undefined}
-                    isInGrid={formData.gridImages?.includes(typeof image === 'string' ? image : image.url)}
-                    onToggleGrid={handleToggleGridImage ? () => handleToggleGridImage(typeof image === 'string' ? image : image.url) : undefined}
-                  />
-                ))}
+                {formData.images.map((image, index) => {
+                  const imageUrl = getImageUrl(image);
+                  return (
+                    <ImagePreview
+                      key={index}
+                      url={imageUrl}
+                      onRemove={() => handleRemoveImage && handleRemoveImage(index)}
+                      isFeatured={formData.featuredImage === imageUrl}
+                      onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(imageUrl) : undefined}
+                      isInGrid={formData.gridImages?.includes(imageUrl)}
+                      onToggleGrid={handleToggleGridImage ? () => handleToggleGridImage(imageUrl) : undefined}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -78,13 +88,16 @@ export function ImagesStep({
             
             {formData.areaPhotos && formData.areaPhotos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {formData.areaPhotos.map((photo, index) => (
-                  <ImagePreview
-                    key={index}
-                    url={typeof photo === 'string' ? photo : photo.url}
-                    onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(index)}
-                  />
-                ))}
+                {formData.areaPhotos.map((photo, index) => {
+                  const photoUrl = getImageUrl(photo);
+                  return (
+                    <ImagePreview
+                      key={index}
+                      url={photoUrl}
+                      onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(index)}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -105,13 +118,16 @@ export function ImagesStep({
             
             {formData.floorplans && formData.floorplans.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {formData.floorplans.map((floorplan, index) => (
-                  <ImagePreview
-                    key={index}
-                    url={typeof floorplan === 'string' ? floorplan : floorplan.url}
-                    onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
-                  />
-                ))}
+                {formData.floorplans.map((floorplan, index) => {
+                  const floorplanUrl = getImageUrl(floorplan);
+                  return (
+                    <ImagePreview
+                      key={index}
+                      url={floorplanUrl}
+                      onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
