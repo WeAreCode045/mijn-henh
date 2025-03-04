@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
+interface PropertyImageWithArea extends PropertyImage {
+  area?: string | null;
+}
+
 export function AreasSection({ property, settings }: WebViewSectionProps) {
-  const [areaImages, setAreaImages] = useState<Record<string, PropertyImage[]>>({});
+  const [areaImages, setAreaImages] = useState<Record<string, PropertyImageWithArea[]>>({});
   
   useEffect(() => {
     const fetchAreaImages = async () => {
@@ -25,15 +29,16 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
         }
         
         // Group images by area
-        const imagesByArea: Record<string, PropertyImage[]> = {};
+        const imagesByArea: Record<string, PropertyImageWithArea[]> = {};
         
         if (data && data.length > 0) {
           data.forEach(img => {
-            if (img.area) {
-              if (!imagesByArea[img.area]) {
-                imagesByArea[img.area] = [];
+            const image = img as PropertyImageWithArea;
+            if (image.area) {
+              if (!imagesByArea[image.area]) {
+                imagesByArea[image.area] = [];
               }
-              imagesByArea[img.area].push(img as PropertyImage);
+              imagesByArea[image.area].push(image);
             }
           });
         }

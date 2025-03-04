@@ -53,7 +53,7 @@ export function useAreaImageRemove(
           .from('property_images')
           .update({ 
             area: null 
-          })
+          } as any)
           .eq('id', imageId)
           .eq('property_id', formData.id);
           

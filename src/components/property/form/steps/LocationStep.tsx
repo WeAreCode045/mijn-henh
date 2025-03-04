@@ -37,29 +37,7 @@ export function LocationStep({
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={formData.city || ""}
-                  onChange={(e) => onFieldChange && onFieldChange("city", e.target.value)}
-                  placeholder="City"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="zipCode">Postal Code</Label>
-                <Input
-                  id="zipCode"
-                  name="zipCode"
-                  value={formData.zipCode || ""}
-                  onChange={(e) => onFieldChange && onFieldChange("zipCode", e.target.value)}
-                  placeholder="Postal Code"
-                />
-              </div>
-            </div>
+            {/* City and zip code inputs are removed as they don't exist in PropertyFormData type */}
             
             <div className="flex justify-end">
               {onFetchLocationData && (
@@ -77,7 +55,7 @@ export function LocationStep({
         </CardContent>
       </Card>
       
-      {formData.mapImage && (
+      {formData.map_image && (
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-4">
@@ -98,7 +76,7 @@ export function LocationStep({
               
               <div className="border rounded-md overflow-hidden">
                 <img
-                  src={formData.mapImage}
+                  src={formData.map_image}
                   alt="Property location map"
                   className="w-full h-auto"
                 />
@@ -108,14 +86,14 @@ export function LocationStep({
         </Card>
       )}
       
-      {formData.nearbyPlaces && formData.nearbyPlaces.length > 0 && (
+      {formData.nearby_places && formData.nearby_places.length > 0 && (
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-4">
               <Label>Nearby Places</Label>
               
               <div className="space-y-2">
-                {formData.nearbyPlaces.map((place, index) => (
+                {formData.nearby_places.map((place, index) => (
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
                     <div>
                       <div className="font-medium">{place.name}</div>

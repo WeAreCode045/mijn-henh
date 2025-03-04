@@ -27,7 +27,7 @@ export function useAreaImageSelect(
           .from('property_images')
           .update({ 
             area: null
-          })
+          } as any)
           .eq('property_id', formData.id)
           .eq('area', areaId);
           
@@ -41,7 +41,7 @@ export function useAreaImageSelect(
             .from('property_images')
             .update({ 
               area: areaId
-            })
+            } as any)
             .eq('id', imageId)
             .eq('property_id', formData.id);
             

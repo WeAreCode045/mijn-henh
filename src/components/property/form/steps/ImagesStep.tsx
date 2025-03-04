@@ -2,8 +2,8 @@
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ImageUploader } from "@/components/ImageUploader";
-import { ImagePreview } from "@/components/ImagePreview";
+import { ImageUploader } from "@/components/ui/ImageUploader";
+import { ImagePreview } from "@/components/ui/ImagePreview";
 
 interface ImagesStepProps {
   formData: PropertyFormData;
@@ -81,7 +81,7 @@ export function ImagesStep({
                 {formData.areaPhotos.map((photo, index) => (
                   <ImagePreview
                     key={index}
-                    url={photo.url}
+                    url={typeof photo === 'string' ? photo : photo.url}
                     onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(index)}
                   />
                 ))}
@@ -108,7 +108,7 @@ export function ImagesStep({
                 {formData.floorplans.map((floorplan, index) => (
                   <ImagePreview
                     key={index}
-                    url={floorplan.url}
+                    url={typeof floorplan === 'string' ? floorplan : floorplan.url}
                     onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
                   />
                 ))}

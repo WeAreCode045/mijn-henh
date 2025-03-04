@@ -20,6 +20,15 @@ interface AreaCardProps {
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
+type AreaImage = {
+  id: string;
+  url: string;
+  area?: string | null;
+  property_id?: string;
+  created_at?: string;
+  type?: string;
+};
+
 export function AreaCard({
   area,
   images,
@@ -31,7 +40,7 @@ export function AreaCard({
   onImagesSelect,
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
-  const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
+  const [areaImages, setAreaImages] = useState<AreaImage[]>([]);
   
   // Get area images based on area ID from property_images table
   useEffect(() => {
@@ -54,7 +63,7 @@ export function AreaCard({
             console.error(`Error fetching images for area ${area.id} from property_images:`, error);
           } else if (data && data.length > 0) {
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
-            setAreaImages(data as PropertyImage[]);
+            setAreaImages(data as AreaImage[]);
             return;
           } else {
             console.log(`AreaCard ${area.id} - No images found in property_images table`);
@@ -68,7 +77,7 @@ export function AreaCard({
         const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
         if (imageIds.length > 0 && images && images.length > 0) {
           const foundImages = images.filter(img => imageIds.includes(img.id));
-          setAreaImages(foundImages);
+          setAreaImages(foundImages as AreaImage[]);
         } else {
           setAreaImages([]);
         }
