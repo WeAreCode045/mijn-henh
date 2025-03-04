@@ -50,12 +50,12 @@ export function ImagesStep({
                 {formData.images.map((image, index) => (
                   <ImagePreview
                     key={index}
-                    url={image.url}
+                    url={typeof image === 'string' ? image : image.url}
                     onRemove={() => handleRemoveImage && handleRemoveImage(index)}
-                    isFeatured={formData.featuredImage === image.url}
-                    onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(image.url) : undefined}
-                    isInGrid={formData.gridImages?.includes(image.url)}
-                    onToggleGrid={handleToggleGridImage ? () => handleToggleGridImage(image.url) : undefined}
+                    isFeatured={formData.featuredImage === (typeof image === 'string' ? image : image.url)}
+                    onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(typeof image === 'string' ? image : image.url) : undefined}
+                    isInGrid={formData.gridImages?.includes(typeof image === 'string' ? image : image.url)}
+                    onToggleGrid={handleToggleGridImage ? () => handleToggleGridImage(typeof image === 'string' ? image : image.url) : undefined}
                   />
                 ))}
               </div>

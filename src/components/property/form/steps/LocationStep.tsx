@@ -37,8 +37,6 @@ export function LocationStep({
               />
             </div>
             
-            {/* City and zip code inputs are removed as they don't exist in PropertyFormData type */}
-            
             <div className="flex justify-end">
               {onFetchLocationData && (
                 <Button 
@@ -97,7 +95,7 @@ export function LocationStep({
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
                     <div>
                       <div className="font-medium">{place.name}</div>
-                      <div className="text-sm text-gray-500">{place.distance}</div>
+                      <div className="text-sm text-gray-500">{place.vicinity}</div>
                     </div>
                     
                     {onRemoveNearbyPlace && (
