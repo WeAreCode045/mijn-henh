@@ -2,6 +2,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from '@/types/property';
+import { prepareAreasForFormSubmission } from "../property-form/preparePropertyData";
 
 export function useAreaImageRemove(
   formData: PropertyFormData,
@@ -48,11 +49,14 @@ export function useAreaImageRemove(
       if (formData.id) {
         console.log(`Updating area-image relation in database for property ${formData.id}`);
         
+        // Convert areas to the format expected by the database
+        const areasForDatabase = prepareAreasForFormSubmission(updatedAreas);
+        
         // Update the property record with the new areas data
         const { error: updateError } = await supabase
           .from('properties')
           .update({
-            areas: updatedAreas
+            areas: areasForDatabase
           })
           .eq('id', formData.id);
         
