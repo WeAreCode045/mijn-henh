@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertySubmitData } from "@/types/property";
+import { prepareAreasForFormSubmission } from "./preparePropertyData";
 
 export function usePropertyDatabase() {
   const { toast } = useToast();
@@ -15,6 +16,11 @@ export function usePropertyDatabase() {
     try {
       // Remove floorplans from the data as we store them in property_images now
       const { floorplans, featuredImage, coverImages, ...updateData } = data;
+
+      // Transform areas to the correct format for the database
+      if (updateData.areas && Array.isArray(updateData.areas)) {
+        updateData.areas = prepareAreasForFormSubmission(updateData.areas);
+      }
 
       console.log("usePropertyDatabase - Final update data:", updateData);
       
@@ -55,6 +61,11 @@ export function usePropertyDatabase() {
     try {
       // Remove floorplans from the data as we store them in property_images now
       const { floorplans, featuredImage, coverImages, ...createData } = data;
+
+      // Transform areas to the correct format for the database
+      if (createData.areas && Array.isArray(createData.areas)) {
+        createData.areas = prepareAreasForFormSubmission(createData.areas);
+      }
 
       console.log("usePropertyDatabase - Final create data:", createData);
       

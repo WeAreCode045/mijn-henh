@@ -48,7 +48,11 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         // First try to fetch by object_id
         let { data, error } = await supabase
           .from('properties')
-          .select('*, property_images(*)')
+          .select(`
+            *,
+            property_images(*),
+            agent:profiles(id, full_name, email, phone, photo_url:agent_photo)
+          `)
           .eq('object_id', id)
           .maybeSingle();
 
@@ -57,7 +61,11 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           console.log("usePropertyData - Not found by object_id, trying UUID:", id);
           const { data: uuidData, error: uuidError } = await supabase
             .from('properties')
-            .select('*, property_images(*)')
+            .select(`
+              *,
+              property_images(*),
+              agent:profiles(id, full_name, email, phone, photo_url:agent_photo)
+            `)
             .eq('id', id)
             .maybeSingle();
 
@@ -76,7 +84,13 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         console.log("usePropertyData - Raw data from Supabase:", data);
 
         if (data) {
-          const transformedData = transformSupabaseData(data);
+          // Ensure agent property is properly structured
+          const propertyWithAgent = {
+            ...data,
+            agent: data.agent || null
+          };
+          
+          const transformedData = transformSupabaseData(propertyWithAgent);
           console.log("usePropertyData - Transformed property data:", transformedData);
           
           if (isMounted.current) {

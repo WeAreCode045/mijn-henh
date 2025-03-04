@@ -13,7 +13,11 @@ export const useProperties = () => {
   const fetchProperties = async () => {
     let query = supabase
       .from('properties')
-      .select('*, property_images(*)');
+      .select(`
+        *,
+        property_images(*),
+        agent:profiles(id, full_name, email, phone, photo_url:agent_photo)
+      `);
 
     if (!isAdmin) {
       query = query.eq('agent_id', profile.id);
@@ -25,7 +29,14 @@ export const useProperties = () => {
       throw error;
     }
 
-    return (data || []).map(item => transformSupabaseData(item));
+    return (data || []).map(item => {
+      // Ensure each item has the agent property structured correctly
+      const propertyWithAgent = {
+        ...item,
+        agent: item.agent || null
+      };
+      return transformSupabaseData(propertyWithAgent);
+    });
   };
 
   const { data: properties = [], isLoading, error } = useQuery({
