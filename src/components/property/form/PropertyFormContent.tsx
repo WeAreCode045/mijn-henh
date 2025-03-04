@@ -72,15 +72,11 @@ export function PropertyFormContent({
   const renderStep = () => {
     switch (step) {
       case 1:
+        // Only pass the expected props to GeneralInfoStep
         return (
           <GeneralInfoStep
             formData={formData}
             onFieldChange={onFieldChange}
-            handleImageUpload={handleImageUpload}
-            handleRemoveImage={handleRemoveImage}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleGridImage={handleToggleGridImage}
-            isUploading={isUploading}
           />
         );
       case 2:
@@ -93,16 +89,9 @@ export function PropertyFormContent({
           />
         );
       case 3:
+        // Only pass properties that are expected by ImagesStep
         return (
-          <ImagesStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            handleAreaPhotosUpload={handleAreaPhotosUpload}
-            handleFloorplanUpload={handleFloorplanUpload}
-            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-            handleRemoveFloorplan={handleRemoveFloorplan}
-            handleUpdateFloorplan={handleUpdateFloorplan}
-          />
+          <ImagesStep />
         );
       case 4:
         return (
@@ -120,14 +109,9 @@ export function PropertyFormContent({
           />
         );
       case 5:
+        // Only pass properties that are expected by LocationStep
         return (
-          <LocationStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            onFetchLocationData={onFetchLocationData}
-            onRemoveNearbyPlace={onRemoveNearbyPlace}
-            handleMapImageDelete={handleMapImageDelete}
-          />
+          <LocationStep />
         );
       case 6:
         return (

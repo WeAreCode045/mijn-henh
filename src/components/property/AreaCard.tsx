@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
@@ -34,7 +33,7 @@ export function AreaCard({
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
   
-  // Get area images based on imageIds whenever area or images change
+  // Get area images based on area ID from property_images table
   useEffect(() => {
     const fetchAreaImages = async () => {
       if (!area) {
@@ -42,7 +41,7 @@ export function AreaCard({
         return;
       }
       
-      // If we have a propertyId, try to fetch images from property_images table first
+      // If we have a propertyId, fetch images from property_images table
       if (propertyId) {
         try {
           const { data, error } = await supabase
@@ -57,26 +56,22 @@ export function AreaCard({
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
             setAreaImages(data as PropertyImage[]);
             return;
+          } else {
+            console.log(`AreaCard ${area.id} - No images found in property_images table`);
+            setAreaImages([]);
           }
         } catch (err) {
           console.error(`Error in fetching area images from property_images:`, err);
         }
-      }
-      
-      // Fallback to using imageIds from area if no images found in property_images
-      // This maintains backward compatibility
-      const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
-      console.log(`AreaCard ${area.id} - Finding images for imageIds (fallback):`, imageIds);
-      
-      if (imageIds.length > 0 && images && images.length > 0) {
-        // Find corresponding image objects for each ID
-        const foundImages = images.filter(img => imageIds.includes(img.id));
-        console.log(`AreaCard ${area.id} - Found ${foundImages.length} images from ${imageIds.length} imageIds`);
-        console.log(`Found image details:`, foundImages);
-        setAreaImages(foundImages);
       } else {
-        console.log(`AreaCard ${area.id} - No imageIds available or empty array`);
-        setAreaImages([]);
+        // Fallback to imageIds in area if propertyId is not available
+        const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
+        if (imageIds.length > 0 && images && images.length > 0) {
+          const foundImages = images.filter(img => imageIds.includes(img.id));
+          setAreaImages(foundImages);
+        } else {
+          setAreaImages([]);
+        }
       }
     };
     
@@ -111,7 +106,6 @@ export function AreaCard({
     }
   };
 
-  // Function for upload button click that doesn't require an event parameter
   const handleUploadClick = () => {
     const input = document.createElement("input");
     input.type = "file";

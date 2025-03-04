@@ -8,7 +8,11 @@ export interface PropertyFeature {
 export interface PropertyImage {
   id: string;
   url: string;
-  [key: string]: string;
+  area?: string | null; // Added area property to match the database schema
+  property_id?: string;
+  created_at?: string;
+  type?: string;
+  [key: string]: string | null | undefined; // Keep the index signature for other potential properties
 }
 
 export interface PropertyArea {
