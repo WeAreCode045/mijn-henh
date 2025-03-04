@@ -95,23 +95,29 @@ export function RecentProperties() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {(recentProperties || []).map((property: PropertyData) => (
-            <div 
-              key={property.id} 
-              className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-              onClick={() => navigate(`/property/${property.id}/edit`)}
-            >
-              <img
-                src={property.images?.[0]?.url || '/placeholder.svg'}
-                alt={property.title}
-                className="w-16 h-16 object-cover rounded-lg"
-              />
-              <div>
-                <h3 className="font-medium">{property.title}</h3>
-                <p className="text-sm text-muted-foreground">{property.price}</p>
+          {(recentProperties || []).map((property: PropertyData) => {
+            // Use featured image if available, otherwise fallback to first image
+            const displayImage = property.featuredImage || 
+                               (property.images?.[0]?.url || '/placeholder.svg');
+            
+            return (
+              <div 
+                key={property.id} 
+                className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                onClick={() => navigate(`/property/${property.id}/edit`)}
+              >
+                <img
+                  src={displayImage}
+                  alt={property.title}
+                  className="w-16 h-16 object-cover rounded-lg"
+                />
+                <div>
+                  <h3 className="font-medium">{property.title}</h3>
+                  <p className="text-sm text-muted-foreground">{property.price}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>
