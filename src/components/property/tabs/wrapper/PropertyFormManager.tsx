@@ -63,6 +63,12 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
   // Handle form submission
   const { handleSubmit } = usePropertyFormSubmit();
   
+  // Create a wrapper function that also sets pendingChanges flag
+  const handleFieldChangeWithFlag = (field: keyof PropertyData, value: any) => {
+    handleFieldChange(field, value);
+    setPendingChanges(true);
+  };
+  
   // Handle property content
   const {
     addFeature,
@@ -71,7 +77,10 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     addTechnicalItem,
     removeTechnicalItem,
     updateTechnicalItem,
-  } = usePropertyContent(formState, setFormState);
+  } = usePropertyContent(
+    formState,
+    handleFieldChangeWithFlag
+  );
   
   // Handle property areas
   const {
@@ -81,7 +90,16 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleAreaImageUpload,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-  } = usePropertyAreas(formState, setFormState);
+  } = usePropertyAreas(
+    formState, 
+    handleFieldChangeWithFlag
+  );
+  
+  // Create a wrapper function for setFormState that also sets pendingChanges flag
+  const setFormStateWithFlag = (newState: PropertyData) => {
+    setFormState(newState);
+    setPendingChanges(true);
+  };
   
   // Handle property images
   const {
@@ -93,12 +111,15 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleRemoveFloorplan,
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
-  } = usePropertyImages(formState, setFormState);
+  } = usePropertyImages(
+    formState, 
+    setFormStateWithFlag
+  );
   
   // Handle main image functionality
   const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyMainImages(
     formState, 
-    setFormState
+    setFormStateWithFlag
   );
   
   // Auto-save functionality
