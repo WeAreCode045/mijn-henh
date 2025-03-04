@@ -9,6 +9,7 @@ import { EmptyAreaMessage } from "./EmptyAreaMessage";
 interface PropertyAreasProps {
   areas: PropertyArea[];
   images: PropertyImage[];
+  propertyId?: string;
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
@@ -21,6 +22,7 @@ interface PropertyAreasProps {
 export function PropertyAreas({
   areas = [],
   images = [],
+  propertyId,
   onAdd,
   onRemove,
   onUpdate,
@@ -32,13 +34,14 @@ export function PropertyAreas({
   useEffect(() => {
     console.log("PropertyAreas - Current areas:", areas);
     console.log("PropertyAreas - Available images:", images);
+    console.log("PropertyAreas - Property ID:", propertyId);
     
     // Debug each area's imageIds
     areas.forEach(area => {
       console.log(`Area ${area.id} (${area.title}) - imageIds:`, 
         Array.isArray(area.imageIds) ? area.imageIds : 'Not an array: ' + JSON.stringify(area.imageIds));
     });
-  }, [areas, images]);
+  }, [areas, images, propertyId]);
 
   const handleAddArea = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,6 +80,7 @@ export function PropertyAreas({
               key={area.id}
               area={area}
               images={images}
+              propertyId={propertyId}
               onRemove={onRemove}
               onUpdate={onUpdate}
               onImageUpload={onImageUpload}

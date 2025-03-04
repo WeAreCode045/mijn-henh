@@ -2,7 +2,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from '@/types/property';
-import { prepareAreasForFormSubmission } from "../property-form/preparePropertyData";
 
 export function useAreaImageRemove(
   formData: PropertyFormData,
@@ -45,38 +44,20 @@ export function useAreaImageRemove(
         areas: updatedAreas
       }));
       
-      // If we have a property ID, also update the database
+      // If we have a property ID, update the property_images table
       if (formData.id) {
-        console.log(`Updating area-image relation in database for property ${formData.id}`);
+        console.log(`Removing area assignment for image ${imageId} in property_images table`);
         
-        // Convert areas to the format expected by the database
-        const areasForDatabase = prepareAreasForFormSubmission(updatedAreas);
-        
-        // Update the property record with the new areas data
-        const { error: updateError } = await supabase
-          .from('properties')
-          .update({
-            areas: areasForDatabase
-          })
-          .eq('id', formData.id);
-        
-        if (updateError) {
-          console.error('Error updating property areas in database:', updateError);
-          throw updateError;
-        }
-        
-        // Also check if we need to update any relationships in the area_images table
-        try {
-          // This isn't critical functionality, so we don't throw if it fails
-          await supabase
-            .from('area_images')
-            .delete()
-            .match({
-              area_id: areaId,
-              image_id: imageId
-            });
-        } catch (relationError) {
-          console.error('Error updating area_images relationship (non-critical):', relationError);
+        // Update the property_images record to set area to null
+        const { error } = await supabase
+          .from('property_images')
+          .update({ area: null })
+          .eq('id', imageId)
+          .eq('property_id', formData.id);
+          
+        if (error) {
+          console.error('Error updating property_images:', error);
+          throw error;
         }
       }
       

@@ -8,10 +8,12 @@ import { AreaDescription } from "./area/AreaDescription";
 import { AreaColumnsSelector } from "./area/AreaColumnsSelector";
 import { AreaImageActions } from "./area/AreaImageActions";
 import { AreaImageSelectDialog } from "./area/AreaImageSelectDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AreaCardProps {
   area: PropertyArea;
   images: PropertyImage[];
+  propertyId?: string;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
   onImageUpload: (id: string, files: FileList) => void;
@@ -22,6 +24,7 @@ interface AreaCardProps {
 export function AreaCard({
   area,
   images,
+  propertyId,
   onRemove,
   onUpdate,
   onImageUpload,
@@ -33,26 +36,52 @@ export function AreaCard({
   
   // Get area images based on imageIds whenever area or images change
   useEffect(() => {
-    if (!area || !images || images.length === 0) {
-      setAreaImages([]);
-      return;
-    }
+    const fetchAreaImages = async () => {
+      if (!area) {
+        setAreaImages([]);
+        return;
+      }
+      
+      // If we have a propertyId, try to fetch images from property_images table first
+      if (propertyId) {
+        try {
+          const { data, error } = await supabase
+            .from('property_images')
+            .select('*')
+            .eq('property_id', propertyId)
+            .eq('area', area.id);
+            
+          if (error) {
+            console.error(`Error fetching images for area ${area.id} from property_images:`, error);
+          } else if (data && data.length > 0) {
+            console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
+            setAreaImages(data as PropertyImage[]);
+            return;
+          }
+        } catch (err) {
+          console.error(`Error in fetching area images from property_images:`, err);
+        }
+      }
+      
+      // Fallback to using imageIds from area if no images found in property_images
+      // This maintains backward compatibility
+      const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
+      console.log(`AreaCard ${area.id} - Finding images for imageIds (fallback):`, imageIds);
+      
+      if (imageIds.length > 0 && images && images.length > 0) {
+        // Find corresponding image objects for each ID
+        const foundImages = images.filter(img => imageIds.includes(img.id));
+        console.log(`AreaCard ${area.id} - Found ${foundImages.length} images from ${imageIds.length} imageIds`);
+        console.log(`Found image details:`, foundImages);
+        setAreaImages(foundImages);
+      } else {
+        console.log(`AreaCard ${area.id} - No imageIds available or empty array`);
+        setAreaImages([]);
+      }
+    };
     
-    // Make sure area.imageIds is always an array
-    const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
-    console.log(`AreaCard ${area.id} - Finding images for imageIds:`, imageIds);
-    
-    if (imageIds.length > 0) {
-      // Find corresponding image objects for each ID
-      const foundImages = images.filter(img => imageIds.includes(img.id));
-      console.log(`AreaCard ${area.id} - Found ${foundImages.length} images from ${imageIds.length} imageIds`);
-      console.log(`Found image details:`, foundImages);
-      setAreaImages(foundImages);
-    } else {
-      console.log(`AreaCard ${area.id} - No imageIds available or empty array`);
-      setAreaImages([]);
-    }
-  }, [area, images]);
+    fetchAreaImages();
+  }, [area, images, propertyId]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -75,7 +104,6 @@ export function AreaCard({
 
   const handleUpdateImageIds = (imageIds: string[]) => {
     console.log(`Updating area ${area.id} image IDs:`, imageIds);
-    onUpdate(area.id, "imageIds", imageIds);
     
     // Additional callback for external handling if needed
     if (onImagesSelect) {
@@ -146,7 +174,7 @@ export function AreaCard({
         onOpenChange={setIsSelectDialogOpen}
         images={images}
         areaTitle={area.title}
-        selectedImageIds={Array.isArray(area.imageIds) ? area.imageIds : []}
+        selectedImageIds={areaImages.map(img => img.id)}
         onUpdate={handleUpdateImageIds}
       />
     </Card>

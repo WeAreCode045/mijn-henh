@@ -5,6 +5,7 @@ import type { PropertyArea, PropertyImage } from "@/types/property";
 interface AreasStepProps {
   areas: PropertyArea[];
   images: PropertyImage[];
+  propertyId?: string;
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
@@ -17,6 +18,7 @@ interface AreasStepProps {
 export function AreasStep({
   areas,
   images,
+  propertyId,
   onAddArea,
   onRemoveArea,
   onUpdateArea,
@@ -27,6 +29,7 @@ export function AreasStep({
 }: AreasStepProps) {
   console.log("AreasStep rendering with areas:", areas);
   console.log("AreasStep images:", images);
+  console.log("AreasStep propertyId:", propertyId);
   
   const handleAddArea = (e?: React.MouseEvent) => {
     if (e) {
@@ -40,6 +43,7 @@ export function AreasStep({
     <PropertyAreas
       areas={areas || []}
       images={images || []}
+      propertyId={propertyId}
       onAdd={handleAddArea}
       onRemove={onRemoveArea}
       onUpdate={onUpdateArea}

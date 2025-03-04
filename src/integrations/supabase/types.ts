@@ -111,32 +111,6 @@ export type Database = {
         }
         Relationships: []
       }
-      area_images: {
-        Row: {
-          area_id: string
-          image_id: string
-          position: number
-        }
-        Insert: {
-          area_id: string
-          image_id: string
-          position: number
-        }
-        Update: {
-          area_id?: string
-          image_id?: string
-          position?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "area_images_image_id_fkey"
-            columns: ["image_id"]
-            isOneToOne: false
-            referencedRelation: "property_images"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       brochure_templates: {
         Row: {
           created_at: string

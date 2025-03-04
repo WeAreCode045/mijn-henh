@@ -44,7 +44,8 @@ export function useAreaImageUpload(
             .insert({
               property_id: formData.id,
               url: publicUrl,
-              type: 'image'
+              type: 'image',
+              area: areaId // Directly assign to the area
             })
             .select('id')
             .single();
@@ -73,7 +74,7 @@ export function useAreaImageUpload(
         throw new Error(`Area with ID ${areaId} not found`);
       }
       
-      // Add the new image IDs to the area
+      // Add the new image IDs to the area (for backward compatibility)
       const updatedImageIds = [...(areaToUpdate.imageIds || []), ...newImages.map(img => img.id)];
       console.log(`Updating area ${areaId} with new imageIds:`, updatedImageIds);
       
