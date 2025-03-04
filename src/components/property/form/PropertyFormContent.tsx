@@ -1,3 +1,4 @@
+
 import { PropertyArea, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
@@ -137,6 +138,10 @@ export function PropertyFormContent({
             onAddTechnicalItem={onAddTechnicalItem}
             onRemoveTechnicalItem={onRemoveTechnicalItem}
             onUpdateTechnicalItem={onUpdateTechnicalItem}
+            onFloorplanUpload={handleFloorplanUpload}
+            onRemoveFloorplan={handleRemoveFloorplan}
+            onUpdateFloorplan={handleUpdateFloorplan}
+            isUploading={isUploading}
           />
         );
       default:

@@ -7,7 +7,6 @@ interface TechnicalDataStepProps {
   formData?: PropertyFormData;
   technicalItems?: PropertyTechnicalItem[];
   floorplans?: PropertyFloorplan[];
-  images?: any[]; // Allow images to be passed directly
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
@@ -15,7 +14,6 @@ interface TechnicalDataStepProps {
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
   onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
-  onTechnicalItemFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>, technicalItemId: string) => void;
   isUploading?: boolean;
 }
 
