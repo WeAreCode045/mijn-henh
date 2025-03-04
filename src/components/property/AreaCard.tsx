@@ -36,9 +36,7 @@ export function AreaCard({
     if (area && area.imageIds && images && images.length > 0) {
       console.log(`AreaCard ${area.id} - Finding images for imageIds:`, area.imageIds);
       
-      const foundImages = (area.imageIds || [])
-        .map(id => images.find(img => img.id === id))
-        .filter(Boolean) as PropertyImage[];
+      const foundImages = images.filter(img => area.imageIds.includes(img.id));
       
       console.log(`AreaCard ${area.id} - Found ${foundImages.length} images:`, foundImages);
       

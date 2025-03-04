@@ -27,9 +27,6 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
       ...prev,
       [imageId]: true
     }));
-    
-    // Optionally, we could also remove the image from the area here
-    // onImageRemove(areaId, imageId);
   };
 
   if (!validAreaImages || validAreaImages.length === 0) {
@@ -54,7 +51,7 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
             type="button"
             variant="destructive"
             size="icon"
-            className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 h-6 w-6 opacity-100 shadow-sm"
             onClick={() => onImageRemove(areaId, image.id)}
           >
             <X className="h-3 w-3" />

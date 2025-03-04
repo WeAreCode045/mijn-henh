@@ -14,12 +14,12 @@ export function useAreaImageRemove(
     console.log(`Removing image ${imageId} from area ${areaId}`);
     
     try {
-      // Find the image to get its URL
-      const imageToRemove = formData.images.find(img => img.id === imageId);
+      // Find the area to update
+      const areaToUpdate = formData.areas.find(area => area.id === areaId);
       
-      if (!imageToRemove) {
-        console.error(`Image with ID ${imageId} not found`);
-        throw new Error(`Image with ID ${imageId} not found`);
+      if (!areaToUpdate) {
+        console.error(`Area with ID ${areaId} not found`);
+        throw new Error(`Area with ID ${areaId} not found`);
       }
       
       // First update the area's imageIds in the local state
@@ -42,10 +42,7 @@ export function useAreaImageRemove(
       });
       
       // If we have a property ID, also update the database relation
-      // Note: We don't remove the image itself from storage or property_images table
-      if (formData.id && imageToRemove) {
-        // Only update the area-image relation in the database
-        // We no longer delete from property_images table or storage
+      if (formData.id) {
         console.log(`Updated area-image relation in database for property ${formData.id}`);
       }
       
