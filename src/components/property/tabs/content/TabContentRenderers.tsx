@@ -1,3 +1,4 @@
+
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
@@ -6,7 +7,7 @@ import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 
 // Dashboard Tab
 export function renderDashboardTab(tabProps: PropertyTabProps) {
-  const { activeTab, property, agentInfo, templateInfo, isUpdating, handlers, formState } = tabProps;
+  const { activeTab, property, agentInfo, templateInfo, isUpdating, handlers } = tabProps;
 
   if (activeTab !== 'dashboard') return null;
 
@@ -14,50 +15,59 @@ export function renderDashboardTab(tabProps: PropertyTabProps) {
     <DashboardTabContent
       id={property.id}
       title={property.title}
-      agentInfo={agentInfo}
-      templateInfo={templateInfo}
-      isUpdating={isUpdating}
+      objectId={property.object_id}
+      agentId={agentInfo?.id}
+      agentName={agentInfo?.name}
+      templateId={templateInfo?.id}
+      templateName={templateInfo?.name}
+      createdAt={property.created_at}
+      updatedAt={property.updated_at}
       onSave={handlers.onSave}
       onDelete={handlers.onDelete}
-      handleSaveObjectId={handlers.handleSaveObjectId}
-      handleSaveAgent={handlers.handleSaveAgent}
-      handleSaveTemplate={handlers.handleSaveTemplate}
-      handleGeneratePDF={handlers.handleGeneratePDF}
-      handleWebView={handlers.handleWebView}
-      currentStep={handlers.currentStep}
-      handleStepClick={handlers.handleStepClick}
-      handleNext={handlers.handleNext}
-      handlePrevious={handlers.handlePrevious}
-      onSubmit={handlers.onSubmit}
-      formState={formState}
+      onGeneratePDF={handlers.handleGeneratePDF}
+      onWebView={handlers.handleWebView}
+      onSaveAgent={handlers.handleSaveAgent}
+      onSaveObjectId={handlers.handleSaveObjectId}
+      onSaveTemplate={handlers.handleSaveTemplate}
+      isUpdating={isUpdating}
     />
   );
 }
 
 // Content Tab
 export function renderContentTab(tabProps: PropertyTabProps) {
-  const { activeTab, property, handlers, formState } = tabProps;
+  const { activeTab, property, handlers } = tabProps;
 
   if (activeTab !== 'content') return null;
 
   return (
     <ContentTabContent
-      id={property.id}
-      title={property.title}
-      formState={formState}
+      formData={handlers.formState}
       onFieldChange={handlers.onFieldChange}
       onAddFeature={handlers.onAddFeature}
       onRemoveFeature={handlers.onRemoveFeature}
       onUpdateFeature={handlers.onUpdateFeature}
-      onAddTechnicalItem={handlers.onAddTechnicalItem}
-      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
-      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
       onAddArea={handlers.onAddArea}
       onRemoveArea={handlers.onRemoveArea}
       onUpdateArea={handlers.onUpdateArea}
       onAreaImageUpload={handlers.onAreaImageUpload}
       onAreaImageRemove={handlers.onAreaImageRemove}
       onAreaImagesSelect={handlers.onAreaImagesSelect}
+      handleImageUpload={handlers.handleImageUpload}
+      handleAreaPhotosUpload={handlers.handleImageUpload} // Using same handler for simplicity
+      handleFloorplanUpload={handlers.handleImageUpload} // Using same handler for simplicity
+      handleRemoveImage={handlers.handleRemoveImage}
+      handleRemoveAreaPhoto={handlers.handleRemoveImage} // Using same handler for simplicity
+      handleRemoveFloorplan={handlers.handleRemoveImage} // Using same handler for simplicity
+      onAddTechnicalItem={handlers.onAddTechnicalItem}
+      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
+      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
+      currentStep={handlers.currentStep}
+      handleStepClick={handlers.handleStepClick}
+      handleNext={handlers.handleNext}
+      handlePrevious={handlers.handlePrevious}
+      onSubmit={handlers.onSubmit}
+      isUploading={handlers.isUploading}
     />
   );
 }
@@ -93,11 +103,14 @@ export function renderMediaTab(tabProps: PropertyTabProps) {
 
 // Communications Tab
 export function renderCommunicationsTab(tabProps: PropertyTabProps) {
-  const { activeTab } = tabProps;
+  const { activeTab, property } = tabProps;
 
   if (activeTab !== 'communications') return null;
 
   return (
-    <CommunicationsTabContent />
+    <CommunicationsTabContent 
+      id={property.id}
+      title={property.title}
+    />
   );
 }
