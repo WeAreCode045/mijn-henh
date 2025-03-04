@@ -1,14 +1,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UploadIcon, Trash2Icon } from "lucide-react";
+import { UploadIcon, Trash2Icon, StarIcon, GridIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { useState } from "react";
+import { ImagePreview } from "@/components/ui/ImagePreview";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onSetFeatured?: (url: string) => void; 
+  onToggleGrid?: (url: string) => void;
+  featuredImageUrl?: string | null;
+  gridImageUrls?: string[];
   isUploading?: boolean;
 }
 
@@ -16,6 +21,10 @@ export function PropertyImagesCard({
   images = [],
   onImageUpload,
   onRemoveImage,
+  onSetFeatured,
+  onToggleGrid,
+  featuredImageUrl,
+  gridImageUrls = [],
   isUploading = false,
 }: PropertyImagesCardProps) {
   // File input ref
@@ -59,28 +68,15 @@ export function PropertyImagesCard({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             {images && images.length > 0 ? (
               images.map((image, index) => (
-                <div key={image.id || index} className="relative group">
-                  <div className="aspect-square border rounded-lg overflow-hidden bg-gray-100">
-                    <img
-                      src={image.url}
-                      alt={`Property image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    {/* Delete button */}
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => onRemoveImage(index)}
-                    >
-                      <Trash2Icon className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                <ImagePreview
+                  key={image.id || index}
+                  url={image.url}
+                  onRemove={() => onRemoveImage(index)}
+                  isFeatured={image.url === featuredImageUrl}
+                  onSetFeatured={onSetFeatured ? () => onSetFeatured(image.url) : undefined}
+                  isInGrid={gridImageUrls.includes(image.url)}
+                  onToggleGrid={onToggleGrid ? () => onToggleGrid(image.url) : undefined}
+                />
               ))
             ) : (
               <div className="col-span-full py-8 text-center text-gray-500">

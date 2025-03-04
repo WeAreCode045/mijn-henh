@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -107,11 +106,9 @@ export function PropertyTabContents({
   handleNext,
   handlePrevious,
   onSubmit,
-  // Add optional props for backward compatibility
   handleSetFeaturedImage,
   handleToggleGridImage
 }: PropertyTabContentsProps) {
-  // Create wrapped versions of handlers to prevent default behavior
   const safeAddTechnicalItem = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
@@ -123,7 +120,6 @@ export function PropertyTabContents({
     }
   };
 
-  // Organize all handler functions into a single object
   const handlers = {
     onSave,
     onDelete,
@@ -150,7 +146,6 @@ export function PropertyTabContents({
     handleRemoveAreaPhoto,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    // Use the wrapped version of onAddTechnicalItem
     onAddTechnicalItem: safeAddTechnicalItem,
     onRemoveTechnicalItem,
     onUpdateTechnicalItem,
@@ -159,20 +154,17 @@ export function PropertyTabContents({
     handleNext,
     handlePrevious,
     onSubmit,
-    formState, // Added formState to handlers to make it available in renderers
-    // Add dummy functions for backward compatibility
-    handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Featured image functionality has been removed")),
-    handleToggleGridImage: handleToggleGridImage || (() => console.warn("Grid image functionality has been removed"))
+    formState,
+    handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Featured image functionality not available")),
+    handleToggleGridImage: handleToggleGridImage || (() => console.warn("Grid image functionality not available"))
   };
 
-  // Common props for all tab renderers
   const tabProps = {
     activeTab,
     property: {
       ...property,
-      // Add missing properties that might be expected by renderers
-      featuredImage: "",
-      gridImages: []
+      featuredImage: formState.featuredImage || "",
+      gridImages: formState.gridImages || []
     },
     formState,
     agentInfo,
@@ -181,7 +173,6 @@ export function PropertyTabContents({
     handlers
   };
 
-  // Debug the active tab to ensure it's being set correctly
   console.log("PropertyTabContents - Active tab:", activeTab);
 
   return (

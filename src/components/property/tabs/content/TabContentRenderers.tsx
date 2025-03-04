@@ -1,122 +1,103 @@
-
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
+import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 
-// Common props type to simplify passing data to tab renderers
-interface TabRenderProps {
-  activeTab: string;
-  property: {
-    id: string;
-    title: string;
-    object_id?: string;
-    agent_id?: string;
-    created_at?: string;
-    updated_at?: string;
-    images: any[];
-    featuredImage?: string; // Made optional
-    gridImages?: string[]; // Made optional
-    virtualTourUrl?: string;
-    youtubeUrl?: string;
-    notes?: string;
-  };
-  formState: any;
-  agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
-  isUpdating: boolean;
-  handlers: any;
-}
+// Dashboard Tab
+export function renderDashboardTab(tabProps: PropertyTabProps) {
+  const { activeTab, property, agentInfo, templateInfo, isUpdating, handlers, formState } = tabProps;
 
-export const renderDashboardTab = ({ activeTab, property, agentInfo, templateInfo, isUpdating, handlers }: TabRenderProps) => {
   if (activeTab !== 'dashboard') return null;
-  
+
   return (
     <DashboardTabContent
       id={property.id}
-      objectId={property.object_id}
       title={property.title}
-      agentId={agentInfo?.id}
-      agentName={agentInfo?.name}
-      templateId={templateInfo?.id}
-      templateName={templateInfo?.name}
-      createdAt={property.created_at}
-      updatedAt={property.updated_at}
+      agentInfo={agentInfo}
+      templateInfo={templateInfo}
+      isUpdating={isUpdating}
       onSave={handlers.onSave}
       onDelete={handlers.onDelete}
-      onGeneratePDF={handlers.handleGeneratePDF}
-      onWebView={handlers.handleWebView}
-      onSaveAgent={handlers.handleSaveAgent}
-      onSaveObjectId={handlers.handleSaveObjectId}
-      onSaveTemplate={handlers.handleSaveTemplate}
-      isUpdating={isUpdating}
+      handleSaveObjectId={handlers.handleSaveObjectId}
+      handleSaveAgent={handlers.handleSaveAgent}
+      handleSaveTemplate={handlers.handleSaveTemplate}
+      handleGeneratePDF={handlers.handleGeneratePDF}
+      handleWebView={handlers.handleWebView}
+      currentStep={handlers.currentStep}
+      handleStepClick={handlers.handleStepClick}
+      handleNext={handlers.handleNext}
+      handlePrevious={handlers.handlePrevious}
+      onSubmit={handlers.onSubmit}
+      formState={formState}
     />
   );
-};
+}
 
-export const renderContentTab = ({ activeTab, formState, handlers }: TabRenderProps) => {
+// Content Tab
+export function renderContentTab(tabProps: PropertyTabProps) {
+  const { activeTab, property, handlers, formState } = tabProps;
+
   if (activeTab !== 'content') return null;
-  
+
   return (
     <ContentTabContent
-      formData={formState}
+      id={property.id}
+      title={property.title}
+      formState={formState}
       onFieldChange={handlers.onFieldChange}
       onAddFeature={handlers.onAddFeature}
       onRemoveFeature={handlers.onRemoveFeature}
       onUpdateFeature={handlers.onUpdateFeature}
+      onAddTechnicalItem={handlers.onAddTechnicalItem}
+      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
+      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
       onAddArea={handlers.onAddArea}
       onRemoveArea={handlers.onRemoveArea}
       onUpdateArea={handlers.onUpdateArea}
       onAreaImageUpload={handlers.onAreaImageUpload}
       onAreaImageRemove={handlers.onAreaImageRemove}
       onAreaImagesSelect={handlers.onAreaImagesSelect}
-      handleImageUpload={handlers.handleImageUpload}
-      handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
-      handleFloorplanUpload={handlers.handleFloorplanUpload}
-      handleRemoveImage={handlers.handleRemoveImage}
-      handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
-      handleRemoveFloorplan={handlers.handleRemoveFloorplan}
-      handleUpdateFloorplan={handlers.handleUpdateFloorplan}
-      onAddTechnicalItem={handlers.onAddTechnicalItem}
-      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
-      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
-      currentStep={handlers.currentStep}
-      handleStepClick={handlers.handleStepClick}
-      handleNext={handlers.handleNext}
-      handlePrevious={handlers.handlePrevious}
-      onSubmit={handlers.onSubmit}
-      isUploading={handlers.isUploading}
     />
   );
-};
+}
 
-export const renderMediaTab = ({ activeTab, property, handlers }: TabRenderProps) => {
+// Update the renderMediaTab function to pass the featured and grid image properties
+export function renderMediaTab(tabProps: PropertyTabProps) {
+  const { activeTab, property, handlers } = tabProps;
+  
   if (activeTab !== 'media') return null;
   
   return (
     <MediaTabContent
       id={property.id}
       title={property.title}
-      images={property.images}
+      images={property.images || []}
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
-      onVirtualTourUpdate={(url: string) => handlers.onFieldChange('virtualTourUrl', url)}
-      onYoutubeUrlUpdate={(url: string) => handlers.onFieldChange('youtubeUrl', url)}
-      onNotesUpdate={(notes: string) => handlers.onFieldChange('notes', notes)}
+      notes={property.notes}
+      onVirtualTourUpdate={(url) => handlers.onFieldChange('virtualTourUrl', url)}
+      onYoutubeUrlUpdate={(url) => handlers.onFieldChange('youtubeUrl', url)}
+      onNotesUpdate={(notes) => handlers.onFieldChange('notes', notes)}
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
       isUploading={handlers.isUploading}
+      // Add the new properties
+      featuredImageUrl={property.featuredImage}
+      gridImageUrls={property.gridImages}
+      onSetFeatured={handlers.handleSetFeaturedImage}
+      onToggleGrid={handlers.handleToggleGridImage}
     />
   );
-};
+}
 
-export const renderCommunicationsTab = ({ activeTab, property }: TabRenderProps) => {
+// Communications Tab
+export function renderCommunicationsTab(tabProps: PropertyTabProps) {
+  const { activeTab } = tabProps;
+
   if (activeTab !== 'communications') return null;
-  
+
   return (
-    <CommunicationsTabContent 
-      id={property.id}
-      title={property.title}
-    />
+    <CommunicationsTabContent />
   );
-};
+}
