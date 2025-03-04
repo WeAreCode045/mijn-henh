@@ -138,7 +138,7 @@ export function ImageSelections({
               </DialogTitle>
             </DialogHeader>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4 max-h-[60vh] overflow-y-auto p-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
               {images.map((image, index) => {
                 const isSelected = selectionType === 'featured' 
                   ? image.url === featuredImage
@@ -147,7 +147,7 @@ export function ImageSelections({
                 return (
                   <div 
                     key={image.id || index} 
-                    className={`relative cursor-pointer aspect-square border-2 rounded-lg overflow-hidden hover:border-blue-500 ${isSelected ? 'border-blue-500' : 'border-gray-200'}`}
+                    className={`relative cursor-pointer h-[150px] border-2 rounded-lg overflow-hidden hover:border-blue-500 ${isSelected ? 'border-blue-500' : 'border-gray-200'}`}
                     onClick={() => handleSelectImage(image.url)}
                   >
                     <img
