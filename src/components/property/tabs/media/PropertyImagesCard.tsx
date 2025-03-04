@@ -37,6 +37,21 @@ export function PropertyImagesCard({
     e.target.value = '';
   };
 
+  // Add methods to handle featured and grid image actions with preventDefault
+  const handleSetFeatured = (e: React.MouseEvent, url: string) => {
+    e.preventDefault(); // Prevent form submission
+    if (onSetFeatured) {
+      onSetFeatured(url);
+    }
+  };
+
+  const handleToggleGrid = (e: React.MouseEvent, url: string) => {
+    e.preventDefault(); // Prevent form submission
+    if (onToggleGrid) {
+      onToggleGrid(url);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -73,9 +88,9 @@ export function PropertyImagesCard({
                   url={image.url}
                   onRemove={() => onRemoveImage(index)}
                   isFeatured={image.url === featuredImageUrl}
-                  onSetFeatured={onSetFeatured ? () => onSetFeatured(image.url) : undefined}
+                  onSetFeatured={(e) => handleSetFeatured(e, image.url)}
                   isInGrid={gridImageUrls.includes(image.url)}
-                  onToggleGrid={onToggleGrid ? () => onToggleGrid(image.url) : undefined}
+                  onToggleGrid={(e) => handleToggleGrid(e, image.url)}
                 />
               ))
             ) : (

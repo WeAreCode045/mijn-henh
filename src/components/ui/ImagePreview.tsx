@@ -6,9 +6,9 @@ interface ImagePreviewProps {
   url: string;
   onRemove: () => void;
   isFeatured?: boolean;
-  onSetFeatured?: () => void;
+  onSetFeatured?: (e: React.MouseEvent) => void;
   isInGrid?: boolean;
-  onToggleGrid?: () => void;
+  onToggleGrid?: (e: React.MouseEvent) => void;
 }
 
 export function ImagePreview({
@@ -31,8 +31,12 @@ export function ImagePreview({
         <Button 
           size="icon" 
           variant="destructive" 
-          onClick={onRemove} 
+          onClick={(e) => {
+            e.preventDefault(); // Prevent form submission
+            onRemove();
+          }} 
           className="h-8 w-8"
+          type="button"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -44,6 +48,7 @@ export function ImagePreview({
             onClick={onSetFeatured} 
             className="h-8 w-8"
             title={isFeatured ? "Featured image" : "Set as featured"}
+            type="button"
           >
             <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} />
           </Button>
@@ -56,6 +61,7 @@ export function ImagePreview({
             onClick={onToggleGrid} 
             className="h-8 w-8"
             title={isInGrid ? "Remove from grid" : "Add to grid"}
+            type="button"
           >
             <Grid className="h-4 w-4" />
           </Button>
