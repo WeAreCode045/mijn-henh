@@ -11,9 +11,9 @@ interface PropertyImagesCardProps {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
   onSetFeatured?: (url: string) => void; 
-  onToggleGrid?: (url: string) => void;
+  onToggleCover?: (url: string) => void;
   featuredImageUrl?: string | null;
-  gridImageUrls?: string[];
+  coverImageUrls?: string[];
   isUploading?: boolean;
 }
 
@@ -22,9 +22,9 @@ export function PropertyImagesCard({
   onImageUpload,
   onRemoveImage,
   onSetFeatured,
-  onToggleGrid,
+  onToggleCover,
   featuredImageUrl,
-  gridImageUrls = [],
+  coverImageUrls = [],
   isUploading = false,
 }: PropertyImagesCardProps) {
   // File input ref
@@ -37,7 +37,7 @@ export function PropertyImagesCard({
     e.target.value = '';
   };
 
-  // Add methods to handle featured and grid image actions with preventDefault
+  // Add methods to handle featured and cover image actions with preventDefault
   const handleSetFeatured = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
     if (onSetFeatured) {
@@ -45,10 +45,10 @@ export function PropertyImagesCard({
     }
   };
 
-  const handleToggleGrid = (e: React.MouseEvent, url: string) => {
+  const handleToggleCover = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
-    if (onToggleGrid) {
-      onToggleGrid(url);
+    if (onToggleCover) {
+      onToggleCover(url);
     }
   };
 
@@ -89,8 +89,8 @@ export function PropertyImagesCard({
                   onRemove={() => onRemoveImage(index)}
                   isFeatured={image.url === featuredImageUrl}
                   onSetFeatured={(e) => handleSetFeatured(e, image.url)}
-                  isInGrid={gridImageUrls.includes(image.url)}
-                  onToggleGrid={(e) => handleToggleGrid(e, image.url)}
+                  isInCover={coverImageUrls.includes(image.url)}
+                  onToggleCover={(e) => handleToggleCover(e, image.url)}
                 />
               ))
             ) : (

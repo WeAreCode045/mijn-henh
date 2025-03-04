@@ -33,7 +33,7 @@ export interface PropertyFormManagerChildrenProps {
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan: (index: number, field: any, value: any) => void;
   handleSetFeaturedImage: (url: string | null) => void;
-  handleToggleGridImage: (url: string) => void;
+  handleToggleCoverImage: (url: string) => void;
   onSubmit: () => void;
   currentStep: number;
   handleStepClick: (step: number) => void;

@@ -17,11 +17,11 @@ interface MediaTabContentProps {
   isUploading?: boolean;
   // Add onUpload as an alias for onImageUpload
   onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  // Add new properties for featured and grid images
+  // Updated properties for featured and cover images
   featuredImageUrl?: string | null;
-  gridImageUrls?: string[];
+  coverImageUrls?: string[];
   onSetFeatured?: (url: string) => void;
-  onToggleGrid?: (url: string) => void;
+  onToggleCover?: (url: string) => void;
 }
 
 export function MediaTabContent({
@@ -39,9 +39,9 @@ export function MediaTabContent({
   isUploading,
   onUpload,
   featuredImageUrl,
-  gridImageUrls,
+  coverImageUrls,
   onSetFeatured,
-  onToggleGrid,
+  onToggleCover,
 }: MediaTabContentProps) {
   // Use aliases if provided, fall back to original props
   const effectiveImageUpload = onUpload || onImageUpload;
@@ -61,9 +61,9 @@ export function MediaTabContent({
       onRemoveImage={onRemoveImage}
       isUploading={isUploading}
       featuredImageUrl={featuredImageUrl}
-      gridImageUrls={gridImageUrls}
+      coverImageUrls={coverImageUrls}
       onSetFeatured={onSetFeatured}
-      onToggleGrid={onToggleGrid}
+      onToggleCover={onToggleCover}
     />
   );
 }

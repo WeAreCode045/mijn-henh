@@ -7,8 +7,8 @@ interface ImagePreviewProps {
   onRemove: () => void;
   isFeatured?: boolean;
   onSetFeatured?: (e: React.MouseEvent) => void;
-  isInGrid?: boolean;
-  onToggleGrid?: (e: React.MouseEvent) => void;
+  isInCover?: boolean;
+  onToggleCover?: (e: React.MouseEvent) => void;
 }
 
 export function ImagePreview({
@@ -16,8 +16,8 @@ export function ImagePreview({
   onRemove,
   isFeatured,
   onSetFeatured,
-  isInGrid,
-  onToggleGrid
+  isInCover,
+  onToggleCover
 }: ImagePreviewProps) {
   return (
     <div className="relative group border border-gray-200 rounded-md overflow-hidden">
@@ -54,16 +54,16 @@ export function ImagePreview({
           </Button>
         )}
         
-        {onToggleGrid && (
+        {onToggleCover && (
           <Button 
             size="icon" 
-            variant={isInGrid ? "secondary" : "ghost"} 
-            onClick={onToggleGrid} 
-            className={`h-8 w-8 ${isInGrid ? "bg-blue-100" : "hover:bg-blue-50"}`}
-            title={isInGrid ? "Remove from grid" : "Add to grid"}
+            variant={isInCover ? "secondary" : "ghost"} 
+            onClick={onToggleCover} 
+            className={`h-8 w-8 ${isInCover ? "bg-blue-100" : "hover:bg-blue-50"}`}
+            title={isInCover ? "Remove from cover" : "Add to cover"}
             type="button"
           >
-            <Grid className={`h-4 w-4 ${isInGrid ? "text-blue-500" : ""}`} />
+            <Grid className={`h-4 w-4 ${isInCover ? "text-blue-500" : ""}`} />
           </Button>
         )}
       </div>
@@ -75,17 +75,17 @@ export function ImagePreview({
         </div>
       )}
       
-      {/* Grid image tag - New addition */}
-      {isInGrid && !isFeatured && (
+      {/* Cover image tag - Updated naming from Grid */}
+      {isInCover && !isFeatured && (
         <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1 rounded">
-          Grid
+          Cover
         </div>
       )}
       
-      {/* Show both tags if both are true, position the grid tag below the featured tag */}
-      {isInGrid && isFeatured && (
+      {/* Show both tags if both are true, position the cover tag below the featured tag */}
+      {isInCover && isFeatured && (
         <div className="absolute top-6 right-1 bg-blue-500 text-white text-xs px-1 rounded">
-          Grid
+          Cover
         </div>
       )}
     </div>

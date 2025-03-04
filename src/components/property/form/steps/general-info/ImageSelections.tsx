@@ -9,22 +9,22 @@ import { Check, Image as ImageIcon } from "lucide-react";
 interface ImageSelectionsProps {
   images: PropertyImage[];
   featuredImage: string | null;
-  gridImages: string[];
+  coverImages: string[];
   onFeaturedImageSelect: (url: string | null) => void;
-  onGridImageToggle: (url: string) => void;
-  maxGridImages?: number;
+  onCoverImageToggle: (url: string) => void;
+  maxCoverImages?: number;
 }
 
 export function ImageSelections({
   images,
   featuredImage,
-  gridImages = [],
+  coverImages = [],
   onFeaturedImageSelect,
-  onGridImageToggle,
-  maxGridImages = 4
+  onCoverImageToggle,
+  maxCoverImages = 4
 }: ImageSelectionsProps) {
   const [imageSelectOpen, setImageSelectOpen] = useState(false);
-  const [selectionType, setSelectionType] = useState<'featured' | 'grid'>('featured');
+  const [selectionType, setSelectionType] = useState<'featured' | 'cover'>('featured');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   const handleOpenSelectFeatured = (e: React.MouseEvent) => {
@@ -34,9 +34,9 @@ export function ImageSelections({
     setImageSelectOpen(true);
   };
   
-  const handleOpenSelectGrid = (e: React.MouseEvent) => {
+  const handleOpenSelectCover = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
-    setSelectionType('grid');
+    setSelectionType('cover');
     setSelectedImage(null);
     setImageSelectOpen(true);
   };
@@ -45,8 +45,8 @@ export function ImageSelections({
     if (selectionType === 'featured') {
       setSelectedImage(url);
     } else {
-      // For grid images, toggle directly
-      onGridImageToggle(url);
+      // For cover images, toggle directly
+      onCoverImageToggle(url);
     }
   };
   
@@ -63,7 +63,7 @@ export function ImageSelections({
     setImageSelectOpen(false);
   };
   
-  const canAddMoreGridImages = gridImages.length < maxGridImages;
+  const canAddMoreCoverImages = coverImages.length < maxCoverImages;
   
   return (
     <Card>
@@ -101,28 +101,29 @@ export function ImageSelections({
             <Button 
               onClick={handleOpenSelectFeatured} 
               type="button"
+              className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-800"
             >
               {featuredImage ? "Change" : "Select"} Featured Image
             </Button>
           </div>
         </div>
         
-        {/* Grid Images Selection */}
+        {/* Cover Images Selection - Renamed from Grid Images */}
         <div className="space-y-2">
-          <h3 className="text-md font-medium">Grid Images (max {maxGridImages})</h3>
+          <h3 className="text-md font-medium">Cover Images (max {maxCoverImages})</h3>
           <div className="flex flex-wrap gap-4">
-            {gridImages.map((url, index) => (
+            {coverImages.map((url, index) => (
               <div key={index} className="relative w-24 h-24 border rounded-lg overflow-hidden">
                 <img 
                   src={url} 
-                  alt={`Grid ${index + 1}`} 
+                  alt={`Cover ${index + 1}`} 
                   className="w-full h-full object-cover"
                 />
                 <button 
                   className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-xs"
                   onClick={(e) => {
                     e.preventDefault(); // Prevent form submission
-                    onGridImageToggle(url);
+                    onCoverImageToggle(url);
                   }}
                   type="button"
                 >
@@ -131,10 +132,10 @@ export function ImageSelections({
               </div>
             ))}
             
-            {canAddMoreGridImages && (
+            {canAddMoreCoverImages && (
               <Button 
-                onClick={handleOpenSelectGrid}
-                className="h-24 w-24 flex flex-col items-center justify-center"
+                onClick={handleOpenSelectCover}
+                className="h-24 w-24 flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800"
                 variant="outline"
                 type="button"
               >
@@ -150,17 +151,17 @@ export function ImageSelections({
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>
-                {selectionType === 'featured' ? 'Select Featured Image' : 'Select Grid Image'}
+                {selectionType === 'featured' ? 'Select Featured Image' : 'Select Cover Image'}
               </DialogTitle>
             </DialogHeader>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
               {images.map((image, index) => {
                 // For featured images, check against the temporary selectedImage state
-                // For grid images, check if it's already in the gridImages array
+                // For cover images, check if it's already in the coverImages array
                 const isSelected = selectionType === 'featured' 
                   ? image.url === selectedImage
-                  : gridImages.includes(image.url);
+                  : coverImages.includes(image.url);
                 
                 return (
                   <div 

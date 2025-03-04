@@ -57,7 +57,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleAreaImagesSelect,
   } = usePropertyAreas(
     formState, 
-    setFormStateWithTracking // Use proper Dispatch<SetStateAction<PropertyFormData>> here
+    setFormStateWithTracking
   );
   
   // Property images management - use setFormStateWithTracking 
@@ -76,8 +76,8 @@ export function usePropertyFormManager(property: PropertyData) {
     setFormStateWithTracking
   );
   
-  // Import directly instead of using require
-  const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyMainImages(
+  // Import directly instead of using require, and use updated method name
+  const { handleSetFeaturedImage, handleToggleCoverImage } = usePropertyMainImages(
     formState, 
     setFormStateWithTracking
   );
@@ -117,7 +117,7 @@ export function usePropertyFormManager(property: PropertyData) {
   const propertyWithRequiredProps = {
     ...propertyWithRequiredId,
     featuredImage: propertyWithRequiredId.featuredImage || null,
-    gridImages: propertyWithRequiredId.gridImages || []
+    coverImages: propertyWithRequiredId.coverImages || []
   };
 
   return {
@@ -150,7 +150,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveFloorplan,
     handleUpdateFloorplan,
     handleSetFeaturedImage,
-    handleToggleGridImage,
+    handleToggleCoverImage,
     onSubmit,
     currentStep,
     handleStepClick,

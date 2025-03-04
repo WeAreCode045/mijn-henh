@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
@@ -61,46 +60,46 @@ export function usePropertyMainImages(
     }
   };
 
-  // Toggle whether an image is in the grid
-  const handleToggleGridImage = async (url: string) => {
+  // Toggle whether an image is in the cover images
+  const handleToggleCoverImage = async (url: string) => {
     if (!formData.id) return;
     
     setIsUpdating(true);
     try {
-      // Check if the image is already in the grid
-      const isInGrid = formData.gridImages?.includes(url) || false;
+      // Check if the image is already in the cover images
+      const isInCover = formData.coverImages?.includes(url) || false;
       
-      // Toggle the is_grid_image flag in the database
+      // Toggle the is_grid_image flag in the database (keeping the database field name)
       await supabase
         .from('property_images')
-        .update({ is_grid_image: !isInGrid })
+        .update({ is_grid_image: !isInCover })
         .eq('property_id', formData.id)
         .eq('url', url);
       
-      // Update local state
+      // Update local state with the new terminology
       setFormData(prevState => {
-        const currentGridImages = prevState.gridImages || [];
-        const updatedGridImages = isInGrid
-          ? currentGridImages.filter(img => img !== url)
-          : [...currentGridImages, url];
+        const currentCoverImages = prevState.coverImages || [];
+        const updatedCoverImages = isInCover
+          ? currentCoverImages.filter(img => img !== url)
+          : [...currentCoverImages, url];
         
         return {
           ...prevState,
-          gridImages: updatedGridImages
+          coverImages: updatedCoverImages
         };
       });
       
       toast({
         title: "Success",
-        description: isInGrid 
-          ? "Image removed from grid." 
-          : "Image added to grid."
+        description: isInCover 
+          ? "Image removed from cover." 
+          : "Image added to cover."
       });
     } catch (error) {
-      console.error("Error toggling grid image:", error);
+      console.error("Error toggling cover image:", error);
       toast({
         title: "Error",
-        description: "Failed to update grid image.",
+        description: "Failed to update cover image.",
         variant: "destructive"
       });
     } finally {
@@ -110,7 +109,7 @@ export function usePropertyMainImages(
 
   return {
     handleSetFeaturedImage,
-    handleToggleGridImage,
+    handleToggleCoverImage,
     isUpdating
   };
 }
