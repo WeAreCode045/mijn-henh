@@ -1,3 +1,4 @@
+
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,19 +24,34 @@ export function usePropertyMainImages(
     // Update in database if we have a property ID
     if (formData.id) {
       try {
-        const { error } = await supabase
-          .from('properties')
-          .update({ featuredImage: url })
-          .eq('id', formData.id);
+        // First, unset all featured images
+        const { error: clearError } = await supabase
+          .from('property_images')
+          .update({ is_featured: false })
+          .eq('property_id', formData.id);
           
-        if (error) {
-          console.error("Error updating featured image in database:", error);
-          toast({
-            title: "Error",
-            description: "Failed to update featured image in database",
-            variant: "destructive"
-          });
+        if (clearError) {
+          console.error("Error clearing featured images in database:", clearError);
           return;
+        }
+        
+        // Then set the new featured image
+        if (url) {
+          const { error } = await supabase
+            .from('property_images')
+            .update({ is_featured: true })
+            .eq('property_id', formData.id)
+            .eq('url', url);
+            
+          if (error) {
+            console.error("Error updating featured image in database:", error);
+            toast({
+              title: "Error",
+              description: "Failed to update featured image in database",
+              variant: "destructive"
+            });
+            return;
+          }
         }
         
         toast({
@@ -61,10 +77,12 @@ export function usePropertyMainImages(
     const currentGridImages = [...(formData.gridImages || [])];
     
     let updatedGridImages: string[];
+    let newIsGridValue: boolean;
     
     // If image is already in grid, remove it
     if (currentGridImages.includes(url)) {
       updatedGridImages = currentGridImages.filter(imageUrl => imageUrl !== url);
+      newIsGridValue = false;
     } else {
       // Otherwise add it (max 4)
       if (currentGridImages.length >= 4) {
@@ -75,6 +93,7 @@ export function usePropertyMainImages(
         return;
       }
       updatedGridImages = [...currentGridImages, url];
+      newIsGridValue = true;
     }
     
     // Update form data
@@ -89,15 +108,16 @@ export function usePropertyMainImages(
     if (formData.id) {
       try {
         const { error } = await supabase
-          .from('properties')
-          .update({ gridImages: updatedGridImages })
-          .eq('id', formData.id);
+          .from('property_images')
+          .update({ is_grid_image: newIsGridValue })
+          .eq('property_id', formData.id)
+          .eq('url', url);
           
         if (error) {
-          console.error("Error updating grid images in database:", error);
+          console.error("Error updating grid image in database:", error);
           toast({
             title: "Error",
-            description: "Failed to update grid images in database",
+            description: "Failed to update grid image in database",
             variant: "destructive"
           });
           return;
@@ -105,13 +125,13 @@ export function usePropertyMainImages(
         
         toast({
           title: "Success",
-          description: "Grid images updated successfully",
+          description: "Grid image updated successfully",
         });
       } catch (error) {
-        console.error("Error updating grid images:", error);
+        console.error("Error updating grid image:", error);
         toast({
           title: "Error",
-          description: "Failed to update grid images",
+          description: "Failed to update grid image",
           variant: "destructive"
         });
       }

@@ -19,18 +19,19 @@ export function useImageRemoveHandler(
     
     // Get the image to be removed
     const imageToRemove = formData.images[index];
+    const imageUrl = typeof imageToRemove === 'string' ? imageToRemove : imageToRemove.url;
     
     // Create a copy of the images array without the removed image
     const updatedImages = formData.images.filter((_, i) => i !== index);
     
     // Update the featured image if it was removed
     let updatedFeaturedImage = formData.featuredImage;
-    if (formData.featuredImage === imageToRemove.url) {
+    if (formData.featuredImage === imageUrl) {
       updatedFeaturedImage = null;
     }
     
     // Update grid images if they include the removed image
-    const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageToRemove.url);
+    const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageUrl);
     
     // Create an updated form data object
     const updatedFormData = {
@@ -43,7 +44,7 @@ export function useImageRemoveHandler(
     // Update the form state
     setFormData(updatedFormData);
     
-    // Attempt to delete the file from storage if file path exists
+    // If the image has a file path, attempt to delete it from storage
     if (imageToRemove.filePath) {
       try {
         const { error } = await supabase.storage
@@ -58,15 +59,14 @@ export function useImageRemoveHandler(
       }
     }
     
-    // If property exists in database, update the property_images table
-    if (formData.id && imageToRemove.url) {
+    // If property exists in database, delete the image from property_images table
+    if (formData.id && imageUrl) {
       try {
         const { error } = await supabase
           .from('property_images')
           .delete()
-          .eq('url', imageToRemove.url)
-          .eq('property_id', formData.id)
-          .eq('type', 'image');
+          .eq('url', imageUrl)
+          .eq('property_id', formData.id);
           
         if (error) {
           console.error('Error removing image from database:', error);

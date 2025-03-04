@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import type { PropertyFormData, PropertySubmitData } from "@/types/property";
@@ -40,6 +39,8 @@ export function usePropertyFormSubmit() {
     console.log("usePropertyFormSubmit - Form submission - floorplans:", floorplansForSubmission);
     console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
     
+    // We still include featuredImage and gridImages in the submission data for backward compatibility
+    // But we now also update the property_images table directly
     const submitData: PropertySubmitData = {
       title: formData.title,
       price: formData.price,
@@ -56,14 +57,14 @@ export function usePropertyFormSubmit() {
       location_description: formData.location_description,
       features: featuresJson,
       floorplans: floorplansForSubmission,
-      featuredImage: formData.featuredImage,
-      gridImages: formData.gridImages,
+      featuredImage: formData.featuredImage, // Keep for backward compatibility
+      gridImages: formData.gridImages, // Keep for backward compatibility
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
       areas: areasForSubmission,
       nearby_places: nearby_placesJson,
-      images: formData.images.map(img => img.url),
+      images: formData.images.map(img => typeof img === 'string' ? img : img.url),
       object_id: formData.object_id,
       agent_id: formData.agent_id,
       template_id: formData.template_id,
@@ -80,8 +81,42 @@ export function usePropertyFormSubmit() {
     let success = false;
     if (formData.id) {
       success = await updateProperty(formData.id, submitData);
+      
+      // Update property_images table to set is_featured and is_grid_image flags
+      if (success) {
+        try {
+          // Reset all image flags first
+          await supabase
+            .from('property_images')
+            .update({ is_featured: false, is_grid_image: false })
+            .eq('property_id', formData.id);
+          
+          // Set featured image
+          if (formData.featuredImage) {
+            await supabase
+              .from('property_images')
+              .update({ is_featured: true })
+              .eq('property_id', formData.id)
+              .eq('url', formData.featuredImage);
+          }
+          
+          // Set grid images
+          if (formData.gridImages && formData.gridImages.length > 0) {
+            for (const imageUrl of formData.gridImages) {
+              await supabase
+                .from('property_images')
+                .update({ is_grid_image: true })
+                .eq('property_id', formData.id)
+                .eq('url', imageUrl);
+            }
+          }
+        } catch (error) {
+          console.error("Error updating image flags:", error);
+        }
+      }
     } else {
       success = await createProperty(submitData);
+      
       // Only redirect to home page after creating a new property if shouldRedirect is true
       if (success && shouldRedirect) {
         navigate('/');

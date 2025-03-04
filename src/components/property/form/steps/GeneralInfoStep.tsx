@@ -1,31 +1,27 @@
+
 import { PropertyFormData } from "@/types/property";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { ImageUploader } from "@/components/ImageUploader";
-import { ImagePreview } from "@/components/ImagePreview";
 import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Star, Grid } from "lucide-react";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage?: (index: number) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleGridImage?: (url: string) => void;
-  isUploading?: boolean;
 }
 
 export function GeneralInfoStep({
   formData,
   onFieldChange,
-  handleImageUpload,
-  handleRemoveImage,
   handleSetFeaturedImage,
-  handleToggleGridImage,
-  isUploading
+  handleToggleGridImage
 }: GeneralInfoStepProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -37,6 +33,20 @@ export function GeneralInfoStep({
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     onFieldChange(name as keyof PropertyFormData, checked);
+  };
+
+  // Function to handle featured image selection
+  const handleFeaturedImageSelect = (url: string) => {
+    if (handleSetFeaturedImage) {
+      handleSetFeaturedImage(url);
+    }
+  };
+
+  // Function to handle grid image selection
+  const handleGridImageSelect = (url: string) => {
+    if (handleToggleGridImage) {
+      handleToggleGridImage(url);
+    }
   };
 
   return (
@@ -208,32 +218,101 @@ export function GeneralInfoStep({
         </CardContent>
       </Card>
       
-      {handleImageUpload && handleRemoveImage && (
+      {/* Image Selection Section - Only have selector dropdowns, not the grid */}
+      {formData.images && formData.images.length > 0 && (
         <Card>
           <CardContent className="pt-6">
-            <div className="space-y-4">
-              <Label>Property Images</Label>
-              <ImageUploader 
-                onUpload={handleImageUpload} 
-                isUploading={isUploading}
-                label="Upload Images"
-              />
-              
-              {formData.images && formData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                  {formData.images.map((image, index) => (
-                    <ImagePreview
-                      key={index}
-                      url={image.url}
-                      onRemove={() => handleRemoveImage(index)}
-                      isFeatured={formData.featuredImage === image.url}
-                      onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(image.url) : undefined}
-                      isInGrid={formData.gridImages?.includes(image.url)}
-                      onToggleGrid={handleToggleGridImage ? () => handleToggleGridImage(image.url) : undefined}
-                    />
-                  ))}
+            <div className="space-y-6">
+              {/* Featured Image Selection */}
+              <div>
+                <Label htmlFor="featuredImage">Featured Image</Label>
+                <div className="flex items-center gap-4 mt-2">
+                  <Select 
+                    value={formData.featuredImage || ""} 
+                    onValueChange={handleFeaturedImageSelect}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a featured image" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {formData.images.map((image, index) => {
+                        const imageUrl = typeof image === 'string' ? image : image.url;
+                        return (
+                          <SelectItem key={index} value={imageUrl}>
+                            Image {index + 1}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  
+                  {formData.featuredImage && (
+                    <div className="w-20 h-20 relative border rounded overflow-hidden">
+                      <img 
+                        src={formData.featuredImage} 
+                        alt="Featured" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-1 right-1 bg-yellow-500 rounded-full p-1">
+                        <Star className="h-3 w-3 text-white" />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+              
+              {/* Grid Images Selection */}
+              <div>
+                <Label>Grid Images (max 4)</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.images.map((image, index) => {
+                    const imageUrl = typeof image === 'string' ? image : image.url;
+                    const isInGrid = formData.gridImages?.includes(imageUrl);
+                    
+                    return (
+                      <Button
+                        key={index}
+                        type="button"
+                        variant={isInGrid ? "secondary" : "outline"}
+                        className="flex items-center gap-2 h-auto py-2"
+                        onClick={() => handleGridImageSelect(imageUrl)}
+                      >
+                        <div className="w-10 h-10 relative border rounded overflow-hidden">
+                          <img 
+                            src={imageUrl} 
+                            alt={`Image ${index + 1}`} 
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+                        {isInGrid && <Grid className="h-4 w-4 text-primary" />}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                {formData.gridImages && formData.gridImages.length > 0 && (
+                  <div className="mt-4">
+                    <Label>Selected Grid Images</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                      {formData.gridImages.map((url, index) => (
+                        <div key={index} className="relative border rounded overflow-hidden aspect-square">
+                          <img src={url} alt={`Grid ${index + 1}`} className="w-full h-full object-cover" />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={() => handleGridImageSelect(url)}
+                          >
+                            <Grid className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
