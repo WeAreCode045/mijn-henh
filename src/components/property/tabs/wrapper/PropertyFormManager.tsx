@@ -1,3 +1,4 @@
+
 import { PropertyData, PropertyTechnicalItem } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
