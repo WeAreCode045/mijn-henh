@@ -1,5 +1,6 @@
 
 import { PropertyFormData } from "@/types/property";
+import { Dispatch, SetStateAction } from "react";
 
 export function usePropertyStateTracking(
   formState: PropertyFormData,
@@ -14,6 +15,7 @@ export function usePropertyStateTracking(
   };
 
   // Create a wrapper function for setFormState that also sets pendingChanges flag
+  // This adapter function helps maintain the original signature while being compatible with SetStateAction
   const setFormStateWithTracking = (newState: PropertyFormData) => {
     setFormState(newState);
     setPendingChanges(true);

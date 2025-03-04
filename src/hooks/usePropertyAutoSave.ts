@@ -1,10 +1,12 @@
 
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from "@/types/property";
 import type { Json } from "@/integrations/supabase/types";
 
-export function usePropertyAutosave() {
+// Renamed to usePropertyAutoSave for consistency across the application
+export function usePropertyAutoSave() {
   const { toast } = useToast();
 
   const autosaveData = async (formData: PropertyFormData) => {
@@ -34,7 +36,7 @@ export function usePropertyAutosave() {
         return JSON.stringify(floorplanData);
       });
 
-      console.log("usePropertyAutosave - Processed floorplans for database:", floorplansForDb);
+      console.log("usePropertyAutoSave - Processed floorplans for database:", floorplansForDb);
 
       // Get the database schema structure
       const { error } = await supabase
@@ -50,7 +52,7 @@ export function usePropertyAutosave() {
           energyLabel: formData.energyLabel || null,
           featuredImage: formData.featuredImage || null,
           features: formData.features as unknown as Json,
-          floorplans: floorplansForDb, // Sending as string[] which is what Supabase expects
+          floorplans: floorplansForDb,
           garages: formData.garages || null,
           gridImages: formData.gridImages || [],
           hasGarden: formData.hasGarden || false,

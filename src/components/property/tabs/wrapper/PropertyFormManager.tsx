@@ -6,7 +6,7 @@ import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave"; // Corrected import name
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
@@ -60,12 +60,12 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
   const { lastSaved, isSaving, pendingChanges, setPendingChanges, setLastSaved } = 
     usePropertyAutoSave(formState, formState.id);
   
-  // State tracking utilities - Fix the parameter type issue here
+  // State tracking utilities - Creating a proper wrapper to fix type issues
   const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
     usePropertyStateTracking(
       formState, 
       handleFieldChange, 
-      (newState) => setFormState(newState), // Wrap setFormState to match expected type
+      (newState) => setFormState(newState), // Use a function that matches the expected signature
       setPendingChanges
     );
   
