@@ -399,6 +399,7 @@ export type Database = {
       }
       property_images: {
         Row: {
+          area: string | null
           created_at: string
           id: string
           property_id: string | null
@@ -406,6 +407,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          area?: string | null
           created_at?: string
           id?: string
           property_id?: string | null
@@ -413,6 +415,7 @@ export type Database = {
           url: string
         }
         Update: {
+          area?: string | null
           created_at?: string
           id?: string
           property_id?: string | null

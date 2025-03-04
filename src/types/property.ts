@@ -9,7 +9,7 @@ export interface PropertyFeature {
 export interface PropertyImage {
   id: string;
   url: string;
-  area?: string | null; // Area property for storing area assignment
+  area?: string | null; // Added area property for storing area assignment
   property_id?: string;
   created_at?: string;
   type?: string;

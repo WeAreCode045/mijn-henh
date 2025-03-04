@@ -51,9 +51,7 @@ export function useAreaImageRemove(
         // Update the property_images record to set area to null
         const { error } = await supabase
           .from('property_images')
-          .update({ 
-            area: null 
-          } as any)
+          .update({ area: null })
           .eq('id', imageId)
           .eq('property_id', formData.id);
           
