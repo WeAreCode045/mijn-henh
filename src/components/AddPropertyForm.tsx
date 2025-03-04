@@ -28,7 +28,7 @@ export function AddPropertyForm() {
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
-    handleToggleGridImage
+    handleToggleCoverImage
   } = usePropertyImages(formData, setFormData);
 
   const {
@@ -54,7 +54,6 @@ export function AddPropertyForm() {
     setFormData({ ...formData, map_image: null });
   };
 
-  // Create adapter functions to match expected types
   const handleRemoveImageAdapter = (index: number) => {
     if (!formData || !formData.images[index]) return;
     handleRemoveImage(index);
@@ -116,7 +115,7 @@ export function AddPropertyForm() {
           handleRemoveFloorplan={handleRemoveFloorplan}
           handleUpdateFloorplan={handleUpdateFloorplan}
           handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleGridImage={handleToggleGridImage}
+          handleToggleCoverImage={handleToggleCoverImage}
           handleMapImageDelete={handleMapImageDelete}
         />
       </form>

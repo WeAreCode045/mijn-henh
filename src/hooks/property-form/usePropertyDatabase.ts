@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertySubmitData } from "@/types/property";
-import { prepareAreasForFormSubmission } from "./preparePropertyData";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "./preparePropertyData";
 
 export function usePropertyDatabase() {
   const { toast } = useToast();
@@ -19,8 +19,19 @@ export function usePropertyDatabase() {
 
       // Transform areas to the correct format for the database
       if (updateData.areas && Array.isArray(updateData.areas)) {
-        // Use the updated prepareAreasForFormSubmission function which already returns Json[]
-        updateData.areas = updateData.areas;
+        // Use the updated prepareAreasForFormSubmission function
+        const transformedAreas = prepareAreasForFormSubmission(updateData.areas);
+        updateData.areas = transformedAreas;
+      }
+
+      // Transform features to the correct format
+      if (updateData.features && Array.isArray(updateData.features)) {
+        updateData.features = preparePropertiesForJsonField(updateData.features);
+      }
+
+      // Transform nearby_places to the correct format
+      if (updateData.nearby_places && Array.isArray(updateData.nearby_places)) {
+        updateData.nearby_places = preparePropertiesForJsonField(updateData.nearby_places);
       }
 
       console.log("usePropertyDatabase - Final update data:", updateData);
@@ -65,8 +76,19 @@ export function usePropertyDatabase() {
 
       // Transform areas to the correct format for the database
       if (createData.areas && Array.isArray(createData.areas)) {
-        // Areas should already be in the correct format
-        createData.areas = createData.areas;
+        // Use the updated prepareAreasForFormSubmission function
+        const transformedAreas = prepareAreasForFormSubmission(createData.areas);
+        createData.areas = transformedAreas;
+      }
+
+      // Transform features to the correct format
+      if (createData.features && Array.isArray(createData.features)) {
+        createData.features = preparePropertiesForJsonField(createData.features);
+      }
+
+      // Transform nearby_places to the correct format
+      if (createData.nearby_places && Array.isArray(createData.nearby_places)) {
+        createData.nearby_places = preparePropertiesForJsonField(createData.nearby_places);
       }
 
       console.log("usePropertyDatabase - Final create data:", createData);

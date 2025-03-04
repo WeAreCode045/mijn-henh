@@ -1,6 +1,7 @@
 
 import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
+import { Json } from "@/integrations/supabase/types";
 
 export interface SupabasePropertyData {
   id: string;
@@ -17,9 +18,9 @@ export interface SupabasePropertyData {
   hasGarden: boolean;
   description: string;
   location_description: string;
-  features: any[];
-  areas: any[];
-  nearby_places: any[];
+  features: any; // Changed from any[] to any to accommodate Json type
+  areas: any; // Changed from any[] to any
+  nearby_places: any; // Changed from any[] to any
   latitude: number | null;
   longitude: number | null;
   map_image: string | null;
@@ -97,10 +98,12 @@ export function transformSupabaseData(
   }));
 
   // Ensure features is always an array
-  const dataFeatures = Array.isArray(data.features) ? data.features : [];
+  const dataFeatures = Array.isArray(data.features) ? data.features : 
+                      (data.features ? [data.features] : []);
 
   // Ensure nearby_places is always an array
-  const nearbyPlaces = Array.isArray(data.nearby_places) ? data.nearby_places : [];
+  const nearbyPlaces = Array.isArray(data.nearby_places) ? data.nearby_places : 
+                      (data.nearby_places ? [data.nearby_places] : []);
 
   // Create the transformed property data
   const transformedData: PropertyData = {

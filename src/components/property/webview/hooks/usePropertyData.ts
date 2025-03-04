@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,17 +10,14 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
   const isMounted = useRef(true);
 
   useEffect(() => {
-    // Set up the mounted ref
     isMounted.current = true;
     
     return () => {
-      // Clean up - component unmounted
       isMounted.current = false;
     };
   }, []);
 
   useEffect(() => {
-    // If we already have the property data passed as a prop, use that
     if (property) {
       console.log("usePropertyData - Using provided property data:", property);
       setPropertyData(property);
@@ -29,7 +25,6 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
       return;
     }
 
-    // If no id is provided, we can't fetch property data
     if (!id) {
       console.log("usePropertyData - No ID provided and no property data");
       setIsLoading(false);
@@ -45,7 +40,6 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
       try {
         console.log("usePropertyData - Fetching property with ID:", id);
         
-        // First try to fetch by object_id
         let { data, error } = await supabase
           .from('properties')
           .select(`
@@ -56,7 +50,6 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           .eq('object_id', id)
           .maybeSingle();
 
-        // If not found by object_id, try by UUID
         if (!data && !error) {
           console.log("usePropertyData - Not found by object_id, trying UUID:", id);
           const { data: uuidData, error: uuidError } = await supabase
@@ -84,12 +77,11 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         console.log("usePropertyData - Raw data from Supabase:", data);
 
         if (data) {
-          // Ensure agent property is properly structured
           const propertyWithAgent = {
             ...data,
             agent: data.agent || null,
-            // Ensure features is always an array
-            features: Array.isArray(data.features) ? data.features : []
+            features: Array.isArray(data.features) ? data.features : (data.features ? [data.features] : []),
+            nearby_places: Array.isArray(data.nearby_places) ? data.nearby_places : (data.nearby_places ? [data.nearby_places] : [])
           };
           
           const transformedData = transformSupabaseData(propertyWithAgent);

@@ -14,8 +14,10 @@ export const CoverSection = ({ property, settings, styles }: {
                    (property.images?.length > 0 ? property.images[0].url : null);
   
   // Support both coverImages and gridImages (for backward compatibility)
-  const coverImagesToUse = property.coverImages || 
-                         ((property as any).gridImages || []);
+  // First try coverImages, then fallback to gridImages if coverImages is empty
+  const coverImagesToUse = (property.coverImages && property.coverImages.length > 0) 
+    ? property.coverImages 
+    : (property.gridImages || []);
   
   // Slice the cover images to a maximum of 4
   const displayImages = coverImagesToUse.slice(0, 4);

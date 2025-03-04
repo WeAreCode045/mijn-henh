@@ -20,7 +20,7 @@ export function RecentProperties() {
       try {
         let query = supabase
           .from('properties')
-          .select('*, property_images(*)')
+          .select('*, property_images(*), agent:profiles(id, full_name, email, phone, photo_url:agent_photo)')
           .order('created_at', { ascending: false })
           .limit(3);
 
@@ -35,7 +35,14 @@ export function RecentProperties() {
           throw error;
         }
 
-        return (data || []).map(item => transformSupabaseData(item));
+        return (data || []).map(item => {
+          // Ensure the item has the agent property structured correctly
+          const itemWithAgent = {
+            ...item,
+            agent: item.agent || null
+          };
+          return transformSupabaseData(itemWithAgent);
+        });
       } catch (err) {
         console.error('Error fetching properties:', err);
         throw err;
