@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
@@ -11,7 +12,7 @@ export function usePropertyMainImages(
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Set an image as the featured image
+  // Set an image as the main image (previously featured image)
   const handleSetFeaturedImage = async (url: string | null) => {
     if (!formData.id) return;
     
@@ -39,7 +40,7 @@ export function usePropertyMainImages(
         
         toast({
           title: "Success",
-          description: "Featured image updated successfully."
+          description: "Main image updated successfully."
         });
       } else {
         // If url is null, just clear the featured image
@@ -49,10 +50,10 @@ export function usePropertyMainImages(
         }));
       }
     } catch (error) {
-      console.error("Error updating featured image:", error);
+      console.error("Error updating main image:", error);
       toast({
         title: "Error",
-        description: "Failed to update featured image.",
+        description: "Failed to update main image.",
         variant: "destructive"
       });
     } finally {

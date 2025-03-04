@@ -8,7 +8,7 @@ export const CoverSection = ({ property, settings, styles }: {
   settings: AgencySettings; 
   styles: any; 
 }) => {
-  // Get the main image (featured image or first cover image or first regular image)
+  // Get the main image (main image or first cover image or first regular image)
   const mainImage = property.featuredImage || 
                    (property.coverImages?.length > 0 ? property.coverImages[0] : null) || 
                    (property.images?.length > 0 ? property.images[0].url : null);

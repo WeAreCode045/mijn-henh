@@ -47,7 +47,7 @@ export function ImagePreview({
             variant={isFeatured ? "secondary" : "ghost"} 
             onClick={onSetFeatured} 
             className={`h-8 w-8 ${isFeatured ? "bg-yellow-100" : "hover:bg-yellow-50"}`}
-            title={isFeatured ? "Featured image" : "Set as featured"}
+            title={isFeatured ? "Main image" : "Set as main"}
             type="button"
           >
             <Star className={`h-4 w-4 ${isFeatured ? "fill-yellow-500" : ""}`} />
@@ -68,21 +68,21 @@ export function ImagePreview({
         )}
       </div>
       
-      {/* Featured image tag */}
+      {/* Main image tag (previously Featured) */}
       {isFeatured && (
         <div className="absolute top-1 right-1 bg-yellow-500 text-white text-xs px-1 rounded">
-          Featured
+          Main
         </div>
       )}
       
-      {/* Cover image tag - Updated naming from Grid */}
+      {/* Cover image tag */}
       {isInCover && !isFeatured && (
         <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1 rounded">
           Cover
         </div>
       )}
       
-      {/* Show both tags if both are true, position the cover tag below the featured tag */}
+      {/* Show both tags if both are true, position the cover tag below the main tag */}
       {isInCover && isFeatured && (
         <div className="absolute top-6 right-1 bg-blue-500 text-white text-xs px-1 rounded">
           Cover

@@ -37,7 +37,7 @@ export function PropertyImagesCard({
     e.target.value = '';
   };
 
-  // Add methods to handle featured and cover image actions with preventDefault
+  // Add methods to handle main and cover image actions with preventDefault
   const handleSetFeatured = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
     if (onSetFeatured) {

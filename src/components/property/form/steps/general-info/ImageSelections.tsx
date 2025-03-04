@@ -52,7 +52,7 @@ export function ImageSelections({
   
   const handleConfirmSelection = () => {
     if (selectionType === 'featured' && selectedImage !== undefined) {
-      console.log("Confirming featured image selection:", selectedImage);
+      console.log("Confirming main image selection:", selectedImage);
       onFeaturedImageSelect(selectedImage);
     }
     setImageSelectOpen(false);
@@ -71,15 +71,15 @@ export function ImageSelections({
         <CardTitle className="text-lg font-medium">Image Selections</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Featured Image Selection */}
+        {/* Main Image Selection (previously Featured) */}
         <div className="space-y-2">
-          <h3 className="text-md font-medium">Featured Image</h3>
+          <h3 className="text-md font-medium">Main Image</h3>
           <div className="flex items-start gap-4">
             {featuredImage ? (
               <div className="relative w-40 h-40 border rounded-lg overflow-hidden">
                 <img 
                   src={featuredImage} 
-                  alt="Featured" 
+                  alt="Main" 
                   className="w-full h-full object-cover"
                 />
                 <button 
@@ -103,12 +103,12 @@ export function ImageSelections({
               type="button"
               className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-800"
             >
-              {featuredImage ? "Change" : "Select"} Featured Image
+              {featuredImage ? "Change" : "Select"} Main Image
             </Button>
           </div>
         </div>
         
-        {/* Cover Images Selection - Renamed from Grid Images */}
+        {/* Cover Images Selection */}
         <div className="space-y-2">
           <h3 className="text-md font-medium">Cover Images (max {maxCoverImages})</h3>
           <div className="flex flex-wrap gap-4">
@@ -151,13 +151,13 @@ export function ImageSelections({
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>
-                {selectionType === 'featured' ? 'Select Featured Image' : 'Select Cover Image'}
+                {selectionType === 'featured' ? 'Select Main Image' : 'Select Cover Image'}
               </DialogTitle>
             </DialogHeader>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
               {images.map((image, index) => {
-                // For featured images, check against the temporary selectedImage state
+                // For main images, check against the temporary selectedImage state
                 // For cover images, check if it's already in the coverImages array
                 const isSelected = selectionType === 'featured' 
                   ? image.url === selectedImage

@@ -17,10 +17,10 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
     return "€ " + numericPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  console.log("OverviewSection rendering with featured image:", property.featuredImage);
+  console.log("OverviewSection rendering with main image:", property.featuredImage);
   console.log("Cover images:", property.coverImages);
 
-  // Get the image to display (featured image, first cover image, or first regular image)
+  // Get the image to display (main image, first cover image, or first regular image)
   const mainImage = property.featuredImage || 
                    (property.coverImages && property.coverImages.length > 0 ? property.coverImages[0] : null) ||
                    (property.images && property.images.length > 0 ? 
