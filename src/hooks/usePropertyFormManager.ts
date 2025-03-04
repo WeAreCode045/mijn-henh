@@ -77,7 +77,7 @@ export function usePropertyFormManager(property: PropertyData) {
   );
   
   // Import directly instead of using require, and use updated method name
-  const { handleSetFeaturedImage, handleToggleCoverImage } = usePropertyMainImages(
+  const { handleSetFeaturedImage, handleToggleFeaturedImage } = usePropertyMainImages(
     formState, 
     setFormStateWithTracking
   );
@@ -110,22 +110,12 @@ export function usePropertyFormManager(property: PropertyData) {
   // Cast property to PropertyData to ensure it has required id
   const propertyWithRequiredId: PropertyData = {
     ...formState,
-    id: property.id // Ensure id is always present
-  };
-
-  // Add back required properties for type compatibility
-  const propertyWithRequiredProps = {
-    ...propertyWithRequiredId,
-    featuredImage: propertyWithRequiredId.featuredImage || null,
-    coverImages: propertyWithRequiredId.coverImages || []
+    id: property.id // Ensure id is present
   };
 
   return {
     formState,
-    handleFieldChange: (field: keyof PropertyData, value: any) => {
-      handleFieldChange(field, value);
-      setPendingChanges(true);
-    },
+    handleFieldChange,
     handleSaveObjectId,
     handleSaveAgent,
     handleSaveTemplate,
@@ -150,13 +140,13 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveFloorplan,
     handleUpdateFloorplan,
     handleSetFeaturedImage,
-    handleToggleCoverImage,
+    handleToggleFeaturedImage,
     onSubmit,
     currentStep,
     handleStepClick,
     handleNext,
     handlePrevious,
-    propertyWithRequiredProps,
+    propertyWithRequiredProps: propertyWithRequiredId,
     lastSaved,
     isSaving
   };

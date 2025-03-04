@@ -55,7 +55,7 @@ export function transformSupabaseData(
   const images: PropertyImage[] = [];
   const floorplans: any[] = [];
   let featuredImage: string | null = null;
-  const coverImages: string[] = [];
+  const featuredImages: string[] = [];
 
   // Process property images
   if (data.property_images && data.property_images.length > 0) {
@@ -78,9 +78,9 @@ export function transformSupabaseData(
           featuredImage = img.url;
         }
 
-        // Check if this is a grid/cover image
+        // Check if this is a grid/featured image
         if (img.is_grid_image) {
-          coverImages.push(img.url);
+          featuredImages.push(img.url);
         }
       }
     });
@@ -125,7 +125,8 @@ export function transformSupabaseData(
     images: images,
     floorplans: floorplans,
     featuredImage: featuredImage,
-    coverImages: coverImages,
+    featuredImages: featuredImages,
+    coverImages: featuredImages, // For backward compatibility
     areas: transformedAreas,
     nearby_places: nearbyPlaces,
     latitude: data.latitude,
@@ -146,7 +147,7 @@ export function transformSupabaseData(
     template_id: data.template_id,
     floorplanEmbedScript: data.floorplanEmbedScript,
     // For backward compatibility with components that still use gridImages
-    gridImages: coverImages
+    gridImages: featuredImages
   };
 
   return transformedData;

@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -61,7 +62,7 @@ interface PropertyTabContentsProps {
   handleNext: () => void;
   handlePrevious: () => void;
   onSubmit: () => void;
-  // Legacy props (for backward compatibility)
+  // Main image and featured images props
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
 }

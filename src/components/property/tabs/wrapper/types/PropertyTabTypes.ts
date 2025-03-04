@@ -9,7 +9,7 @@ export interface PropertyTabProps {
     object_id?: string;
     agent_id?: string;
     featuredImage?: string | null;
-    coverImages?: string[];
+    featuredImages?: string[];
     images: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
@@ -43,7 +43,7 @@ export interface PropertyTabProps {
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
     handleSetFeaturedImage: (url: string | null) => void;
-    handleToggleCoverImage: (url: string) => void;
+    handleToggleFeaturedImage: (url: string) => void;
     onAddTechnicalItem: (e?: React.MouseEvent) => void;
     onRemoveTechnicalItem?: (id: string) => void;
     onUpdateTechnicalItem?: (id: string, field: any, value: any) => void;
