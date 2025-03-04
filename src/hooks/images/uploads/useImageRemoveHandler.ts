@@ -47,12 +47,17 @@ export function useImageRemoveHandler(
     // If the image has a file path, attempt to delete it from storage
     if (typeof imageToRemove !== 'string' && imageToRemove.filePath) {
       try {
-        const { error } = await supabase.storage
-          .from('properties')
-          .remove([imageToRemove.filePath]);
-          
-        if (error) {
-          console.error('Error deleting image from storage:', error);
+        // Fix: Ensure filePath is a string before using it
+        const filePath = typeof imageToRemove.filePath === 'string' ? imageToRemove.filePath : '';
+        
+        if (filePath) {
+          const { error } = await supabase.storage
+            .from('properties')
+            .remove([filePath]);
+            
+          if (error) {
+            console.error('Error deleting image from storage:', error);
+          }
         }
       } catch (error) {
         console.error('Error in file deletion process:', error);
