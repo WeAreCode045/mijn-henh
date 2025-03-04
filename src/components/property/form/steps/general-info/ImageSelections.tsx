@@ -26,12 +26,14 @@ export function ImageSelections({
   const [imageSelectOpen, setImageSelectOpen] = useState(false);
   const [selectionType, setSelectionType] = useState<'featured' | 'grid'>('featured');
   
-  const handleOpenSelectFeatured = () => {
+  const handleOpenSelectFeatured = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     setSelectionType('featured');
     setImageSelectOpen(true);
   };
   
-  const handleOpenSelectGrid = () => {
+  const handleOpenSelectGrid = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     setSelectionType('grid');
     setImageSelectOpen(true);
   };
@@ -66,7 +68,11 @@ export function ImageSelections({
                 />
                 <button 
                   className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
-                  onClick={() => onFeaturedImageSelect(null)}
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent form submission
+                    onFeaturedImageSelect(null);
+                  }}
+                  type="button"
                 >
                   ✕
                 </button>
@@ -76,7 +82,10 @@ export function ImageSelections({
                 <ImageIcon className="h-12 w-12 text-gray-400" />
               </div>
             )}
-            <Button onClick={handleOpenSelectFeatured}>
+            <Button 
+              onClick={handleOpenSelectFeatured} 
+              type="button"
+            >
               {featuredImage ? "Change" : "Select"} Featured Image
             </Button>
           </div>
@@ -95,7 +104,11 @@ export function ImageSelections({
                 />
                 <button 
                   className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-xs"
-                  onClick={() => onGridImageToggle(url)}
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent form submission
+                    onGridImageToggle(url);
+                  }}
+                  type="button"
                 >
                   ✕
                 </button>
@@ -107,6 +120,7 @@ export function ImageSelections({
                 onClick={handleOpenSelectGrid}
                 className="h-24 w-24 flex flex-col items-center justify-center"
                 variant="outline"
+                type="button"
               >
                 <ImageIcon className="h-8 w-8 mb-1" />
                 <span className="text-xs">Add</span>
