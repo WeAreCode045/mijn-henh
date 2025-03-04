@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 
@@ -28,7 +29,7 @@ interface PropertyContentFormProps {
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleCoverImage?: (url: string) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
   setPendingChanges: (pending: boolean) => void;
 }
@@ -60,7 +61,7 @@ export function PropertyContentForm({
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
   handleSetFeaturedImage,
-  handleToggleCoverImage,
+  handleToggleFeaturedImage,
   isUploading,
   setPendingChanges
 }: PropertyContentFormProps) {
@@ -127,9 +128,9 @@ export function PropertyContentForm({
     }
   };
 
-  const safeToggleCoverImage = (url: string) => {
-    if (handleToggleCoverImage) {
-      handleToggleCoverImage(url);
+  const safeToggleFeaturedImage = (url: string) => {
+    if (handleToggleFeaturedImage) {
+      handleToggleFeaturedImage(url);
       setPendingChanges(true);
     }
   };
@@ -162,7 +163,7 @@ export function PropertyContentForm({
       onRemoveTechnicalItem={safeRemoveTechnicalItem}
       onUpdateTechnicalItem={safeUpdateTechnicalItem}
       handleSetFeaturedImage={safeSetFeaturedImage}
-      handleToggleCoverImage={safeToggleCoverImage}
+      handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}
     />
   );

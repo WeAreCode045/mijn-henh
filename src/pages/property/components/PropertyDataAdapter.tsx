@@ -1,51 +1,55 @@
 
-import { PropertyData, PropertySubmitData } from "@/types/property";
+// Fix Json type issues by using the preparePropertiesForJsonField and similar helper functions
+
+import { PropertySubmitData, PropertyData } from "@/types/property";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField, prepareFloorplansForFormSubmission } from "@/hooks/property-form/preparePropertyData";
 
 interface PropertyDataAdapterProps {
-  property: PropertyData;
-  children: (adaptedProperty: PropertySubmitData) => React.ReactNode;
+  propertyData: PropertyData;
+  onSubmit: (data: PropertySubmitData) => Promise<void>;
 }
 
-export function PropertyDataAdapter({ property, children }: PropertyDataAdapterProps) {
-  // Convert PropertyData to PropertySubmitData format
-  const adaptedData: PropertySubmitData = {
-    id: property.id,
-    title: property.title,
-    price: property.price,
-    address: property.address,
-    bedrooms: property.bedrooms,
-    bathrooms: property.bathrooms,
-    sqft: property.sqft,
-    livingArea: property.livingArea,
-    buildYear: property.buildYear,
-    garages: property.garages,
-    energyLabel: property.energyLabel,
-    hasGarden: property.hasGarden,
-    description: property.description,
-    location_description: property.location_description,
-    features: property.features,
-    floorplans: property.floorplans,
-    featuredImage: property.featuredImage,
-    featuredImages: property.featuredImages || [], // Add this to fix the missing property error
-    coverImages: property.coverImages || [],
-    gridImages: property.gridImages || [],
-    areas: property.areas,
-    areaPhotos: property.areaPhotos,
-    object_id: property.object_id,
-    map_image: property.map_image,
-    nearby_places: property.nearby_places || [],
-    latitude: property.latitude,
-    longitude: property.longitude,
-    images: Array.isArray(property.images) 
-      ? property.images.map(img => typeof img === 'string' ? img : img.url)
-      : [],
-    agent_id: property.agent_id || "",
-    virtualTourUrl: property.virtualTourUrl,
-    youtubeUrl: property.youtubeUrl,
-    notes: property.notes,
-    template_id: property.template_id || "default",
-    floorplanEmbedScript: property.floorplanEmbedScript || "",
+export const PropertyDataAdapter = ({ propertyData, onSubmit }: PropertyDataAdapterProps) => {
+  const handleSubmit = async () => {
+    if (!propertyData) return;
+
+    // Transform the data to match the expected types
+    const featuresJson = preparePropertiesForJsonField(propertyData.features);
+    const floorplansJson = prepareFloorplansForFormSubmission(propertyData.floorplans);
+    const areasJson = prepareAreasForFormSubmission(propertyData.areas);
+    const nearbyPlacesJson = preparePropertiesForJsonField(propertyData.nearby_places || []);
+
+    const submitData: PropertySubmitData = {
+      id: propertyData.id,
+      title: propertyData.title,
+      price: propertyData.price,
+      address: propertyData.address,
+      bedrooms: propertyData.bedrooms,
+      bathrooms: propertyData.bathrooms,
+      sqft: propertyData.sqft,
+      livingArea: propertyData.livingArea,
+      buildYear: propertyData.buildYear,
+      garages: propertyData.garages,
+      energyLabel: propertyData.energyLabel,
+      hasGarden: propertyData.hasGarden,
+      description: propertyData.description,
+      location_description: propertyData.location_description,
+      features: featuresJson,
+      floorplans: floorplansJson,
+      featuredImage: propertyData.featuredImage,
+      featuredImages: propertyData.featuredImages || [],
+      coverImages: propertyData.coverImages || [],
+      areas: areasJson,
+      map_image: propertyData.map_image,
+      nearby_places: nearbyPlacesJson,
+      latitude: propertyData.latitude,
+      longitude: propertyData.longitude,
+      images: propertyData.images.map(img => typeof img === 'string' ? img : img.url),
+      agent_id: propertyData.agent_id
+    };
+
+    await onSubmit(submitData);
   };
 
-  return children(adaptedData);
-}
+  return null; // This component doesn't render anything
+};

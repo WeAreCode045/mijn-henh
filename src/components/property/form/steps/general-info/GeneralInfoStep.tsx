@@ -28,8 +28,8 @@ export function GeneralInfoStep({
     }
   };
 
-  const handleGridImageToggle = (url: string) => {
-    console.log("Grid image toggled in GeneralInfoStep:", url);
+  const handleFeaturedImageToggle = (url: string) => {
+    console.log("Featured image toggled in GeneralInfoStep:", url);
     if (handleToggleCoverImage) {
       handleToggleCoverImage(url);
     }
@@ -68,10 +68,10 @@ export function GeneralInfoStep({
       {formData.images && formData.images.length > 0 && (
         <ImageSelections
           images={formData.images}
-          featuredImage={formData.featuredImage || ''}
-          coverImages={formData.coverImages || []}
-          onFeaturedImageSelect={handleSetFeaturedImage || (() => {})}
-          onCoverImageToggle={handleToggleCoverImage || (() => {})}
+          featuredImage={formData.featuredImage || null}
+          featuredImages={formData.featuredImages || []}
+          onFeaturedImageSelect={handleFeaturedImageSelect}
+          onFeaturedImageToggle={handleFeaturedImageToggle}
         />
       )}
     </div>

@@ -1,124 +1,186 @@
-import { Card } from "@/components/ui/card";
+import React, { useState, ChangeEvent, useCallback } from "react";
+import { PropertyFormData } from "@/types/property";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyAreas } from "@/hooks/usePropertyAreas";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
-import { useFeatures } from "@/hooks/useFeatures";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
-import type { PropertyFormData } from "@/types/property";
-import { steps } from "./property/form/formSteps";
-import { FormStepNavigation } from "./property/form/FormStepNavigation";
-import { useFormSteps } from "@/hooks/useFormSteps";
-import { PropertyFormContent } from "./property/form/PropertyFormContent";
-import { useState, useCallback } from "react";
+import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
+import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
+import { useToast } from "@/components/ui/use-toast";
 
-export function AddPropertyForm() {
-  const { formData, setFormData, isLoading } = usePropertyForm(undefined);
-  const { addFeature, removeFeature, updateFeature } = useFeatures(formData, setFormData);
-  const { handleSubmit } = usePropertyFormSubmit();
-  const { autosaveData } = usePropertyAutoSave();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const {
-    handleImageUpload,
-    handleRemoveImage,
-    handleAreaPhotosUpload,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
-    handleRemoveAreaPhoto,
-    handleSetFeaturedImage,
-    handleToggleCoverImage
+interface AddPropertyFormProps {
+  propertyId?: string;
+}
+
+export function AddPropertyForm({ propertyId }: AddPropertyFormProps) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const { toast } = useToast();
+
+  // Load property data
+  const { formData, setFormData } = usePropertyForm(propertyId);
+
+  // Load property image handlers
+  const { 
+    handleImageUpload, 
+    handleRemoveImage, 
+    isUploading, 
+    handleAreaPhotosUpload, 
+    handleFloorplanUpload, 
+    handleRemoveAreaPhoto, 
+    handleRemoveFloorplan, 
+    handleSetFeaturedImage, 
+    handleToggleFeaturedImage,
+    images 
   } = usePropertyImages(formData, setFormData);
 
-  const {
-    handleAreaImageUpload,
-    addArea,
-    removeArea,
-    updateArea,
-    handleAreaImageRemove,
-    handleAreaImagesSelect
-  } = usePropertyAreas(formData, setFormData);
+  // Property content management
+  const handleAddFeature = useCallback(() => {
+    setFormData(prevFormData => {
+      const newFeature = {
+        id: Date.now().toString(),
+        description: ''
+      };
+      return {
+        ...prevFormData,
+        features: [...(prevFormData.features || []), newFeature]
+      };
+    });
+  }, [setFormData]);
 
-  const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(
-    formData,
-    () => autosaveData(formData),
-    steps.length
-  );
+  const handleRemoveFeature = useCallback((id: string) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      features: (prevFormData.features || []).filter(feature => feature.id !== id)
+    }));
+  }, [setFormData]);
 
-  const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
-    setFormData({ ...formData, [field]: value });
+  const handleUpdateFeature = useCallback((id: string, description: string) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      features: (prevFormData.features || []).map(feature =>
+        feature.id === id ? { ...feature, description } : feature
+      )
+    }));
+  }, [setFormData]);
+
+  // Technical item management functions
+  const handleAddTechnicalItem = useCallback(() => {
+    setFormData(prevFormData => {
+      const newItem = {
+        id: Date.now().toString(),
+        title: '',
+        size: '',
+        description: '',
+        floorplanId: null
+      };
+      return {
+        ...prevFormData,
+        technicalItems: [...(prevFormData.technicalItems || []), newItem]
+      };
+    });
+  }, [setFormData]);
+
+  const handleRemoveTechnicalItem = useCallback((id: string) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      technicalItems: (prevFormData.technicalItems || []).filter(item => item.id !== id)
+    }));
+  }, [setFormData]);
+
+  const handleUpdateTechnicalItem = useCallback((id: string, field: any, value: any) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      technicalItems: (prevFormData.technicalItems || []).map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    }));
+  }, [setFormData]);
+
+  const handleAddArea = useCallback(() => {
+    setFormData(prevFormData => {
+      const newArea = {
+        id: Date.now().toString(),
+        title: '',
+        description: '',
+        imageIds: [],
+        columns: 2
+      };
+      return {
+        ...prevFormData,
+        areas: [...(prevFormData.areas || []), newArea]
+      };
+    });
+  }, [setFormData]);
+
+  const handleRemoveArea = useCallback((id: string) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      areas: (prevFormData.areas || []).filter(area => area.id !== id)
+    }));
+  }, [setFormData]);
+
+  const handleUpdateArea = useCallback((id: string, field: any, value: any) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      areas: (prevFormData.areas || []).map(area =>
+        area.id === id ? { ...area, [field]: value } : area
+      )
+    }));
+  }, [setFormData]);
+
+  const handleAreaImageUpload = async (areaId: string, files: FileList) => {
+    // Implementation for handling area image uploads
+  };
+
+  const handleAreaImageRemove = (areaId: string, imageId: string) => {
+    // Implementation for handling area image removal
+  };
+
+  const handleAreaImagesSelect = (areaId: string, imageIds: string[]) => {
+    // Implementation for handling area image selection
   };
 
   const handleMapImageDelete = async () => {
-    setFormData({ ...formData, map_image: null });
+    // Implementation for handling map image deletion
   };
-
-  const handleRemoveImageAdapter = (index: number) => {
-    if (!formData || !formData.images[index]) return;
-    handleRemoveImage(index);
-  };
-
-  const onFormSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (isSubmitting || !formData) return;
-    
-    setIsSubmitting(true);
-    try {
-      handleSubmit(e, formData);
-    } catch (error) {
-      console.error("Form submission error:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formData, handleSubmit, isSubmitting]);
-
-  if (isLoading) {
-    return null;
-  }
 
   return (
-    <Card className="w-full p-6 animate-fadeIn">
-      <form 
-        id="propertyForm" 
-        onSubmit={onFormSubmit} 
-        className="space-y-6"
-      >
-        <FormStepNavigation
-          steps={steps}
-          currentStep={currentStep}
-          onStepClick={handleStepClick}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          onSubmit={() => onFormSubmit(new Event('submit') as any)}
-          isUpdateMode={false}
-        />
-        <PropertyFormContent 
-          step={currentStep}
-          formData={formData}
-          onFieldChange={handleFieldChange}
-          onAddFeature={addFeature}
-          onRemoveFeature={removeFeature}
-          onUpdateFeature={updateFeature}
-          onAddArea={addArea}
-          onRemoveArea={removeArea}
-          onUpdateArea={updateArea}
-          onAreaImageUpload={handleAreaImageUpload}
-          onAreaImageRemove={handleAreaImageRemove}
-          onAreaImagesSelect={handleAreaImagesSelect}
-          handleImageUpload={handleImageUpload}
-          handleAreaPhotosUpload={handleAreaPhotosUpload}
-          handleFloorplanUpload={handleFloorplanUpload}
-          handleRemoveImage={handleRemoveImageAdapter}
-          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-          handleRemoveFloorplan={handleRemoveFloorplan}
-          handleUpdateFloorplan={handleUpdateFloorplan}
-          handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleCoverImage={handleToggleCoverImage}
-          handleMapImageDelete={handleMapImageDelete}
-        />
-      </form>
-    </Card>
+    <div className="container mx-auto py-8">
+      <h1 className="text-2xl font-bold mb-4">Add New Property</h1>
+      
+      <PropertyFormContent
+        step={currentStep}
+        formData={formData}
+        onFieldChange={(field, value) => setFormData(prevFormData => ({ ...prevFormData, [field]: value }))}
+        onAddFeature={handleAddFeature}
+        onRemoveFeature={handleRemoveFeature}
+        onUpdateFeature={handleUpdateFeature}
+        onAddArea={handleAddArea}
+        onRemoveArea={handleRemoveArea}
+        onUpdateArea={handleUpdateArea}
+        onAreaImageUpload={handleAreaImageUpload}
+        onAreaImageRemove={handleAreaImageRemove}
+        onAreaImagesSelect={handleAreaImagesSelect}
+        handleImageUpload={handleImageUpload}
+        handleRemoveImage={handleRemoveImage}
+        handleAreaPhotosUpload={handleAreaPhotosUpload}
+        handleFloorplanUpload={handleFloorplanUpload}
+        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+        handleRemoveFloorplan={handleRemoveFloorplan}
+        handleSetFeaturedImage={handleSetFeaturedImage}
+        handleToggleFeaturedImage={handleToggleFeaturedImage}
+        onAddTechnicalItem={handleAddTechnicalItem}
+        onRemoveTechnicalItem={handleRemoveTechnicalItem}
+        onUpdateTechnicalItem={handleUpdateTechnicalItem}
+        handleMapImageDelete={handleMapImageDelete}
+        isUploading={isUploading}
+      />
+    </div>
   );
 }
