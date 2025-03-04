@@ -9,6 +9,7 @@ import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
+import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
 
 export function usePropertyFormManager(property: PropertyData) {
   // Form state management
@@ -66,17 +67,16 @@ export function usePropertyFormManager(property: PropertyData) {
     isUploading,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
+    handleRemoveAreaPhoto,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    handleRemoveAreaPhoto,
     images
   } = usePropertyImages(
     formState, 
     setFormStateWithTracking
   );
   
-  // Import usePropertyMainImages directly here for better control
-  const { usePropertyMainImages } = require("./images/usePropertyMainImages");
+  // Import directly instead of using require
   const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyMainImages(
     formState, 
     setFormStateWithTracking
