@@ -87,7 +87,7 @@ interface BasePropertyData {
   floorplans: PropertyFloorplan[]; // Updated to structured objects
   technicalItems?: PropertyTechnicalItem[]; // New field for technical items
   featuredImage: string | null;
-  gridImages: string[];
+  coverImages: string[]; // Changed from gridImages to coverImages
   areas: PropertyArea[];
   areaPhotos?: string[];
   currentPath?: string;
@@ -137,7 +137,7 @@ export interface PropertySubmitData {
   floorplans: Json; // Updated to Json for structured floorplans
   technicalItems?: Json; // New field for technical items
   featuredImage: string | null;
-  gridImages: string[];
+  coverImages: string[]; // Changed from gridImages to coverImages
   areaPhotos?: string[];
   object_id?: string;
   map_image?: string | null;
@@ -173,7 +173,7 @@ export interface PropertyDatabaseData {
   features?: Json;
   floorplans?: Json;
   featuredImage?: string | null;
-  gridImages?: string[];
+  coverImages?: string[]; // Changed from gridImages to coverImages
   areas?: Json[];
   areaPhotos?: string[];
   object_id?: string;

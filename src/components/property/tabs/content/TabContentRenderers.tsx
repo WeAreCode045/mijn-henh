@@ -1,4 +1,3 @@
-
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
@@ -72,7 +71,7 @@ export function renderContentTab(tabProps: PropertyTabProps) {
   );
 }
 
-// Update the renderMediaTab function to pass the featured and grid image properties
+// Update the renderMediaTab function to pass the featured and cover image properties
 export function renderMediaTab(tabProps: PropertyTabProps) {
   const { activeTab, property, handlers } = tabProps;
   
@@ -92,11 +91,11 @@ export function renderMediaTab(tabProps: PropertyTabProps) {
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
       isUploading={handlers.isUploading}
-      // Add the new properties
+      // Use the renamed properties
       featuredImageUrl={property.featuredImage}
-      gridImageUrls={property.gridImages}
+      coverImageUrls={property.coverImages}
       onSetFeatured={handlers.handleSetFeaturedImage}
-      onToggleGrid={handlers.handleToggleGridImage}
+      onToggleCover={handlers.handleToggleCoverImage}
     />
   );
 }

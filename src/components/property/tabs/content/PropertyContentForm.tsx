@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 
@@ -29,7 +28,7 @@ interface PropertyContentFormProps {
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleGridImage?: (url: string) => void;
+  handleToggleCoverImage?: (url: string) => void;
   isUploading?: boolean;
   setPendingChanges: (pending: boolean) => void;
 }
@@ -61,17 +60,15 @@ export function PropertyContentForm({
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
   handleSetFeaturedImage,
-  handleToggleGridImage,
+  handleToggleCoverImage,
   isUploading,
   setPendingChanges
 }: PropertyContentFormProps) {
-  // Create wrapped handlers that also set the pending changes flag
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
     onFieldChange(field, value);
     setPendingChanges(true);
   };
 
-  // Wrap other handlers to set pending changes
   const wrappedAddFeature = () => {
     onAddFeature();
     setPendingChanges(true);
@@ -102,7 +99,6 @@ export function PropertyContentForm({
     setPendingChanges(true);
   };
 
-  // Safe technical item handlers
   const safeAddTechnicalItem = () => {
     if (onAddTechnicalItem) {
       onAddTechnicalItem();
@@ -124,7 +120,6 @@ export function PropertyContentForm({
     }
   };
 
-  // Safe image handlers
   const safeSetFeaturedImage = (url: string | null) => {
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
@@ -132,9 +127,9 @@ export function PropertyContentForm({
     }
   };
 
-  const safeToggleGridImage = (url: string) => {
-    if (handleToggleGridImage) {
-      handleToggleGridImage(url);
+  const safeToggleCoverImage = (url: string) => {
+    if (handleToggleCoverImage) {
+      handleToggleCoverImage(url);
       setPendingChanges(true);
     }
   };
@@ -167,7 +162,7 @@ export function PropertyContentForm({
       onRemoveTechnicalItem={safeRemoveTechnicalItem}
       onUpdateTechnicalItem={safeUpdateTechnicalItem}
       handleSetFeaturedImage={safeSetFeaturedImage}
-      handleToggleGridImage={safeToggleGridImage}
+      handleToggleCoverImage={safeToggleCoverImage}
       isUploading={isUploading}
     />
   );

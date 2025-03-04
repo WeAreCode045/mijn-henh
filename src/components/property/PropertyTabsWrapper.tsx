@@ -60,7 +60,7 @@ export function PropertyTabsWrapper({
               handleRemoveFloorplan,
               handleUpdateFloorplan,
               handleSetFeaturedImage,
-              handleToggleGridImage,
+              handleToggleCoverImage,
               onSubmit,
               currentStep,
               handleStepClick,
@@ -104,7 +104,7 @@ export function PropertyTabsWrapper({
                       handleRemoveFloorplan={handleRemoveFloorplan}
                       handleUpdateFloorplan={handleUpdateFloorplan}
                       handleSetFeaturedImage={handleSetFeaturedImage}
-                      handleToggleGridImage={handleToggleGridImage}
+                      handleToggleCoverImage={handleToggleCoverImage}
                       onAddTechnicalItem={addTechnicalItem}
                       onRemoveTechnicalItem={removeTechnicalItem}
                       onUpdateTechnicalItem={updateTechnicalItem}
