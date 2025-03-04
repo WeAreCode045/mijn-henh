@@ -20,6 +20,12 @@ export function AreaCardHeader({
   onRemove,
   children
 }: AreaCardHeaderProps) {
+  const handleRemove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onRemove();
+  };
+
   return (
     <CardHeader className="pb-3">
       <div className="flex justify-between items-start">
@@ -36,8 +42,9 @@ export function AreaCardHeader({
           <Button
             variant="outline"
             size="icon"
-            onClick={onRemove}
+            onClick={handleRemove}
             className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            type="button"
           >
             <Trash className="h-4 w-4" />
           </Button>

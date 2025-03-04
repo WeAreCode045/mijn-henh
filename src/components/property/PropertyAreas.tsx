@@ -75,12 +75,13 @@ export function PropertyAreas({
         <EmptyAreaMessage />
       ) : (
         <div className="space-y-6">
-          {normalizedAreas.map((area) => (
+          {normalizedAreas.map((area, index) => (
             <AreaCard
               key={area.id}
               area={area}
               images={images}
               propertyId={propertyId}
+              isFirstArea={index === 0}
               onRemove={onRemove}
               onUpdate={onUpdate}
               onImageUpload={onImageUpload}

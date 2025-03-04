@@ -16,6 +16,7 @@ interface AreaCardProps {
   area: PropertyArea;
   images: PropertyImage[];
   propertyId?: string;
+  isFirstArea?: boolean;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
   onImageUpload: (id: string, files: FileList) => void;
@@ -36,6 +37,7 @@ export function AreaCard({
   area,
   images,
   propertyId,
+  isFirstArea = false,
   onRemove,
   onUpdate,
   onImageUpload,
@@ -44,7 +46,7 @@ export function AreaCard({
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [areaImages, setAreaImages] = useState<AreaImage[]>([]);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(isFirstArea);
   
   // Get area images based on area ID from property_images table
   useEffect(() => {
@@ -112,7 +114,9 @@ export function AreaCard({
     }
   };
 
-  const toggleExpand = () => {
+  const toggleExpand = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsExpanded(!isExpanded);
   };
 
@@ -129,6 +133,7 @@ export function AreaCard({
           size="sm" 
           onClick={toggleExpand}
           aria-label={isExpanded ? "Collapse area" : "Expand area"}
+          type="button"
         >
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
