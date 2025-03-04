@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,13 +14,15 @@ interface GeneralInfoStepProps {
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleGridImage?: (url: string) => void;
+  isUploading?: boolean;
 }
 
 export function GeneralInfoStep({
   formData,
   onFieldChange,
   handleSetFeaturedImage,
-  handleToggleGridImage
+  handleToggleGridImage,
+  isUploading
 }: GeneralInfoStepProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -35,14 +36,12 @@ export function GeneralInfoStep({
     onFieldChange(name as keyof PropertyFormData, checked);
   };
 
-  // Function to handle featured image selection
   const handleFeaturedImageSelect = (url: string) => {
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
     }
   };
 
-  // Function to handle grid image selection
   const handleGridImageSelect = (url: string) => {
     if (handleToggleGridImage) {
       handleToggleGridImage(url);
@@ -218,12 +217,10 @@ export function GeneralInfoStep({
         </CardContent>
       </Card>
       
-      {/* Image Selection Section - Only have selector dropdowns, not the grid */}
       {formData.images && formData.images.length > 0 && (
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-6">
-              {/* Featured Image Selection */}
               <div>
                 <Label htmlFor="featuredImage">Featured Image</Label>
                 <div className="flex items-center gap-4 mt-2">
@@ -262,7 +259,6 @@ export function GeneralInfoStep({
                 </div>
               </div>
               
-              {/* Grid Images Selection */}
               <div>
                 <Label>Grid Images (max 4)</Label>
                 <div className="mt-2 flex flex-wrap gap-2">

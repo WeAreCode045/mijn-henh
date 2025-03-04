@@ -1,8 +1,10 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import type { PropertyFormData, PropertySubmitData } from "@/types/property";
 import { usePropertyValidation } from "./property-form/usePropertyValidation";
 import { usePropertyDatabase } from "./property-form/usePropertyDatabase";
+import { supabase } from "@/integrations/supabase/client"; // Add the missing import
 import { 
   prepareAreasForFormSubmission, 
   prepareFloorplansForFormSubmission,

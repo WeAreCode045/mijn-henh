@@ -1,4 +1,3 @@
-
 import { PropertyArea, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
@@ -68,17 +67,13 @@ export function PropertyFormContent({
   handleToggleGridImage,
   isUploading
 }: PropertyFormContentProps) {
-  // Helper function to render the correct step
   const renderStep = () => {
     switch (step) {
       case 1:
-        // Only pass the expected props to GeneralInfoStep
         return (
           <GeneralInfoStep
             formData={formData}
             onFieldChange={onFieldChange}
-            handleImageUpload={handleImageUpload}
-            handleRemoveImage={handleRemoveImage}
             handleSetFeaturedImage={handleSetFeaturedImage}
             handleToggleGridImage={handleToggleGridImage}
             isUploading={isUploading}
@@ -94,7 +89,6 @@ export function PropertyFormContent({
           />
         );
       case 3:
-        // Pass all required props to ImagesStep
         return (
           <ImagesStep
             formData={formData}
@@ -126,7 +120,6 @@ export function PropertyFormContent({
           />
         );
       case 5:
-        // Pass required props to LocationStep
         return (
           <LocationStep
             formData={formData}

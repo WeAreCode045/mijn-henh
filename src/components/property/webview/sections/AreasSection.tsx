@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
+// Update the interface to include boolean properties
 interface PropertyImageWithArea extends PropertyImage {
   area?: string | null;
+  is_featured?: boolean;
+  is_grid_image?: boolean;
 }
 
 export function AreasSection({ property, settings }: WebViewSectionProps) {
@@ -33,6 +36,7 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
         
         if (data && data.length > 0) {
           data.forEach(img => {
+            // Cast to PropertyImageWithArea since we know it matches our updated interface
             const image = img as PropertyImageWithArea;
             if (image.area) {
               if (!imagesByArea[image.area]) {
