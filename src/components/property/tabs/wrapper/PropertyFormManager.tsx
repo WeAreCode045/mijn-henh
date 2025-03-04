@@ -65,20 +65,12 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     setLastSaved 
   } = usePropertyAutoSave();
   
-  // State tracking utilities - fixing the type issue
+  // State tracking utilities with properly typed setter function
   const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
     usePropertyStateTracking(
       formState, 
       handleFieldChange, 
-      (newState) => {
-        if (typeof newState === 'function') {
-          // If it's a function, call it with the previous state
-          setFormState((prev) => (newState as any)(prev));
-        } else {
-          // If it's a direct value
-          setFormState(newState);
-        }
-      },
+      setFormState,
       setPendingChanges
     );
   
