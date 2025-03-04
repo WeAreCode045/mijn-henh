@@ -1,88 +1,99 @@
+import { PropertyData, PropertyImage } from "@/types/property";
+import { AgencySettings } from "@/types/agency";
 
-import { PropertyData, PropertyFeature, PropertyImage, PropertyArea, PropertyAgent, PropertyFloorplan } from "@/types/property";
+export interface SupabasePropertyData {
+  id: string;
+  title: string;
+  price: string;
+  address: string;
+  bedrooms: string;
+  bathrooms: string;
+  sqft: string;
+  livingArea: string;
+  buildYear: string;
+  garages: string;
+  energyLabel: string;
+  hasGarden: boolean;
+  description: string;
+  location_description: string;
+  features: any[];
+  areas: any[];
+  nearby_places: any[];
+  latitude: number | null;
+  longitude: number | null;
+  map_image: string | null;
+  agent_id: string | null;
+  agent: {
+    id: string;
+    full_name: string;
+    email: string;
+    phone: string;
+    photo_url: string;
+  } | null;
+  property_images: {
+    id: string;
+    url: string;
+    property_id: string;
+    is_featured: boolean;
+    is_grid_image: boolean;
+    type: string;
+    area: string | null;
+  }[];
+  created_at: string;
+  updated_at: string;
+  template_id: string;
+  floorplanEmbedScript: string;
+}
 
-export function transformSupabaseData(data: any): PropertyData {
-  // Process features array or object
-  const features: PropertyFeature[] = Array.isArray(data.features) 
-    ? data.features.map((feature: any) => ({
-        id: feature.id || crypto.randomUUID(),
-        description: feature.description || ""
-      }))
-    : [];
+export function transformSupabaseData(
+  data: SupabasePropertyData,
+  settings?: AgencySettings
+): PropertyData {
+  // Extract images from property_images
+  const images: PropertyImage[] = [];
+  const floorplans: any[] = [];
+  let featuredImage: string | null = null;
+  const coverImages: string[] = [];
 
-  // Process areas (if it exists)
-  const areas: PropertyArea[] = Array.isArray(data.areas)
-    ? data.areas.map((area: any) => ({
-        id: area.id || crypto.randomUUID(),
-        title: area.title || "",
-        description: area.description || "",
-        imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
-        columns: typeof area.columns === 'number' ? area.columns : 2 // Ensure columns is preserved
-      }))
-    : [];
+  // Process property images
+  if (data.property_images && data.property_images.length > 0) {
+    data.property_images.forEach((img) => {
+      if (img.type === "floorplan") {
+        floorplans.push({
+          id: img.id,
+          url: img.url,
+        });
+      } else {
+        // Regular image
+        images.push({
+          id: img.id,
+          url: img.url,
+          area: img.area,
+        });
 
-  console.log("transformSupabaseData - raw areas data:", data.areas);
-  console.log("transformSupabaseData - processed areas:", areas);
-
-  // Process images from property_images relation
-  const images: PropertyImage[] = Array.isArray(data.property_images)
-    ? data.property_images.map((img: any) => ({
-        id: img.id,
-        url: img.url
-      }))
-    : [];
-
-  // Process floorplans
-  const floorplans: PropertyFloorplan[] = Array.isArray(data.floorplans)
-    ? data.floorplans.map((floorplan: any) => {
-        if (typeof floorplan === 'string') {
-          try {
-            // Try to parse as JSON string
-            const parsedFloorplan = JSON.parse(floorplan);
-            return {
-              id: parsedFloorplan.id || crypto.randomUUID(),
-              url: parsedFloorplan.url || '',
-              filePath: parsedFloorplan.filePath || '',
-              columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
-            };
-          } catch (e) {
-            // If parsing fails, treat as a simple URL string
-            return { 
-              id: crypto.randomUUID(),
-              url: floorplan, 
-              columns: 1 
-            };
-          }
-        } else if (typeof floorplan === 'object' && floorplan !== null) {
-          // If it's already an object
-          return {
-            id: floorplan.id || crypto.randomUUID(),
-            url: floorplan.url || '',
-            filePath: floorplan.filePath || '',
-            columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
-          };
+        // Check if this is the featured image
+        if (img.is_featured) {
+          featuredImage = img.url;
         }
-        // Default case
-        return { 
-          id: crypto.randomUUID(),
-          url: '', 
-          columns: 1 
-        };
-      }).filter(f => f.url) // Filter out items with empty URLs
-    : [];
 
-  // Process agent data if available
-  const agent: PropertyAgent | undefined = data.agent_id ? {
-    id: data.agent_id,
-    name: data.agent_name || "",
-    email: data.agent_email || "",
-    phone: data.agent_phone || "",
-    photoUrl: data.agent_photo || "",
-    address: data.agent_address || ""
-  } : undefined;
+        // Check if this is a grid/cover image
+        if (img.is_grid_image) {
+          coverImages.push(img.url);
+        }
+      }
+    });
+  }
 
-  // Return the transformed property data
-  return {
+  // Transform areas to include imageIds
+  const transformedAreas = data.areas.map((area: any) => ({
+    ...area,
+    imageIds: data.property_images
+      .filter((img) => img.area === area.id)
+      .map((img) => img.id),
+  }));
+
+  // Create the transformed property data
+  const transformedData: PropertyData = {
     id: data.id,
     title: data.title || "",
     price: data.price || "",
@@ -94,26 +105,34 @@ export function transformSupabaseData(data: any): PropertyData {
     buildYear: data.buildYear || "",
     garages: data.garages || "",
     energyLabel: data.energyLabel || "",
-    hasGarden: Boolean(data.hasGarden),
+    hasGarden: data.hasGarden || false,
     description: data.description || "",
     location_description: data.location_description || "",
-    features: features,
+    features: data.features || [],
     images: images,
     floorplans: floorplans,
-    featuredImage: data.featuredImage || null,
-    gridImages: Array.isArray(data.gridImages) ? data.gridImages : [],
-    areas: areas,
-    object_id: data.object_id || undefined,
-    map_image: data.map_image || null,
+    featuredImage: featuredImage,
+    coverImages: coverImages,
+    areas: transformedAreas,
     nearby_places: data.nearby_places || [],
-    latitude: data.latitude || null,
-    longitude: data.longitude || null,
-    agent_id: data.agent_id || undefined,
-    agent: agent,
-    virtualTourUrl: data.virtualTourUrl || '',
-    youtubeUrl: data.youtubeUrl || '',
-    notes: data.notes || '',
-    template_id: data.template_id || undefined,
-    floorplanEmbedScript: data.floorplanEmbedScript || ''
+    latitude: data.latitude,
+    longitude: data.longitude,
+    map_image: data.map_image,
+    agent_id: data.agent_id,
+    agent: data.agent
+      ? {
+          id: data.agent.id,
+          name: data.agent.full_name,
+          email: data.agent.email,
+          phone: data.agent.phone,
+          photoUrl: data.agent.photo_url,
+        }
+      : undefined,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    template_id: data.template_id,
+    floorplanEmbedScript: data.floorplanEmbedScript,
   };
+
+  return transformedData;
 }

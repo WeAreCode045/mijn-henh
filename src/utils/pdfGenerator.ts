@@ -29,7 +29,7 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
         imageIds: area.imageIds || [] // Ensure imageIds exists
       })),
       images: property.images || [],
-      gridImages: (property.gridImages || []).slice(0, 6),
+      coverImages: (property.coverImages || []).slice(0, 6),
       features: (property.features || []).slice(0, 10),
       nearby_places: (property.nearby_places || []).slice(0, 5),
     };

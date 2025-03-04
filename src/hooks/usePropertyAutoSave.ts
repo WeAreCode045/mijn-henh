@@ -58,7 +58,7 @@ export function usePropertyAutoSave() {
           features: formData.features as unknown as Json,
           floorplans: floorplansForDb,
           garages: formData.garages || null,
-          gridImages: formData.gridImages || [],
+          coverImages: formData.coverImages || [],
           hasGarden: formData.hasGarden || false,
           images: imageUrls,
           latitude: formData.latitude ?? currentData?.latitude ?? null,

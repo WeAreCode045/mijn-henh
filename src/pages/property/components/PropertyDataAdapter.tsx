@@ -24,7 +24,7 @@ export function createPropertyDataFromFormData(formData: PropertyFormData): Prop
     hasGarden: formData.hasGarden || false,
     description: formData.description || '',
     featuredImage: formData.featuredImage || null,
-    gridImages: formData.gridImages || []
+    coverImages: formData.coverImages || []
   };
 }
 
@@ -49,7 +49,7 @@ export function createSubmitDataFromPropertyData(propertyData: PropertyData, sel
     location_description: propertyData.location_description,
     floorplans: floorplansForDb,
     featuredImage: propertyData.featuredImage,
-    gridImages: propertyData.gridImages,
+    coverImages: propertyData.coverImages,
     areaPhotos: propertyData.areaPhotos,
     features: propertyData.features as unknown as Json,
     areas: areasWithColumns as unknown as Json[],

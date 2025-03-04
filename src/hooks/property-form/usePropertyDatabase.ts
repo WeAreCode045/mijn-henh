@@ -14,7 +14,7 @@ export function usePropertyDatabase() {
     
     try {
       // Remove floorplans from the data as we store them in property_images now
-      const { floorplans, featuredImage, gridImages, ...updateData } = data;
+      const { floorplans, featuredImage, coverImages, ...updateData } = data;
 
       console.log("usePropertyDatabase - Final update data:", updateData);
       
@@ -54,7 +54,7 @@ export function usePropertyDatabase() {
     
     try {
       // Remove floorplans from the data as we store them in property_images now
-      const { floorplans, featuredImage, gridImages, ...createData } = data;
+      const { floorplans, featuredImage, coverImages, ...createData } = data;
 
       console.log("usePropertyDatabase - Final create data:", createData);
       
