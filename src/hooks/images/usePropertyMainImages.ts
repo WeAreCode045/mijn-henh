@@ -24,7 +24,9 @@ export function usePropertyMainImages(
     // Update in database if we have a property ID
     if (formData.id) {
       try {
-        // First, unset all featured images
+        console.log("Updating featured image in database for property:", formData.id);
+        
+        // First, unset all featured images for this property
         const { error: clearError } = await supabase
           .from('property_images')
           .update({ is_featured: false })
@@ -40,9 +42,9 @@ export function usePropertyMainImages(
           return;
         }
         
-        // Then set the new featured image
+        // Then set the new featured image if provided
         if (url) {
-          console.log("Setting featured image in database for property", formData.id, "url:", url);
+          console.log("Setting new featured image in database:", url);
           
           // Check if this image exists in property_images
           const { data: existingImage, error: checkError } = await supabase

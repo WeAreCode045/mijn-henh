@@ -5,7 +5,6 @@ import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
@@ -60,7 +59,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleFieldChangeWithTracking
   );
   
-  // Property images management
+  // Property images management - use setFormStateWithTracking instead of setFormState
   const {
     handleImageUpload,
     handleRemoveImage,
@@ -70,12 +69,14 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveFloorplan,
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
+    images
   } = usePropertyImages(
     formState, 
     setFormStateWithTracking
   );
   
-  // Main image functionality
+  // Import usePropertyMainImages directly here for better control
+  const { usePropertyMainImages } = require("./images/usePropertyMainImages");
   const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyMainImages(
     formState, 
     setFormStateWithTracking

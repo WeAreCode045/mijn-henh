@@ -17,10 +17,16 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
     return "€ " + numericPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
+  console.log("OverviewSection rendering with featured image:", property.featuredImage);
+  console.log("Grid images:", property.gridImages);
+
   // Get the image to display (featured image, first grid image, or first regular image)
   const mainImage = property.featuredImage || 
-                   (property.gridImages?.length > 0 ? property.gridImages[0] : null) ||
-                   (property.images?.length > 0 ? property.images[0].url : null);
+                   (property.gridImages && property.gridImages.length > 0 ? property.gridImages[0] : null) ||
+                   (property.images && property.images.length > 0 ? 
+                     (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url) : null);
+
+  console.log("Selected main image for display:", mainImage);
 
   return (
     <div className="space-y-4 pb-24">

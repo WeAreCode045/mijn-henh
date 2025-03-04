@@ -24,7 +24,7 @@ export function MediaDatabaseFetcher({
           
           const { data, error } = await supabase
             .from('property_images')
-            .select('id, url')
+            .select('id, url, is_featured, is_grid_image')
             .eq('property_id', propertyId)
             .eq('type', 'image')
             .order('created_at', { ascending: false });
@@ -38,7 +38,9 @@ export function MediaDatabaseFetcher({
             // Transform to PropertyImage objects
             const dbImages: PropertyImage[] = data.map(item => ({
               id: item.id,
-              url: item.url
+              url: item.url,
+              is_featured: item.is_featured,
+              is_grid_image: item.is_grid_image
             }));
             
             console.log("MediaDatabaseFetcher - Fetched images from DB:", dbImages);
