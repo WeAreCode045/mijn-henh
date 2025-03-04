@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -36,6 +37,8 @@ interface PropertyContentTabProps {
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   isUpdateMode: boolean;
   isUploading?: boolean;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleGridImage?: (url: string) => void;
 }
 
 export function PropertyContentTab({
@@ -70,6 +73,8 @@ export function PropertyContentTab({
   onUpdateTechnicalItem,
   isUpdateMode,
   isUploading,
+  handleSetFeaturedImage,
+  handleToggleGridImage,
 }: PropertyContentTabProps) {
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   
@@ -130,9 +135,6 @@ export function PropertyContentTab({
       console.log("Form submitted in PropertyContentTab");
     }
   };
-
-  const handleSetFeaturedImage = () => console.warn("Featured image functionality has been removed");
-  const handleToggleGridImage = () => console.warn("Grid image functionality has been removed");
 
   return (
     <div className="space-y-4">

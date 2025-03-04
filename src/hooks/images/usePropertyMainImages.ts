@@ -57,6 +57,8 @@ export function usePropertyMainImages(
             });
             return;
           }
+          
+          console.log("Featured image set successfully in database");
         }
         
         toast({
@@ -127,6 +129,8 @@ export function usePropertyMainImages(
           });
           return;
         }
+        
+        console.log("Grid image updated successfully in database");
         
         toast({
           title: "Success",

@@ -40,8 +40,10 @@ export function ImageSelections({
   
   const handleSelectImage = (url: string) => {
     if (selectionType === 'featured') {
+      console.log("Setting featured image from ImageSelections:", url);
       onFeaturedImageSelect(url);
     } else {
+      console.log("Toggling grid image from ImageSelections:", url);
       onGridImageToggle(url);
     }
     setImageSelectOpen(false);
