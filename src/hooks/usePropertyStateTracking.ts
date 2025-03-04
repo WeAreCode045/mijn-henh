@@ -17,7 +17,7 @@ export function usePropertyStateTracking(
   };
 
   // Create a proper SetStateAction compatible function for formState
-  const setFormStateWithTracking: Dispatch<SetStateAction<PropertyFormData>> = (newStateOrUpdater) => {
+  const setFormStateWithTracking = (newStateOrUpdater: SetStateAction<PropertyFormData>) => {
     if (typeof newStateOrUpdater === 'function') {
       // If it's a function updater, we need to call it with the previous state
       setFormState((prevState) => {
