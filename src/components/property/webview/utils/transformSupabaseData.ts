@@ -18,9 +18,9 @@ export interface SupabasePropertyData {
   hasGarden: boolean;
   description: string;
   location_description: string;
-  features: any; // Changed from any[] to any to accommodate Json type
-  areas: any; // Changed from any[] to any
-  nearby_places: any; // Changed from any[] to any
+  features: any; // Using any to accommodate Json or array types
+  areas: any; // Using any to accommodate Json or array types
+  nearby_places: any; // Using any to accommodate Json or array types
   latitude: number | null;
   longitude: number | null;
   map_image: string | null;
