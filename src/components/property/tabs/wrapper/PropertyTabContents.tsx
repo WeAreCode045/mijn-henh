@@ -63,7 +63,7 @@ interface PropertyTabContentsProps {
   onSubmit: () => void;
   // Legacy props (for backward compatibility)
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleCoverImage?: (url: string) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
 }
 
 export function PropertyTabContents({
@@ -107,7 +107,7 @@ export function PropertyTabContents({
   handlePrevious,
   onSubmit,
   handleSetFeaturedImage,
-  handleToggleCoverImage
+  handleToggleFeaturedImage
 }: PropertyTabContentsProps) {
   const safeAddTechnicalItem = (e?: React.MouseEvent) => {
     if (e) {
@@ -155,8 +155,8 @@ export function PropertyTabContents({
     handlePrevious,
     onSubmit,
     formState,
-    handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Featured image functionality not available")),
-    handleToggleCoverImage: handleToggleCoverImage || (() => console.warn("Cover image functionality not available"))
+    handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
+    handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available"))
   };
 
   const tabProps = {
@@ -164,7 +164,7 @@ export function PropertyTabContents({
     property: {
       ...property,
       featuredImage: formState.featuredImage || "",
-      coverImages: formState.coverImages || []
+      featuredImages: formState.featuredImages || []
     },
     formState,
     agentInfo,

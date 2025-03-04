@@ -71,7 +71,7 @@ export function renderContentTab(tabProps: PropertyTabProps) {
   );
 }
 
-// Update the renderMediaTab function to pass the featured and cover image properties
+// Update the renderMediaTab function to pass the featured images properties
 export function renderMediaTab(tabProps: PropertyTabProps) {
   const { activeTab, property, handlers } = tabProps;
   
@@ -93,9 +93,9 @@ export function renderMediaTab(tabProps: PropertyTabProps) {
       isUploading={handlers.isUploading}
       // Use the renamed properties
       featuredImageUrl={property.featuredImage}
-      coverImageUrls={property.coverImages}
+      featuredImageUrls={property.featuredImages}
       onSetFeatured={handlers.handleSetFeaturedImage}
-      onToggleCover={handlers.handleToggleCoverImage}
+      onToggleFeatured={handlers.handleToggleFeaturedImage}
     />
   );
 }

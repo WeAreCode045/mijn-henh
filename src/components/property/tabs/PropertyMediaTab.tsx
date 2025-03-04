@@ -18,11 +18,11 @@ interface PropertyMediaTabProps {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
   isUploading?: boolean;
-  // Updated properties for featured and cover images
+  // Updated properties for main and featured images
   featuredImageUrl?: string | null;
-  coverImageUrls?: string[];
+  featuredImageUrls?: string[];
   onSetFeatured?: (url: string) => void;
-  onToggleCover?: (url: string) => void;
+  onToggleFeatured?: (url: string) => void;
 }
 
 export function PropertyMediaTab({
@@ -39,9 +39,9 @@ export function PropertyMediaTab({
   onRemoveImage,
   isUploading = false,
   featuredImageUrl,
-  coverImageUrls = [],
+  featuredImageUrls = [],
   onSetFeatured,
-  onToggleCover,
+  onToggleFeatured,
 }: PropertyMediaTabProps) {
   const [mediaImages, setMediaImages] = useState<PropertyImage[]>(images);
 
@@ -64,9 +64,9 @@ export function PropertyMediaTab({
         onRemoveImage={onRemoveImage}
         isUploading={isUploading}
         featuredImageUrl={featuredImageUrl}
-        coverImageUrls={coverImageUrls}
+        featuredImageUrls={featuredImageUrls}
         onSetFeatured={onSetFeatured}
-        onToggleCover={onToggleCover}
+        onToggleFeatured={onToggleFeatured}
       />
 
       <VirtualTourCard 

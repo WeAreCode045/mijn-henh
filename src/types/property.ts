@@ -1,4 +1,3 @@
-
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -88,8 +87,9 @@ interface BasePropertyData {
   floorplans: PropertyFloorplan[]; // Updated to structured objects
   technicalItems?: PropertyTechnicalItem[]; // New field for technical items
   featuredImage: string | null;
-  coverImages: string[]; // Changed from gridImages to coverImages
-  gridImages?: string[]; // Keep for backward compatibility with existing components
+  featuredImages: string[]; // Changed from coverImages to featuredImages
+  coverImages?: string[]; // Keep for backward compatibility 
+  gridImages?: string[]; // Keep for backward compatibility
   areas: PropertyArea[];
   areaPhotos?: string[];
   currentPath?: string;
@@ -139,7 +139,8 @@ export interface PropertySubmitData {
   floorplans: Json; // Updated to Json for structured floorplans
   technicalItems?: Json; // New field for technical items
   featuredImage: string | null;
-  coverImages: string[]; // Changed from gridImages to coverImages
+  featuredImages: string[]; // Changed from coverImages to featuredImages
+  coverImages?: string[]; // Keep for backward compatibility
   gridImages?: string[]; // Keep for backward compatibility
   areaPhotos?: string[];
   object_id?: string;
@@ -176,7 +177,8 @@ export interface PropertyDatabaseData {
   features?: Json;
   floorplans?: Json;
   featuredImage?: string | null;
-  coverImages?: string[]; // Changed from gridImages to coverImages
+  featuredImages?: string[]; // Changed from coverImages to featuredImages
+  coverImages?: string[]; // Keep for backward compatibility
   gridImages?: string[]; // Keep for backward compatibility
   areas?: Json[];
   areaPhotos?: string[];

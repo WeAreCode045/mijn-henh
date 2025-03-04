@@ -8,19 +8,21 @@ export const CoverSection = ({ property, settings, styles }: {
   settings: AgencySettings; 
   styles: any; 
 }) => {
-  // Get the main image (main image or first cover image or first regular image)
+  // Get the main image (main image or first featured image or first regular image)
   const mainImage = property.featuredImage || 
-                   (property.coverImages?.length > 0 ? property.coverImages[0] : null) || 
+                   (property.featuredImages?.length > 0 ? property.featuredImages[0] : null) || 
                    (property.images?.length > 0 ? property.images[0].url : null);
   
-  // Support both coverImages and gridImages (for backward compatibility)
-  // First try coverImages, then fallback to gridImages if coverImages is empty
-  const coverImagesToUse = (property.coverImages && property.coverImages.length > 0) 
-    ? property.coverImages 
-    : (property.gridImages || []);
+  // Support both featuredImages, coverImages and gridImages (for backward compatibility)
+  // First try featuredImages, then fallback to coverImages, then to gridImages if both are empty
+  const featuredImagesToUse = (property.featuredImages && property.featuredImages.length > 0) 
+    ? property.featuredImages 
+    : (property.coverImages && property.coverImages.length > 0)
+      ? property.coverImages
+      : (property.gridImages || []);
   
-  // Slice the cover images to a maximum of 4
-  const displayImages = coverImagesToUse.slice(0, 4);
+  // Slice the featured images to a maximum of 4
+  const displayImages = featuredImagesToUse.slice(0, 4);
   
   return (
     <Page size="A4" style={styles.page}>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
@@ -61,46 +60,48 @@ export function usePropertyMainImages(
     }
   };
 
-  // Toggle whether an image is in the cover images
-  const handleToggleCoverImage = async (url: string) => {
+  // Toggle whether an image is in the featured images (previously cover images)
+  const handleToggleFeaturedImage = async (url: string) => {
     if (!formData.id) return;
     
     setIsUpdating(true);
     try {
-      // Check if the image is already in the cover images
-      const isInCover = formData.coverImages?.includes(url) || false;
+      // Check if the image is already in the featured images
+      const isInFeatured = formData.featuredImages?.includes(url) || false;
       
-      // Toggle the is_grid_image flag in the database (keeping the database field name)
+      // Toggle the is_grid_image flag in the database (keeping the database field name for now)
       await supabase
         .from('property_images')
-        .update({ is_grid_image: !isInCover })
+        .update({ is_grid_image: !isInFeatured })
         .eq('property_id', formData.id)
         .eq('url', url);
       
       // Update local state with the new terminology
       setFormData(prevState => {
-        const currentCoverImages = prevState.coverImages || [];
-        const updatedCoverImages = isInCover
-          ? currentCoverImages.filter(img => img !== url)
-          : [...currentCoverImages, url];
+        const currentFeaturedImages = prevState.featuredImages || [];
+        const updatedFeaturedImages = isInFeatured
+          ? currentFeaturedImages.filter(img => img !== url)
+          : [...currentFeaturedImages, url];
         
         return {
           ...prevState,
-          coverImages: updatedCoverImages
+          featuredImages: updatedFeaturedImages,
+          // Update legacy fields for backward compatibility
+          coverImages: updatedFeaturedImages
         };
       });
       
       toast({
         title: "Success",
-        description: isInCover 
-          ? "Image removed from cover." 
-          : "Image added to cover."
+        description: isInFeatured 
+          ? "Image removed from featured images." 
+          : "Image added to featured images."
       });
     } catch (error) {
-      console.error("Error toggling cover image:", error);
+      console.error("Error toggling featured image:", error);
       toast({
         title: "Error",
-        description: "Failed to update cover image.",
+        description: "Failed to update featured image.",
         variant: "destructive"
       });
     } finally {
@@ -110,7 +111,7 @@ export function usePropertyMainImages(
 
   return {
     handleSetFeaturedImage,
-    handleToggleCoverImage,
+    handleToggleFeaturedImage,
     isUpdating
   };
 }

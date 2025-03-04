@@ -18,11 +18,11 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
   };
 
   console.log("OverviewSection rendering with main image:", property.featuredImage);
-  console.log("Cover images:", property.coverImages);
+  console.log("Featured images:", property.featuredImages);
 
-  // Get the image to display (main image, first cover image, or first regular image)
+  // Get the image to display (main image, first featured image, or first regular image)
   const mainImage = property.featuredImage || 
-                   (property.coverImages && property.coverImages.length > 0 ? property.coverImages[0] : null) ||
+                   (property.featuredImages && property.featuredImages.length > 0 ? property.featuredImages[0] : null) ||
                    (property.images && property.images.length > 0 ? 
                      (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url) : null);
 
@@ -56,11 +56,11 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
           </>
         )}
         
-        {/* Grid images */}
-        {property.coverImages && property.coverImages.length > 0 && (
+        {/* Featured images grid (previously Grid images) */}
+        {property.featuredImages && property.featuredImages.length > 0 && (
           <div className="px-6 mt-4">
             <div className="grid grid-cols-2 gap-2">
-              {property.coverImages.slice(0, 4).map((imageUrl, index) => (
+              {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
                 <div key={index} className="aspect-square rounded-md overflow-hidden">
                   <img 
                     src={imageUrl} 

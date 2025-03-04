@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ interface ImagesStepProps {
   handleRemoveAreaPhoto?: (index: number) => void;
   handleRemoveFloorplan?: (index: number) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleCoverImage?: (url: string) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
 }
 
@@ -27,7 +28,7 @@ export function ImagesStep({
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
   handleSetFeaturedImage,
-  handleToggleCoverImage,
+  handleToggleFeaturedImage,
   isUploading
 }: ImagesStepProps) {
   // Helper function to safely get the URL from an image
@@ -62,8 +63,8 @@ export function ImagesStep({
                       onRemove={() => handleRemoveImage && handleRemoveImage(index)}
                       isFeatured={formData.featuredImage === imageUrl}
                       onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(imageUrl) : undefined}
-                      isInCover={formData.coverImages?.includes(imageUrl)}
-                      onToggleCover={handleToggleCoverImage ? () => handleToggleCoverImage(imageUrl) : undefined}
+                      isInFeatured={formData.featuredImages?.includes(imageUrl)}
+                      onToggleFeatured={handleToggleFeaturedImage ? () => handleToggleFeaturedImage(imageUrl) : undefined}
                     />
                   );
                 })}

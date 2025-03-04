@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UploadIcon, Trash2Icon, StarIcon, GridIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { useState } from "react";
 import { ImagePreview } from "@/components/ui/ImagePreview";
@@ -11,9 +11,9 @@ interface PropertyImagesCardProps {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
   onSetFeatured?: (url: string) => void; 
-  onToggleCover?: (url: string) => void;
+  onToggleFeatured?: (url: string) => void;
   featuredImageUrl?: string | null;
-  coverImageUrls?: string[];
+  featuredImageUrls?: string[];
   isUploading?: boolean;
 }
 
@@ -22,9 +22,9 @@ export function PropertyImagesCard({
   onImageUpload,
   onRemoveImage,
   onSetFeatured,
-  onToggleCover,
+  onToggleFeatured,
   featuredImageUrl,
-  coverImageUrls = [],
+  featuredImageUrls = [],
   isUploading = false,
 }: PropertyImagesCardProps) {
   // File input ref
@@ -37,7 +37,7 @@ export function PropertyImagesCard({
     e.target.value = '';
   };
 
-  // Add methods to handle main and cover image actions with preventDefault
+  // Add methods to handle main and featured image actions with preventDefault
   const handleSetFeatured = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
     if (onSetFeatured) {
@@ -45,10 +45,10 @@ export function PropertyImagesCard({
     }
   };
 
-  const handleToggleCover = (e: React.MouseEvent, url: string) => {
+  const handleToggleFeatured = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
-    if (onToggleCover) {
-      onToggleCover(url);
+    if (onToggleFeatured) {
+      onToggleFeatured(url);
     }
   };
 
@@ -89,8 +89,8 @@ export function PropertyImagesCard({
                   onRemove={() => onRemoveImage(index)}
                   isFeatured={image.url === featuredImageUrl}
                   onSetFeatured={(e) => handleSetFeatured(e, image.url)}
-                  isInCover={coverImageUrls.includes(image.url)}
-                  onToggleCover={(e) => handleToggleCover(e, image.url)}
+                  isInFeatured={featuredImageUrls.includes(image.url)}
+                  onToggleFeatured={(e) => handleToggleFeatured(e, image.url)}
                 />
               ))
             ) : (

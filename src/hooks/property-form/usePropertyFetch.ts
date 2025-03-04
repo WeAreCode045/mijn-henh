@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { initialFormData } from "./initialFormData";
@@ -63,7 +64,7 @@ export function usePropertyFetch(id: string | undefined) {
           console.error("Error fetching property images:", imagesError);
         }
         
-        const coverImages = allImages
+        const featuredImages = allImages
           ? allImages.filter(img => img.is_grid_image).map(img => img.url)
           : [];
           
@@ -79,7 +80,8 @@ export function usePropertyFetch(id: string | undefined) {
           areas: transformedAreas,
           floorplans: transformedFloorplans,
           nearby_places: transformedNearbyPlaces,
-          coverImages: coverImages,
+          featuredImages: featuredImages,
+          coverImages: featuredImages, // Keep for backward compatibility
           featuredImage: featuredImage,
           images: allImages
             ? allImages.filter(img => img.type !== 'floorplan').map(img => ({ 

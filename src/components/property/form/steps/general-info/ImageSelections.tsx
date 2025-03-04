@@ -9,49 +9,49 @@ import { Check, Image as ImageIcon } from "lucide-react";
 interface ImageSelectionsProps {
   images: PropertyImage[];
   featuredImage: string | null;
-  coverImages: string[];
+  featuredImages: string[];
   onFeaturedImageSelect: (url: string | null) => void;
-  onCoverImageToggle: (url: string) => void;
-  maxCoverImages?: number;
+  onFeaturedImageToggle: (url: string) => void;
+  maxFeaturedImages?: number;
 }
 
 export function ImageSelections({
   images,
   featuredImage,
-  coverImages = [],
+  featuredImages = [],
   onFeaturedImageSelect,
-  onCoverImageToggle,
-  maxCoverImages = 4
+  onFeaturedImageToggle,
+  maxFeaturedImages = 4
 }: ImageSelectionsProps) {
   const [imageSelectOpen, setImageSelectOpen] = useState(false);
-  const [selectionType, setSelectionType] = useState<'featured' | 'cover'>('featured');
+  const [selectionType, setSelectionType] = useState<'main' | 'featured'>('main');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
-  const handleOpenSelectFeatured = (e: React.MouseEvent) => {
+  const handleOpenSelectMain = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
-    setSelectionType('featured');
+    setSelectionType('main');
     setSelectedImage(featuredImage);
     setImageSelectOpen(true);
   };
   
-  const handleOpenSelectCover = (e: React.MouseEvent) => {
+  const handleOpenSelectFeatured = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
-    setSelectionType('cover');
+    setSelectionType('featured');
     setSelectedImage(null);
     setImageSelectOpen(true);
   };
   
   const handleImageClick = (url: string) => {
-    if (selectionType === 'featured') {
+    if (selectionType === 'main') {
       setSelectedImage(url);
     } else {
-      // For cover images, toggle directly
-      onCoverImageToggle(url);
+      // For featured images, toggle directly
+      onFeaturedImageToggle(url);
     }
   };
   
   const handleConfirmSelection = () => {
-    if (selectionType === 'featured' && selectedImage !== undefined) {
+    if (selectionType === 'main' && selectedImage !== undefined) {
       console.log("Confirming main image selection:", selectedImage);
       onFeaturedImageSelect(selectedImage);
     }
@@ -63,7 +63,7 @@ export function ImageSelections({
     setImageSelectOpen(false);
   };
   
-  const canAddMoreCoverImages = coverImages.length < maxCoverImages;
+  const canAddMoreFeaturedImages = featuredImages.length < maxFeaturedImages;
   
   return (
     <Card>
@@ -71,7 +71,7 @@ export function ImageSelections({
         <CardTitle className="text-lg font-medium">Image Selections</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Main Image Selection (previously Featured) */}
+        {/* Main Image Selection */}
         <div className="space-y-2">
           <h3 className="text-md font-medium">Main Image</h3>
           <div className="flex items-start gap-4">
@@ -99,7 +99,7 @@ export function ImageSelections({
               </div>
             )}
             <Button 
-              onClick={handleOpenSelectFeatured} 
+              onClick={handleOpenSelectMain} 
               type="button"
               className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-800"
             >
@@ -108,22 +108,22 @@ export function ImageSelections({
           </div>
         </div>
         
-        {/* Cover Images Selection */}
+        {/* Featured Images Selection (previously Cover) */}
         <div className="space-y-2">
-          <h3 className="text-md font-medium">Cover Images (max {maxCoverImages})</h3>
+          <h3 className="text-md font-medium">Featured Images (max {maxFeaturedImages})</h3>
           <div className="flex flex-wrap gap-4">
-            {coverImages.map((url, index) => (
+            {featuredImages.map((url, index) => (
               <div key={index} className="relative w-24 h-24 border rounded-lg overflow-hidden">
                 <img 
                   src={url} 
-                  alt={`Cover ${index + 1}`} 
+                  alt={`Featured ${index + 1}`} 
                   className="w-full h-full object-cover"
                 />
                 <button 
                   className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-xs"
                   onClick={(e) => {
                     e.preventDefault(); // Prevent form submission
-                    onCoverImageToggle(url);
+                    onFeaturedImageToggle(url);
                   }}
                   type="button"
                 >
@@ -132,9 +132,9 @@ export function ImageSelections({
               </div>
             ))}
             
-            {canAddMoreCoverImages && (
+            {canAddMoreFeaturedImages && (
               <Button 
-                onClick={handleOpenSelectCover}
+                onClick={handleOpenSelectFeatured}
                 className="h-24 w-24 flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800"
                 variant="outline"
                 type="button"
@@ -151,17 +151,17 @@ export function ImageSelections({
           <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>
-                {selectionType === 'featured' ? 'Select Main Image' : 'Select Cover Image'}
+                {selectionType === 'main' ? 'Select Main Image' : 'Select Featured Images'}
               </DialogTitle>
             </DialogHeader>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
               {images.map((image, index) => {
                 // For main images, check against the temporary selectedImage state
-                // For cover images, check if it's already in the coverImages array
-                const isSelected = selectionType === 'featured' 
+                // For featured images, check if it's already in the featuredImages array
+                const isSelected = selectionType === 'main' 
                   ? image.url === selectedImage
-                  : coverImages.includes(image.url);
+                  : featuredImages.includes(image.url);
                 
                 return (
                   <div 
@@ -190,7 +190,7 @@ export function ImageSelections({
               )}
             </div>
             
-            {selectionType === 'featured' && (
+            {selectionType === 'main' && (
               <DialogFooter className="mt-4">
                 <Button variant="outline" onClick={handleCloseDialog}>
                   Cancel

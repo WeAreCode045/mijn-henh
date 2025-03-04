@@ -53,7 +53,8 @@ export function usePropertyFormSubmit() {
       location_description: formData.location_description,
       features: featuresJson,
       featuredImage: formData.featuredImage,
-      coverImages: formData.coverImages,
+      featuredImages: formData.featuredImages || [],
+      coverImages: formData.featuredImages || [], // Keep for backward compatibility
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
@@ -84,7 +85,7 @@ export function usePropertyFormSubmit() {
             .eq('property_id', formData.id);
           
           if (formData.featuredImage) {
-            console.log("Setting featured image in database:", formData.featuredImage);
+            console.log("Setting main image in database:", formData.featuredImage);
             const { error } = await supabase
               .from('property_images')
               .update({ is_featured: true })
@@ -92,13 +93,13 @@ export function usePropertyFormSubmit() {
               .eq('url', formData.featuredImage);
               
             if (error) {
-              console.error("Error setting featured image:", error);
+              console.error("Error setting main image:", error);
             }
           }
           
-          if (formData.coverImages && formData.coverImages.length > 0) {
-            for (const imageUrl of formData.coverImages) {
-              console.log("Setting cover image in database:", imageUrl);
+          if (formData.featuredImages && formData.featuredImages.length > 0) {
+            for (const imageUrl of formData.featuredImages) {
+              console.log("Setting featured image in database:", imageUrl);
               const { error } = await supabase
                 .from('property_images')
                 .update({ is_grid_image: true })
@@ -106,7 +107,7 @@ export function usePropertyFormSubmit() {
                 .eq('url', imageUrl);
                 
               if (error) {
-                console.error("Error setting cover image:", error);
+                console.error("Error setting featured image:", error);
               }
             }
           }
@@ -158,7 +159,7 @@ export function usePropertyFormSubmit() {
                   property_id: newProperty.id,
                   url: imageUrl,
                   is_featured: formData.featuredImage === imageUrl,
-                  is_grid_image: formData.coverImages?.includes(imageUrl) || false,
+                  is_grid_image: formData.featuredImages?.includes(imageUrl) || false,
                   type: 'image'
                 });
             }

@@ -32,10 +32,10 @@ export function usePropertyImages(
     isUploading: isUploadingFloorplans
   } = usePropertyFloorplans(formData, setFormData);
 
-  // Main image selections (featured and cover)
+  // Main image selections (main and featured)
   const {
     handleSetFeaturedImage,
-    handleToggleCoverImage
+    handleToggleFeaturedImage
   } = usePropertyMainImages(formData, setFormData);
 
   // Combine all upload states
@@ -51,7 +51,7 @@ export function usePropertyImages(
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
-    handleToggleCoverImage,
+    handleToggleFeaturedImage,
     // Direct access to the images for components
     images: Array.isArray(formData.images) ? formData.images : []
   };
