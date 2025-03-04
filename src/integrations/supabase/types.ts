@@ -233,12 +233,9 @@ export type Database = {
           created_at: string
           description: string | null
           energyLabel: string | null
-          featuredImage: string | null
           features: Json | null
           floorplanEmbedScript: string | null
-          floorplans: string[] | null
           garages: string | null
-          gridImages: string[] | null
           hasGarden: boolean | null
           id: string
           images: Json[] | null
@@ -269,12 +266,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           energyLabel?: string | null
-          featuredImage?: string | null
           features?: Json | null
           floorplanEmbedScript?: string | null
-          floorplans?: string[] | null
           garages?: string | null
-          gridImages?: string[] | null
           hasGarden?: boolean | null
           id?: string
           images?: Json[] | null
@@ -305,12 +299,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           energyLabel?: string | null
-          featuredImage?: string | null
           features?: Json | null
           floorplanEmbedScript?: string | null
-          floorplans?: string[] | null
           garages?: string | null
-          gridImages?: string[] | null
           hasGarden?: boolean | null
           id?: string
           images?: Json[] | null

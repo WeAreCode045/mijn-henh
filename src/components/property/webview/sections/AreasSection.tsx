@@ -1,10 +1,13 @@
+
 import { WebViewSectionProps } from "../types";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
-// Update the interface to include boolean properties
-interface PropertyImageWithArea extends PropertyImage {
+// Update the interface to correctly extend PropertyImage with boolean properties
+interface PropertyImageWithArea extends Omit<PropertyImage, 'id' | 'url'> {
+  id: string;
+  url: string;
   area?: string | null;
   is_featured?: boolean;
   is_grid_image?: boolean;

@@ -1,4 +1,3 @@
-
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -13,7 +12,9 @@ export interface PropertyImage {
   property_id?: string;
   created_at?: string;
   type?: string;
-  [key: string]: string | null | undefined; // Keep the index signature for other potential properties
+  is_featured?: boolean; // Added for featured image flag
+  is_grid_image?: boolean; // Added for grid image flag
+  [key: string]: string | boolean | null | undefined; // Updated index signature to include boolean
 }
 
 export interface PropertyArea {
