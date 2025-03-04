@@ -60,9 +60,14 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
   const { lastSaved, isSaving, pendingChanges, setPendingChanges, setLastSaved } = 
     usePropertyAutoSave(formState, formState.id);
   
-  // State tracking utilities
+  // State tracking utilities - Fix the parameter type issue here
   const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
-    usePropertyStateTracking(formState, handleFieldChange, setFormState, setPendingChanges);
+    usePropertyStateTracking(
+      formState, 
+      handleFieldChange, 
+      (newState) => setFormState(newState), // Wrap setFormState to match expected type
+      setPendingChanges
+    );
   
   // Property content management
   const {

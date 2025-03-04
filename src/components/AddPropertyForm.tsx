@@ -5,7 +5,7 @@ import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { useFeatures } from "@/hooks/useFeatures";
-import { usePropertyAutosave } from "@/hooks/usePropertyAutosave";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import type { PropertyFormData } from "@/types/property";
 import { steps } from "./property/form/formSteps";
 import { FormStepNavigation } from "./property/form/FormStepNavigation";
