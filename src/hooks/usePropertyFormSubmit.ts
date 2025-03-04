@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import type { PropertyFormData, PropertySubmitData } from "@/types/property";
@@ -165,14 +164,26 @@ export function usePropertyFormSubmit() {
                 });
             }
             
-            for (const floorplan of formData.floorplans || []) {
-              await supabase
-                .from('property_images')
-                .insert({
-                  property_id: newProperty.id,
-                  url: floorplan.url,
-                  type: 'floorplan'
-                });
+            if (formData.floorplans && formData.floorplans.length > 0) {
+              for (const floorplan of formData.floorplans) {
+                const { data: existingFloorplan } = await supabase
+                  .from('property_images')
+                  .select('*')
+                  .eq('property_id', newProperty.id)
+                  .eq('url', floorplan.url)
+                  .eq('type', 'floorplan')
+                  .maybeSingle();
+                  
+                if (!existingFloorplan) {
+                  await supabase
+                    .from('property_images')
+                    .insert({
+                      property_id: newProperty.id,
+                      url: floorplan.url,
+                      type: 'floorplan'
+                    });
+                }
+              }
             }
           } catch (error) {
             console.error("Error adding images to property_images table:", error);

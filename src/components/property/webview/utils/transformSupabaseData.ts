@@ -1,3 +1,4 @@
+
 import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
@@ -35,9 +36,8 @@ export interface SupabasePropertyData {
     id: string;
     url: string;
     property_id: string;
-    is_featured: boolean;
-    is_grid_image: boolean;
     is_main: boolean;
+    is_featured_image: boolean;
     type: string;
     area: string | null;
   }[];
