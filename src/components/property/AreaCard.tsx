@@ -87,13 +87,6 @@ export function AreaCard({
     fetchAreaImages();
   }, [area, images, propertyId]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      console.log(`AreaCard ${area.id} - Uploading ${event.target.files.length} files`);
-      onImageUpload(area.id, event.target.files);
-    }
-  };
-
   const handleUpdateTitle = (value: string) => {
     onUpdate(area.id, "title", value);
   };
@@ -113,23 +106,6 @@ export function AreaCard({
     if (onImagesSelect) {
       onImagesSelect(area.id, imageIds);
     }
-  };
-
-  const handleUploadClick = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.multiple = true;
-    input.accept = "image/*";
-    input.onchange = (e) => {
-      if (e && e.target) {
-        const syntheticEvent = {
-          target: e.target as HTMLInputElement
-        } as React.ChangeEvent<HTMLInputElement>;
-        
-        handleFileUpload(syntheticEvent);
-      }
-    };
-    input.click();
   };
 
   return (
@@ -157,7 +133,6 @@ export function AreaCard({
         <div>
           <AreaImageActions
             onSelectClick={() => setIsSelectDialogOpen(true)}
-            onUploadClick={handleUploadClick}
           />
           
           <div className="mt-2">
