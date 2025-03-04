@@ -7,8 +7,6 @@ import { FloorplanUpload } from "./FloorplanUpload";
 
 interface TechnicalDataContainerProps {
   formData?: PropertyFormData;
-  technicalItems?: PropertyTechnicalItem[];
-  floorplans?: PropertyFloorplan[];
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;

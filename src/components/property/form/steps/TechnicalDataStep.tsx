@@ -6,7 +6,6 @@ import { TechnicalDataContainer } from "./technical-data/TechnicalDataContainer"
 interface TechnicalDataStepProps {
   formData?: PropertyFormData;
   technicalItems?: PropertyTechnicalItem[];
-  floorplans?: PropertyFloorplan[];
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (id: string) => void;
