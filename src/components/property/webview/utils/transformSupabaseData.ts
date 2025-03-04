@@ -85,13 +85,22 @@ export function transformSupabaseData(
     });
   }
 
+  // Ensure areas is an array
+  const dataAreas = Array.isArray(data.areas) ? data.areas : [];
+  
   // Transform areas to include imageIds
-  const transformedAreas = data.areas.map((area: any) => ({
+  const transformedAreas = dataAreas.map((area: any) => ({
     ...area,
     imageIds: data.property_images
       .filter((img) => img.area === area.id)
       .map((img) => img.id),
   }));
+
+  // Ensure features is always an array
+  const dataFeatures = Array.isArray(data.features) ? data.features : [];
+
+  // Ensure nearby_places is always an array
+  const nearbyPlaces = Array.isArray(data.nearby_places) ? data.nearby_places : [];
 
   // Create the transformed property data
   const transformedData: PropertyData = {
@@ -109,13 +118,13 @@ export function transformSupabaseData(
     hasGarden: data.hasGarden || false,
     description: data.description || "",
     location_description: data.location_description || "",
-    features: data.features || [],
+    features: dataFeatures,
     images: images,
     floorplans: floorplans,
     featuredImage: featuredImage,
     coverImages: coverImages,
     areas: transformedAreas,
-    nearby_places: data.nearby_places || [],
+    nearby_places: nearbyPlaces,
     latitude: data.latitude,
     longitude: data.longitude,
     map_image: data.map_image,
@@ -133,6 +142,8 @@ export function transformSupabaseData(
     updated_at: data.updated_at,
     template_id: data.template_id,
     floorplanEmbedScript: data.floorplanEmbedScript,
+    // For backward compatibility with components that still use gridImages
+    gridImages: coverImages
   };
 
   return transformedData;

@@ -87,7 +87,9 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           // Ensure agent property is properly structured
           const propertyWithAgent = {
             ...data,
-            agent: data.agent || null
+            agent: data.agent || null,
+            // Ensure features is always an array
+            features: Array.isArray(data.features) ? data.features : []
           };
           
           const transformedData = transformSupabaseData(propertyWithAgent);

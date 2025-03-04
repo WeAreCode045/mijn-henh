@@ -1,3 +1,4 @@
+
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -88,6 +89,7 @@ interface BasePropertyData {
   technicalItems?: PropertyTechnicalItem[]; // New field for technical items
   featuredImage: string | null;
   coverImages: string[]; // Changed from gridImages to coverImages
+  gridImages?: string[]; // Keep for backward compatibility with existing components
   areas: PropertyArea[];
   areaPhotos?: string[];
   currentPath?: string;
@@ -138,6 +140,7 @@ export interface PropertySubmitData {
   technicalItems?: Json; // New field for technical items
   featuredImage: string | null;
   coverImages: string[]; // Changed from gridImages to coverImages
+  gridImages?: string[]; // Keep for backward compatibility
   areaPhotos?: string[];
   object_id?: string;
   map_image?: string | null;
@@ -174,6 +177,7 @@ export interface PropertyDatabaseData {
   floorplans?: Json;
   featuredImage?: string | null;
   coverImages?: string[]; // Changed from gridImages to coverImages
+  gridImages?: string[]; // Keep for backward compatibility
   areas?: Json[];
   areaPhotos?: string[];
   object_id?: string;

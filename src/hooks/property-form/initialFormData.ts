@@ -20,6 +20,7 @@ export const initialFormData: PropertyFormData = {
   floorplans: [],
   featuredImage: null,
   coverImages: [], // Changed from gridImages to coverImages
+  gridImages: [], // Keep for backward compatibility
   areas: [],
   map_image: null,
   nearby_places: [],

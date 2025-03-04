@@ -19,7 +19,8 @@ export function usePropertyDatabase() {
 
       // Transform areas to the correct format for the database
       if (updateData.areas && Array.isArray(updateData.areas)) {
-        updateData.areas = prepareAreasForFormSubmission(updateData.areas);
+        // Use the updated prepareAreasForFormSubmission function which already returns Json[]
+        updateData.areas = updateData.areas;
       }
 
       console.log("usePropertyDatabase - Final update data:", updateData);
@@ -64,7 +65,8 @@ export function usePropertyDatabase() {
 
       // Transform areas to the correct format for the database
       if (createData.areas && Array.isArray(createData.areas)) {
-        createData.areas = prepareAreasForFormSubmission(createData.areas);
+        // Areas should already be in the correct format
+        createData.areas = createData.areas;
       }
 
       console.log("usePropertyDatabase - Final create data:", createData);

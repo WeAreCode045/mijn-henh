@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
-import { prepareAreasForFormSubmission } from "./property-form/preparePropertyData";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "./property-form/preparePropertyData";
 
 export function usePropertyAutoSave() {
   const [isSaving, setIsSaving] = useState(false);
@@ -67,8 +67,10 @@ export function usePropertyAutoSave() {
         return false;
       }
 
-      // Transform the areas to the correct JSON format
+      // Transform the features and areas to the correct JSON format
       const transformedAreas = prepareAreasForFormSubmission(areas);
+      const transformedFeatures = preparePropertiesForJsonField(features);
+      const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
 
       const updateData = {
         title,
@@ -84,9 +86,9 @@ export function usePropertyAutoSave() {
         hasGarden,
         description,
         location_description,
-        features,
+        features: transformedFeatures,
         areas: transformedAreas,
-        nearby_places,
+        nearby_places: transformedNearbyPlaces,
         latitude,
         longitude,
         map_image,

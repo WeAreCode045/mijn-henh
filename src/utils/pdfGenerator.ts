@@ -32,7 +32,7 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
       coverImages: (property.coverImages || []).slice(0, 6),
       features: (property.features || []).slice(0, 10),
       nearby_places: (property.nearby_places || []).slice(0, 5),
-      // Add gridImages for backwards compatibility with PDF generator
+      // Add gridImages for backward compatibility with PDF generator
       gridImages: property.coverImages || [],
     };
 

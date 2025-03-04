@@ -13,8 +13,12 @@ export const CoverSection = ({ property, settings, styles }: {
                    (property.coverImages?.length > 0 ? property.coverImages[0] : null) || 
                    (property.images?.length > 0 ? property.images[0].url : null);
   
+  // Support both coverImages and gridImages (for backward compatibility)
+  const coverImagesToUse = property.coverImages || 
+                         ((property as any).gridImages || []);
+  
   // Slice the cover images to a maximum of 4
-  const coverImages = (property.coverImages || []).slice(0, 4);
+  const displayImages = coverImagesToUse.slice(0, 4);
   
   return (
     <Page size="A4" style={styles.page}>
@@ -32,9 +36,9 @@ export const CoverSection = ({ property, settings, styles }: {
         />
       )}
 
-      {coverImages.length > 0 && (
+      {displayImages.length > 0 && (
         <View style={styles.imageGrid}>
-          {coverImages.map((url, index) => (
+          {displayImages.map((url, index) => (
             <Image key={index} src={url} style={styles.gridImage} />
           ))}
         </View>
