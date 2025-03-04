@@ -30,15 +30,15 @@ export function useImageRemoveHandler(
       updatedFeaturedImage = null;
     }
     
-    // Update grid images if they include the removed image
-    const updatedGridImages = (formData.gridImages || []).filter(url => url !== imageUrl);
+    // Update cover images if they include the removed image
+    const updatedCoverImages = (formData.coverImages || []).filter(url => url !== imageUrl);
     
     // Create an updated form data object
     const updatedFormData = {
       ...formData,
       images: updatedImages,
       featuredImage: updatedFeaturedImage,
-      gridImages: updatedGridImages
+      coverImages: updatedCoverImages
     };
     
     // Update the form state

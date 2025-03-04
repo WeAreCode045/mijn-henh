@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
@@ -11,7 +10,7 @@ interface GeneralInfoStepProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleGridImage?: (url: string) => void;
+  handleToggleCoverImage?: (url: string) => void;
   isUploading?: boolean;
 }
 
@@ -19,7 +18,7 @@ export function GeneralInfoStep({
   formData,
   onFieldChange,
   handleSetFeaturedImage,
-  handleToggleGridImage,
+  handleToggleCoverImage,
   isUploading
 }: GeneralInfoStepProps) {
   const handleFeaturedImageSelect = (url: string | null) => {
@@ -31,8 +30,8 @@ export function GeneralInfoStep({
 
   const handleGridImageToggle = (url: string) => {
     console.log("Grid image toggled in GeneralInfoStep:", url);
-    if (handleToggleGridImage) {
-      handleToggleGridImage(url);
+    if (handleToggleCoverImage) {
+      handleToggleCoverImage(url);
     }
   };
 
@@ -65,13 +64,16 @@ export function GeneralInfoStep({
         onFieldChange={onFieldChange} 
       />
 
-      <ImageSelections 
-        images={propertyImages}
-        featuredImage={formData.featuredImage}
-        gridImages={formData.gridImages || []}
-        onFeaturedImageSelect={handleFeaturedImageSelect}
-        onGridImageToggle={handleGridImageToggle}
-      />
+      {/* Only render image selections if there are images */}
+      {formData.images && formData.images.length > 0 && (
+        <ImageSelections
+          images={formData.images}
+          featuredImage={formData.featuredImage || ''}
+          coverImages={formData.coverImages || []}
+          onFeaturedImageSelect={handleSetFeaturedImage || (() => {})}
+          onCoverImageToggle={handleToggleCoverImage || (() => {})}
+        />
+      )}
     </div>
   );
 }

@@ -8,13 +8,13 @@ export const CoverSection = ({ property, settings, styles }: {
   settings: AgencySettings; 
   styles: any; 
 }) => {
-  // Get the main image (featured image or first grid image or first regular image)
+  // Get the main image (featured image or first cover image or first regular image)
   const mainImage = property.featuredImage || 
-                   (property.gridImages?.length > 0 ? property.gridImages[0] : null) || 
+                   (property.coverImages?.length > 0 ? property.coverImages[0] : null) || 
                    (property.images?.length > 0 ? property.images[0].url : null);
   
-  // Slice the grid images to a maximum of 4
-  const gridImages = (property.gridImages || []).slice(0, 4);
+  // Slice the cover images to a maximum of 4
+  const coverImages = (property.coverImages || []).slice(0, 4);
   
   return (
     <Page size="A4" style={styles.page}>
@@ -32,9 +32,9 @@ export const CoverSection = ({ property, settings, styles }: {
         />
       )}
 
-      {gridImages.length > 0 && (
+      {coverImages.length > 0 && (
         <View style={styles.imageGrid}>
-          {gridImages.map((url, index) => (
+          {coverImages.map((url, index) => (
             <Image key={index} src={url} style={styles.gridImage} />
           ))}
         </View>
