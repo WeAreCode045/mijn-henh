@@ -55,24 +55,20 @@ export function GeneralInfoStep({
     <div className="space-y-6">
       {/* Basic Details */}
       <BasicDetails 
-        title={formData.title || ''} 
-        price={formData.price || ''} 
-        address={formData.address || ''} 
-        onInputChange={handleInputChange} 
+        formData={formData}
+        onFieldChange={onFieldChange}
       />
       
       {/* Property Specifications */}
       <PropertySpecs 
         formData={formData} 
-        onFieldChange={onFieldChange} 
-        onInputChange={handleInputChange} 
-        onSwitchChange={handleSwitchChange} 
+        onFieldChange={onFieldChange}
       />
       
       {/* Description Section */}
       <DescriptionSection 
-        description={formData.description || ''} 
-        onInputChange={handleInputChange} 
+        formData={formData}
+        onFieldChange={onFieldChange}
       />
       
       {/* Advanced Fields Toggle */}

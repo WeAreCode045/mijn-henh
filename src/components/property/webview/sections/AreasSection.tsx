@@ -1,4 +1,3 @@
-
 import { WebViewSectionProps } from "../types";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,7 @@ interface PropertyImageWithArea extends PropertyImage {
   area?: string | null;
   is_featured?: boolean;
   is_grid_image?: boolean;
+  [key: string]: string | boolean | null | undefined; // Update index signature to include boolean
 }
 
 export function AreasSection({ property, settings }: WebViewSectionProps) {
