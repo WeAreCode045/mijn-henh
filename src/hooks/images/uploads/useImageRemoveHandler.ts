@@ -45,7 +45,7 @@ export function useImageRemoveHandler(
     setFormData(updatedFormData);
     
     // If the image has a file path, attempt to delete it from storage
-    if (imageToRemove.filePath) {
+    if (typeof imageToRemove !== 'string' && imageToRemove.filePath) {
       try {
         const { error } = await supabase.storage
           .from('properties')

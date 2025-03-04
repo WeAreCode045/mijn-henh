@@ -19,6 +19,7 @@ export function usePropertyFetch(id: string | undefined) {
     setIsLoading(true);
     
     try {
+      // Fetch the main property data
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -32,11 +33,51 @@ export function usePropertyFetch(id: string | undefined) {
       if (data) {
         console.log("Fetched property data:", data);
         
-        // Transform the properties as needed
+        // Fetch floorplans from property_images table
+        const { data: floorplanData, error: floorplanError } = await supabase
+          .from('property_images')
+          .select('*')
+          .eq('property_id', propertyId)
+          .eq('type', 'floorplan');
+          
+        if (floorplanError) {
+          console.error("Error fetching floorplans:", floorplanError);
+        }
+        
+        // Transform floorplans
+        const transformedFloorplans = floorplanData 
+          ? transformFloorplans(floorplanData.map(item => ({
+              id: item.id,
+              url: item.url,
+              filePath: item.url,
+              columns: 2 // Default column value
+            })))
+          : [];
+        
+        // Transform other properties
         const transformedFeatures = transformFeatures(Array.isArray(data.features) ? data.features : []);
         const transformedAreas = transformAreas(Array.isArray(data.areas) ? data.areas : []);
-        const transformedFloorplans = transformFloorplans(data.floorplans || []);
         const transformedNearbyPlaces = transformNearbyPlaces(Array.isArray(data.nearby_places) ? data.nearby_places : []);
+        
+        // Fetch all property images to get grid images
+        const { data: allImages, error: imagesError } = await supabase
+          .from('property_images')
+          .select('*')
+          .eq('property_id', propertyId);
+          
+        if (imagesError) {
+          console.error("Error fetching property images:", imagesError);
+        }
+        
+        // Extract grid images
+        const gridImages = allImages
+          ? allImages.filter(img => img.is_grid_image).map(img => img.url)
+          : [];
+          
+        // Extract featured image
+        const featuredImage = allImages
+          ? allImages.find(img => img.is_featured)?.url || null
+          : null;
         
         // Update form data with fetched property data
         setFormData({
@@ -47,9 +88,19 @@ export function usePropertyFetch(id: string | undefined) {
           areas: transformedAreas,
           floorplans: transformedFloorplans,
           nearby_places: transformedNearbyPlaces,
+          // Set grid images and featured image from property_images table
+          gridImages: gridImages,
+          featuredImage: featuredImage,
           // Convert null values to empty strings or arrays as needed
-          images: data.images?.map((url: string) => ({ id: crypto.randomUUID(), url })) || [],
-          gridImages: data.gridImages || [],
+          images: allImages
+            ? allImages.filter(img => img.type !== 'floorplan').map(img => ({ 
+                id: img.id, 
+                url: img.url,
+                area: img.area,
+                is_featured: img.is_featured,
+                is_grid_image: img.is_grid_image
+              })) 
+            : [],
           // Ensure the floorplanEmbedScript is set correctly
           floorplanEmbedScript: data.floorplanEmbedScript || ""
         });

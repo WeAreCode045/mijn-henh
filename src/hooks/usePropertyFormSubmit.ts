@@ -4,10 +4,9 @@ import { useToast } from "@/components/ui/use-toast";
 import type { PropertyFormData, PropertySubmitData } from "@/types/property";
 import { usePropertyValidation } from "./property-form/usePropertyValidation";
 import { usePropertyDatabase } from "./property-form/usePropertyDatabase";
-import { supabase } from "@/integrations/supabase/client"; // Add the missing import
+import { supabase } from "@/integrations/supabase/client"; 
 import { 
   prepareAreasForFormSubmission, 
-  prepareFloorplansForFormSubmission,
   preparePropertiesForJsonField
 } from "./property-form/preparePropertyData";
 
@@ -33,12 +32,10 @@ export function usePropertyFormSubmit() {
     
     // Prepare data for submission using our utility functions
     const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
-    const floorplansForSubmission = prepareFloorplansForFormSubmission(formData.floorplans);
     const featuresJson = preparePropertiesForJsonField(formData.features);
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places);
     
     console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
-    console.log("usePropertyFormSubmit - Form submission - floorplans:", floorplansForSubmission);
     console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
     
     // We still include featuredImage and gridImages in the submission data for backward compatibility
@@ -58,7 +55,6 @@ export function usePropertyFormSubmit() {
       description: formData.description,
       location_description: formData.location_description,
       features: featuresJson,
-      floorplans: floorplansForSubmission,
       featuredImage: formData.featuredImage, // Keep for backward compatibility
       gridImages: formData.gridImages, // Keep for backward compatibility
       map_image: formData.map_image,
@@ -112,12 +108,80 @@ export function usePropertyFormSubmit() {
                 .eq('url', imageUrl);
             }
           }
+          
+          // For each floorplan in formData.floorplans, make sure it exists in property_images
+          if (formData.floorplans && formData.floorplans.length > 0) {
+            for (const floorplan of formData.floorplans) {
+              // Check if this floorplan already exists in property_images
+              const { data: existingFloorplan } = await supabase
+                .from('property_images')
+                .select('*')
+                .eq('property_id', formData.id)
+                .eq('url', floorplan.url)
+                .eq('type', 'floorplan')
+                .maybeSingle();
+                
+              if (!existingFloorplan) {
+                // Insert new floorplan record
+                await supabase
+                  .from('property_images')
+                  .insert({
+                    property_id: formData.id,
+                    url: floorplan.url,
+                    type: 'floorplan'
+                  });
+              }
+            }
+          }
         } catch (error) {
           console.error("Error updating image flags:", error);
         }
       }
     } else {
       success = await createProperty(submitData);
+      
+      // If successful creation, add all images to property_images table
+      if (success) {
+        // Get the newly created property ID
+        const { data: newProperty } = await supabase
+          .from('properties')
+          .select('id')
+          .eq('title', formData.title)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+          
+        if (newProperty && newProperty.id) {
+          try {
+            // Add all images to property_images table
+            for (const image of formData.images) {
+              const imageUrl = typeof image === 'string' ? image : image.url;
+              await supabase
+                .from('property_images')
+                .insert({
+                  property_id: newProperty.id,
+                  url: imageUrl,
+                  is_featured: formData.featuredImage === imageUrl,
+                  is_grid_image: formData.gridImages?.includes(imageUrl) || false,
+                  type: 'image'
+                });
+            }
+            
+            // Add all floorplans to property_images table
+            for (const floorplan of formData.floorplans || []) {
+              await supabase
+                .from('property_images')
+                .insert({
+                  property_id: newProperty.id,
+                  url: floorplan.url,
+                  type: 'floorplan'
+                });
+            }
+          } catch (error) {
+            console.error("Error adding images to property_images table:", error);
+          }
+        }
+      }
       
       // Only redirect to home page after creating a new property if shouldRedirect is true
       if (success && shouldRedirect) {

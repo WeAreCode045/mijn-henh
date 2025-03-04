@@ -5,13 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
 // Update the interface to correctly extend PropertyImage with boolean properties
-interface PropertyImageWithArea extends Omit<PropertyImage, 'id' | 'url'> {
-  id: string;
-  url: string;
+interface PropertyImageWithArea extends PropertyImage {
   area?: string | null;
-  is_featured?: boolean;
-  is_grid_image?: boolean;
-  [key: string]: string | boolean | null | undefined; // Update index signature to include boolean
+  [key: string]: string | boolean | null | undefined; // Updated index signature to include boolean
 }
 
 export function AreasSection({ property, settings }: WebViewSectionProps) {

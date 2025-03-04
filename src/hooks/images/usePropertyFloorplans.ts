@@ -129,7 +129,8 @@ export function usePropertyFloorplans(
             .from('property_images')
             .delete()
             .eq('property_id', formData.id)
-            .eq('url', floorplanToRemove.url);
+            .eq('url', floorplanToRemove.url)
+            .eq('type', 'floorplan');
             
           if (error) {
             console.error('Error removing floorplan from database:', error);
@@ -178,6 +179,17 @@ export function usePropertyFloorplans(
       ...formData,
       floorplans: updatedFloorplans
     });
+    
+    // If property exists in database and field is "columns", update the property_images record
+    if (formData.id && field === "columns" && updatedFloorplans[index].url) {
+      try {
+        // We currently don't have a columns field in property_images, so we'd need to implement this later
+        // This would require a schema update to add a columns field to property_images
+        console.log("Floorplan columns updated in local state only; database schema update needed to persist this");
+      } catch (error) {
+        console.error('Error updating floorplan columns in database:', error);
+      }
+    }
   };
 
   return {

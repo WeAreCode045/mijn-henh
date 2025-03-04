@@ -13,14 +13,10 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
-      // Ensure floorplanEmbedScript is included in the update data
-      const updateData = {
-        ...data,
-        floorplanEmbedScript: data.floorplanEmbedScript || ""
-      };
+      // Remove floorplans from the data as we store them in property_images now
+      const { floorplans, ...updateData } = data;
 
-      console.log("usePropertyDatabase - Final update data with floorplanEmbedScript:", 
-                 updateData.floorplanEmbedScript);
+      console.log("usePropertyDatabase - Final update data:", updateData);
       
       const { error, data: updatedData } = await supabase
         .from('properties')
@@ -57,14 +53,10 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
-      // Ensure floorplanEmbedScript is included in the create data
-      const createData = {
-        ...data,
-        floorplanEmbedScript: data.floorplanEmbedScript || ""
-      };
-      
-      console.log("usePropertyDatabase - Final create data with floorplanEmbedScript:", 
-                 createData.floorplanEmbedScript);
+      // Remove floorplans from the data as we store them in property_images now
+      const { floorplans, ...createData } = data;
+
+      console.log("usePropertyDatabase - Final create data:", createData);
       
       const { error, data: createdData } = await supabase
         .from('properties')
