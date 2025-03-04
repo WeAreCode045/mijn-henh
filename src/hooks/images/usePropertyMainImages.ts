@@ -32,6 +32,11 @@ export function usePropertyMainImages(
           
         if (clearError) {
           console.error("Error clearing featured images in database:", clearError);
+          toast({
+            title: "Error",
+            description: "Failed to clear featured images in database",
+            variant: "destructive"
+          });
           return;
         }
         
