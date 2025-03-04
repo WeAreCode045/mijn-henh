@@ -1,64 +1,51 @@
 
-import { PropertyFormData, PropertyData, PropertySubmitData } from "@/types/property";
-import { Json } from "@/integrations/supabase/types";
-import { prepareAreasForFormSubmission, prepareFloorplansForFormSubmission } from "@/hooks/property-form/preparePropertyData";
+import { PropertyData, PropertySubmitData } from "@/types/property";
 
-export function createPropertyDataFromFormData(formData: PropertyFormData): PropertyData {
-  return {
-    ...formData,
-    id: formData.id || crypto.randomUUID(),
-    features: formData.features || [],
-    images: formData.images || [],
-    floorplans: formData.floorplans || [],
-    areas: formData.areas || [],
-    title: formData.title || '',
-    price: formData.price || '',
-    address: formData.address || '',
-    bedrooms: formData.bedrooms || '',
-    bathrooms: formData.bathrooms || '',
-    sqft: formData.sqft || '',
-    livingArea: formData.livingArea || '',
-    buildYear: formData.buildYear || '',
-    garages: formData.garages || '',
-    energyLabel: formData.energyLabel || '',
-    hasGarden: formData.hasGarden || false,
-    description: formData.description || '',
-    featuredImage: formData.featuredImage || null,
-    coverImages: formData.coverImages || []
-  };
+interface PropertyDataAdapterProps {
+  property: PropertyData;
+  children: (adaptedProperty: PropertySubmitData) => React.ReactNode;
 }
 
-export function createSubmitDataFromPropertyData(propertyData: PropertyData, selectedAgent: string | null): PropertySubmitData {
-  const areasWithColumns = prepareAreasForFormSubmission(propertyData.areas);
-  const floorplansForDb = prepareFloorplansForFormSubmission(propertyData.floorplans);
-
-  return {
-    id: propertyData.id,
-    title: propertyData.title,
-    price: propertyData.price,
-    address: propertyData.address,
-    bedrooms: propertyData.bedrooms,
-    bathrooms: propertyData.bathrooms,
-    sqft: propertyData.sqft,
-    livingArea: propertyData.livingArea,
-    buildYear: propertyData.buildYear,
-    garages: propertyData.garages,
-    energyLabel: propertyData.energyLabel,
-    hasGarden: propertyData.hasGarden,
-    description: propertyData.description,
-    location_description: propertyData.location_description,
-    floorplans: floorplansForDb,
-    featuredImage: propertyData.featuredImage,
-    coverImages: propertyData.coverImages,
-    areaPhotos: propertyData.areaPhotos,
-    features: propertyData.features as unknown as Json,
-    areas: areasWithColumns as unknown as Json[],
-    nearby_places: propertyData.nearby_places as unknown as Json,
-    images: propertyData.images.map(img => img.url),
-    latitude: propertyData.latitude,
-    longitude: propertyData.longitude,
-    object_id: propertyData.object_id,
-    map_image: propertyData.map_image,
-    agent_id: selectedAgent || null
+export function PropertyDataAdapter({ property, children }: PropertyDataAdapterProps) {
+  // Convert PropertyData to PropertySubmitData format
+  const adaptedData: PropertySubmitData = {
+    id: property.id,
+    title: property.title,
+    price: property.price,
+    address: property.address,
+    bedrooms: property.bedrooms,
+    bathrooms: property.bathrooms,
+    sqft: property.sqft,
+    livingArea: property.livingArea,
+    buildYear: property.buildYear,
+    garages: property.garages,
+    energyLabel: property.energyLabel,
+    hasGarden: property.hasGarden,
+    description: property.description,
+    location_description: property.location_description,
+    features: property.features,
+    floorplans: property.floorplans,
+    featuredImage: property.featuredImage,
+    featuredImages: property.featuredImages || [], // Add this to fix the missing property error
+    coverImages: property.coverImages || [],
+    gridImages: property.gridImages || [],
+    areas: property.areas,
+    areaPhotos: property.areaPhotos,
+    object_id: property.object_id,
+    map_image: property.map_image,
+    nearby_places: property.nearby_places || [],
+    latitude: property.latitude,
+    longitude: property.longitude,
+    images: Array.isArray(property.images) 
+      ? property.images.map(img => typeof img === 'string' ? img : img.url)
+      : [],
+    agent_id: property.agent_id || "",
+    virtualTourUrl: property.virtualTourUrl,
+    youtubeUrl: property.youtubeUrl,
+    notes: property.notes,
+    template_id: property.template_id || "default",
+    floorplanEmbedScript: property.floorplanEmbedScript || "",
   };
+
+  return children(adaptedData);
 }

@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ interface GeneralInfoStepProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleCoverImage?: (url: string) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
 }
 
@@ -24,7 +25,7 @@ export function GeneralInfoStep({
   formData,
   onFieldChange,
   handleSetFeaturedImage,
-  handleToggleCoverImage,
+  handleToggleFeaturedImage,
   isUploading
 }: GeneralInfoStepProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -44,9 +45,9 @@ export function GeneralInfoStep({
     }
   };
 
-  const handleCoverImageToggle = (url: string) => {
-    if (handleToggleCoverImage) {
-      handleToggleCoverImage(url);
+  const handleFeaturedImageToggle = (url: string) => {
+    if (handleToggleFeaturedImage) {
+      handleToggleFeaturedImage(url);
     }
   };
 
@@ -154,10 +155,10 @@ export function GeneralInfoStep({
         <ImageSelections
           images={formData.images}
           featuredImage={formData.featuredImage || null}
-          coverImages={formData.coverImages || []}
+          featuredImages={formData.featuredImages || []}
           onFeaturedImageSelect={handleFeaturedImageSelect}
-          onCoverImageToggle={handleCoverImageToggle}
-          maxCoverImages={4}
+          onFeaturedImageToggle={handleFeaturedImageToggle}
+          maxFeaturedImages={4}
         />
       )}
     </div>

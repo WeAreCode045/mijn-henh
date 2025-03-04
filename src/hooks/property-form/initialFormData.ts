@@ -19,7 +19,7 @@ export const initialFormData: PropertyFormData = {
   images: [],
   floorplans: [],
   featuredImage: null,
-  featuredImages: [], // New property for featured images (previously coverImages)
+  featuredImages: [], // For featured images (previously coverImages)
   coverImages: [], // Keep for backward compatibility
   gridImages: [], // Keep for backward compatibility
   areas: [],

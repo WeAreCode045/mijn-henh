@@ -1,3 +1,4 @@
+
 import { PropertyArea, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
@@ -33,7 +34,7 @@ interface PropertyFormContentProps {
   onRemoveTechnicalItem?: (id: string) => void;
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleCoverImage?: (url: string) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
 }
 
@@ -64,7 +65,7 @@ export function PropertyFormContent({
   onRemoveTechnicalItem,
   onUpdateTechnicalItem,
   handleSetFeaturedImage,
-  handleToggleCoverImage,
+  handleToggleFeaturedImage,
   isUploading
 }: PropertyFormContentProps) {
   const renderStep = () => {
@@ -76,7 +77,7 @@ export function PropertyFormContent({
               formData={formData}
               onFieldChange={onFieldChange}
               handleSetFeaturedImage={handleSetFeaturedImage}
-              handleToggleCoverImage={handleToggleCoverImage}
+              handleToggleFeaturedImage={handleToggleFeaturedImage}
               isUploading={isUploading}
             />
           </form>
@@ -105,7 +106,7 @@ export function PropertyFormContent({
               handleRemoveAreaPhoto={handleRemoveAreaPhoto}
               handleRemoveFloorplan={handleRemoveFloorplan}
               handleSetFeaturedImage={handleSetFeaturedImage}
-              handleToggleCoverImage={handleToggleCoverImage}
+              handleToggleFeaturedImage={handleToggleFeaturedImage}
               isUploading={isUploading}
             />
           </form>

@@ -108,7 +108,7 @@ export function ImageSelections({
           </div>
         </div>
         
-        {/* Featured Images Selection (previously Cover) */}
+        {/* Featured Images Selection */}
         <div className="space-y-2">
           <h3 className="text-md font-medium">Featured Images (max {maxFeaturedImages})</h3>
           <div className="flex flex-wrap gap-4">
