@@ -1,11 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PropertyData, PropertyTechnicalItem } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PropertyFormManagerProps {
   property: PropertyData;
@@ -43,12 +45,20 @@ interface PropertyFormManagerProps {
     handleNext: () => void;
     handlePrevious: () => void;
     propertyWithRequiredProps: any;
+    lastSaved: Date | null;
+    isSaving: boolean;
   }) => React.ReactNode;
 }
 
 export function PropertyFormManager({ property, children }: PropertyFormManagerProps) {
   // Form state management
   const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
+  const { toast } = useToast();
+  
+  // Auto-save state
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState(false);
   
   // Handle form submission
   const { handleSubmit } = usePropertyFormSubmit();
@@ -61,7 +71,10 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     addTechnicalItem,
     removeTechnicalItem,
     updateTechnicalItem,
-  } = usePropertyContent(formState, handleFieldChange);
+  } = usePropertyContent(formState, (newState) => {
+    handleFieldChange(newState as any);
+    setPendingChanges(true);
+  });
   
   // Handle property areas
   const {
@@ -71,7 +84,10 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleAreaImageUpload,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-  } = usePropertyAreas(formState, setFormState);
+  } = usePropertyAreas(formState, (newState) => {
+    setFormState(newState);
+    setPendingChanges(true);
+  });
   
   // Handle property images
   const {
@@ -83,61 +99,222 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleRemoveFloorplan,
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
-    handleSetFeaturedImage,
-    handleToggleGridImage,
-  } = usePropertyImages(formState, setFormState);
+  } = usePropertyImages(formState, (newState) => {
+    setFormState(newState);
+    setPendingChanges(true);
+  });
   
-  // Define autosave function (placeholder for now)
-  const handleAutosave = () => {
-    console.log("Autosaving...");
-    // Actual autosave logic would go here
-  };
+  // Handle main image functionality
+  const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyMainImages(
+    formState, 
+    (newState) => {
+      setFormState(newState);
+      setPendingChanges(true);
+    }
+  );
+  
+  // Auto-save functionality
+  useEffect(() => {
+    if (formState.id && pendingChanges) {
+      const timer = setTimeout(() => {
+        console.log("Auto-saving property data...");
+        setIsSaving(true);
+        
+        // Create a form event
+        const formEvent = {} as React.FormEvent;
+        
+        // Call handleSubmit with the formState and false for shouldRedirect
+        handleSubmit(formEvent, formState, false)
+          .then((success) => {
+            if (success) {
+              setLastSaved(new Date());
+              setPendingChanges(false);
+              toast({
+                description: "Changes saved automatically",
+                duration: 2000,
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Auto-save failed:", error);
+            toast({
+              title: "Auto-save failed",
+              description: "Your changes couldn't be saved automatically",
+              variant: "destructive",
+            });
+          })
+          .finally(() => {
+            setIsSaving(false);
+          });
+      }, 2000); // 2-second delay for auto-save
+      
+      return () => clearTimeout(timer);
+    }
+  }, [formState, pendingChanges]);
   
   // Form steps
   const [currentStep, setCurrentStep] = useState(1);
   
   const handleStepClick = (step: number) => {
     console.log("Step clicked:", step);
-    setCurrentStep(step);
+    // Auto-save before changing step if there are pending changes
+    if (pendingChanges && formState.id) {
+      setIsSaving(true);
+      const formEvent = {} as React.FormEvent;
+      handleSubmit(formEvent, formState, false)
+        .then((success) => {
+          if (success) {
+            setLastSaved(new Date());
+            setPendingChanges(false);
+            // Now proceed with step change
+            setCurrentStep(step);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to save before changing step:", error);
+          toast({
+            title: "Warning",
+            description: "Changes couldn't be saved before changing step",
+            variant: "destructive",
+          });
+          // Still allow step change
+          setCurrentStep(step);
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    } else {
+      // No pending changes, just change step
+      setCurrentStep(step);
+    }
   };
   
   const handleNext = () => {
     console.log("Next clicked");
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
+    // Auto-save before proceeding if there are pending changes
+    if (pendingChanges && formState.id) {
+      setIsSaving(true);
+      const formEvent = {} as React.FormEvent;
+      handleSubmit(formEvent, formState, false)
+        .then((success) => {
+          if (success) {
+            setLastSaved(new Date());
+            setPendingChanges(false);
+            // Now proceed to next step
+            if (currentStep < 5) {
+              setCurrentStep(currentStep + 1);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to save before proceeding to next step:", error);
+          toast({
+            title: "Warning",
+            description: "Changes couldn't be saved before proceeding",
+            variant: "destructive",
+          });
+          // Still allow step change
+          if (currentStep < 5) {
+            setCurrentStep(currentStep + 1);
+          }
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    } else {
+      // No pending changes, just proceed
+      if (currentStep < 5) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
   
   const handlePrevious = () => {
     console.log("Previous clicked");
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    // Auto-save before going back if there are pending changes
+    if (pendingChanges && formState.id) {
+      setIsSaving(true);
+      const formEvent = {} as React.FormEvent;
+      handleSubmit(formEvent, formState, false)
+        .then((success) => {
+          if (success) {
+            setLastSaved(new Date());
+            setPendingChanges(false);
+            // Now go to previous step
+            if (currentStep > 1) {
+              setCurrentStep(currentStep - 1);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to save before going to previous step:", error);
+          toast({
+            title: "Warning",
+            description: "Changes couldn't be saved before going back",
+            variant: "destructive",
+          });
+          // Still allow step change
+          if (currentStep > 1) {
+            setCurrentStep(currentStep - 1);
+          }
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
+    } else {
+      // No pending changes, just go back
+      if (currentStep > 1) {
+        setCurrentStep(currentStep - 1);
+      }
     }
   };
 
   const onSubmit = () => {
-    const formEl = document.getElementById('propertyForm') as HTMLFormElement;
-    if (formEl) {
-      // Create a FormEvent object
-      const formEvent = new Event('submit', { bubbles: true, cancelable: true }) as unknown as React.FormEvent;
-      // Pass false to prevent redirection
-      handleSubmit(formEvent, formState, false);
+    // Final save when clicking submit
+    if (formState.id) {
+      setIsSaving(true);
+      const formEvent = {} as React.FormEvent;
+      handleSubmit(formEvent, formState, false)
+        .then((success) => {
+          if (success) {
+            setLastSaved(new Date());
+            setPendingChanges(false);
+            toast({
+              title: "Success",
+              description: "All changes have been saved",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Final save failed:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save all changes",
+            variant: "destructive",
+          });
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
     }
   };
 
   // Handle saving object ID
   const handleSaveObjectId = (objectId: string) => {
     handleFieldChange('object_id', objectId);
+    setPendingChanges(true);
   };
 
   // Handle saving agent
   const handleSaveAgent = (agentId: string) => {
     handleFieldChange('agent_id', agentId);
+    setPendingChanges(true);
   };
 
   // Handle saving template
   const handleSaveTemplate = (templateId: string) => {
     handleFieldChange('template_id', templateId);
+    setPendingChanges(true);
   };
 
   // Cast property to PropertyData to ensure it has required id
@@ -155,7 +332,10 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
 
   return children({
     formState,
-    handleFieldChange,
+    handleFieldChange: (field, value) => {
+      handleFieldChange(field, value);
+      setPendingChanges(true);
+    },
     handleSaveObjectId,
     handleSaveAgent,
     handleSaveTemplate,
@@ -186,6 +366,8 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleStepClick,
     handleNext,
     handlePrevious,
-    propertyWithRequiredProps
+    propertyWithRequiredProps,
+    lastSaved,
+    isSaving
   });
 }

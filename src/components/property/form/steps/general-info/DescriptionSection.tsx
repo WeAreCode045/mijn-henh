@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from "react";
+import { PropertyFormData } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { PropertyFormData } from "@/types/property";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
@@ -10,41 +10,42 @@ interface DescriptionSectionProps {
 }
 
 export function DescriptionSection({ formData, onFieldChange }: DescriptionSectionProps) {
-  const [charCount, setCharCount] = useState(0);
-  const maxChars = 2000; // Maximum character limit
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onFieldChange('description', e.target.value);
+  };
   
-  useEffect(() => {
-    // Safely handle undefined description
-    setCharCount(formData?.description?.length || 0);
-  }, [formData?.description]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    console.log("Description changed:", value);
-    onFieldChange('description', value);
-    setCharCount(value?.length || 0);
+  const handleLocationDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onFieldChange('location_description', e.target.value);
   };
   
   return (
-    <div className="space-y-2">
-      <Label htmlFor="description" className="flex justify-between">
-        <span>Property Description</span>
-        <span className={`text-xs ${charCount > maxChars ? 'text-red-500' : 'text-gray-500'}`}>
-          {charCount}/{maxChars}
-        </span>
-      </Label>
-      <Textarea
-        id="description"
-        value={formData?.description || ''}
-        onChange={handleChange}
-        placeholder="Describe the property in detail..."
-        className="min-h-[150px] resize-y"
-      />
-      {charCount > maxChars && (
-        <p className="text-xs text-red-500">
-          Description exceeds maximum character limit.
-        </p>
-      )}
-    </div>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-medium">Description & Location</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="description">Property Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Describe the property's features and highlights..."
+            rows={6}
+            value={formData.description || ''}
+            onChange={handleDescriptionChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="location_description">Location Description</Label>
+          <Textarea
+            id="location_description"
+            placeholder="Describe the neighborhood, amenities, and surroundings..."
+            rows={4}
+            value={formData.location_description || ''}
+            onChange={handleLocationDescriptionChange}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

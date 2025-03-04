@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { FormStep } from "./formSteps";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 interface FormStepNavigationProps {
   steps: FormStep[];
@@ -11,6 +11,8 @@ interface FormStepNavigationProps {
   onNext: () => void;
   onSubmit?: () => void;
   isUpdateMode?: boolean;
+  lastSaved?: Date | null;
+  isSaving?: boolean;
 }
 
 export function FormStepNavigation({
@@ -20,7 +22,9 @@ export function FormStepNavigation({
   onPrevious,
   onNext,
   onSubmit,
-  isUpdateMode
+  isUpdateMode,
+  lastSaved,
+  isSaving
 }: FormStepNavigationProps) {
   // Prevent event propagation to avoid unwanted form submissions
   const handleStepClick = (e: React.MouseEvent, stepId: number) => {
@@ -55,8 +59,21 @@ export function FormStepNavigation({
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold">{steps[currentStep - 1]?.title || 'Property Information'}</h2>
-          <div className="text-sm text-gray-500">
-            Step {currentStep} of {steps.length}
+          <div className="flex items-center gap-3">
+            {isSaving && (
+              <div className="text-xs text-muted-foreground flex items-center">
+                <Save className="h-3 w-3 mr-1 animate-pulse" />
+                Saving...
+              </div>
+            )}
+            {lastSaved && !isSaving && (
+              <div className="text-xs text-muted-foreground">
+                Last saved: {lastSaved.toLocaleTimeString()}
+              </div>
+            )}
+            <div className="text-sm text-gray-500">
+              Step {currentStep} of {steps.length}
+            </div>
           </div>
         </div>
         <div className="flex justify-between items-center">
@@ -98,8 +115,15 @@ export function FormStepNavigation({
         </Button>
         
         {currentStep === steps.length ? (
-          <Button type="button" onClick={handleSubmit}>
-            Save Property
+          <Button type="button" onClick={handleSubmit} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Save className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Property'
+            )}
           </Button>
         ) : (
           <Button type="button" onClick={handleNext}>

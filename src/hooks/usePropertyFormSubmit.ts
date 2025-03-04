@@ -24,11 +24,12 @@ export function usePropertyFormSubmit() {
     }
     
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
-    console.log("usePropertyFormSubmit - Features to submit:", formData.features);
-    console.log("usePropertyFormSubmit - floorplanEmbedScript:", formData.floorplanEmbedScript);
     
-    if (!validatePropertyData(formData)) {
-      return false;
+    if (!formData.id) {
+      // For new properties, require basic validation
+      if (!validatePropertyData(formData)) {
+        return false;
+      }
     }
     
     // Prepare data for submission using our utility functions
@@ -78,7 +79,6 @@ export function usePropertyFormSubmit() {
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);
-    console.log("usePropertyFormSubmit - Final features data:", submitData.features);
     
     let success = false;
     if (formData.id) {
@@ -95,21 +95,31 @@ export function usePropertyFormSubmit() {
           
           // Set featured image
           if (formData.featuredImage) {
-            await supabase
+            console.log("Setting featured image in database:", formData.featuredImage);
+            const { error } = await supabase
               .from('property_images')
               .update({ is_featured: true })
               .eq('property_id', formData.id)
               .eq('url', formData.featuredImage);
+              
+            if (error) {
+              console.error("Error setting featured image:", error);
+            }
           }
           
           // Set grid images
           if (formData.gridImages && formData.gridImages.length > 0) {
             for (const imageUrl of formData.gridImages) {
-              await supabase
+              console.log("Setting grid image in database:", imageUrl);
+              const { error } = await supabase
                 .from('property_images')
                 .update({ is_grid_image: true })
                 .eq('property_id', formData.id)
                 .eq('url', imageUrl);
+                
+              if (error) {
+                console.error("Error setting grid image:", error);
+              }
             }
           }
           

@@ -72,77 +72,89 @@ export function PropertyFormContent({
     switch (step) {
       case 1:
         return (
-          <GeneralInfoStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleGridImage={handleToggleGridImage}
-            isUploading={isUploading}
-          />
+          <form id="generalInfoForm">
+            <GeneralInfoStep
+              formData={formData}
+              onFieldChange={onFieldChange}
+              handleSetFeaturedImage={handleSetFeaturedImage}
+              handleToggleGridImage={handleToggleGridImage}
+              isUploading={isUploading}
+            />
+          </form>
         );
       case 2:
         return (
-          <FeaturesStep
-            features={formData.features || []}
-            onAddFeature={onAddFeature}
-            onRemoveFeature={onRemoveFeature}
-            onUpdateFeature={onUpdateFeature}
-          />
+          <form id="featuresForm">
+            <FeaturesStep
+              features={formData.features || []}
+              onAddFeature={onAddFeature}
+              onRemoveFeature={onRemoveFeature}
+              onUpdateFeature={onUpdateFeature}
+            />
+          </form>
         );
       case 3:
         return (
-          <ImagesStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            handleImageUpload={handleImageUpload}
-            handleAreaPhotosUpload={handleAreaPhotosUpload}
-            handleFloorplanUpload={handleFloorplanUpload}
-            handleRemoveImage={handleRemoveImage}
-            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-            handleRemoveFloorplan={handleRemoveFloorplan}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleGridImage={handleToggleGridImage}
-            isUploading={isUploading}
-          />
+          <form id="imagesForm">
+            <ImagesStep
+              formData={formData}
+              onFieldChange={onFieldChange}
+              handleImageUpload={handleImageUpload}
+              handleAreaPhotosUpload={handleAreaPhotosUpload}
+              handleFloorplanUpload={handleFloorplanUpload}
+              handleRemoveImage={handleRemoveImage}
+              handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+              handleRemoveFloorplan={handleRemoveFloorplan}
+              handleSetFeaturedImage={handleSetFeaturedImage}
+              handleToggleGridImage={handleToggleGridImage}
+              isUploading={isUploading}
+            />
+          </form>
         );
       case 4:
         return (
-          <AreasStep
-            areas={formData.areas || []}
-            images={formData.images || []}
-            propertyId={formData.id}
-            onAddArea={onAddArea}
-            onRemoveArea={onRemoveArea}
-            onUpdateArea={onUpdateArea}
-            onAreaImageUpload={onAreaImageUpload}
-            onAreaImageRemove={onAreaImageRemove}
-            onAreaImagesSelect={onAreaImagesSelect}
-            isUploading={isUploading}
-          />
+          <form id="areasForm">
+            <AreasStep
+              areas={formData.areas || []}
+              images={formData.images || []}
+              propertyId={formData.id}
+              onAddArea={onAddArea}
+              onRemoveArea={onRemoveArea}
+              onUpdateArea={onUpdateArea}
+              onAreaImageUpload={onAreaImageUpload}
+              onAreaImageRemove={onAreaImageRemove}
+              onAreaImagesSelect={onAreaImagesSelect}
+              isUploading={isUploading}
+            />
+          </form>
         );
       case 5:
         return (
-          <LocationStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            onFetchLocationData={onFetchLocationData}
-            onRemoveNearbyPlace={onRemoveNearbyPlace}
-            handleMapImageDelete={handleMapImageDelete}
-          />
+          <form id="locationForm">
+            <LocationStep
+              formData={formData}
+              onFieldChange={onFieldChange}
+              onFetchLocationData={onFetchLocationData}
+              onRemoveNearbyPlace={onRemoveNearbyPlace}
+              handleMapImageDelete={handleMapImageDelete}
+            />
+          </form>
         );
       case 6:
         return (
-          <TechnicalDataStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            onAddTechnicalItem={onAddTechnicalItem}
-            onRemoveTechnicalItem={onRemoveTechnicalItem}
-            onUpdateTechnicalItem={onUpdateTechnicalItem}
-            onFloorplanUpload={handleFloorplanUpload}
-            onRemoveFloorplan={handleRemoveFloorplan}
-            onUpdateFloorplan={handleUpdateFloorplan}
-            isUploading={isUploading}
-          />
+          <form id="technicalDataForm">
+            <TechnicalDataStep
+              formData={formData}
+              onFieldChange={onFieldChange}
+              onAddTechnicalItem={onAddTechnicalItem}
+              onRemoveTechnicalItem={onRemoveTechnicalItem}
+              onUpdateTechnicalItem={onUpdateTechnicalItem}
+              onFloorplanUpload={handleFloorplanUpload}
+              onRemoveFloorplan={handleRemoveFloorplan}
+              onUpdateFloorplan={handleUpdateFloorplan}
+              isUploading={isUploading}
+            />
+          </form>
         );
       default:
         return <div>Invalid step</div>;
