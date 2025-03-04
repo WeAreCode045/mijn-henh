@@ -52,7 +52,7 @@ export function useAreaImageRemove(
         const { error } = await supabase
           .from('property_images')
           .update({ 
-            area: null  // This is now valid with our updated type
+            area: null 
           })
           .eq('id', imageId)
           .eq('property_id', formData.id);

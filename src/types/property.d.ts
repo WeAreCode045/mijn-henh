@@ -1,4 +1,3 @@
-
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -9,7 +8,10 @@ export interface PropertyFeature {
 export interface PropertyImage {
   id: string;
   url: string;
-  [key: string]: string;
+  property_id: string;
+  type: string;
+  created_at: string;
+  area?: string | null; // Added the area property to fix type errors
 }
 
 export interface PropertyArea {

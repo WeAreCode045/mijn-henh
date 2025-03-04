@@ -26,7 +26,7 @@ export function useAreaImageSelect(
         const { error: clearError } = await supabase
           .from('property_images')
           .update({ 
-            area: null  // Now valid with our updated type
+            area: null
           })
           .eq('property_id', formData.id)
           .eq('area', areaId);
@@ -40,7 +40,7 @@ export function useAreaImageSelect(
           const { error: updateError } = await supabase
             .from('property_images')
             .update({ 
-              area: areaId  // Now valid with our updated type
+              area: areaId
             })
             .eq('id', imageId)
             .eq('property_id', formData.id);
