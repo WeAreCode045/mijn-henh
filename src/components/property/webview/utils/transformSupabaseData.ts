@@ -1,3 +1,4 @@
+
 import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 

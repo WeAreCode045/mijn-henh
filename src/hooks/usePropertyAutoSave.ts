@@ -1,109 +1,132 @@
 
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData } from "@/types/property";
-import type { Json } from "@/integrations/supabase/types";
+import { useToast } from "@/components/ui/use-toast";
+import { PropertyFormData } from "@/types/property";
 
-// Renamed to usePropertyAutoSave for consistency across the application
 export function usePropertyAutoSave() {
-  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [pendingChanges, setPendingChanges] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
 
-  const autosaveData = async (formData: PropertyFormData) => {
-    if (!formData.id) return;
+  // Cleanup function for the timeout
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
+    // Don't save if there's no ID (new property that hasn't been saved initially)
+    if (!formData.id) {
+      console.log('No ID available, auto-save skipped');
+      return false;
+    }
 
     setIsSaving(true);
+    console.log('Auto-saving property data...');
+
     try {
-      const { data: currentData, error: fetchError } = await supabase
-        .from('properties')
-        .select('map_image, nearby_places, latitude, longitude, virtualTourUrl, youtubeUrl, notes')
-        .eq('id', formData.id)
-        .maybeSingle();
+      // Extract the fields we want to update
+      const {
+        title,
+        price,
+        address,
+        bedrooms,
+        bathrooms,
+        sqft,
+        livingArea,
+        buildYear,
+        garages,
+        energyLabel,
+        hasGarden,
+        description,
+        location_description,
+        features,
+        areas,
+        nearby_places,
+        latitude,
+        longitude,
+        map_image,
+        agent_id,
+        virtualTourUrl,
+        youtubeUrl,
+        notes,
+        template_id,
+        floorplanEmbedScript
+      } = formData;
 
-      if (fetchError) throw fetchError;
+      // If still new or draft state (no ID), return false
+      if (!formData.id) {
+        console.log('Property ID not available for auto-save');
+        return false;
+      }
 
-      const imageUrls = formData.images.map(img => img.url);
-      
-      // Process floorplans data - ensure it's stored as string[] in the database
-      // Each string in the array is a stringified JSON object with url and columns properties
-      const floorplansForDb = formData.floorplans.map(floorplan => {
-        // Create a clean object with just the properties we want to store
-        const floorplanData = {
-          url: floorplan.url,
-          columns: floorplan.columns || 1
-        };
-        
-        // Return the stringified object
-        return JSON.stringify(floorplanData);
-      });
+      const updateData = {
+        title,
+        price,
+        address,
+        bedrooms,
+        bathrooms,
+        sqft,
+        livingArea,
+        buildYear,
+        garages,
+        energyLabel,
+        hasGarden,
+        description,
+        location_description,
+        features,
+        areas,
+        nearby_places,
+        latitude,
+        longitude,
+        map_image,
+        agent_id,
+        virtualTourUrl,
+        youtubeUrl,
+        notes,
+        template_id,
+        floorplanEmbedScript
+      };
 
-      console.log("usePropertyAutoSave - Processed floorplans for database:", floorplansForDb);
-
-      // Get the database schema structure
       const { error } = await supabase
         .from('properties')
-        .upsert({
-          address: formData.address || null,
-          areaPhotos: formData.areaPhotos || [],
-          areas: formData.areas as unknown as Json[],
-          bathrooms: formData.bathrooms || null,
-          bedrooms: formData.bedrooms || null,
-          buildYear: formData.buildYear || null,
-          description: formData.description || null,
-          energyLabel: formData.energyLabel || null,
-          featuredImage: formData.featuredImage || null,
-          features: formData.features as unknown as Json,
-          floorplans: floorplansForDb,
-          garages: formData.garages || null,
-          coverImages: formData.coverImages || [],
-          hasGarden: formData.hasGarden || false,
-          images: imageUrls,
-          latitude: formData.latitude ?? currentData?.latitude ?? null,
-          livingArea: formData.livingArea || null,
-          longitude: formData.longitude ?? currentData?.longitude ?? null,
-          map_image: formData.map_image ?? currentData?.map_image ?? null,
-          nearby_places: formData.nearby_places as unknown as Json,
-          price: formData.price || null,
-          sqft: formData.sqft || null,
-          title: formData.title || null,
-          id: formData.id,
-          agent_id: formData.agent_id || null,
-          virtualTourUrl: formData.virtualTourUrl ?? currentData?.virtualTourUrl ?? null,
-          youtubeUrl: formData.youtubeUrl ?? currentData?.youtubeUrl ?? null,
-          notes: formData.notes ?? currentData?.notes ?? null,
-          object_id: formData.object_id || null
-        });
+        .update(updateData)
+        .eq('id', formData.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Auto-save error:', error);
+        throw error;
+      }
 
       setLastSaved(new Date());
       setPendingChanges(false);
-      
+      console.log('Auto-save successful');
+      return true;
+    } catch (error: any) {
+      console.error('Auto-save failed:', error);
       toast({
-        description: "Progress saved",
-        duration: 2000
-      });
-    } catch (error) {
-      console.error('Save error:', error);
-      toast({
+        title: "Auto-save Failed",
+        description: error.message || "An error occurred during auto-save",
         variant: "destructive",
-        description: "Failed to save progress",
       });
+      return false;
     } finally {
       setIsSaving(false);
     }
   };
 
-  return { 
+  return {
     autosaveData,
     isSaving,
-    setIsSaving,
     lastSaved,
-    setLastSaved,
     pendingChanges,
-    setPendingChanges
+    setPendingChanges,
+    setLastSaved
   };
 }
