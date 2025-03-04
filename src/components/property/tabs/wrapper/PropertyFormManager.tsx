@@ -71,10 +71,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     addTechnicalItem,
     removeTechnicalItem,
     updateTechnicalItem,
-  } = usePropertyContent(formState, (newState) => {
-    handleFieldChange(newState as any);
-    setPendingChanges(true);
-  });
+  } = usePropertyContent(formState, setFormState);
   
   // Handle property areas
   const {
@@ -84,10 +81,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleAreaImageUpload,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-  } = usePropertyAreas(formState, (newState) => {
-    setFormState(newState);
-    setPendingChanges(true);
-  });
+  } = usePropertyAreas(formState, setFormState);
   
   // Handle property images
   const {
@@ -99,18 +93,12 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleRemoveFloorplan,
     handleUpdateFloorplan,
     handleRemoveAreaPhoto,
-  } = usePropertyImages(formState, (newState) => {
-    setFormState(newState);
-    setPendingChanges(true);
-  });
+  } = usePropertyImages(formState, setFormState);
   
   // Handle main image functionality
   const { handleSetFeaturedImage, handleToggleGridImage } = usePropertyMainImages(
     formState, 
-    (newState) => {
-      setFormState(newState);
-      setPendingChanges(true);
-    }
+    setFormState
   );
   
   // Auto-save functionality
