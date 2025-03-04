@@ -34,12 +34,6 @@ export function useAreaImageSelect(
         areas: updatedAreas
       }));
       
-      // Update database relations if we have a property ID
-      if (formData.id) {
-        console.log(`Updated area-images relations in database for property ${formData.id}`);
-        // Database update logic would go here if needed
-      }
-      
       toast({
         title: "Success",
         description: "Images updated for area",

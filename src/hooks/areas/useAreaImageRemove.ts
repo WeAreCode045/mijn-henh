@@ -1,6 +1,5 @@
 
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from '@/types/property';
 
 export function useAreaImageRemove(
@@ -43,12 +42,6 @@ export function useAreaImageRemove(
         ...prevData,
         areas: updatedAreas
       }));
-      
-      // If we have a property ID, also update the database relation
-      if (formData.id) {
-        console.log(`Updated area-image relation in database for property ${formData.id}`);
-        // Database update logic would go here if needed
-      }
       
       toast({
         title: "Success",
