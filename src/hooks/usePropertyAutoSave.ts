@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData } from "@/types/property";
@@ -8,10 +8,14 @@ import type { Json } from "@/integrations/supabase/types";
 // Renamed to usePropertyAutoSave for consistency across the application
 export function usePropertyAutoSave() {
   const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [pendingChanges, setPendingChanges] = useState(false);
 
   const autosaveData = async (formData: PropertyFormData) => {
     if (!formData.id) return;
 
+    setIsSaving(true);
     try {
       const { data: currentData, error: fetchError } = await supabase
         .from('properties')
@@ -75,18 +79,31 @@ export function usePropertyAutoSave() {
 
       if (error) throw error;
 
+      setLastSaved(new Date());
+      setPendingChanges(false);
+      
       toast({
         description: "Progress saved",
         duration: 2000
       });
     } catch (error) {
-      console.error('Autosave error:', error);
+      console.error('Save error:', error);
       toast({
         variant: "destructive",
         description: "Failed to save progress",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  return { autosaveData };
+  return { 
+    autosaveData,
+    isSaving,
+    setIsSaving,
+    lastSaved,
+    setLastSaved,
+    pendingChanges,
+    setPendingChanges
+  };
 }

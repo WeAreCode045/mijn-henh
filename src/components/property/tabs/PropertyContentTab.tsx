@@ -7,6 +7,7 @@ import { usePropertyContentAutoSave } from "@/hooks/usePropertyContentAutoSave";
 import { usePropertyContentStepNavigation } from "@/hooks/usePropertyContentStepNavigation";
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 import { PropertyContentForm } from "./content/PropertyContentForm";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
@@ -85,12 +86,23 @@ export function PropertyContentTab({
   // Use the provided step if available, otherwise use internal state
   const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
   
-  // Use the extracted hooks for auto-save, navigation, and submission
-  const { lastSaved, setLastSaved } = usePropertyContentAutoSave(
-    formData, 
-    pendingChanges, 
-    setPendingChanges
-  );
+  // Use the property auto save hook directly
+  const { 
+    autosaveData, 
+    isSaving, 
+    lastSaved, 
+    setLastSaved 
+  } = usePropertyAutoSave();
+  
+  // Handle manual save
+  const handleSave = () => {
+    if (formData.id) {
+      console.log("PropertyContentTab - Manual save triggered");
+      autosaveData(formData).then(() => {
+        setPendingChanges(false);
+      });
+    }
+  };
   
   const { handleStepClick, handleNext, handlePrevious } = usePropertyContentStepNavigation(
     formData,
@@ -120,8 +132,10 @@ export function PropertyContentTab({
         onPrevious={handlePrevious}
         onNext={handleNext}
         onSubmit={onSubmit}
+        onSave={handleSave}
         isUpdateMode={isUpdateMode}
         lastSaved={lastSaved}
+        isSaving={isSaving}
       />
       
       <PropertyContentForm

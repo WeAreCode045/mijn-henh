@@ -56,9 +56,15 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
   // Form state management
   const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
   
-  // Auto-save state management
-  const { lastSaved, isSaving, pendingChanges, setPendingChanges, setLastSaved } = 
-    usePropertyAutoSave(formState, formState.id);
+  // Auto-save functionality
+  const { 
+    autosaveData, 
+    isSaving, 
+    lastSaved, 
+    pendingChanges, 
+    setPendingChanges, 
+    setLastSaved 
+  } = usePropertyAutoSave();
   
   // State tracking utilities - Creating a proper wrapper to fix type issues
   const { handleFieldChangeWithTracking, setFormStateWithTracking } = 

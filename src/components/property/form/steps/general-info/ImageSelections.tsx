@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PropertyImage } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Check, Image as ImageIcon } from "lucide-react";
 
 interface ImageSelectionsProps {
@@ -25,27 +25,41 @@ export function ImageSelections({
 }: ImageSelectionsProps) {
   const [imageSelectOpen, setImageSelectOpen] = useState(false);
   const [selectionType, setSelectionType] = useState<'featured' | 'grid'>('featured');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   const handleOpenSelectFeatured = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
     setSelectionType('featured');
+    setSelectedImage(featuredImage);
     setImageSelectOpen(true);
   };
   
   const handleOpenSelectGrid = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
     setSelectionType('grid');
+    setSelectedImage(null);
     setImageSelectOpen(true);
   };
   
-  const handleSelectImage = (url: string) => {
+  const handleImageClick = (url: string) => {
     if (selectionType === 'featured') {
-      console.log("Setting featured image from ImageSelections:", url);
-      onFeaturedImageSelect(url);
+      setSelectedImage(url);
     } else {
-      console.log("Toggling grid image from ImageSelections:", url);
+      // For grid images, toggle directly
       onGridImageToggle(url);
     }
+  };
+  
+  const handleConfirmSelection = () => {
+    if (selectionType === 'featured' && selectedImage !== undefined) {
+      console.log("Confirming featured image selection:", selectedImage);
+      onFeaturedImageSelect(selectedImage);
+    }
+    setImageSelectOpen(false);
+  };
+  
+  const handleCloseDialog = () => {
+    setSelectedImage(null);
     setImageSelectOpen(false);
   };
   
@@ -142,15 +156,17 @@ export function ImageSelections({
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
               {images.map((image, index) => {
+                // For featured images, check against the temporary selectedImage state
+                // For grid images, check if it's already in the gridImages array
                 const isSelected = selectionType === 'featured' 
-                  ? image.url === featuredImage
+                  ? image.url === selectedImage
                   : gridImages.includes(image.url);
                 
                 return (
                   <div 
                     key={image.id || index} 
                     className={`relative cursor-pointer h-[150px] border-2 rounded-lg overflow-hidden hover:border-blue-500 ${isSelected ? 'border-blue-500' : 'border-gray-200'}`}
-                    onClick={() => handleSelectImage(image.url)}
+                    onClick={() => handleImageClick(image.url)}
                   >
                     <img
                       src={image.url}
@@ -172,6 +188,17 @@ export function ImageSelections({
                 </div>
               )}
             </div>
+            
+            {selectionType === 'featured' && (
+              <DialogFooter className="mt-4">
+                <Button variant="outline" onClick={handleCloseDialog}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmSelection}>
+                  Confirm Selection
+                </Button>
+              </DialogFooter>
+            )}
           </DialogContent>
         </Dialog>
       </CardContent>

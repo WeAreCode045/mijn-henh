@@ -10,6 +10,7 @@ interface FormStepNavigationProps {
   onPrevious: () => void;
   onNext: () => void;
   onSubmit?: () => void;
+  onSave?: () => void;
   isUpdateMode?: boolean;
   lastSaved?: Date | null;
   isSaving?: boolean;
@@ -22,6 +23,7 @@ export function FormStepNavigation({
   onPrevious,
   onNext,
   onSubmit,
+  onSave,
   isUpdateMode,
   lastSaved,
   isSaving
@@ -52,6 +54,12 @@ export function FormStepNavigation({
     e.preventDefault();
     e.stopPropagation();
     if (onSubmit) onSubmit();
+  };
+
+  const handleSave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onSave) onSave();
   };
 
   return (
@@ -114,23 +122,46 @@ export function FormStepNavigation({
           Previous
         </Button>
         
-        {currentStep === steps.length ? (
-          <Button type="button" onClick={handleSubmit} disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <Save className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Save Property'
-            )}
-          </Button>
-        ) : (
-          <Button type="button" onClick={handleNext}>
-            Next
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {onSave && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Save className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save
+                </>
+              )}
+            </Button>
+          )}
+          
+          {currentStep === steps.length ? (
+            <Button type="button" onClick={handleSubmit} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Save className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Property'
+              )}
+            </Button>
+          ) : (
+            <Button type="button" onClick={handleNext}>
+              Next
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          )}
+        </div>
       </div>
     </>
   );

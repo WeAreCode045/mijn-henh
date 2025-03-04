@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyContentAutoSave(
@@ -9,47 +10,31 @@ export function usePropertyContentAutoSave(
   pendingChanges: boolean, 
   setPendingChanges: (pending: boolean) => void
 ) {
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { handleSubmit } = usePropertyFormSubmit();
+  const { autosaveData, lastSaved, setLastSaved } = usePropertyAutoSave();
   const { toast } = useToast();
   
-  // Auto-save functionality
-  useEffect(() => {
+  // Manual save function
+  const saveChanges = async () => {
     if (formData.id && pendingChanges) {
-      const timer = setTimeout(() => {
-        console.log("Auto-saving form data...");
-        
-        // Create a form event
-        const formEvent = {} as React.FormEvent;
-        
-        // Call handleSubmit with the formData and false for shouldRedirect
-        handleSubmit(formEvent, formData, false)
-          .then((success) => {
-            if (success) {
-              setLastSaved(new Date());
-              setPendingChanges(false);
-              toast({
-                description: "Changes saved automatically",
-                duration: 2000,
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Auto-save failed:", error);
-            toast({
-              title: "Auto-save failed",
-              description: "Your changes couldn't be saved automatically",
-              variant: "destructive",
-            });
-          });
-      }, 2000); // 2-second delay for auto-save
+      console.log("Manually saving form data...");
       
-      return () => clearTimeout(timer);
+      try {
+        await autosaveData(formData);
+        setPendingChanges(false);
+      } catch (error) {
+        console.error("Manual save failed:", error);
+        toast({
+          title: "Save failed",
+          description: "Your changes couldn't be saved",
+          variant: "destructive",
+        });
+      }
     }
-  }, [formData, pendingChanges, handleSubmit, toast, setPendingChanges]);
+  };
 
   return {
     lastSaved,
-    setLastSaved
+    setLastSaved,
+    saveChanges
   };
 }
