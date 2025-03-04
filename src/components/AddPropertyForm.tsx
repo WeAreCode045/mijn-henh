@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
@@ -17,7 +16,7 @@ export function AddPropertyForm() {
   const { formData, setFormData, isLoading } = usePropertyForm(undefined);
   const { addFeature, removeFeature, updateFeature } = useFeatures(formData, setFormData);
   const { handleSubmit } = usePropertyFormSubmit();
-  const { autosaveData } = usePropertyAutosave();
+  const { autosaveData } = usePropertyAutoSave();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {

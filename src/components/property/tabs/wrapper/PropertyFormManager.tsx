@@ -1,4 +1,3 @@
-
 import { PropertyData, PropertyTechnicalItem } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
@@ -6,7 +5,7 @@ import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave"; // Corrected import name
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
@@ -66,12 +65,20 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     setLastSaved 
   } = usePropertyAutoSave();
   
-  // State tracking utilities - Creating a proper wrapper to fix type issues
+  // State tracking utilities - fixing the type issue
   const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
     usePropertyStateTracking(
       formState, 
       handleFieldChange, 
-      (newState) => setFormState(newState), // Use a function that matches the expected signature
+      (newState) => {
+        if (typeof newState === 'function') {
+          // If it's a function, call it with the previous state
+          setFormState((prev) => (newState as any)(prev));
+        } else {
+          // If it's a direct value
+          setFormState(newState);
+        }
+      },
       setPendingChanges
     );
   
