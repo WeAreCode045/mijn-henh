@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
@@ -8,6 +9,8 @@ import { AreaColumnsSelector } from "./area/AreaColumnsSelector";
 import { AreaImageActions } from "./area/AreaImageActions";
 import { AreaImageSelectDialog } from "./area/AreaImageSelectDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface AreaCardProps {
   area: PropertyArea;
@@ -41,6 +44,7 @@ export function AreaCard({
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [areaImages, setAreaImages] = useState<AreaImage[]>([]);
+  const [isExpanded, setIsExpanded] = useState(true);
   
   // Get area images based on area ID from property_images table
   useEffect(() => {
@@ -108,6 +112,10 @@ export function AreaCard({
     }
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <Card>
       <AreaCardHeader
@@ -115,37 +123,48 @@ export function AreaCard({
         areaId={area.id}
         onTitleChange={handleUpdateTitle}
         onRemove={() => onRemove(area.id)}
-      />
+      >
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={toggleExpand}
+          aria-label={isExpanded ? "Collapse area" : "Expand area"}
+        >
+          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+      </AreaCardHeader>
 
-      <CardContent className="space-y-4">
-        <AreaDescription
-          description={area.description}
-          areaId={area.id}
-          onDescriptionChange={handleUpdateDescription}
-        />
-        
-        <AreaColumnsSelector
-          columns={area.columns || 2}
-          areaId={area.id}
-          onColumnsChange={handleUpdateColumns}
-        />
-
-        <div>
-          <AreaImageActions
-            onSelectClick={() => setIsSelectDialogOpen(true)}
+      {isExpanded && (
+        <CardContent className="space-y-4">
+          <AreaDescription
+            description={area.description}
+            areaId={area.id}
+            onDescriptionChange={handleUpdateDescription}
           />
           
-          <div className="mt-2">
-            <p className="text-sm font-medium mb-2">Selected Images ({areaImages.length})</p>
-            <AreaImageGrid
-              areaImages={areaImages}
-              areaId={area.id}
-              areaTitle={area.title}
-              onImageRemove={onImageRemove}
+          <AreaColumnsSelector
+            columns={area.columns || 2}
+            areaId={area.id}
+            onColumnsChange={handleUpdateColumns}
+          />
+
+          <div>
+            <AreaImageActions
+              onSelectClick={() => setIsSelectDialogOpen(true)}
             />
+            
+            <div className="mt-2">
+              <p className="text-sm font-medium mb-2">Selected Images ({areaImages.length})</p>
+              <AreaImageGrid
+                areaImages={areaImages}
+                areaId={area.id}
+                areaTitle={area.title}
+                onImageRemove={onImageRemove}
+              />
+            </div>
           </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
       
       <AreaImageSelectDialog
         open={isSelectDialogOpen}
