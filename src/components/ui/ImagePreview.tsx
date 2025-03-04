@@ -46,7 +46,7 @@ export function ImagePreview({
             size="icon" 
             variant={isFeatured ? "secondary" : "ghost"} 
             onClick={onSetFeatured} 
-            className="h-8 w-8"
+            className={`h-8 w-8 ${isFeatured ? "bg-yellow-100" : "hover:bg-yellow-50"}`}
             title={isFeatured ? "Featured image" : "Set as featured"}
             type="button"
           >
@@ -59,18 +59,33 @@ export function ImagePreview({
             size="icon" 
             variant={isInGrid ? "secondary" : "ghost"} 
             onClick={onToggleGrid} 
-            className="h-8 w-8"
+            className={`h-8 w-8 ${isInGrid ? "bg-blue-100" : "hover:bg-blue-50"}`}
             title={isInGrid ? "Remove from grid" : "Add to grid"}
             type="button"
           >
-            <Grid className="h-4 w-4" />
+            <Grid className={`h-4 w-4 ${isInGrid ? "text-blue-500" : ""}`} />
           </Button>
         )}
       </div>
       
+      {/* Featured image tag */}
       {isFeatured && (
         <div className="absolute top-1 right-1 bg-yellow-500 text-white text-xs px-1 rounded">
           Featured
+        </div>
+      )}
+      
+      {/* Grid image tag - New addition */}
+      {isInGrid && !isFeatured && (
+        <div className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-1 rounded">
+          Grid
+        </div>
+      )}
+      
+      {/* Show both tags if both are true, position the grid tag below the featured tag */}
+      {isInGrid && isFeatured && (
+        <div className="absolute top-6 right-1 bg-blue-500 text-white text-xs px-1 rounded">
+          Grid
         </div>
       )}
     </div>
