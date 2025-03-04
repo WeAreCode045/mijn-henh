@@ -61,8 +61,7 @@ export function GeneralInfoStep({
       </Card>
 
       <DescriptionSection 
-        description={formData.description || ''} 
-        locationDescription={formData.location_description || ''} 
+        formData={formData}
         onFieldChange={onFieldChange} 
       />
 
