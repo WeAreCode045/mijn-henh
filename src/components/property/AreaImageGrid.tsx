@@ -18,6 +18,11 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
     console.log(`AreaImageGrid for ${areaId} (${areaTitle}) - received ${areaImages.length} images:`, areaImages);
   }, [areaImages, areaId, areaTitle]);
   
+  // Reset image load errors when areaImages changes
+  useEffect(() => {
+    setImageLoadErrors({});
+  }, [areaImages]);
+  
   // Filter out images with load errors
   const validAreaImages = areaImages.filter(image => !imageLoadErrors[image.id]);
   
@@ -43,7 +48,7 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
         <div key={image.id} className="relative group">
           <img
             src={image.url}
-            alt={areaTitle}
+            alt={`${areaTitle} - ${image.id}`}
             className="w-full h-24 object-cover rounded-md"
             onError={() => handleImageError(image.id)}
           />

@@ -13,26 +13,31 @@ export function useAreaImageSelect(
     console.log(`Selected ${imageIds.length} images for area ${areaId}:`, imageIds);
     
     try {
+      // Ensure imageIds is always an array
+      const validImageIds = Array.isArray(imageIds) ? imageIds : [];
+      
       // Update the area with the new imageIds
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
+          console.log(`Updating area ${areaId} imageIds:`, validImageIds);
           return {
             ...area,
-            imageIds: imageIds
+            imageIds: validImageIds
           };
         }
         return area;
       });
       
       // Update the form data with the modified areas
-      setFormData({
-        ...formData,
+      setFormData(prevData => ({
+        ...prevData,
         areas: updatedAreas
-      });
+      }));
       
       // Update database relations if we have a property ID
       if (formData.id) {
         console.log(`Updated area-images relations in database for property ${formData.id}`);
+        // Database update logic would go here if needed
       }
       
       toast({

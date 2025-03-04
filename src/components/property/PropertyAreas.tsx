@@ -30,8 +30,14 @@ export function PropertyAreas({
   isUploading,
 }: PropertyAreasProps) {
   useEffect(() => {
-    console.log("PropertyAreas - Current areas with columns:", areas);
+    console.log("PropertyAreas - Current areas:", areas);
     console.log("PropertyAreas - Available images:", images);
+    
+    // Debug each area's imageIds
+    areas.forEach(area => {
+      console.log(`Area ${area.id} (${area.title}) - imageIds:`, 
+        Array.isArray(area.imageIds) ? area.imageIds : 'Not an array: ' + JSON.stringify(area.imageIds));
+    });
   }, [areas, images]);
 
   const handleAddArea = (e: React.MouseEvent) => {
@@ -63,7 +69,10 @@ export function PropertyAreas({
           {areas.map((area) => (
             <AreaCard
               key={area.id}
-              area={area}
+              area={{
+                ...area,
+                imageIds: Array.isArray(area.imageIds) ? area.imageIds : [] // Ensure imageIds is always an array
+              }}
               images={images}
               onRemove={onRemove}
               onUpdate={onUpdate}

@@ -39,14 +39,15 @@ export function useAreaImageRemove(
       });
       
       // Update the form data with the modified areas
-      setFormData({
-        ...formData,
+      setFormData(prevData => ({
+        ...prevData,
         areas: updatedAreas
-      });
+      }));
       
       // If we have a property ID, also update the database relation
       if (formData.id) {
         console.log(`Updated area-image relation in database for property ${formData.id}`);
+        // Database update logic would go here if needed
       }
       
       toast({

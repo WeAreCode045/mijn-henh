@@ -1,3 +1,4 @@
+
 import type { PropertyFeature, PropertyArea, PropertyFloorplan, PropertyPlaceType } from "@/types/property";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
@@ -12,24 +13,42 @@ export function transformFeatures(features: any[]): PropertyFeature[] {
 export function transformAreas(areas: any[]): PropertyArea[] {
   return Array.isArray(areas)
     ? areas.map((area: any) => {
-        // Ensure imageIds is always an array
-        let imageIds = [];
+        // Ensure imageIds is always processed to a valid array
+        let imageIds: string[] = [];
+        
         if (area.imageIds) {
           if (Array.isArray(area.imageIds)) {
+            // Already an array, use it directly
             imageIds = area.imageIds;
           } else if (typeof area.imageIds === 'string') {
-            // Handle case where imageIds might be a JSON string
             try {
+              // Try to parse as JSON
               const parsed = JSON.parse(area.imageIds);
               imageIds = Array.isArray(parsed) ? parsed : [];
             } catch (e) {
-              // If parsing fails, treat it as a comma-separated list or single ID
+              // If parsing fails, treat as comma-separated or single value
               imageIds = area.imageIds.includes(',') 
-                ? area.imageIds.split(',').map(id => id.trim())
+                ? area.imageIds.split(',').map((id: string) => id.trim())
                 : [area.imageIds];
+            }
+          } else if (typeof area.imageIds === 'object' && area.imageIds !== null) {
+            // Handle any other object-like value
+            console.log("Object-like imageIds, trying to extract values:", area.imageIds);
+            try {
+              // Try to get values if it's an object with values
+              const values = Object.values(area.imageIds);
+              if (values.length > 0) {
+                imageIds = values.map(v => String(v));
+              }
+            } catch (err) {
+              console.error("Error extracting values from imageIds object:", err);
             }
           }
         }
+        
+        // Log the transformation for debugging
+        console.log(`Area ${area.id || 'new'} - Input imageIds:`, area.imageIds);
+        console.log(`Area ${area.id || 'new'} - Transformed imageIds:`, imageIds);
         
         return {
           id: area.id || crypto.randomUUID(),

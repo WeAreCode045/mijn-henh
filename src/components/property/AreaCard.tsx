@@ -33,21 +33,26 @@ export function AreaCard({
   
   // Get area images based on imageIds whenever area or images change
   useEffect(() => {
-    if (area && area.imageIds && images && images.length > 0) {
-      console.log(`AreaCard ${area.id} - Finding images for imageIds:`, area.imageIds);
-      
-      // Make sure area.imageIds is an array before filtering
+    if (area && images && images.length > 0) {
+      // Make sure area.imageIds is always an array
       const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
-      const foundImages = images.filter(img => imageIds.includes(img.id));
       
-      console.log(`AreaCard ${area.id} - Found ${foundImages.length} images:`, foundImages);
-      
-      setAreaImages(foundImages);
+      if (imageIds.length > 0) {
+        console.log(`AreaCard ${area.id} - Finding images for imageIds:`, imageIds);
+        
+        const foundImages = images.filter(img => imageIds.includes(img.id));
+        console.log(`AreaCard ${area.id} - Found ${foundImages.length} images:`, foundImages);
+        
+        setAreaImages(foundImages);
+      } else {
+        console.log(`AreaCard ${area.id} - No imageIds available or empty array`);
+        setAreaImages([]);
+      }
     } else {
-      console.log(`AreaCard ${area.id} - No imageIds or no images available`);
+      console.log(`AreaCard ${area.id} - No area, no imageIds, or no images available`);
       setAreaImages([]);
     }
-  }, [area, images, area.imageIds]);
+  }, [area, area.imageIds, images]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
