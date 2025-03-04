@@ -6,72 +6,78 @@ import type { PropertyFloorplan } from "@/types/property";
 export function useFloorplanDatabase() {
   const { toast } = useToast();
 
-  const addFloorplanToDatabase = async (propertyId: string, floorplan: PropertyFloorplan) => {
+  // Save floorplans to property_images table
+  const saveFloorplans = async (
+    propertyId: string,
+    floorplans: PropertyFloorplan[]
+  ): Promise<boolean> => {
     try {
-      const { error } = await supabase
+      // First, get existing floorplans
+      const { data: existingFloorplans, error: fetchError } = await supabase
         .from('property_images')
-        .insert({
-          property_id: propertyId,
-          url: floorplan.url,
-          type: 'floorplan' // Add type to distinguish floorplans
-        });
-        
-      if (error) {
-        console.error('Error adding floorplan to property_images table:', error);
+        .select('id, url')
+        .eq('property_id', propertyId)
+        .eq('type', 'floorplan');
+
+      if (fetchError) {
+        console.error("Error fetching existing floorplans:", fetchError);
         return false;
       }
+
+      // Identify existing floorplans that are no longer present
+      const newFloorplanUrls = floorplans.map(f => f.url);
+      const floorplansToDelete = existingFloorplans.filter(
+        f => !newFloorplanUrls.includes(f.url)
+      );
+
+      // Delete removed floorplans
+      if (floorplansToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('property_images')
+          .delete()
+          .in('id', floorplansToDelete.map(f => f.id));
+
+        if (deleteError) {
+          console.error("Error deleting floorplans:", deleteError);
+        }
+      }
+
+      // Add or update floorplans
+      for (const floorplan of floorplans) {
+        const existingFloorplan = existingFloorplans.find(f => f.url === floorplan.url);
+
+        if (!existingFloorplan) {
+          // Insert new floorplan
+          const { error: insertError } = await supabase
+            .from('property_images')
+            .insert({
+              property_id: propertyId,
+              url: floorplan.url,
+              type: 'floorplan'
+            });
+
+          if (insertError) {
+            console.error("Error inserting floorplan:", insertError);
+          }
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Floorplans saved successfully",
+      });
+      
       return true;
     } catch (error) {
-      console.error('Exception adding floorplan to database:', error);
+      console.error("Error saving floorplans:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save floorplans",
+        variant: "destructive",
+      });
       return false;
     }
   };
 
-  const removeFloorplanFromDatabase = async (propertyId: string, floorplanUrl: string) => {
-    try {
-      const { error } = await supabase
-        .from('property_images')
-        .delete()
-        .eq('url', floorplanUrl)
-        .eq('property_id', propertyId);
-        
-      if (error) {
-        console.error('Error removing floorplan from property_images table:', error);
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error('Exception removing floorplan from database:', error);
-      return false;
-    }
-  };
-
-  const updatePropertyFloorplans = async (propertyId: string, floorplansForDb: any) => {
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .update({ floorplans: floorplansForDb })
-        .eq('id', propertyId);
-        
-      if (error) {
-        console.error('Error updating floorplans in database:', error);
-        toast({
-          title: "Error", 
-          description: "Failed to update database with floorplan changes",
-          variant: "destructive"
-        });
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error('Exception updating floorplans in database:', error);
-      return false;
-    }
-  };
-
-  return {
-    addFloorplanToDatabase,
-    removeFloorplanFromDatabase,
-    updatePropertyFloorplans
-  };
+  return { saveFloorplans };
 }

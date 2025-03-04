@@ -7,7 +7,8 @@ import { usePropertyDatabase } from "./property-form/usePropertyDatabase";
 import { supabase } from "@/integrations/supabase/client"; 
 import { 
   prepareAreasForFormSubmission, 
-  preparePropertiesForJsonField
+  preparePropertiesForJsonField,
+  prepareFloorplansForFormSubmission
 } from "./property-form/preparePropertyData";
 
 export function usePropertyFormSubmit() {
@@ -34,6 +35,7 @@ export function usePropertyFormSubmit() {
     const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
     const featuresJson = preparePropertiesForJsonField(formData.features);
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places);
+    const floorplansJson = prepareFloorplansForFormSubmission(formData.floorplans);
     
     console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
     console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
@@ -70,7 +72,9 @@ export function usePropertyFormSubmit() {
       youtubeUrl: formData.youtubeUrl,
       notes: formData.notes,
       // Make sure floorplanEmbedScript is explicitly included
-      floorplanEmbedScript: formData.floorplanEmbedScript || ""
+      floorplanEmbedScript: formData.floorplanEmbedScript || "",
+      // Add floorplans field to satisfy the type
+      floorplans: floorplansJson
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);
