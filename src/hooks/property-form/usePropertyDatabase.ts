@@ -31,11 +31,14 @@ export function usePropertyDatabase() {
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
 
-      console.log("usePropertyDatabase - Final update data:", data);
+      // Make a copy of data without coverImages field
+      const { coverImages, ...dataToUpdate } = data as any;
+      
+      console.log("usePropertyDatabase - Final update data:", dataToUpdate);
       
       const { error, data: updatedData } = await supabase
         .from('properties')
-        .update(data as any)
+        .update(dataToUpdate)
         .eq('id', id)
         .select();
         
@@ -85,11 +88,14 @@ export function usePropertyDatabase() {
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
 
-      console.log("usePropertyDatabase - Final create data:", data);
+      // Make a copy of data without coverImages field
+      const { coverImages, ...dataToCreate } = data as any;
+
+      console.log("usePropertyDatabase - Final create data:", dataToCreate);
       
       const { error, data: createdData } = await supabase
         .from('properties')
-        .insert(data as any)
+        .insert(dataToCreate)
         .select();
         
       if (error) {

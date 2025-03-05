@@ -53,7 +53,7 @@ export function usePropertyFormSubmit() {
       features: featuresJson,
       featuredImage: formData.featuredImage,
       featuredImages: formData.featuredImages || [],
-      coverImages: formData.featuredImages || [], // Keep for backward compatibility
+      // Removed coverImages field that doesn't exist in database
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
