@@ -1,3 +1,4 @@
+
 import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
@@ -17,8 +18,6 @@ export const renderDashboardTab = (props: PropertyTabProps) => {
       agentId={property.agent_id}
       createdAt={property.created_at}
       updatedAt={property.updated_at}
-      agentInfo={agentInfo}
-      templateInfo={templateInfo}
       isUpdating={isUpdating}
       onSave={handlers.onSave}
       onDelete={handlers.onDelete}
@@ -27,6 +26,9 @@ export const renderDashboardTab = (props: PropertyTabProps) => {
       handleSaveTemplate={handlers.handleSaveTemplate}
       handleGeneratePDF={handlers.handleGeneratePDF}
       handleWebView={handlers.handleWebView}
+      // Pass agent and template info
+      agentInfo={agentInfo}
+      templateInfo={templateInfo}
     />
   );
 };
@@ -50,9 +52,10 @@ export const renderContentTab = (props: PropertyTabProps) => {
       onAreaImageRemove={handlers.onAreaImageRemove}
       onAreaImagesSelect={handlers.onAreaImagesSelect}
       handleImageUpload={handlers.handleImageUpload}
-      handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
       handleRemoveImage={handlers.handleRemoveImage}
+      // Use the correct handler for area photo removal
       handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
+      handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
       handleFloorplanUpload={handlers.handleFloorplanUpload}
       handleRemoveFloorplan={handlers.handleRemoveFloorplan}
       currentStep={handlers.currentStep}

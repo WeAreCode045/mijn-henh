@@ -1,64 +1,61 @@
 
-import { PropertyDashboardTab } from "../dashboard";
+import { PropertyDashboardTab } from "../PropertyDashboardTab";
 
 interface DashboardTabContentProps {
   id: string;
-  objectId?: string;
   title: string;
+  objectId?: string;
   agentId?: string;
-  agentName?: string;
-  templateId?: string;
-  templateName?: string;
   createdAt?: string;
   updatedAt?: string;
+  agentInfo?: { id: string; name: string } | null;
+  templateInfo?: { id: string; name: string } | null;
+  isUpdating: boolean;
   onSave: () => void;
   onDelete: () => Promise<void>;
-  onGeneratePDF: () => void;
-  onWebView: (e?: React.MouseEvent) => void;
-  onSaveAgent: (agentId: string) => void;
-  onSaveObjectId: (objectId: string) => void;
-  onSaveTemplate: (templateId: string) => void;
-  isUpdating: boolean;
+  handleSaveObjectId: (objectId: string) => void;
+  handleSaveAgent: (agentId: string) => void;
+  handleSaveTemplate: (templateId: string) => void;
+  handleGeneratePDF: () => void;
+  handleWebView: () => void;
 }
 
 export function DashboardTabContent({
   id,
-  objectId,
   title,
+  objectId,
   agentId,
-  agentName,
-  templateId,
-  templateName,
   createdAt,
   updatedAt,
+  agentInfo,
+  templateInfo,
+  isUpdating,
   onSave,
   onDelete,
-  onGeneratePDF,
-  onWebView,
-  onSaveAgent,
-  onSaveObjectId,
-  onSaveTemplate,
-  isUpdating,
+  handleSaveObjectId,
+  handleSaveAgent,
+  handleSaveTemplate,
+  handleGeneratePDF,
+  handleWebView,
 }: DashboardTabContentProps) {
   return (
-    <PropertyDashboardTab 
+    <PropertyDashboardTab
       id={id}
+      title={title}
       objectId={objectId}
-      title={title || "Untitled Property"}
       agentId={agentId}
-      agentName={agentName}
-      templateId={templateId}
-      templateName={templateName}
       createdAt={createdAt}
       updatedAt={updatedAt}
+      agentInfo={agentInfo}
+      templateInfo={templateInfo}
+      isUpdating={isUpdating}
       onSave={onSave}
       onDelete={onDelete}
-      onGeneratePDF={onGeneratePDF}
-      onWebView={onWebView}
-      onSaveAgent={onSaveAgent}
-      onSaveObjectId={onSaveObjectId}
-      onSaveTemplate={onSaveTemplate}
-      isUpdating={isUpdating}
+      handleSaveObjectId={handleSaveObjectId}
+      handleSaveAgent={handleSaveAgent}
+      handleSaveTemplate={handleSaveTemplate}
+      handleGeneratePDF={handleGeneratePDF}
+      handleWebView={handleWebView}
     />
   );
 }
