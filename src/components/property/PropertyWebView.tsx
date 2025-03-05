@@ -86,7 +86,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     return (
       <PropertyWebViewDialog
         propertyData={propertyData}
-        isOpen={open} // Pass both open and isOpen for compatibility
+        isOpen={open} // Added isOpen prop here
         open={open}
         onOpenChange={onOpenChange}
         settings={settings}
@@ -104,7 +104,6 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
   }
 
   const handleBackNavigation = () => {
-    // Use the new URL structure
     if (window.history.length > 1) {
       window.history.back();
     } else {
