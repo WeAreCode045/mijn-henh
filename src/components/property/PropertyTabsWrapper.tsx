@@ -63,7 +63,9 @@ export function PropertyTabsWrapper({
               handleStepClick,
               handleNext,
               handlePrevious,
-              propertyWithRequiredProps
+              propertyWithRequiredProps,
+              onAddTechnicalItem,
+              onRemoveTechnicalItem
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -106,6 +108,8 @@ export function PropertyTabsWrapper({
                       handleNext={handleNext}
                       handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
+                      onAddTechnicalItem={onAddTechnicalItem}
+                      onRemoveTechnicalItem={onRemoveTechnicalItem}
                     />
                   </PropertyTabs>
                 </Tabs>

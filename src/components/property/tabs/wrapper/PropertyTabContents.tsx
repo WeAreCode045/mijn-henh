@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -61,6 +60,9 @@ interface PropertyTabContentsProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploadingFloorplan?: boolean;
+  // TechnicalItem props
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
 }
 
 export function PropertyTabContents({
@@ -100,7 +102,9 @@ export function PropertyTabContents({
   onSubmit,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploadingFloorplan
+  isUploadingFloorplan,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
