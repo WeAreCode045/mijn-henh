@@ -8,9 +8,16 @@ interface SortableFloorplanItemProps {
   url: string;
   label: string;
   onRemove: () => void;
+  sort_order?: number; // Add sort_order prop to the interface
 }
 
-export function SortableFloorplanItem({ id, url, label, onRemove }: SortableFloorplanItemProps) {
+export function SortableFloorplanItem({ 
+  id, 
+  url, 
+  label, 
+  onRemove,
+  sort_order // Add sort_order to the props destructuring
+}: SortableFloorplanItemProps) {
   const {
     attributes,
     listeners,
