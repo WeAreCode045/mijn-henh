@@ -85,9 +85,9 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
   if (typeof open !== 'undefined' && onOpenChange) {
     return (
       <PropertyWebViewDialog
-        open={open}
-        onOpenChange={onOpenChange}
         propertyData={propertyData}
+        isOpen={open}
+        onOpenChange={onOpenChange}
         settings={settings}
         contentRef={contentRef}
         printContentRef={printContentRef}

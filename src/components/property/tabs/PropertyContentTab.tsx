@@ -37,8 +37,10 @@ interface PropertyContentTabProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isUpdateMode: boolean;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
+  onAddTechnicalItem?: () => void;
 }
 
 export function PropertyContentTab({
@@ -69,8 +71,10 @@ export function PropertyContentTab({
   onRemoveNearbyPlace,
   isUpdateMode,
   isUploading,
+  isUploadingFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
+  onAddTechnicalItem,
 }: PropertyContentTabProps) {
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   const [pendingChanges, setPendingChanges] = useState(false);
@@ -152,6 +156,8 @@ export function PropertyContentTab({
         handleSetFeaturedImage={handleSetFeaturedImage}
         handleToggleFeaturedImage={handleToggleFeaturedImage}
         isUploading={isUploading}
+        isUploadingFloorplan={isUploadingFloorplan}
+        onAddTechnicalItem={onAddTechnicalItem}
         setPendingChanges={setPendingChanges}
       />
     </div>

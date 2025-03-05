@@ -12,17 +12,36 @@ interface PropertyWebViewContentProps {
   settings: AgencySettings;
   isPrintView?: boolean;
   waitForPlaces?: boolean;
+  currentPage?: number;
+  setCurrentPage?: (page: number) => void;
+  selectedImage?: string | null;
+  setSelectedImage?: (image: string | null) => void;
+  handleShare?: (platform: string) => Promise<void>;
+  handlePrint?: () => void;
+  handleDownload?: () => Promise<void>;
 }
 
 export function PropertyWebViewContent({
   property,
   settings,
   isPrintView = false,
-  waitForPlaces = false
+  waitForPlaces = false,
+  currentPage: externalCurrentPage,
+  setCurrentPage: externalSetCurrentPage,
+  selectedImage,
+  setSelectedImage,
+  handleShare,
+  handlePrint,
+  handleDownload
 }: PropertyWebViewContentProps) {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(0);
   const { calculateTotalPages } = usePageCalculation();
   const { formData, handleChange, handleSubmit, isSubmitting } = useContactForm(property);
+  
+  // Use external state if provided, otherwise use internal state
+  const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
+  const setCurrentPageFn = externalSetCurrentPage || setInternalCurrentPage;
+  
   const totalPages = calculateTotalPages(property, isPrintView);
   const canGoBack = currentPage > 0;
   const canGoForward = currentPage < totalPages - 1;
@@ -42,8 +61,8 @@ export function PropertyWebViewContent({
   
   // Reset to first page when property changes
   useEffect(() => {
-    setCurrentPage(0);
-  }, [property?.id]);
+    setCurrentPageFn(0);
+  }, [property?.id, setCurrentPageFn]);
   
   // Get sections based on the current property and page
   const sections = getSections({ 
@@ -56,13 +75,13 @@ export function PropertyWebViewContent({
 
   const handleNext = () => {
     if (canGoForward) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPageFn(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (canGoBack) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPageFn(prev => prev - 1);
     }
   };
 

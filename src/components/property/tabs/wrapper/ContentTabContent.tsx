@@ -29,6 +29,7 @@ interface ContentTabContentProps {
   isUploadingFloorplan?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
+  onAddTechnicalItem?: () => void; // Add missing property
 }
 
 export function ContentTabContent({
@@ -57,7 +58,8 @@ export function ContentTabContent({
   isUploading,
   isUploadingFloorplan,
   handleSetFeaturedImage,
-  handleToggleFeaturedImage
+  handleToggleFeaturedImage,
+  onAddTechnicalItem
 }: ContentTabContentProps) {
   return (
     <PropertyContentTab 
@@ -88,6 +90,7 @@ export function ContentTabContent({
       isUploadingFloorplan={isUploadingFloorplan}
       handleSetFeaturedImage={handleSetFeaturedImage}
       handleToggleFeaturedImage={handleToggleFeaturedImage}
+      onAddTechnicalItem={onAddTechnicalItem}
     />
   );
 }

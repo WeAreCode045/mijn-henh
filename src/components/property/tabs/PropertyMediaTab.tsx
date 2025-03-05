@@ -12,11 +12,14 @@ interface PropertyMediaTabProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  floorplans?: any[];
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onNotesUpdate?: (notes: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
   // Updated properties for main and featured images
   featuredImageUrl?: string | null;
@@ -32,11 +35,14 @@ export function PropertyMediaTab({
   virtualTourUrl = "",
   youtubeUrl = "",
   notes = "",
+  floorplans = [],
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
   onNotesUpdate,
   onImageUpload,
   onRemoveImage,
+  onFloorplanUpload,
+  onRemoveFloorplan,
   isUploading = false,
   featuredImageUrl,
   featuredImageUrls = [],

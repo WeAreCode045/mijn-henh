@@ -55,5 +55,6 @@ export interface PropertyTabProps {
     handlePrevious: () => void;
     onSubmit: () => void;
     formState: PropertyFormData;
+    onAddTechnicalItem?: () => void;
   };
 }

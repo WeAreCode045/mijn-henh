@@ -39,4 +39,5 @@ export interface PropertyFormManagerChildrenProps {
   propertyWithRequiredProps: PropertyData;
   lastSaved: Date | null;
   isSaving: boolean;
+  onAddTechnicalItem?: () => void;
 }

@@ -31,6 +31,9 @@ interface PropertyFormContentProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
+  onAddTechnicalItem?: () => void;
+  setPendingChanges?: (changes: boolean) => void;
 }
 
 export function PropertyFormContent({
@@ -57,7 +60,10 @@ export function PropertyFormContent({
   onRemoveNearbyPlace,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading
+  isUploading,
+  isUploadingFloorplan,
+  onAddTechnicalItem,
+  setPendingChanges
 }: PropertyFormContentProps) {
   const renderStep = () => {
     switch (step) {
@@ -99,6 +105,7 @@ export function PropertyFormContent({
               handleSetFeaturedImage={handleSetFeaturedImage}
               handleToggleFeaturedImage={handleToggleFeaturedImage}
               isUploading={isUploading}
+              isUploadingFloorplan={isUploadingFloorplan}
             />
           </form>
         );
@@ -128,6 +135,7 @@ export function PropertyFormContent({
               onFetchLocationData={onFetchLocationData}
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               handleMapImageDelete={handleMapImageDelete}
+              onAddTechnicalItem={onAddTechnicalItem}
             />
           </form>
         );
