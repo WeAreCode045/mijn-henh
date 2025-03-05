@@ -27,7 +27,7 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
   const validAreaImages = areaImages
     .filter(image => !imageLoadErrors[image.id])
     .sort((a, b) => {
-      if (a.sort_order && b.sort_order) {
+      if (a.sort_order !== undefined && b.sort_order !== undefined) {
         return a.sort_order - b.sort_order;
       }
       return 0;

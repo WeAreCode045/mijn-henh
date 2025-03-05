@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UploadIcon } from "lucide-react";
@@ -35,7 +34,7 @@ export function PropertyImagesCard({
   const [uploading, setUploading] = useState(isUploading);
   // Ensure we apply the same sort order to sortableImages when component initializes
   const initialSortedImages = [...images].sort((a, b) => {
-    if (a.sort_order && b.sort_order) {
+    if (a.sort_order !== undefined && b.sort_order !== undefined) {
       return a.sort_order - b.sort_order;
     }
     return 0;
@@ -59,7 +58,7 @@ export function PropertyImagesCard({
     // Apply sorting when we receive new images from parent
     if (images && images.length > 0) {
       const sortedImages = [...images].sort((a, b) => {
-        if (a.sort_order && b.sort_order) {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
           return a.sort_order - b.sort_order;
         }
         return 0;
@@ -86,7 +85,6 @@ export function PropertyImagesCard({
     }
   };
 
-  // Add methods to handle main and featured image actions with preventDefault
   const handleSetFeatured = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
     if (onSetFeatured) {
@@ -111,12 +109,18 @@ export function PropertyImagesCard({
         
         const newItems = arrayMove(items, oldIndex, newIndex);
         
+        // Update each item with a new sort_order based on its position
+        const updatedItems = newItems.map((item, index) => ({
+          ...item,
+          sort_order: index + 1 // 1-based indexing for sort_order
+        }));
+        
         // Update sort_order in the database
         if (propertyId) {
-          updateImageSortOrderInDatabase(newItems);
+          updateImageSortOrderInDatabase(updatedItems);
         }
         
-        return newItems;
+        return updatedItems;
       });
     }
   };

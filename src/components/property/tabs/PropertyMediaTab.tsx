@@ -58,7 +58,7 @@ export function PropertyMediaTab({
     // Sort images if they come with sort_order values
     const sortedImages = [...fetchedImages].sort((a, b) => {
       // Use sort_order as primary sort criteria
-      if (a.sort_order && b.sort_order) {
+      if (a.sort_order !== undefined && b.sort_order !== undefined) {
         return a.sort_order - b.sort_order;
       }
       // Fall back to using array order if sort_order is not available
@@ -75,7 +75,7 @@ export function PropertyMediaTab({
       // This ensures we update our state when parent component updates images
       // Apply the same sorting logic
       const sortedImages = [...images].sort((a, b) => {
-        if (a.sort_order && b.sort_order) {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
           return a.sort_order - b.sort_order;
         }
         return 0;
