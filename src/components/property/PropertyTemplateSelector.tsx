@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Template } from "@/pages/Templates";
+import { Template } from "@/components/brochure/types/templateTypes";
 import { FileType } from "lucide-react";
 import { useState } from "react";
 
