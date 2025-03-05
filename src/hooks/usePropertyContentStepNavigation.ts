@@ -17,6 +17,7 @@ export function usePropertyContentStepNavigation(
 ) {
   const { toast } = useToast();
   const { handleSubmit } = usePropertyFormSubmit();
+  const maxSteps = steps.length;
 
   const handleStepClick = (step: number) => {
     console.log("Step clicked in PropertyContentTab:", step);
@@ -73,7 +74,7 @@ export function usePropertyContentStepNavigation(
             // Now proceed to next step
             if (externalHandleNext) {
               externalHandleNext();
-            } else if (currentStep < steps.length) {
+            } else if (currentStep < maxSteps) {
               setCurrentStep(currentStep + 1);
             }
           }
@@ -88,7 +89,7 @@ export function usePropertyContentStepNavigation(
           // Still allow step change
           if (externalHandleNext) {
             externalHandleNext();
-          } else if (currentStep < steps.length) {
+          } else if (currentStep < maxSteps) {
             setCurrentStep(currentStep + 1);
           }
         });
@@ -96,7 +97,7 @@ export function usePropertyContentStepNavigation(
       // No pending changes, just proceed
       if (externalHandleNext) {
         externalHandleNext();
-      } else if (currentStep < steps.length) {
+      } else if (currentStep < maxSteps) {
         setCurrentStep(currentStep + 1);
       }
     }

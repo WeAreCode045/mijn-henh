@@ -1,3 +1,4 @@
+
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { getSections } from "./config/sectionConfig";
@@ -37,7 +38,8 @@ export function PropertyWebViewContent({
   const sections = getSections({ 
     property, 
     settings, 
-    currentPage 
+    currentPage,
+    waitForPlaces
   });
 
   const handleNext = () => {

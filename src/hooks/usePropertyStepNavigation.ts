@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { useToast } from "@/components/ui/use-toast";
+import { steps } from "@/components/property/form/formSteps";
 
 export function usePropertyStepNavigation(
   formData: PropertyFormData,
@@ -13,6 +14,7 @@ export function usePropertyStepNavigation(
   const [currentStep, setCurrentStep] = useState(1);
   const { handleSubmit } = usePropertyFormSubmit();
   const { toast } = useToast();
+  const maxSteps = steps.length;
 
   const handleStepClick = (step: number) => {
     console.log("Step clicked:", step);
@@ -55,7 +57,7 @@ export function usePropertyStepNavigation(
             setLastSaved(new Date());
             setPendingChanges(false);
             // Now proceed to next step
-            if (currentStep < 5) {
+            if (currentStep < maxSteps) {
               setCurrentStep(currentStep + 1);
             }
           }
@@ -68,13 +70,13 @@ export function usePropertyStepNavigation(
             variant: "destructive",
           });
           // Still allow step change
-          if (currentStep < 5) {
+          if (currentStep < maxSteps) {
             setCurrentStep(currentStep + 1);
           }
         });
     } else {
       // No pending changes, just proceed
-      if (currentStep < 5) {
+      if (currentStep < maxSteps) {
         setCurrentStep(currentStep + 1);
       }
     }

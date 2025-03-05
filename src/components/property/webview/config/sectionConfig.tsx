@@ -13,6 +13,7 @@ interface SectionConfigProps {
   settings: AgencySettings;
   currentPage: number;
   waitForPlaces?: boolean;
+  isPrintView?: boolean;
 }
 
 interface Section {
@@ -24,7 +25,8 @@ export function getSections({
   property,
   settings,
   currentPage,
-  waitForPlaces = false
+  waitForPlaces = false,
+  isPrintView = false
 }: SectionConfigProps): Section[] {
   const sections: Section[] = [
     {
