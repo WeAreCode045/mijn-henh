@@ -1,5 +1,6 @@
 
-import type { PropertyFeature, PropertyArea, PropertyFloorplan, PropertyPlaceType } from "@/types/property";
+import type { PropertyFeature, PropertyArea, PropertyPlaceType } from "@/types/property";
+import { Floorplan } from "@/components/property/form/steps/technical-data/FloorplanUpload";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
   return Array.isArray(features)
@@ -46,10 +47,6 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           }
         }
         
-        // Log the transformation for debugging
-        console.log(`Area ${area.id || 'new'} - Input imageIds:`, area.imageIds);
-        console.log(`Area ${area.id || 'new'} - Transformed imageIds:`, imageIds);
-        
         return {
           id: area.id || crypto.randomUUID(),
           title: area.title || "",
@@ -61,7 +58,7 @@ export function transformAreas(areas: any[]): PropertyArea[] {
     : [];
 }
 
-export function transformFloorplans(floorplans: any[]): PropertyFloorplan[] {
+export function transformFloorplans(floorplans: any[]): Floorplan[] {
   if (!Array.isArray(floorplans)) return [];
   
   return floorplans.map((floorplan: any) => {
@@ -72,16 +69,14 @@ export function transformFloorplans(floorplans: any[]): PropertyFloorplan[] {
         return {
           id: parsedFloorplan.id || crypto.randomUUID(),
           url: parsedFloorplan.url || '',
-          filePath: parsedFloorplan.filePath || '', 
-          columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
+          title: parsedFloorplan.title || 'Floorplan'
         };
       } catch (e) {
         // If parsing fails, treat it as a plain URL string
         return { 
           id: crypto.randomUUID(),
           url: floorplan, 
-          filePath: '', 
-          columns: 1 
+          title: 'Floorplan'
         };
       }
     } else if (typeof floorplan === 'object' && floorplan !== null) {
@@ -89,16 +84,14 @@ export function transformFloorplans(floorplans: any[]): PropertyFloorplan[] {
       return {
         id: floorplan.id || crypto.randomUUID(),
         url: floorplan.url || '',
-        filePath: floorplan.filePath || '',
-        columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
+        title: floorplan.title || 'Floorplan'
       };
     } else {
       // Fallback for any other case
       return { 
         id: crypto.randomUUID(),
         url: '', 
-        filePath: '',
-        columns: 1 
+        title: 'Floorplan'
       };
     }
   }).filter(f => f.url); // Filter out any items with empty URLs

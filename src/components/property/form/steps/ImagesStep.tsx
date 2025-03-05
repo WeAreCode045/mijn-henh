@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { ImagePreview } from "@/components/ui/ImagePreview";
+import { Floorplan } from "./technical-data/FloorplanUpload";
 
 interface ImagesStepProps {
   formData: PropertyFormData;
@@ -14,6 +15,7 @@ interface ImagesStepProps {
   handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAreaPhoto?: (index: number) => void;
   handleRemoveFloorplan?: (index: number) => void;
+  handleUpdateFloorplan?: (index: number, field: keyof Floorplan, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
@@ -27,6 +29,7 @@ export function ImagesStep({
   handleFloorplanUpload,
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
+  handleUpdateFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading
@@ -125,6 +128,7 @@ export function ImagesStep({
                       key={index}
                       url={floorplanUrl}
                       onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
+                      label={typeof floorplan === 'object' && floorplan.title ? floorplan.title : undefined}
                     />
                   );
                 })}

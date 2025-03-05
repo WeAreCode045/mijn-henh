@@ -23,8 +23,9 @@ export interface PropertyArea {
 }
 
 export interface PropertyFloorplan {
+  id: string;
   url: string;
-  columns?: number; // New field for grid column count
+  title?: string;
 }
 
 export interface PropertyPlaceType {

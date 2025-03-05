@@ -1,9 +1,9 @@
 
 import React from "react";
-import { PropertyFormData, PropertyTechnicalItem, PropertyFloorplan } from "@/types/property";
+import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TechnicalDataForm } from "./TechnicalDataForm";
-import { FloorplanUpload } from "./FloorplanUpload";
+import { FloorplanUpload, Floorplan } from "./FloorplanUpload";
 
 interface TechnicalDataContainerProps {
   formData?: PropertyFormData;
@@ -13,7 +13,7 @@ interface TechnicalDataContainerProps {
   onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
-  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  onUpdateFloorplan?: (index: number, field: keyof Floorplan, value: any) => void;
   isUploading?: boolean;
 }
 

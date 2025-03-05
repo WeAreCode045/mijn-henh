@@ -1,75 +1,43 @@
 
 import { WebViewSectionProps } from "../types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ImagePreviewDialog } from "../components/ImagePreviewDialog";
-import { PropertyFloorplan } from "@/types/property";
-import { supabase } from "@/integrations/supabase/client";
+import { Floorplan } from "@/components/property/form/steps/technical-data/FloorplanUpload";
 
-export function FloorplansSection({ property, settings }: WebViewSectionProps) {
+export function FloorplansSection({ property }: WebViewSectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    // Check if we need to fetch floorplans from the property_images table
-    const fetchFloorplansFromDb = async () => {
-      if (property.id) {
-        try {
-          const { data, error } = await supabase
-            .from('property_images')
-            .select('*')
-            .eq('property_id', property.id)
-            .eq('type', 'floorplan');
-            
-          if (error) throw error;
-          
-          if (data && data.length > 0) {
-            const dbFloorplans = data.map(item => ({
-              id: item.id,
-              url: item.url,
-              columns: 1
-            }));
-            
-            setParsedFloorplans(prevFloorplans => {
-              // Merge with any existing floorplans, avoiding duplicates
-              const existingUrls = prevFloorplans.map(f => f.url);
-              const newFloorplans = dbFloorplans.filter(f => !existingUrls.includes(f.url));
-              return [...prevFloorplans, ...newFloorplans];
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching floorplans from DB:', error);
-        }
-      }
-    };
-    
-    // First parse any floorplans in the property object
-    if (property.floorplans && Array.isArray(property.floorplans)) {
-      try {
-        const parsed = property.floorplans.map(floorplan => {
-          if (typeof floorplan === 'string') {
-            try {
-              // Try to parse as JSON string
-              return JSON.parse(floorplan);
-            } catch (e) {
-              // If parsing fails, it's a plain URL string
-              return { id: crypto.randomUUID(), url: floorplan, columns: 1 };
-            }
-          }
-          // Already an object
-          return floorplan;
-        }).filter(floorplan => floorplan && floorplan.url); // Filter out empty or invalid floorplans
-        
-        console.log("FloorplansSection - Parsed floorplans:", parsed);
-        setParsedFloorplans(parsed);
-      } catch (error) {
-        console.error("Error parsing floorplans:", error);
-      }
+  // Parse floorplans from property data
+  const parseFloorplans = (): Floorplan[] => {
+    if (!property.floorplans || !Array.isArray(property.floorplans) || property.floorplans.length === 0) {
+      return [];
     }
     
-    // Then fetch any additional floorplans from the database
-    fetchFloorplansFromDb();
-  }, [property.floorplans, property.id]);
+    return property.floorplans.map(plan => {
+      if (typeof plan === 'string') {
+        try {
+          // If it's a stringified JSON object, try to parse it
+          return JSON.parse(plan);
+        } catch (e) {
+          // If parsing fails, assume it's a direct URL string
+          return { id: crypto.randomUUID(), url: plan, title: 'Floorplan' };
+        }
+      } else if (plan && typeof plan === 'object') {
+        // If it's already an object
+        return {
+          id: plan.id || crypto.randomUUID(),
+          url: plan.url || '',
+          title: plan.title || 'Floorplan'
+        };
+      }
+      
+      // Fallback for invalid data
+      return { id: crypto.randomUUID(), url: '', title: 'Floorplan' };
+    }).filter(plan => plan.url); // Filter out items without URLs
+  };
+
+  const floorplans = parseFloorplans();
 
   const handleImageClick = (image: string) => {
     setSelectedImage(image);
@@ -83,72 +51,8 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
     setLoadErrors(prev => ({ ...prev, [url]: true }));
   };
 
-  const getFloorplansByColumns = () => {
-    if (!parsedFloorplans.length) {
-      return [];
-    }
-    
-    // Filter out floorplans with load errors
-    const validFloorplans = parsedFloorplans.filter(plan => 
-      plan && 
-      plan.url && 
-      !loadErrors[plan.url]
-    );
-    
-    if (!validFloorplans.length) {
-      return [];
-    }
-    
-    // Group floorplans by column count
-    const resultGroups: { [key: number]: PropertyFloorplan[] } = {};
-    
-    // First, check for technical items with floorplanId references
-    if (property.technicalItems && Array.isArray(property.technicalItems)) {
-      property.technicalItems.forEach(item => {
-        if (item.floorplanId) {
-          const floorplan = validFloorplans.find(fp => fp.id === item.floorplanId);
-          
-          if (floorplan) {
-            const columns = item.columns || 1;
-            if (!resultGroups[columns]) {
-              resultGroups[columns] = [];
-            }
-            resultGroups[columns].push({
-              ...floorplan,
-              columns
-            });
-          }
-        }
-      });
-    }
-    
-    // For floorplans not linked to technical items, group by their own column value
-    validFloorplans.forEach(plan => {
-      // Check if this floorplan is already assigned to a technical item
-      const isAssigned = property.technicalItems && Array.isArray(property.technicalItems) && 
-        property.technicalItems.some(item => 
-          item.floorplanId === plan.id
-        );
-      
-      if (!isAssigned) {
-        const columns = plan.columns || 1;
-        if (!resultGroups[columns]) {
-          resultGroups[columns] = [];
-        }
-        resultGroups[columns].push(plan);
-      }
-    });
-    
-    return Object.entries(resultGroups).map(([columns, plans]) => ({
-      columns: parseInt(columns),
-      plans
-    }));
-  };
-
-  const floorplanGroups = getFloorplansByColumns();
-  
   // Don't render anything if there are no valid floorplans and no embed script
-  if ((!parsedFloorplans.length || parsedFloorplans.every(plan => !plan.url || loadErrors[plan.url])) && !property.floorplanEmbedScript) {
+  if ((!floorplans.length || floorplans.every(plan => loadErrors[plan.url])) && !property.floorplanEmbedScript) {
     return null;
   }
 
@@ -166,33 +70,34 @@ export function FloorplansSection({ property, settings }: WebViewSectionProps) {
           </div>
         )}
         
-        {floorplanGroups.length > 0 ? (
-          floorplanGroups.map((group, groupIndex) => (
-            <div key={groupIndex} className="mb-6">
-              <div className={`grid grid-cols-${group.columns} gap-4`}>
-                {group.plans.map((plan, index) => (
-                  <div 
-                    key={plan.id || `floorplan-${groupIndex}-${index}`} 
-                    className="w-full cursor-pointer shadow-md rounded-lg overflow-hidden" 
-                    onClick={() => handleImageClick(plan.url)}
-                  >
-                    <img
-                      src={plan.url}
-                      alt={`Floorplan ${groupIndex + 1}-${index + 1}`}
-                      className="w-full h-auto object-contain max-h-[400px]"
-                      onError={() => handleImageError(plan.url)}
-                    />
+        {floorplans.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {floorplans.map((floorplan, index) => (
+              <div 
+                key={floorplan.id || `floorplan-${index}`} 
+                className="w-full cursor-pointer shadow-md rounded-lg overflow-hidden"
+                onClick={() => handleImageClick(floorplan.url)}
+              >
+                <img
+                  src={floorplan.url}
+                  alt={floorplan.title || `Floorplan ${index + 1}`}
+                  className="w-full h-auto object-contain max-h-[400px]"
+                  onError={() => handleImageError(floorplan.url)}
+                />
+                {floorplan.title && (
+                  <div className="p-2 bg-white/90 text-center font-medium">
+                    {floorplan.title}
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          ))
-        ) : (
-          !property.floorplanEmbedScript && (
-            <div className="text-center py-6 bg-gray-50 rounded-md text-gray-500">
-              No floorplans available
-            </div>
-          )
+            ))}
+          </div>
+        )}
+        
+        {!floorplans.length && !property.floorplanEmbedScript && (
+          <div className="text-center py-6 bg-gray-50 rounded-md text-gray-500">
+            No floorplans available
+          </div>
         )}
       </div>
 

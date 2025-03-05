@@ -1,6 +1,6 @@
-
-import type { PropertyArea, PropertyFloorplan } from "@/types/property";
+import type { PropertyArea } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
+import { Floorplan } from "@/components/property/form/steps/technical-data/FloorplanUpload";
 
 /**
  * Transforms array of area objects into JSON array for database storage
@@ -34,17 +34,14 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
 
 /**
  * Transforms floorplan objects array into JSON for database storage
- * Note: This is kept for backward compatibility, but we now store floorplans in property_images
  */
-export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan[] | undefined) {
+export function prepareFloorplansForFormSubmission(floorplans: Floorplan[] | undefined) {
   if (!floorplans || !Array.isArray(floorplans)) {
     return [];
   }
   
-  console.log("prepareFloorplansForFormSubmission - input:", floorplans);
-  
   // Filter out any undefined or null values to ensure we only process valid floorplans
-  const preparedFloorplans = floorplans
+  return floorplans
     .filter(floorplan => floorplan && (typeof floorplan === 'string' || floorplan.id))
     .map(floorplan => {
       // If it's a string, it's already in the right format
@@ -53,18 +50,12 @@ export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan
       }
       
       // Otherwise, convert it to JSON
-      const floorplanData = {
-        id: floorplan.id || crypto.randomUUID(), // Ensure we preserve or create an ID
+      return {
+        id: floorplan.id || crypto.randomUUID(),
         url: floorplan.url,
-        filePath: floorplan.filePath || '',   // Preserve file path for storage operations
-        columns: floorplan.columns || 1
+        title: floorplan.title || 'Floorplan'
       };
-      
-      return floorplanData;
     });
-    
-  console.log("prepareFloorplansForFormSubmission - output:", preparedFloorplans);
-  return preparedFloorplans;
 }
 
 /**

@@ -2,16 +2,21 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UploadIcon, Trash2Icon, Settings } from "lucide-react";
-import { PropertyFloorplan } from "@/types/property";
+import { UploadIcon, Trash2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+export interface Floorplan {
+  id: string;
+  url: string;
+  title?: string;
+}
+
 interface FloorplanUploadProps {
-  floorplans: PropertyFloorplan[];
+  floorplans: Floorplan[];
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
-  onUpdateFloorplan?: (index: number, field: keyof PropertyFloorplan, value: any) => void;
+  onUpdateFloorplan?: (index: number, field: keyof Floorplan, value: any) => void;
   isUploading?: boolean;
 }
 
@@ -64,19 +69,15 @@ export function FloorplanUpload({
                   
                   <div className="mt-2 space-y-2">
                     <div>
-                      <Label htmlFor={`floorplan-columns-${index}`}>Columns</Label>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Input
-                          id={`floorplan-columns-${index}`}
-                          type="number"
-                          min="1"
-                          max="3"
-                          value={floorplan.columns || 1}
-                          onChange={(e) => onUpdateFloorplan?.(index, 'columns', parseInt(e.target.value) || 1)}
-                          className="max-w-20"
-                        />
-                        <Settings className="w-4 h-4 text-gray-400" />
-                      </div>
+                      <Label htmlFor={`floorplan-title-${index}`}>Title</Label>
+                      <Input
+                        id={`floorplan-title-${index}`}
+                        type="text"
+                        value={floorplan.title || ''}
+                        onChange={(e) => onUpdateFloorplan?.(index, 'title', e.target.value)}
+                        placeholder="Floor plan title"
+                        className="mt-1"
+                      />
                     </div>
                     
                     <Button
