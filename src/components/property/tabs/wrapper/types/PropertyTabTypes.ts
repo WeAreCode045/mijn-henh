@@ -56,7 +56,7 @@ export interface PropertyTabProps {
     onSubmit: () => void;
     formState: PropertyFormData;
     onAddTechnicalItem?: () => void;
-    // Update the signature to match what's used in usePropertyImages
+    // Use the standardized signature
     handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
   };
 }

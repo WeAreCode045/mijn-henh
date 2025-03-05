@@ -17,7 +17,7 @@ interface ContentTabContentProps {
   handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage?: (index: number) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;  // Updated to match correct signature
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
   handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan?: (index: number) => void;
   currentStep: number;

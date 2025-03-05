@@ -1,4 +1,3 @@
-
 import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
@@ -53,7 +52,6 @@ export const renderContentTab = (props: PropertyTabProps) => {
       onAreaImagesSelect={handlers.onAreaImagesSelect}
       handleImageUpload={handlers.handleImageUpload}
       handleRemoveImage={handlers.handleRemoveImage}
-      // Use the correct handler for area photo removal
       handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
       handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
       handleFloorplanUpload={handlers.handleFloorplanUpload}
