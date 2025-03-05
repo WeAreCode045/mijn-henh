@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UploadIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImagePreview } from "@/components/ui/ImagePreview";
 
 interface PropertyImagesCardProps {
@@ -27,14 +27,25 @@ export function PropertyImagesCard({
   featuredImageUrls = [],
   isUploading = false,
 }: PropertyImagesCardProps) {
-  // File input ref
   const [uploading, setUploading] = useState(isUploading);
+  const fileInputRef = React.createRef<HTMLInputElement>();
+
+  useEffect(() => {
+    setUploading(isUploading);
+  }, [isUploading]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploading(true);
     onImageUpload(e);
     // Reset the file input value
     e.target.value = '';
+  };
+
+  const handleUploadClick = () => {
+    // Programmatically click the hidden file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   // Add methods to handle main and featured image actions with preventDefault
@@ -59,26 +70,25 @@ export function PropertyImagesCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col space-y-4">
-          <label htmlFor="image-upload" className="w-full">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              disabled={uploading}
-            >
-              <UploadIcon className="w-4 h-4 mr-2" />
-              {uploading ? "Uploading..." : "Upload Images"}
-            </Button>
-            <input
-              id="image-upload"
-              type="file"
-              multiple
-              accept="image/*"
-              className="sr-only"
-              onChange={handleImageUpload}
-              disabled={uploading}
-            />
-          </label>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={uploading}
+            onClick={handleUploadClick}
+          >
+            <UploadIcon className="w-4 h-4 mr-2" />
+            {uploading ? "Uploading..." : "Upload Images"}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+            disabled={uploading}
+          />
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             {images && images.length > 0 ? (

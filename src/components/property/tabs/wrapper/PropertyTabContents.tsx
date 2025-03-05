@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -138,7 +139,9 @@ export function PropertyTabContents({
     formState,
     isUploadingFloorplan,
     handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
-    handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available"))
+    handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
+    onAddTechnicalItem,
+    onRemoveTechnicalItem
   };
 
   const tabProps = {
