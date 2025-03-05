@@ -55,13 +55,8 @@ export function renderContentTab(tabProps: PropertyTabProps) {
       onAreaImagesSelect={handlers.onAreaImagesSelect}
       handleImageUpload={handlers.handleImageUpload}
       handleAreaPhotosUpload={handlers.handleImageUpload} // Using same handler for simplicity
-      handleFloorplanUpload={handlers.handleImageUpload} // Using same handler for simplicity
       handleRemoveImage={handlers.handleRemoveImage}
       handleRemoveAreaPhoto={handlers.handleRemoveImage} // Using same handler for simplicity
-      handleRemoveFloorplan={handlers.handleRemoveImage} // Using same handler for simplicity
-      onAddTechnicalItem={handlers.onAddTechnicalItem}
-      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
-      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
       currentStep={handlers.currentStep}
       handleStepClick={handlers.handleStepClick}
       handleNext={handlers.handleNext}

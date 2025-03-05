@@ -65,7 +65,8 @@ export function usePropertyFormSubmit() {
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      notes: formData.notes
+      notes: formData.notes,
+      floorplans: [] // Add empty floorplans array
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);

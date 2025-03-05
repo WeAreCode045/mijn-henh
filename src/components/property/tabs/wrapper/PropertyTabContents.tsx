@@ -48,10 +48,6 @@ interface PropertyTabContentsProps {
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto: (index: number) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
   // Step navigation props
   currentStep: number;
   handleStepClick: (step: number) => void;
@@ -91,10 +87,6 @@ export function PropertyTabContents({
   handleRemoveImage,
   isUploading,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
-  handleRemoveAreaPhoto,
-  handleRemoveFloorplan,
-  handleUpdateFloorplan,
   currentStep,
   handleStepClick,
   handleNext,
@@ -125,10 +117,6 @@ export function PropertyTabContents({
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleFloorplanUpload,
-    handleRemoveAreaPhoto,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
     currentStep,
     handleStepClick,
     handleNext,

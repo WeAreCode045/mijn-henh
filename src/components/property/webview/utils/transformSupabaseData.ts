@@ -137,8 +137,8 @@ export function transformSupabaseData(
     created_at: data.created_at,
     updated_at: data.updated_at,
     template_id: data.template_id,
-    // For backward compatibility with components that still use gridImages
-    gridImages: featuredImages
+    floorplans: [], // Add empty floorplans array
+    gridImages: featuredImages // For backward compatibility with components that still use gridImages
   };
 
   return transformedData;

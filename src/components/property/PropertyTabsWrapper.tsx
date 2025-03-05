@@ -52,10 +52,6 @@ export function PropertyTabsWrapper({
               handleRemoveImage,
               isUploading,
               handleAreaPhotosUpload,
-              handleFloorplanUpload,
-              handleRemoveAreaPhoto,
-              handleRemoveFloorplan,
-              handleUpdateFloorplan,
               handleSetFeaturedImage,
               handleToggleFeaturedImage,
               onSubmit,
@@ -96,10 +92,6 @@ export function PropertyTabsWrapper({
                       handleRemoveImage={handleRemoveImage}
                       isUploading={isUploading}
                       handleAreaPhotosUpload={handleAreaPhotosUpload}
-                      handleFloorplanUpload={handleFloorplanUpload}
-                      handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-                      handleRemoveFloorplan={handleRemoveFloorplan}
-                      handleUpdateFloorplan={handleUpdateFloorplan}
                       handleSetFeaturedImage={handleSetFeaturedImage}
                       handleToggleFeaturedImage={handleToggleFeaturedImage}
                       currentStep={currentStep}

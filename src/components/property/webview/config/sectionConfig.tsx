@@ -35,7 +35,7 @@ export function getSections({
     },
     {
       title: "Details",
-      content: <DetailsSection property={property} isPrintView={isPrintView} />
+      content: <DetailsSection property={property} />
     },
     {
       title: "Areas",
@@ -46,7 +46,6 @@ export function getSections({
       content: <NeighborhoodSection 
         property={property} 
         settings={settings} 
-        isPrintView={isPrintView} 
         waitForPlaces={waitForPlaces} 
       />
     },

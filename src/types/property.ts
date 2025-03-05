@@ -36,11 +36,11 @@ export interface PropertyTechnicalItem {
 }
 
 export interface PropertyFloorplan {
-  id: string;     // Changed from optional to required to match Floorplan interface
+  id: string;
   url: string;
-  filePath?: string; // Added filePath for storage deletion
-  columns?: number; // Field for grid column count
-  title?: string;   // Added title property to match Floorplan interface
+  filePath?: string;
+  columns?: number;
+  title?: string;
 }
 
 export interface PropertyPlaceType {
@@ -86,7 +86,7 @@ interface BasePropertyData {
   location_description?: string;
   features: PropertyFeature[];
   images: PropertyImage[];
-  floorplans: PropertyFloorplan[]; // Updated to structured objects
+  floorplans?: PropertyFloorplan[]; // Made optional
   technicalItems?: PropertyTechnicalItem[]; // New field for technical items
   featuredImage: string | null;
   featuredImages: string[]; // Changed from coverImages to featuredImages
@@ -138,7 +138,7 @@ export interface PropertySubmitData {
   hasGarden: boolean;
   description: string;
   location_description?: string;
-  floorplans: Json; // Updated to Json for structured floorplans
+  floorplans?: Json; // Made optional
   technicalItems?: Json; // New field for technical items
   featuredImage: string | null;
   featuredImages: string[]; // Changed from coverImages to featuredImages
@@ -177,7 +177,7 @@ export interface PropertyDatabaseData {
   description?: string;
   location_description?: string;
   features?: Json;
-  floorplans?: Json;
+  floorplans?: Json; // Made optional
   featuredImage?: string | null;
   featuredImages?: string[]; // Changed from coverImages to featuredImages
   coverImages?: string[]; // Keep for backward compatibility

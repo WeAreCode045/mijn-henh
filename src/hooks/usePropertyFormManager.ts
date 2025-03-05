@@ -1,5 +1,5 @@
 
-import { PropertyData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyData } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
@@ -39,9 +39,6 @@ export function usePropertyFormManager(property: PropertyData) {
     addFeature,
     removeFeature,
     updateFeature,
-    addTechnicalItem,
-    removeTechnicalItem,
-    updateTechnicalItem,
   } = usePropertyContent(
     formState,
     handleFieldChangeWithTracking
@@ -66,18 +63,11 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleFloorplanUpload,
     handleRemoveAreaPhoto,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
     images
   } = usePropertyImages(
-    formState, 
-    setFormStateWithTracking
-  );
-  
-  // Import directly instead of using require, and use updated method name
-  const { handleSetFeaturedImage, handleToggleFeaturedImage } = usePropertyMainImages(
     formState, 
     setFormStateWithTracking
   );
@@ -122,9 +112,6 @@ export function usePropertyFormManager(property: PropertyData) {
     addFeature,
     removeFeature,
     updateFeature,
-    addTechnicalItem,
-    removeTechnicalItem,
-    updateTechnicalItem,
     addArea,
     removeArea,
     updateArea,
@@ -135,10 +122,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleFloorplanUpload,
     handleRemoveAreaPhoto,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     onSubmit,

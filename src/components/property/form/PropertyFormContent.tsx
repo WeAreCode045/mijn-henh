@@ -21,11 +21,8 @@ interface PropertyFormContentProps {
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -49,11 +46,8 @@ export function PropertyFormContent({
   onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
-  handleRemoveFloorplan,
-  handleUpdateFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
@@ -94,10 +88,8 @@ export function PropertyFormContent({
               onFieldChange={onFieldChange}
               handleImageUpload={handleImageUpload}
               handleAreaPhotosUpload={handleAreaPhotosUpload}
-              handleFloorplanUpload={handleFloorplanUpload}
               handleRemoveImage={handleRemoveImage}
               handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-              handleRemoveFloorplan={handleRemoveFloorplan}
               handleSetFeaturedImage={handleSetFeaturedImage}
               handleToggleFeaturedImage={handleToggleFeaturedImage}
               isUploading={isUploading}

@@ -42,6 +42,7 @@ export interface PropertyTabProps {
     handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
+    handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleSetFeaturedImage: (url: string | null) => void;
     handleToggleFeaturedImage: (url: string) => void;
     currentStep: number;

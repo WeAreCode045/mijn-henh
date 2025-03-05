@@ -26,5 +26,6 @@ export const initialFormData: PropertyFormData = {
   nearby_places: [],
   latitude: null,
   longitude: null,
-  template_id: "default" // Set default template_id
+  template_id: "default", // Set default template_id
+  floorplans: [] // Add empty floorplans array
 };
