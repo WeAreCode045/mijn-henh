@@ -1,14 +1,14 @@
 import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { usePropertyWebView } from "./webview/usePropertyWebView";
+import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
 import { Dispatch, SetStateAction, useRef } from "react";
-import { PropertyWebViewDialog } from "./webview/PropertyWebViewDialog";
-import { PropertyWebViewMain } from "./webview/PropertyWebViewMain";
-import { PropertyBreadcrumb } from "./webview/PropertyBreadcrumb";
-import { WebViewFooter } from "./webview/WebViewFooter";
-import { usePropertyData } from "./webview/hooks/usePropertyData";
-import { usePageCalculation } from "./webview/hooks/usePageCalculation";
+import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
+import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
+import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
+import { WebViewFooter } from "@/components/property/webview/WebViewFooter";
+import { usePropertyData } from "@/components/property/webview/hooks/usePropertyData";
+import { usePageCalculation } from "@/components/property/webview/hooks/usePageCalculation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     return (
       <PropertyWebViewDialog
         propertyData={propertyData}
-        isOpen={open} // Pass both open and isOpen for compatibility
+        isOpen={open}
         open={open}
         onOpenChange={onOpenChange}
         settings={settings}
