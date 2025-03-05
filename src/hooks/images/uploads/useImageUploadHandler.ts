@@ -21,13 +21,30 @@ export function useImageUploadHandler(
     try {
       const currentImages = Array.isArray(formData.images) ? formData.images : [];
       
-      // Find the highest sort_order
+      // Find the highest sort_order for images only (not floorplans)
       let highestSortOrder = 0;
+      
+      // First check the current state images
       currentImages.forEach(img => {
         if (typeof img === 'object' && img.sort_order && img.sort_order > highestSortOrder) {
           highestSortOrder = img.sort_order;
         }
       });
+      
+      // If we have a property ID, also check the database for the highest sort_order
+      if (formData.id) {
+        const { data, error } = await supabase
+          .from('property_images')
+          .select('sort_order')
+          .eq('property_id', formData.id)
+          .eq('type', 'image')
+          .order('sort_order', { ascending: false })
+          .limit(1);
+          
+        if (!error && data && data.length > 0 && data[0].sort_order) {
+          highestSortOrder = Math.max(highestSortOrder, data[0].sort_order);
+        }
+      }
 
       // Process each file
       for (const file of files) {

@@ -60,7 +60,14 @@ export function FloorplansCard({
 
   useEffect(() => {
     if (floorplans && floorplans.length > 0) {
-      setDisplayFloorplans(floorplans);
+      // Sort floorplans by sort_order when they come in
+      const sortedFloorplans = [...floorplans].sort((a, b) => {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      setDisplayFloorplans(sortedFloorplans);
     }
   }, [floorplans]);
 
@@ -89,7 +96,14 @@ export function FloorplansCard({
 
   const handleFetchComplete = (fetchedFloorplans: PropertyFloorplan[]) => {
     if (fetchedFloorplans.length > 0) {
-      setDisplayFloorplans(fetchedFloorplans);
+      // Ensure floorplans are sorted by sort_order
+      const sortedFloorplans = [...fetchedFloorplans].sort((a, b) => {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      setDisplayFloorplans(sortedFloorplans);
     }
   };
 
@@ -102,14 +116,25 @@ export function FloorplansCard({
       
       const reorderedFloorplans = arrayMove(displayFloorplans, oldIndex, newIndex);
       
+      // Update each item with a new sort_order based on its position
+      const updatedFloorplans = reorderedFloorplans.map((floorplan, index) => ({
+        ...floorplan,
+        sort_order: index + 1 // 1-based indexing for sort_order
+      }));
+      
       // Update the local state
-      setDisplayFloorplans(reorderedFloorplans);
+      setDisplayFloorplans(updatedFloorplans);
       
       // Save the new order to the database if we have a property ID
       if (id) {
         try {
           // Update sort_order for each floorplan in the database
-          const updatePromises = reorderedFloorplans.map((floorplan, index) => {
+          const updatePromises = updatedFloorplans.map((floorplan, index) => {
+            if (!floorplan.id || typeof floorplan.id !== 'string' || floorplan.id.startsWith('temp-')) {
+              console.log('Skipping floorplan without valid ID:', floorplan);
+              return Promise.resolve();
+            }
+            
             return supabase
               .from('property_images')
               .update({ sort_order: index + 1 }) // 1-based indexing
