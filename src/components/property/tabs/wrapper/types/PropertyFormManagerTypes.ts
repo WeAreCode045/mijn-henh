@@ -25,7 +25,7 @@ export interface PropertyFormManagerChildrenProps {
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto: (index: number) => void;
+  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void; // Updated signature to match AreaCard
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan: (index: number) => void;
   isUploadingFloorplan: boolean;

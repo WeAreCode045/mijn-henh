@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,7 @@ interface ImagesStepProps {
   handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage?: (index: number) => void;
   handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (index: number) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;  // Updated signature
   handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan?: (index: number) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
@@ -91,11 +92,14 @@ export function ImagesStep({
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {formData.areaPhotos.map((photo, index) => {
                   const photoUrl = getImageUrl(photo);
+                  const areaId = "general"; // We use a default area ID for general area photos
+                  const imageId = `area-photo-${index}`; // Generate an ID for the image
+                  
                   return (
                     <ImagePreview
                       key={index}
                       url={photoUrl}
-                      onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(index)}
+                      onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(areaId, imageId)}
                     />
                   );
                 })}
