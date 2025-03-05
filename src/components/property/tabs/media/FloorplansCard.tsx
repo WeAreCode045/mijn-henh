@@ -1,61 +1,51 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyFloorplan } from "@/types/property";
-import { FloorplanProcessor } from "./floorplans/FloorplanProcessor";
-import { FloorplanGrid } from "./floorplans/FloorplanGrid";
-import { FloorplanUploader } from "./floorplans/FloorplanUploader";
-import { FloorplanEmbed } from "./floorplans/FloorplanEmbed";
-import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
+import { Button } from "@/components/ui/button";
+import { UploadIcon } from "lucide-react";
+import { useState, useEffect, createRef } from "react";
+import { ImagePreview } from "@/components/ui/ImagePreview";
 
-interface FloorplansCardProps {
-  floorplans: PropertyFloorplan[] | string[];
-  floorplanEmbedScript?: string;
+interface FloorplanCardProps {
+  floorplans: any[];
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
-  onUpdateFloorplanEmbedScript?: (script: string) => void;
-  propertyId?: string; // Add property ID to fetch floorplans directly if needed
+  isUploading?: boolean;
 }
 
 export function FloorplansCard({
   floorplans = [],
-  floorplanEmbedScript = "",
   onFloorplanUpload,
   onRemoveFloorplan,
-  onUpdateFloorplanEmbedScript,
-  propertyId,
-}: FloorplansCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
-  
-  // Use a key to force re-render when floorplans array changes
-  const [floorplansKey, setFloorplansKey] = useState(Date.now());
+  isUploading = false,
+}: FloorplanCardProps) {
+  const [uploading, setUploading] = useState(isUploading);
+  const fileInputRef = createRef<HTMLInputElement>();
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    setUploading(isUploading);
+  }, [isUploading]);
+
+  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploading(true);
     if (onFloorplanUpload) {
-      setIsLoading(true);
-      try {
-        onFloorplanUpload(e);
-      } finally {
-        setIsLoading(false);
-      }
+      onFloorplanUpload(e);
+    }
+    // Reset the file input value
+    e.target.value = '';
+  };
+
+  const handleUploadClick = () => {
+    // Programmatically click the hidden file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
-  const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onUpdateFloorplanEmbedScript) {
-      onUpdateFloorplanEmbedScript(e.target.value);
-    }
-  };
-
-  const handleFloorplansProcessed = (processed: PropertyFloorplan[]) => {
-    setParsedFloorplans(processed);
-    setFloorplansKey(Date.now()); // Update key to force re-render
-  };
-
-  const handleDatabaseFloorplansFetched = (dbFloorplans: PropertyFloorplan[]) => {
-    setParsedFloorplans(dbFloorplans);
-    setFloorplansKey(Date.now()); // Force re-render
+  // Helper function to get the URL from a floorplan object
+  const getFloorplanUrl = (floorplan: any): string => {
+    if (typeof floorplan === 'string') return floorplan;
+    if (floorplan && typeof floorplan === 'object' && 'url' in floorplan) return floorplan.url;
+    return '';
   };
 
   return (
@@ -64,32 +54,49 @@ export function FloorplansCard({
         <CardTitle className="text-lg font-medium">Floorplans</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Hidden processor components that handle data transformation */}
-        <FloorplanProcessor 
-          floorplans={floorplans} 
-          propertyId={propertyId}
-          onProcessed={handleFloorplansProcessed} 
-        />
-        
-        <FloorplanDatabaseFetcher
-          propertyId={propertyId}
-          floorplans={parsedFloorplans}
-          onFetchComplete={handleDatabaseFloorplansFetched}
-        />
-
-        {/* Visible UI components */}
-        <FloorplanUploader isLoading={isLoading} onUpload={handleUpload} />
-        
-        <FloorplanEmbed 
-          embedScript={floorplanEmbedScript} 
-          onChange={handleEmbedScriptChange} 
-        />
-
-        <FloorplanGrid 
-          floorplans={parsedFloorplans} 
-          gridKey={floorplansKey} 
-          onRemoveFloorplan={onRemoveFloorplan} 
-        />
+        <div className="flex flex-col space-y-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={uploading}
+            onClick={handleUploadClick}
+          >
+            <UploadIcon className="w-4 h-4 mr-2" />
+            {uploading ? "Uploading..." : "Upload Floorplans"}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleFloorplanUpload}
+            disabled={uploading}
+          />
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+            {floorplans && floorplans.length > 0 ? (
+              floorplans.map((floorplan, index) => {
+                const url = getFloorplanUrl(floorplan);
+                const label = floorplan.title || `Floorplan ${index + 1}`;
+                
+                return (
+                  <ImagePreview
+                    key={floorplan.id || index}
+                    url={url}
+                    onRemove={() => onRemoveFloorplan && onRemoveFloorplan(index)}
+                    label={label}
+                  />
+                );
+              })
+            ) : (
+              <div className="col-span-full py-8 text-center text-gray-500">
+                No floorplans uploaded yet. Click "Upload Floorplans" to add floorplans.
+              </div>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

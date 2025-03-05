@@ -3,6 +3,7 @@ import { PropertyImage } from "@/types/property";
 import { PropertyImagesCard } from "./media/PropertyImagesCard";
 import { VirtualTourCard } from "./media/VirtualTourCard";
 import { MediaDatabaseFetcher } from "./media/MediaDatabaseFetcher";
+import { FloorplansCard } from "./media/FloorplansCard";
 import { useState } from "react";
 
 interface PropertyMediaTabProps {
@@ -21,6 +22,7 @@ interface PropertyMediaTabProps {
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
   // Updated properties for main and featured images
   featuredImageUrl?: string | null;
   featuredImageUrls?: string[];
@@ -44,6 +46,7 @@ export function PropertyMediaTab({
   onFloorplanUpload,
   onRemoveFloorplan,
   isUploading = false,
+  isUploadingFloorplan = false,
   featuredImageUrl,
   featuredImageUrls = [],
   onSetFeatured,
@@ -73,6 +76,13 @@ export function PropertyMediaTab({
         featuredImageUrls={featuredImageUrls}
         onSetFeatured={onSetFeatured}
         onToggleFeatured={onToggleFeatured}
+      />
+
+      <FloorplansCard
+        floorplans={floorplans}
+        onFloorplanUpload={onFloorplanUpload}
+        onRemoveFloorplan={onRemoveFloorplan}
+        isUploading={isUploadingFloorplan}
       />
 
       <VirtualTourCard 

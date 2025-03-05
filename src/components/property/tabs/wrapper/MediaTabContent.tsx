@@ -18,6 +18,7 @@ interface MediaTabContentProps {
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
   // Add onUpload as an alias for onImageUpload
   onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   // Updated properties for main and featured images
@@ -43,6 +44,7 @@ export function MediaTabContent({
   onFloorplanUpload,
   onRemoveFloorplan,
   isUploading,
+  isUploadingFloorplan,
   onUpload,
   featuredImageUrl,
   featuredImageUrls,
@@ -69,6 +71,7 @@ export function MediaTabContent({
       onFloorplanUpload={onFloorplanUpload}
       onRemoveFloorplan={onRemoveFloorplan}
       isUploading={isUploading}
+      isUploadingFloorplan={isUploadingFloorplan}
       featuredImageUrl={featuredImageUrl}
       featuredImageUrls={featuredImageUrls}
       onSetFeatured={onSetFeatured}
