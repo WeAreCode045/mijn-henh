@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -77,10 +76,8 @@ export function PropertyContentTab({
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   const [pendingChanges, setPendingChanges] = useState(false);
   
-  // Use the provided step if available, otherwise use internal state
   const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
   
-  // Use the property auto save hook directly
   const { 
     autosaveData, 
     isSaving, 
@@ -88,7 +85,6 @@ export function PropertyContentTab({
     setLastSaved 
   } = usePropertyAutoSave();
   
-  // Handle manual save
   const handleSave = () => {
     if (formData.id) {
       console.log("PropertyContentTab - Manual save triggered");
