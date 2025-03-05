@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData, PropertyTechnicalItem, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TechnicalDataForm } from "./TechnicalDataForm";
 import { FloorplanUpload, Floorplan } from "./FloorplanUpload";
@@ -28,6 +28,17 @@ export function TechnicalDataContainer({
   onUpdateFloorplan,
   isUploading = false,
 }: TechnicalDataContainerProps) {
+  // Convert PropertyFloorplan[] to Floorplan[] safely
+  const convertFloorplans = (floorplans: PropertyFloorplan[] = []): Floorplan[] => {
+    return floorplans.map(floorplan => ({
+      id: floorplan.id || crypto.randomUUID(),
+      url: floorplan.url,
+      title: floorplan.title || 'Floorplan'
+    }));
+  };
+
+  const floorplans = formData.floorplans ? convertFloorplans(formData.floorplans) : [];
+
   return (
     <div className="space-y-6">
       {/* Embed Code section */}
@@ -52,7 +63,7 @@ export function TechnicalDataContainer({
 
       {/* Floorplan Uploads */}
       <FloorplanUpload
-        floorplans={formData.floorplans || []}
+        floorplans={floorplans}
         onFloorplanUpload={onFloorplanUpload}
         onRemoveFloorplan={onRemoveFloorplan}
         onUpdateFloorplan={onUpdateFloorplan}

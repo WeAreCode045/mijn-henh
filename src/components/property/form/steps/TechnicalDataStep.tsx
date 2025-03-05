@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData, PropertyTechnicalItem, PropertyFloorplan } from "@/types/property";
 import { TechnicalDataContainer } from "./technical-data/TechnicalDataContainer";
 import { Floorplan } from "./technical-data/FloorplanUpload";
 

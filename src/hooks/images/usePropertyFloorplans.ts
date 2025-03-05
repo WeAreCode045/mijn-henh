@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyFloorplan } from '@/types/property';
+import { Floorplan } from '@/components/property/form/steps/technical-data/FloorplanUpload';
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
@@ -46,6 +46,7 @@ export function usePropertyFloorplans(
           id: crypto.randomUUID(),
           url: publicUrl,
           filePath,
+          title: 'Floorplan', // Add default title
           columns: 2 // Default to 2 columns
         };
       });
@@ -78,7 +79,8 @@ export function usePropertyFloorplans(
               .insert({
                 property_id: formData.id,
                 url: floorplan.url,
-                type: 'floorplan' // Set type as 'floorplan' to distinguish from regular images
+                type: 'floorplan', // Set type as 'floorplan' to distinguish from regular images
+                title: floorplan.title // Add title to the database
               });
               
             if (error) {
@@ -166,7 +168,7 @@ export function usePropertyFloorplans(
   };
 
   // Update a floorplan's properties
-  const handleUpdateFloorplan = (index: number, field: keyof PropertyFloorplan, value: any) => {
+  const handleUpdateFloorplan = (index: number, field: keyof Floorplan, value: any) => {
     if (!formData.floorplans) return;
     
     const updatedFloorplans = [...formData.floorplans];

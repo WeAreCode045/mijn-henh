@@ -1,3 +1,4 @@
+
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -35,10 +36,11 @@ export interface PropertyTechnicalItem {
 }
 
 export interface PropertyFloorplan {
-  id?: string;     // Added ID property for tracking floorplans
+  id: string;     // Changed from optional to required to match Floorplan interface
   url: string;
   filePath?: string; // Added filePath for storage deletion
   columns?: number; // Field for grid column count
+  title?: string;   // Added title property to match Floorplan interface
 }
 
 export interface PropertyPlaceType {

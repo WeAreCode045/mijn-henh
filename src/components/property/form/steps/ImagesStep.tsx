@@ -123,12 +123,14 @@ export function ImagesStep({
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {formData.floorplans.map((floorplan, index) => {
                   const floorplanUrl = getImageUrl(floorplan);
+                  const floorplanTitle = typeof floorplan === 'object' && floorplan.title ? floorplan.title : undefined;
+                  
                   return (
                     <ImagePreview
                       key={index}
                       url={floorplanUrl}
                       onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
-                      label={typeof floorplan === 'object' && floorplan.title ? floorplan.title : undefined}
+                      label={floorplanTitle}
                     />
                   );
                 })}
