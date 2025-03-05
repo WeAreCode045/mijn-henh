@@ -56,7 +56,7 @@ export interface PropertyTabProps {
     onSubmit: () => void;
     formState: PropertyFormData;
     onAddTechnicalItem?: () => void;
-    // Add the missing handleRemoveAreaPhoto handler
-    handleRemoveAreaPhoto: (index: number) => void;
+    // Update the signature to match what's used in usePropertyImages
+    handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
   };
 }

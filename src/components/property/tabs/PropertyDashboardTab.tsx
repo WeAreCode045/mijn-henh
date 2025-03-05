@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -176,17 +177,18 @@ export function PropertyDashboardTab({
     }
   };
 
-  const handleSaveAgent = (e: React.MouseEvent) => {
+  // Fix the local handlers to handle React events properly
+  const handleSaveAgentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     handleSaveAgent(currentAgentId);
   };
 
-  const handleSaveObjectId = (e: React.MouseEvent) => {
+  const handleSaveObjectIdClick = (e: React.MouseEvent) => {
     e.preventDefault();
     handleSaveObjectId(currentObjectId);
   };
   
-  const handleSaveTemplate = (e: React.MouseEvent) => {
+  const handleSaveTemplateClick = (e: React.MouseEvent) => {
     e.preventDefault();
     handleSaveTemplate(currentTemplateId);
   };
@@ -254,7 +256,7 @@ export function PropertyDashboardTab({
                   onChange={(e) => setCurrentObjectId(e.target.value)}
                   placeholder="Enter object ID"
                 />
-                <Button onClick={handleSaveObjectId} disabled={isUpdating} size="sm">
+                <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size="sm">
                   {isUpdating ? "Saving..." : "Save"}
                 </Button>
               </div>
@@ -322,7 +324,7 @@ export function PropertyDashboardTab({
               </Select>
             </div>
             
-            <Button onClick={handleSaveAgent} disabled={isUpdating}>
+            <Button onClick={handleSaveAgentClick} disabled={isUpdating}>
               <Save className="h-4 w-4 mr-2" />
               {isUpdating ? "Saving..." : "Assign Agent"}
             </Button>
@@ -357,7 +359,7 @@ export function PropertyDashboardTab({
               </Select>
             </div>
             
-            <Button onClick={handleSaveTemplate} disabled={isUpdating}>
+            <Button onClick={handleSaveTemplateClick} disabled={isUpdating}>
               <Save className="h-4 w-4 mr-2" />
               {isUpdating ? "Saving..." : "Set Template"}
             </Button>

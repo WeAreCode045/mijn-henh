@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -138,7 +139,10 @@ export function PropertyTabContents({
     handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
     onAddTechnicalItem,
     onRemoveTechnicalItem,
-    handleRemoveAreaPhoto
+    // Ensure we use the correct signature for handleRemoveAreaPhoto
+    handleRemoveAreaPhoto: handleRemoveAreaPhoto || ((areaId: string, imageId: string) => {
+      console.warn("Area photo removal functionality not available");
+    })
   };
 
   const tabProps = {
