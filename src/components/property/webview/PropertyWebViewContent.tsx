@@ -36,7 +36,7 @@ export function PropertyWebViewContent({
 }: PropertyWebViewContentProps) {
   const [internalCurrentPage, setInternalCurrentPage] = useState(0);
   const { calculateTotalPages } = usePageCalculation();
-  const { formData, handleChange, handleSubmit, isSubmitting } = useContactForm(property);
+  const { formData, handleChange, handleSubmit, isSubmitting } = useContactForm(property, settings);
   
   // Use external state if provided, otherwise use internal state
   const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
@@ -85,9 +85,9 @@ export function PropertyWebViewContent({
     }
   };
   
-  // Fixed function signature to match the expected form submission handler 
-  const handleFormSubmit = (e: React.FormEvent, formData: any) => {
-    handleSubmit(e, formData);
+  // Correctly match the handleSubmit signature from useContactForm
+  const handleFormSubmit = (e: React.FormEvent) => {
+    handleSubmit(e);
   };
 
   return (
