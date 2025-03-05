@@ -19,6 +19,7 @@ export function usePropertyFetch(id: string | undefined) {
     setIsLoading(true);
     
     try {
+      // Fetch base property data
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -30,8 +31,7 @@ export function usePropertyFetch(id: string | undefined) {
       }
       
       if (data) {
-        console.log("Fetched property data:", data);
-        
+        // Fetch floorplan images
         const { data: floorplanData, error: floorplanError } = await supabase
           .from('property_images')
           .select('*')
@@ -42,6 +42,17 @@ export function usePropertyFetch(id: string | undefined) {
           console.error("Error fetching floorplans:", floorplanError);
         }
         
+        // Fetch all images
+        const { data: allImages, error: imagesError } = await supabase
+          .from('property_images')
+          .select('*')
+          .eq('property_id', propertyId);
+          
+        if (imagesError) {
+          console.error("Error fetching property images:", imagesError);
+        }
+        
+        // Transform data for the form
         const transformedFloorplans = floorplanData 
           ? transformFloorplans(floorplanData.map(item => ({
               id: item.id,
@@ -54,15 +65,6 @@ export function usePropertyFetch(id: string | undefined) {
         const transformedFeatures = transformFeatures(Array.isArray(data.features) ? data.features : []);
         const transformedAreas = transformAreas(Array.isArray(data.areas) ? data.areas : []);
         const transformedNearbyPlaces = transformNearbyPlaces(Array.isArray(data.nearby_places) ? data.nearby_places : []);
-        
-        const { data: allImages, error: imagesError } = await supabase
-          .from('property_images')
-          .select('*')
-          .eq('property_id', propertyId);
-          
-        if (imagesError) {
-          console.error("Error fetching property images:", imagesError);
-        }
         
         const featuredImages = allImages
           ? allImages.filter(img => img.is_featured_image).map(img => img.url)
