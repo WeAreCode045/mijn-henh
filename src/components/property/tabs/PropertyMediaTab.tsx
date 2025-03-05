@@ -76,6 +76,7 @@ export function PropertyMediaTab({
         featuredImageUrls={featuredImageUrls}
         onSetFeatured={onSetFeatured}
         onToggleFeatured={onToggleFeatured}
+        propertyId={id} // Pass propertyId to allow database updates
       />
 
       <FloorplansCard

@@ -24,10 +24,11 @@ export function MediaDatabaseFetcher({
           
           const { data, error } = await supabase
             .from('property_images')
-            .select('id, url, is_main, is_featured_image')
+            .select('id, url, is_main, is_featured_image, sort_order')
             .eq('property_id', propertyId)
             .eq('type', 'image')
-            .order('created_at', { ascending: false });
+            .order('sort_order', { ascending: true }) // Order by sort_order first
+            .order('created_at', { ascending: false }); // Then by created_at as fallback
             
           if (error) {
             console.error("MediaDatabaseFetcher - Error fetching images:", error);
@@ -40,7 +41,8 @@ export function MediaDatabaseFetcher({
               id: item.id,
               url: item.url,
               is_main: item.is_main,
-              is_featured_image: item.is_featured_image
+              is_featured_image: item.is_featured_image,
+              sort_order: item.sort_order
             }));
             
             console.log("MediaDatabaseFetcher - Fetched images from DB:", dbImages);
