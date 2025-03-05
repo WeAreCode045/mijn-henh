@@ -30,6 +30,8 @@ interface PropertyContentTabProps {
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -60,6 +62,8 @@ export function PropertyContentTab({
   handleAreaPhotosUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
@@ -140,6 +144,8 @@ export function PropertyContentTab({
         handleAreaPhotosUpload={handleAreaPhotosUpload}
         handleRemoveImage={handleRemoveImage}
         handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+        handleFloorplanUpload={handleFloorplanUpload}
+        handleRemoveFloorplan={handleRemoveFloorplan}
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}

@@ -26,6 +26,9 @@ export interface PropertyFormManagerChildrenProps {
   isUploading: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAreaPhoto: (index: number) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan: (index: number) => void;
+  isUploadingFloorplan: boolean;
   handleSetFeaturedImage: (url: string | null) => void;
   handleToggleFeaturedImage: (url: string) => void;
   onSubmit: () => void;

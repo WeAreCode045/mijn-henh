@@ -12,6 +12,8 @@ interface ImagesStepProps {
   handleRemoveImage?: (index: number) => void;
   handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAreaPhoto?: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
@@ -23,6 +25,8 @@ export function ImagesStep({
   handleRemoveImage,
   handleAreaPhotosUpload,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading
@@ -91,6 +95,38 @@ export function ImagesStep({
                       key={index}
                       url={photoUrl}
                       onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(index)}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <Label>Floorplans</Label>
+            {handleFloorplanUpload && (
+              <ImageUploader 
+                onUpload={handleFloorplanUpload} 
+                isUploading={isUploading}
+                label="Upload Floorplans"
+                accept=".jpg,.jpeg,.png,.pdf,.svg"
+              />
+            )}
+            
+            {formData.floorplans && formData.floorplans.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                {formData.floorplans.map((floorplan, index) => {
+                  const floorplanUrl = getImageUrl(floorplan);
+                  return (
+                    <ImagePreview
+                      key={index}
+                      url={floorplanUrl}
+                      onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
+                      title={floorplan.title || `Floorplan ${index + 1}`}
                     />
                   );
                 })}

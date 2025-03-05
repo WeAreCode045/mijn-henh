@@ -18,6 +18,8 @@ interface ContentTabContentProps {
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
@@ -44,6 +46,8 @@ export function ContentTabContent({
   handleAreaPhotosUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
   currentStep,
   handleStepClick,
   handleNext,
@@ -70,6 +74,8 @@ export function ContentTabContent({
       handleAreaPhotosUpload={handleAreaPhotosUpload}
       handleRemoveImage={handleRemoveImage}
       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+      handleFloorplanUpload={handleFloorplanUpload}
+      handleRemoveFloorplan={handleRemoveFloorplan}
       isUpdateMode={true}
       currentStep={currentStep}
       handleStepClick={handleStepClick}

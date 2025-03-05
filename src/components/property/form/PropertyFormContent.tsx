@@ -23,6 +23,8 @@ interface PropertyFormContentProps {
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -48,6 +50,8 @@ export function PropertyFormContent({
   handleAreaPhotosUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
@@ -90,6 +94,8 @@ export function PropertyFormContent({
               handleAreaPhotosUpload={handleAreaPhotosUpload}
               handleRemoveImage={handleRemoveImage}
               handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+              handleFloorplanUpload={handleFloorplanUpload}
+              handleRemoveFloorplan={handleRemoveFloorplan}
               handleSetFeaturedImage={handleSetFeaturedImage}
               handleToggleFeaturedImage={handleToggleFeaturedImage}
               isUploading={isUploading}

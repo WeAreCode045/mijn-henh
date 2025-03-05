@@ -5,6 +5,7 @@ import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
@@ -71,6 +72,16 @@ export function usePropertyFormManager(property: PropertyData) {
     formState, 
     setFormStateWithTracking
   );
+
+  // Property floorplans management
+  const {
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan
+  } = usePropertyFloorplans(
+    formState,
+    setFormStateWithTracking
+  );
   
   // Step navigation with auto-save
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
@@ -125,6 +136,9 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
     onSubmit,
     currentStep,
     handleStepClick,

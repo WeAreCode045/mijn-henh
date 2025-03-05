@@ -54,15 +54,19 @@ export function renderContentTab(tabProps: PropertyTabProps) {
       onAreaImageRemove={handlers.onAreaImageRemove}
       onAreaImagesSelect={handlers.onAreaImagesSelect}
       handleImageUpload={handlers.handleImageUpload}
-      handleAreaPhotosUpload={handlers.handleImageUpload} // Using same handler for simplicity
+      handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
       handleRemoveImage={handlers.handleRemoveImage}
       handleRemoveAreaPhoto={handlers.handleRemoveImage} // Using same handler for simplicity
+      handleFloorplanUpload={handlers.handleFloorplanUpload}
+      handleRemoveFloorplan={handlers.handleRemoveFloorplan}
       currentStep={handlers.currentStep}
       handleStepClick={handlers.handleStepClick}
       handleNext={handlers.handleNext}
       handlePrevious={handlers.handlePrevious}
       onSubmit={handlers.onSubmit}
       isUploading={handlers.isUploading}
+      handleSetFeaturedImage={handlers.handleSetFeaturedImage}
+      handleToggleFeaturedImage={handlers.handleToggleFeaturedImage}
     />
   );
 }
@@ -81,11 +85,14 @@ export function renderMediaTab(tabProps: PropertyTabProps) {
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
       notes={property.notes}
+      floorplans={property.floorplans || []}
       onVirtualTourUpdate={(url) => handlers.onFieldChange('virtualTourUrl', url)}
       onYoutubeUrlUpdate={(url) => handlers.onFieldChange('youtubeUrl', url)}
       onNotesUpdate={(notes) => handlers.onFieldChange('notes', notes)}
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
+      onFloorplanUpload={handlers.handleFloorplanUpload}
+      onRemoveFloorplan={handlers.handleRemoveFloorplan}
       isUploading={handlers.isUploading}
       // Use the renamed properties
       featuredImageUrl={property.featuredImage}
