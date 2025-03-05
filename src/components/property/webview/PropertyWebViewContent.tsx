@@ -86,7 +86,7 @@ export function PropertyWebViewContent({
   };
   
   // Fixed function signature to match the expected form submission handler 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent, formData: any) => {
     handleSubmit(e);
   };
 

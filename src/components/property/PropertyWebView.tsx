@@ -1,6 +1,6 @@
 
 import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { usePropertyWebView } from "@/components/property/webview/usePropertyWebView";
+import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
 import { Dispatch, SetStateAction, useRef } from "react";
@@ -86,7 +86,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     return (
       <PropertyWebViewDialog
         propertyData={propertyData}
-        isOpen={open} // Added isOpen prop here
+        isOpen={open} 
         open={open}
         onOpenChange={onOpenChange}
         settings={settings}
