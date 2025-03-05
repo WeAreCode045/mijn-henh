@@ -11,6 +11,7 @@ export interface PropertyTabProps {
     featuredImage?: string | null;
     featuredImages?: string[];
     images: any[];
+    floorplans?: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
@@ -43,6 +44,9 @@ export interface PropertyTabProps {
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
     handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleRemoveFloorplan: (index: number) => void;
+    isUploadingFloorplan: boolean;
     handleSetFeaturedImage: (url: string | null) => void;
     handleToggleFeaturedImage: (url: string) => void;
     currentStep: number;

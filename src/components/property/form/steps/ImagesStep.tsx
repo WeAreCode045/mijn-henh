@@ -113,7 +113,6 @@ export function ImagesStep({
                 onUpload={handleFloorplanUpload} 
                 isUploading={isUploading}
                 label="Upload Floorplans"
-                accept=".jpg,.jpeg,.png,.pdf,.svg"
               />
             )}
             
@@ -126,7 +125,6 @@ export function ImagesStep({
                       key={index}
                       url={floorplanUrl}
                       onRemove={() => handleRemoveFloorplan && handleRemoveFloorplan(index)}
-                      title={floorplan.title || `Floorplan ${index + 1}`}
                     />
                   );
                 })}

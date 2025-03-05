@@ -5,7 +5,7 @@ import { getSections } from "./config/sectionConfig";
 import { useEffect, useState } from "react";
 import { useContactForm } from "./hooks/useContactForm";
 import { usePageCalculation } from "./hooks/usePageCalculation";
-import { PrintStyles } from "./PrintStyles";
+import { getPrintStyles } from "./PrintStyles";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
@@ -21,8 +21,11 @@ export function PropertyWebViewContent({
   waitForPlaces = false
 }: PropertyWebViewContentProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const { totalPages, canGoBack, canGoForward } = usePageCalculation(currentPage);
-  const { formState, handleChange, handleSubmit, isSubmitting, formMessage } = useContactForm(property);
+  const { calculateTotalPages } = usePageCalculation();
+  const { formData, handleChange, handleSubmit, isSubmitting } = useContactForm(property);
+  const totalPages = calculateTotalPages(property, isPrintView);
+  const canGoBack = currentPage > 0;
+  const canGoForward = currentPage < totalPages - 1;
   
   // Function to conditionally log when in development/debug
   const debugLog = (message: string, data?: any) => {
@@ -65,7 +68,7 @@ export function PropertyWebViewContent({
 
   return (
     <div className="relative">
-      {isPrintView && <PrintStyles />}
+      {isPrintView && getPrintStyles()}
       
       {sections[currentPage]?.content}
       

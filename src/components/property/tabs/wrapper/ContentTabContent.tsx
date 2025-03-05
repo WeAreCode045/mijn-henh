@@ -18,14 +18,15 @@ interface ContentTabContentProps {
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan: (index: number) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
   handlePrevious: () => void;
   onSubmit: () => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
 }
@@ -54,6 +55,7 @@ export function ContentTabContent({
   handlePrevious,
   onSubmit,
   isUploading,
+  isUploadingFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage
 }: ContentTabContentProps) {
@@ -83,6 +85,7 @@ export function ContentTabContent({
       handlePrevious={handlePrevious}
       onSubmit={onSubmit}
       isUploading={isUploading}
+      isUploadingFloorplan={isUploadingFloorplan}
       handleSetFeaturedImage={handleSetFeaturedImage}
       handleToggleFeaturedImage={handleToggleFeaturedImage}
     />

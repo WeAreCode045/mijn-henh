@@ -17,10 +17,10 @@ interface PropertyTabContentsProps {
     created_at?: string;
     updated_at?: string;
     images: any[];
+    floorplans?: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
-    floorplans?: any[];
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
@@ -49,8 +49,8 @@ interface PropertyTabContentsProps {
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan: (index: number) => void;
   // Step navigation props
   currentStep: number;
   handleStepClick: (step: number) => void;
@@ -60,6 +60,7 @@ interface PropertyTabContentsProps {
   // Main image and featured images props
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
+  isUploadingFloorplan?: boolean;
 }
 
 export function PropertyTabContents({
@@ -98,7 +99,8 @@ export function PropertyTabContents({
   handlePrevious,
   onSubmit,
   handleSetFeaturedImage,
-  handleToggleFeaturedImage
+  handleToggleFeaturedImage,
+  isUploadingFloorplan
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -130,6 +132,7 @@ export function PropertyTabContents({
     handlePrevious,
     onSubmit,
     formState,
+    isUploadingFloorplan,
     handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
     handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available"))
   };

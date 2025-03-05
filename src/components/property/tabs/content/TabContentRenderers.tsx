@@ -65,6 +65,7 @@ export function renderContentTab(tabProps: PropertyTabProps) {
       handlePrevious={handlers.handlePrevious}
       onSubmit={handlers.onSubmit}
       isUploading={handlers.isUploading}
+      isUploadingFloorplan={handlers.isUploadingFloorplan}
       handleSetFeaturedImage={handlers.handleSetFeaturedImage}
       handleToggleFeaturedImage={handlers.handleToggleFeaturedImage}
     />
@@ -85,7 +86,6 @@ export function renderMediaTab(tabProps: PropertyTabProps) {
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
       notes={property.notes}
-      floorplans={property.floorplans || []}
       onVirtualTourUpdate={(url) => handlers.onFieldChange('virtualTourUrl', url)}
       onYoutubeUrlUpdate={(url) => handlers.onFieldChange('youtubeUrl', url)}
       onNotesUpdate={(notes) => handlers.onFieldChange('notes', notes)}
@@ -99,6 +99,7 @@ export function renderMediaTab(tabProps: PropertyTabProps) {
       featuredImageUrls={property.featuredImages}
       onSetFeatured={handlers.handleSetFeaturedImage}
       onToggleFeatured={handlers.handleToggleFeaturedImage}
+      floorplans={property.floorplans || []}
     />
   );
 }

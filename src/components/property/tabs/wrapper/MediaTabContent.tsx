@@ -9,11 +9,14 @@ interface MediaTabContentProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  floorplans?: any[];
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
   onNotesUpdate?: (notes: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
   // Add onUpload as an alias for onImageUpload
   onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -31,11 +34,14 @@ export function MediaTabContent({
   virtualTourUrl,
   youtubeUrl,
   notes,
+  floorplans,
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
   onNotesUpdate,
   onImageUpload,
   onRemoveImage,
+  onFloorplanUpload,
+  onRemoveFloorplan,
   isUploading,
   onUpload,
   featuredImageUrl,
@@ -54,11 +60,14 @@ export function MediaTabContent({
       virtualTourUrl={virtualTourUrl}
       youtubeUrl={youtubeUrl}
       notes={notes}
+      floorplans={floorplans}
       onVirtualTourUpdate={onVirtualTourUpdate}
       onYoutubeUrlUpdate={onYoutubeUrlUpdate}
       onNotesUpdate={onNotesUpdate}
       onImageUpload={effectiveImageUpload}
       onRemoveImage={onRemoveImage}
+      onFloorplanUpload={onFloorplanUpload}
+      onRemoveFloorplan={onRemoveFloorplan}
       isUploading={isUploading}
       featuredImageUrl={featuredImageUrl}
       featuredImageUrls={featuredImageUrls}
