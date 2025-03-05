@@ -1,5 +1,5 @@
 
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 
 interface PropertyContentFormProps {
@@ -25,9 +25,6 @@ interface PropertyContentFormProps {
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
@@ -57,9 +54,6 @@ export function PropertyContentForm({
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
@@ -100,27 +94,6 @@ export function PropertyContentForm({
     setPendingChanges(true);
   };
 
-  const safeAddTechnicalItem = () => {
-    if (onAddTechnicalItem) {
-      onAddTechnicalItem();
-      setPendingChanges(true);
-    }
-  };
-
-  const safeRemoveTechnicalItem = (id: string) => {
-    if (onRemoveTechnicalItem) {
-      onRemoveTechnicalItem(id);
-      setPendingChanges(true);
-    }
-  };
-
-  const safeUpdateTechnicalItem = (id: string, field: keyof PropertyTechnicalItem, value: any) => {
-    if (onUpdateTechnicalItem) {
-      onUpdateTechnicalItem(id, field, value);
-      setPendingChanges(true);
-    }
-  };
-
   const safeSetFeaturedImage = (url: string | null) => {
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
@@ -159,9 +132,6 @@ export function PropertyContentForm({
       handleMapImageDelete={handleMapImageDelete}
       onFetchLocationData={onFetchLocationData}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
-      onAddTechnicalItem={safeAddTechnicalItem}
-      onRemoveTechnicalItem={safeRemoveTechnicalItem}
-      onUpdateTechnicalItem={safeUpdateTechnicalItem}
       handleSetFeaturedImage={safeSetFeaturedImage}
       handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}

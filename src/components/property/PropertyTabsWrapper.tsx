@@ -42,9 +42,6 @@ export function PropertyTabsWrapper({
               addFeature,
               removeFeature,
               updateFeature,
-              addTechnicalItem,
-              removeTechnicalItem,
-              updateTechnicalItem,
               addArea,
               removeArea,
               updateArea,
@@ -105,9 +102,6 @@ export function PropertyTabsWrapper({
                       handleUpdateFloorplan={handleUpdateFloorplan}
                       handleSetFeaturedImage={handleSetFeaturedImage}
                       handleToggleFeaturedImage={handleToggleFeaturedImage}
-                      onAddTechnicalItem={addTechnicalItem}
-                      onRemoveTechnicalItem={removeTechnicalItem}
-                      onUpdateTechnicalItem={updateTechnicalItem}
                       currentStep={currentStep}
                       handleStepClick={handleStepClick}
                       handleNext={handleNext}

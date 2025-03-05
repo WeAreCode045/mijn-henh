@@ -1,6 +1,6 @@
 
 import { PropertyContentTab } from "../PropertyContentTab";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 
 interface ContentTabContentProps {
   formData: PropertyFormData;
@@ -21,9 +21,6 @@ interface ContentTabContentProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
@@ -51,9 +48,6 @@ export function ContentTabContent({
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
   handleUpdateFloorplan,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   currentStep,
   handleStepClick,
   handleNext,
@@ -81,9 +75,6 @@ export function ContentTabContent({
       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
       handleRemoveFloorplan={handleRemoveFloorplan}
       handleUpdateFloorplan={handleUpdateFloorplan}
-      onAddTechnicalItem={onAddTechnicalItem}
-      onRemoveTechnicalItem={onRemoveTechnicalItem}
-      onUpdateTechnicalItem={onUpdateTechnicalItem}
       isUpdateMode={true}
       currentStep={currentStep}
       handleStepClick={handleStepClick}

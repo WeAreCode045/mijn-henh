@@ -1,5 +1,5 @@
 
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
   renderContentTab, 
@@ -52,10 +52,6 @@ interface PropertyTabContentsProps {
   handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
   handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
-  // Technical data props
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   // Step navigation props
   currentStep: number;
   handleStepClick: (step: number) => void;
@@ -99,9 +95,6 @@ export function PropertyTabContents({
   handleRemoveAreaPhoto,
   handleRemoveFloorplan,
   handleUpdateFloorplan,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   currentStep,
   handleStepClick,
   handleNext,
@@ -110,17 +103,6 @@ export function PropertyTabContents({
   handleSetFeaturedImage,
   handleToggleFeaturedImage
 }: PropertyTabContentsProps) {
-  const safeAddTechnicalItem = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    if (onAddTechnicalItem) {
-      console.log("PropertyTabContents - Adding technical item");
-      onAddTechnicalItem();
-    }
-  };
-
   const handlers = {
     onSave,
     onDelete,
@@ -147,9 +129,6 @@ export function PropertyTabContents({
     handleRemoveAreaPhoto,
     handleRemoveFloorplan,
     handleUpdateFloorplan,
-    onAddTechnicalItem: safeAddTechnicalItem,
-    onRemoveTechnicalItem,
-    onUpdateTechnicalItem,
     currentStep,
     handleStepClick,
     handleNext,

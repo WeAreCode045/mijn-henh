@@ -1,5 +1,5 @@
 
-import { PropertyData, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
@@ -15,9 +15,6 @@ export interface PropertyFormManagerChildrenProps {
   addFeature: () => void;
   removeFeature: (id: string) => void;
   updateFeature: (id: string, description: string) => void;
-  addTechnicalItem: () => void;
-  removeTechnicalItem: (id: string) => void;
-  updateTechnicalItem: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   addArea: () => void;
   removeArea: (id: string) => void;
   updateArea: (id: string, field: any, value: any) => void;

@@ -2,14 +2,13 @@
 import { WebViewSectionProps } from "../types";
 import { useState } from "react";
 import { ImagePreviewDialog } from "../components/ImagePreviewDialog";
-import { Floorplan } from "@/components/property/form/steps/technical-data/FloorplanUpload";
 
 export function FloorplansSection({ property }: WebViewSectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loadErrors, setLoadErrors] = useState<Record<string, boolean>>({});
 
   // Parse floorplans from property data
-  const parseFloorplans = (): Floorplan[] => {
+  const parseFloorplans = (): any[] => {
     if (!property.floorplans || !Array.isArray(property.floorplans) || property.floorplans.length === 0) {
       return [];
     }

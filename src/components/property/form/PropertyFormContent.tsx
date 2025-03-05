@@ -1,11 +1,10 @@
 
-import { PropertyArea, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyArea, PropertyFormData } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
 import { ImagesStep } from "./steps/ImagesStep";
 import { LocationStep } from "./steps/LocationStep";
-import { TechnicalDataStep } from "./steps/TechnicalDataStep";
 
 interface PropertyFormContentProps {
   step: number;
@@ -30,9 +29,6 @@ interface PropertyFormContentProps {
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onAddTechnicalItem?: (e?: React.MouseEvent) => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
@@ -61,9 +57,6 @@ export function PropertyFormContent({
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading
@@ -137,22 +130,6 @@ export function PropertyFormContent({
               onFetchLocationData={onFetchLocationData}
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               handleMapImageDelete={handleMapImageDelete}
-            />
-          </form>
-        );
-      case 6:
-        return (
-          <form id="technicalDataForm">
-            <TechnicalDataStep
-              formData={formData}
-              onFieldChange={onFieldChange}
-              onAddTechnicalItem={onAddTechnicalItem}
-              onRemoveTechnicalItem={onRemoveTechnicalItem}
-              onUpdateTechnicalItem={onUpdateTechnicalItem}
-              onFloorplanUpload={handleFloorplanUpload}
-              onRemoveFloorplan={handleRemoveFloorplan}
-              onUpdateFloorplan={handleUpdateFloorplan}
-              isUploading={isUploading}
             />
           </form>
         );

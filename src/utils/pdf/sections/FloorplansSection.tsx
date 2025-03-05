@@ -4,7 +4,6 @@ import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { Floorplan } from '@/components/property/form/steps/technical-data/FloorplanUpload';
 
 export const FloorplansSection = ({ property, settings, styles }: {
   property: PropertyData;
@@ -12,7 +11,7 @@ export const FloorplansSection = ({ property, settings, styles }: {
   styles: any;
 }) => {
   // Extract and parse floorplans
-  const parseFloorplans = (): Floorplan[] => {
+  const parseFloorplans = (): any[] => {
     if (!property.floorplans || !Array.isArray(property.floorplans) || property.floorplans.length === 0) {
       return [];
     }

@@ -1,6 +1,6 @@
+
 import type { PropertyArea } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
-import { Floorplan } from "@/components/property/form/steps/technical-data/FloorplanUpload";
 
 /**
  * Transforms array of area objects into JSON array for database storage
@@ -35,7 +35,7 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
 /**
  * Transforms floorplan objects array into JSON for database storage
  */
-export function prepareFloorplansForFormSubmission(floorplans: Floorplan[] | undefined) {
+export function prepareFloorplansForFormSubmission(floorplans: any[] | undefined) {
   if (!floorplans || !Array.isArray(floorplans)) {
     return [];
   }

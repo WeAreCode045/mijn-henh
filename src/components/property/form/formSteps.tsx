@@ -2,9 +2,8 @@
 import { AreasStep } from "./steps/AreasStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
-import { TechnicalDataStep } from "./steps/TechnicalDataStep";
 import { LocationStep } from "./steps/LocationStep";
-import { Info, MapPin, List, Grid, Ruler } from "lucide-react";
+import { Info, MapPin, List, Grid } from "lucide-react";
 
 export interface FormStep {
   id: number;
@@ -28,18 +27,12 @@ export const steps: FormStep[] = [
   },
   {
     id: 3,
-    title: "Technical Data",
-    component: TechnicalDataStep,
-    icon: <Ruler className="h-4 w-4" />,
-  },
-  {
-    id: 4,
     title: "Areas",
     component: AreasStep,
     icon: <Grid className="h-4 w-4" />,
   },
   {
-    id: 5,
+    id: 4,
     title: "Location",
     component: LocationStep,
     icon: <MapPin className="h-4 w-4" />,

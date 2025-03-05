@@ -1,6 +1,5 @@
 
 import type { PropertyFeature, PropertyArea, PropertyPlaceType } from "@/types/property";
-import { Floorplan } from "@/components/property/form/steps/technical-data/FloorplanUpload";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
   return Array.isArray(features)
@@ -58,7 +57,7 @@ export function transformAreas(areas: any[]): PropertyArea[] {
     : [];
 }
 
-export function transformFloorplans(floorplans: any[]): Floorplan[] {
+export function transformFloorplans(floorplans: any[]): any[] {
   if (!Array.isArray(floorplans)) return [];
   
   return floorplans.map((floorplan: any) => {

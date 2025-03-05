@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
 import { steps } from "@/components/property/form/formSteps";
 import { usePropertyContentAutoSave } from "@/hooks/usePropertyContentAutoSave";
@@ -36,9 +36,6 @@ interface PropertyContentTabProps {
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   isUpdateMode: boolean;
   isUploading?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
@@ -72,9 +69,6 @@ export function PropertyContentTab({
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   isUpdateMode,
   isUploading,
   handleSetFeaturedImage,
@@ -161,9 +155,6 @@ export function PropertyContentTab({
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
-        onAddTechnicalItem={onAddTechnicalItem}
-        onRemoveTechnicalItem={onRemoveTechnicalItem}
-        onUpdateTechnicalItem={onUpdateTechnicalItem}
         handleSetFeaturedImage={handleSetFeaturedImage}
         handleToggleFeaturedImage={handleToggleFeaturedImage}
         isUploading={isUploading}
