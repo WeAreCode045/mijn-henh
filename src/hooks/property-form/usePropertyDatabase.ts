@@ -14,31 +14,28 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
-      // Remove floorplans from the data as we store them in property_images now
-      const { floorplans, featuredImage, coverImages, ...updateData } = data;
-
       // Transform areas to the correct format for the database
-      if (updateData.areas && Array.isArray(updateData.areas)) {
+      if (data.areas && Array.isArray(data.areas)) {
         // Cast to any to avoid TypeScript errors while still using the function properly
-        const transformedAreas = prepareAreasForFormSubmission(updateData.areas as any);
-        updateData.areas = transformedAreas;
+        const transformedAreas = prepareAreasForFormSubmission(data.areas as any);
+        data.areas = transformedAreas;
       }
 
       // Transform features to the correct format
-      if (updateData.features && Array.isArray(updateData.features)) {
-        updateData.features = preparePropertiesForJsonField(updateData.features);
+      if (data.features && Array.isArray(data.features)) {
+        data.features = preparePropertiesForJsonField(data.features);
       }
 
       // Transform nearby_places to the correct format
-      if (updateData.nearby_places && Array.isArray(updateData.nearby_places)) {
-        updateData.nearby_places = preparePropertiesForJsonField(updateData.nearby_places);
+      if (data.nearby_places && Array.isArray(data.nearby_places)) {
+        data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
 
-      console.log("usePropertyDatabase - Final update data:", updateData);
+      console.log("usePropertyDatabase - Final update data:", data);
       
       const { error, data: updatedData } = await supabase
         .from('properties')
-        .update(updateData as any)
+        .update(data as any)
         .eq('id', id)
         .select();
         
@@ -71,31 +68,28 @@ export function usePropertyDatabase() {
     console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
-      // Remove floorplans from the data as we store them in property_images now
-      const { floorplans, featuredImage, coverImages, ...createData } = data;
-
       // Transform areas to the correct format for the database
-      if (createData.areas && Array.isArray(createData.areas)) {
+      if (data.areas && Array.isArray(data.areas)) {
         // Cast to any to avoid TypeScript errors while still using the function properly
-        const transformedAreas = prepareAreasForFormSubmission(createData.areas as any);
-        createData.areas = transformedAreas;
+        const transformedAreas = prepareAreasForFormSubmission(data.areas as any);
+        data.areas = transformedAreas;
       }
 
       // Transform features to the correct format
-      if (createData.features && Array.isArray(createData.features)) {
-        createData.features = preparePropertiesForJsonField(createData.features);
+      if (data.features && Array.isArray(data.features)) {
+        data.features = preparePropertiesForJsonField(data.features);
       }
 
       // Transform nearby_places to the correct format
-      if (createData.nearby_places && Array.isArray(createData.nearby_places)) {
-        createData.nearby_places = preparePropertiesForJsonField(createData.nearby_places);
+      if (data.nearby_places && Array.isArray(data.nearby_places)) {
+        data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
 
-      console.log("usePropertyDatabase - Final create data:", createData);
+      console.log("usePropertyDatabase - Final create data:", data);
       
       const { error, data: createdData } = await supabase
         .from('properties')
-        .insert(createData as any)
+        .insert(data as any)
         .select();
         
       if (error) {

@@ -44,9 +44,6 @@ export interface PropertyTabProps {
     isUploading: boolean;
     handleSetFeaturedImage: (url: string | null) => void;
     handleToggleFeaturedImage: (url: string) => void;
-    onAddTechnicalItem: (e?: React.MouseEvent) => void;
-    onRemoveTechnicalItem?: (id: string) => void;
-    onUpdateTechnicalItem?: (id: string, field: any, value: any) => void;
     currentStep: number;
     handleStepClick: (step: number) => void;
     handleNext: () => void;

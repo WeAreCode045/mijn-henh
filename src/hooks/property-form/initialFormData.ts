@@ -17,7 +17,6 @@ export const initialFormData: PropertyFormData = {
   location_description: "",
   features: [],
   images: [],
-  floorplans: [],
   featuredImage: null,
   featuredImages: [], // For featured images (previously coverImages)
   coverImages: [], // Keep for backward compatibility
@@ -27,6 +26,5 @@ export const initialFormData: PropertyFormData = {
   nearby_places: [],
   latitude: null,
   longitude: null,
-  template_id: "default", // Set default template_id
-  floorplanEmbedScript: "" // Initialize floorplanEmbedScript property
+  template_id: "default" // Set default template_id
 };

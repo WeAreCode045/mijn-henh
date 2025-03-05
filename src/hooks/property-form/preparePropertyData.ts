@@ -33,32 +33,6 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
 }
 
 /**
- * Transforms floorplan objects array into JSON for database storage
- */
-export function prepareFloorplansForFormSubmission(floorplans: any[] | undefined) {
-  if (!floorplans || !Array.isArray(floorplans)) {
-    return [];
-  }
-  
-  // Filter out any undefined or null values to ensure we only process valid floorplans
-  return floorplans
-    .filter(floorplan => floorplan && (typeof floorplan === 'string' || floorplan.id))
-    .map(floorplan => {
-      // If it's a string, it's already in the right format
-      if (typeof floorplan === 'string') {
-        return floorplan;
-      }
-      
-      // Otherwise, convert it to JSON
-      return {
-        id: floorplan.id || crypto.randomUUID(),
-        url: floorplan.url,
-        title: floorplan.title || 'Floorplan'
-      };
-    });
-}
-
-/**
  * Prepare property properties for JSON field
  * Works with any array of objects or primitive values
  */

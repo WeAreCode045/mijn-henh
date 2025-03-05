@@ -57,45 +57,6 @@ export function transformAreas(areas: any[]): PropertyArea[] {
     : [];
 }
 
-export function transformFloorplans(floorplans: any[]): any[] {
-  if (!Array.isArray(floorplans)) return [];
-  
-  return floorplans.map((floorplan: any) => {
-    if (typeof floorplan === 'string') {
-      try {
-        // Try to parse as JSON if it's a stringified object
-        const parsedFloorplan = JSON.parse(floorplan);
-        return {
-          id: parsedFloorplan.id || crypto.randomUUID(),
-          url: parsedFloorplan.url || '',
-          title: parsedFloorplan.title || 'Floorplan'
-        };
-      } catch (e) {
-        // If parsing fails, treat it as a plain URL string
-        return { 
-          id: crypto.randomUUID(),
-          url: floorplan, 
-          title: 'Floorplan'
-        };
-      }
-    } else if (typeof floorplan === 'object' && floorplan !== null) {
-      // If it's already an object
-      return {
-        id: floorplan.id || crypto.randomUUID(),
-        url: floorplan.url || '',
-        title: floorplan.title || 'Floorplan'
-      };
-    } else {
-      // Fallback for any other case
-      return { 
-        id: crypto.randomUUID(),
-        url: '', 
-        title: 'Floorplan'
-      };
-    }
-  }).filter(f => f.url); // Filter out any items with empty URLs
-}
-
 export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {
   return Array.isArray(places)
     ? places.map((place: any) => ({
