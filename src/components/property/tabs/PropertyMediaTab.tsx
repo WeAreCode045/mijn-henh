@@ -4,7 +4,7 @@ import { PropertyImagesCard } from "./media/PropertyImagesCard";
 import { VirtualTourCard } from "./media/VirtualTourCard";
 import { MediaDatabaseFetcher } from "./media/MediaDatabaseFetcher";
 import { FloorplansCard } from "./media/FloorplansCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PropertyMediaTabProps {
   id: string;
@@ -55,8 +55,35 @@ export function PropertyMediaTab({
   const [mediaImages, setMediaImages] = useState<PropertyImage[]>(images);
 
   const handleFetchComplete = (fetchedImages: PropertyImage[]) => {
-    setMediaImages(fetchedImages);
+    // Sort images if they come with sort_order values
+    const sortedImages = [...fetchedImages].sort((a, b) => {
+      // Use sort_order as primary sort criteria
+      if (a.sort_order && b.sort_order) {
+        return a.sort_order - b.sort_order;
+      }
+      // Fall back to using array order if sort_order is not available
+      return 0;
+    });
+    
+    console.log("PropertyMediaTab - Received sorted images:", sortedImages);
+    setMediaImages(sortedImages);
   };
+
+  // Update mediaImages when images prop changes
+  useEffect(() => {
+    if (images && images.length > 0) {
+      // This ensures we update our state when parent component updates images
+      // Apply the same sorting logic
+      const sortedImages = [...images].sort((a, b) => {
+        if (a.sort_order && b.sort_order) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      
+      setMediaImages(sortedImages);
+    }
+  }, [images]);
 
   return (
     <div className="space-y-6">
@@ -76,7 +103,7 @@ export function PropertyMediaTab({
         featuredImageUrls={featuredImageUrls}
         onSetFeatured={onSetFeatured}
         onToggleFeatured={onToggleFeatured}
-        propertyId={id} // Pass propertyId to allow database updates
+        propertyId={id}
       />
 
       <FloorplansCard

@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { UploadIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { useState, useEffect, createRef } from "react";
-import { ImagePreview } from "@/components/ui/ImagePreview";
 import { SortableImageItem } from "./images/SortableImageItem";
 import { DndContext, DragEndEvent, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
@@ -34,7 +33,15 @@ export function PropertyImagesCard({
   propertyId,
 }: PropertyImagesCardProps) {
   const [uploading, setUploading] = useState(isUploading);
-  const [sortableImages, setSortableImages] = useState<PropertyImage[]>(images);
+  // Ensure we apply the same sort order to sortableImages when component initializes
+  const initialSortedImages = [...images].sort((a, b) => {
+    if (a.sort_order && b.sort_order) {
+      return a.sort_order - b.sort_order;
+    }
+    return 0;
+  });
+  
+  const [sortableImages, setSortableImages] = useState<PropertyImage[]>(initialSortedImages);
   const fileInputRef = createRef<HTMLInputElement>();
   
   const sensors = useSensors(
@@ -49,7 +56,20 @@ export function PropertyImagesCard({
   }, [isUploading]);
 
   useEffect(() => {
-    setSortableImages(images);
+    // Apply sorting when we receive new images from parent
+    if (images && images.length > 0) {
+      const sortedImages = [...images].sort((a, b) => {
+        if (a.sort_order && b.sort_order) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      
+      setSortableImages(sortedImages);
+      console.log("PropertyImagesCard - Updated with sorted images:", sortedImages);
+    } else {
+      setSortableImages([]);
+    }
   }, [images]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,6 +150,12 @@ export function PropertyImagesCard({
       console.error('Error updating image sort order:', error);
     }
   };
+
+  // Debug logging for rendering
+  console.log("Rendering PropertyImagesCard with:", {
+    imageCount: sortableImages.length,
+    sortOrders: sortableImages.map(i => i.sort_order || 'none')
+  });
 
   return (
     <Card>
