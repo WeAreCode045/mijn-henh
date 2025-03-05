@@ -24,6 +24,8 @@ interface ContentTabContentProps {
   handlePrevious: () => void;
   onSubmit: () => void;
   isUploading?: boolean;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
 }
 
 export function ContentTabContent({
@@ -47,7 +49,9 @@ export function ContentTabContent({
   handleNext,
   handlePrevious,
   onSubmit,
-  isUploading
+  isUploading,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage
 }: ContentTabContentProps) {
   return (
     <PropertyContentTab 
@@ -73,6 +77,8 @@ export function ContentTabContent({
       handlePrevious={handlePrevious}
       onSubmit={onSubmit}
       isUploading={isUploading}
+      handleSetFeaturedImage={handleSetFeaturedImage}
+      handleToggleFeaturedImage={handleToggleFeaturedImage}
     />
   );
 }

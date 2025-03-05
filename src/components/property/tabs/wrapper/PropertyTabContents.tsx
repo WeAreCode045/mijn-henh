@@ -20,6 +20,7 @@ interface PropertyTabContentsProps {
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
+    floorplans?: any[];
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;

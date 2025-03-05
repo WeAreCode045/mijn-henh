@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { getSections } from "./config/sectionConfig";
@@ -38,9 +37,7 @@ export function PropertyWebViewContent({
   const sections = getSections({ 
     property, 
     settings, 
-    currentPage, 
-    isPrintView,
-    waitForPlaces
+    currentPage 
   });
 
   const handleNext = () => {
@@ -55,7 +52,6 @@ export function PropertyWebViewContent({
     }
   };
 
-  // Apply background image to all pages except Overview (page 0)
   const backgroundStyle: CSSProperties = 
     currentPage !== 0 && settings?.webviewBackgroundUrl 
       ? {
@@ -75,17 +71,14 @@ export function PropertyWebViewContent({
 
   return (
     <div className="flex flex-col h-full relative">
-      {/* Background Image */}
       {currentPage !== 0 && settings?.webviewBackgroundUrl && (
         <div style={backgroundStyle}></div>
       )}
 
-      {/* Header */}
       <div className="border-b flex-shrink-0 bg-white relative z-10">
         <WebViewHeader settings={settings} />
       </div>
 
-      {/* Content Section */}
       <div className="flex-1 overflow-y-auto min-h-0 relative z-10">
         <div className="p-4 pb-24">
           {sections[currentPage]?.content}
@@ -97,7 +90,6 @@ export function PropertyWebViewContent({
         onClose={() => setSelectedImage(null)}
       />
 
-      {/* Fixed Navigation Footer */}
       {!isPrintView && (
         <div 
           className="absolute bottom-0 left-0 right-0 p-4 border-t bg-opacity-95 z-10"

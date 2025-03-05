@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyForm } from "@/components/PropertyForm";
@@ -6,7 +5,6 @@ import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
-import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { useAuth } from "@/providers/AuthProvider";
