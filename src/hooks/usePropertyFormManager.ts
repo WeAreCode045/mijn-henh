@@ -108,6 +108,42 @@ export function usePropertyFormManager(property: PropertyData) {
     handleFieldChange('template_id', id);
   };
 
+  // Technical items management
+  const onAddTechnicalItem = () => {
+    setFormStateWithTracking({
+      ...formState,
+      technicalItems: [
+        ...(formState.technicalItems || []),
+        {
+          id: Date.now().toString(),
+          title: '',
+          size: '',
+          description: '',
+          floorplanId: null
+        }
+      ]
+    });
+  };
+
+  // Create a function that can handle both number and string parameters
+  const onRemoveTechnicalItem = (idOrIndex: number | string) => {
+    if (typeof idOrIndex === 'number') {
+      // Handle removal by index
+      const updatedItems = [...(formState.technicalItems || [])];
+      updatedItems.splice(idOrIndex, 1);
+      setFormStateWithTracking({
+        ...formState,
+        technicalItems: updatedItems
+      });
+    } else {
+      // Handle removal by id
+      setFormStateWithTracking({
+        ...formState,
+        technicalItems: (formState.technicalItems || []).filter(item => item.id !== idOrIndex)
+      });
+    }
+  };
+
   // Cast property to PropertyData to ensure it has required id
   const propertyWithRequiredId: PropertyData = {
     ...formState,
@@ -146,6 +182,8 @@ export function usePropertyFormManager(property: PropertyData) {
     handlePrevious,
     propertyWithRequiredProps: propertyWithRequiredId,
     lastSaved,
-    isSaving
+    isSaving,
+    onAddTechnicalItem,
+    onRemoveTechnicalItem
   };
 }
