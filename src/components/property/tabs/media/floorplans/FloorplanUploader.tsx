@@ -1,46 +1,49 @@
 
+import { UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { createRef } from "react";
 
 interface FloorplanUploaderProps {
-  isLoading: boolean;
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isUploading: boolean;
 }
 
-export function FloorplanUploader({ isLoading, onUpload }: FloorplanUploaderProps) {
+export function FloorplanUploader({ onFloorplanUpload, isUploading }: FloorplanUploaderProps) {
+  const fileInputRef = createRef<HTMLInputElement>();
+
+  const handleUploadClick = () => {
+    // Programmatically click the hidden file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFloorplanUpload(e);
+    // Reset the file input value
+    e.target.value = '';
+  };
+
   return (
-    <div className="flex items-center space-x-2">
-      <Button 
-        type="button" 
-        variant="outline" 
+    <div>
+      <Button
+        type="button"
+        variant="outline"
         className="w-full"
-        disabled={isLoading}
-        onClick={(e) => {
-          e.preventDefault(); // Prevent any default navigation
-          document.getElementById('floorplan-upload')?.click();
-        }}
+        disabled={isUploading}
+        onClick={handleUploadClick}
       >
-        {isLoading ? (
-          <>
-            <Spinner className="h-4 w-4 mr-2" />
-            <span>Uploading...</span>
-          </>
-        ) : (
-          <>
-            <Upload className="h-4 w-4 mr-2" />
-            <span>Upload Floorplans</span>
-          </>
-        )}
+        <UploadIcon className="w-4 h-4 mr-2" />
+        {isUploading ? "Uploading..." : "Upload Floorplans"}
       </Button>
       <input
-        id="floorplan-upload"
+        ref={fileInputRef}
         type="file"
-        accept="image/*"
         multiple
+        accept="image/*"
         className="hidden"
-        onChange={onUpload}
-        disabled={isLoading}
+        onChange={handleFileChange}
+        disabled={isUploading}
       />
     </div>
   );
