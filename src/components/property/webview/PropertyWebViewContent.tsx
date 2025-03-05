@@ -85,7 +85,7 @@ export function PropertyWebViewContent({
     }
   };
   
-  // Handle form submission with the correct signature
+  // Handle form submission with the correct signature to match useContactForm
   const handleFormSubmit = (e: React.FormEvent) => {
     handleSubmit(e);
   };
