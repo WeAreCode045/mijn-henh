@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -33,7 +32,6 @@ interface PropertyTabContentsProps {
   handleSaveTemplate: (templateId: string) => void;
   handleGeneratePDF: () => void;
   handleWebView: () => void;
-  // Content tab props
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -44,26 +42,23 @@ interface PropertyTabContentsProps {
   onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  // Media tab props
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan: (index: number) => void;
-  // Step navigation props
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
   handlePrevious: () => void;
   onSubmit: () => void;
-  // Main image and featured images props
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploadingFloorplan?: boolean;
-  // TechnicalItem props
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
 }
 
 export function PropertyTabContents({
@@ -105,7 +100,8 @@ export function PropertyTabContents({
   handleToggleFeaturedImage,
   isUploadingFloorplan,
   onAddTechnicalItem,
-  onRemoveTechnicalItem
+  onRemoveTechnicalItem,
+  handleRemoveAreaPhoto
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -141,7 +137,8 @@ export function PropertyTabContents({
     handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
     handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
     onAddTechnicalItem,
-    onRemoveTechnicalItem
+    onRemoveTechnicalItem,
+    handleRemoveAreaPhoto
   };
 
   const tabProps = {

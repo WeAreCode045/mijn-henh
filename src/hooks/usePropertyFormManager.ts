@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
@@ -64,7 +63,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
+    handleRemoveAreaPhoto,  // Make sure this is properly exposed from usePropertyImages
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     images
@@ -169,7 +168,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
+    handleRemoveAreaPhoto,  // Make sure to include this in the return object
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     handleFloorplanUpload,
