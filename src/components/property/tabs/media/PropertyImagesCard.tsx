@@ -105,16 +105,27 @@ export function PropertyImagesCard({
     if (!propertyId) return;
     
     try {
-      // Update sort_order for each image
-      const updates = images.map((image, index) => {
+      console.log('Updating image sort order in database...');
+      
+      // Create an array of promises for each update operation
+      const updatePromises = images.map((image, index) => {
+        // Skip images without a valid database ID
+        if (!image.id || typeof image.id !== 'string' || image.id.startsWith('temp-')) {
+          console.log('Skipping image without valid ID:', image);
+          return Promise.resolve();
+        }
+        
+        console.log(`Setting image ${image.id} to sort_order ${index + 1}`);
+        
         return supabase
           .from('property_images')
           .update({ sort_order: index + 1 }) // 1-based index for sort_order
           .eq('id', image.id);
       });
       
-      await Promise.all(updates);
-      console.log('Image sort order updated in database');
+      // Execute all update operations in parallel
+      await Promise.all(updatePromises);
+      console.log('Image sort order updated successfully');
     } catch (error) {
       console.error('Error updating image sort order:', error);
     }
