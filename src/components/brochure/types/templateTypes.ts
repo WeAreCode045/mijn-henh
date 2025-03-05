@@ -31,6 +31,6 @@ export interface Template {
   id: string;
   name: string;
   description: string | null;
-  sections: any;
+  sections: Section[];
   created_at: string;
 }

@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableSection } from './SortableSection';
 import { useToast } from '../ui/use-toast';
-import { Template, Section, Container } from './types/templateTypes';
+import { Template, Section, Container, ContentElement } from './types/templateTypes';
 import { defaultSections } from './constants/templateDefaults';
 import { TemplateForm } from './TemplateForm';
 import { ElementsPanel } from './ElementsPanel';
