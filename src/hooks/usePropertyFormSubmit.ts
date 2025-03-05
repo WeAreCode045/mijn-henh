@@ -66,7 +66,7 @@ export function usePropertyFormSubmit() {
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       notes: formData.notes,
-      floorplans: [] // Add empty floorplans array
+      floorplans: formData.floorplans ? formData.floorplans.map(fp => typeof fp === 'string' ? fp : fp.url) : []
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);
@@ -127,6 +127,7 @@ export function usePropertyFormSubmit() {
           
         if (newProperty && newProperty.id) {
           try {
+            // Add regular images to property_images table
             for (const image of formData.images) {
               const imageUrl = typeof image === 'string' ? image : image.url;
               await supabase
@@ -138,6 +139,20 @@ export function usePropertyFormSubmit() {
                   is_featured_image: formData.featuredImages?.includes(imageUrl) || false,
                   type: 'image'
                 });
+            }
+            
+            // Add floorplans to property_images table
+            if (formData.floorplans && formData.floorplans.length > 0) {
+              for (const floorplan of formData.floorplans) {
+                const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+                await supabase
+                  .from('property_images')
+                  .insert({
+                    property_id: newProperty.id,
+                    url: floorplanUrl,
+                    type: 'floorplan'
+                  });
+              }
             }
           } catch (error) {
             console.error("Error adding images to property_images table:", error);

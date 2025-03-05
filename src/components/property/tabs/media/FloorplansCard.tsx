@@ -4,26 +4,39 @@ import { Button } from "@/components/ui/button";
 import { UploadIcon } from "lucide-react";
 import { useState, useEffect, createRef } from "react";
 import { ImagePreview } from "@/components/ui/ImagePreview";
+import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
+import { PropertyFloorplan } from "@/types/property";
 
 interface FloorplanCardProps {
-  floorplans: any[];
+  id?: string;
+  floorplans?: any[];
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
 }
 
 export function FloorplansCard({
+  id,
   floorplans = [],
   onFloorplanUpload,
   onRemoveFloorplan,
   isUploading = false,
 }: FloorplanCardProps) {
   const [uploading, setUploading] = useState(isUploading);
+  const [displayFloorplans, setDisplayFloorplans] = useState<PropertyFloorplan[]>(
+    Array.isArray(floorplans) ? floorplans : []
+  );
   const fileInputRef = createRef<HTMLInputElement>();
 
   useEffect(() => {
     setUploading(isUploading);
   }, [isUploading]);
+
+  useEffect(() => {
+    if (floorplans && floorplans.length > 0) {
+      setDisplayFloorplans(floorplans);
+    }
+  }, [floorplans]);
 
   const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploading(true);
@@ -48,12 +61,27 @@ export function FloorplansCard({
     return '';
   };
 
+  const handleFetchComplete = (fetchedFloorplans: PropertyFloorplan[]) => {
+    if (fetchedFloorplans.length > 0) {
+      setDisplayFloorplans(fetchedFloorplans);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">Floorplans</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Hidden database fetcher component */}
+        {id && (
+          <FloorplanDatabaseFetcher
+            propertyId={id}
+            floorplans={displayFloorplans}
+            onFetchComplete={handleFetchComplete}
+          />
+        )}
+
         <div className="flex flex-col space-y-4">
           <Button
             type="button"
@@ -76,8 +104,8 @@ export function FloorplansCard({
           />
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-            {floorplans && floorplans.length > 0 ? (
-              floorplans.map((floorplan, index) => {
+            {displayFloorplans && displayFloorplans.length > 0 ? (
+              displayFloorplans.map((floorplan, index) => {
                 const url = getFloorplanUrl(floorplan);
                 const label = floorplan.title || `Floorplan ${index + 1}`;
                 

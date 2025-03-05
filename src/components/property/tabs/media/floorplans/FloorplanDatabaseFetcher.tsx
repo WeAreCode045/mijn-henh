@@ -15,7 +15,7 @@ export function FloorplanDatabaseFetcher({
   onFetchComplete
 }: FloorplanDatabaseFetcherProps) {
   useEffect(() => {
-    console.log("FloorplanDatabaseFetcher - checking if fetch needed", {propertyId, floorplanLength: floorplans?.length});
+    console.log("FloorplanDatabaseFetcher - checking if fetch needed", {propertyId, floorplansLength: floorplans?.length});
     
     if (propertyId && (!floorplans || floorplans.length === 0)) {
       const fetchFloorplans = async () => {
@@ -35,11 +35,12 @@ export function FloorplanDatabaseFetcher({
           }
           
           if (data && data.length > 0) {
-            // Transform to simple PropertyFloorplan objects with explicit type casting
+            // Transform to PropertyFloorplan objects
             const dbFloorplans: PropertyFloorplan[] = data.map(item => ({
               id: item.id,
               url: item.url,
-              columns: 1
+              columns: 12,
+              title: 'Floorplan'
             }));
             
             console.log("FloorplanDatabaseFetcher - Fetched floorplans from DB:", dbFloorplans);

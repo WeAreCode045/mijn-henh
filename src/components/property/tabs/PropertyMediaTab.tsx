@@ -79,6 +79,7 @@ export function PropertyMediaTab({
       />
 
       <FloorplansCard
+        id={id}
         floorplans={floorplans}
         onFloorplanUpload={onFloorplanUpload}
         onRemoveFloorplan={onRemoveFloorplan}
