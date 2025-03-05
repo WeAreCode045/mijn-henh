@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PropertyFormData, PropertyFloorplan } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,31 @@ export function usePropertyFloorplans(
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
+  // Helper function to get the next sort order
+  const getNextSortOrder = async (propertyId: string): Promise<number> => {
+    // Get the highest current sort_order for floorplans
+    const { data, error } = await supabase
+      .from('property_images')
+      .select('sort_order')
+      .eq('property_id', propertyId)
+      .eq('type', 'floorplan')
+      .order('sort_order', { ascending: false })
+      .limit(1);
+      
+    if (error) {
+      console.error('Error getting max sort order:', error);
+      return 1; // Default to 1 if there's an error
+    }
+    
+    // If no data or no sort_order, start with 1
+    if (!data || data.length === 0 || !data[0].sort_order) {
+      return 1;
+    }
+    
+    // Otherwise, use the next number
+    return data[0].sort_order + 1;
+  };
+
   // Handle floorplan upload
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -19,7 +43,7 @@ export function usePropertyFloorplans(
     
     try {
       const files = Array.from(e.target.files);
-      const uploadPromises = files.map(async (file) => {
+      const uploadPromises = files.map(async (file, index) => {
         // Sanitize the file name
         const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
         
@@ -47,7 +71,8 @@ export function usePropertyFloorplans(
           url: publicUrl,
           filePath,
           columns: 12,  // Default column width
-          title: fileName.split('-').pop() || 'Floorplan'
+          title: fileName.split('-').pop() || 'Floorplan',
+          sort_order: 0 // Temporary value, will be updated later
         };
       });
       
@@ -67,6 +92,9 @@ export function usePropertyFloorplans(
       // If the property is already saved in the database, update it immediately
       if (formData.id) {
         try {
+          // Get the next sort order to use
+          let nextSortOrder = await getNextSortOrder(formData.id);
+          
           // Add floorplans to the property_images table for tracking
           for (const floorplan of newFloorplans) {
             const { error } = await supabase
@@ -74,7 +102,8 @@ export function usePropertyFloorplans(
               .insert({
                 property_id: formData.id,
                 url: floorplan.url,
-                type: 'floorplan' // Set type as 'floorplan' to distinguish from regular images
+                type: 'floorplan',
+                sort_order: nextSortOrder++ // Assign and increment
               });
               
             if (error) {

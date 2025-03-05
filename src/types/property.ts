@@ -1,4 +1,3 @@
-
 import { Json } from "@/integrations/supabase/types";
 
 export interface PropertyFeature {
@@ -15,7 +14,8 @@ export interface PropertyImage {
   type?: string;
   is_main?: boolean; // Updated from is_featured to is_main
   is_featured_image?: boolean; // Updated from is_grid_image to is_featured_image
-  [key: string]: string | boolean | null | undefined; // Updated index signature to include boolean
+  sort_order?: number; // Added sort_order field for sorting
+  [key: string]: string | boolean | number | null | undefined; // Updated index signature to include number
 }
 
 export interface PropertyArea {
@@ -41,6 +41,7 @@ export interface PropertyFloorplan {
   filePath?: string;
   columns?: number;
   title?: string;
+  sort_order?: number; // Added sort_order for ordering
 }
 
 export interface PropertyPlaceType {

@@ -6,6 +6,24 @@ import { useState, useEffect, createRef } from "react";
 import { ImagePreview } from "@/components/ui/ImagePreview";
 import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
 import { PropertyFloorplan } from "@/types/property";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableFloorplanItem } from "./floorplans/SortableFloorplanItem";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FloorplanCardProps {
   id?: string;
@@ -27,6 +45,14 @@ export function FloorplansCard({
     Array.isArray(floorplans) ? floorplans : []
   );
   const fileInputRef = createRef<HTMLInputElement>();
+  const { toast } = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     setUploading(isUploading);
@@ -67,6 +93,49 @@ export function FloorplansCard({
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = displayFloorplans.findIndex(item => item.id === active.id);
+      const newIndex = displayFloorplans.findIndex(item => item.id === over.id);
+      
+      const reorderedFloorplans = arrayMove(displayFloorplans, oldIndex, newIndex);
+      
+      // Update the local state
+      setDisplayFloorplans(reorderedFloorplans);
+      
+      // Save the new order to the database if we have a property ID
+      if (id) {
+        try {
+          // Update sort_order for each floorplan in the database
+          const updatePromises = reorderedFloorplans.map((floorplan, index) => {
+            return supabase
+              .from('property_images')
+              .update({ sort_order: index + 1 }) // 1-based indexing
+              .eq('property_id', id)
+              .eq('id', floorplan.id)
+              .eq('type', 'floorplan');
+          });
+          
+          await Promise.all(updatePromises);
+          
+          toast({
+            title: "Order updated",
+            description: "Floorplan order has been saved",
+          });
+        } catch (error) {
+          console.error('Error saving floorplan order:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save floorplan order",
+            variant: "destructive",
+          });
+        }
+      }
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -103,21 +172,35 @@ export function FloorplansCard({
             disabled={uploading}
           />
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+          <div className="w-full">
             {displayFloorplans && displayFloorplans.length > 0 ? (
-              displayFloorplans.map((floorplan, index) => {
-                const url = getFloorplanUrl(floorplan);
-                const label = floorplan.title || `Floorplan ${index + 1}`;
-                
-                return (
-                  <ImagePreview
-                    key={floorplan.id || index}
-                    url={url}
-                    onRemove={() => onRemoveFloorplan && onRemoveFloorplan(index)}
-                    label={label}
-                  />
-                );
-              })
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext 
+                  items={displayFloorplans.map(floorplan => floorplan.id)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                    {displayFloorplans.map((floorplan, index) => {
+                      const url = getFloorplanUrl(floorplan);
+                      const label = floorplan.title || `Floorplan ${index + 1}`;
+                      
+                      return (
+                        <SortableFloorplanItem
+                          key={floorplan.id}
+                          id={floorplan.id}
+                          url={url}
+                          label={label}
+                          onRemove={() => onRemoveFloorplan && onRemoveFloorplan(index)}
+                        />
+                      );
+                    })}
+                  </div>
+                </SortableContext>
+              </DndContext>
             ) : (
               <div className="col-span-full py-8 text-center text-gray-500">
                 No floorplans uploaded yet. Click "Upload Floorplans" to add floorplans.

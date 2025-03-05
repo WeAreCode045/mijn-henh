@@ -24,10 +24,11 @@ export function FloorplanDatabaseFetcher({
           
           const { data, error } = await supabase
             .from('property_images')
-            .select('id, url')
+            .select('id, url, sort_order')
             .eq('property_id', propertyId)
             .eq('type', 'floorplan')
-            .order('created_at', { ascending: false });
+            .order('sort_order', { ascending: true }) // Order by sort_order first
+            .order('created_at', { ascending: false }); // Then by created_at as fallback
             
           if (error) {
             console.error("FloorplanDatabaseFetcher - Error fetching floorplans:", error);
@@ -40,7 +41,8 @@ export function FloorplanDatabaseFetcher({
               id: item.id,
               url: item.url,
               columns: 12,
-              title: 'Floorplan'
+              title: 'Floorplan',
+              sort_order: item.sort_order || undefined
             }));
             
             console.log("FloorplanDatabaseFetcher - Fetched floorplans from DB:", dbFloorplans);
