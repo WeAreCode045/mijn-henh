@@ -54,6 +54,8 @@ export function PropertyWebViewMain({
         <PropertyWebViewContent 
           property={propertyData}
           settings={settings}
+          isPrintView={true}
+          waitForPlaces={true}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           selectedImage={selectedImage}
@@ -61,8 +63,6 @@ export function PropertyWebViewMain({
           handleShare={handleShare}
           handlePrint={handlePrint}
           handleDownload={handleDownload}
-          isPrintView={true}
-          waitForPlaces={true}
         />
       </div>
     </div>

@@ -40,5 +40,5 @@ export interface PropertyFormManagerChildrenProps {
   lastSaved: Date | null;
   isSaving: boolean;
   onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (index: number) => void; // Using index: number, consistent with other remove functions
+  onRemoveTechnicalItem?: (index: number) => void; // Using number parameter to match usage in the codebase
 }

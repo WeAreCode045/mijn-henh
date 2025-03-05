@@ -75,19 +75,19 @@ export function PropertyWebViewContent({
 
   const handleNext = () => {
     if (canGoForward) {
-      setCurrentPageFn(prev => prev + 1);
+      setCurrentPageFn(currentPage + 1);
     }
   };
 
   const handlePrevious = () => {
     if (canGoBack) {
-      setCurrentPageFn(prev => prev - 1);
+      setCurrentPageFn(currentPage - 1);
     }
   };
   
-  // Fix for the expected 2 arguments error - make sure we're passing the form event
-  const handleFormSubmit = (e: React.FormEvent, formData: any) => {
-    handleSubmit(e, formData);
+  // Handle form submission with the correct signature
+  const handleFormSubmit = (e: React.FormEvent) => {
+    handleSubmit(e);
   };
 
   return (
