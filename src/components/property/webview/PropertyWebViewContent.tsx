@@ -5,7 +5,7 @@ import { getSections } from "./config/sectionConfig";
 import { useEffect, useState } from "react";
 import { useContactForm } from "./hooks/useContactForm";
 import { usePageCalculation } from "./hooks/usePageCalculation";
-import { getPrintStyles } from "./PrintStyles";
+import { getPrintStylesContent } from "./PrintStyles";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
@@ -68,7 +68,9 @@ export function PropertyWebViewContent({
 
   return (
     <div className="relative">
-      {isPrintView && getPrintStyles()}
+      {isPrintView && (
+        <style type="text/css" dangerouslySetInnerHTML={{ __html: getPrintStylesContent() }} />
+      )}
       
       {sections[currentPage]?.content}
       
