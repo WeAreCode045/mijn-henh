@@ -42,3 +42,11 @@ export function preparePropertiesForJsonField(properties: any[]): Json {
   }
   return properties;
 }
+
+/**
+ * Prepare floorplans for JSON field
+ * This is a compatibility function to keep the API consistent
+ */
+export function prepareFloorplansForFormSubmission(floorplans: any[]): Json {
+  return preparePropertiesForJsonField(floorplans || []);
+}

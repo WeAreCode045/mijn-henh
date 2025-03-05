@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -27,11 +28,8 @@ interface PropertyContentTabProps {
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   handleRemoveAreaPhoto: (index: number) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -60,11 +58,8 @@ export function PropertyContentTab({
   onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
-  handleRemoveFloorplan,
-  handleUpdateFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
@@ -143,11 +138,8 @@ export function PropertyContentTab({
         onAreaImagesSelect={onAreaImagesSelect}
         handleImageUpload={handleImageUpload}
         handleAreaPhotosUpload={handleAreaPhotosUpload}
-        handleFloorplanUpload={handleFloorplanUpload}
         handleRemoveImage={handleRemoveImage}
         handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-        handleRemoveFloorplan={handleRemoveFloorplan}
-        handleUpdateFloorplan={handleUpdateFloorplan}
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
