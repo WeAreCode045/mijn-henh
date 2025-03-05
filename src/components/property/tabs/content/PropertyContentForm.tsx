@@ -27,6 +27,9 @@ interface PropertyContentFormProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges: (pending: boolean) => void;
 }
 

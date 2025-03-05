@@ -1,13 +1,14 @@
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { PropertyData } from "@/types/property";
 import { PropertyWebViewContent } from "./PropertyWebViewContent";
+import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { useRef } from "react";
 
 interface PropertyWebViewDialogProps {
   propertyData: PropertyData;
   isOpen: boolean;
+  open?: boolean; // Add this for compatibility
   onOpenChange: (open: boolean) => void;
   settings?: AgencySettings;
   contentRef?: React.RefObject<HTMLDivElement>;
@@ -24,6 +25,7 @@ interface PropertyWebViewDialogProps {
 export function PropertyWebViewDialog({ 
   propertyData, 
   isOpen, 
+  open,
   onOpenChange,
   settings,
   contentRef,
@@ -39,8 +41,11 @@ export function PropertyWebViewDialog({
   const defaultContentRef = useRef<HTMLDivElement>(null);
   const defaultPrintContentRef = useRef<HTMLDivElement>(null);
   
+  // Use 'open' prop if provided, otherwise use 'isOpen'
+  const dialogOpen = open !== undefined ? open : isOpen;
+  
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={dialogOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
         <div className="flex-1 overflow-auto">
           <PropertyWebViewContent 

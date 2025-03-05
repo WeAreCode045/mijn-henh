@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -17,6 +16,7 @@ interface ImagesStepProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
 }
 
 export function ImagesStep({
@@ -29,7 +29,8 @@ export function ImagesStep({
   handleRemoveFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading
+  isUploading,
+  isUploadingFloorplan
 }: ImagesStepProps) {
   // Helper function to safely get the URL from an image
   const getImageUrl = (image: any): string => {
@@ -111,7 +112,7 @@ export function ImagesStep({
             {handleFloorplanUpload && (
               <ImageUploader 
                 onUpload={handleFloorplanUpload} 
-                isUploading={isUploading}
+                isUploading={isUploadingFloorplan}
                 label="Upload Floorplans"
               />
             )}

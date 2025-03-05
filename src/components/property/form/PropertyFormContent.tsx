@@ -33,6 +33,7 @@ interface PropertyFormContentProps {
   isUploading?: boolean;
   isUploadingFloorplan?: boolean;
   onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges?: (changes: boolean) => void;
 }
 
@@ -63,6 +64,7 @@ export function PropertyFormContent({
   isUploading,
   isUploadingFloorplan,
   onAddTechnicalItem,
+  onRemoveTechnicalItem,
   setPendingChanges
 }: PropertyFormContentProps) {
   const renderStep = () => {

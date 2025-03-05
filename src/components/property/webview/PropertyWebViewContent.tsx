@@ -84,6 +84,11 @@ export function PropertyWebViewContent({
       setCurrentPageFn(prev => prev - 1);
     }
   };
+  
+  // Fix for the expected 2 arguments error - make sure we're passing the form event
+  const handleFormSubmit = (e: React.FormEvent) => {
+    handleSubmit(e);
+  };
 
   return (
     <div className="relative">
