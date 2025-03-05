@@ -396,6 +396,7 @@ export type Database = {
           is_featured_image: boolean | null
           is_main: boolean | null
           property_id: string | null
+          sort_order: number | null
           type: string | null
           url: string
         }
@@ -406,6 +407,7 @@ export type Database = {
           is_featured_image?: boolean | null
           is_main?: boolean | null
           property_id?: string | null
+          sort_order?: number | null
           type?: string | null
           url: string
         }
@@ -416,6 +418,7 @@ export type Database = {
           is_featured_image?: boolean | null
           is_main?: boolean | null
           property_id?: string | null
+          sort_order?: number | null
           type?: string | null
           url?: string
         }
