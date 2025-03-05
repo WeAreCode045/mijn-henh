@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UploadIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { ImagePreview } from "@/components/ui/ImagePreview";
 
 interface PropertyImagesCardProps {
@@ -28,7 +28,7 @@ export function PropertyImagesCard({
   isUploading = false,
 }: PropertyImagesCardProps) {
   const [uploading, setUploading] = useState(isUploading);
-  const fileInputRef = React.createRef<HTMLInputElement>();
+  const fileInputRef = createRef<HTMLInputElement>();
 
   useEffect(() => {
     setUploading(isUploading);
