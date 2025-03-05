@@ -86,8 +86,8 @@ export function PropertyWebViewContent({
   };
   
   // Fix for the expected 2 arguments error - make sure we're passing the form event
-  const handleFormSubmit = (e: React.FormEvent) => {
-    handleSubmit(e);
+  const handleFormSubmit = (e: React.FormEvent, formData: any) => {
+    handleSubmit(e, formData);
   };
 
   return (

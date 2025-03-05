@@ -86,7 +86,8 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     return (
       <PropertyWebViewDialog
         propertyData={propertyData}
-        isOpen={open}
+        isOpen={open} // Pass both open and isOpen for compatibility
+        open={open}
         onOpenChange={onOpenChange}
         settings={settings}
         contentRef={contentRef}
