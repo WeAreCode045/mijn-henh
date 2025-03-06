@@ -54,6 +54,9 @@ export function ConstructionStep({
     onFieldChange('technicalItems', updatedItems);
   };
 
+  // Ensure floorplans is always an array
+  const normalizedFloorplans = floorplans || [];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -126,10 +129,10 @@ export function ConstructionStep({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">None</SelectItem>
-                      {floorplans.map((floorplan, fpIndex) => {
+                      {normalizedFloorplans.map((floorplan, fpIndex) => {
                         const url = typeof floorplan === 'string' ? floorplan : floorplan.url;
                         return (
-                          <SelectItem key={fpIndex} value={url}>
+                          <SelectItem key={`floorplan-${fpIndex}`} value={url || ''}>
                             Floorplan {fpIndex + 1}
                           </SelectItem>
                         );

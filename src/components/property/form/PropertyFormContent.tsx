@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
@@ -118,7 +117,6 @@ export function PropertyFormContent({
               onFetchLocationData={onFetchLocationData}
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               handleMapImageDelete={handleMapImageDelete}
-              onAddTechnicalItem={onAddTechnicalItem}
             />
           </form>
         );

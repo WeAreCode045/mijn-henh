@@ -30,6 +30,7 @@ interface ContentTabContentProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (index: number) => void;
 }
 
 export function ContentTabContent({
@@ -59,7 +60,8 @@ export function ContentTabContent({
   isUploadingFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  onAddTechnicalItem
+  onAddTechnicalItem,
+  onRemoveTechnicalItem
 }: ContentTabContentProps) {
   return (
     <PropertyContentTab 
@@ -91,6 +93,7 @@ export function ContentTabContent({
       handleSetFeaturedImage={handleSetFeaturedImage}
       handleToggleFeaturedImage={handleToggleFeaturedImage}
       onAddTechnicalItem={onAddTechnicalItem}
+      onRemoveTechnicalItem={onRemoveTechnicalItem}
     />
   );
 }
