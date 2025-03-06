@@ -22,17 +22,23 @@ export function usePropertyDatabase() {
 
       // Transform features to the correct format
       if (data.features && Array.isArray(data.features)) {
+        // Make sure we're passing an array to preparePropertiesForJsonField
         data.features = preparePropertiesForJsonField(data.features);
       }
 
       // Transform nearby_places to the correct format
       if (data.nearby_places && Array.isArray(data.nearby_places)) {
+        // Make sure we're passing an array to preparePropertiesForJsonField
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
       
       // Transform technicalItems to the correct format
       if (data.technicalItems) {
-        data.technicalItems = preparePropertiesForJsonField(data.technicalItems);
+        // Ensure technicalItems is treated as an array
+        const technicalItemsArray = Array.isArray(data.technicalItems) 
+          ? data.technicalItems 
+          : [];
+        data.technicalItems = preparePropertiesForJsonField(technicalItemsArray);
       }
 
       // Make a copy of data without fields that don't exist in the database
@@ -83,17 +89,23 @@ export function usePropertyDatabase() {
 
       // Transform features to the correct format
       if (data.features && Array.isArray(data.features)) {
+        // Make sure we're passing an array to preparePropertiesForJsonField
         data.features = preparePropertiesForJsonField(data.features);
       }
 
       // Transform nearby_places to the correct format
       if (data.nearby_places && Array.isArray(data.nearby_places)) {
+        // Make sure we're passing an array to preparePropertiesForJsonField
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
       
       // Transform technicalItems to the correct format
       if (data.technicalItems) {
-        data.technicalItems = preparePropertiesForJsonField(data.technicalItems);
+        // Ensure technicalItems is treated as an array
+        const technicalItemsArray = Array.isArray(data.technicalItems) 
+          ? data.technicalItems 
+          : [];
+        data.technicalItems = preparePropertiesForJsonField(technicalItemsArray);
       }
 
       // Make a copy of data without fields that don't exist in the database

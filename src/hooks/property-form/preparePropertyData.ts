@@ -35,12 +35,13 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
 /**
  * Prepare property properties for JSON field
  * Works with any array of objects or primitive values
+ * Returns Json type compatible with Supabase
  */
 export function preparePropertiesForJsonField(properties: any[]): Json {
   if (!properties || !Array.isArray(properties)) {
     return [];
   }
-  return properties;
+  return properties as Json;
 }
 
 /**
