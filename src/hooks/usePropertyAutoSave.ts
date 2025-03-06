@@ -58,6 +58,7 @@ export function usePropertyAutoSave() {
         youtubeUrl,
         notes,
         template_id,
+        technicalItems,
         floorplanEmbedScript
       } = formData;
 
@@ -71,6 +72,7 @@ export function usePropertyAutoSave() {
       const transformedAreas = prepareAreasForFormSubmission(areas);
       const transformedFeatures = preparePropertiesForJsonField(features);
       const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
+      const transformedTechnicalItems = technicalItems ? JSON.stringify(technicalItems) : null;
 
       const updateData = {
         title,
@@ -97,6 +99,7 @@ export function usePropertyAutoSave() {
         youtubeUrl,
         notes,
         template_id,
+        technicalItems: transformedTechnicalItems,
         floorplanEmbedScript
       };
 
@@ -108,6 +111,37 @@ export function usePropertyAutoSave() {
       if (error) {
         console.error('Auto-save error:', error);
         throw error;
+      }
+
+      // Handle floorplans separately
+      if (formData.floorplans && formData.floorplans.length > 0) {
+        try {
+          // First, get existing floorplans
+          const { data: existingFloorplans } = await supabase
+            .from('property_images')
+            .select('id, url')
+            .eq('property_id', formData.id)
+            .eq('type', 'floorplan');
+            
+          const existingUrls = existingFloorplans?.map(f => f.url) || [];
+          
+          // Add new floorplans
+          for (const floorplan of formData.floorplans) {
+            const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+            if (!floorplanUrl || existingUrls.includes(floorplanUrl)) continue;
+            
+            await supabase
+              .from('property_images')
+              .insert({
+                property_id: formData.id,
+                url: floorplanUrl,
+                type: 'floorplan'
+              });
+          }
+        } catch (error) {
+          console.error('Error updating floorplans:', error);
+          // Don't throw here, as the main save was successful
+        }
       }
 
       setLastSaved(new Date());

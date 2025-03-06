@@ -11,7 +11,6 @@ export function usePropertyDatabase() {
   const updateProperty = async (id: string, data: PropertySubmitData): Promise<boolean> => {
     console.log("usePropertyDatabase - Updating property with ID:", id);
     console.log("usePropertyDatabase - Update data:", JSON.stringify(data));
-    console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
       // Transform areas to the correct format for the database
@@ -32,7 +31,7 @@ export function usePropertyDatabase() {
       }
 
       // Make a copy of data without fields that don't exist in the database
-      const { featuredImage, featuredImages, coverImages, ...dataToUpdate } = data as any;
+      const { featuredImage, featuredImages, coverImages, floorplans, ...dataToUpdate } = data as any;
       
       console.log("usePropertyDatabase - Final update data:", dataToUpdate);
       
@@ -68,7 +67,6 @@ export function usePropertyDatabase() {
   
   const createProperty = async (data: PropertySubmitData): Promise<boolean> => {
     console.log("usePropertyDatabase - Creating new property with data:", JSON.stringify(data));
-    console.log("usePropertyDatabase - Features data:", JSON.stringify(data.features));
     
     try {
       // Transform areas to the correct format for the database
@@ -89,7 +87,7 @@ export function usePropertyDatabase() {
       }
 
       // Make a copy of data without fields that don't exist in the database
-      const { featuredImage, featuredImages, coverImages, ...dataToCreate } = data as any;
+      const { featuredImage, featuredImages, coverImages, floorplans, ...dataToCreate } = data as any;
 
       console.log("usePropertyDatabase - Final create data:", dataToCreate);
       

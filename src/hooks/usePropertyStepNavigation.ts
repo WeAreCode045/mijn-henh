@@ -16,105 +16,79 @@ export function usePropertyStepNavigation(
   const { toast } = useToast();
   const maxSteps = steps.length;
 
-  const handleStepClick = (step: number) => {
-    console.log("Step clicked:", step);
-    // Auto-save before changing step if there are pending changes
+  // Single unified function to handle saving before changing steps
+  const saveBeforeStepChange = async (newStep: number | ((prev: number) => number)) => {
+    console.log("Saving before step change");
+    
+    // Only save if there are pending changes and the form has an ID
     if (pendingChanges && formData.id) {
-      const formEvent = {} as React.FormEvent;
-      handleSubmit(formEvent, formData, false)
-        .then((success) => {
-          if (success) {
-            setLastSaved(new Date());
-            setPendingChanges(false);
-            // Now proceed with step change
-            setCurrentStep(step);
+      try {
+        const formEvent = {} as React.FormEvent;
+        const success = await handleSubmit(formEvent, formData, false);
+        
+        if (success) {
+          setLastSaved(new Date());
+          setPendingChanges(false);
+          
+          // Apply the step change after successful save
+          if (typeof newStep === 'function') {
+            setCurrentStep(newStep);
+          } else {
+            setCurrentStep(newStep);
           }
-        })
-        .catch((error) => {
-          console.error("Failed to save before changing step:", error);
-          toast({
-            title: "Warning",
-            description: "Changes couldn't be saved before changing step",
-            variant: "destructive",
-          });
-          // Still allow step change
-          setCurrentStep(step);
+          return true;
+        } else {
+          // Still change step even if save fails
+          if (typeof newStep === 'function') {
+            setCurrentStep(newStep);
+          } else {
+            setCurrentStep(newStep);
+          }
+          return false;
+        }
+      } catch (error) {
+        console.error("Failed to save before changing step:", error);
+        toast({
+          title: "Warning",
+          description: "Changes couldn't be saved before changing step",
+          variant: "destructive",
         });
+        
+        // Still change step even if save fails
+        if (typeof newStep === 'function') {
+          setCurrentStep(newStep);
+        } else {
+          setCurrentStep(newStep);
+        }
+        return false;
+      }
     } else {
       // No pending changes, just change step
-      setCurrentStep(step);
+      if (typeof newStep === 'function') {
+        setCurrentStep(newStep);
+      } else {
+        setCurrentStep(newStep);
+      }
+      return true;
     }
+  };
+
+  const handleStepClick = (step: number) => {
+    console.log("Step clicked:", step);
+    saveBeforeStepChange(step);
   };
 
   const handleNext = () => {
     console.log("Next clicked");
-    // Auto-save before proceeding if there are pending changes
-    if (pendingChanges && formData.id) {
-      const formEvent = {} as React.FormEvent;
-      handleSubmit(formEvent, formData, false)
-        .then((success) => {
-          if (success) {
-            setLastSaved(new Date());
-            setPendingChanges(false);
-            // Now proceed to next step
-            if (currentStep < maxSteps) {
-              setCurrentStep(currentStep + 1);
-            }
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to save before proceeding to next step:", error);
-          toast({
-            title: "Warning",
-            description: "Changes couldn't be saved before proceeding",
-            variant: "destructive",
-          });
-          // Still allow step change
-          if (currentStep < maxSteps) {
-            setCurrentStep(currentStep + 1);
-          }
-        });
-    } else {
-      // No pending changes, just proceed
-      if (currentStep < maxSteps) {
-        setCurrentStep(currentStep + 1);
-      }
+    if (currentStep < maxSteps) {
+      saveBeforeStepChange(currentStep + 1);
     }
   };
 
   const handlePrevious = () => {
     console.log("Previous clicked");
-    // Auto-save before going back if there are pending changes
-    if (pendingChanges && formData.id) {
-      const formEvent = {} as React.FormEvent;
-      handleSubmit(formEvent, formData, false)
-        .then((success) => {
-          if (success) {
-            setLastSaved(new Date());
-            setPendingChanges(false);
-            // Now go to previous step
-            if (currentStep > 1) {
-              setCurrentStep(currentStep - 1);
-            }
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to save before going to previous step:", error);
-          toast({
-            title: "Warning",
-            description: "Changes couldn't be saved before going back",
-            variant: "destructive",
-          });
-          // Still allow step change
-          if (currentStep > 1) {
-            setCurrentStep(currentStep - 1);
-          }
-        });
-    } else {
-      // No pending changes, just go back
-      if (currentStep > 1) {
-        setCurrentStep(currentStep - 1);
-      }
+    if (currentStep > 1) {
+      saveBeforeStepChange(currentStep - 1);
     }
   };
 

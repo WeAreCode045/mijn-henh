@@ -32,9 +32,11 @@ export function usePropertyFormSubmit() {
     const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
     const featuresJson = preparePropertiesForJsonField(formData.features);
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places);
+    const technicalItemsJson = formData.technicalItems ? JSON.stringify(formData.technicalItems) : null;
     
     console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
     console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
+    console.log("usePropertyFormSubmit - Form submission - technicalItems:", technicalItemsJson);
     
     const submitData: PropertySubmitData = {
       title: formData.title,
@@ -66,7 +68,9 @@ export function usePropertyFormSubmit() {
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       notes: formData.notes,
-      floorplans: formData.floorplans ? formData.floorplans.map(fp => typeof fp === 'string' ? fp : fp.url) : []
+      technicalItems: technicalItemsJson,
+      // Don't include floorplans as a column in the properties table
+      // floorplans is handled separately
     };
     
     console.log("usePropertyFormSubmit - Final submit data:", submitData);
@@ -109,6 +113,32 @@ export function usePropertyFormSubmit() {
               }
             }
           }
+          
+          // Handle floorplans separately
+          if (formData.floorplans && formData.floorplans.length > 0) {
+            // First, get existing floorplans
+            const { data: existingFloorplans } = await supabase
+              .from('property_images')
+              .select('id, url')
+              .eq('property_id', formData.id)
+              .eq('type', 'floorplan');
+              
+            const existingUrls = existingFloorplans?.map(f => f.url) || [];
+            
+            // Add new floorplans
+            for (const floorplan of formData.floorplans) {
+              const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+              if (!floorplanUrl || existingUrls.includes(floorplanUrl)) continue;
+              
+              await supabase
+                .from('property_images')
+                .insert({
+                  property_id: formData.id,
+                  url: floorplanUrl,
+                  type: 'floorplan'
+                });
+            }
+          }
         } catch (error) {
           console.error("Error updating image flags:", error);
         }
@@ -145,6 +175,8 @@ export function usePropertyFormSubmit() {
             if (formData.floorplans && formData.floorplans.length > 0) {
               for (const floorplan of formData.floorplans) {
                 const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+                if (!floorplanUrl) continue;
+                
                 await supabase
                   .from('property_images')
                   .insert({
