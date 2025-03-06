@@ -1,9 +1,8 @@
 
-import { PropertyArea, PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
-import { ImagesStep } from "./steps/ImagesStep";
 import { LocationStep } from "./steps/LocationStep";
 
 interface PropertyFormContentProps {
@@ -94,25 +93,6 @@ export function PropertyFormContent({
         );
       case 3:
         return (
-          <form id="imagesForm">
-            <ImagesStep
-              formData={formData}
-              onFieldChange={onFieldChange}
-              handleImageUpload={handleImageUpload}
-              handleAreaPhotosUpload={handleAreaPhotosUpload}
-              handleRemoveImage={handleRemoveImage}
-              handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-              handleFloorplanUpload={handleFloorplanUpload}
-              handleRemoveFloorplan={handleRemoveFloorplan}
-              handleSetFeaturedImage={handleSetFeaturedImage}
-              handleToggleFeaturedImage={handleToggleFeaturedImage}
-              isUploading={isUploading}
-              isUploadingFloorplan={isUploadingFloorplan}
-            />
-          </form>
-        );
-      case 4:
-        return (
           <form id="areasForm">
             <AreasStep
               areas={formData.areas || []}
@@ -128,7 +108,7 @@ export function PropertyFormContent({
             />
           </form>
         );
-      case 5:
+      case 4:
         return (
           <form id="locationForm">
             <LocationStep
