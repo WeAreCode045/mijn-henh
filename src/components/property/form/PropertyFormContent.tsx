@@ -4,6 +4,7 @@ import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
 import { LocationStep } from "./steps/LocationStep";
+import { ConstructionStep } from "./steps/ConstructionStep";
 
 interface PropertyFormContentProps {
   step: number;
@@ -118,6 +119,18 @@ export function PropertyFormContent({
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               handleMapImageDelete={handleMapImageDelete}
               onAddTechnicalItem={onAddTechnicalItem}
+            />
+          </form>
+        );
+      case 5:
+        return (
+          <form id="constructionForm">
+            <ConstructionStep
+              formData={formData}
+              onAddTechnicalItem={onAddTechnicalItem}
+              onRemoveTechnicalItem={onRemoveTechnicalItem}
+              onFieldChange={onFieldChange}
+              floorplans={formData.floorplans || []}
             />
           </form>
         );
