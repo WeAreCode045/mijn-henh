@@ -31,8 +31,8 @@ export function usePropertyDatabase() {
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
 
-      // Make a copy of data without coverImages field
-      const { coverImages, ...dataToUpdate } = data as any;
+      // Make a copy of data without fields that don't exist in the database
+      const { featuredImage, featuredImages, coverImages, ...dataToUpdate } = data as any;
       
       console.log("usePropertyDatabase - Final update data:", dataToUpdate);
       
@@ -88,8 +88,8 @@ export function usePropertyDatabase() {
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
 
-      // Make a copy of data without coverImages field
-      const { coverImages, ...dataToCreate } = data as any;
+      // Make a copy of data without fields that don't exist in the database
+      const { featuredImage, featuredImages, coverImages, ...dataToCreate } = data as any;
 
       console.log("usePropertyDatabase - Final create data:", dataToCreate);
       

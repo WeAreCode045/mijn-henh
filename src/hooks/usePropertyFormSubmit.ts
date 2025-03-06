@@ -51,9 +51,7 @@ export function usePropertyFormSubmit() {
       description: formData.description,
       location_description: formData.location_description,
       features: featuresJson,
-      featuredImage: formData.featuredImage,
-      featuredImages: formData.featuredImages || [],
-      // Removed coverImages field that doesn't exist in database
+      // Remove featuredImage and featuredImages fields as they don't exist in database
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
