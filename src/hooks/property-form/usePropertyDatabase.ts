@@ -29,6 +29,11 @@ export function usePropertyDatabase() {
       if (data.nearby_places && Array.isArray(data.nearby_places)) {
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
+      
+      // Transform technicalItems to the correct format
+      if (data.technicalItems) {
+        data.technicalItems = preparePropertiesForJsonField(data.technicalItems);
+      }
 
       // Make a copy of data without fields that don't exist in the database
       const { featuredImage, featuredImages, coverImages, floorplans, ...dataToUpdate } = data as any;
@@ -84,6 +89,11 @@ export function usePropertyDatabase() {
       // Transform nearby_places to the correct format
       if (data.nearby_places && Array.isArray(data.nearby_places)) {
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
+      }
+      
+      // Transform technicalItems to the correct format
+      if (data.technicalItems) {
+        data.technicalItems = preparePropertiesForJsonField(data.technicalItems);
       }
 
       // Make a copy of data without fields that don't exist in the database

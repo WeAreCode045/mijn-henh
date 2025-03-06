@@ -249,6 +249,7 @@ export type Database = {
           object_id: string | null
           price: string | null
           sqft: string | null
+          technicalItems: Json | null
           template_id: string | null
           title: string | null
           updated_at: string
@@ -282,6 +283,7 @@ export type Database = {
           object_id?: string | null
           price?: string | null
           sqft?: string | null
+          technicalItems?: Json | null
           template_id?: string | null
           title?: string | null
           updated_at?: string
@@ -315,6 +317,7 @@ export type Database = {
           object_id?: string | null
           price?: string | null
           sqft?: string | null
+          technicalItems?: Json | null
           template_id?: string | null
           title?: string | null
           updated_at?: string

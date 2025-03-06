@@ -72,7 +72,7 @@ export function usePropertyAutoSave() {
       const transformedAreas = prepareAreasForFormSubmission(areas);
       const transformedFeatures = preparePropertiesForJsonField(features);
       const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
-      const transformedTechnicalItems = technicalItems ? JSON.stringify(technicalItems) : null;
+      const transformedTechnicalItems = technicalItems ? preparePropertiesForJsonField(technicalItems) : null;
 
       const updateData = {
         title,

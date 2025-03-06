@@ -18,7 +18,7 @@ export function usePropertyStepNavigation(
 
   // Single unified function to handle saving before changing steps
   const saveBeforeStepChange = async (newStep: number | ((prev: number) => number)) => {
-    console.log("Saving before step change");
+    console.log("Saving before step change, pendingChanges:", pendingChanges, "formData.id:", formData.id);
     
     // Only save if there are pending changes and the form has an ID
     if (pendingChanges && formData.id) {
@@ -27,24 +27,16 @@ export function usePropertyStepNavigation(
         const success = await handleSubmit(formEvent, formData, false);
         
         if (success) {
+          console.log("Save successful before step change");
           setLastSaved(new Date());
           setPendingChanges(false);
-          
-          // Apply the step change after successful save
-          if (typeof newStep === 'function') {
-            setCurrentStep(newStep);
-          } else {
-            setCurrentStep(newStep);
-          }
-          return true;
         } else {
-          // Still change step even if save fails
-          if (typeof newStep === 'function') {
-            setCurrentStep(newStep);
-          } else {
-            setCurrentStep(newStep);
-          }
-          return false;
+          console.warn("Save was not successful before step change");
+          toast({
+            title: "Warning",
+            description: "Unable to save changes before changing step",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Failed to save before changing step:", error);
@@ -53,24 +45,18 @@ export function usePropertyStepNavigation(
           description: "Changes couldn't be saved before changing step",
           variant: "destructive",
         });
-        
-        // Still change step even if save fails
-        if (typeof newStep === 'function') {
-          setCurrentStep(newStep);
-        } else {
-          setCurrentStep(newStep);
-        }
-        return false;
       }
     } else {
-      // No pending changes, just change step
-      if (typeof newStep === 'function') {
-        setCurrentStep(newStep);
-      } else {
-        setCurrentStep(newStep);
-      }
-      return true;
+      console.log("No need to save before step change");
     }
+    
+    // Always change step even if save fails or is not needed
+    if (typeof newStep === 'function') {
+      setCurrentStep(newStep);
+    } else {
+      setCurrentStep(newStep);
+    }
+    return true;
   };
 
   const handleStepClick = (step: number) => {

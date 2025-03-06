@@ -21,6 +21,8 @@ export function usePropertyContentStepNavigation(
 
   // Unified function to handle saving before changing steps
   const saveBeforeStepChange = async (action: 'step' | 'next' | 'previous', stepNum?: number) => {
+    console.log("Saving before changing steps, pendingChanges:", pendingChanges, "formData.id:", formData.id);
+    
     // Only save if there are pending changes and the property exists
     if (pendingChanges && formData.id) {
       try {
@@ -30,6 +32,15 @@ export function usePropertyContentStepNavigation(
         if (success) {
           setLastSaved(new Date());
           setPendingChanges(false);
+          console.log("Save successful before navigation");
+        } else {
+          console.warn("Save was not successful before navigation");
+          toast({
+            title: "Warning",
+            description: "Unable to save changes before navigation",
+            variant: "destructive",
+          });
+          // Still continue with navigation
         }
       } catch (error) {
         console.error(`Failed to save before ${action}:`, error);
@@ -38,13 +49,17 @@ export function usePropertyContentStepNavigation(
           description: "Changes couldn't be saved before navigation",
           variant: "destructive",
         });
+        // Still continue with navigation
       }
+    } else {
+      console.log("No need to save before navigation");
     }
     
     // Always proceed with the navigation, even if save fails
     switch (action) {
       case 'step':
         if (stepNum !== undefined) {
+          console.log("Navigating to step:", stepNum);
           if (externalHandleStepClick) {
             externalHandleStepClick(stepNum);
           } else {
@@ -53,6 +68,7 @@ export function usePropertyContentStepNavigation(
         }
         break;
       case 'next':
+        console.log("Navigating to next step");
         if (externalHandleNext) {
           externalHandleNext();
         } else if (currentStep < maxSteps) {
@@ -60,6 +76,7 @@ export function usePropertyContentStepNavigation(
         }
         break;
       case 'previous':
+        console.log("Navigating to previous step");
         if (externalHandlePrevious) {
           externalHandlePrevious();
         } else if (currentStep > 1) {
