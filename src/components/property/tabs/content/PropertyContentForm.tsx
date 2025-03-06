@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 
@@ -58,6 +57,8 @@ export function PropertyContentForm({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
   setPendingChanges
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
@@ -109,6 +110,20 @@ export function PropertyContentForm({
     }
   };
 
+  const wrappedAddTechnicalItem = () => {
+    if (onAddTechnicalItem) {
+      onAddTechnicalItem();
+      setPendingChanges(true);
+    }
+  };
+
+  const wrappedRemoveTechnicalItem = (index: number) => {
+    if (onRemoveTechnicalItem) {
+      onRemoveTechnicalItem(index);
+      setPendingChanges(true);
+    }
+  };
+
   return (
     <PropertyFormContent
       step={step}
@@ -135,6 +150,9 @@ export function PropertyContentForm({
       handleSetFeaturedImage={safeSetFeaturedImage}
       handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}
+      onAddTechnicalItem={wrappedAddTechnicalItem}
+      onRemoveTechnicalItem={wrappedRemoveTechnicalItem}
+      setPendingChanges={setPendingChanges}
     />
   );
 }

@@ -31,14 +31,20 @@ export function ConstructionStep({
   }, [formData.technicalItems]);
 
   const handleAddItem = () => {
+    console.log("Add item button clicked");
     if (onAddTechnicalItem) {
       onAddTechnicalItem();
+    } else {
+      console.warn("onAddTechnicalItem function is not defined");
     }
   };
 
   const handleRemoveItem = (index: number) => {
+    console.log("Remove item button clicked for index:", index);
     if (onRemoveTechnicalItem) {
       onRemoveTechnicalItem(index);
+    } else {
+      console.warn("onRemoveTechnicalItem function is not defined");
     }
   };
 
@@ -61,7 +67,7 @@ export function ConstructionStep({
         </Button>
       </div>
 
-      {technicalItems.length === 0 ? (
+      {(!technicalItems || technicalItems.length === 0) ? (
         <div className="text-center py-8 bg-gray-50 rounded-md border border-dashed border-gray-300">
           <p className="text-gray-500">No construction items added yet. Click 'Add Item' to begin.</p>
         </div>
