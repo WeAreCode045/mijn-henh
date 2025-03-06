@@ -51,7 +51,9 @@ export function usePropertyFormSubmit() {
       description: formData.description,
       location_description: formData.location_description,
       features: featuresJson,
-      // Remove featuredImage and featuredImages fields as they don't exist in database
+      // Include these fields to satisfy TypeScript, but they'll be removed before database operations
+      featuredImage: formData.featuredImage,
+      featuredImages: formData.featuredImages || [],
       map_image: formData.map_image,
       latitude: formData.latitude,
       longitude: formData.longitude,
