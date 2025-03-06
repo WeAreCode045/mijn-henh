@@ -121,18 +121,19 @@ export function ConstructionStep({
                 <div>
                   <label className="block text-sm font-medium mb-1">Link to Floorplan</label>
                   <Select
-                    value={item.floorplanId || ''}
+                    value={item.floorplanId || 'none'}
                     onValueChange={(value) => handleItemChange(index, 'floorplanId', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a floorplan" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {normalizedFloorplans.map((floorplan, fpIndex) => {
                         const url = typeof floorplan === 'string' ? floorplan : floorplan.url;
+                        if (!url) return null;
                         return (
-                          <SelectItem key={`floorplan-${fpIndex}`} value={url || ''}>
+                          <SelectItem key={`floorplan-${fpIndex}`} value={url}>
                             Floorplan {fpIndex + 1}
                           </SelectItem>
                         );
