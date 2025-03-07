@@ -37,7 +37,7 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               <img
                 src={mainImage}
                 alt={property.title}
-                className="w-full h-[500px] object-cover rounded-lg shadow-lg"
+                className="w-full h-[200px] object-cover rounded-lg shadow-lg"
               />
             </div>
             
@@ -48,11 +48,11 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
           <div className="px-6 mt-4">
             <div className="grid grid-cols-4 gap-2">
               {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
-                <div key={index} className="aspect-square rounded-md overflow-hidden">
+                <div key={index} className="rounded-md overflow-hidden">
                   <img 
                     src={imageUrl} 
                     alt={`Property ${index + 1}`}
-                    className="w-full h-[500px] object-cover"
+                    className="w-full h-[200px] object-contain"
                   />
                 </div>
               ))}
