@@ -37,7 +37,7 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               <img
                 src={mainImage}
                 alt={property.title}
-                className="w-full h-[400px] object-cover rounded-lg shadow-lg"
+                className="w-full h-[500px] object-cover rounded-lg shadow-lg"
               />
             </div>
             
@@ -52,7 +52,7 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
                   <img 
                     src={imageUrl} 
                     alt={`Property ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-[500px] object-cover"
                   />
                 </div>
               ))}
