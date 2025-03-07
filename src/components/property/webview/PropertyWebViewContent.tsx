@@ -100,28 +100,6 @@ export function PropertyWebViewContent({
       <div className="webview-section p-4 mb-8">
         {sections[currentPage]?.content}
       </div>
-      
-      <div className="mt-8 flex justify-between items-center">
-        <Button 
-          onClick={handlePrevious} 
-          disabled={!canGoBack}
-          className={`px-4 py-2 rounded ${canGoBack ? 'webview-button' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-        >
-          Previous
-        </Button>
-        
-        <div className="text-sm text-gray-600 font-medium">
-          Page {currentPage + 1} of {totalPages}
-        </div>
-        
-        <Button 
-          onClick={handleNext} 
-          disabled={!canGoForward}
-          className={`px-4 py-2 rounded ${canGoForward ? 'webview-button' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-        >
-          Next
-        </Button>
-      </div>
     </div>
   );
 }

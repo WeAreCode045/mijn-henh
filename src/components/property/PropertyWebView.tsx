@@ -6,6 +6,7 @@ import { PropertyData } from "@/types/property";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
+import { WebViewHeader } from "@/components/property/webview/WebViewHeader";
 import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
 import { WebViewFooter } from "@/components/property/webview/WebViewFooter";
 import { usePropertyData } from "@/components/property/webview/hooks/usePropertyData";
@@ -152,8 +153,12 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
           {/* Container with padding */}
           <div className="w-full flex-1 px-4 sm:px-8 py-4">
             <div className="flex justify-center">
-              <div className="w-full max-w-[800px] p-0 sm:p-4 h-full">
+              <div className="w-full max-w-[1000px] p-0 sm:p-4 h-full">
                 <div className="webview-content rounded-xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-14rem)]">
+                  <WebViewHeader 
+                    property={propertyData}
+                    settings={settings}
+                  />
                   <div className="w-full flex-1 overflow-y-auto">
                     <PropertyWebViewMain
                       propertyData={propertyData}
@@ -180,7 +185,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
       <div className="fixed bottom-0 left-0 right-0 z-10 bg-estate-100 shadow-lg">
         <div className="container mx-auto py-4 px-4">
           <div className="flex justify-center">
-            <div className="w-full max-w-[800px]">
+            <div className="w-full max-w-[1000px]">
               <WebViewFooter 
                 currentPage={currentPage}
                 totalPages={totalPages}

@@ -31,7 +31,7 @@ export function PropertyWebViewMain({
   handleDownload
 }: PropertyWebViewMainProps) {
   return (
-    <div className="w-full bg-white shadow-lg overflow-hidden h-full flex flex-col">
+    <div className="w-full overflow-hidden h-full flex flex-col">
       <div ref={contentRef} className="flex-1 min-h-0">
         <PropertyWebViewContent 
           property={propertyData}

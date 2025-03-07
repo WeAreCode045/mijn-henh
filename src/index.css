@@ -127,7 +127,6 @@
   
   .max-w-\[1000px\] {
     max-width: 1000px;
-    min-width: 1000px;
   }
 
   /* Adding new webview styles */
@@ -167,5 +166,29 @@
 
   .webview-button-outline {
     @apply border border-estate-400 text-estate-700 hover:bg-estate-50 transition-colors;
+  }
+  
+  .webview-header {
+    background-color: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+  }
+  
+  .webview-property-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: hsl(var(--estate-800));
+    margin-bottom: 0.5rem;
+  }
+  
+  .webview-property-subtitle {
+    font-size: 1rem;
+    color: hsl(var(--estate-600));
+  }
+  
+  .webview-property-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: hsl(var(--estate-700));
   }
 }
