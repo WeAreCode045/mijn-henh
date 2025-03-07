@@ -1,17 +1,16 @@
+
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
-import { WebViewHeader } from "@/components/property/webview/WebViewHeader";
-import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
-import { WebViewFooter } from "@/components/property/webview/WebViewFooter";
 import { usePropertyData } from "@/components/property/webview/hooks/usePropertyData";
-import { usePageCalculation } from "@/components/property/webview/hooks/usePageCalculation";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { WebViewLoading } from "@/components/property/webview/WebViewLoading";
+import { WebViewError } from "@/components/property/webview/WebViewError";
+import { WebViewDialogContent } from "@/components/property/webview/WebViewDialogContent";
+import { WebViewFullPage } from "@/components/property/webview/WebViewFullPage";
+import { useWebViewBackground } from "@/components/property/webview/hooks/useWebViewBackground";
+import { hexToHSL } from "@/components/property/webview/utils/colorUtils";
 
 interface PropertyWebViewProps {
   property?: PropertyData;
@@ -28,7 +27,7 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
   const printContentRef = useRef<HTMLDivElement>(null);
   
   const { propertyData, isLoading, error } = usePropertyData(id, property);
-  const { calculateTotalPages } = usePageCalculation();
+  
   const {
     selectedImage,
     setSelectedImage,
@@ -41,101 +40,7 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
   } = usePropertyWebView();
 
   // Set webview background image from settings
-  useEffect(() => {
-    if (settings.webviewBackgroundUrl) {
-      document.documentElement.style.setProperty(
-        '--webview-bg-image', 
-        `url(${settings.webviewBackgroundUrl})`
-      );
-    } else {
-      document.documentElement.style.removeProperty('--webview-bg-image');
-    }
-  }, [settings.webviewBackgroundUrl]);
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className={`${isDialog ? "" : "min-h-screen"} bg-white flex flex-col items-center justify-center p-4`}>
-        <div className="max-w-md w-full space-y-4">
-          <Skeleton className="h-8 w-3/4 mx-auto" />
-          <Skeleton className="h-64 w-full rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="h-4 w-4/6" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error || !propertyData) {
-    return (
-      <div className={`${isDialog ? "" : "min-h-screen"} bg-white flex flex-col items-center justify-center p-4`}>
-        <div className="max-w-md w-full text-center space-y-6">
-          <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-          <h1 className="text-2xl font-bold text-gray-800">Property Not Found</h1>
-          <p className="text-gray-600">
-            {error || "We couldn't find the property you're looking for. It may have been removed or the URL is incorrect."}
-          </p>
-          <div className="flex space-x-4 justify-center">
-            <Button onClick={() => navigate('/properties')} variant="default">
-              View All Properties
-            </Button>
-            <Button onClick={() => navigate('/')} variant="outline">
-              Go Home
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const totalPages = calculateTotalPages(propertyData);
-
-  // If this is being rendered in a dialog
-  if (isDialog && onOpenChange) {
-    return (
-      <div className="w-full h-full flex flex-col">
-        <WebViewHeader 
-          property={propertyData}
-          settings={settings}
-        />
-        <div className="flex-1 overflow-y-auto">
-          <PropertyWebViewMain
-            propertyData={propertyData}
-            settings={settings}
-            contentRef={contentRef}
-            printContentRef={printContentRef}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            selectedImage={selectedImage}
-            setSelectedImage={setSelectedImage}
-            handleShare={handleShare}
-            handlePrint={handlePrint}
-            handleDownload={async () => {}}
-          />
-        </div>
-        <WebViewFooter 
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          onShare={handleShare}
-          onPrint={handlePrint}
-        />
-      </div>
-    );
-  }
-
-  const handleBackNavigation = () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigate('/properties');
-    }
-  };
+  useWebViewBackground(settings);
 
   // Apply primary color from settings to buttons and accent elements
   useEffect(() => {
@@ -146,114 +51,59 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
         document.documentElement.style.setProperty('--estate-700', `${hslColor.h} ${hslColor.s}% ${Math.max(0, hslColor.l - 10)}%`);
       }
     }
+    
+    // Cleanup function
+    return () => {
+      document.documentElement.style.removeProperty('--estate-600');
+      document.documentElement.style.removeProperty('--estate-700');
+    };
   }, [settings.primaryColor]);
+
+  // Loading state
+  if (isLoading) {
+    return <WebViewLoading isDialog={isDialog} />;
+  }
+
+  // Error state
+  if (error || !propertyData) {
+    return <WebViewError error={error} isDialog={isDialog} />;
+  }
+
+  // If this is being rendered in a dialog
+  if (isDialog && onOpenChange) {
+    return (
+      <WebViewDialogContent
+        propertyData={propertyData}
+        settings={settings}
+        contentRef={contentRef}
+        printContentRef={printContentRef}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        selectedImage={selectedImage}
+        setSelectedImage={setSelectedImage}
+        handleShare={handleShare}
+        handlePrint={handlePrint}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+      />
+    );
+  }
 
   // Full page view
   return (
-    <div className="min-h-screen webview-page relative">
-      {/* Fixed Breadcrumb */}
-      <div className="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm">
-        <div className="container mx-auto px-4">
-          <PropertyBreadcrumb 
-            title={propertyData.title}
-            onBack={handleBackNavigation}
-          />
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="container mx-auto min-h-screen overflow-hidden">
-        <div className="flex flex-col items-center h-full pt-20 pb-24">
-          {/* Container with padding */}
-          <div className="w-full flex-1 px-4 sm:px-8 py-4">
-            <div className="flex justify-center">
-              <div className="w-full max-w-[1000px] p-0 sm:p-4 h-full">
-                <div className="webview-content rounded-xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-14rem)]">
-                  <WebViewHeader 
-                    property={propertyData}
-                    settings={settings}
-                  />
-                  <div className="w-full flex-1 overflow-y-auto">
-                    <PropertyWebViewMain
-                      propertyData={propertyData}
-                      settings={settings}
-                      contentRef={contentRef}
-                      printContentRef={printContentRef}
-                      currentPage={currentPage}
-                      setCurrentPage={setCurrentPage}
-                      selectedImage={selectedImage}
-                      setSelectedImage={setSelectedImage}
-                      handleShare={handleShare}
-                      handlePrint={handlePrint}
-                      handleDownload={async () => {}}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Fixed Footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 bg-estate-100 shadow-lg">
-        <div className="container mx-auto py-4 px-4">
-          <div className="flex justify-center">
-            <div className="w-full max-w-[1000px]">
-              <WebViewFooter 
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onShare={handleShare}
-                onPrint={handlePrint}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <WebViewFullPage
+      propertyData={propertyData}
+      settings={settings}
+      contentRef={contentRef}
+      printContentRef={printContentRef}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      selectedImage={selectedImage}
+      setSelectedImage={setSelectedImage}
+      handleShare={handleShare}
+      handlePrint={handlePrint}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+    />
   );
-}
-
-// Helper function to convert hex color to HSL
-function hexToHSL(hex: string): { h: number; s: number; l: number } | null {
-  // Remove the # if present
-  hex = hex.replace(/^#/, '');
-
-  // Parse the hex values
-  let r, g, b;
-  if (hex.length === 3) {
-    r = parseInt(hex.substring(0, 1).repeat(2), 16) / 255;
-    g = parseInt(hex.substring(1, 2).repeat(2), 16) / 255;
-    b = parseInt(hex.substring(2, 3).repeat(2), 16) / 255;
-  } else if (hex.length === 6) {
-    r = parseInt(hex.substring(0, 2), 16) / 255;
-    g = parseInt(hex.substring(2, 4), 16) / 255;
-    b = parseInt(hex.substring(4, 6), 16) / 255;
-  } else {
-    return null;
-  }
-
-  // Find min and max values
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0, s = 0, l = (max + min) / 2;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h = Math.round(h * 60);
-  }
-
-  s = Math.round(s * 100);
-  l = Math.round(l * 100);
-
-  return { h, s, l };
 }
