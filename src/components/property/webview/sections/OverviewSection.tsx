@@ -41,25 +41,12 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               />
             </div>
             
-            {/* Blue bar with title and price */}
-            <div 
-              className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
-              style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}
-            >
-              <h2 className="font-semibold text-white text-lg truncate mr-4">
-                {property.title}
-              </h2>
-              <span className="text-white font-bold text-lg whitespace-nowrap">
-                {formatPrice(property.price)}
-              </span>
-            </div>
-          </>
-        )}
+         
         
         {/* Featured images grid (previously Grid images) */}
         {property.featuredImages && property.featuredImages.length > 0 && (
           <div className="px-6 mt-4">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
                 <div key={index} className="aspect-square rounded-md overflow-hidden">
                   <img 
@@ -72,6 +59,20 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
             </div>
           </div>
         )}
+   {/* Blue bar with title and price */}
+            <div 
+              className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
+              style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}
+            >
+              <h2 className="font-semibold text-white text-lg truncate mr-4">
+                {property.title}
+              </h2>
+              <span className="text-white font-bold text-lg whitespace-nowrap">
+                {formatPrice(property.price)}
+              </span>
+            </div>
+          </>
+        )}        
       </div>
     </div>
   );
