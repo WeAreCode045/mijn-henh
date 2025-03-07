@@ -60,19 +60,19 @@ export function usePropertyStepNavigation(
   };
 
   const handleStepClick = (step: number) => {
-    console.log("Step clicked:", step);
+    console.log("Step clicked:", step, "Current formData:", formData);
     saveBeforeStepChange(step);
   };
 
   const handleNext = () => {
-    console.log("Next clicked");
+    console.log("Next clicked", "Current formData:", formData);
     if (currentStep < maxSteps) {
       saveBeforeStepChange(currentStep + 1);
     }
   };
 
   const handlePrevious = () => {
-    console.log("Previous clicked");
+    console.log("Previous clicked", "Current formData:", formData);
     if (currentStep > 1) {
       saveBeforeStepChange(currentStep - 1);
     }

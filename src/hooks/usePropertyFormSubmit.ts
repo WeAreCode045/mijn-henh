@@ -33,7 +33,10 @@ export function usePropertyFormSubmit() {
       const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
       const featuresJson = preparePropertiesForJsonField(formData.features);
       const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
-      const technicalItemsJson = formData.technicalItems ? preparePropertiesForJsonField(formData.technicalItems) : null;
+      
+      // Ensure technicalItems is treated as an array before transformation
+      const technicalItemsArray = Array.isArray(formData.technicalItems) ? formData.technicalItems : [];
+      const technicalItemsJson = preparePropertiesForJsonField(technicalItemsArray);
       
       console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
       console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
@@ -200,6 +203,15 @@ export function usePropertyFormSubmit() {
       }
       
       console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");
+      
+      // Show a toast notification to confirm the save was successful
+      if (success) {
+        toast({
+          title: "Success",
+          description: formData.id ? "Property updated successfully" : "Property created successfully",
+        });
+      }
+      
       return success;
     } catch (error) {
       console.error("Error during property submit:", error);

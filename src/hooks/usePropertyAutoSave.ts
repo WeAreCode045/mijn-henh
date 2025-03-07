@@ -29,7 +29,7 @@ export function usePropertyAutoSave() {
     }
 
     setIsSaving(true);
-    console.log('Auto-saving property data...');
+    console.log('Auto-saving property data...', formData);
 
     try {
       // Extract the fields we want to update
@@ -72,7 +72,12 @@ export function usePropertyAutoSave() {
       const transformedAreas = prepareAreasForFormSubmission(areas);
       const transformedFeatures = preparePropertiesForJsonField(features);
       const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
-      const transformedTechnicalItems = technicalItems ? preparePropertiesForJsonField(technicalItems) : null;
+      
+      // Ensure technicalItems is treated as an array before transformation
+      const technicalItemsArray = Array.isArray(technicalItems) ? technicalItems : [];
+      const transformedTechnicalItems = preparePropertiesForJsonField(technicalItemsArray);
+      
+      console.log('Transformed technical items:', transformedTechnicalItems);
 
       const updateData = {
         title,
@@ -102,6 +107,8 @@ export function usePropertyAutoSave() {
         technicalItems: transformedTechnicalItems,
         floorplanEmbedScript
       };
+
+      console.log('Saving to database:', updateData);
 
       const { error } = await supabase
         .from('properties')

@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 
@@ -62,6 +63,7 @@ export function PropertyContentForm({
   setPendingChanges
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
+    console.log(`Field changed: ${String(field)}`, value);
     onFieldChange(field, value);
     setPendingChanges(true);
   };
