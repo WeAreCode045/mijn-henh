@@ -13,7 +13,7 @@ export function useWebViewContent({
   currentPage: number;
   setCurrentPage: (page: number) => void;
 }) {
-  const { calculateTotalPages, isValidPageIndex } = usePageCalculation();
+  const { calculateTotalPages, isValidPageIndex, getSectionIndex } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
   
   // Reset to first page when property changes
@@ -27,7 +27,7 @@ export function useWebViewContent({
       console.log("Invalid page index detected, resetting to 0");
       setCurrentPage(0);
     }
-  }, [currentPage, propertyData, setCurrentPage]);
+  }, [currentPage, propertyData, setCurrentPage, isValidPageIndex]);
   
   // Navigation functions
   const canGoBack = currentPage > 0;
@@ -37,7 +37,12 @@ export function useWebViewContent({
     if (canGoForward) {
       const nextPage = currentPage + 1;
       if (isValidPageIndex(nextPage, propertyData)) {
-        setCurrentPage(nextPage);
+        // Store the next page index in a temporary variable
+        const validatedNextPage = getSectionIndex(nextPage, propertyData);
+        
+        // Set the validated page
+        setCurrentPage(validatedNextPage);
+        
         // Scroll to top when changing page
         window.scrollTo(0, 0);
       } else {
@@ -50,7 +55,12 @@ export function useWebViewContent({
     if (canGoBack) {
       const prevPage = currentPage - 1;
       if (isValidPageIndex(prevPage, propertyData)) {
-        setCurrentPage(prevPage);
+        // Store the previous page index in a temporary variable
+        const validatedPrevPage = getSectionIndex(prevPage, propertyData);
+        
+        // Set the validated page
+        setCurrentPage(validatedPrevPage);
+        
         // Scroll to top when changing page
         window.scrollTo(0, 0);
       } else {

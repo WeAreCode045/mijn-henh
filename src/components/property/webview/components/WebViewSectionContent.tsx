@@ -3,6 +3,7 @@ import React from "react";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { getSections } from "../config/sectionConfig";
+import { usePageCalculation } from "../hooks/usePageCalculation";
 
 interface WebViewSectionContentProps {
   property: PropertyData;
@@ -19,6 +20,8 @@ export function WebViewSectionContent({
   isPrintView = false,
   waitForPlaces = false
 }: WebViewSectionContentProps) {
+  const { getSectionIndex } = usePageCalculation();
+  
   // Validate property data
   if (!property) {
     return (
@@ -37,9 +40,20 @@ export function WebViewSectionContent({
     isPrintView
   });
 
-  // Check if currentPage is out of bounds
-  if (!sections || currentPage < 0 || currentPage >= sections.length) {
-    console.error(`Invalid page: ${currentPage}, available sections: ${sections?.length || 0}`);
+  if (!sections || sections.length === 0) {
+    return (
+      <div className="p-4 bg-white/90 rounded-lg shadow-sm">
+        <p className="text-gray-500 text-center">No sections available</p>
+      </div>
+    );
+  }
+  
+  // Get validated section index
+  const safePageIndex = getSectionIndex(currentPage, property, isPrintView);
+  
+  // Check if safePageIndex is out of bounds
+  if (safePageIndex < 0 || safePageIndex >= sections.length) {
+    console.error(`Invalid page: ${safePageIndex}, available sections: ${sections.length}`);
     return (
       <div className="p-4 bg-white/90 rounded-lg shadow-sm">
         <p className="text-gray-500 text-center">Invalid page index</p>
@@ -48,7 +62,7 @@ export function WebViewSectionContent({
   }
 
   // Get the current section
-  const currentSection = sections[currentPage];
+  const currentSection = sections[safePageIndex];
   
   // Check if we have content for this page
   if (!currentSection || !currentSection.content) {

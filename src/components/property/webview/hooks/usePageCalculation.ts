@@ -31,5 +31,14 @@ export const usePageCalculation = () => {
     return pageIndex >= 0 && pageIndex < totalPages;
   };
 
-  return { calculateTotalPages, isValidPageIndex };
+  // Function to get section index based on page number
+  const getSectionIndex = (pageIndex: number, propertyData: PropertyData | null, isPrintView: boolean = false) => {
+    if (!isValidPageIndex(pageIndex, propertyData, isPrintView)) {
+      return 0; // Default to first page if invalid
+    }
+    
+    return pageIndex;
+  };
+
+  return { calculateTotalPages, isValidPageIndex, getSectionIndex };
 };

@@ -22,10 +22,24 @@ export function WebViewNavigation({
   const displayCurrentPage = Math.max(0, Math.min(currentPage, totalPages - 1)) + 1;
   const displayTotalPages = Math.max(1, totalPages);
 
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (canGoBack) {
+      onPrevious();
+    }
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (canGoForward) {
+      onNext();
+    }
+  };
+
   return (
     <div className="flex justify-between mt-6">
       <Button 
-        onClick={onPrevious} 
+        onClick={handlePrevious} 
         disabled={!canGoBack}
         variant="outline"
         size="sm"
@@ -36,7 +50,7 @@ export function WebViewNavigation({
         {totalPages > 0 ? `Page ${displayCurrentPage} of ${displayTotalPages}` : "Loading..."}
       </span>
       <Button 
-        onClick={onNext} 
+        onClick={handleNext} 
         disabled={!canGoForward}
         variant="outline"
         size="sm"
