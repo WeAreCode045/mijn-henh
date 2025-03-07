@@ -71,7 +71,22 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   };
 
   // Safely get icon names with fallbacks
-  const safeSettings = settings || {};
+  // Explicitly type safeSettings as AgencySettings to ensure TypeScript knows all properties exist
+  const safeSettings: AgencySettings = settings || {
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    primaryColor: "",
+    secondaryColor: "",
+    iconBuildYear: "calendar",
+    iconBedrooms: "bed",
+    iconBathrooms: "bath",
+    iconGarages: "car",
+    iconEnergyClass: "zap",
+    iconSqft: "ruler",
+    iconLivingSpace: "home"
+  };
   
   return (
     <div className="mb-8">
@@ -165,4 +180,3 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
     </div>
   );
 }
-
