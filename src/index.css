@@ -197,11 +197,6 @@
     transition: all 0.2s ease-in-out;
   }
 
-  .webview-section:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  }
-
   .webview-detail-icon {
     @apply flex items-center justify-center w-10 h-10 rounded-full bg-estate-100;
     color: hsl(var(--estate-700));
