@@ -28,6 +28,7 @@ export function VirtualTourCard({
   const [localYoutubeUrl, setLocalYoutubeUrl] = useState(youtubeUrl);
   const [localFloorplanEmbed, setLocalFloorplanEmbed] = useState(floorplanEmbedScript);
   
+  // Update local state when props change
   useEffect(() => {
     setLocalVirtualTourUrl(virtualTourUrl);
   }, [virtualTourUrl]);

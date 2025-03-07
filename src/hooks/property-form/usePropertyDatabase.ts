@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +42,9 @@ export function usePropertyDatabase() {
 
       // Make a copy of data without fields that don't exist in the database
       const { featuredImage, featuredImages, coverImages, floorplans, ...dataToUpdate } = data as any;
+      
+      // Ensure floorplanEmbedScript is included in the data to update
+      console.log("usePropertyDatabase - floorplanEmbedScript value:", dataToUpdate.floorplanEmbedScript);
       
       console.log("usePropertyDatabase - Final update data:", dataToUpdate);
       
@@ -107,6 +109,9 @@ export function usePropertyDatabase() {
           : [];
         data.technicalItems = preparePropertiesForJsonField(technicalItemsArray);
       }
+
+      // Ensure floorplanEmbedScript is included in the data
+      console.log("usePropertyDatabase - floorplanEmbedScript value for new property:", data.floorplanEmbedScript);
 
       // Make a copy of data without fields that don't exist in the database
       const { featuredImage, featuredImages, coverImages, floorplans, ...dataToCreate } = data as any;

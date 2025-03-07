@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,7 +11,6 @@ export function usePropertyAutoSave() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Cleanup function for the timeout
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -22,7 +20,6 @@ export function usePropertyAutoSave() {
   }, []);
 
   const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
-    // Don't save if there's no ID (new property that hasn't been saved initially)
     if (!formData.id) {
       console.log('No ID available, auto-save skipped');
       return false;
@@ -32,7 +29,6 @@ export function usePropertyAutoSave() {
     console.log('Auto-saving property data...', formData);
 
     try {
-      // Extract the fields we want to update
       const {
         title,
         price,
@@ -62,22 +58,20 @@ export function usePropertyAutoSave() {
         floorplanEmbedScript
       } = formData;
 
-      // If still new or draft state (no ID), return false
       if (!formData.id) {
         console.log('Property ID not available for auto-save');
         return false;
       }
 
-      // Transform the features and areas to the correct JSON format
       const transformedAreas = prepareAreasForFormSubmission(areas);
       const transformedFeatures = preparePropertiesForJsonField(features);
       const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
       
-      // Ensure technicalItems is treated as an array before transformation
       const technicalItemsArray = Array.isArray(technicalItems) ? technicalItems : [];
       const transformedTechnicalItems = preparePropertiesForJsonField(technicalItemsArray);
       
       console.log('Transformed technical items:', transformedTechnicalItems);
+      console.log('floorplanEmbedScript for autosave:', floorplanEmbedScript);
 
       const updateData = {
         title,
@@ -120,10 +114,8 @@ export function usePropertyAutoSave() {
         throw error;
       }
 
-      // Handle floorplans separately
       if (formData.floorplans && formData.floorplans.length > 0) {
         try {
-          // First, get existing floorplans
           const { data: existingFloorplans } = await supabase
             .from('property_images')
             .select('id, url')
@@ -132,7 +124,6 @@ export function usePropertyAutoSave() {
             
           const existingUrls = existingFloorplans?.map(f => f.url) || [];
           
-          // Add new floorplans
           for (const floorplan of formData.floorplans) {
             const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
             if (!floorplanUrl || existingUrls.includes(floorplanUrl)) continue;
@@ -147,7 +138,6 @@ export function usePropertyAutoSave() {
           }
         } catch (error) {
           console.error('Error updating floorplans:', error);
-          // Don't throw here, as the main save was successful
         }
       }
 
