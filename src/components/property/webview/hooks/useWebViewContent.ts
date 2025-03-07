@@ -37,12 +37,7 @@ export function useWebViewContent({
     if (canGoForward) {
       const nextPage = currentPage + 1;
       if (isValidPageIndex(nextPage, propertyData)) {
-        // Store the next page index in a temporary variable
-        const validatedNextPage = getSectionIndex(nextPage, propertyData);
-        
-        // Set the validated page
-        setCurrentPage(validatedNextPage);
-        
+        setCurrentPage(nextPage);
         // Scroll to top when changing page
         window.scrollTo(0, 0);
       } else {
@@ -55,12 +50,7 @@ export function useWebViewContent({
     if (canGoBack) {
       const prevPage = currentPage - 1;
       if (isValidPageIndex(prevPage, propertyData)) {
-        // Store the previous page index in a temporary variable
-        const validatedPrevPage = getSectionIndex(prevPage, propertyData);
-        
-        // Set the validated page
-        setCurrentPage(validatedPrevPage);
-        
+        setCurrentPage(prevPage);
         // Scroll to top when changing page
         window.scrollTo(0, 0);
       } else {

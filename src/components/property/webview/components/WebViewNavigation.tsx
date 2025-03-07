@@ -22,17 +22,14 @@ export function WebViewNavigation({
   const displayCurrentPage = Math.max(0, Math.min(currentPage, totalPages - 1)) + 1;
   const displayTotalPages = Math.max(1, totalPages);
 
-  const handlePrevious = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Modified handlers to ensure they work correctly
+  const handlePrevious = () => {
     if (canGoBack) {
       onPrevious();
     }
   };
 
-  const handleNext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleNext = () => {
     if (canGoForward) {
       onNext();
     }

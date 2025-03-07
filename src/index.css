@@ -129,14 +129,13 @@
     max-width: 1000px;
   }
 
-  /* WebView styles */
+  /* WebView styles - Moved background to content instead of page */
   .webview-page {
     background-color: #fff;
     background-image: var(--webview-bg-image);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed;
   }
 
   .webview-content {
