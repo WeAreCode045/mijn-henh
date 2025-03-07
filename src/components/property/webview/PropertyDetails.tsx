@@ -23,8 +23,11 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   const iconSize = 18;
   
   // Map icon names to actual components
-  const getIcon = (iconName: string) => {
-    switch (iconName?.toLowerCase()) {
+  const getIcon = (iconName: string | undefined) => {
+    // Default to calendar if iconName is undefined
+    const iconToRender = iconName?.toLowerCase() || 'calendar';
+    
+    switch (iconToRender) {
       case 'calendar':
       case 'calendars':
       case 'calendardays':
@@ -67,6 +70,9 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
     return isNaN(parsed) ? 0 : parsed;
   };
 
+  // Safely get icon names with fallbacks
+  const safeSettings = settings || {};
+  
   return (
     <div className="mb-8">
       <h2 className="text-xl font-bold mb-4">Property Details</h2>
@@ -75,7 +81,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {property.buildYear && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconBuildYear || 'calendar')}
+              {getIcon(safeSettings.iconBuildYear)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Year Built</p>
@@ -87,7 +93,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {parseValueToNumber(property.bedrooms) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconBedrooms || 'bed')}
+              {getIcon(safeSettings.iconBedrooms)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Bedrooms</p>
@@ -99,7 +105,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {parseValueToNumber(property.bathrooms) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconBathrooms || 'bath')}
+              {getIcon(safeSettings.iconBathrooms)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Bathrooms</p>
@@ -111,7 +117,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {parseValueToNumber(property.garages) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconGarages || 'car')}
+              {getIcon(safeSettings.iconGarages)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Garages</p>
@@ -123,7 +129,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {property.energyLabel && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconEnergyClass || 'zap')}
+              {getIcon(safeSettings.iconEnergyClass)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Energy Class</p>
@@ -135,7 +141,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {parseValueToNumber(property.sqft) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconSqft || 'ruler')}
+              {getIcon(safeSettings.iconSqft)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Plot Size</p>
@@ -147,7 +153,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {parseValueToNumber(property.livingArea) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
-              {getIcon(settings.iconLivingSpace || 'home')}
+              {getIcon(safeSettings.iconLivingSpace)}
             </div>
             <div>
               <p className="text-xs text-gray-500">Living Space</p>
@@ -159,3 +165,4 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
     </div>
   );
 }
+

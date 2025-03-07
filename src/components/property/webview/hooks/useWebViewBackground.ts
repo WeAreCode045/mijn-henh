@@ -4,7 +4,7 @@ import { AgencySettings } from "@/types/agency";
 
 export function useWebViewBackground(settings: AgencySettings) {
   useEffect(() => {
-    if (settings.webviewBackgroundUrl) {
+    if (settings?.webviewBackgroundUrl) {
       document.documentElement.style.setProperty(
         '--webview-bg-image', 
         `url(${settings.webviewBackgroundUrl})`
@@ -17,5 +17,6 @@ export function useWebViewBackground(settings: AgencySettings) {
     return () => {
       document.documentElement.style.removeProperty('--webview-bg-image');
     };
-  }, [settings.webviewBackgroundUrl]);
+  }, [settings?.webviewBackgroundUrl]);
 }
+
