@@ -42,7 +42,7 @@ export function PropertyWebViewContent({
   const setCurrentPageFn = externalSetCurrentPage || setInternalCurrentPage;
   
   return (
-    <div className="relative p-6">
+    <div className="p-6 h-full overflow-y-auto">
       {isPrintView && (
         <style type="text/css" dangerouslySetInnerHTML={{ __html: getPrintStylesContent() }} />
       )}

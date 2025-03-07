@@ -54,12 +54,12 @@ export function WebViewFullPage({
   const containerStyle = settings?.webviewBackgroundUrl ? {
     backgroundImage: `url(${settings.webviewBackgroundUrl})`,
     backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundPosition: 'bottom right',
     backgroundRepeat: 'no-repeat'
   } : {};
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start">
+    <div className="min-h-screen w-full flex items-center justify-center py-10 px-4">
       {/* Fixed Breadcrumb */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm">
         <div className="container mx-auto px-4">
@@ -71,36 +71,36 @@ export function WebViewFullPage({
       </div>
 
       {/* Main Content Area */}
-      <div className="container mx-auto min-h-screen flex flex-col items-center pt-20 pb-4 px-4">
+      <div className="webview-container-wrapper">
         <div 
-          className="w-full max-w-4xl webview-content rounded-xl overflow-hidden shadow-lg flex flex-col"
+          className="webview-container-main flex flex-col rounded-xl overflow-hidden shadow-lg"
           style={containerStyle}
         >
-          <WebViewHeader 
-            property={propertyData}
-            settings={settings}
-          />
+          <div className="webview-sticky-header">
+            <WebViewHeader 
+              property={propertyData}
+              settings={settings}
+            />
+          </div>
           
-          <div className="flex-1 overflow-hidden">
-            <div className="h-full overflow-y-auto">
-              <PropertyWebViewMain
-                propertyData={propertyData}
-                settings={settings}
-                contentRef={contentRef}
-                printContentRef={printContentRef}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                selectedImage={selectedImage}
-                setSelectedImage={setSelectedImage}
-                handleShare={handleShare}
-                handlePrint={handlePrint}
-                handleDownload={async () => {}}
-              />
-            </div>
+          <div className="webview-scrollable-content">
+            <PropertyWebViewMain
+              propertyData={propertyData}
+              settings={settings}
+              contentRef={contentRef}
+              printContentRef={printContentRef}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              selectedImage={selectedImage}
+              setSelectedImage={setSelectedImage}
+              handleShare={handleShare}
+              handlePrint={handlePrint}
+              handleDownload={async () => {}}
+            />
           </div>
           
           {/* Navigation inside the container */}
-          <div className="p-4 border-t bg-white bg-opacity-90">
+          <div className="webview-sticky-footer">
             <WebViewFooter 
               currentPage={currentPage}
               totalPages={totalPages}

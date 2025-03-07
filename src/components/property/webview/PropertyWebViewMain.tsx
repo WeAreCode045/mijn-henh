@@ -45,7 +45,7 @@ export function PropertyWebViewMain({
   });
 
   return (
-    <div className="w-full overflow-hidden h-full flex flex-col">
+    <div className="w-full h-full">
       {/* Main visible content */}
       <MainContentView 
         contentRef={contentRef}

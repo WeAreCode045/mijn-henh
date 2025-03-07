@@ -46,7 +46,7 @@ export function WebViewDialogContent({
   const containerStyle = settings?.webviewBackgroundUrl ? {
     backgroundImage: `url(${settings.webviewBackgroundUrl})`,
     backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundPosition: 'bottom right',
     backgroundRepeat: 'no-repeat'
   } : {};
 
@@ -72,33 +72,33 @@ export function WebViewDialogContent({
       </div>
       
       <div 
-        className="flex-1 overflow-hidden bg-white rounded-md shadow-sm flex flex-col"
+        className="flex-1 overflow-hidden bg-white rounded-md shadow-sm flex flex-col webview-container-dialog"
         style={containerStyle}
       >
-        <WebViewHeader 
-          property={propertyData}
-          settings={settings}
-        />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <PropertyWebViewMain
-              propertyData={propertyData}
-              settings={settings}
-              contentRef={contentRef}
-              printContentRef={printContentRef}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              selectedImage={selectedImage}
-              setSelectedImage={setSelectedImage}
-              handleShare={handleShare}
-              handlePrint={handlePrint}
-              handleDownload={async () => {}}
-            />
-          </div>
+        <div className="webview-sticky-header">
+          <WebViewHeader 
+            property={propertyData}
+            settings={settings}
+          />
         </div>
         
-        <div className="p-4 border-t bg-white bg-opacity-90">
+        <div className="webview-scrollable-content">
+          <PropertyWebViewMain
+            propertyData={propertyData}
+            settings={settings}
+            contentRef={contentRef}
+            printContentRef={printContentRef}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            selectedImage={selectedImage}
+            setSelectedImage={setSelectedImage}
+            handleShare={handleShare}
+            handlePrint={handlePrint}
+            handleDownload={async () => {}}
+          />
+        </div>
+        
+        <div className="webview-sticky-footer">
           <WebViewFooter 
             currentPage={currentPage}
             totalPages={totalPages}
