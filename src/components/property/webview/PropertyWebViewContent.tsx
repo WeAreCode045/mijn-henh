@@ -1,12 +1,12 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { getSections } from "./config/sectionConfig";
 import { useEffect, useState } from "react";
 import { useContactForm } from "./hooks/useContactForm";
 import { usePageCalculation } from "./hooks/usePageCalculation";
 import { getPrintStylesContent } from "./PrintStyles";
-import { Button } from "@/components/ui/button";
+import { WebViewNavigation } from "./components/WebViewNavigation";
+import { WebViewSectionContent } from "./components/WebViewSectionContent";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
@@ -64,15 +64,6 @@ export function PropertyWebViewContent({
   useEffect(() => {
     setCurrentPageFn(0);
   }, [property?.id, setCurrentPageFn]);
-  
-  // Get sections based on the current property and page
-  const sections = getSections({ 
-    property, 
-    settings, 
-    currentPage,
-    waitForPlaces,
-    isPrintView
-  });
 
   const handleNext = () => {
     if (canGoForward) {
@@ -85,11 +76,6 @@ export function PropertyWebViewContent({
       setCurrentPageFn(currentPage - 1);
     }
   };
-  
-  // Correctly match the handleSubmit signature from useContactForm
-  const handleFormSubmit = (e: React.FormEvent) => {
-    handleSubmit(e);
-  };
 
   return (
     <div className="relative p-6">
@@ -97,9 +83,24 @@ export function PropertyWebViewContent({
         <style type="text/css" dangerouslySetInnerHTML={{ __html: getPrintStylesContent() }} />
       )}
       
-      <div className="webview-section p-4 mb-8">
-        {sections[currentPage]?.content}
-      </div>
+      <WebViewSectionContent 
+        property={property}
+        settings={settings}
+        currentPage={currentPage}
+        isPrintView={isPrintView}
+        waitForPlaces={waitForPlaces}
+      />
+
+      {!isPrintView && (
+        <WebViewNavigation 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          canGoBack={canGoBack}
+          canGoForward={canGoForward}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+        />
+      )}
     </div>
   );
 }
