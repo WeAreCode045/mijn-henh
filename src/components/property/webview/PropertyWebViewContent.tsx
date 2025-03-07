@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useContactForm } from "./hooks/useContactForm";
 import { usePageCalculation } from "./hooks/usePageCalculation";
 import { getPrintStylesContent } from "./PrintStyles";
-import { WebViewNavigation } from "./components/WebViewNavigation";
 import { WebViewSectionContent } from "./components/WebViewSectionContent";
 import { useWebViewContent } from "./hooks/useWebViewContent";
 
@@ -68,17 +67,8 @@ export function PropertyWebViewContent({
         isPrintView={isPrintView}
         waitForPlaces={waitForPlaces}
       />
-
-      {!isPrintView && (
-        <WebViewNavigation 
-          currentPage={currentPage}
-          totalPages={totalPages}
-          canGoBack={canGoBack}
-          canGoForward={canGoForward}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-        />
-      )}
+      
+      {/* We've removed the navigation here as it's now in the parent container */}
     </div>
   );
 }

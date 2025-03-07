@@ -36,6 +36,8 @@ export function useWebViewContent({
   const handleNext = () => {
     if (canGoForward) {
       const nextPage = currentPage + 1;
+      console.log(`Navigating to next page: ${nextPage}`);
+      
       if (isValidPageIndex(nextPage, propertyData)) {
         setCurrentPage(nextPage);
         // Scroll to top when changing page
@@ -49,6 +51,8 @@ export function useWebViewContent({
   const handlePrevious = () => {
     if (canGoBack) {
       const prevPage = currentPage - 1;
+      console.log(`Navigating to previous page: ${prevPage}`);
+      
       if (isValidPageIndex(prevPage, propertyData)) {
         setCurrentPage(prevPage);
         // Scroll to top when changing page

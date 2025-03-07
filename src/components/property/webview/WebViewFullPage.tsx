@@ -51,7 +51,7 @@ export function WebViewFullPage({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-estate-50">
       {/* Fixed Breadcrumb */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm">
         <div className="container mx-auto px-4">
@@ -63,51 +63,39 @@ export function WebViewFullPage({
       </div>
 
       {/* Main Content Area */}
-      <div className="container mx-auto min-h-screen flex justify-center overflow-hidden">
-        <div className="flex flex-col items-center h-full pt-20 pb-24 w-full max-w-[1000px]">
-          {/* Container with padding */}
-          <div className="w-full flex-1 px-4 sm:px-8 py-4">
-            <div className="w-full h-full">
-              <div className="webview-page webview-content rounded-xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-14rem)]">
-                <WebViewHeader 
-                  property={propertyData}
-                  settings={settings}
-                />
-                <div className="w-full flex-1 overflow-y-auto">
-                  <PropertyWebViewMain
-                    propertyData={propertyData}
-                    settings={settings}
-                    contentRef={contentRef}
-                    printContentRef={printContentRef}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    selectedImage={selectedImage}
-                    setSelectedImage={setSelectedImage}
-                    handleShare={handleShare}
-                    handlePrint={handlePrint}
-                    handleDownload={async () => {}}
-                  />
-                </div>
-              </div>
-            </div>
+      <div className="container mx-auto min-h-screen flex flex-col items-center pt-20 pb-4 px-4">
+        <div className="w-full max-w-4xl webview-content rounded-xl overflow-hidden shadow-lg flex flex-col">
+          <WebViewHeader 
+            property={propertyData}
+            settings={settings}
+          />
+          
+          <div className="flex-1 overflow-y-auto">
+            <PropertyWebViewMain
+              propertyData={propertyData}
+              settings={settings}
+              contentRef={contentRef}
+              printContentRef={printContentRef}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              selectedImage={selectedImage}
+              setSelectedImage={setSelectedImage}
+              handleShare={handleShare}
+              handlePrint={handlePrint}
+              handleDownload={async () => {}}
+            />
           </div>
-        </div>
-      </div>
-
-      {/* Fixed Footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 bg-estate-100 shadow-lg">
-        <div className="container mx-auto py-4 px-4">
-          <div className="flex justify-center">
-            <div className="w-full max-w-[1000px]">
-              <WebViewFooter 
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onShare={handleShare}
-                onPrint={handlePrint}
-              />
-            </div>
+          
+          {/* Navigation moved inside the container */}
+          <div className="p-4 border-t">
+            <WebViewFooter 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onShare={handleShare}
+              onPrint={handlePrint}
+            />
           </div>
         </div>
       </div>
