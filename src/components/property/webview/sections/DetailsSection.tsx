@@ -9,7 +9,6 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
     <div className="space-y-1 pb-16">
       <PropertyDetails 
         property={property}
-        primaryColor={settings?.secondaryColor}
         settings={settings}
       />
       

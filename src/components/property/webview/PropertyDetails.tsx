@@ -55,9 +55,16 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   };
 
   // Format the number with commas for thousands
-  const formatNumber = (num?: number) => {
+  const formatNumber = (num?: number | string) => {
     if (num === undefined || num === null) return '';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  // Helper function to convert string to number for comparison
+  const parseValueToNumber = (value: string | number): number => {
+    if (typeof value === 'number') return value;
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
   };
 
   return (
@@ -77,7 +84,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           </div>
         )}
         
-        {property.bedrooms > 0 && (
+        {parseValueToNumber(property.bedrooms) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
               {getIcon(settings.iconBedrooms || 'bed')}
@@ -89,7 +96,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           </div>
         )}
         
-        {property.bathrooms > 0 && (
+        {parseValueToNumber(property.bathrooms) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
               {getIcon(settings.iconBathrooms || 'bath')}
@@ -101,7 +108,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           </div>
         )}
         
-        {property.garages > 0 && (
+        {parseValueToNumber(property.garages) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
               {getIcon(settings.iconGarages || 'car')}
@@ -113,38 +120,38 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           </div>
         )}
         
-        {property.energyClass && (
+        {property.energyLabel && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
               {getIcon(settings.iconEnergyClass || 'zap')}
             </div>
             <div>
               <p className="text-xs text-gray-500">Energy Class</p>
-              <p className="font-medium">{property.energyClass.toUpperCase()}</p>
+              <p className="font-medium">{property.energyLabel.toUpperCase()}</p>
             </div>
           </div>
         )}
         
-        {property.plotSize > 0 && (
+        {parseValueToNumber(property.sqft) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
               {getIcon(settings.iconSqft || 'ruler')}
             </div>
             <div>
               <p className="text-xs text-gray-500">Plot Size</p>
-              <p className="font-medium">{formatNumber(property.plotSize)} m²</p>
+              <p className="font-medium">{formatNumber(property.sqft)} m²</p>
             </div>
           </div>
         )}
         
-        {property.livingSpace > 0 && (
+        {parseValueToNumber(property.livingArea) > 0 && (
           <div className="flex items-center gap-3">
             <div className="webview-detail-icon">
               {getIcon(settings.iconLivingSpace || 'home')}
             </div>
             <div>
               <p className="text-xs text-gray-500">Living Space</p>
-              <p className="font-medium">{formatNumber(property.livingSpace)} m²</p>
+              <p className="font-medium">{formatNumber(property.livingArea)} m²</p>
             </div>
           </div>
         )}
