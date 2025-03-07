@@ -53,7 +53,7 @@ export function WebViewFullPage({
   // Determine if we have a webview background from settings
   const containerStyle = settings?.webviewBackgroundUrl ? {
     backgroundImage: `url(${settings.webviewBackgroundUrl})`,
-    backgroundSize: 'cover',
+    backgroundSize: 'contain',
     backgroundPosition: 'bottom right',
     backgroundRepeat: 'no-repeat'
   } : {};
