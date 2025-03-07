@@ -24,6 +24,7 @@ export function WebViewNavigation({
 
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (canGoBack) {
       onPrevious();
     }
@@ -31,6 +32,7 @@ export function WebViewNavigation({
 
   const handleNext = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (canGoForward) {
       onNext();
     }

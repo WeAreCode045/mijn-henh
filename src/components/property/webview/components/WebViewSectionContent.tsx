@@ -20,7 +20,7 @@ export function WebViewSectionContent({
   isPrintView = false,
   waitForPlaces = false
 }: WebViewSectionContentProps) {
-  const { getSectionIndex } = usePageCalculation();
+  const { getSectionIndex, calculateTotalPages } = usePageCalculation();
   
   // Validate property data
   if (!property) {
@@ -48,21 +48,14 @@ export function WebViewSectionContent({
     );
   }
   
-  // Get validated section index
-  const safePageIndex = getSectionIndex(currentPage, property, isPrintView);
+  // Get total pages
+  const totalPages = calculateTotalPages(property, isPrintView);
   
-  // Check if safePageIndex is out of bounds
-  if (safePageIndex < 0 || safePageIndex >= sections.length) {
-    console.error(`Invalid page: ${safePageIndex}, available sections: ${sections.length}`);
-    return (
-      <div className="p-4 bg-white/90 rounded-lg shadow-sm">
-        <p className="text-gray-500 text-center">Invalid page index</p>
-      </div>
-    );
-  }
-
-  // Get the current section
-  const currentSection = sections[safePageIndex];
+  // Get validated section index and ensure it's within boundaries
+  const safePageIndex = Math.min(Math.max(0, currentPage), totalPages - 1);
+  
+  // Get the current section, with fallback to first section if current is not available
+  const currentSection = safePageIndex < sections.length ? sections[safePageIndex] : sections[0];
   
   // Check if we have content for this page
   if (!currentSection || !currentSection.content) {

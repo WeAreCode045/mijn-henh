@@ -1,17 +1,19 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { WebViewHeader } from "./WebViewHeader";
 import { PropertyWebViewMain } from "./PropertyWebViewMain";
+import { WebViewHeader } from "./WebViewHeader";
 import { WebViewFooter } from "./WebViewFooter";
 import { usePageCalculation } from "./hooks/usePageCalculation";
-import { MutableRefObject } from "react";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface WebViewDialogContentProps {
   propertyData: PropertyData;
   settings: AgencySettings;
-  contentRef: MutableRefObject<HTMLDivElement | null>;
-  printContentRef: MutableRefObject<HTMLDivElement | null>;
+  contentRef: React.RefObject<HTMLDivElement>;
+  printContentRef: React.RefObject<HTMLDivElement>;
   currentPage: number;
   setCurrentPage: (page: number) => void;
   selectedImage: string | null;
@@ -38,36 +40,62 @@ export function WebViewDialogContent({
 }: WebViewDialogContentProps) {
   const { calculateTotalPages } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
+  const navigate = useNavigate();
+
+  const handleOpenInNewTab = () => {
+    // Get the full URL for the webview page
+    const webviewUrl = `/property/${propertyData.id}/webview`;
+    window.open(webviewUrl, '_blank');
+  };
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <WebViewHeader 
-        property={propertyData}
-        settings={settings}
-      />
-      <div className="flex-1 overflow-y-auto">
-        <PropertyWebViewMain
-          propertyData={propertyData}
-          settings={settings}
-          contentRef={contentRef}
-          printContentRef={printContentRef}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          selectedImage={selectedImage}
-          setSelectedImage={setSelectedImage}
-          handleShare={handleShare}
-          handlePrint={handlePrint}
-          handleDownload={async () => {}}
-        />
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex justify-between items-center pb-4">
+        <h2 className="text-xl font-semibold">Property Preview</h2>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleOpenInNewTab}
+          className="flex items-center gap-2"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Open in New Tab
+        </Button>
       </div>
-      <WebViewFooter 
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onShare={handleShare}
-        onPrint={handlePrint}
-      />
+      
+      <div className="flex-1 overflow-hidden bg-white rounded-md shadow-sm flex flex-col">
+        <WebViewHeader 
+          property={propertyData}
+          settings={settings}
+        />
+        
+        <div className="flex-1 overflow-y-auto">
+          <PropertyWebViewMain
+            propertyData={propertyData}
+            settings={settings}
+            contentRef={contentRef}
+            printContentRef={printContentRef}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            selectedImage={selectedImage}
+            setSelectedImage={setSelectedImage}
+            handleShare={handleShare}
+            handlePrint={handlePrint}
+            handleDownload={async () => {}}
+          />
+        </div>
+        
+        <div className="p-4 border-t">
+          <WebViewFooter 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onShare={handleShare}
+            onPrint={handlePrint}
+          />
+        </div>
+      </div>
     </div>
   );
 }

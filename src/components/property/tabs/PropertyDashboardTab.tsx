@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -177,7 +176,6 @@ export function PropertyDashboardTab({
     }
   };
 
-  // Fix the local handlers to handle React events properly
   const handleSaveAgentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     handleSaveAgent(currentAgentId);
@@ -201,8 +199,15 @@ export function PropertyDashboardTab({
           <Button variant="outline" size="icon" onClick={onSave} title="Save">
             <Save className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={handleWebView} title="Web View">
-            <Globe className="h-4 w-4" />
+          <Button 
+            variant="outline" 
+            size="icon" 
+            asChild
+            title="Web View"
+          >
+            <a href={`/property/${id}/webview`} target="_blank" rel="noopener noreferrer">
+              <Globe className="h-4 w-4" />
+            </a>
           </Button>
           <Button variant="outline" size="icon" onClick={handleGeneratePDF} title="Generate PDF">
             <FileDown className="h-4 w-4" />
