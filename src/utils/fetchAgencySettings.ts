@@ -25,9 +25,9 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     primaryColor: data.primary_color || defaultAgencySettings.primaryColor,
     secondaryColor: data.secondary_color || defaultAgencySettings.secondaryColor,
     logoUrl: data.logo_url,
-    pdfBackgroundUrl: data.description_background_url, // Updated to use existing column
-    webviewBackgroundUrl: data.webview_background_url || data.description_background_url, // Use dedicated column if exists
-    webviewBgImage: data.webview_background_url || data.description_background_url, // Added this line
+    pdfBackgroundUrl: data.description_background_url, // Use the existing column for PDF background
+    webviewBackgroundUrl: data.description_background_url, // Use the same field for webview background
+    webviewBgImage: data.description_background_url, // Use the same field for webview background image
     instagramUrl: data.instagram_url || defaultAgencySettings.instagramUrl,
     youtubeUrl: data.youtube_url || defaultAgencySettings.youtubeUrl,
     facebookUrl: data.facebook_url || defaultAgencySettings.facebookUrl,

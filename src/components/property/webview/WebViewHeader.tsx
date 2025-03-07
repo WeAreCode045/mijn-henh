@@ -1,7 +1,6 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { formatPrice } from "@/utils/formatters";
 
 interface WebViewHeaderProps {
   property: PropertyData;
