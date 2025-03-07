@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -132,13 +133,17 @@
 
   /* Updated WebView styles - container centered, better scrolling */
   .webview-page {
-    @apply flex flex-col min-h-screen bg-estate-50;
+    @apply flex flex-col min-h-screen;
+    background-color: #f9f9f9;
   }
 
   .webview-content {
     background-color: rgba(255, 255, 255, 0.95);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border-radius: 12px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1000px;
   }
 
   .webview-section {

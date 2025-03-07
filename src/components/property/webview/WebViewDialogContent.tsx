@@ -42,6 +42,14 @@ export function WebViewDialogContent({
   const totalPages = calculateTotalPages(propertyData);
   const navigate = useNavigate();
 
+  // Determine if we have a webview background from settings
+  const containerStyle = settings?.webviewBackgroundUrl ? {
+    backgroundImage: `url(${settings.webviewBackgroundUrl})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  } : {};
+
   const handleOpenInNewTab = () => {
     // Get the full URL for the webview page
     const webviewUrl = `/property/${propertyData.id}/webview`;
@@ -63,29 +71,34 @@ export function WebViewDialogContent({
         </Button>
       </div>
       
-      <div className="flex-1 overflow-hidden bg-white rounded-md shadow-sm flex flex-col">
+      <div 
+        className="flex-1 overflow-hidden bg-white rounded-md shadow-sm flex flex-col"
+        style={containerStyle}
+      >
         <WebViewHeader 
           property={propertyData}
           settings={settings}
         />
         
-        <div className="flex-1 overflow-y-auto">
-          <PropertyWebViewMain
-            propertyData={propertyData}
-            settings={settings}
-            contentRef={contentRef}
-            printContentRef={printContentRef}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            selectedImage={selectedImage}
-            setSelectedImage={setSelectedImage}
-            handleShare={handleShare}
-            handlePrint={handlePrint}
-            handleDownload={async () => {}}
-          />
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <PropertyWebViewMain
+              propertyData={propertyData}
+              settings={settings}
+              contentRef={contentRef}
+              printContentRef={printContentRef}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              selectedImage={selectedImage}
+              setSelectedImage={setSelectedImage}
+              handleShare={handleShare}
+              handlePrint={handlePrint}
+              handleDownload={async () => {}}
+            />
+          </div>
         </div>
         
-        <div className="p-4 border-t">
+        <div className="p-4 border-t bg-white bg-opacity-90">
           <WebViewFooter 
             currentPage={currentPage}
             totalPages={totalPages}

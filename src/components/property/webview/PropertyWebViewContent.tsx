@@ -41,19 +41,6 @@ export function PropertyWebViewContent({
   const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
   const setCurrentPageFn = externalSetCurrentPage || setInternalCurrentPage;
   
-  // Use the custom hook for content-related logic
-  const { 
-    totalPages, 
-    canGoBack, 
-    canGoForward, 
-    handleNext, 
-    handlePrevious
-  } = useWebViewContent({
-    propertyData: property,
-    currentPage,
-    setCurrentPage: setCurrentPageFn
-  });
-  
   return (
     <div className="relative p-6">
       {isPrintView && (
@@ -67,8 +54,6 @@ export function PropertyWebViewContent({
         isPrintView={isPrintView}
         waitForPlaces={waitForPlaces}
       />
-      
-      {/* We've removed the navigation here as it's now in the parent container */}
     </div>
   );
 }
