@@ -1,3 +1,4 @@
+
 import { WebViewSectionProps } from "../types";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +42,6 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
           });
         }
         
-        console.log('Area images from property_images table:', imagesByArea);
         setAreaImages(imagesByArea);
       } catch (err) {
         console.error('Error fetching area images:', err);
@@ -51,12 +51,16 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
     fetchAreaImages();
   }, [property.id, property.areas]);
 
-  if (!property.areas || property.areas.length === 0) return null;
+  if (!property.areas || property.areas.length === 0) {
+    return (
+      <div className="p-4 bg-white/90 rounded-lg shadow-sm">
+        <p className="text-gray-500 text-center">No areas available for this property</p>
+      </div>
+    );
+  }
 
-  const pageMatch = property.currentPath?.match(/areas-(\d+)/);
-  const pageIndex = pageMatch ? parseInt(pageMatch[1]) : 0;
-  const startIndex = pageIndex * 2;
-  const areasForThisPage = property.areas.slice(startIndex, startIndex + 2);
+  // Ensure we have valid areas to display
+  const areasToDisplay = property.areas.slice(0, 2);
   
   const getAreaImages = (areaId: string): string[] => {
     if (areaImages[areaId]) {
@@ -71,17 +75,12 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
       .map(img => img.url);
   };
 
-  console.log("AreasSection - property.areas:", property.areas);
-
   return (
     <div className="space-y-4 pb-24">
       <div className="px-6 space-y-8">
-        {areasForThisPage.map((area, index) => {
+        {areasToDisplay.map((area, index) => {
           const areaImagesUrls = getAreaImages(area.id);
           const columnCount = area.columns || 2;
-          
-          console.log(`Area ${index} (${area.title}) - columns:`, columnCount);
-          console.log(`Area ${index} (${area.title}) - resolved images:`, areaImagesUrls);
           
           return (
             <div key={index} className="space-y-4 bg-white/90 p-4 rounded-lg shadow-sm">

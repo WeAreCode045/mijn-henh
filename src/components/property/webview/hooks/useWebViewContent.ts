@@ -28,12 +28,16 @@ export function useWebViewContent({
   const handleNext = () => {
     if (canGoForward) {
       setCurrentPage(currentPage + 1);
+      // Scroll to top when changing page
+      window.scrollTo(0, 0);
     }
   };
 
   const handlePrevious = () => {
     if (canGoBack) {
       setCurrentPage(currentPage - 1);
+      // Scroll to top when changing page
+      window.scrollTo(0, 0);
     }
   };
   

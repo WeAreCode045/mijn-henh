@@ -29,7 +29,7 @@ export function WebViewNavigation({
         Previous
       </Button>
       <span className="text-sm">
-        Page {currentPage + 1} of {totalPages}
+        {totalPages > 0 ? `Page ${currentPage + 1} of ${totalPages}` : "Loading..."}
       </span>
       <Button 
         onClick={onNext} 

@@ -5,16 +5,12 @@ export const usePageCalculation = () => {
   const calculateTotalPages = (propertyData: PropertyData | null, isPrintView: boolean = false) => {
     if (!propertyData) return 0;
     
-    let total = 2; // Overview and Details pages
+    // Start with basic pages
+    let total = 2; // Overview and Details pages always exist
     
-    // Add area pages
+    // Add area pages if they exist
     if (propertyData.areas && propertyData.areas.length > 0) {
-      total += Math.ceil(propertyData.areas.length / 2);
-    }
-    
-    // Add floorplans page if there are floorplans
-    if (propertyData.floorplans && propertyData.floorplans.length > 0) {
-      total += 1;
+      total += 1; // At least one area page
     }
     
     // Add neighborhood page

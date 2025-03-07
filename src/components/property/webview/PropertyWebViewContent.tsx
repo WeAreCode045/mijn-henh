@@ -7,6 +7,7 @@ import { usePageCalculation } from "./hooks/usePageCalculation";
 import { getPrintStylesContent } from "./PrintStyles";
 import { WebViewNavigation } from "./components/WebViewNavigation";
 import { WebViewSectionContent } from "./components/WebViewSectionContent";
+import { useWebViewContent } from "./hooks/useWebViewContent";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
@@ -36,47 +37,24 @@ export function PropertyWebViewContent({
   handleDownload
 }: PropertyWebViewContentProps) {
   const [internalCurrentPage, setInternalCurrentPage] = useState(0);
-  const { calculateTotalPages } = usePageCalculation();
-  const { formData, handleChange, handleSubmit, isSubmitting } = useContactForm(property, settings);
   
   // Use external state if provided, otherwise use internal state
   const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
   const setCurrentPageFn = externalSetCurrentPage || setInternalCurrentPage;
   
-  const totalPages = calculateTotalPages(property, isPrintView);
-  const canGoBack = currentPage > 0;
-  const canGoForward = currentPage < totalPages - 1;
-  
-  // Function to conditionally log when in development/debug
-  const debugLog = (message: string, data?: any) => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`WebView: ${message}`, data);
-    }
-  };
-  
-  debugLog('PropertyWebViewContent rendered', { 
-    property: property?.id, 
-    currentPage, 
-    isPrintView 
+  // Use the custom hook for content-related logic
+  const { 
+    totalPages, 
+    canGoBack, 
+    canGoForward, 
+    handleNext, 
+    handlePrevious 
+  } = useWebViewContent({
+    propertyData: property,
+    currentPage,
+    setCurrentPage: setCurrentPageFn
   });
   
-  // Reset to first page when property changes
-  useEffect(() => {
-    setCurrentPageFn(0);
-  }, [property?.id, setCurrentPageFn]);
-
-  const handleNext = () => {
-    if (canGoForward) {
-      setCurrentPageFn(currentPage + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (canGoBack) {
-      setCurrentPageFn(currentPage - 1);
-    }
-  };
-
   return (
     <div className="relative p-6">
       {isPrintView && (

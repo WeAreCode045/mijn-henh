@@ -29,7 +29,7 @@ export function WebViewSectionContent({
   });
 
   // Check if we have content for this page
-  if (!sections[currentPage]) {
+  if (!sections || !sections[currentPage]) {
     return (
       <div className="p-4 bg-white/90 rounded-lg shadow-sm">
         <p className="text-gray-500 text-center">No content available for this page</p>
