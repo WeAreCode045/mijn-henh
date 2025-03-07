@@ -3,7 +3,7 @@ import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
-import { Dispatch, SetStateAction, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
 import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
@@ -39,6 +39,18 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     handleNext,
     handlePrevious
   } = usePropertyWebView();
+
+  // Set webview background image from settings
+  useEffect(() => {
+    if (settings.webviewBackgroundUrl) {
+      document.documentElement.style.setProperty(
+        '--webview-bg-image', 
+        `url(${settings.webviewBackgroundUrl})`
+      );
+    } else {
+      document.documentElement.style.removeProperty('--webview-bg-image');
+    }
+  }, [settings.webviewBackgroundUrl]);
 
   // Loading state
   if (isLoading) {
@@ -111,8 +123,19 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     }
   };
 
+  // Apply primary color from settings to buttons and accent elements
+  useEffect(() => {
+    if (settings.primaryColor) {
+      const hslColor = hexToHSL(settings.primaryColor);
+      if (hslColor) {
+        document.documentElement.style.setProperty('--estate-600', `${hslColor.h} ${hslColor.s}% ${hslColor.l}%`);
+        document.documentElement.style.setProperty('--estate-700', `${hslColor.h} ${hslColor.s}% ${Math.max(0, hslColor.l - 10)}%`);
+      }
+    }
+  }, [settings.primaryColor]);
+
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen webview-page relative">
       {/* Fixed Breadcrumb */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm">
         <div className="container mx-auto px-4">
@@ -130,7 +153,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
           <div className="w-full flex-1 px-4 sm:px-8 py-4">
             <div className="flex justify-center">
               <div className="w-full max-w-[800px] p-0 sm:p-4 h-full">
-                <div className="bg-white shadow-[0_0_15px_rgba(0,0,0,0.1)] rounded-xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-14rem)]">
+                <div className="webview-content rounded-xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-14rem)]">
                   <div className="w-full flex-1 overflow-y-auto">
                     <PropertyWebViewMain
                       propertyData={propertyData}
@@ -172,4 +195,46 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
       </div>
     </div>
   );
+}
+
+// Helper function to convert hex color to HSL
+function hexToHSL(hex: string): { h: number; s: number; l: number } | null {
+  // Remove the # if present
+  hex = hex.replace(/^#/, '');
+
+  // Parse the hex values
+  let r, g, b;
+  if (hex.length === 3) {
+    r = parseInt(hex.substring(0, 1).repeat(2), 16) / 255;
+    g = parseInt(hex.substring(1, 2).repeat(2), 16) / 255;
+    b = parseInt(hex.substring(2, 3).repeat(2), 16) / 255;
+  } else if (hex.length === 6) {
+    r = parseInt(hex.substring(0, 2), 16) / 255;
+    g = parseInt(hex.substring(2, 4), 16) / 255;
+    b = parseInt(hex.substring(4, 6), 16) / 255;
+  } else {
+    return null;
+  }
+
+  // Find min and max values
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h = Math.round(h * 60);
+  }
+
+  s = Math.round(s * 100);
+  l = Math.round(l * 100);
+
+  return { h, s, l };
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useContactForm } from "./hooks/useContactForm";
 import { usePageCalculation } from "./hooks/usePageCalculation";
 import { getPrintStylesContent } from "./PrintStyles";
+import { Button } from "@/components/ui/button";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
@@ -91,39 +92,35 @@ export function PropertyWebViewContent({
   };
 
   return (
-    <div className="relative">
+    <div className="relative p-6">
       {isPrintView && (
         <style type="text/css" dangerouslySetInnerHTML={{ __html: getPrintStylesContent() }} />
       )}
       
-      {sections[currentPage]?.content}
+      <div className="webview-section p-4 mb-8">
+        {sections[currentPage]?.content}
+      </div>
       
       <div className="mt-8 flex justify-between items-center">
-        <button 
+        <Button 
           onClick={handlePrevious} 
           disabled={!canGoBack}
-          className={`px-4 py-2 rounded ${canGoBack 
-            ? 'bg-estate-600 text-white hover:bg-estate-700' 
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
+          className={`px-4 py-2 rounded ${canGoBack ? 'webview-button' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
         >
           Previous
-        </button>
+        </Button>
         
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 font-medium">
           Page {currentPage + 1} of {totalPages}
         </div>
         
-        <button 
+        <Button 
           onClick={handleNext} 
           disabled={!canGoForward}
-          className={`px-4 py-2 rounded ${canGoForward 
-            ? 'bg-estate-600 text-white hover:bg-estate-700' 
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
+          className={`px-4 py-2 rounded ${canGoForward ? 'webview-button' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );
