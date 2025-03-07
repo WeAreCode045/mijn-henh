@@ -27,5 +27,6 @@ export const initialFormData: PropertyFormData = {
   latitude: null,
   longitude: null,
   template_id: "default", // Set default template_id
-  floorplans: [] // Add empty floorplans array
+  floorplans: [], // Add empty floorplans array
+  floorplanEmbedScript: "" // Add empty floorplanEmbedScript
 };

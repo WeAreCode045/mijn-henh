@@ -25,7 +25,6 @@ export const renderDashboardTab = (props: PropertyTabProps) => {
       handleSaveTemplate={handlers.handleSaveTemplate}
       handleGeneratePDF={handlers.handleGeneratePDF}
       handleWebView={handlers.handleWebView}
-      // Pass agent and template info
       agentInfo={agentInfo}
       templateInfo={templateInfo}
     />
@@ -82,7 +81,7 @@ export const renderMediaTab = (props: PropertyTabProps) => {
       images={property.images || []}
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
-      notes={property.notes}
+      floorplanEmbedScript={property.floorplanEmbedScript}
       floorplans={property.floorplans || []}
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
@@ -94,6 +93,9 @@ export const renderMediaTab = (props: PropertyTabProps) => {
       featuredImageUrls={property.featuredImages || []}
       onSetFeatured={handlers.handleSetFeaturedImage}
       onToggleFeatured={handlers.handleToggleFeaturedImage}
+      onVirtualTourUpdate={url => handlers.onFieldChange('virtualTourUrl', url)}
+      onYoutubeUrlUpdate={url => handlers.onFieldChange('youtubeUrl', url)}
+      onFloorplanEmbedScriptUpdate={script => handlers.onFieldChange('floorplanEmbedScript', script)}
     />
   );
 };

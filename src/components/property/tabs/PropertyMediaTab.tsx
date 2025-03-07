@@ -12,11 +12,11 @@ interface PropertyMediaTabProps {
   images: PropertyImage[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  notes?: string;
+  floorplanEmbedScript?: string;
   floorplans?: any[];
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
-  onNotesUpdate?: (notes: string) => void;
+  onFloorplanEmbedScriptUpdate?: (script: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -36,11 +36,11 @@ export function PropertyMediaTab({
   images = [],
   virtualTourUrl = "",
   youtubeUrl = "",
-  notes = "",
+  floorplanEmbedScript = "",
   floorplans = [],
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
-  onNotesUpdate,
+  onFloorplanEmbedScriptUpdate,
   onImageUpload,
   onRemoveImage,
   onFloorplanUpload,
@@ -118,10 +118,10 @@ export function PropertyMediaTab({
         id={id}
         virtualTourUrl={virtualTourUrl}
         youtubeUrl={youtubeUrl}
-        notes={notes}
+        floorplanEmbedScript={floorplanEmbedScript}
         onVirtualTourUpdate={onVirtualTourUpdate}
         onYoutubeUrlUpdate={onYoutubeUrlUpdate}
-        onNotesUpdate={onNotesUpdate}
+        onFloorplanEmbedScriptUpdate={onFloorplanEmbedScriptUpdate}
       />
     </div>
   );

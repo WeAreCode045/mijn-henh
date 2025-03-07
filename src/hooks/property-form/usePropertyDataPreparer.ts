@@ -48,7 +48,6 @@ export function usePropertyDataPreparer() {
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      notes: formData.notes,
       technicalItems: technicalItemsJson,
       floorplanEmbedScript: formData.floorplanEmbedScript
     };
