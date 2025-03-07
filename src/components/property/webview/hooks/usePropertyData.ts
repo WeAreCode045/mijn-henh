@@ -88,7 +88,8 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             nearby_places: Array.isArray(data.nearby_places) ? data.nearby_places : 
                           (data.nearby_places ? [data.nearby_places] : []),
             areas: Array.isArray(data.areas) ? data.areas : 
-                  (data.areas ? [data.areas] : [])
+                  (data.areas ? [data.areas] : []),
+            floorplanEmbedScript: data.floorplanEmbedScript || ""
           };
           
           const transformedData = transformSupabaseData(propertyWithAgent as any);

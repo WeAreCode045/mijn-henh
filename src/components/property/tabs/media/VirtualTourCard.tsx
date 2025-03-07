@@ -61,6 +61,7 @@ export function VirtualTourCard({
     const newScript = e.target.value;
     setLocalFloorplanEmbed(newScript);
     if (onFloorplanEmbedScriptUpdate) {
+      console.log("Updating floorplan embed script:", newScript);
       onFloorplanEmbedScriptUpdate(newScript);
     }
   };

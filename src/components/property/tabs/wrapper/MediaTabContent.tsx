@@ -53,6 +53,8 @@ export function MediaTabContent({
 }: MediaTabContentProps) {
   // Use aliases if provided, fall back to original props
   const effectiveImageUpload = onUpload || onImageUpload;
+  
+  console.log("MediaTabContent: floorplanEmbedScript =", floorplanEmbedScript);
 
   return (
     <PropertyMediaTab
