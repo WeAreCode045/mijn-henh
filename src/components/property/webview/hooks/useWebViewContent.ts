@@ -13,7 +13,7 @@ export function useWebViewContent({
   currentPage: number;
   setCurrentPage: (page: number) => void;
 }) {
-  const { calculateTotalPages } = usePageCalculation();
+  const { calculateTotalPages, isValidPageIndex } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
   
   // Reset to first page when property changes
@@ -21,23 +21,41 @@ export function useWebViewContent({
     setCurrentPage(0);
   }, [propertyData?.id, setCurrentPage]);
   
+  // Ensure currentPage is valid
+  useEffect(() => {
+    if (!isValidPageIndex(currentPage, propertyData)) {
+      console.log("Invalid page index detected, resetting to 0");
+      setCurrentPage(0);
+    }
+  }, [currentPage, propertyData, setCurrentPage]);
+  
   // Navigation functions
   const canGoBack = currentPage > 0;
   const canGoForward = currentPage < totalPages - 1;
   
   const handleNext = () => {
     if (canGoForward) {
-      setCurrentPage(currentPage + 1);
-      // Scroll to top when changing page
-      window.scrollTo(0, 0);
+      const nextPage = currentPage + 1;
+      if (isValidPageIndex(nextPage, propertyData)) {
+        setCurrentPage(nextPage);
+        // Scroll to top when changing page
+        window.scrollTo(0, 0);
+      } else {
+        console.warn(`Cannot navigate to invalid page index: ${nextPage}`);
+      }
     }
   };
 
   const handlePrevious = () => {
     if (canGoBack) {
-      setCurrentPage(currentPage - 1);
-      // Scroll to top when changing page
-      window.scrollTo(0, 0);
+      const prevPage = currentPage - 1;
+      if (isValidPageIndex(prevPage, propertyData)) {
+        setCurrentPage(prevPage);
+        // Scroll to top when changing page
+        window.scrollTo(0, 0);
+      } else {
+        console.warn(`Cannot navigate to invalid page index: ${prevPage}`);
+      }
     }
   };
   

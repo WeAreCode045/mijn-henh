@@ -18,6 +18,10 @@ export function WebViewNavigation({
   onPrevious,
   onNext
 }: WebViewNavigationProps) {
+  // Make sure we have valid page numbers
+  const displayCurrentPage = Math.max(0, Math.min(currentPage, totalPages - 1)) + 1;
+  const displayTotalPages = Math.max(1, totalPages);
+
   return (
     <div className="flex justify-between mt-6">
       <Button 
@@ -29,7 +33,7 @@ export function WebViewNavigation({
         Previous
       </Button>
       <span className="text-sm">
-        {totalPages > 0 ? `Page ${currentPage + 1} of ${totalPages}` : "Loading..."}
+        {totalPages > 0 ? `Page ${displayCurrentPage} of ${displayTotalPages}` : "Loading..."}
       </span>
       <Button 
         onClick={onNext} 

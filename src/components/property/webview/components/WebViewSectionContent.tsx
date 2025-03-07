@@ -19,6 +19,15 @@ export function WebViewSectionContent({
   isPrintView = false,
   waitForPlaces = false
 }: WebViewSectionContentProps) {
+  // Validate property data
+  if (!property) {
+    return (
+      <div className="p-4 bg-white/90 rounded-lg shadow-sm">
+        <p className="text-gray-500 text-center">No property data available</p>
+      </div>
+    );
+  }
+
   // Get sections based on the current property and page
   const sections = getSections({ 
     property, 
@@ -28,8 +37,21 @@ export function WebViewSectionContent({
     isPrintView
   });
 
+  // Check if currentPage is out of bounds
+  if (!sections || currentPage < 0 || currentPage >= sections.length) {
+    console.error(`Invalid page: ${currentPage}, available sections: ${sections?.length || 0}`);
+    return (
+      <div className="p-4 bg-white/90 rounded-lg shadow-sm">
+        <p className="text-gray-500 text-center">Invalid page index</p>
+      </div>
+    );
+  }
+
+  // Get the current section
+  const currentSection = sections[currentPage];
+  
   // Check if we have content for this page
-  if (!sections || !sections[currentPage]) {
+  if (!currentSection || !currentSection.content) {
     return (
       <div className="p-4 bg-white/90 rounded-lg shadow-sm">
         <p className="text-gray-500 text-center">No content available for this page</p>
@@ -39,7 +61,7 @@ export function WebViewSectionContent({
 
   return (
     <div className="webview-section p-4 mb-8">
-      {sections[currentPage]?.content}
+      {currentSection.content}
     </div>
   );
 }

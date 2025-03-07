@@ -48,7 +48,7 @@ export function PropertyWebViewContent({
     canGoBack, 
     canGoForward, 
     handleNext, 
-    handlePrevious 
+    handlePrevious
   } = useWebViewContent({
     propertyData: property,
     currentPage,
