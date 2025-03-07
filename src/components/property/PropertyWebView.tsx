@@ -1,10 +1,8 @@
-
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
 import { WebViewHeader } from "@/components/property/webview/WebViewHeader";
 import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
@@ -19,9 +17,10 @@ interface PropertyWebViewProps {
   property?: PropertyData;
   open?: boolean;
   onOpenChange?: Dispatch<SetStateAction<boolean>>;
+  isDialog?: boolean;
 }
 
-export function PropertyWebView({ property, open, onOpenChange }: PropertyWebViewProps = {}) {
+export function PropertyWebView({ property, open, onOpenChange, isDialog = false }: PropertyWebViewProps = {}) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { settings } = useAgencySettings();
@@ -56,7 +55,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      <div className={`${isDialog ? "" : "min-h-screen"} bg-white flex flex-col items-center justify-center p-4`}>
         <div className="max-w-md w-full space-y-4">
           <Skeleton className="h-8 w-3/4 mx-auto" />
           <Skeleton className="h-64 w-full rounded-lg" />
@@ -73,7 +72,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
   // Error state
   if (error || !propertyData) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      <div className={`${isDialog ? "" : "min-h-screen"} bg-white flex flex-col items-center justify-center p-4`}>
         <div className="max-w-md w-full text-center space-y-6">
           <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
           <h1 className="text-2xl font-bold text-gray-800">Property Not Found</h1>
@@ -95,24 +94,38 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
 
   const totalPages = calculateTotalPages(propertyData);
 
-  if (typeof open !== 'undefined' && onOpenChange) {
+  // If this is being rendered in a dialog
+  if (isDialog && onOpenChange) {
     return (
-      <PropertyWebViewDialog
-        propertyData={propertyData}
-        isOpen={open} 
-        open={open}
-        onOpenChange={onOpenChange}
-        settings={settings}
-        contentRef={contentRef}
-        printContentRef={printContentRef}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-        handleShare={handleShare}
-        handlePrint={handlePrint}
-        handleDownload={async () => {}}
-      />
+      <div className="w-full h-full flex flex-col">
+        <WebViewHeader 
+          property={propertyData}
+          settings={settings}
+        />
+        <div className="flex-1 overflow-y-auto">
+          <PropertyWebViewMain
+            propertyData={propertyData}
+            settings={settings}
+            contentRef={contentRef}
+            printContentRef={printContentRef}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            selectedImage={selectedImage}
+            setSelectedImage={setSelectedImage}
+            handleShare={handleShare}
+            handlePrint={handlePrint}
+            handleDownload={async () => {}}
+          />
+        </div>
+        <WebViewFooter 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          onShare={handleShare}
+          onPrint={handlePrint}
+        />
+      </div>
     );
   }
 
@@ -135,6 +148,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     }
   }, [settings.primaryColor]);
 
+  // Full page view
   return (
     <div className="min-h-screen webview-page relative">
       {/* Fixed Breadcrumb */}

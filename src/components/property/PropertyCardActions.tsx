@@ -38,7 +38,10 @@ export const PropertyCardActions = ({
       <Button 
         variant="outline" 
         size="icon"
-        onClick={() => navigate(`/property/${property.id}/webview`)}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent card click propagation
+          navigate(`/property/${property.id}/webview`);
+        }}
         title="Open Preview"
       >
         <ArrowUpRight className="h-4 w-4" />
@@ -46,7 +49,10 @@ export const PropertyCardActions = ({
       <Button 
         variant="outline" 
         size="icon"
-        onClick={() => navigate(`/property/${property.id}/dashboard`)}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent card click propagation
+          navigate(`/property/${property.id}/dashboard`);
+        }}
         title="Bewerk"
       >
         <Pencil className="h-4 w-4" />
@@ -54,7 +60,10 @@ export const PropertyCardActions = ({
       <Button 
         variant="outline" 
         size="icon"
-        onClick={handleDownloadPDF}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent card click propagation
+          handleDownloadPDF();
+        }}
         title="Download PDF"
       >
         <FileDown className="h-4 w-4" />
@@ -62,7 +71,10 @@ export const PropertyCardActions = ({
       <Button 
         variant="destructive" 
         size="icon"
-        onClick={() => onDelete(property.id)}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent card click propagation
+          onDelete(property.id);
+        }}
         title="Verwijder"
       >
         <Trash className="h-4 w-4" />
@@ -70,7 +82,10 @@ export const PropertyCardActions = ({
       <Button
         variant="outline"
         size="icon"
-        onClick={onShowSubmissions}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent card click propagation
+          onShowSubmissions();
+        }}
         className="relative"
         title="Berichten"
       >
