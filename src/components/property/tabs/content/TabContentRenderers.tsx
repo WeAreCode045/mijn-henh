@@ -1,3 +1,4 @@
+
 import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 import { DashboardTabContent } from "../wrapper/DashboardTabContent";
 import { ContentTabContent } from "../wrapper/ContentTabContent";
@@ -72,25 +73,25 @@ export const renderContentTab = (props: PropertyTabProps) => {
 export const renderMediaTab = (props: PropertyTabProps) => {
   if (props.activeTab !== "media") return null;
   
-  const { property, handlers } = props;
+  const { property, handlers, formState } = props;
   
   return (
     <MediaTabContent
       id={property.id}
       title={property.title || ""}
       images={property.images || []}
-      virtualTourUrl={property.virtualTourUrl}
-      youtubeUrl={property.youtubeUrl}
-      floorplanEmbedScript={property.floorplanEmbedScript}
-      floorplans={property.floorplans || []}
+      virtualTourUrl={formState.virtualTourUrl}
+      youtubeUrl={formState.youtubeUrl}
+      floorplanEmbedScript={formState.floorplanEmbedScript}
+      floorplans={formState.floorplans || []}
       onImageUpload={handlers.handleImageUpload}
       onRemoveImage={handlers.handleRemoveImage}
       isUploading={handlers.isUploading}
       onFloorplanUpload={handlers.handleFloorplanUpload}
       onRemoveFloorplan={handlers.handleRemoveFloorplan}
       isUploadingFloorplan={handlers.isUploadingFloorplan}
-      featuredImageUrl={property.featuredImage}
-      featuredImageUrls={property.featuredImages || []}
+      featuredImageUrl={formState.featuredImage}
+      featuredImageUrls={formState.featuredImages || []}
       onSetFeatured={handlers.handleSetFeaturedImage}
       onToggleFeatured={handlers.handleToggleFeaturedImage}
       onVirtualTourUpdate={url => handlers.onFieldChange('virtualTourUrl', url)}

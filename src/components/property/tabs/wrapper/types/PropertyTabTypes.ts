@@ -17,6 +17,7 @@ export interface PropertyTabProps {
     notes?: string;
     created_at?: string;
     updated_at?: string;
+    floorplanEmbedScript?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;

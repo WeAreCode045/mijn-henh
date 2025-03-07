@@ -15,10 +15,10 @@ export function renderMediaTab(tabProps: any) {
       images={tabProps.formState.images || []}
       virtualTourUrl={tabProps.formState.virtualTourUrl}
       youtubeUrl={tabProps.formState.youtubeUrl}
-      notes={tabProps.formState.notes}
+      floorplanEmbedScript={tabProps.formState.floorplanEmbedScript}
       onVirtualTourUpdate={(url) => tabProps.handlers.onFieldChange('virtualTourUrl', url)}
       onYoutubeUrlUpdate={(url) => tabProps.handlers.onFieldChange('youtubeUrl', url)}
-      onNotesUpdate={(notes) => tabProps.handlers.onFieldChange('notes', notes)}
+      onFloorplanEmbedScriptUpdate={(script) => tabProps.handlers.onFieldChange('floorplanEmbedScript', script)}
       onImageUpload={tabProps.handlers.handleImageUpload}
       onRemoveImage={tabProps.handlers.handleRemoveImage}
       isUploading={tabProps.handlers.isUploading}
