@@ -52,7 +52,7 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
     
     /* Adding Estate theme colors for webview */
-    --estate-50: 209 34% 74% / 0.9;
+    --estate-50: 209 34% 74% / 0.3;
     --estate-100: 259 30% 94%;
     --estate-200: 260 25% 90%;
     --estate-300: 260 20% 83%;
@@ -63,7 +63,8 @@
     --estate-800: 260 7% 30%;
     --estate-900: 260 10% 15%;
 
-  --bg-estate-50:  209 34% 74% / 0.3;
+  --bg-estate-50:  209 34% 74% / 0.16;
+    
   }
 
   .dark {
