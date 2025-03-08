@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { 
@@ -87,7 +86,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   // Get energy label image path based on energy class
   const getEnergyLabelImagePath = () => {
     if (!property.energyLabel) return null;
-    return `/storage/v1/object/public/global/energy/${property.energyLabel.toUpperCase()}.png`;
+    return `https://gjvpptmwijiosgdcozep.supabase.co/storage/v1/object/public/global/energy/${property.energyLabel.toUpperCase()}.png`;
   };
   
   return (
