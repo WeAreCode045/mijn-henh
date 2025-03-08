@@ -1,87 +1,89 @@
 
+import { PropertyData } from "@/types/property";
 import { WebViewSectionProps } from "../types";
-import { PropertyArea } from "@/types/property";
+import { useState } from "react";
 import "../styles/WebViewStyles.css";
 
-interface SingleAreaSectionProps extends WebViewSectionProps {
-  areaIndex: number;
-}
-
-export function SingleAreaSection({ property, areaIndex }: SingleAreaSectionProps) {
+export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebViewSectionProps & { areaIndex?: number }) {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // Ensure areas exist and the requested index is valid
   if (!property.areas || !property.areas[areaIndex]) {
     return (
       <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">Area not found</p>
+        <p className="text-gray-500">No area information available</p>
       </div>
     );
   }
-
-  const area = property.areas[areaIndex] as PropertyArea;
   
-  // Find images for this area
-  const areaImages: string[] = [];
-  if (area.imageIds && Array.isArray(area.imageIds)) {
-    // Get all property images
-    const allImages = Array.isArray(property.images) ? property.images : [];
-    
-    // Filter images for this area
-    area.imageIds.forEach(imageId => {
-      const foundImage = allImages.find(img => 
-        (typeof img === 'string' && img === imageId) || 
-        (typeof img === 'object' && img.id === imageId)
-      );
-      
-      if (foundImage) {
-        if (typeof foundImage === 'string') {
-          areaImages.push(foundImage);
-        } else if (foundImage.url) {
-          areaImages.push(foundImage.url);
-        }
-      }
-    });
-  }
-
+  const area = property.areas[areaIndex];
+  const areaTitle = area.title || `Area ${areaIndex + 1}`;
+  
+  // Get area photos
+  const areaPhotos = area.photos || [];
+  
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-estate-800">{area.title}</h2>
+      <h2 className="text-2xl font-bold text-estate-800">{areaTitle}</h2>
+      
+      {/* Area description */}
+      {area.description && (
+        <div className="prose prose-slate max-w-none">
+          <p>{area.description}</p>
+        </div>
+      )}
+      
+      {/* Area images gallery */}
+      {areaPhotos.length > 0 && (
+        <div className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {areaPhotos.map((photo, index) => (
+              <div 
+                key={index} 
+                className="relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => setSelectedImage(photo)}
+              >
+                <img 
+                  src={photo} 
+                  alt={`${areaTitle} photo ${index + 1}`}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Area details */}
-      <div className="bg-white rounded-lg shadow p-6">
-        {area.description && (
-          <div className="mb-6">
-            <p className="text-estate-700">{area.description}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        {area.sqft && (
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold">Area:</span>
+            <span>{area.sqft} sq ft</span>
           </div>
         )}
         
-        {/* Area specifications */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {area.sqFt && (
-            <div className="flex flex-col">
-              <span className="text-sm text-estate-500">Size</span>
-              <span className="font-medium">{area.sqFt} sq ft</span>
-            </div>
-          )}
-          {area.dimensions && (
-            <div className="flex flex-col">
-              <span className="text-sm text-estate-500">Dimensions</span>
-              <span className="font-medium">{area.dimensions}</span>
-            </div>
-          )}
-        </div>
+        {area.dimensions && (
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold">Dimensions:</span>
+            <span>{area.dimensions}</span>
+          </div>
+        )}
       </div>
       
-      {/* Area images */}
-      {areaImages.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {areaImages.map((imageUrl, index) => (
-            <div key={index} className="rounded-lg overflow-hidden shadow-md">
-              <img 
-                src={imageUrl} 
-                alt={`${area.title} - Image ${index + 1}`} 
-                className="w-full h-64 object-cover"
-              />
-            </div>
-          ))}
+      {/* Modal for full-size image view */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="max-w-4xl max-h-[90vh]">
+            <img 
+              src={selectedImage} 
+              alt="Area full view" 
+              className="object-contain max-h-[90vh] max-w-full"
+            />
+          </div>
         </div>
       )}
     </div>
