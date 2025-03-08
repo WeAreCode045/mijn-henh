@@ -76,7 +76,7 @@ export function MediaDatabaseFetcher({
       
       fetchImages();
     }
-  }, [propertyId, images, onFetchComplete, lastFetchTime]);
+  }, [propertyId, lastFetchTime, onFetchComplete]);
 
   return null; // This is a logic-only component with no UI
 }

@@ -54,7 +54,9 @@ export function PropertyImagesCard({
   // Debug logging for rendering
   console.log("Rendering PropertyImagesCard with:", {
     imageCount: sortableImages.length,
-    sortOrders: sortableImages.map(i => i.sort_order || 'none')
+    sortOrders: sortableImages.map(i => i.sort_order || 'none'),
+    featuredImageUrl,
+    featuredImageUrls
   });
 
   return (

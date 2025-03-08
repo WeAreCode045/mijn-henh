@@ -55,6 +55,8 @@ export function PropertyMediaTab({
   const [mediaImages, setMediaImages] = useState<PropertyImage[]>(images);
   
   console.log("PropertyMediaTab: floorplanEmbedScript =", floorplanEmbedScript);
+  console.log("PropertyMediaTab: featuredImageUrl =", featuredImageUrl);
+  console.log("PropertyMediaTab: featuredImageUrls =", featuredImageUrls);
 
   const handleFetchComplete = (fetchedImages: PropertyImage[]) => {
     // Sort images if they come with sort_order values
