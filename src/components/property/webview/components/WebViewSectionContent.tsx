@@ -57,6 +57,15 @@ export function WebViewSectionContent({
   // Get the current section, with fallback to first section if current is not available
   const currentSection = safePageIndex < sections.length ? sections[safePageIndex] : sections[0];
   
+  // Debug information to help identify issues
+  console.log('WebViewSectionContent rendering:', {
+    currentPage,
+    safePageIndex,
+    totalPages,
+    sectionsAvailable: sections.length,
+    currentSectionTitle: currentSection?.title
+  });
+  
   // Check if we have content for this page
   if (!currentSection || !currentSection.content) {
     return (
