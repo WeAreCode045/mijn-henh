@@ -79,16 +79,18 @@
   transition: all 0.2s ease-in-out;
 }
 
+
 .webview-detail-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  background-color: hsl(var(--estate-100));
-  color: hsl(var(--estate-700));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background-color: #fe9c13;
+    color: hsl(0deg 0% 100%);
 }
+
 
 .webview-button {
   background-color: hsl(var(--estate-600));
@@ -97,7 +99,7 @@
 }
 
 .webview-button:hover {
-  background-color: hsl(var(--estate-700));
+  background-color: hsl(var(--estate-50));
 }
 
 .webview-button-outline {
