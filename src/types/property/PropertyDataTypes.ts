@@ -1,14 +1,54 @@
 
-/**
- * Property data related type definitions
- */
+import { PropertyFeature } from './PropertyTypes';
+import { PropertyImage } from './PropertyImageTypes';
+import { PropertyNearbyPlace, PropertyCity } from './PropertyLocationTypes';
+import { PropertyFloorplan } from './PropertyFloorplanTypes';
 
-import { PropertyArea } from "./PropertyAreaTypes";
-import { PropertyFeature } from "./PropertyFeatureTypes";
-import { PropertyAgent } from "./PropertyAgentTypes";
-import { PropertyNearbyPlace, PropertyCity } from "./PropertyLocationTypes";
-import { PropertyTechnicalItem } from "./PropertyTechnicalTypes";
-import { PropertyImage, PropertyImageUnion } from "./PropertyImageTypes";
+export interface PropertyArea {
+  id: string;
+  name: string;
+  size: string;
+  title: string; // Added based on the error messages
+  description: string;
+  images: string[] | { url: string }[];
+  imageIds: string[]; // Added based on the error messages
+  columns: number; // Added based on the error messages
+}
+
+export interface PropertySubmitData {
+  id?: string;
+  title: string;
+  price: string;
+  address: string;
+  bedrooms: string;
+  bathrooms: string;
+  sqft: string;
+  livingArea: string;
+  buildYear: string;
+  garages: string;
+  energyLabel: string;
+  hasGarden: boolean;
+  description: string;
+  location_description?: string;
+  features: any;
+  images: string[];
+  areas: any[];
+  map_image?: string;
+  latitude?: number;
+  longitude?: number;
+  nearby_places?: any;
+  object_id?: string;
+  agent_id?: string;
+  template_id?: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
+  floorplans?: string[];
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  technicalItems?: any; // Added based on the error messages
+  floorplanEmbedScript?: string; // Added based on the error messages
+}
 
 export interface PropertyData {
   id: string;
@@ -24,43 +64,31 @@ export interface PropertyData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
-  location_description: string;
+  location_description?: string;
   features: PropertyFeature[];
+  images: (string | { url: string })[];
   areas: PropertyArea[];
-  images: PropertyImageUnion[];
-  nearby_places: PropertyNearbyPlace[];
-  agent_id?: string;
-  agent?: PropertyAgent;
-  latitude?: number | null;
-  longitude?: number | null;
-  map_image?: string | null;
-  created_at?: string;
-  updated_at?: string;
-  template_id?: string;
+  map_image?: string;
+  latitude?: number;
+  longitude?: number;
+  nearby_places?: PropertyNearbyPlace[];
+  nearby_cities?: PropertyCity[]; // Added based on the error messages
   object_id?: string;
-  floorplans?: PropertyImageUnion[];
+  agent_id?: string;
+  agent?: any; // Added based on the error messages
+  template_id?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  floorplans?: (string | { url: string })[];
   featuredImage?: string | null;
   featuredImages?: string[];
   technicalItems?: PropertyTechnicalItem[];
-  // Additional properties needed by components
-  coverImages?: string[];
-  gridImages?: string[];
-  floorplanEmbedScript?: string;
-  nearby_cities?: PropertyCity[];
+  floorplanEmbedScript?: string; // Added based on the error messages
+  coverImages?: string[]; // Added based on the error messages
+  gridImages?: any[]; // Added based on the error messages
 }
 
-export interface PropertyFormData extends Omit<PropertyData, 'id'> {
-  id?: string;
-  // Add any form-specific fields
-  areaPhotos?: string[];
-}
-
-export interface PropertySubmitData extends Omit<PropertyFormData, "featuredImage" | "featuredImages" | "images"> {
-  images: string[];
-  technicalItems?: PropertyTechnicalItem[];
-  floorplanEmbedScript?: string;
-  coverImages?: string[];
+export interface PropertyFormData extends PropertyData {
+  areaPhotos?: string[]; // Added based on the error messages
 }

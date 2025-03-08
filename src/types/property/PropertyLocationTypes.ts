@@ -1,33 +1,33 @@
 
-/**
- * Property location related types
- */
+export enum PropertyPlaceType {
+  RESTAURANT = 'restaurant',
+  CAFE = 'cafe',
+  STORE = 'store',
+  SCHOOL = 'school',
+  PARK = 'park',
+  HOSPITAL = 'hospital',
+  GYM = 'gym',
+  BANK = 'bank',
+  PHARMACY = 'pharmacy',
+  BAR = 'bar',
+  SUPERMARKET = 'supermarket',
+  TRANSPORTATION = 'transit_station'
+}
 
 export interface PropertyNearbyPlace {
   id: string;
   name: string;
-  vicinity: string;
-  rating: number;
-  user_ratings_total: number;
-  distance: number;
-  // Additional properties needed by components
-  type: string;
-  visible_in_webview: boolean;
+  distance: string;
+  vicinity?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  type?: string; // Added based on the error messages
+  visible_in_webview?: boolean; // Added based on the error messages
 }
 
 export interface PropertyCity {
-  id: string;
+  id?: string;
   name: string;
   distance: number;
-  visible_in_webview: boolean;
+  visible_in_webview?: boolean;
 }
-
-export type PropertyPlaceType = 
-  | 'restaurant'
-  | 'school'
-  | 'park'
-  | 'supermarket'
-  | 'gym'
-  | 'hospital'
-  | 'shopping_mall'
-  | 'cafe';

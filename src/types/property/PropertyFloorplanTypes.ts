@@ -1,15 +1,12 @@
 
-/**
- * Property floorplan type definitions
- */
-
 export interface PropertyFloorplan {
   id: string;
   url: string;
-  name?: string;
-  description?: string;
-  filePath?: string;
   property_id?: string;
-  type?: string;
+  title?: string;
+  description?: string;
   sort_order?: number;
+  filePath?: string; // Added based on the error messages
+  size?: number;
+  type?: string;
 }

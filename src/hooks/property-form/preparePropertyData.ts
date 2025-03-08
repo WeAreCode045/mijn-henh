@@ -21,13 +21,19 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     const description = (area as any).description || '';
     const imageIds = (area as any).imageIds || [];
     const columns = (area as any).columns || 2; // Default to 2 columns if not specified
+    const name = (area as any).name || '';
+    const size = (area as any).size || '';
+    const images = (area as any).images || [];
     
     return {
       id,
       title,
       description,
       imageIds,
-      columns
+      columns,
+      name,
+      size,
+      images
     };
   });
 }
