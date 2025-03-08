@@ -1,10 +1,11 @@
 
 export interface PropertyArea {
   id: string;
-  name?: string;
-  size?: string;
-  images?: string[];
-  // Add these properties that are being used in the codebase
+  name: string;
+  size: string;
+  images: any[];
+  
+  // Additional fields required by components
   title: string;
   description: string;
   imageIds: string[];

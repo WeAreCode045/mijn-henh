@@ -1,9 +1,8 @@
 
 export interface PropertyAgent {
-  id?: string;
-  name?: string;
+  id: string;
+  full_name?: string;
   email?: string;
   phone?: string;
-  photoUrl?: string;
-  address?: string;
+  photo_url?: string;
 }
