@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
@@ -14,10 +14,27 @@ export function MediaDatabaseFetcher({
   images,
   onFetchComplete
 }: MediaDatabaseFetcherProps) {
+  const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
+  
+  // Force re-fetch every 5 seconds when uploads might be happening
   useEffect(() => {
-    console.log("MediaDatabaseFetcher - checking if fetch needed", {propertyId, imagesLength: images?.length});
+    const interval = setInterval(() => {
+      if (propertyId) {
+        setLastFetchTime(Date.now());
+      }
+    }, 5000);
     
-    if (propertyId && (!images || images.length === 0)) {
+    return () => clearInterval(interval);
+  }, [propertyId]);
+  
+  useEffect(() => {
+    console.log("MediaDatabaseFetcher - checking if fetch needed", {
+      propertyId, 
+      imagesLength: images?.length,
+      lastFetchTime
+    });
+    
+    if (propertyId) {
       const fetchImages = async () => {
         try {
           console.log("MediaDatabaseFetcher - fetching images for property:", propertyId);
@@ -59,7 +76,7 @@ export function MediaDatabaseFetcher({
       
       fetchImages();
     }
-  }, [propertyId, images, onFetchComplete]);
+  }, [propertyId, images, onFetchComplete, lastFetchTime]);
 
   return null; // This is a logic-only component with no UI
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PropertyFormData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
+import { toast } from "sonner";
 
 export function useImageUploadHandler(
   formData: PropertyFormData,
@@ -46,19 +47,26 @@ export function useImageUploadHandler(
         }
       }
 
+      console.log("Starting upload for", files.length, "files. Property ID:", formData.id);
+
       // Process each file
       for (const file of files) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `${formData.id ? formData.id : 'temp'}/${fileName}`;
+        const filePath = formData.id 
+          ? `properties/${formData.id}/${fileName}`
+          : `temp/${fileName}`;
+
+        console.log("Uploading file to path:", filePath);
 
         // Upload to storage
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from('property_images')
           .upload(filePath, file);
 
         if (uploadError) {
           console.error('Error uploading image:', uploadError);
+          toast.error(`Error uploading image: ${uploadError.message}`);
           continue;
         }
 
@@ -72,41 +80,62 @@ export function useImageUploadHandler(
           continue;
         }
 
+        console.log("File uploaded successfully, public URL:", publicUrlData.publicUrl);
+
         // Increment the sort_order for each new image
         highestSortOrder += 1;
 
         // Create image record in database if we have a property ID
         if (formData.id) {
-          const { error: dbError } = await supabase
+          console.log("Creating database record for image with property_id:", formData.id);
+          const { error: dbError, data: imageData } = await supabase
             .from('property_images')
             .insert({
               property_id: formData.id,
               type: 'image',
               url: publicUrlData.publicUrl,
               sort_order: highestSortOrder // Assign sort_order
-            });
+            })
+            .select()
+            .single();
 
           if (dbError) {
             console.error('Error recording image in database:', dbError);
+            toast.error(`Error saving image reference: ${dbError.message}`);
+          } else {
+            console.log("Database record created successfully:", imageData);
+            
+            // Use the returned database ID if available
+            newImages.push({
+              id: imageData.id || Date.now().toString() + Math.random().toString(),
+              url: publicUrlData.publicUrl,
+              sort_order: highestSortOrder
+            });
           }
+        } else {
+          // If no property ID, just use a temporary ID
+          newImages.push({
+            id: Date.now().toString() + Math.random().toString(),
+            url: publicUrlData.publicUrl,
+            sort_order: highestSortOrder
+          });
         }
-
-        // Add to new images array
-        newImages.push({
-          id: Date.now().toString() + Math.random().toString(),
-          url: publicUrlData.publicUrl,
-          sort_order: highestSortOrder // Include sort_order in the image object
-        });
       }
 
       // Update form data with new images
+      console.log("Adding new images to form state:", newImages);
       setFormData({
         ...formData,
         images: [...currentImages, ...newImages]
       });
       
+      if (newImages.length > 0) {
+        toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded successfully`);
+      }
+      
     } catch (error) {
       console.error('Error in image upload:', error);
+      toast.error('Error uploading images. Please try again.');
     } finally {
       setIsUploading(false);
     }
