@@ -1,13 +1,17 @@
 
+/**
+ * Property data related type definitions
+ */
+
 import { PropertyArea } from "./PropertyAreaTypes";
 import { PropertyFeature } from "./PropertyFeatureTypes";
+import { PropertyAgent } from "./PropertyAgentTypes";
 import { PropertyNearbyPlace, PropertyCity } from "./PropertyLocationTypes";
 import { PropertyTechnicalItem } from "./PropertyTechnicalTypes";
-import { PropertyAgent } from "./PropertyAgentTypes";
+import { PropertyImage, PropertyImageUnion } from "./PropertyImageTypes";
 
 export interface PropertyData {
   id: string;
-  object_id?: string;
   title: string;
   price: string;
   address: string;
@@ -22,41 +26,41 @@ export interface PropertyData {
   description: string;
   location_description: string;
   features: PropertyFeature[];
-  featuredImage: string | null;
-  featuredImages: string[];
-  images: any[];
   areas: PropertyArea[];
-  map_image: string | null;
+  images: PropertyImageUnion[];
   nearby_places: PropertyNearbyPlace[];
-  latitude: number | null;
-  longitude: number | null;
-  template_id: string;
-  floorplans: any[];
-  virtualTourUrl: string;
-  youtubeUrl: string;
-  technicalItems: PropertyTechnicalItem[];
-  agent?: PropertyAgent | null;
-  
-  // Additional required properties
-  floorplanEmbedScript?: string;
-  nearby_cities?: PropertyCity[];
-  areaPhotos?: any[];
-  // For backward compatibility
+  agent_id?: string;
+  agent?: PropertyAgent;
+  latitude?: number | null;
+  longitude?: number | null;
+  map_image?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  template_id?: string;
+  object_id?: string;
+  floorplans?: PropertyImageUnion[];
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  technicalItems?: PropertyTechnicalItem[];
+  // Additional properties needed by components
   coverImages?: string[];
   gridImages?: string[];
+  floorplanEmbedScript?: string;
+  nearby_cities?: PropertyCity[];
 }
 
 export interface PropertyFormData extends Omit<PropertyData, 'id'> {
   id?: string;
-  agent_id?: string;
-  created_at?: string;
-  updated_at?: string;
+  // Add any form-specific fields
+  areaPhotos?: string[];
 }
 
-export interface PropertySubmitData extends Omit<PropertyFormData, 'images' | 'featuredImage' | 'featuredImages'> {
-  images?: string[];
-  featuredImage?: string | null;
-  featuredImages?: string[];
-  technicalItems?: any; // Make sure technicalItems is included here
+export interface PropertySubmitData extends Omit<PropertyFormData, "featuredImage" | "featuredImages" | "images"> {
+  images: string[];
+  technicalItems?: PropertyTechnicalItem[];
   floorplanEmbedScript?: string;
+  coverImages?: string[];
 }
