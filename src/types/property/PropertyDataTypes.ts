@@ -1,15 +1,10 @@
 
-import { PropertyArea } from './PropertyAreaTypes';
-import { PropertyFeature } from './PropertyFeatureTypes';
+import { PropertyArea, PropertyTechnicalItem } from './PropertyTypes';
 import { PropertyNearbyPlace } from './PropertyPlaceTypes';
+import { PropertyCity } from './PropertyCityTypes';
 import { PropertyImage } from './PropertyImageTypes';
 import { PropertyFloorplan } from './PropertyFloorplanTypes';
-import { PropertyCity } from './PropertyCityTypes';
-import { PropertyTechnicalItem } from './PropertyTechnicalItemTypes';
 
-/**
- * Represents property data
- */
 export interface PropertyData {
   id: string;
   title: string;
@@ -24,19 +19,16 @@ export interface PropertyData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
-  location_description: string;
+  location_description?: string;
   features: PropertyFeature[];
+  images: PropertyImage[] | string[] | { url: string }[];
   areas: PropertyArea[];
-  nearby_places: PropertyNearbyPlace[];
+  map_image?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  nearby_places?: PropertyNearbyPlace[];
   nearby_cities?: PropertyCity[];
-  latitude: number | null;
-  longitude: number | null;
-  map_image: string | null;
-  images: PropertyImage[];
-  featuredImage: string | null;
-  featuredImages: string[];
-  coverImages?: string[]; // For backward compatibility
-  gridImages?: string[]; // For backward compatibility
+  object_id?: string;
   agent_id?: string;
   agent?: {
     id: string;
@@ -45,15 +37,62 @@ export interface PropertyData {
     phone: string;
     photoUrl: string;
   };
-  created_at?: string;
-  updated_at?: string;
-  object_id?: string;
   template_id?: string;
-  floorplanEmbedScript?: string;
-  floorplans?: PropertyFloorplan[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
+  floorplans?: PropertyFloorplan[] | string[] | { url: string }[];
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  coverImages?: string[];
+  gridImages?: string[];
   technicalItems?: PropertyTechnicalItem[];
   areaPhotos?: string[];
+  floorplanEmbedScript?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PropertyFeature {
+  id: string;
+  description: string;
+}
+
+export interface PropertyFormData extends PropertyData {
+  // Additional properties specific to form state
+}
+
+export interface PropertySubmitData {
+  title: string;
+  price: string;
+  address: string;
+  bedrooms: string;
+  bathrooms: string;
+  sqft: string;
+  livingArea: string;
+  buildYear: string;
+  garages: string;
+  energyLabel: string;
+  hasGarden: boolean;
+  description: string;
+  location_description?: string;
+  features: string;
+  images: string[];
+  areas: PropertyArea[];
+  map_image?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  nearby_places?: string;
+  nearby_cities?: string;
+  object_id?: string;
+  agent_id?: string;
+  template_id?: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
+  floorplans?: string[];
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  technicalItems?: string;
+  floorplanEmbedScript?: string;
 }

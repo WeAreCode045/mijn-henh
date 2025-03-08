@@ -1,12 +1,15 @@
 
-import { PropertyArea } from './PropertyDataTypes';
-import { PropertyFloorplan } from './PropertyFloorplanTypes';
-import { PropertyImage } from './PropertyImageTypes';
-import { PropertyCity, PropertyNearbyPlace, PropertyPlaceType } from './PropertyLocationTypes';
+import { PropertyDataTypes } from './PropertyDataTypes';
 
-export interface PropertyFeature {
+export interface PropertyArea {
   id: string;
+  name: string;
+  size: string;
   description: string;
+  images: string[] | { url: string }[];
+  title: string;
+  imageIds: string[];
+  columns: number;
 }
 
 export interface PropertyTechnicalItem {
@@ -15,5 +18,7 @@ export interface PropertyTechnicalItem {
   size: string;
   description: string;
   floorplanId: string | null;
-  columns?: number; // Added based on the error message
+  columns?: number;
 }
+
+// Export other types from this file as needed

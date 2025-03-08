@@ -2,6 +2,7 @@
 import type { PropertyFormData } from "@/types/property";
 
 export const initialFormData: PropertyFormData = {
+  id: "",
   title: "",
   price: "",
   address: "",
@@ -22,6 +23,7 @@ export const initialFormData: PropertyFormData = {
   areas: [],
   map_image: null,
   nearby_places: [],
+  nearby_cities: [],
   latitude: null,
   longitude: null,
   template_id: "default", // Set default template_id
@@ -29,7 +31,8 @@ export const initialFormData: PropertyFormData = {
   floorplanEmbedScript: "", // Empty floorplanEmbedScript with empty string default
   virtualTourUrl: "",
   youtubeUrl: "",
-  nearby_cities: [], // Empty nearby_cities array
   areaPhotos: [], // Empty areaPhotos array
-  technicalItems: [] // Empty technicalItems array
+  technicalItems: [], // Empty technicalItems array
+  coverImages: [], // Empty coverImages array for backward compatibility
+  gridImages: [] // Empty gridImages array for backward compatibility
 };
