@@ -14,9 +14,19 @@ export function useWebViewBackground(settings: AgencySettings) {
         '--webview-bg-position',
         'bottom right'
       );
+      document.documentElement.style.setProperty(
+        '--webview-bg-size',
+        '60%'  // Set background size to 60%
+      );
+      document.documentElement.style.setProperty(
+        '--webview-bg-opacity',
+        '0.5'  // Set background opacity to 50%
+      );
     } else {
       document.documentElement.style.removeProperty('--webview-bg-image');
       document.documentElement.style.removeProperty('--webview-bg-position');
+      document.documentElement.style.removeProperty('--webview-bg-size');
+      document.documentElement.style.removeProperty('--webview-bg-opacity');
     }
     
     // Set agency colors as CSS custom properties
@@ -38,6 +48,8 @@ export function useWebViewBackground(settings: AgencySettings) {
     return () => {
       document.documentElement.style.removeProperty('--webview-bg-image');
       document.documentElement.style.removeProperty('--webview-bg-position');
+      document.documentElement.style.removeProperty('--webview-bg-size');
+      document.documentElement.style.removeProperty('--webview-bg-opacity');
       document.documentElement.style.removeProperty('--primary-color');
       document.documentElement.style.removeProperty('--secondary-color');
     };

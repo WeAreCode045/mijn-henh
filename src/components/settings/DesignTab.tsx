@@ -29,8 +29,10 @@ export function DesignTab({
     if (settings.webviewBackgroundUrl) {
       setPreviewStyle({
         backgroundImage: `url(${settings.webviewBackgroundUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundSize: '60%', // Set to 60% of size
+        backgroundPosition: 'bottom right',
+        backgroundRepeat: 'no-repeat',
+        opacity: 0.5, // Set to 50% opacity
       });
     } else {
       setPreviewStyle({});
