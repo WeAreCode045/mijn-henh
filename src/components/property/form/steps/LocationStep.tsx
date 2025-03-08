@@ -57,12 +57,14 @@ export function LocationStep({
         onRemoveNearbyPlace={onRemoveNearbyPlace}
         onFetchLocationData={onFetchLocationData}
         isLoadingLocationData={isLoadingLocationData}
+        onFieldChange={onFieldChange}
       />
       
       <NearbyCitiesSection 
         formData={formData}
         onFetchLocationData={onFetchLocationData}
         isLoadingLocationData={isLoadingLocationData}
+        onFieldChange={onFieldChange}
       />
     </div>
   );

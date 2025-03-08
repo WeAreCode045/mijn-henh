@@ -51,6 +51,7 @@ export interface PropertyPlaceType {
   vicinity: string;
   rating: number;
   user_ratings_total: number;
+  visible_in_webview?: boolean;
 }
 
 export interface PropertyGridImage {
@@ -99,7 +100,7 @@ interface BasePropertyData {
   object_id?: string;
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];
-  nearby_cities?: Array<{name: string, distance: number}>;
+  nearby_cities?: Array<{name: string, distance: number, visible_in_webview?: boolean}>;
   latitude?: number | null;
   longitude?: number | null;
   agent_id?: string;

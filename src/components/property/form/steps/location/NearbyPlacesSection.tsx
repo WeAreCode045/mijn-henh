@@ -3,30 +3,35 @@ import { PropertyFormData, PropertyPlaceType } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, MapPin, Loader2 } from "lucide-react";
+import { Trash2, MapPin, Loader2, Check } from "lucide-react";
 import { useLocationCategories } from "./useLocationCategories";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
   onRemoveNearbyPlace?: (index: number) => void;
   onFetchLocationData?: () => Promise<void>;
   isLoadingLocationData?: boolean;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
 }
 
 export function NearbyPlacesSection({
   formData,
   onRemoveNearbyPlace,
   onFetchLocationData,
-  isLoadingLocationData = false
+  isLoadingLocationData = false,
+  onFieldChange
 }: NearbyPlacesSectionProps) {
   const { showCategories, toggleCategory } = useLocationCategories();
 
-  // Group nearby places by category
+  // Group nearby places by category with improved categorization
   const groupedPlaces = formData.nearby_places ? 
     formData.nearby_places.reduce((acc: {[key: string]: PropertyPlaceType[]}, place) => {
       const category = place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
         ? 'education'
-        : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport')
+        : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport') || 
+          place.type?.toLowerCase().includes('fitness') || place.type?.toLowerCase().includes('tennis') || 
+          place.type?.toLowerCase().includes('soccer')
         ? 'sports'
         : place.type?.toLowerCase().includes('transit') || place.type?.toLowerCase().includes('station') || place.type?.toLowerCase().includes('bus')
         ? 'transportation'
@@ -49,6 +54,20 @@ export function NearbyPlacesSection({
     } else {
       return 'Transit';
     }
+  };
+
+  // Toggle place visibility in webview
+  const togglePlaceVisibility = (place: PropertyPlaceType, visible: boolean) => {
+    if (!onFieldChange || !formData.nearby_places) return;
+    
+    const updatedPlaces = formData.nearby_places.map(p => {
+      if (p.id === place.id) {
+        return { ...p, visible_in_webview: visible };
+      }
+      return p;
+    });
+    
+    onFieldChange('nearby_places', updatedPlaces);
   };
 
   return (
@@ -102,15 +121,24 @@ export function NearbyPlacesSection({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {places.map((place, index) => (
                       <div key={place.id || index} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                        <div>
-                          <div className="font-medium">{place.name}</div>
-                          <div className="text-sm text-gray-500">{place.vicinity}</div>
-                          {category === 'transportation' && (
-                            <div className="text-sm font-medium text-blue-600">{getTransportType(place)}</div>
-                          )}
-                          {place.rating && (
-                            <div className="text-sm text-yellow-600">★ {place.rating} ({place.user_ratings_total || 0})</div>
-                          )}
+                        <div className="flex items-start gap-2">
+                          <Checkbox 
+                            id={`place-${place.id || index}`}
+                            checked={place.visible_in_webview !== false}
+                            onCheckedChange={(checked) => {
+                              togglePlaceVisibility(place, checked === true);
+                            }}
+                          />
+                          <div>
+                            <div className="font-medium">{place.name}</div>
+                            <div className="text-sm text-gray-500">{place.vicinity}</div>
+                            {category === 'transportation' && (
+                              <div className="text-sm font-medium text-blue-600">{getTransportType(place)}</div>
+                            )}
+                            {place.rating && (
+                              <div className="text-sm text-yellow-600">★ {place.rating} ({place.user_ratings_total || 0})</div>
+                            )}
+                          </div>
                         </div>
                         
                         {onRemoveNearbyPlace && (

@@ -6,7 +6,8 @@ export function useLocationCategories() {
     education: true,
     sports: true,
     transportation: true,
-    shopping: true
+    shopping: true,
+    other: true
   });
 
   const toggleCategory = (e: React.MouseEvent, category: string) => {

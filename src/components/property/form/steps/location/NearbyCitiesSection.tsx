@@ -4,19 +4,35 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Building2, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface NearbyCitiesSectionProps {
   formData: PropertyFormData;
   onFetchLocationData?: () => Promise<void>;
   isLoadingLocationData?: boolean;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
 }
 
 export function NearbyCitiesSection({
   formData,
   onFetchLocationData,
-  isLoadingLocationData = false
+  isLoadingLocationData = false,
+  onFieldChange
 }: NearbyCitiesSectionProps) {
   const nearbyCities = formData.nearby_cities || [];
+  
+  // Toggle city visibility in webview
+  const toggleCityVisibility = (cityIndex: number, visible: boolean) => {
+    if (!onFieldChange || !formData.nearby_cities) return;
+    
+    const updatedCities = [...formData.nearby_cities];
+    updatedCities[cityIndex] = {
+      ...updatedCities[cityIndex],
+      visible_in_webview: visible
+    };
+    
+    onFieldChange('nearby_cities', updatedCities);
+  };
   
   return (
     <Card className="mt-6">
@@ -49,9 +65,18 @@ export function NearbyCitiesSection({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {nearbyCities.map((city, index) => (
                 <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                  <div>
-                    <div className="font-medium">{city.name}</div>
-                    <div className="text-sm text-gray-500">{city.distance} km</div>
+                  <div className="flex items-start gap-2">
+                    <Checkbox 
+                      id={`city-${index}`}
+                      checked={city.visible_in_webview !== false}
+                      onCheckedChange={(checked) => {
+                        toggleCityVisibility(index, checked === true);
+                      }}
+                    />
+                    <div>
+                      <div className="font-medium">{city.name}</div>
+                      <div className="text-sm text-gray-500">{city.distance} km</div>
+                    </div>
                   </div>
                 </div>
               ))}

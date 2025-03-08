@@ -28,12 +28,19 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     };
   }, [property.latitude, property.longitude, waitForPlaces]);
 
+  // Filter places by visibility
+  const visiblePlaces = property.nearby_places ? 
+    property.nearby_places.filter(place => place.visible_in_webview !== false) : 
+    [];
+
   // Group nearby places by category with improved categorization
-  const groupedPlaces = property.nearby_places ? 
-    property.nearby_places.reduce((acc: {[key: string]: any[]}, place) => {
+  const groupedPlaces = visiblePlaces.length > 0 ? 
+    visiblePlaces.reduce((acc: {[key: string]: any[]}, place) => {
       const category = place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
         ? 'education'
-        : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport')
+        : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport') ||
+          place.type?.toLowerCase().includes('fitness') || place.type?.toLowerCase().includes('tennis') || 
+          place.type?.toLowerCase().includes('soccer')
         ? 'sports'
         : place.type?.toLowerCase().includes('transit') || place.type?.toLowerCase().includes('station') || place.type?.toLowerCase().includes('bus')
         ? 'transportation'
@@ -58,7 +65,10 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     }
   };
   
-  const nearbyCities = property.nearby_cities || [];
+  // Filter cities by visibility
+  const visibleCities = property.nearby_cities ? 
+    property.nearby_cities.filter(city => city.visible_in_webview !== false) : 
+    [];
 
   return (
     <div className="space-y-6 pb-24">
@@ -143,11 +153,11 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
               </p>
             ) : null}
             
-            {nearbyCities.length > 0 && (
+            {visibleCities.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-2">Nearby Cities</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  {nearbyCities.map((city, index) => (
+                  {visibleCities.map((city, index) => (
                     <div key={index} className="text-sm">
                       <span className="font-medium">{city.name}</span>
                       <span className="ml-1 text-gray-500">({city.distance} km)</span>
