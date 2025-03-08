@@ -24,19 +24,18 @@ export async function submitContactForm(
   console.log("Submitting contact form with data:", formData);
   console.log("Property:", property.id);
 
-  // Save the submission to the database with better error handling
   try {
-    // First try with all fields
+    // Save the submission to the database
     const { data: submissionData, error: submissionError } = await supabase
       .from('property_contact_submissions')
       .insert({
         property_id: property.id,
         name: formData.name,
         email: formData.email,
-        phone: formData.phone,
+        phone: formData.phone || null, // Ensure phone is null if empty
         message: formData.message,
         inquiry_type: formData.inquiry_type,
-        agent_id: property.agent_id,
+        agent_id: property.agent_id || null, // Ensure agent_id is null if not present
         is_read: false
       })
       .select()
@@ -45,32 +44,28 @@ export async function submitContactForm(
     if (submissionError) {
       console.error("Error saving submission:", submissionError);
       
-      // If there's an error, it might be related to response columns that don't exist
-      // Try a simplified version with only the essential fields
-      const { data: fallbackData, error: fallbackError } = await supabase
+      // Try a simplified insertion without the .select().single() which might be causing issues
+      const { error: fallbackError } = await supabase
         .from('property_contact_submissions')
         .insert({
           property_id: property.id,
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
+          phone: formData.phone || null,
           message: formData.message,
           inquiry_type: formData.inquiry_type,
           is_read: false
-        })
-        .select()
-        .single();
+        });
         
       if (fallbackError) {
         console.error("Fallback submission also failed:", fallbackError);
-        throw new Error("Er is een fout opgetreden bij het verzenden van het formulier");
+        throw new Error(`Fout bij het verzenden: ${fallbackError.message}`);
       }
       
-      console.log("Submission saved with fallback method:", fallbackData);
-      return fallbackData;
+      console.log("Submission saved with fallback method (without returning data)");
+    } else {
+      console.log("Submission saved successfully:", submissionData);
     }
-
-    console.log("Submission saved successfully:", submissionData);
 
     // Try to send email notification
     try {
@@ -111,16 +106,7 @@ export async function submitContactForm(
               <p><strong>Type aanvraag:</strong> ${inquiryTypeLabel}</p>
               <p><strong>Bericht:</strong> ${formData.message}</p>
               <p>Log in om te reageren op deze aanvraag.</p>
-            `,
-            smtpSettings: {
-              host: settings.smtp_host,
-              port: Number(settings.smtp_port),
-              username: settings.smtp_username,
-              password: settings.smtp_password,
-              fromEmail: settings.smtp_from_email,
-              fromName: settings.smtp_from_name || settings.name,
-              secure: settings.smtp_secure || false
-            }
+            `
           }
         });
       } else {
@@ -128,33 +114,38 @@ export async function submitContactForm(
         console.log("Sending agent notification with:", {
           property_id: property.id,
           property_title: property.title,
-          submission_id: submissionData.id,
           agent_email: property.agent?.email || settings.email
         });
         
-        await supabase.functions.invoke('send-agent-notification', {
-          body: {
-            property_id: property.id,
-            property_title: property.title,
-            submission_id: submissionData.id,
-            agent_email: property.agent?.email || settings.email,
-            agent_name: property.agent?.name || settings.name,
-            inquiry_name: formData.name,
-            inquiry_email: formData.email,
-            inquiry_phone: formData.phone,
-            inquiry_message: formData.message,
-            inquiry_type: formData.inquiry_type
-          }
+        const notificationParams = {
+          property_id: property.id,
+          property_title: property.title,
+          submission_id: submissionData?.id || "unknown",
+          agent_email: property.agent?.email || settings.email,
+          agent_name: property.agent?.name || settings.name,
+          inquiry_name: formData.name,
+          inquiry_email: formData.email,
+          inquiry_phone: formData.phone || "",
+          inquiry_message: formData.message,
+          inquiry_type: formData.inquiry_type
+        };
+        
+        const { error: notificationError } = await supabase.functions.invoke('send-agent-notification', {
+          body: notificationParams
         });
         
-        console.log("Agent notification sent successfully");
+        if (notificationError) {
+          console.error("Error sending agent notification:", notificationError);
+        } else {
+          console.log("Agent notification sent successfully");
+        }
       }
     } catch (emailError) {
       console.error("Error sending email notification:", emailError);
       // We don't want to block the form submission if email fails
     }
 
-    return submissionData;
+    return { success: true, message: "Formulier succesvol verzonden" };
   } catch (error) {
     console.error("Error in submit contact form:", error);
     throw error;
