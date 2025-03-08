@@ -4,7 +4,7 @@ import { Submission } from "../types";
 
 interface UseMarkAsReadProps {
   setSubmissions: (updater: (prevSubmissions: Submission[]) => Submission[]) => void;
-  setSelectedSubmission: (submission: Submission | null) => void;
+  setSelectedSubmission: (submission: Submission | null | ((prev: Submission | null) => Submission | null)) => void;
   toast: any;
 }
 
