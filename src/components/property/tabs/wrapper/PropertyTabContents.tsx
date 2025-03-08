@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -150,6 +151,16 @@ export function PropertyTabContents({
     onFetchLocationData,
     onRemoveNearbyPlace,
     isLoadingLocationData
+  };
+
+  const tabProps = {
+    activeTab,
+    property,
+    formState,
+    agentInfo,
+    templateInfo,
+    isUpdating,
+    handlers
   };
 
   console.log("PropertyTabContents - Active tab:", activeTab);
