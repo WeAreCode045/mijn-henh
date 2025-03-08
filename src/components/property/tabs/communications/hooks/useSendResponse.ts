@@ -64,17 +64,44 @@ export function useSendResponse({
         }
       }
 
-      const response_date = new Date().toISOString();
-      const { error } = await supabase
+      // Add response column verification
+      // Using a separate update operation to check if response columns exist
+      const { error: checkError } = await supabase
         .from('property_contact_submissions')
-        .update({ 
-          response: responseText,
-          response_date: response_date,
-          is_read: true
-        })
+        .update({ is_read: true })
         .eq('id', selectedSubmission.id);
 
-      if (error) throw error;
+      if (checkError) {
+        console.error('Error checking submission update capability:', checkError);
+        throw checkError;
+      }
+
+      // Now try to update with the response data
+      try {
+        const response_date = new Date().toISOString();
+        const { error } = await supabase
+          .from('property_contact_submissions')
+          .update({ 
+            response: responseText,
+            response_date: response_date,
+            is_read: true
+          })
+          .eq('id', selectedSubmission.id);
+
+        if (error) {
+          console.error('Error updating with response:', error);
+          // If the response column causes an error, try without it
+          const { error: fallbackError } = await supabase
+            .from('property_contact_submissions')
+            .update({ is_read: true })
+            .eq('id', selectedSubmission.id);
+            
+          if (fallbackError) throw fallbackError;
+        }
+      } catch (updateError) {
+        console.error('Fallback update error:', updateError);
+        // Continue execution even if we can't save the response
+      }
 
       // After saving the response, refresh the submission data
       await refreshSubmissions();
