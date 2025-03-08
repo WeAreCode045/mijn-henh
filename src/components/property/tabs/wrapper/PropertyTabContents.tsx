@@ -153,6 +153,7 @@ export function PropertyTabContents({
     isLoadingLocationData
   };
 
+  // Define tabProps before using it
   const tabProps = {
     activeTab,
     property,
