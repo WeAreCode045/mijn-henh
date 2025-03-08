@@ -1,13 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PropertyCity } from "@/types/property";
 
 interface CityItemProps {
-  city: { 
-    name: string; 
-    distance: number;
-    visible_in_webview?: boolean;
-  };
+  city: PropertyCity;
   index: number;
   onVisibilityChange: (index: number, visible: boolean) => void;
 }

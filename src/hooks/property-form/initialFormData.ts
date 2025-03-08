@@ -30,5 +30,8 @@ export const initialFormData: PropertyFormData = {
   floorplans: [], // Add empty floorplans array
   floorplanEmbedScript: "", // Add empty floorplanEmbedScript with empty string default
   virtualTourUrl: "",
-  youtubeUrl: ""
+  youtubeUrl: "",
+  nearby_cities: [], // Add empty nearby_cities array
+  areaPhotos: [], // Add empty areaPhotos array
+  technicalItems: [] // Add empty technicalItems array
 };

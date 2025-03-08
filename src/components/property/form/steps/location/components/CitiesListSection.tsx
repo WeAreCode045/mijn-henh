@@ -1,9 +1,9 @@
 
-import { PropertyFormData } from "@/types/property";
+import { PropertyCity } from "@/types/property";
 import { CityItem } from "./CityItem";
 
 interface CitiesListSectionProps {
-  nearbyCities: Array<{name: string, distance: number, visible_in_webview?: boolean}>;
+  nearbyCities: PropertyCity[];
   toggleCityVisibility: (cityIndex: number, visible: boolean) => void;
 }
 

@@ -17,7 +17,10 @@ export function useAreaManagement(
       title: '',
       description: '',
       imageIds: [],
-      columns: 2 // Default to 2 columns
+      columns: 2, // Default to 2 columns
+      name: '',
+      size: '',
+      images: []
     };
     
     console.log("Adding new area with default columns:", newArea);

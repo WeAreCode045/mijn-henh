@@ -1,91 +1,66 @@
 
-import { Json } from "@/integrations/supabase/types";
-import { BasePropertyData } from "./PropertyBaseTypes";
+import { PropertyArea } from './PropertyAreaTypes';
+import { PropertyFeature } from './PropertyFeatureTypes';
+import { PropertyImage } from './PropertyImageTypes';
+import { PropertyNearbyPlace, PropertyCity } from './PropertyLocationTypes';
+import { PropertyFloorplan } from './PropertyFloorplanTypes';
+import { PropertyTechnicalItem } from './PropertyTechnicalTypes';
+import { PropertyAgent } from './PropertyAgentTypes';
+import { PropertyBase } from './PropertyBaseTypes';
 
-// PropertyData requires id
-export interface PropertyData extends BasePropertyData {
-  id: string;
-}
-
-// PropertyFormData makes id optional
-export interface PropertyFormData extends BasePropertyData {
-  id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface PropertySubmitData {
-  id?: string;
-  title: string;
-  price: string;
-  address: string;
-  bedrooms: string;
-  bathrooms: string;
-  sqft: string;
-  livingArea: string;
-  buildYear: string;
-  garages: string;
-  energyLabel: string;
-  hasGarden: boolean;
-  description: string;
-  location_description?: string;
-  floorplans?: Json;
-  technicalItems?: Json;
+export interface PropertyFormData extends PropertyBase {
+  features: PropertyFeature[];
+  areas: PropertyArea[];
+  nearby_places: PropertyNearbyPlace[];
+  latitude: number | null;
+  longitude: number | null;
+  map_image: string | null;
+  images: (string | { url: string })[];
   featuredImage: string | null;
   featuredImages: string[];
-  coverImages?: string[];
-  gridImages?: string[];
+  floorplans?: PropertyFloorplan[];
+  technicalItems?: PropertyTechnicalItem[];
+  // Add missing fields that are being used
   areaPhotos?: string[];
-  object_id?: string;
-  map_image?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  features: Json;
-  areas: Json[];
-  nearby_places: Json;
-  images: string[];
-  agent_id?: string;
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  notes?: string;
-  template_id?: string;
-  floorplanEmbedScript?: string;
+  nearby_cities?: PropertyCity[];
+  coverImages?: string[]; // For backward compatibility
+  gridImages?: string[]; // For backward compatibility
 }
 
-export interface PropertyDatabaseData {
-  id?: string;
-  title?: string;
-  price?: string;
-  address?: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  sqft?: string;
-  livingArea?: string;
-  buildYear?: string;
-  garages?: string;
-  energyLabel?: string;
-  hasGarden?: boolean;
-  description?: string;
-  location_description?: string;
-  features?: Json;
-  floorplans?: Json;
-  featuredImage?: string | null;
-  featuredImages?: string[];
-  coverImages?: string[];
-  gridImages?: string[];
-  areas?: Json[];
+export interface PropertyData extends PropertyBase {
+  id: string;
+  features: PropertyFeature[];
+  areas: PropertyArea[];
+  nearby_places: PropertyNearbyPlace[];
+  latitude: number | null;
+  longitude: number | null;
+  map_image: string | null;
+  images: (string | { url: string })[];
+  featuredImage: string | null;
+  featuredImages: string[];
+  floorplans?: PropertyFloorplan[];
+  agent?: PropertyAgent;
+  technicalItems?: PropertyTechnicalItem[];
+  // Add missing fields
   areaPhotos?: string[];
-  object_id?: string;
-  map_image?: string | null;
-  nearby_places?: Json;
-  latitude?: number | null;
-  longitude?: number | null;
-  agent_id?: string;
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  notes?: string;
-  created_at?: string;
-  updated_at?: string;
-  template_id?: string;
-  floorplanEmbedScript?: string;
+  nearby_cities?: PropertyCity[];
+  coverImages?: string[]; // For backward compatibility
+  gridImages?: string[]; // For backward compatibility
+}
+
+export interface PropertySubmitData extends PropertyBase {
+  features: any;
+  areas: PropertyArea[];
+  nearby_places: any;
+  latitude: number | null;
+  longitude: number | null;
+  map_image: string | null;
+  images: string[];
+  featuredImage: string | null;
+  featuredImages: string[];
+  floorplans?: any[];
+  technicalItems?: any;
+  // Add missing fields
+  areaPhotos?: string[];
+  nearby_cities?: PropertyCity[];
 }

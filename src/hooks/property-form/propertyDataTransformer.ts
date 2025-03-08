@@ -1,5 +1,6 @@
 
-import type { PropertyFeature, PropertyArea, PropertyPlaceType } from "@/types/property";
+import type { PropertyFeature, PropertyArea, PropertyNearbyPlace } from "@/types/property";
+import { Json } from "@/integrations/supabase/types";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
   return Array.isArray(features)
@@ -51,13 +52,16 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           title: area.title || "",
           description: area.description || "",
           imageIds: imageIds,
-          columns: typeof area.columns === 'number' ? area.columns : 2
+          columns: typeof area.columns === 'number' ? area.columns : 2,
+          name: area.name || "",
+          size: area.size || "",
+          images: area.images || []
         };
       })
     : [];
 }
 
-export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {
+export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
   return Array.isArray(places)
     ? places.map((place: any) => ({
         id: place.id || "",
@@ -65,7 +69,8 @@ export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {
         type: place.type || "",
         vicinity: place.vicinity || "",
         rating: place.rating || 0,
-        user_ratings_total: place.user_ratings_total || 0
+        user_ratings_total: place.user_ratings_total || 0,
+        visible_in_webview: place.visible_in_webview || false
       }))
     : [];
 }
