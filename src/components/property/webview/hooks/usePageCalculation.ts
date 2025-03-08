@@ -16,6 +16,9 @@ export const usePageCalculation = () => {
     // Add floorplan page if floorplanEmbedScript exists
     if (propertyData.floorplanEmbedScript) {
       total += 1;
+      console.log('Adding floorplan page because floorplanEmbedScript exists:', propertyData.floorplanEmbedScript.substring(0, 50) + '...');
+    } else {
+      console.log('No floorplan page added - floorplanEmbedScript is missing or empty');
     }
     
     // Add neighborhood page
@@ -25,6 +28,13 @@ export const usePageCalculation = () => {
     if (!isPrintView) {
       total += 1;
     }
+    
+    console.log('Total pages calculated:', total, {
+      hasAreas: propertyData.areas?.length > 0,
+      areaCount: propertyData.areas?.length || 0,
+      hasFloorplan: !!propertyData.floorplanEmbedScript,
+      isPrintView
+    });
     
     return total;
   };

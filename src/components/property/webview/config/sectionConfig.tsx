@@ -54,10 +54,13 @@ export function getSections({
   
   // Add floorplan section if available
   if (property.floorplanEmbedScript) {
+    console.log('Adding floorplan section to sections array');
     sections.push({
       title: "Floorplan",
       content: <FloorplanSection property={property} settings={settings} />
     });
+  } else {
+    console.log('Skipping floorplan section - no embed script found');
   }
   
   // Add remaining sections
@@ -77,6 +80,10 @@ export function getSections({
       content: <ContactSection property={property} settings={settings} />
     });
   }
+
+  // Log the final sections structure for debugging
+  console.log('Sections generated:', sections.map(s => s.title).join(', '), 
+    { totalSections: sections.length, hasFloorplan: !!property.floorplanEmbedScript });
 
   return sections;
 }

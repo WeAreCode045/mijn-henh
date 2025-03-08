@@ -30,6 +30,12 @@ export function WebViewSectionContent({
       </div>
     );
   }
+  
+  // Check if floorplan exists
+  console.log('Property has floorplan embed script:', !!property.floorplanEmbedScript);
+  if (property.floorplanEmbedScript) {
+    console.log('FloorplanEmbedScript exists, first 50 chars:', property.floorplanEmbedScript.substring(0, 50) + '...');
+  }
 
   // Get sections based on the current property and page
   const sections = getSections({ 
@@ -63,7 +69,8 @@ export function WebViewSectionContent({
     safePageIndex,
     totalPages,
     sectionsAvailable: sections.length,
-    currentSectionTitle: currentSection?.title
+    currentSectionTitle: currentSection?.title,
+    sectionTitles: sections.map(s => s.title)
   });
   
   // Check if we have content for this page
