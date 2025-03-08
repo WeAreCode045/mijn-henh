@@ -31,6 +31,7 @@ interface PropertyContentFormProps {
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges: (pending: boolean) => void;
+  isLoadingLocationData?: boolean;
 }
 
 export function PropertyContentForm({
@@ -60,7 +61,8 @@ export function PropertyContentForm({
   isUploading,
   onAddTechnicalItem,
   onRemoveTechnicalItem,
-  setPendingChanges
+  setPendingChanges,
+  isLoadingLocationData
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
     console.log(`Field changed: ${String(field)}`, value);
@@ -155,6 +157,7 @@ export function PropertyContentForm({
       onAddTechnicalItem={wrappedAddTechnicalItem}
       onRemoveTechnicalItem={wrappedRemoveTechnicalItem}
       setPendingChanges={setPendingChanges}
+      isLoadingLocationData={isLoadingLocationData}
     />
   );
 }

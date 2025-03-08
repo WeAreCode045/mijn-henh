@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -60,6 +59,9 @@ interface PropertyTabContentsProps {
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  onFetchLocationData?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
 }
 
 export function PropertyTabContents({
@@ -102,7 +104,10 @@ export function PropertyTabContents({
   isUploadingFloorplan,
   onAddTechnicalItem,
   onRemoveTechnicalItem,
-  handleRemoveAreaPhoto
+  handleRemoveAreaPhoto,
+  onFetchLocationData,
+  onRemoveNearbyPlace,
+  isLoadingLocationData
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -139,24 +144,12 @@ export function PropertyTabContents({
     handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
     onAddTechnicalItem,
     onRemoveTechnicalItem,
-    // Ensure we use the correct signature for handleRemoveAreaPhoto
     handleRemoveAreaPhoto: handleRemoveAreaPhoto || ((areaId: string, imageId: string) => {
       console.warn("Area photo removal functionality not available");
-    })
-  };
-
-  const tabProps = {
-    activeTab,
-    property: {
-      ...property,
-      featuredImage: formState.featuredImage || "",
-      featuredImages: formState.featuredImages || []
-    },
-    formState,
-    agentInfo,
-    templateInfo,
-    isUpdating,
-    handlers
+    }),
+    onFetchLocationData,
+    onRemoveNearbyPlace,
+    isLoadingLocationData
   };
 
   console.log("PropertyTabContents - Active tab:", activeTab);

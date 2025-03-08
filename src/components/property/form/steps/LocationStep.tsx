@@ -33,7 +33,8 @@ export function LocationStep({
     shopping: true
   });
 
-  const toggleCategory = (category: string) => {
+  const toggleCategory = (e: React.MouseEvent, category: string) => {
+    e.preventDefault(); // Prevent form submission
     setShowCategories(prev => ({
       ...prev,
       [category]: !prev[category]
@@ -92,7 +93,10 @@ export function LocationStep({
               {onFetchLocationData && (
                 <Button 
                   type="button" 
-                  onClick={onFetchLocationData}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onFetchLocationData();
+                  }}
                   className="flex items-center gap-2"
                   disabled={isLoadingLocationData}
                 >
@@ -119,8 +123,12 @@ export function LocationStep({
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    onClick={handleMapImageDelete}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMapImageDelete();
+                    }}
                     className="flex items-center gap-1"
+                    type="button"
                   >
                     <Trash2 className="h-3 w-3" />
                     Remove
@@ -152,7 +160,8 @@ export function LocationStep({
                     key={category}
                     variant={showCategories[category] ? "default" : "outline"}
                     size="sm"
-                    onClick={() => toggleCategory(category)}
+                    onClick={(e) => toggleCategory(e, category)}
+                    type="button"
                   >
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </Button>
@@ -179,13 +188,15 @@ export function LocationStep({
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.preventDefault();
                                   const placeIndex = formData.nearby_places?.findIndex(p => 
                                     p.id === place.id || (p.name === place.name && p.vicinity === place.vicinity));
                                   if (placeIndex !== undefined && placeIndex >= 0) {
                                     onRemoveNearbyPlace(placeIndex);
                                   }
                                 }}
+                                type="button"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>

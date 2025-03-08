@@ -31,6 +31,9 @@ interface ContentTabContentProps {
   handleToggleFeaturedImage?: (url: string) => void;
   onAddTechnicalItem?: () => void;
   onRemoveTechnicalItem?: (index: number) => void;
+  onFetchLocationData?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
 }
 
 export function ContentTabContent({
@@ -61,7 +64,10 @@ export function ContentTabContent({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   onAddTechnicalItem,
-  onRemoveTechnicalItem
+  onRemoveTechnicalItem,
+  onFetchLocationData,
+  onRemoveNearbyPlace,
+  isLoadingLocationData
 }: ContentTabContentProps) {
   return (
     <PropertyContentTab 
@@ -94,6 +100,9 @@ export function ContentTabContent({
       handleToggleFeaturedImage={handleToggleFeaturedImage}
       onAddTechnicalItem={onAddTechnicalItem}
       onRemoveTechnicalItem={onRemoveTechnicalItem}
+      onFetchLocationData={onFetchLocationData}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
     />
   );
 }
