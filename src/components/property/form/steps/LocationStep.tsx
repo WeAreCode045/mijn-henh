@@ -26,7 +26,7 @@ export function LocationStep({
 }: LocationStepProps) {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
-  // Function to handle generating description
+  // Function to handle generating location description
   const handleGenerateDescription = async () => {
     if (!onFetchLocationData) return;
     

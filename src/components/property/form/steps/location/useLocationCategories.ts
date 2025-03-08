@@ -7,6 +7,8 @@ export function useLocationCategories() {
     sports: true,
     transportation: true,
     shopping: true,
+    restaurant: true,
+    health: true,
     other: true
   });
 
