@@ -8,6 +8,7 @@ export interface ContactFormData {
   email: string;
   phone: string;
   message: string;
+  inquiry_type: string;
 }
 
 export async function submitContactForm(
@@ -16,8 +17,8 @@ export async function submitContactForm(
   settings: AgencySettings
 ) {
   // Validate form data
-  if (!formData.name || !formData.email || !formData.message) {
-    throw new Error("Please fill in all required fields");
+  if (!formData.name || !formData.email || !formData.message || !formData.inquiry_type) {
+    throw new Error("Vul alle verplichte velden in");
   }
 
   // Save the submission to the database
@@ -29,7 +30,7 @@ export async function submitContactForm(
       email: formData.email,
       phone: formData.phone,
       message: formData.message,
-      inquiry_type: 'information',
+      inquiry_type: formData.inquiry_type,
       agent_id: property.agent_id,
       is_read: false,
       created_at: new Date().toISOString()
@@ -52,24 +53,34 @@ export async function submitContactForm(
       settings.smtp_from_email;
 
     if (hasSMTPSettings) {
+      // Get the inquiry type label for the email
+      const inquiryTypeLabels: Record<string, string> = {
+        'offer': 'een bod doen',
+        'viewing': 'een bezichtiging plannen',
+        'information': 'meer informatie'
+      };
+      const inquiryTypeLabel = inquiryTypeLabels[formData.inquiry_type] || formData.inquiry_type;
+
       // Send email using SMTP settings
       await supabase.functions.invoke('send-email-with-smtp', {
         body: {
           to: settings.email,
-          subject: `New inquiry for ${property.title}`,
+          subject: `Nieuwe aanvraag voor ${property.title}`,
           text: `
-            Name: ${formData.name}
-            Email: ${formData.email}
-            Phone: ${formData.phone || 'Not provided'}
-            Message: ${formData.message}
+            Naam: ${formData.name}
+            E-mail: ${formData.email}
+            Telefoon: ${formData.phone || 'Niet opgegeven'}
+            Type aanvraag: ${inquiryTypeLabel}
+            Bericht: ${formData.message}
           `,
           html: `
-            <h2>New inquiry for ${property.title}</h2>
-            <p><strong>Name:</strong> ${formData.name}</p>
-            <p><strong>Email:</strong> ${formData.email}</p>
-            <p><strong>Phone:</strong> ${formData.phone || 'Not provided'}</p>
-            <p><strong>Message:</strong> ${formData.message}</p>
-            <p>Login to respond to this inquiry.</p>
+            <h2>Nieuwe aanvraag voor ${property.title}</h2>
+            <p><strong>Naam:</strong> ${formData.name}</p>
+            <p><strong>E-mail:</strong> ${formData.email}</p>
+            <p><strong>Telefoon:</strong> ${formData.phone || 'Niet opgegeven'}</p>
+            <p><strong>Type aanvraag:</strong> ${inquiryTypeLabel}</p>
+            <p><strong>Bericht:</strong> ${formData.message}</p>
+            <p>Log in om te reageren op deze aanvraag.</p>
           `,
           smtpSettings: {
             host: settings.smtp_host,
@@ -94,7 +105,8 @@ export async function submitContactForm(
           inquiry_name: formData.name,
           inquiry_email: formData.email,
           inquiry_phone: formData.phone,
-          inquiry_message: formData.message
+          inquiry_message: formData.message,
+          inquiry_type: formData.inquiry_type
         }
       });
     }

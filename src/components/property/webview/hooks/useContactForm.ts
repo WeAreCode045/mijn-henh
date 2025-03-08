@@ -15,11 +15,19 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
     name: "",
     email: "",
     phone: "",
-    message: ""
+    message: "",
+    inquiry_type: "information" // Default to "meer informatie"
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -35,8 +43,8 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
 
       // Success message
       toast({
-        title: "Message sent successfully!",
-        description: "We'll get back to you as soon as possible.",
+        title: "Bericht succesvol verzonden!",
+        description: "We nemen zo snel mogelijk contact met u op.",
       });
 
       // Reset the form
@@ -44,13 +52,14 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
         name: "",
         email: "",
         phone: "",
-        message: ""
+        message: "",
+        inquiry_type: "information"
       });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
-        title: error instanceof Error ? error.message : "Error submitting form",
-        description: "Please try again later.",
+        title: error instanceof Error ? error.message : "Fout bij het versturen van het formulier",
+        description: "Probeer het later opnieuw.",
         variant: "destructive"
       });
     }
@@ -61,6 +70,7 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
   return {
     formData,
     handleChange,
+    handleSelectChange,
     handleSubmit,
     isSubmitting
   };
