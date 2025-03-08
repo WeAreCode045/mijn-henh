@@ -8,9 +8,14 @@ export const usePageCalculation = () => {
     // Start with basic pages
     let total = 2; // Overview and Details pages always exist
     
-    // Add area pages if they exist
+    // Add individual area pages if they exist
     if (propertyData.areas && propertyData.areas.length > 0) {
-      total += 1; // Add area page
+      total += propertyData.areas.length; // Add a page for each area
+    }
+    
+    // Add floorplan page if floorplanEmbedScript exists
+    if (propertyData.floorplanEmbedScript) {
+      total += 1;
     }
     
     // Add neighborhood page
