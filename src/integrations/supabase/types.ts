@@ -29,6 +29,7 @@ export type Database = {
           instagram_url: string | null
           logo_url: string | null
           name: string
+          openai_api_key: string | null
           phone: string | null
           primary_color: string | null
           secondary_color: string | null
@@ -62,6 +63,7 @@ export type Database = {
           instagram_url?: string | null
           logo_url?: string | null
           name: string
+          openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
@@ -95,6 +97,7 @@ export type Database = {
           instagram_url?: string | null
           logo_url?: string | null
           name?: string
+          openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
