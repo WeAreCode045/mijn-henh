@@ -19,8 +19,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
         <div className="flex-[3] relative">
           <div className="relative bg-white/90 p-4 rounded-lg shadow-sm">
             <h3 
-              className="text-xl font-semibold mb-2"
-              style={{ color: settings?.secondaryColor }}
+              className="text-xl font-semibold mb-2 text-secondary-color"
             >
               Description
             </h3>
@@ -35,8 +34,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
           <div className="flex-[2]">
             <div className="bg-white/90 p-4 rounded-lg shadow-sm">
               <h3 
-                className="text-xl font-semibold mb-2"
-                style={{ color: settings?.secondaryColor }}
+                className="text-xl font-semibold mb-2 text-secondary-color"
               >
                 Features
               </h3>
@@ -61,9 +59,8 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                         >
                           <TableCell className="p-2 text-gray-700 flex items-center text-left pl-4">
                             <Check 
-                              className="w-5 h-5 mr-2"
+                              className="w-5 h-5 mr-2 text-secondary-color"
                               strokeWidth={2.5}
-                              style={{ color: settings?.secondaryColor }}
                             />
                             <span style={{ fontWeight: 600 }}>
                               {feature.description}

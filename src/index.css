@@ -61,7 +61,11 @@
     --estate-600: 260 10% 55%;
     --estate-700: 260 8% 45%;
     --estate-800: 260 7% 30%;
-    --estate-900: 260 10% 15%;    
+    --estate-900: 260 10% 15%;
+    
+    /* Agency primary and secondary color variables */
+    --primary-color: #40497A;
+    --secondary-color: #E2E8F0;
   }
 
   .dark {

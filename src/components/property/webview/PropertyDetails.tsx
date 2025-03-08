@@ -99,7 +99,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         {/* Icon Grid Section - Takes up 3/4 of space on larger screens */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:w-3/4">
           {property.buildYear && (
-            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+            <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
                 {getIcon(safeSettings.iconBuildYear)}
               </div>
@@ -111,7 +111,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           )}
           
           {parseValueToNumber(property.bedrooms) > 0 && (
-            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+            <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
                 {getIcon(safeSettings.iconBedrooms)}
               </div>
@@ -123,7 +123,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           )}
           
           {parseValueToNumber(property.bathrooms) > 0 && (
-            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+            <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
                 {getIcon(safeSettings.iconBathrooms)}
               </div>
@@ -135,7 +135,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           )}
           
           {parseValueToNumber(property.garages) > 0 && (
-            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+            <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
                 {getIcon(safeSettings.iconGarages)}
               </div>
@@ -147,7 +147,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           )}
           
           {parseValueToNumber(property.sqft) > 0 && (
-            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+            <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
                 {getIcon(safeSettings.iconSqft)}
               </div>
@@ -159,7 +159,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           )}
           
           {parseValueToNumber(property.livingArea) > 0 && (
-            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+            <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
                 {getIcon(safeSettings.iconLivingSpace)}
               </div>
