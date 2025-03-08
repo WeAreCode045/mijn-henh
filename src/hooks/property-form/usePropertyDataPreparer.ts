@@ -1,8 +1,10 @@
 
-import { PropertyFormData, PropertySubmitData, PropertyArea } from "@/types/property";
+import { PropertyFormData, PropertySubmitData } from "@/types/property";
 import { 
   prepareAreasForFormSubmission, 
-  preparePropertiesForJsonField
+  preparePropertiesForJsonField,
+  prepareImagesForSubmission,
+  prepareTechnicalItemsForSubmission
 } from "./preparePropertyData";
 
 export function usePropertyDataPreparer() {
@@ -10,17 +12,14 @@ export function usePropertyDataPreparer() {
     const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
     const featuresJson = preparePropertiesForJsonField(formData.features);
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
+    const nearby_citiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
     
     // Ensure technicalItems is treated as an array before transformation
     const technicalItemsArray = Array.isArray(formData.technicalItems) ? formData.technicalItems : [];
-    const technicalItemsJson = preparePropertiesForJsonField(technicalItemsArray);
-    
-    console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
-    console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
-    console.log("usePropertyFormSubmit - Form submission - technicalItems:", technicalItemsJson);
+    const technicalItemsJson = prepareTechnicalItemsForSubmission(technicalItemsArray);
     
     // Convert image objects to URLs for database storage
-    const imageUrls = formData.images.map(img => typeof img === 'string' ? img : img.url);
+    const imageUrls = prepareImagesForSubmission(formData.images);
     
     return {
       title: formData.title,
@@ -36,9 +35,10 @@ export function usePropertyDataPreparer() {
       hasGarden: formData.hasGarden,
       description: formData.description,
       location_description: formData.location_description,
-      features: featuresJson,
+      features: featuresJson as string,
       areas: areasForSubmission as any,
-      nearby_places: nearby_placesJson,
+      nearby_places: nearby_placesJson as string,
+      nearby_cities: nearby_citiesJson as string,
       latitude: formData.latitude,
       longitude: formData.longitude,
       map_image: formData.map_image,
@@ -48,7 +48,7 @@ export function usePropertyDataPreparer() {
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       images: imageUrls,
-      technicalItems: technicalItemsJson,
+      technicalItems: technicalItemsJson as string,
       floorplanEmbedScript: formData.floorplanEmbedScript || ""
     };
   };

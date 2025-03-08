@@ -2,43 +2,65 @@
 import { PropertyImage } from "@/types/property";
 
 /**
- * Gets the URL from a PropertyImage or string
- * @param image - The image to get the URL from
- * @returns The URL of the image
+ * Normalizes an image value to a PropertyImage object
+ * @param image Can be a string URL or PropertyImage object
  */
-export function getImageUrl(image: PropertyImage | string | { url: string }): string {
+export function normalizeImage(image: string | { url: string } | PropertyImage): PropertyImage {
+  if (typeof image === 'string') {
+    return { id: crypto.randomUUID(), url: image };
+  }
+  if ('url' in image) {
+    return { 
+      id: (image as PropertyImage).id || crypto.randomUUID(), 
+      url: image.url,
+      ...(image as PropertyImage)
+    };
+  }
+  return image as PropertyImage;
+}
+
+/**
+ * Gets URL from various image formats
+ */
+export function getImageUrl(image: string | { url: string } | PropertyImage): string {
   if (typeof image === 'string') {
     return image;
   }
-  
   return image.url;
 }
 
 /**
- * Safely converts a variety of image types to a consistent PropertyImage[] array
- * @param images - The images to convert
- * @returns A PropertyImage[] array
+ * Normalizes an array of images to PropertyImage objects
  */
-export function normalizeImages(images: any[] | undefined): PropertyImage[] {
-  if (!images || !Array.isArray(images)) {
-    return [];
+export function normalizeImages(images: (string | { url: string } | PropertyImage)[]): PropertyImage[] {
+  if (!images) return [];
+  return images.map(normalizeImage);
+}
+
+/**
+ * Gets all image URLs from an array of images
+ */
+export function getImageUrls(images: (string | { url: string } | PropertyImage)[]): string[] {
+  if (!images) return [];
+  return images.map(getImageUrl);
+}
+
+/**
+ * Gets the ID from an image
+ */
+export function getImageId(image: string | { url: string; id?: string } | PropertyImage): string {
+  if (typeof image === 'string') {
+    return crypto.randomUUID(); // Generate an ID if it's just a string URL
   }
-  
-  return images.map(img => {
-    if (typeof img === 'string') {
-      return { id: crypto.randomUUID(), url: img };
-    } else if (typeof img === 'object' && img !== null && 'url' in img) {
-      return { 
-        id: img.id || crypto.randomUUID(), 
-        url: img.url,
-        ...('area' in img ? { area: img.area } : {}),
-        ...('is_main' in img ? { is_main: img.is_main } : {}),
-        ...('is_featured_image' in img ? { is_featured_image: img.is_featured_image } : {}),
-        ...('sort_order' in img ? { sort_order: img.sort_order } : {})
-      };
-    }
-    
-    // Fallback for unexpected types
-    return { id: crypto.randomUUID(), url: String(img) };
-  });
+  if ('id' in image && image.id) {
+    return image.id;
+  }
+  return crypto.randomUUID();
+}
+
+/**
+ * Validates if an item is a PropertyImage
+ */
+export function isPropertyImage(item: any): item is PropertyImage {
+  return item && typeof item === 'object' && 'url' in item;
 }

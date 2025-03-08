@@ -1,6 +1,7 @@
 
 import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
   return Array.isArray(features)
@@ -73,5 +74,11 @@ export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
         visible_in_webview: place.visible_in_webview || false,
         distance: place.distance || 0
       }))
+    : [];
+}
+
+export function transformImages(images: any[]): PropertyImage[] {
+  return Array.isArray(images)
+    ? images.map((img: any) => normalizeImage(img))
     : [];
 }
