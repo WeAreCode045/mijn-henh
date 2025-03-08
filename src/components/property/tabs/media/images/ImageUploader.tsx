@@ -27,7 +27,9 @@ export function ImageUploader({ onImageUpload, isUploading }: ImageUploaderProps
       return;
     }
 
-    // Check file types
+    console.log("Selected files for upload:", files.length);
+
+    // Check file types and sizes
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith('image/')) {
@@ -37,10 +39,22 @@ export function ImageUploader({ onImageUpload, isUploading }: ImageUploaderProps
         e.target.value = '';
         return;
       }
+
+      // Check file size (limit to 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setValidationMessage('Images must be less than 10MB');
+        toast.error('Images must be less than 10MB');
+        // Reset the file input value
+        e.target.value = '';
+        return;
+      }
     }
 
     // Clear any previous validation message
     setValidationMessage(null);
+    
+    // Show uploading toast
+    toast.info(`Uploading ${files.length} image${files.length > 1 ? 's' : ''}...`);
     
     // Call the parent handler
     onImageUpload(e);
@@ -72,6 +86,9 @@ export function ImageUploader({ onImageUpload, isUploading }: ImageUploaderProps
       />
       {validationMessage && (
         <p className="text-sm text-red-500">{validationMessage}</p>
+      )}
+      {isUploading && (
+        <p className="text-sm text-blue-500">Uploading images, please wait...</p>
       )}
     </div>
   );

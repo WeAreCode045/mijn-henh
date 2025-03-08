@@ -16,13 +16,13 @@ export function MediaDatabaseFetcher({
 }: MediaDatabaseFetcherProps) {
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   
-  // Force re-fetch every 5 seconds when uploads might be happening
+  // Force re-fetch every 3 seconds when uploads might be happening
   useEffect(() => {
     const interval = setInterval(() => {
       if (propertyId) {
         setLastFetchTime(Date.now());
       }
-    }, 5000);
+    }, 3000);
     
     return () => clearInterval(interval);
   }, [propertyId]);

@@ -52,16 +52,16 @@ export function useImageUploadHandler(
       // Process each file
       for (const file of files) {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
+        const fileName = `${uuidv4()}-${file.name}`;
         const filePath = formData.id 
           ? `properties/${formData.id}/${fileName}`
           : `temp/${fileName}`;
 
         console.log("Uploading file to path:", filePath);
 
-        // Upload to storage
+        // Upload to storage - CORRECTED BUCKET NAME
         const { error: uploadError, data: uploadData } = await supabase.storage
-          .from('property_images')
+          .from('properties')
           .upload(filePath, file);
 
         if (uploadError) {
@@ -70,9 +70,9 @@ export function useImageUploadHandler(
           continue;
         }
 
-        // Get public URL
+        // Get public URL - CORRECTED BUCKET NAME
         const { data: publicUrlData } = supabase.storage
-          .from('property_images')
+          .from('properties')
           .getPublicUrl(filePath);
 
         if (!publicUrlData || !publicUrlData.publicUrl) {
