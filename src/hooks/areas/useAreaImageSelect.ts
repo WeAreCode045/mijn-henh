@@ -9,52 +9,18 @@ export function useAreaImageSelect(
 ) {
   const { toast } = useToast();
 
-  // Handle selecting multiple images for an area
+  // Select images for an area from existing property images
   const handleAreaImagesSelect = async (areaId: string, imageIds: string[]) => {
-    console.log(`Selected ${imageIds.length} images for area ${areaId}:`, imageIds);
+    console.log(`Selecting images for area ${areaId}:`, imageIds);
     
     try {
-      // Ensure imageIds is always an array
-      const validImageIds = Array.isArray(imageIds) ? imageIds : [];
-      
-      // If we have a property ID, update the property_images table
-      if (formData.id) {
-        console.log(`Updating image-area associations in property_images table for property ${formData.id}, area ${areaId}`);
-        
-        // First, clear any existing area assignments for this area
-        // This ensures we don't have outdated assignments
-        const { error: clearError } = await supabase
-          .from('property_images')
-          .update({ area: null })
-          .eq('property_id', formData.id)
-          .eq('area', areaId);
-          
-        if (clearError) {
-          console.error('Error clearing existing area assignments:', clearError);
-        }
-        
-        // Then, assign the selected images to this area
-        for (const imageId of validImageIds) {
-          const { error: updateError } = await supabase
-            .from('property_images')
-            .update({ area: areaId })
-            .eq('id', imageId)
-            .eq('property_id', formData.id);
-            
-          if (updateError) {
-            console.error(`Error assigning image ${imageId} to area ${areaId}:`, updateError);
-          }
-        }
-      }
-      
-      // Update the local form state to reflect these changes
-      // For backward compatibility, we'll still update the areas with imageIds
+      // First update the area's imageIds in the local state
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          console.log(`Updating local state for area ${areaId} imageIds:`, validImageIds);
+          console.log(`Updating area ${areaId} imageIds to:`, imageIds);
           return {
             ...area,
-            imageIds: validImageIds
+            imageIds: imageIds
           };
         }
         return area;
@@ -65,11 +31,43 @@ export function useAreaImageSelect(
         ...prevData,
         areas: updatedAreas
       }));
+
+      // If we have a property ID, update the property_images table
+      if (formData.id) {
+        console.log(`Updating area assignments for images in property_images table`);
+        
+        // First, clear all area assignments for this area
+        const { error: clearError } = await supabase
+          .from('property_images')
+          .update({ area: null })
+          .eq('property_id', formData.id)
+          .eq('area', areaId);
+          
+        if (clearError) {
+          console.error('Error clearing area assignments:', clearError);
+          throw clearError;
+        }
+        
+        // Now set the area for each selected image
+        for (const imageId of imageIds) {
+          const { error } = await supabase
+            .from('property_images')
+            .update({ area: areaId })
+            .eq('id', imageId)
+            .eq('property_id', formData.id);
+            
+          if (error) {
+            console.error(`Error updating area for image ${imageId}:`, error);
+            throw error;
+          }
+        }
+      }
       
       toast({
         title: "Success",
-        description: "Images updated for area",
+        description: "Area images updated",
       });
+      
     } catch (error) {
       console.error('Error selecting images for area:', error);
       toast({

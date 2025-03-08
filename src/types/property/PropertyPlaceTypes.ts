@@ -1,14 +1,35 @@
 
-export enum PropertyPlaceType {
-  RESTAURANT = 'restaurant',
-  CAFE = 'cafe',
-  SCHOOL = 'school',
-  HOSPITAL = 'hospital',
-  SUPERMARKET = 'supermarket',
-  PARK = 'park',
-  TRANSIT_STATION = 'transit_station',
-  SHOPPING_MALL = 'shopping_mall',
-  GYM = 'gym',
-  PHARMACY = 'pharmacy',
-  OTHER = 'other'
+/**
+ * Represents the type of a nearby place
+ */
+export type PropertyPlaceType = 
+  | 'restaurant'
+  | 'cafe'
+  | 'bar'
+  | 'supermarket'
+  | 'school'
+  | 'park'
+  | 'gym'
+  | 'hospital'
+  | 'pharmacy'
+  | 'bus_station'
+  | 'subway_station'
+  | 'train_station'
+  | 'shopping_mall'
+  | 'airport'
+  | 'tourist_attraction'
+  | 'other';
+
+/**
+ * Represents a nearby place to a property
+ */
+export interface PropertyNearbyPlace {
+  id: string;
+  name: string;
+  type: PropertyPlaceType;
+  vicinity: string;
+  rating: number;
+  user_ratings_total: number;
+  distance: number;
+  visible_in_webview?: boolean;
 }

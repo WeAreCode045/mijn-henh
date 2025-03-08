@@ -1,5 +1,5 @@
 
-import { PropertyFormData, PropertySubmitData } from "@/types/property";
+import { PropertyFormData, PropertySubmitData, PropertyArea } from "@/types/property";
 import { 
   prepareAreasForFormSubmission, 
   preparePropertiesForJsonField
@@ -19,6 +19,9 @@ export function usePropertyDataPreparer() {
     console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
     console.log("usePropertyFormSubmit - Form submission - technicalItems:", technicalItemsJson);
     
+    // Convert image objects to URLs for database storage
+    const imageUrls = formData.images.map(img => typeof img === 'string' ? img : img.url);
+    
     return {
       title: formData.title,
       price: formData.price,
@@ -34,22 +37,19 @@ export function usePropertyDataPreparer() {
       description: formData.description,
       location_description: formData.location_description,
       features: featuresJson,
-      // Include these fields to satisfy TypeScript, but they'll be removed before database operations
-      featuredImage: formData.featuredImage,
-      featuredImages: formData.featuredImages || [],
-      map_image: formData.map_image,
+      areas: areasForSubmission as any,
+      nearby_places: nearby_placesJson,
       latitude: formData.latitude,
       longitude: formData.longitude,
-      areas: areasForSubmission,
-      nearby_places: nearby_placesJson,
-      images: formData.images.map(img => typeof img === 'string' ? img : img.url),
+      map_image: formData.map_image,
       object_id: formData.object_id,
       agent_id: formData.agent_id,
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
+      images: imageUrls,
       technicalItems: technicalItemsJson,
-      floorplanEmbedScript: formData.floorplanEmbedScript
+      floorplanEmbedScript: formData.floorplanEmbedScript || ""
     };
   };
 

@@ -1,7 +1,11 @@
 
-// Export all property-related types
-export * from './PropertyTypes';
+// Make sure to re-export all types from various files
+export * from './PropertyAreaTypes';
 export * from './PropertyDataTypes';
-export * from './PropertyFloorplanTypes';
+export * from './PropertyFeatureTypes';
+export * from './PropertyFormTypes';
 export * from './PropertyImageTypes';
-export * from './PropertyLocationTypes';
+export * from './PropertyFloorplanTypes';
+export * from './PropertyPlaceTypes';
+export * from './PropertyCityTypes';
+export * from './PropertyTechnicalItemTypes';

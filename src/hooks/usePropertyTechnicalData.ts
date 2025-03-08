@@ -1,48 +1,40 @@
 
-import { useCallback } from "react";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
-import { v4 as uuidv4 } from "uuid";
+import { useState } from 'react';
+import { PropertyTechnicalItem } from '@/types/property';
 
-export function usePropertyTechnicalData(
-  formData: PropertyFormData,
-  setFormData: (data: PropertyFormData) => void
-) {
-  const addTechnicalItem = useCallback(() => {
-    const newItem: PropertyTechnicalItem = {
-      id: uuidv4(),
-      title: "",
-      size: "",
-      description: "",
-      floorplanId: "none", // Changed from null to "none"
-      columns: 1 // Default to 1 column
-    };
+export function usePropertyTechnicalData() {
+  const [technicalItems, setTechnicalItems] = useState<PropertyTechnicalItem[]>([]);
 
-    setFormData({
-      ...formData,
-      technicalItems: [...(formData.technicalItems || []), newItem]
-    });
-  }, [formData, setFormData]);
+  const addTechnicalItem = () => {
+    setTechnicalItems(prev => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        title: '',
+        size: '',
+        description: '',
+        floorplanId: null,
+        columns: 2 // Default column value
+      }
+    ]);
+  };
 
-  const removeTechnicalItem = useCallback((id: string) => {
-    setFormData({
-      ...formData,
-      technicalItems: (formData.technicalItems || []).filter(item => item.id !== id)
-    });
-  }, [formData, setFormData]);
-
-  const updateTechnicalItem = useCallback((id: string, field: keyof PropertyTechnicalItem, value: any) => {
-    setFormData({
-      ...formData,
-      technicalItems: (formData.technicalItems || []).map(item => 
+  const updateTechnicalItem = (id: string, field: keyof PropertyTechnicalItem, value: any) => {
+    setTechnicalItems(prev => 
+      prev.map(item => 
         item.id === id ? { ...item, [field]: value } : item
       )
-    });
-  }, [formData, setFormData]);
+    );
+  };
+
+  const removeTechnicalItem = (id: string) => {
+    setTechnicalItems(prev => prev.filter(item => item.id !== id));
+  };
 
   return {
-    technicalItems: formData.technicalItems || [],
+    technicalItems,
     addTechnicalItem,
-    removeTechnicalItem,
-    updateTechnicalItem
+    updateTechnicalItem,
+    removeTechnicalItem
   };
 }

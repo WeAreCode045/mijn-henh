@@ -8,10 +8,10 @@ import { PropertyCity } from './PropertyCityTypes';
 import { PropertyTechnicalItem } from './PropertyTechnicalItemTypes';
 
 /**
- * Represents property data
+ * Represents form data for property submission
  */
-export interface PropertyData {
-  id: string;
+export interface PropertyFormData {
+  id?: string;
   title: string;
   price: string;
   address: string;
@@ -26,34 +26,34 @@ export interface PropertyData {
   description: string;
   location_description: string;
   features: PropertyFeature[];
+  images: PropertyImage[];
+  featuredImage: string | null;
+  featuredImages: string[];
+  coverImages?: string[]; // For backward compatibility
+  gridImages?: string[]; // For backward compatibility
   areas: PropertyArea[];
   nearby_places: PropertyNearbyPlace[];
   nearby_cities?: PropertyCity[];
   latitude: number | null;
   longitude: number | null;
   map_image: string | null;
-  images: PropertyImage[];
-  featuredImage: string | null;
-  featuredImages: string[];
-  coverImages?: string[]; // For backward compatibility
-  gridImages?: string[]; // For backward compatibility
   agent_id?: string;
-  agent?: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    photoUrl: string;
-  };
-  created_at?: string;
-  updated_at?: string;
   object_id?: string;
   template_id?: string;
-  floorplanEmbedScript?: string;
-  floorplans?: PropertyFloorplan[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  notes?: string;
+  floorplans?: PropertyFloorplan[];
+  floorplanEmbedScript?: string;
   technicalItems?: PropertyTechnicalItem[];
   areaPhotos?: string[];
+}
+
+/**
+ * Represents data for property submission to the database
+ * Excluding client-side specific fields like imagesFiles
+ */
+export interface PropertySubmitData extends Omit<PropertyFormData, "featuredImage" | "featuredImages" | "images"> {
+  images: string[];
+  technicalItems?: any; // JSON compatible
+  floorplanEmbedScript?: string;
 }

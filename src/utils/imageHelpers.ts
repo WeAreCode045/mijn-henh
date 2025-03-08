@@ -2,50 +2,40 @@
 import { PropertyImage } from "@/types/property";
 
 /**
- * Helper function to safely get URL from either string or object with URL property
+ * Helper function to ensure an image object is processed correctly
+ * Handles both string URLs and PropertyImage objects
  */
-export function getImageUrl(image: string | { url: string } | PropertyImage): string {
+export function getImageUrl(image: string | PropertyImage): string {
   if (typeof image === 'string') {
     return image;
   }
-  
-  if (image && typeof image === 'object' && 'url' in image) {
-    return image.url;
-  }
-  
-  return '';
+  return image.url;
 }
 
 /**
- * Helper function to normalize images to PropertyImage type
+ * Helper function to get image ID from either string or object
+ * Returns undefined if the image doesn't have an ID
  */
-export function normalizeImage(image: string | { url: string } | PropertyImage): PropertyImage {
+export function getImageId(image: string | PropertyImage): string | undefined {
   if (typeof image === 'string') {
-    return { id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, url: image };
+    return undefined;
   }
-  
-  if ('url' in image) {
-    return {
-      id: ('id' in image) ? image.id : `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: image.url,
-      ...('property_id' in image ? { property_id: image.property_id } : {}),
-      ...('is_main' in image ? { is_main: image.is_main } : {}),
-      ...('is_featured_image' in image ? { is_featured_image: image.is_featured_image } : {}),
-      ...('area' in image ? { area: image.area } : {}),
-      ...('sort_order' in image ? { sort_order: image.sort_order } : {})
-    };
-  }
-  
-  return image;
+  return image.id;
 }
 
 /**
- * Helper function to normalize an array of images
+ * Helper function to convert image URLs to PropertyImage objects
  */
-export function normalizeImages(images: (string | { url: string } | PropertyImage)[]): PropertyImage[] {
-  if (!images || !Array.isArray(images)) {
-    return [];
-  }
-  
-  return images.map(img => normalizeImage(img));
+export function convertUrlsToImageObjects(urls: string[]): PropertyImage[] {
+  return urls.map(url => ({
+    id: crypto.randomUUID(),
+    url
+  }));
+}
+
+/**
+ * Helper function to extract URLs from PropertyImage objects
+ */
+export function extractUrlsFromImages(images: PropertyImage[]): string[] {
+  return images.map(image => image.url);
 }

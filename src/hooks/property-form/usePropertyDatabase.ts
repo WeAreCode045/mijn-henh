@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,7 @@ export function usePropertyDatabase() {
       if (data.areas && Array.isArray(data.areas)) {
         // Cast to any to avoid TypeScript errors while still using the function properly
         const transformedAreas = prepareAreasForFormSubmission(data.areas as any);
-        data.areas = transformedAreas;
+        data.areas = transformedAreas as any;
       }
 
       // Transform features to the correct format
@@ -86,7 +87,7 @@ export function usePropertyDatabase() {
       if (data.areas && Array.isArray(data.areas)) {
         // Cast to any to avoid TypeScript errors while still using the function properly
         const transformedAreas = prepareAreasForFormSubmission(data.areas as any);
-        data.areas = transformedAreas;
+        data.areas = transformedAreas as any;
       }
 
       // Transform features to the correct format

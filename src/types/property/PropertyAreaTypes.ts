@@ -1,18 +1,16 @@
 
+import { PropertyImage } from './PropertyImageTypes';
+
 /**
- * Property area type definitions
+ * Represents an area of a property
  */
-
-import { PropertyImage } from "./PropertyImageTypes";
-
 export interface PropertyArea {
   id: string;
   name: string;
   size: string;
-  images: PropertyImage[];
-  // Additional properties used in the application
   title: string;
   description: string;
   imageIds: string[];
   columns: number;
+  images: PropertyImage[];
 }

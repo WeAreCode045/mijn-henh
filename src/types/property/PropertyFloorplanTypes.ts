@@ -1,12 +1,14 @@
 
+/**
+ * Represents a floorplan associated with a property
+ */
 export interface PropertyFloorplan {
   id: string;
   url: string;
-  property_id?: string;
-  title?: string;
-  description?: string;
-  sort_order?: number;
-  filePath?: string; // Added based on the error messages
-  size?: number;
+  filePath?: string;
+  name?: string;
   type?: string;
+  property_id?: string;
+  created_at?: string;
+  sort_order?: number;
 }
