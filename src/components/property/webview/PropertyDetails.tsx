@@ -87,7 +87,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   // Get energy label image path based on energy class
   const getEnergyLabelImagePath = () => {
     if (!property.energyLabel) return null;
-    return `/energy/${property.energyLabel.toUpperCase()}.png`;
+    return `/storage/v1/object/public/global/energy/${property.energyLabel.toUpperCase()}.png`;
   };
   
   return (
