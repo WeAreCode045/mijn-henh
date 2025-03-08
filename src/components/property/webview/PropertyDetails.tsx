@@ -1,6 +1,7 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
+import { defaultAgencySettings } from "@/utils/defaultAgencySettings";
 import { 
   CalendarDays, 
   BedDouble, 
@@ -67,14 +68,14 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   };
 
   // Safely get icon names with fallbacks
-  // Explicitly type safeSettings as AgencySettings to ensure TypeScript knows all properties exist
+  // Using defaultAgencySettings for colors if settings is undefined
   const safeSettings: AgencySettings = settings || {
     name: "",
     email: "",
     phone: "",
     address: "",
-    primaryColor: "",
-    secondaryColor: "",
+    primaryColor: defaultAgencySettings.primaryColor,
+    secondaryColor: defaultAgencySettings.secondaryColor,
     iconBuildYear: "calendar",
     iconBedrooms: "bed",
     iconBathrooms: "bath",
