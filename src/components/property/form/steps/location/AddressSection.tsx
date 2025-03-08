@@ -4,21 +4,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface AddressSectionProps {
   formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
-  onFetchLocationData?: () => Promise<void>;
-  isLoadingLocationData?: boolean;
+  onFetchLocationDescription?: () => Promise<void>;
+  isLoadingLocationDescription?: boolean;
 }
 
 export function AddressSection({
   formData,
   onFieldChange,
-  onFetchLocationData,
-  isLoadingLocationData = false
+  onFetchLocationDescription,
+  isLoadingLocationDescription = false
 }: AddressSectionProps) {
   return (
     <Card>
@@ -36,7 +36,29 @@ export function AddressSection({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="location_description">Location Description</Label>
+            <div className="flex justify-between items-center">
+              <Label htmlFor="location_description">Location Description</Label>
+              
+              {onFetchLocationDescription && (
+                <Button 
+                  type="button" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onFetchLocationDescription();
+                  }}
+                  className="flex items-center gap-2"
+                  disabled={isLoadingLocationDescription}
+                >
+                  {isLoadingLocationDescription ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4" />
+                  )}
+                  {isLoadingLocationDescription ? "Generating..." : "Generate Description"}
+                </Button>
+              )}
+            </div>
+            
             <Textarea
               id="location_description"
               placeholder="Describe the neighborhood, amenities, and surroundings..."
@@ -44,27 +66,6 @@ export function AddressSection({
               value={formData.location_description || ''}
               onChange={(e) => onFieldChange && onFieldChange('location_description', e.target.value)}
             />
-          </div>
-          
-          <div className="flex justify-end">
-            {onFetchLocationData && (
-              <Button 
-                type="button" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  onFetchLocationData();
-                }}
-                className="flex items-center gap-2"
-                disabled={isLoadingLocationData}
-              >
-                {isLoadingLocationData ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <MapPin className="h-4 w-4" />
-                )}
-                {isLoadingLocationData ? "Fetching Data..." : "Get Location Data"}
-              </Button>
-            )}
           </div>
         </div>
       </CardContent>

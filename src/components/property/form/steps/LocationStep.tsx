@@ -4,6 +4,7 @@ import { AddressSection } from "./location/AddressSection";
 import { MapPreviewSection } from "./location/MapPreviewSection";
 import { NearbyPlacesSection } from "./location/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
+import { useState } from "react";
 
 interface LocationStepProps {
   formData: PropertyFormData;
@@ -23,13 +24,27 @@ export function LocationStep({
   handleMapImageDelete,
   isLoadingLocationData = false
 }: LocationStepProps) {
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+
+  // Function to handle generating description
+  const handleGenerateDescription = async () => {
+    if (!onFetchLocationData) return;
+    
+    setIsGeneratingDescription(true);
+    try {
+      await onFetchLocationData();
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <AddressSection 
         formData={formData}
         onFieldChange={onFieldChange}
-        onFetchLocationData={onFetchLocationData}
-        isLoadingLocationData={isLoadingLocationData}
+        onFetchLocationDescription={handleGenerateDescription}
+        isLoadingLocationDescription={isGeneratingDescription}
       />
       
       <MapPreviewSection 
@@ -40,10 +55,14 @@ export function LocationStep({
       <NearbyPlacesSection 
         formData={formData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
+        onFetchLocationData={onFetchLocationData}
+        isLoadingLocationData={isLoadingLocationData}
       />
       
       <NearbyCitiesSection 
         formData={formData}
+        onFetchLocationData={onFetchLocationData}
+        isLoadingLocationData={isLoadingLocationData}
       />
     </div>
   );

@@ -12,7 +12,12 @@ export function usePropertyContent(
 ) {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
-  const { fetchLocationData, removeNearbyPlace, isLoading: isLoadingLocationData } = useLocationDataFetch(formData, onFieldChange);
+  const { 
+    fetchLocationData, 
+    generateLocationDescription,
+    removeNearbyPlace, 
+    isLoading: isLoadingLocationData 
+  } = useLocationDataFetch(formData, onFieldChange);
 
   const handleStepClick = (stepId: number) => {
     console.log(`usePropertyContent - Setting current step to ${stepId}`);
@@ -81,6 +86,10 @@ export function usePropertyContent(
     await fetchLocationData();
   };
 
+  const handleGenerateLocationDescription = async () => {
+    await generateLocationDescription();
+  };
+
   const handleRemoveNearbyPlace = (index: number) => {
     removeNearbyPlace(index);
   };
@@ -98,6 +107,7 @@ export function usePropertyContent(
     updateFeature,
     // Location management
     onFetchLocationData: handleFetchLocationData,
+    onGenerateLocationDescription: handleGenerateLocationDescription,
     onRemoveNearbyPlace: handleRemoveNearbyPlace,
     isLoadingLocationData
   };

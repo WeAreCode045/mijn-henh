@@ -109,16 +109,90 @@ export function useLocationDataFetch(
     }
   };
 
+  const generateLocationDescription = async () => {
+    if (!formData.address) {
+      toast({
+        title: "Error",
+        description: "Please enter a property address first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property must be saved before generating description",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { data: settings } = await supabase
+        .from('agency_settings')
+        .select('openai_api_key')
+        .single();
+
+      if (!settings?.openai_api_key) {
+        toast({
+          title: "Missing API Key",
+          description: "OpenAI API key is not configured in agency settings",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const nearbyPlaces = formData.nearby_places || [];
+      
+      // Call the Supabase edge function to generate location description
+      const { data, error } = await supabase.functions.invoke('generate-location-description', {
+        body: {
+          address: formData.address,
+          nearbyPlaces: nearbyPlaces
+        }
+      });
+
+      if (error) {
+        throw new Error(`Error generating description: ${error.message}`);
+      }
+
+      if (!data || !data.description) {
+        throw new Error('No description returned from service');
+      }
+
+      onFieldChange('location_description', data.description);
+
+      toast({
+        title: "Success",
+        description: "Location description generated successfully"
+      });
+    } catch (error: any) {
+      console.error('Error generating location description:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate location description",
+        variant: "destructive"
+      });
+    }
+  };
+
   const removeNearbyPlace = (index: number) => {
     if (!formData.nearby_places) return;
     
     const updatedPlaces = [...formData.nearby_places];
     updatedPlaces.splice(index, 1);
     onFieldChange('nearby_places', updatedPlaces);
+    
+    toast({
+      title: "Place removed",
+      description: "Nearby place has been removed successfully"
+    });
   };
 
   return {
     fetchLocationData,
+    generateLocationDescription,
     removeNearbyPlace,
     isLoading
   };

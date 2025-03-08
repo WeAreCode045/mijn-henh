@@ -28,7 +28,7 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     };
   }, [property.latitude, property.longitude, waitForPlaces]);
 
-  // Group nearby places by category
+  // Group nearby places by category with improved categorization
   const groupedPlaces = property.nearby_places ? 
     property.nearby_places.reduce((acc: {[key: string]: any[]}, place) => {
       const category = place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
@@ -46,6 +46,17 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
       return acc;
     }, {}) 
     : {};
+  
+  // Format transportation type
+  const getTransportType = (place: any) => {
+    if (place.type?.toLowerCase().includes('train') || place.type?.toLowerCase().includes('rail')) {
+      return 'Train';
+    } else if (place.type?.toLowerCase().includes('bus')) {
+      return 'Bus';
+    } else {
+      return 'Transit';
+    }
+  };
   
   const nearbyCities = property.nearby_cities || [];
 
@@ -112,6 +123,9 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
                             </svg>
                             <div>
                               <span className="font-medium">{place.name}</span>
+                              {category === 'transportation' && (
+                                <span className="ml-1 text-blue-600">({getTransportType(place)})</span>
+                              )}
                               {place.rating && (
                                 <span className="ml-1 text-yellow-600">★ {place.rating}</span>
                               )}
