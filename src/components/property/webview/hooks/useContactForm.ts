@@ -37,9 +37,12 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    console.log("Submitting contact form for property:", property.id);
+    console.log("Form data:", formData);
 
     try {
-      await submitContactForm(formData, property, settings);
+      const result = await submitContactForm(formData, property, settings);
+      console.log("Form submission result:", result);
 
       // Success message
       toast({

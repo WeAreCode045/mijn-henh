@@ -3,6 +3,7 @@ import { SubmissionsList } from "../communications/SubmissionsList";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
 import { useSubmissions } from "../communications/useSubmissions";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 interface CommunicationsTabContentProps {
   id: string;
@@ -17,8 +18,14 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
     selectedSubmission,
     setSelectedSubmission,
     handleMarkAsRead,
-    handleSendResponse
+    handleSendResponse,
+    refreshSubmissions
   } = useSubmissions(id);
+
+  // Refresh submissions when component mounts
+  useEffect(() => {
+    refreshSubmissions();
+  }, []);
 
   const handleSendResponseWrapper = async (responseText: string) => {
     try {
@@ -36,6 +43,9 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
       });
     }
   };
+
+  console.log("Communications tab content for property:", id);
+  console.log("Submissions:", submissions);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

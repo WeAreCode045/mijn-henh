@@ -8,15 +8,16 @@ const corsHeaders = {
 };
 
 interface ContactSubmission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  inquiry_type: string;
+  property_id: string;
   property_title: string;
+  submission_id: string;
   agent_email: string;
   agent_name: string;
+  inquiry_name: string;
+  inquiry_email: string;
+  inquiry_phone: string;
+  inquiry_message: string;
+  inquiry_type: string;
 }
 
 serve(async (req) => {
@@ -29,6 +30,7 @@ serve(async (req) => {
     
     // Add some logging to help with debugging
     console.log("Processing submission:", {
+      property_id: submission.property_id,
       to: submission.agent_email,
       subject: `New inquiry for ${submission.property_title}`,
       from_address: Deno.env.get("EMAILENGINE_FROM_ADDRESS")
@@ -50,13 +52,13 @@ serve(async (req) => {
           <p>You have received a new inquiry for property: ${submission.property_title}</p>
           <h3>Contact Details:</h3>
           <ul>
-            <li>Name: ${submission.name}</li>
-            <li>Email: ${submission.email}</li>
-            <li>Phone: ${submission.phone}</li>
+            <li>Name: ${submission.inquiry_name}</li>
+            <li>Email: ${submission.inquiry_email}</li>
+            <li>Phone: ${submission.inquiry_phone}</li>
             <li>Inquiry Type: ${submission.inquiry_type}</li>
           </ul>
           <h3>Message:</h3>
-          <p>${submission.message}</p>
+          <p>${submission.inquiry_message}</p>
         `,
         from: {
           name: "Property Inquiry",

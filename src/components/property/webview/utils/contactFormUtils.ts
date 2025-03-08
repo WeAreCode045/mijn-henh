@@ -39,7 +39,8 @@ export async function submitContactForm(
     .single();
 
   if (submissionError) {
-    throw submissionError;
+    console.error("Error saving submission:", submissionError);
+    throw new Error("Er is een fout opgetreden bij het verzenden van het formulier");
   }
 
   // Try to send email notification

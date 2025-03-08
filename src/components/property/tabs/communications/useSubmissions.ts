@@ -27,18 +27,47 @@ export function useSubmissions(propertyId: string) {
 
   useEffect(() => {
     fetchSubmissions();
+    
+    // Set up a subscription to listen for changes in the submissions table
+    const channel = supabase
+      .channel('property_submissions')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'property_contact_submissions',
+          filter: `property_id=eq.${propertyId}`
+        },
+        () => {
+          // When a change is detected, refetch the submissions
+          fetchSubmissions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [propertyId]);
 
   const fetchSubmissions = async () => {
     setIsLoading(true);
     try {
+      console.log("Fetching submissions for property:", propertyId);
+      
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select('*')
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching submissions:", error);
+        throw error;
+      }
+      
+      console.log("Fetched submissions:", data);
       setSubmissions(data || []);
       
       // If there's a selectedSubmission, update it with the latest data
@@ -202,6 +231,7 @@ export function useSubmissions(propertyId: string) {
     setSelectedSubmission,
     isSending,
     handleMarkAsRead,
-    handleSendResponse
+    handleSendResponse,
+    refreshSubmissions: fetchSubmissions
   };
 }
