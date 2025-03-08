@@ -31,15 +31,6 @@ export function usePropertyDatabase() {
         // Make sure we're passing an array to preparePropertiesForJsonField
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
       }
-      
-      // Transform technicalItems to the correct format
-      if (data.technicalItems) {
-        // Ensure technicalItems is treated as an array
-        const technicalItemsArray = Array.isArray(data.technicalItems) 
-          ? data.technicalItems 
-          : [];
-        data.technicalItems = preparePropertiesForJsonField(technicalItemsArray);
-      }
 
       // Make a copy of data without fields that don't exist in the database
       const { featuredImage, featuredImages, coverImages, floorplans, ...dataToUpdate } = data as any;
@@ -100,15 +91,6 @@ export function usePropertyDatabase() {
       if (data.nearby_places && Array.isArray(data.nearby_places)) {
         // Make sure we're passing an array to preparePropertiesForJsonField
         data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
-      }
-      
-      // Transform technicalItems to the correct format
-      if (data.technicalItems) {
-        // Ensure technicalItems is treated as an array
-        const technicalItemsArray = Array.isArray(data.technicalItems) 
-          ? data.technicalItems 
-          : [];
-        data.technicalItems = preparePropertiesForJsonField(technicalItemsArray);
       }
 
       // Ensure floorplanEmbedScript is included in the data

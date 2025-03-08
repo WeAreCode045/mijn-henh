@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -39,8 +40,6 @@ interface PropertyContentTabProps {
   isUploadingFloorplan?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
   isLoadingLocationData?: boolean;
 }
 
@@ -75,8 +74,6 @@ export function PropertyContentTab({
   isUploadingFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
   isLoadingLocationData,
 }: PropertyContentTabProps) {
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
@@ -160,8 +157,6 @@ export function PropertyContentTab({
         handleToggleFeaturedImage={handleToggleFeaturedImage}
         isUploading={isUploading}
         isUploadingFloorplan={isUploadingFloorplan}
-        onAddTechnicalItem={onAddTechnicalItem}
-        onRemoveTechnicalItem={onRemoveTechnicalItem}
         setPendingChanges={setPendingChanges}
         isLoadingLocationData={isLoadingLocationData}
       />

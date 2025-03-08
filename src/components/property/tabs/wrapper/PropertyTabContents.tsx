@@ -57,8 +57,6 @@ interface PropertyTabContentsProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploadingFloorplan?: boolean;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -103,8 +101,6 @@ export function PropertyTabContents({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploadingFloorplan,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
   handleRemoveAreaPhoto,
   onFetchLocationData,
   onRemoveNearbyPlace,
@@ -143,8 +139,6 @@ export function PropertyTabContents({
     isUploadingFloorplan,
     handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
     handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
-    onAddTechnicalItem,
-    onRemoveTechnicalItem,
     handleRemoveAreaPhoto: handleRemoveAreaPhoto || ((areaId: string, imageId: string) => {
       console.warn("Area photo removal functionality not available");
     }),

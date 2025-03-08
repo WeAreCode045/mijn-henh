@@ -32,7 +32,6 @@ export const initialFormData: PropertyFormData = {
   virtualTourUrl: "",
   youtubeUrl: "",
   areaPhotos: [], // Empty areaPhotos array
-  technicalItems: [], // Empty technicalItems array
   coverImages: [], // Empty coverImages array for backward compatibility
   gridImages: [] // Empty gridImages array for backward compatibility
 };

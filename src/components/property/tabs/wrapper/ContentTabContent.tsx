@@ -29,8 +29,6 @@ interface ContentTabContentProps {
   isUploadingFloorplan?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (index: number) => void;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
@@ -63,8 +61,6 @@ export function ContentTabContent({
   isUploadingFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData
@@ -98,8 +94,6 @@ export function ContentTabContent({
       isUploadingFloorplan={isUploadingFloorplan}
       handleSetFeaturedImage={handleSetFeaturedImage}
       handleToggleFeaturedImage={handleToggleFeaturedImage}
-      onAddTechnicalItem={onAddTechnicalItem}
-      onRemoveTechnicalItem={onRemoveTechnicalItem}
       onFetchLocationData={onFetchLocationData}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
       isLoadingLocationData={isLoadingLocationData}

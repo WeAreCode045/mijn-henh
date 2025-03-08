@@ -50,6 +50,7 @@ export interface PropertyCity {
   id: string;
   name: string;
   distance?: string | number;
+  visible_in_webview?: boolean;
 }
 
 // Floor plan type
@@ -62,16 +63,6 @@ export interface PropertyFloorplan {
   sort_order?: number;
 }
 
-// Technical item
-export interface PropertyTechnicalItem {
-  id: string;
-  title: string;
-  size: string;
-  description: string;
-  floorplanId: string | null;
-  columns?: number;
-}
-
 // Property agent
 export interface PropertyAgent {
   id: string;
@@ -79,6 +70,7 @@ export interface PropertyAgent {
   email?: string;
   phone?: string;
   photoUrl?: string;
+  address?: string;
 }
 
 // Property data interface
@@ -114,14 +106,13 @@ export interface PropertyData {
   notes?: string;
   floorplans?: PropertyFloorplan[] | string[] | { url: string }[];
   floorplanEmbedScript?: string;
-  technicalItems?: PropertyTechnicalItem[];
   featuredImage?: string | null;
   featuredImages?: string[];
   coverImages?: string[];
   gridImages?: string[];
+  areaPhotos?: string[];
   created_at?: string;
   updated_at?: string;
-  areaPhotos?: string[];
 }
 
 // Property form data extends PropertyData
@@ -164,6 +155,5 @@ export interface PropertySubmitData {
   floorplans?: string[];
   featuredImage?: string | null;
   featuredImages?: string[];
-  technicalItems?: string;
   floorplanEmbedScript?: string;
 }

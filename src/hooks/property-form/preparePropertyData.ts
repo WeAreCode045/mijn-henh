@@ -1,7 +1,6 @@
 
-import type { PropertyArea, PropertyTechnicalItem } from "@/types/property";
+import type { PropertyArea } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
-import { normalizeImage, getImageUrl } from "@/utils/imageHelpers";
 
 /**
  * Transforms array of area objects into JSON array for database storage
@@ -73,14 +72,4 @@ export function prepareImagesForSubmission(images: any[]): string[] {
  */
 export function prepareFloorplansForFormSubmission(floorplans: any[]): Json {
   return preparePropertiesForJsonField(floorplans || []);
-}
-
-/**
- * Prepare technical items for JSON field
- */
-export function prepareTechnicalItemsForSubmission(items: PropertyTechnicalItem[]): Json {
-  if (!items || !Array.isArray(items)) {
-    return [];
-  }
-  return items as Json;
 }

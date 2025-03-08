@@ -4,7 +4,6 @@ import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
 import { LocationStep } from "./steps/LocationStep";
-import { ConstructionStep } from "./steps/ConstructionStep";
 
 interface PropertyFormContentProps {
   step: number;
@@ -32,8 +31,6 @@ interface PropertyFormContentProps {
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
   isUploadingFloorplan?: boolean;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges?: (changes: boolean) => void;
   isLoadingLocationData?: boolean;
 }
@@ -64,8 +61,6 @@ export function PropertyFormContent({
   handleToggleFeaturedImage,
   isUploading,
   isUploadingFloorplan,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
   setPendingChanges,
   isLoadingLocationData
 }: PropertyFormContentProps) {
@@ -121,18 +116,6 @@ export function PropertyFormContent({
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               handleMapImageDelete={handleMapImageDelete}
               isLoadingLocationData={isLoadingLocationData}
-            />
-          </form>
-        );
-      case 5:
-        return (
-          <form id="constructionForm">
-            <ConstructionStep
-              formData={formData}
-              onAddTechnicalItem={onAddTechnicalItem}
-              onRemoveTechnicalItem={onRemoveTechnicalItem}
-              onFieldChange={onFieldChange}
-              floorplans={formData.floorplans || []}
             />
           </form>
         );

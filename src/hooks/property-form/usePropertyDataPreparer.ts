@@ -3,8 +3,7 @@ import { PropertyFormData, PropertySubmitData } from "@/types/property";
 import { 
   prepareAreasForFormSubmission, 
   preparePropertiesForJsonField,
-  prepareImagesForSubmission,
-  prepareTechnicalItemsForSubmission
+  prepareImagesForSubmission
 } from "./preparePropertyData";
 
 export function usePropertyDataPreparer() {
@@ -13,10 +12,6 @@ export function usePropertyDataPreparer() {
     const featuresJson = preparePropertiesForJsonField(formData.features);
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
     const nearby_citiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
-    
-    // Ensure technicalItems is treated as an array before transformation
-    const technicalItemsArray = Array.isArray(formData.technicalItems) ? formData.technicalItems : [];
-    const technicalItemsJson = prepareTechnicalItemsForSubmission(technicalItemsArray);
     
     // Convert image objects to URLs for database storage
     const imageUrls = prepareImagesForSubmission(formData.images);
@@ -48,7 +43,6 @@ export function usePropertyDataPreparer() {
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       images: imageUrls,
-      technicalItems: technicalItemsJson as string,
       floorplanEmbedScript: formData.floorplanEmbedScript || ""
     };
   };

@@ -28,8 +28,6 @@ interface PropertyContentFormProps {
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
   isUploadingFloorplan?: boolean;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges: (pending: boolean) => void;
   isLoadingLocationData?: boolean;
 }
@@ -59,8 +57,6 @@ export function PropertyContentForm({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
   setPendingChanges,
   isLoadingLocationData
 }: PropertyContentFormProps) {
@@ -114,20 +110,6 @@ export function PropertyContentForm({
     }
   };
 
-  const wrappedAddTechnicalItem = () => {
-    if (onAddTechnicalItem) {
-      onAddTechnicalItem();
-      setPendingChanges(true);
-    }
-  };
-
-  const wrappedRemoveTechnicalItem = (index: number) => {
-    if (onRemoveTechnicalItem) {
-      onRemoveTechnicalItem(index);
-      setPendingChanges(true);
-    }
-  };
-
   return (
     <PropertyFormContent
       step={step}
@@ -154,8 +136,6 @@ export function PropertyContentForm({
       handleSetFeaturedImage={safeSetFeaturedImage}
       handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}
-      onAddTechnicalItem={wrappedAddTechnicalItem}
-      onRemoveTechnicalItem={wrappedRemoveTechnicalItem}
       setPendingChanges={setPendingChanges}
       isLoadingLocationData={isLoadingLocationData}
     />
