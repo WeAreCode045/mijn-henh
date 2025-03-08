@@ -158,6 +158,18 @@ export function NearbyPlacesSection({
                   Shopping
                 </Badge>
                 <Badge 
+                  className={`cursor-pointer ${showCategories.restaurant ? 'bg-blue-500' : 'bg-gray-300'}`}
+                  onClick={(e) => toggleCategory(e, 'restaurant')}
+                >
+                  Restaurants
+                </Badge>
+                <Badge 
+                  className={`cursor-pointer ${showCategories.health ? 'bg-blue-500' : 'bg-gray-300'}`}
+                  onClick={(e) => toggleCategory(e, 'health')}
+                >
+                  Health
+                </Badge>
+                <Badge 
                   className={`cursor-pointer ${showCategories.other ? 'bg-blue-500' : 'bg-gray-300'}`}
                   onClick={(e) => toggleCategory(e, 'other')}
                 >
