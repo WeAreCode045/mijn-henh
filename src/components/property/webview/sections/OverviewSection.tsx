@@ -38,7 +38,7 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               <img
                 src={mainImage}
                 alt={property.title}
-                className="w-full h-[350px] object-cover rounded-lg shadow-lg"
+                className="w-full h-[450px] object-cover rounded-lg shadow-lg"
               />
             </div>
             
