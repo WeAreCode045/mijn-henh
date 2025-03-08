@@ -19,8 +19,10 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
   const area = property.areas[areaIndex];
   const areaTitle = area.title || `Area ${areaIndex + 1}`;
   
-  // Get area photos
-  const areaPhotos = area.photos || [];
+  // Get area photos by finding property images that have this area's id
+  const areaPhotos = property.images
+    .filter(img => img.area === area.id)
+    .map(img => img.url);
   
   return (
     <div className="space-y-6">
@@ -54,19 +56,21 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
         </div>
       )}
       
-      {/* Area details */}
+      {/* Area details - Only show if there's custom data for this area */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        {area.sqft && (
+        {/* We don't have sqft in the PropertyArea type, so we won't display it directly */}
+        {property.sqft && (
           <div className="flex items-center space-x-2">
             <span className="font-semibold">Area:</span>
-            <span>{area.sqft} sq ft</span>
+            <span>{property.sqft} sq ft</span>
           </div>
         )}
         
-        {area.dimensions && (
+        {/* Similarly, dimensions isn't in the PropertyArea type */}
+        {property.livingArea && (
           <div className="flex items-center space-x-2">
-            <span className="font-semibold">Dimensions:</span>
-            <span>{area.dimensions}</span>
+            <span className="font-semibold">Living Area:</span>
+            <span>{property.livingArea}</span>
           </div>
         )}
       </div>
