@@ -1,6 +1,7 @@
 
 import { WebViewSectionProps } from "../types";
 import { WebViewImageGrid } from "../WebViewImageGrid";
+import "../styles/WebViewStyles.css";
 
 export function OverviewSection({ property, settings }: WebViewSectionProps) {
   // Format price with thousand separators

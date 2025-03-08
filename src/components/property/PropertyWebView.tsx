@@ -1,4 +1,3 @@
-
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
@@ -11,6 +10,7 @@ import { WebViewDialogContent } from "@/components/property/webview/WebViewDialo
 import { WebViewFullPage } from "@/components/property/webview/WebViewFullPage";
 import { useWebViewBackground } from "@/components/property/webview/hooks/useWebViewBackground";
 import { hexToHSL } from "@/components/property/webview/utils/colorUtils";
+import "./webview/styles/WebViewStyles.css";
 
 interface PropertyWebViewProps {
   property?: PropertyData;
