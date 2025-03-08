@@ -25,6 +25,21 @@ export function AdvancedTab({ settings, onChange, onSwitchChange }: AdvancedTabP
         />
       </div>
       
+      <div className="space-y-2">
+        <Label htmlFor="openai_api_key">OpenAI API Key</Label>
+        <Input
+          id="openai_api_key"
+          name="openai_api_key"
+          value={settings.openai_api_key || ''}
+          onChange={onChange}
+          type="password"
+          placeholder="sk-..."
+        />
+        <p className="text-sm text-muted-foreground">
+          Used for AI-powered features like location descriptions and content generation.
+        </p>
+      </div>
+      
       <SmtpSettings
         settings={settings}
         onChange={onChange}
