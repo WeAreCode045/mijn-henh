@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PropertyFeature, PropertyFormData } from '@/types/property';
 import { steps } from '@/components/property/form/formSteps';
 import { useToast } from '@/components/ui/use-toast';
+import { useLocationDataFetch } from './useLocationDataFetch';
 
 export function usePropertyContent(
   formData: PropertyFormData,
@@ -11,6 +12,7 @@ export function usePropertyContent(
 ) {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
+  const { fetchLocationData, removeNearbyPlace, isLoading } = useLocationDataFetch(formData, onFieldChange);
 
   const handleStepClick = (stepId: number) => {
     console.log(`usePropertyContent - Setting current step to ${stepId}`);
@@ -74,6 +76,15 @@ export function usePropertyContent(
     onFieldChange('features', updatedFeatures);
   }, [formData, onFieldChange]);
 
+  // Call the functions from useLocationDataFetch
+  const handleFetchLocationData = async () => {
+    await fetchLocationData();
+  };
+
+  const handleRemoveNearbyPlace = (index: number) => {
+    removeNearbyPlace(index);
+  };
+
   return {
     currentStep,
     handleStepClick,
@@ -84,6 +95,10 @@ export function usePropertyContent(
     // Feature management
     addFeature,
     removeFeature,
-    updateFeature
+    updateFeature,
+    // Location management
+    onFetchLocationData: handleFetchLocationData,
+    onRemoveNearbyPlace: handleRemoveNearbyPlace,
+    isLoadingLocationData: isLoading
   };
 }

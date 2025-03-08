@@ -99,6 +99,7 @@ interface BasePropertyData {
   object_id?: string;
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];
+  nearby_cities?: Array<{name: string, distance: number}>;
   latitude?: number | null;
   longitude?: number | null;
   agent_id?: string;
