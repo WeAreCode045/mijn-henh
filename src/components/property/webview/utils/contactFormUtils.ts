@@ -94,7 +94,7 @@ export async function submitContactForm(
         // Send email using SMTP settings
         await supabase.functions.invoke('send-email-with-smtp', {
           body: {
-            to: settings.email,
+            to: property.agent?.email || settings.email,
             subject: `Nieuwe aanvraag voor ${property.title}`,
             text: `
               Naam: ${formData.name}
