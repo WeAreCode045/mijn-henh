@@ -6,11 +6,13 @@ import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
   return (
-    <div className="space-y-1 pb-16">
-      <PropertyDetails 
-        property={property}
-        settings={settings}
-      />
+    <div className="space-y-6 pb-16">
+      <div className="px-6">
+        <PropertyDetails 
+          property={property}
+          settings={settings}
+        />
+      </div>
       
       <div className="px-6 py-1 flex flex-col md:flex-row gap-6">
         {/* Description Section - adjusted width to be more balanced */}

@@ -6,7 +6,6 @@ import {
   BedDouble, 
   Bath, 
   Car, 
-  Zap, 
   Ruler, 
   Home,
   MapPin,
@@ -39,9 +38,6 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
         return <Bath size={iconSize} />;
       case 'car':
         return <Car size={iconSize} />;
-      case 'zap':
-      case 'lightning':
-        return <Zap size={iconSize} />;
       case 'ruler':
         return <Ruler size={iconSize} />;
       case 'home':
@@ -87,92 +83,103 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
     iconSqft: "ruler",
     iconLivingSpace: "home"
   };
+
+  // Get energy label image path based on energy class
+  const getEnergyLabelImagePath = () => {
+    if (!property.energyLabel) return null;
+    return `/energy/${property.energyLabel.toUpperCase()}.png`;
+  };
   
   return (
     <div className="mb-8">
       <h2 className="text-xl font-bold mb-4">Property Details</h2>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {property.buildYear && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconBuildYear)}
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Icon Grid Section - Takes up 3/4 of space on larger screens */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:w-3/4">
+          {property.buildYear && (
+            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+              <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                {getIcon(safeSettings.iconBuildYear)}
+              </div>
+              <div>
+                <p className="text-xs text-white/80">Year Built</p>
+                <p className="font-medium text-white">{property.buildYear}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Year Built</p>
-              <p className="font-medium">{property.buildYear}</p>
+          )}
+          
+          {parseValueToNumber(property.bedrooms) > 0 && (
+            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+              <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                {getIcon(safeSettings.iconBedrooms)}
+              </div>
+              <div>
+                <p className="text-xs text-white/80">Bedrooms</p>
+                <p className="font-medium text-white">{property.bedrooms}</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+          
+          {parseValueToNumber(property.bathrooms) > 0 && (
+            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+              <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                {getIcon(safeSettings.iconBathrooms)}
+              </div>
+              <div>
+                <p className="text-xs text-white/80">Bathrooms</p>
+                <p className="font-medium text-white">{property.bathrooms}</p>
+              </div>
+            </div>
+          )}
+          
+          {parseValueToNumber(property.garages) > 0 && (
+            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+              <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                {getIcon(safeSettings.iconGarages)}
+              </div>
+              <div>
+                <p className="text-xs text-white/80">Garages</p>
+                <p className="font-medium text-white">{property.garages}</p>
+              </div>
+            </div>
+          )}
+          
+          {parseValueToNumber(property.sqft) > 0 && (
+            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+              <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                {getIcon(safeSettings.iconSqft)}
+              </div>
+              <div>
+                <p className="text-xs text-white/80">Plot Size</p>
+                <p className="font-medium text-white">{formatNumber(property.sqft)} m²</p>
+              </div>
+            </div>
+          )}
+          
+          {parseValueToNumber(property.livingArea) > 0 && (
+            <div className="flex items-center gap-3 rounded-lg p-3" style={{ backgroundColor: settings?.primaryColor }}>
+              <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
+                {getIcon(safeSettings.iconLivingSpace)}
+              </div>
+              <div>
+                <p className="text-xs text-white/80">Living Space</p>
+                <p className="font-medium text-white">{formatNumber(property.livingArea)} m²</p>
+              </div>
+            </div>
+          )}
+        </div>
         
-        {parseValueToNumber(property.bedrooms) > 0 && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconBedrooms)}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Bedrooms</p>
-              <p className="font-medium">{property.bedrooms}</p>
-            </div>
-          </div>
-        )}
-        
-        {parseValueToNumber(property.bathrooms) > 0 && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconBathrooms)}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Bathrooms</p>
-              <p className="font-medium">{property.bathrooms}</p>
-            </div>
-          </div>
-        )}
-        
-        {parseValueToNumber(property.garages) > 0 && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconGarages)}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Garages</p>
-              <p className="font-medium">{property.garages}</p>
-            </div>
-          </div>
-        )}
-        
+        {/* Energy Label Section - Takes up 1/4 of space on larger screens */}
         {property.energyLabel && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconEnergyClass)}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Energy Class</p>
-              <p className="font-medium">{property.energyLabel.toUpperCase()}</p>
-            </div>
-          </div>
-        )}
-        
-        {parseValueToNumber(property.sqft) > 0 && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconSqft)}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Plot Size</p>
-              <p className="font-medium">{formatNumber(property.sqft)} m²</p>
-            </div>
-          </div>
-        )}
-        
-        {parseValueToNumber(property.livingArea) > 0 && (
-          <div className="flex items-center gap-3">
-            <div className="webview-detail-icon">
-              {getIcon(safeSettings.iconLivingSpace)}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Living Space</p>
-              <p className="font-medium">{formatNumber(property.livingArea)} m²</p>
+          <div className="md:w-1/4 flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <p className="text-sm font-medium mb-2">Energy Class</p>
+              <img 
+                src={getEnergyLabelImagePath()} 
+                alt={`Energy Class ${property.energyLabel.toUpperCase()}`} 
+                className="w-full max-w-[150px] h-auto"
+              />
             </div>
           </div>
         )}

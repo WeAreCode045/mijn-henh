@@ -79,7 +79,7 @@
   transition: all 0.2s ease-in-out;
 }
 
-
+/* Detail icon styling - updated for new color scheme */
 .webview-detail-icon {
     display: flex;
     align-items: center;
@@ -89,9 +89,31 @@
     border-radius: 9999px;
     background-color: #fe9c13;
     color: hsl(0deg 0% 100%);
+    transition: all 0.2s ease;
 }
 
+/* Property detail card styling */
+.webview-detail-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
 
+.webview-detail-card-label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  color: white;
+}
+
+.webview-detail-card-value {
+  font-weight: 500;
+  color: white;
+}
+
+/* Button styles */
 .webview-button {
   background-color: hsl(var(--estate-600));
   color: white;
@@ -135,6 +157,13 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: hsl(var(--estate-700));
+}
+
+/* Energy label image */
+.webview-energy-label {
+  max-width: 100%;
+  height: auto;
+  margin-top: 0.5rem;
 }
 
 /* Flex utilities */
