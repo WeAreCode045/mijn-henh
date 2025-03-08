@@ -21,6 +21,9 @@ export async function submitContactForm(
     throw new Error("Vul alle verplichte velden in");
   }
 
+  console.log("Submitting contact form with data:", formData);
+  console.log("Property:", property.id);
+
   // Save the submission to the database
   const { data: submissionData, error: submissionError } = await supabase
     .from('property_contact_submissions')
@@ -32,8 +35,7 @@ export async function submitContactForm(
       message: formData.message,
       inquiry_type: formData.inquiry_type,
       agent_id: property.agent_id,
-      is_read: false,
-      created_at: new Date().toISOString()
+      is_read: false
     })
     .select()
     .single();
@@ -42,6 +44,8 @@ export async function submitContactForm(
     console.error("Error saving submission:", submissionError);
     throw new Error("Er is een fout opgetreden bij het verzenden van het formulier");
   }
+
+  console.log("Submission saved successfully:", submissionData);
 
   // Try to send email notification
   try {
@@ -96,6 +100,13 @@ export async function submitContactForm(
       });
     } else {
       // Fallback to default notification method
+      console.log("Sending agent notification with:", {
+        property_id: property.id,
+        property_title: property.title,
+        submission_id: submissionData.id,
+        agent_email: property.agent?.email || settings.email
+      });
+      
       await supabase.functions.invoke('send-agent-notification', {
         body: {
           property_id: property.id,
@@ -110,6 +121,8 @@ export async function submitContactForm(
           inquiry_type: formData.inquiry_type
         }
       });
+      
+      console.log("Agent notification sent successfully");
     }
   } catch (emailError) {
     console.error("Error sending email notification:", emailError);

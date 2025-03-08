@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
@@ -25,33 +25,7 @@ export function useSubmissions(propertyId: string) {
   const { toast } = useToast();
   const { settings } = useAgencySettings();
 
-  useEffect(() => {
-    fetchSubmissions();
-    
-    // Set up a subscription to listen for changes in the submissions table
-    const channel = supabase
-      .channel('property_submissions')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'property_contact_submissions',
-          filter: `property_id=eq.${propertyId}`
-        },
-        () => {
-          // When a change is detected, refetch the submissions
-          fetchSubmissions();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [propertyId]);
-
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     setIsLoading(true);
     try {
       console.log("Fetching submissions for property:", propertyId);
@@ -87,7 +61,37 @@ export function useSubmissions(propertyId: string) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [propertyId, selectedSubmission, toast]);
+
+  useEffect(() => {
+    fetchSubmissions();
+    
+    // Set up a subscription to listen for changes in the submissions table
+    const channel = supabase
+      .channel('property_submissions')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'property_contact_submissions',
+          filter: `property_id=eq.${propertyId}`
+        },
+        (payload) => {
+          console.log("Real-time update received for property submissions:", payload);
+          // When a change is detected, refetch the submissions
+          fetchSubmissions();
+        }
+      )
+      .subscribe();
+
+    console.log("Subscription to property_contact_submissions set up for property:", propertyId);
+    
+    return () => {
+      console.log("Cleaning up submission subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [propertyId, fetchSubmissions]);
 
   const handleMarkAsRead = async (submissionId: string) => {
     try {

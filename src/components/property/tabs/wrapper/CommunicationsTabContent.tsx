@@ -24,8 +24,9 @@ export function CommunicationsTabContent({ id, title }: CommunicationsTabContent
 
   // Refresh submissions when component mounts
   useEffect(() => {
+    console.log("CommunicationsTabContent mounted, refreshing submissions for property:", id);
     refreshSubmissions();
-  }, []);
+  }, [id, refreshSubmissions]);
 
   const handleSendResponseWrapper = async (responseText: string) => {
     try {
