@@ -30,6 +30,16 @@ export function getSections({
   waitForPlaces = false,
   isPrintView = false
 }: SectionConfigProps): Section[] {
+  // Debug log for floorplan script
+  console.log('getSections - Property floorplan check:', {
+    propertyId: property.id,
+    hasFloorplanScript: !!property.floorplanEmbedScript,
+    scriptType: typeof property.floorplanEmbedScript,
+    scriptLength: property.floorplanEmbedScript ? property.floorplanEmbedScript.length : 0,
+    scriptEmpty: property.floorplanEmbedScript === '',
+    scriptFirstChars: property.floorplanEmbedScript ? property.floorplanEmbedScript.substring(0, 30) + '...' : 'none'
+  });
+
   // Start with the fixed sections
   const sections: Section[] = [
     {
@@ -52,15 +62,19 @@ export function getSections({
     });
   }
   
-  // Add floorplan section if available
-  if (property.floorplanEmbedScript) {
+  // Add floorplan section if available - improved check to handle empty strings
+  if (property.floorplanEmbedScript && property.floorplanEmbedScript.trim() !== '') {
     console.log('Adding floorplan section to sections array');
     sections.push({
       title: "Floorplan",
       content: <FloorplanSection property={property} settings={settings} />
     });
   } else {
-    console.log('Skipping floorplan section - no embed script found');
+    console.log('Skipping floorplan section - script is empty or missing:', 
+      property.floorplanEmbedScript === undefined ? 'undefined' : 
+      property.floorplanEmbedScript === null ? 'null' : 
+      property.floorplanEmbedScript === '' ? 'empty string' : 
+      `non-empty but possibly whitespace: "${property.floorplanEmbedScript}"`);
   }
   
   // Add remaining sections

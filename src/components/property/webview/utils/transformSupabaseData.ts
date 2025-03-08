@@ -44,12 +44,21 @@ export interface SupabasePropertyData {
   created_at: string;
   updated_at: string;
   template_id: string;
+  floorplanEmbedScript?: string; // Added explicit type for floorplanEmbedScript
 }
 
 export function transformSupabaseData(
   data: SupabasePropertyData,
   settings?: AgencySettings
 ): PropertyData {
+  // Debug log for floorplan script
+  console.log('transformSupabaseData - Processing property:', {
+    id: data.id,
+    hasFloorplanScript: !!data.floorplanEmbedScript,
+    scriptLength: data.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
+    scriptType: typeof data.floorplanEmbedScript
+  });
+
   // Extract images from property_images
   const images: PropertyImage[] = [];
   let featuredImage: string | null = null;
@@ -137,9 +146,16 @@ export function transformSupabaseData(
     created_at: data.created_at,
     updated_at: data.updated_at,
     template_id: data.template_id,
+    floorplanEmbedScript: data.floorplanEmbedScript || "", // Ensure floorplanEmbedScript is passed through
     floorplans: [], // Add empty floorplans array
     gridImages: featuredImages // For backward compatibility with components that still use gridImages
   };
+
+  console.log('transformSupabaseData - Returning transformed data with floorplan script:', {
+    id: transformedData.id,
+    hasFloorplanScript: !!transformedData.floorplanEmbedScript,
+    scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0
+  });
 
   return transformedData;
 }

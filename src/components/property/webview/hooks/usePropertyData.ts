@@ -20,7 +20,11 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
 
   useEffect(() => {
     if (property) {
-      console.log("usePropertyData - Using provided property data:", property);
+      console.log("usePropertyData - Using provided property data:", {
+        id: property.id,
+        hasFloorplanScript: !!property.floorplanEmbedScript,
+        scriptLength: property.floorplanEmbedScript ? property.floorplanEmbedScript.length : 0
+      });
       setPropertyData(property);
       setIsLoading(false);
       return;
@@ -75,7 +79,12 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           data = uuidData;
         }
 
-        console.log("usePropertyData - Raw data from Supabase:", data);
+        console.log("usePropertyData - Raw data from Supabase:", {
+          id: data?.id,
+          hasFloorplanScript: !!data?.floorplanEmbedScript,
+          scriptLength: data?.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
+          scriptPreview: data?.floorplanEmbedScript ? data.floorplanEmbedScript.substring(0, 50) + '...' : 'none'
+        });
 
         if (data) {
           // Make sure agent is properly structured
@@ -89,11 +98,14 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
                           (data.nearby_places ? [data.nearby_places] : []),
             areas: Array.isArray(data.areas) ? data.areas : 
                   (data.areas ? [data.areas] : []),
-            floorplanEmbedScript: data.floorplanEmbedScript || ""
           };
           
           const transformedData = transformSupabaseData(propertyWithAgent as any);
-          console.log("usePropertyData - Transformed property data:", transformedData);
+          console.log("usePropertyData - Transformed property data:", {
+            id: transformedData.id,
+            hasFloorplanScript: !!transformedData.floorplanEmbedScript,
+            scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0
+          });
           
           if (isMounted.current) {
             setPropertyData(transformedData);

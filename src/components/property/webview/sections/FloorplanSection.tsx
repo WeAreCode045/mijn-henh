@@ -3,8 +3,13 @@ import { WebViewSectionProps } from "../types";
 import "../styles/WebViewStyles.css";
 
 export function FloorplanSection({ property }: WebViewSectionProps) {
-  // Log the floorplan embed script for debugging
-  console.log('FloorplanSection rendered, embed script exists:', !!property.floorplanEmbedScript);
+  // Enhanced logging to debug floorplan issues
+  console.log('FloorplanSection rendered:', {
+    propertyId: property.id,
+    hasFloorplanScript: !!property.floorplanEmbedScript,
+    scriptLength: property.floorplanEmbedScript ? property.floorplanEmbedScript.length : 0,
+    scriptPreview: property.floorplanEmbedScript ? property.floorplanEmbedScript.substring(0, 50) + '...' : 'none'
+  });
   
   if (!property.floorplanEmbedScript) {
     console.warn('No floorplan embed script available for property:', property.id);
