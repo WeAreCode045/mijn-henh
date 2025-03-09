@@ -82,6 +82,7 @@ export function PropertyStepContent({
             onFieldChange={onFieldChange}
             handleSetFeaturedImage={handleSetFeaturedImage}
             handleToggleFeaturedImage={handleToggleFeaturedImage}
+            setPendingChanges={setPendingChanges}
           />
         );
       case 1:
@@ -117,6 +118,7 @@ export function PropertyStepContent({
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
+            isUploading={isUploading}
             setPendingChanges={setPendingChanges}
             handleAreaPhotosUpload={handleAreaPhotosUpload}
             handleRemoveAreaPhoto={handleRemoveAreaPhoto}

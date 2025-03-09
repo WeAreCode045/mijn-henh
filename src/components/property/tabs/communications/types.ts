@@ -14,49 +14,24 @@ export interface SubmissionReply {
   agent?: SubmissionAgent;
 }
 
+export interface SubmissionProperty {
+  id: string;
+  title: string;
+  address?: string;
+}
+
 export interface Submission {
   id: string;
+  property_id: string;
+  agent_id?: string;
   name: string;
   email: string;
   phone: string;
-  message: string;
+  message?: string;
   inquiry_type: string;
-  property_id: string;
+  is_read: boolean;
   created_at: string;
   updated_at: string;
-  is_read: boolean;
-  agent_id?: string;
+  property?: SubmissionProperty;
   replies?: SubmissionReply[];
-  property?: {
-    id: string;
-    title: string;
-  };
-}
-
-export interface SubmissionRepliesProps {
-  submissionId: string;
-  replies: SubmissionReply[];
-}
-
-export interface SubmissionDetailProps {
-  submission: Submission;
-  onCloseDetail: () => void;
-  onMarkAsRead: (submissionId: string) => void;
-  onSendResponse: (responseText: string) => Promise<void>;
-  isSending: boolean;
-}
-
-export interface SubmissionsListProps {
-  submissions: Submission[];
-  isLoading: boolean;
-  selectedSubmissionId: string;
-  onSubmissionClick: (submission: Submission) => void;
-}
-
-export interface UseMarkAsReadProps {
-  handleMarkAsRead: (submissionId: string) => Promise<void>;
-}
-
-export interface UseSendResponseProps {
-  handleSendResponse: (responseText: string) => Promise<void>;
 }

@@ -2,7 +2,6 @@
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { CategoryFilters } from "./components/CategoryFilters";
 import { CategorySection } from "./components/CategorySection";
 import { useLocationCategories } from "./useLocationCategories";
@@ -18,9 +17,8 @@ export function NearbyPlacesSection({
   onRemovePlace,
   onFieldChange
 }: NearbyPlacesSectionProps) {
-  const { categories, handleFilterChange, activeFilters } = useLocationCategories(
-    formData.nearby_places || []
-  );
+  const nearbyPlaces = formData.nearby_places || [];
+  const { categories, handleFilterChange, activeFilters } = useLocationCategories(nearbyPlaces);
   
   // Toggle place visibility in webview
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
@@ -41,7 +39,7 @@ export function NearbyPlacesSection({
         <div className="space-y-4">
           <Label>Nearby Places</Label>
           
-          {(formData.nearby_places && formData.nearby_places.length > 0) ? (
+          {(nearbyPlaces && nearbyPlaces.length > 0) ? (
             <>
               <CategoryFilters 
                 categories={categories}
@@ -53,8 +51,8 @@ export function NearbyPlacesSection({
                 <CategorySection 
                   key={category.name}
                   category={category}
-                  places={formData.nearby_places?.filter(place => place.type === category.name) || []}
-                  onRemovePlace={onRemovePlace}
+                  places={nearbyPlaces.filter(place => place.type === category.name)}
+                  allPlaces={nearbyPlaces}
                   toggleVisibility={togglePlaceVisibility}
                   isVisible={activeFilters.includes(category.name)}
                 />

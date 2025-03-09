@@ -1,81 +1,92 @@
 
-import React, { useState } from "react";
-import { PropertyData } from "@/types/property";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { PropertyTabProps } from "./types/PropertyTabTypes";
+import { useSubmissions } from "../communications/useSubmissions";
 import { SubmissionsList } from "../communications/SubmissionsList";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
-import { useSubmissions } from "../communications/useSubmissions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RefreshCw } from "lucide-react";
 import { Submission } from "../communications/types";
 
 interface CommunicationsTabContentProps {
-  property: PropertyData;
+  property: PropertyTabProps["property"];
 }
 
 export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string>('');
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   
   const {
     submissions,
     isLoading,
-    selectedSubmission,
-    setSelectedSubmission,
-    isSending,
+    refreshSubmissions,
     handleMarkAsRead,
     handleSendResponse,
-    refreshSubmissions
+    isSending
   } = useSubmissions(property.id);
-  
-  // Handler for when a submission is clicked in the list
+
+  useEffect(() => {
+    refreshSubmissions();
+  }, [refreshSubmissions]);
+
   const handleSubmissionClick = (submission: Submission) => {
     setSelectedSubmission(submission);
-    setSelectedSubmissionId(submission.id);
     
-    // Mark as read if it's unread
-    if (!submission.is_read) {
+    // Mark as read when selected
+    if (submission && !submission.is_read) {
       handleMarkAsRead(submission.id);
     }
   };
-  
-  // Handler for closing the detail view
-  const handleCloseDetail = () => {
-    setSelectedSubmissionId('');
-    setSelectedSubmission(null);
-  };
-  
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Communications</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Communications</h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={refreshSubmissions}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
       
-      {isLoading ? (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : submissions.length === 0 ? (
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-center text-muted-foreground">No contact submissions found for this property.</p>
-          </CardContent>
-        </Card>
-      ) : selectedSubmissionId && selectedSubmission ? (
-        <SubmissionDetail
-          submission={selectedSubmission}
-          onCloseDetail={handleCloseDetail}
-          onMarkAsRead={handleMarkAsRead}
-          onSendResponse={handleSendResponse}
-          isSending={isSending}
-        />
-      ) : (
-        <SubmissionsList
-          submissions={submissions}
-          isLoading={isLoading}
-          selectedSubmissionId={selectedSubmissionId}
-          onSubmissionClick={handleSubmissionClick}
-        />
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Submissions</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <SubmissionsList 
+                submissions={submissions} 
+                isLoading={isLoading}
+                selectedSubmission={selectedSubmission} 
+                onSubmissionClick={handleSubmissionClick}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="col-span-1 md:col-span-2">
+          {selectedSubmission ? (
+            <SubmissionDetail 
+              submission={selectedSubmission}
+              onSendResponse={handleSendResponse}
+              isSending={isSending}
+            />
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-muted-foreground">Select a submission to view details</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
