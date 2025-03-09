@@ -119,14 +119,7 @@ export function useLocationDataFetch(
       return;
     }
 
-    if (!formData.id) {
-      toast({
-        title: "Error",
-        description: "Property must be saved before generating description",
-        variant: "destructive"
-      });
-      return;
-    }
+    setIsLoading(true);
 
     try {
       const { data: settings } = await supabase
@@ -174,6 +167,8 @@ export function useLocationDataFetch(
         description: error.message || "Failed to generate location description",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/utils/dateUtils";
@@ -8,17 +8,56 @@ import { ExternalLink, UserPlus, Save, Trash2, Share2, Globe } from "lucide-reac
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { RecentSubmissions } from "@/components/dashboard/RecentSubmissions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardTabContentProps {
   property: PropertyData;
   onDelete?: () => Promise<void>;
   onSave?: () => void;
   onWebView?: () => void;
+  handleSaveAgent?: (agentId: string) => void;
 }
 
-export function DashboardTabContent({ property, onDelete, onSave, onWebView }: DashboardTabContentProps) {
+export function DashboardTabContent({ 
+  property, 
+  onDelete, 
+  onSave, 
+  onWebView,
+  handleSaveAgent
+}: DashboardTabContentProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [agents, setAgents] = useState<{id: string, name: string}[]>([]);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+
+  // Fetch agents for the dropdown
+  useEffect(() => {
+    const fetchAgents = async () => {
+      setIsLoadingAgents(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .eq('role', 'agent');
+        
+        if (error) throw error;
+        
+        if (data) {
+          setAgents(data.map(agent => ({
+            id: agent.id,
+            name: agent.full_name || 'Unnamed Agent'
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching agents:", error);
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
 
   const handleShare = () => {
     // Copy the public URL to clipboard
@@ -28,6 +67,16 @@ export function DashboardTabContent({ property, onDelete, onSave, onWebView }: D
       title: "Link copied to clipboard",
       description: "You can now share this link with others",
     });
+  };
+
+  const handleAgentChange = (agentId: string) => {
+    if (handleSaveAgent) {
+      handleSaveAgent(agentId);
+      toast({
+        title: "Agent updated",
+        description: "The property agent has been updated",
+      });
+    }
   };
 
   const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? property.images[0].url : null);
@@ -160,8 +209,26 @@ export function DashboardTabContent({ property, onDelete, onSave, onWebView }: D
             <CardTitle className="text-lg font-medium">Assigned Agent</CardTitle>
           </CardHeader>
           <CardContent>
-            {property.agent ? (
-              <div className="flex items-center gap-3">
+            <Select 
+              value={property.agent_id || ''} 
+              onValueChange={handleAgentChange}
+              disabled={isLoadingAgents}
+            >
+              <SelectTrigger className="w-full mb-2">
+                <SelectValue placeholder="Select an agent" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No agent assigned</SelectItem>
+                {agents.map(agent => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {property.agent && (
+              <div className="flex items-center gap-3 mt-4">
                 <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                   {property.agent.photoUrl ? (
                     <img src={property.agent.photoUrl} alt={property.agent.name} className="h-full w-full object-cover" />
@@ -175,14 +242,6 @@ export function DashboardTabContent({ property, onDelete, onSave, onWebView }: D
                   <p className="font-medium">{property.agent.name}</p>
                   {property.agent.email && <p className="text-sm text-muted-foreground">{property.agent.email}</p>}
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-muted-foreground mb-3">No agent assigned</p>
-                <Button className="flex items-center gap-2" size="sm">
-                  <UserPlus className="h-4 w-4" />
-                  Assign Agent
-                </Button>
               </div>
             )}
           </CardContent>

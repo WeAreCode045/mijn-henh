@@ -1,17 +1,21 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PropertyFeature, PropertyFormData } from '@/types/property';
 import { steps } from '@/components/property/form/formSteps';
 import { useToast } from '@/components/ui/use-toast';
 import { useLocationDataFetch } from './useLocationDataFetch';
+import { usePropertyFormSubmit } from './usePropertyFormSubmit';
 
 export function usePropertyContent(
   formData: PropertyFormData,
   onFieldChange: (field: keyof PropertyFormData, value: any) => void
 ) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [pendingChanges, setPendingChanges] = useState(false);
   const { toast } = useToast();
+  const { handleSubmit } = usePropertyFormSubmit();
+  
   const { 
     fetchLocationData, 
     generateLocationDescription,
@@ -19,14 +23,56 @@ export function usePropertyContent(
     isLoading: isLoadingLocationData 
   } = useLocationDataFetch(formData, onFieldChange);
 
+  // Save when step changes or when triggered manually
+  const handleSave = async () => {
+    if (!formData || !pendingChanges) return;
+    
+    try {
+      const event = {} as React.FormEvent;
+      const result = await handleSubmit(event, formData, false);
+      
+      if (result) {
+        setPendingChanges(false);
+        toast({
+          title: "Success",
+          description: "Changes saved successfully",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save changes",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleStepClick = (stepId: number) => {
     console.log(`usePropertyContent - Setting current step to ${stepId}`);
-    setCurrentStep(stepId);
+    
+    // First save any pending changes
+    if (pendingChanges) {
+      handleSave().then(() => {
+        setCurrentStep(stepId);
+      });
+    } else {
+      setCurrentStep(stepId);
+    }
   };
 
   const handleNext = () => {
     console.log(`usePropertyContent - Current step: ${currentStep}, max steps: ${steps.length}`);
-    if (currentStep < steps.length) {
+    
+    // Save changes before moving to next step
+    if (pendingChanges) {
+      handleSave().then(() => {
+        if (currentStep < steps.length) {
+          console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
+          setCurrentStep(prevStep => prevStep + 1);
+        }
+      });
+    } else if (currentStep < steps.length) {
       console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
       setCurrentStep(prevStep => prevStep + 1);
     } else {
@@ -35,7 +81,15 @@ export function usePropertyContent(
   };
 
   const handlePrevious = () => {
-    if (currentStep > 1) {
+    // Save changes before moving to previous step
+    if (pendingChanges) {
+      handleSave().then(() => {
+        if (currentStep > 1) {
+          console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
+          setCurrentStep(prevStep => prevStep - 1);
+        }
+      });
+    } else if (currentStep > 1) {
       console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
       setCurrentStep(prevStep => prevStep - 1);
     } else {
@@ -44,12 +98,20 @@ export function usePropertyContent(
   };
 
   const onSubmit = () => {
-    console.log('usePropertyContent - Form submitted');
-    toast({
-      title: "Form submitted",
-      description: "Your changes have been saved."
+    handleSave().then(() => {
+      console.log('usePropertyContent - Form submitted and saved');
+      toast({
+        title: "Form submitted",
+        description: "Your changes have been saved."
+      });
     });
   };
+
+  // Handle field changes and track if there are pending changes
+  const handleFieldChangeWithTracking = useCallback((field: keyof PropertyFormData, value: any) => {
+    onFieldChange(field, value);
+    setPendingChanges(true);
+  }, [onFieldChange]);
 
   // Feature management functions
   const addFeature = useCallback(() => {
@@ -63,6 +125,7 @@ export function usePropertyContent(
     const updatedFeatures = [...(formData.features || []), newFeature];
     console.log("usePropertyContent - Updated features:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
+    setPendingChanges(true);
   }, [formData, onFieldChange]);
 
   const removeFeature = useCallback((id: string) => {
@@ -70,6 +133,7 @@ export function usePropertyContent(
     const updatedFeatures = (formData.features || []).filter(feature => feature.id !== id);
     console.log("usePropertyContent - Updated features after removal:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
+    setPendingChanges(true);
   }, [formData, onFieldChange]);
 
   const updateFeature = useCallback((id: string, description: string) => {
@@ -79,19 +143,23 @@ export function usePropertyContent(
     );
     console.log("usePropertyContent - Updated features after update:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
+    setPendingChanges(true);
   }, [formData, onFieldChange]);
 
   // Call the functions from useLocationDataFetch
   const handleFetchLocationData = async () => {
     await fetchLocationData();
+    setPendingChanges(true);
   };
 
   const handleGenerateLocationDescription = async () => {
     await generateLocationDescription();
+    setPendingChanges(true);
   };
 
   const handleRemoveNearbyPlace = (index: number) => {
     removeNearbyPlace(index);
+    setPendingChanges(true);
   };
 
   return {
@@ -100,7 +168,7 @@ export function usePropertyContent(
     handleNext,
     handlePrevious,
     onSubmit,
-    handleFieldChange: onFieldChange,
+    handleFieldChange: handleFieldChangeWithTracking,
     // Feature management
     addFeature,
     removeFeature,
@@ -109,6 +177,10 @@ export function usePropertyContent(
     onFetchLocationData: handleFetchLocationData,
     onGenerateLocationDescription: handleGenerateLocationDescription,
     onRemoveNearbyPlace: handleRemoveNearbyPlace,
-    isLoadingLocationData
+    isLoadingLocationData,
+    // Change tracking
+    pendingChanges,
+    setPendingChanges,
+    handleSave
   };
 }
