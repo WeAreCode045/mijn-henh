@@ -104,14 +104,14 @@ export interface PropertyData {
   featuredImages?: string[];
   created_at?: string;
   updated_at?: string;
-  // Add these back for backward compatibility
+  // For backward compatibility
   coverImages?: PropertyImage[];
   gridImages?: PropertyImage[];
 }
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends PropertyData {
-  // Add these back for backward compatibility in the form
+  // For backward compatibility in the form
   areaPhotos?: PropertyImage[];
 }
 

@@ -92,6 +92,7 @@ export function usePropertyFetch(id: string | undefined) {
           const features = safeParseArray(propertyData.features);
           const areas = safeParseArray(propertyData.areas);
           const nearby_places = safeParseArray(propertyData.nearby_places);
+          const nearby_cities = safeParseArray(propertyData.nearby_cities || '[]');
           
           // Process agent data for backward compatibility
           const agentId = propertyData.agent_id;
@@ -111,6 +112,7 @@ export function usePropertyFetch(id: string | undefined) {
             features,
             areas,
             nearby_places,
+            nearby_cities,
             hasGarden: propertyData.hasGarden || false,
             images: regularImages,
             floorplans: floorplanImages,
@@ -118,8 +120,8 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImages: featuredImages,
             agent: agentData,
             // Add backward compatibility fields
-            coverImages: regularImages.slice(0, 6),
-            gridImages: regularImages.slice(0, 4),
+            coverImages: regularImages.slice(0, 6).map(img => img),
+            gridImages: regularImages.slice(0, 4).map(img => img),
             areaPhotos: []
           });
         }

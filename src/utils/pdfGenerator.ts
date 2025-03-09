@@ -26,14 +26,13 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
       ...property,
       areas: property.areas.map(area => ({
         ...area,
-        // Use images array instead of imageIds
+        // Ensure images array exists
         images: area.images || []
       })),
       images: property.images || [],
-      coverImages: property.coverImages || property.images?.slice(0, 6) || [],
+      featuredImages: property.featuredImages || [],
       features: (property.features || []).slice(0, 10),
       nearby_places: (property.nearby_places || []).slice(0, 5),
-      gridImages: property.gridImages || property.images?.slice(0, 4) || [],
     };
 
     // Generate PDF blob

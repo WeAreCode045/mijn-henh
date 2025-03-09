@@ -1,79 +1,92 @@
 
-import jsPDF from 'jspdf';
-import { PropertyArea, PropertyImage } from '@/types/property';
-import { AgencySettings } from '@/types/agency';
-import { BROCHURE_STYLES } from '../constants/styles';
-import { addHeaderFooter } from '../utils/pageUtils';
+import { PropertyArea, PropertyData } from "@/types/property";
+import { AgencySettings } from "@/types/agency";
+import { Page, View, Text, Image } from "@react-pdf/renderer";
 
-export const addAreaImages = async (
-  pdf: jsPDF,
-  images: PropertyImage[],
-  startY: number
-): Promise<void> => {
-  const { margin, gutter } = BROCHURE_STYLES.spacing;
-  const contentWidth = BROCHURE_STYLES.pageSize.width - (margin * 2);
-  const imageWidth = (contentWidth - gutter * 2) / 3;
-  const imageHeight = imageWidth / BROCHURE_STYLES.imageAspectRatio;
-
-  for (let i = 0; i < images.length; i++) {
-    try {
-      const img = new Image();
-      img.src = images[i].url;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      const xPos = margin + (i % 3) * (imageWidth + gutter);
-      const yPos = startY + Math.floor(i / 3) * (imageHeight + gutter);
-
-      pdf.addImage(img, 'JPEG', xPos, yPos, imageWidth, imageHeight);
-    } catch (error) {
-      console.error('Error loading area image:', error);
-    }
-  }
-};
-
-export const generateAreaPages = async (
-  pdf: jsPDF,
-  areas: PropertyArea[],
-  images: PropertyImage[],
-  settings: AgencySettings,
-  currentPage: number,
-  totalPages: number,
-  propertyTitle: string
-): Promise<number> => {
-  let pageNum = currentPage;
-
-  for (const area of areas) {
-    if (pageNum % 2 === 0) pdf.addPage();
-    pageNum++;
-    addHeaderFooter(pdf, pageNum, totalPages, settings, propertyTitle);
-
-    const { margin } = BROCHURE_STYLES.spacing;
-    let yPos = 50;
-
-    // Area title
-    pdf.setFillColor(settings.primaryColor || BROCHURE_STYLES.colors.primary);
-    pdf.rect(margin, yPos, 3, 20, 'F');
+/**
+ * Creates PDF pages for an area with a dynamic layout based on the area's column setting
+ */
+export const createAreaPages = ({
+  area,
+  styles,
+  settings,
+  pageIndex = 0,
+}: {
+  area: PropertyArea;
+  styles: any;
+  settings: AgencySettings;
+  pageIndex?: number;
+}) => {
+  // Determine number of columns (default to 2 if not specified)
+  const columns = area.columns || 2;
+  
+  // Get area images
+  const areaImages = area.images || [];
+  
+  // Calculate images per page based on columns (3 rows of images)
+  const imagesPerPage = columns * 3;
+  
+  // Calculate total pages needed
+  const totalImages = areaImages.length;
+  const totalPages = Math.max(1, Math.ceil(totalImages / imagesPerPage));
+  
+  // Generate array of pages for this area
+  return Array.from({ length: totalPages }).map((_, pageIdx) => {
+    const isFirstPage = pageIdx === 0;
+    const startIdx = pageIdx * imagesPerPage;
+    const endIdx = Math.min(startIdx + imagesPerPage, totalImages);
+    const pageImages = areaImages.slice(startIdx, endIdx);
     
-    pdf.setTextColor(BROCHURE_STYLES.colors.text.primary);
-    pdf.setFontSize(18);
-    pdf.text(area.title, margin + 10, yPos + 15);
-
-    // Area description
-    yPos += 30;
-    pdf.setFontSize(11);
-    pdf.setTextColor(BROCHURE_STYLES.colors.text.secondary);
-    const description = pdf.splitTextToSize(area.description, 170);
-    pdf.text(description, margin, yPos);
-
-    // Area images in 3 columns
-    if (area.imageIds?.length) {
-      yPos += description.length * 7 + 10;
-      const areaImages = area.imageIds.map(id => images.find(img => img.id === id)).filter(Boolean) as PropertyImage[];
-      await addAreaImages(pdf, areaImages, yPos);
-    }
-  }
-
-  return pageNum;
+    return (
+      <Page key={`area-${area.id}-page-${pageIdx}`} size="A4" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          {settings.logoUrl && (
+            <Image src={settings.logoUrl} style={styles.logo} />
+          )}
+          <Text style={styles.pageNumber}>{pageIndex + pageIdx + 1}</Text>
+        </View>
+        
+        {/* Area Title and Description (only on first page) */}
+        {isFirstPage && (
+          <View style={styles.areaHeader}>
+            <Text style={styles.areaTitle}>{area.title}</Text>
+            {area.description && (
+              <Text style={styles.areaDescription}>{area.description}</Text>
+            )}
+          </View>
+        )}
+        
+        {/* Images Grid */}
+        <View style={{
+          ...styles.imageGrid,
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: columns > 1 ? 'space-between' : 'flex-start'
+        }}>
+          {pageImages.map((image, imgIdx) => {
+            const imageUrl = typeof image === 'string' ? image : image.url;
+            if (!imageUrl) return null;
+            
+            return (
+              <Image
+                key={`image-${imgIdx}`}
+                src={imageUrl}
+                style={{
+                  ...styles.areaGridImage,
+                  width: `${100 / columns - 2}%`,
+                  margin: '1%'
+                }}
+              />
+            );
+          })}
+        </View>
+        
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>{settings.name || 'Property Brochure'}</Text>
+        </View>
+      </Page>
+    );
+  });
 };

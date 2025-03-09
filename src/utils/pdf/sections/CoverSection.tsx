@@ -13,16 +13,20 @@ export const CoverSection = ({ property, settings, styles }: {
                    (property.featuredImages?.length > 0 ? property.featuredImages[0] : null) || 
                    (property.images?.length > 0 ? property.images[0].url : null);
   
-  // Support both featuredImages, coverImages and gridImages (for backward compatibility)
-  // First try featuredImages, then fallback to coverImages, then to gridImages if both are empty
-  const featuredImagesToUse = (property.featuredImages && property.featuredImages.length > 0) 
-    ? property.featuredImages 
-    : (property.coverImages && property.coverImages.length > 0)
-      ? property.coverImages
-      : (property.gridImages || []);
+  // Get featured images (from featuredImages or from images with is_featured_image=true)
+  let displayImages: string[] = [];
   
-  // Slice the featured images to a maximum of 4
-  const displayImages = featuredImagesToUse.slice(0, 4);
+  if (property.featuredImages && property.featuredImages.length > 0) {
+    displayImages = property.featuredImages;
+  } else if (property.images) {
+    // Filter images with is_featured_image=true
+    displayImages = property.images
+      .filter(img => img.is_featured_image)
+      .map(img => img.url);
+  }
+  
+  // Limit to max 4 images
+  displayImages = displayImages.slice(0, 4);
   
   return (
     <Page size="A4" style={styles.page}>

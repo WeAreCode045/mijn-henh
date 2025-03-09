@@ -1,64 +1,71 @@
 
-import jsPDF from 'jspdf';
-import { PropertyData } from '@/types/property';
-import { BROCHURE_STYLES } from '../constants/styles';
+import { PropertyData } from "@/types/property";
+import { AgencySettings } from "@/types/agency";
+import { Page, View, Text, Image } from "@react-pdf/renderer";
 
-export const generateCoverPage = async (
-  pdf: jsPDF,
-  property: PropertyData,
-  currentPage: number
-): Promise<void> => {
-  const { width, height } = BROCHURE_STYLES.pageSize;
-
-  // Featured image (top half)
-  if (property.featuredImage) {
-    try {
-      const img = new Image();
-      img.src = property.featuredImage;
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      pdf.addImage(img, 'JPEG', 0, 0, width, height / 2);
-
-      // Grid images (bottom half)
-      const padding = 10; // Add padding
-      const gridHeight = height / 4;
-      const imageWidth = (width - (padding * 5)) / 4; // Adjust width for padding
-      
-      for (let i = 0; i < Math.min(4, property.gridImages.length); i++) {
-        const img = new Image();
-        img.src = property.gridImages[i];
-        await new Promise((resolve) => {
-          img.onload = resolve;
-        });
-
-        const xPos = padding + (i * (imageWidth + padding));
-        const yPos = (height / 2) + padding;
-
-        pdf.addImage(img, 'JPEG', xPos, yPos, imageWidth, gridHeight - (padding * 2));
-      }
-
-      // Gradient overlay for title area
-      pdf.setFillColor(0, 0, 0);
-      const gState = pdf.setGState({ opacity: 0.7 });
-      pdf.rect(0, height - 100, width, 100, 'F');
-      pdf.setGState(gState);
-
-      // Property title and price
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(32);
-      pdf.setFont(BROCHURE_STYLES.fonts.heading, 'bold');
-      
-      const title = pdf.splitTextToSize(property.title, width - 40);
-      pdf.text(title, 20, height - 70);
-
-      if (property.price) {
-        pdf.setFontSize(24);
-        pdf.text(property.price, 20, height - 30);
-      }
-    } catch (error) {
-      console.error('Error loading featured image:', error);
-    }
+export const createCoverPage = ({
+  property,
+  settings,
+  styles,
+}: {
+  property: PropertyData;
+  settings: AgencySettings;
+  styles: any;
+}) => {
+  // Get the main image (from featuredImage or first image)
+  const mainImage = property.featuredImage || 
+                   (property.featuredImages && property.featuredImages.length > 0 
+                      ? property.featuredImages[0] 
+                      : property.images.length > 0 
+                        ? property.images[0].url 
+                        : null);
+  
+  // Get featured images (from featuredImages or from images with is_featured_image=true)
+  let gridImages: string[] = [];
+  
+  if (property.featuredImages && property.featuredImages.length > 0) {
+    gridImages = property.featuredImages;
+  } else if (property.images) {
+    // Filter images with is_featured_image=true
+    gridImages = property.images
+      .filter(img => img.is_featured_image)
+      .map(img => img.url);
   }
+  
+  // Limit to max 4 images
+  gridImages = gridImages.slice(0, 4);
+  
+  return (
+    <Page size="A4" style={styles.page}>
+      {/* Header */}
+      <View style={styles.coverHeader}>
+        {settings.logoUrl && (
+          <Image src={settings.logoUrl} style={styles.coverLogo} />
+        )}
+        <Text style={styles.coverTagline}>Uw droomhuis?</Text>
+      </View>
+      
+      {/* Main Image */}
+      {mainImage && (
+        <View style={styles.mainImageContainer}>
+          <Image src={mainImage} style={styles.mainImage} />
+        </View>
+      )}
+      
+      {/* Grid Images */}
+      {gridImages.length > 0 && (
+        <View style={styles.gridContainer}>
+          {gridImages.map((imageUrl, index) => (
+            <Image key={`grid-${index}`} src={imageUrl} style={styles.gridImage} />
+          ))}
+        </View>
+      )}
+      
+      {/* Footer */}
+      <View style={styles.coverFooter}>
+        <Text style={styles.propertyTitle}>{property.title || 'Untitled Property'}</Text>
+        <Text style={styles.propertyPrice}>{property.price || ''}</Text>
+      </View>
+    </Page>
+  );
 };

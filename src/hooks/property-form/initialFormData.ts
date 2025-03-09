@@ -31,7 +31,8 @@ export const initialFormData: PropertyFormData = {
   floorplanEmbedScript: "", // Empty floorplanEmbedScript with empty string default
   virtualTourUrl: "",
   youtubeUrl: "",
-  areaPhotos: [], // For backward compatibility
-  coverImages: [], // For backward compatibility
-  gridImages: [] // For backward compatibility
+  // For backward compatibility
+  areaPhotos: [], 
+  coverImages: [],
+  gridImages: []
 };

@@ -24,6 +24,14 @@ interface ContentTabContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
+  handleAreaPhotosUpload?: (areaId: string, files: FileList) => void;
+  handleImageUpload?: (files: FileList) => void;
+  handleRemoveImage?: (imageId: string) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  handleFloorplanUpload?: (files: FileList) => void;
+  handleRemoveFloorplan?: (imageId: string) => void;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
 }
 
 export function ContentTabContent({
@@ -45,7 +53,15 @@ export function ContentTabContent({
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges = () => {}
+  setPendingChanges = () => {},
+  handleAreaPhotosUpload,
+  handleImageUpload,
+  handleRemoveImage,
+  handleRemoveAreaPhoto,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage
 }: ContentTabContentProps) {
   return (
     <div className="space-y-4">
@@ -76,15 +92,14 @@ export function ContentTabContent({
             isLoadingLocationData={isLoadingLocationData}
             setPendingChanges={setPendingChanges}
             step={currentStep}
-            // Add empty handlers for optional props
-            handleAreaPhotosUpload={undefined}
-            handleImageUpload={undefined}
-            handleRemoveImage={undefined}
-            handleRemoveAreaPhoto={undefined}
-            handleFloorplanUpload={undefined}
-            handleRemoveFloorplan={undefined}
-            handleSetFeaturedImage={undefined}
-            handleToggleFeaturedImage={undefined}
+            handleAreaPhotosUpload={handleAreaPhotosUpload}
+            handleImageUpload={handleImageUpload}
+            handleRemoveImage={handleRemoveImage}
+            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+            handleFloorplanUpload={handleFloorplanUpload}
+            handleRemoveFloorplan={handleRemoveFloorplan}
+            handleSetFeaturedImage={handleSetFeaturedImage}
+            handleToggleFeaturedImage={handleToggleFeaturedImage}
           />
         </CardContent>
       </Card>
