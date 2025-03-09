@@ -97,19 +97,18 @@ export function usePropertyFetch(id: string | undefined) {
           // Handle nearby_cities with fallback for older database entries
           let nearby_cities: PropertyCity[] = [];
           
-          // For older database entries that might not have the nearby_cities field
-          // We need to handle this safely as a type assertion since the property might not exist
-          const dbPropertyData = propertyData as any; // Use any to bypass type checking temporarily
-          
           try {
-            if (dbPropertyData.nearby_cities !== undefined) {
+            // Type assertion to any to safely access potentially missing property
+            const dbPropertyData = propertyData as any;
+            
+            if (dbPropertyData && typeof dbPropertyData === 'object' && 'nearby_cities' in dbPropertyData) {
               nearby_cities = safeParseArray(dbPropertyData.nearby_cities);
             } else {
               console.warn('No nearby_cities property found in database record, using empty array');
               nearby_cities = [];
             }
           } catch (error) {
-            console.warn('Error parsing nearby_cities, using empty array');
+            console.warn('Error parsing nearby_cities, using empty array', error);
             nearby_cities = [];
           }
           

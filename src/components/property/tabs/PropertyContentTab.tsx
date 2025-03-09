@@ -3,7 +3,6 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFormData } from "@/types/property";
 import { PropertyContentForm } from "./content/PropertyContentForm";
-import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { useState } from "react";
 
 interface PropertyContentTabProps {
@@ -31,6 +30,18 @@ interface PropertyContentTabProps {
   setPendingChanges: (pending: boolean) => void;
   isUpdateMode?: boolean;
   onSubmit?: () => void;
+  // Add missing image-related props
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
+  isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
+  handleMapImageDelete?: () => Promise<void>;
 }
 
 export function PropertyContentTab({
@@ -54,7 +65,19 @@ export function PropertyContentTab({
   handlePrevious,
   setPendingChanges,
   isUpdateMode,
-  onSubmit
+  onSubmit,
+  // Add missing props to function parameters
+  handleImageUpload,
+  handleAreaPhotosUpload,
+  handleRemoveImage,
+  handleRemoveAreaPhoto,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  isUploading,
+  isUploadingFloorplan,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage,
+  handleMapImageDelete
 }: PropertyContentTabProps) {
   const [pendingChanges, setPendingChangesInternal] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -115,11 +138,12 @@ export function PropertyContentTab({
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
-            handleAreaPhotosUpload={handleAreaImageInputChange}
-            handleImageUpload={handleImageInputChange}
-            handleRemoveImage={handleRemoveImageByIndex}
-            handleFloorplanUpload={handleFloorplanInputChange}
-            handleRemoveFloorplan={handleRemoveFloorplanByIndex}
+            handleAreaPhotosUpload={handleAreaPhotosUpload || handleAreaImageInputChange}
+            handleImageUpload={handleImageUpload || handleImageInputChange}
+            handleRemoveImage={handleRemoveImage || handleRemoveImageByIndex}
+            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+            handleFloorplanUpload={handleFloorplanUpload || handleFloorplanInputChange}
+            handleRemoveFloorplan={handleRemoveFloorplan || handleRemoveFloorplanByIndex}
             onFetchLocationData={onFetchLocationData}
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
@@ -129,6 +153,11 @@ export function PropertyContentTab({
             handleStepClick={handleStepClick}
             handleNext={handleNext}
             handlePrevious={handlePrevious}
+            isUploading={isUploading}
+            isUploadingFloorplan={isUploadingFloorplan}
+            handleSetFeaturedImage={handleSetFeaturedImage}
+            handleToggleFeaturedImage={handleToggleFeaturedImage}
+            handleMapImageDelete={handleMapImageDelete}
           />
         </CardContent>
       </Card>
