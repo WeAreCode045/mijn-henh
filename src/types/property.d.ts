@@ -25,12 +25,12 @@ export interface PropertyArea {
   size: string;
   title: string;
   description: string;
-  images: PropertyImage[] | string[] | { url: string }[];
+  images: PropertyImage[]; 
   imageIds: string[];
   columns: number;
 }
 
-// PropertyPlaceType as interface instead of enum
+// Property nearby place
 export interface PropertyNearbyPlace {
   id: string;
   name: string;
@@ -42,8 +42,8 @@ export interface PropertyNearbyPlace {
   visible_in_webview?: boolean;
 }
 
-// Define the place type as string literal union for backwards compatibility
-export type PropertyPlaceType = 'restaurant' | 'cafe' | 'shopping' | 'school' | 'transport' | 'park' | 'health' | 'entertainment' | 'other' | PropertyNearbyPlace;
+// Define PropertyPlaceType as PropertyNearbyPlace (not a union type)
+export type PropertyPlaceType = PropertyNearbyPlace;
 
 // City type
 export interface PropertyCity {
@@ -92,7 +92,7 @@ export interface PropertyData {
   description: string;
   location_description?: string;
   features: PropertyFeature[];
-  images: PropertyImage[] | string[] | { url: string }[];
+  images: PropertyImage[];
   areas: PropertyArea[];
   map_image?: string | null;
   latitude?: number | null;
@@ -106,7 +106,7 @@ export interface PropertyData {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  floorplans?: PropertyFloorplan[] | string[] | { url: string }[];
+  floorplans?: PropertyFloorplan[];
   floorplanEmbedScript?: string;
   featuredImage?: string | null;
   featuredImages?: string[];

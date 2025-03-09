@@ -56,7 +56,7 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           columns: typeof area.columns === 'number' ? area.columns : 2,
           name: area.name || "",
           size: area.size || "",
-          images: area.images || []
+          images: normalizeImage(area.images || [])
         };
       })
     : [];
@@ -67,7 +67,7 @@ export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
     ? places.map((place: any) => ({
         id: place.id || "",
         name: place.name || "",
-        type: (place.type as PropertyPlaceType) || "other",
+        type: place.type || "other",
         vicinity: place.vicinity || "",
         rating: place.rating || 0,
         user_ratings_total: place.user_ratings_total || 0,

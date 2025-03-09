@@ -1,5 +1,5 @@
 
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyImage } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
@@ -95,7 +95,7 @@ export function PropertyFormContent({
           <form id="areasForm">
             <AreasStep
               areas={formData.areas || []}
-              images={normalizeImages(formData.images || [])}
+              images={normalizeImages(formData.images)}
               propertyId={formData.id}
               onAddArea={onAddArea}
               onRemoveArea={onRemoveArea}

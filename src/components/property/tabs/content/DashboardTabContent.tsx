@@ -12,6 +12,10 @@ export function DashboardTabContent({ property }: DashboardTabContentProps) {
       <h2 className="text-2xl font-bold">Property Dashboard</h2>
       <p>Property ID: {property.id}</p>
       <p>Title: {property.title}</p>
+      {property.price && <p>Price: {property.price}</p>}
+      {property.address && <p>Address: {property.address}</p>}
+      {property.created_at && <p>Created: {new Date(property.created_at).toLocaleDateString()}</p>}
+      {property.updated_at && <p>Last Updated: {new Date(property.updated_at).toLocaleDateString()}</p>}
       {/* Add more dashboard content as needed */}
     </div>
   );

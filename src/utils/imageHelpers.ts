@@ -73,7 +73,7 @@ export function getImageId(image: string | PropertyImage | { url: string }): str
 /**
  * Converts any image format to PropertyImage[] format
  */
-export function normalizeImages(images: PropertyImage[] | string[] | { url: string }[]): PropertyImage[] {
+export function normalizeImages(images: any[] | null | undefined): PropertyImage[] {
   if (!images || !Array.isArray(images)) return [];
   
   return images.map(img => normalizeImage(img));

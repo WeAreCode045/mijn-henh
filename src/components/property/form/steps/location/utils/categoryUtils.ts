@@ -1,5 +1,5 @@
 
-import { PropertyPlaceType } from "@/types/property";
+import { PropertyPlaceType, PropertyNearbyPlace } from "@/types/property";
 
 // Color mapping for different place categories
 export const getCategoryColor = (type: string) => {
@@ -24,20 +24,20 @@ export const getCategoryColor = (type: string) => {
 };
 
 // Determine the main category for a place
-export const getCategory = (place: PropertyPlaceType) => {
-  const type = place.type.toLowerCase();
+export const getCategory = (place: PropertyNearbyPlace) => {
+  const placeType = place.type.toLowerCase();
   
-  if (type.includes('restaurant') || type.includes('cafe') || type.includes('bar') || type.includes('food')) {
+  if (placeType.includes('restaurant') || placeType.includes('cafe') || placeType.includes('bar') || placeType.includes('food')) {
     return 'restaurant';
-  } else if (type.includes('school') || type.includes('education')) {
+  } else if (placeType.includes('school') || placeType.includes('education')) {
     return 'education';
-  } else if (type.includes('hospital') || type.includes('doctor') || type.includes('clinic') || type.includes('health')) {
+  } else if (placeType.includes('hospital') || placeType.includes('doctor') || placeType.includes('clinic') || placeType.includes('health')) {
     return 'health';
-  } else if (type.includes('store') || type.includes('shop') || type.includes('mall') || type.includes('supermarket')) {
+  } else if (placeType.includes('store') || placeType.includes('shop') || placeType.includes('mall') || placeType.includes('supermarket')) {
     return 'shopping';
-  } else if (type.includes('bus') || type.includes('train') || type.includes('transit') || type.includes('station')) {
+  } else if (placeType.includes('bus') || placeType.includes('train') || placeType.includes('transit') || placeType.includes('station')) {
     return 'transportation';
-  } else if (type.includes('gym') || type.includes('sport') || type.includes('fitness') || type.includes('tennis') || type.includes('soccer') || type.includes('athletic')) {
+  } else if (placeType.includes('gym') || placeType.includes('sport') || placeType.includes('fitness') || placeType.includes('tennis') || placeType.includes('soccer') || placeType.includes('athletic')) {
     return 'sports';
   } else {
     return 'other';
@@ -45,13 +45,13 @@ export const getCategory = (place: PropertyPlaceType) => {
 };
 
 // Determine the transportation type from a place
-export const getTransportationType = (place: PropertyPlaceType) => {
-  const type = place.type.toLowerCase();
-  if (type.includes('train')) {
+export const getTransportationType = (place: PropertyNearbyPlace) => {
+  const placeType = place.type.toLowerCase();
+  if (placeType.includes('train')) {
     return 'Train';
-  } else if (type.includes('bus')) {
+  } else if (placeType.includes('bus')) {
     return 'Bus';
-  } else if (type.includes('transit')) {
+  } else if (placeType.includes('transit')) {
     return 'Transit';
   } else {
     return 'Station';

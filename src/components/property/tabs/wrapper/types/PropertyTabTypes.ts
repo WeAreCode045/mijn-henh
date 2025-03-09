@@ -18,6 +18,12 @@ export interface PropertyTabProps {
     created_at?: string;
     updated_at?: string;
     floorplanEmbedScript?: string;
+    price?: string;
+    address?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+    sqft?: string;
+    description?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;

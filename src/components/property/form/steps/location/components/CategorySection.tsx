@@ -1,11 +1,11 @@
 
-import { PropertyPlaceType } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property";
 import { PlaceItem } from "./PlaceItem";
 
 interface CategorySectionProps {
   category: string;
-  places: PropertyPlaceType[];
-  allPlaces: PropertyPlaceType[];
+  places: PropertyNearbyPlace[];
+  allPlaces: PropertyNearbyPlace[];
   onRemoveNearbyPlace?: (index: number) => void;
   togglePlaceVisibility: (placeIndex: number, visible: boolean) => void;
 }
