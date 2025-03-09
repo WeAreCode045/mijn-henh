@@ -31,6 +31,7 @@ interface PropertyContentFormProps {
   setPendingChanges: (pending: boolean) => void;
   isLoadingLocationData?: boolean;
   onSubmit?: () => void;
+  // Required navigation props
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;

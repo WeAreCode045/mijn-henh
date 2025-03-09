@@ -105,7 +105,7 @@ export interface PropertyData {
   featuredImages?: string[];
   created_at?: string;
   updated_at?: string;
-  // For backward compatibility
+  // For backward compatibility - can be PropertyImage[] or string[]
   coverImages?: PropertyImage[] | string[];
   gridImages?: PropertyImage[] | string[];
 }

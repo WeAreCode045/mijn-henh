@@ -95,11 +95,10 @@ export function usePropertyFetch(id: string | undefined) {
           
           // Handle nearby_cities with fallback for older database entries
           let nearby_cities: PropertyCity[] = [];
-          if (propertyData.nearby_cities) {
+          
+          // For older database entries that might not have the nearby_cities field
+          if (propertyData.nearby_cities !== undefined) {
             nearby_cities = safeParseArray(propertyData.nearby_cities);
-          } else {
-            // For backward compatibility, create empty array
-            nearby_cities = [];
           }
           
           // Process agent data for backward compatibility

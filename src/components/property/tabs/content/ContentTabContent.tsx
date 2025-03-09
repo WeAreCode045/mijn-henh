@@ -92,6 +92,7 @@ export function ContentTabContent({
         </CardHeader>
         <CardContent>
           <PropertyContentForm
+            step={currentStep}
             formData={formData}
             onFieldChange={onFieldChange}
             onAddFeature={onAddFeature}
