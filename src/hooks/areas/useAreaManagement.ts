@@ -16,7 +16,6 @@ export function useAreaManagement(
       id: crypto.randomUUID(),
       title: '',
       description: '',
-      imageIds: [],
       columns: 2, // Default to 2 columns
       name: '',
       size: '',

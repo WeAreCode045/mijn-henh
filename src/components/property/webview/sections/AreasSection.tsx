@@ -68,11 +68,9 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
     }
     
     const area = property.areas?.find(a => a.id === areaId);
-    if (!area || !area.imageIds || !property.images) return [];
+    if (!area || !area.images || !property.images) return [];
     
-    return property.images
-      .filter(img => area.imageIds.includes(img.id))
-      .map(img => img.url);
+    return area.images.map(img => typeof img === 'string' ? img : img.url);
   };
 
   return (

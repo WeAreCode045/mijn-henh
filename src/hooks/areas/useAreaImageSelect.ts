@@ -1,7 +1,7 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData } from '@/types/property';
+import type { PropertyFormData, PropertyImage } from '@/types/property';
 
 export function useAreaImageSelect(
   formData: PropertyFormData,
@@ -14,13 +14,17 @@ export function useAreaImageSelect(
     console.log(`Selecting images for area ${areaId}:`, imageIds);
     
     try {
-      // First update the area's imageIds in the local state
+      // Get the selected images objects
+      const selectedImages = formData.images.filter(img => imageIds.includes(img.id));
+      console.log(`Found ${selectedImages.length} images to assign to area ${areaId}`);
+      
+      // First update the area's images in the local state
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          console.log(`Updating area ${areaId} imageIds to:`, imageIds);
+          console.log(`Updating area ${areaId} with selected images`);
           return {
             ...area,
-            imageIds: imageIds
+            images: selectedImages
           };
         }
         return area;

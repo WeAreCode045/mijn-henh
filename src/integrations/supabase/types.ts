@@ -241,7 +241,6 @@ export type Database = {
           garages: string | null
           hasGarden: boolean | null
           id: string
-          images: Json[] | null
           latitude: number | null
           livingArea: string | null
           location_description: string | null
@@ -275,7 +274,6 @@ export type Database = {
           garages?: string | null
           hasGarden?: boolean | null
           id?: string
-          images?: Json[] | null
           latitude?: number | null
           livingArea?: string | null
           location_description?: string | null
@@ -309,7 +307,6 @@ export type Database = {
           garages?: string | null
           hasGarden?: boolean | null
           id?: string
-          images?: Json[] | null
           latitude?: number | null
           livingArea?: string | null
           location_description?: string | null

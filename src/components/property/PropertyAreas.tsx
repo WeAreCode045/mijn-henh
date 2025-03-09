@@ -36,10 +36,10 @@ export function PropertyAreas({
     console.log("PropertyAreas - Available images:", images);
     console.log("PropertyAreas - Property ID:", propertyId);
     
-    // Debug each area's imageIds
+    // Debug each area's images
     areas.forEach(area => {
-      console.log(`Area ${area.id} (${area.title}) - imageIds:`, 
-        Array.isArray(area.imageIds) ? area.imageIds : 'Not an array: ' + JSON.stringify(area.imageIds));
+      console.log(`Area ${area.id} (${area.title}) - images:`, 
+        Array.isArray(area.images) ? area.images : 'Not an array: ' + JSON.stringify(area.images));
     });
   }, [areas, images, propertyId]);
 
@@ -49,10 +49,10 @@ export function PropertyAreas({
     onAdd();
   };
 
-  // Make sure all areas have imageIds as arrays
+  // Make sure all areas have images as arrays
   const normalizedAreas = areas.map(area => ({
     ...area,
-    imageIds: Array.isArray(area.imageIds) ? area.imageIds : []
+    images: Array.isArray(area.images) ? area.images : []
   }));
 
   return (
