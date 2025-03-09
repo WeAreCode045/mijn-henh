@@ -23,7 +23,7 @@ interface ContentTabContentProps {
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
-  setPendingChanges?: () => void;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function ContentTabContent({
@@ -45,7 +45,7 @@ export function ContentTabContent({
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges
+  setPendingChanges = () => {}
 }: ContentTabContentProps) {
   return (
     <div className="space-y-4">
@@ -74,8 +74,17 @@ export function ContentTabContent({
             onFetchLocationData={onFetchLocationData}
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
-            setPendingChanges={setPendingChanges || (() => {})}
+            setPendingChanges={setPendingChanges}
             step={currentStep}
+            // Add empty handlers for optional props
+            handleAreaPhotosUpload={undefined}
+            handleImageUpload={undefined}
+            handleRemoveImage={undefined}
+            handleRemoveAreaPhoto={undefined}
+            handleFloorplanUpload={undefined}
+            handleRemoveFloorplan={undefined}
+            handleSetFeaturedImage={undefined}
+            handleToggleFeaturedImage={undefined}
           />
         </CardContent>
       </Card>

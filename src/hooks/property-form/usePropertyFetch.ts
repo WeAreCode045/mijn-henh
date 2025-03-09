@@ -93,8 +93,16 @@ export function usePropertyFetch(id: string | undefined) {
           const areas = safeParseArray(propertyData.areas);
           const nearby_places = safeParseArray(propertyData.nearby_places);
           
-          // Process agent data
-          const agentData = formatAgentData(propertyData.agent || propertyData.agent_id);
+          // Process agent data for backward compatibility
+          const agentId = propertyData.agent_id;
+          let agentData: PropertyAgent | undefined;
+          
+          if (agentId) {
+            agentData = {
+              id: agentId,
+              name: 'Unknown Agent'
+            };
+          }
           
           // Set the form data with safe defaults for new fields
           setFormData({
@@ -109,6 +117,10 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImage: featuredImage,
             featuredImages: featuredImages,
             agent: agentData,
+            // Add backward compatibility fields
+            coverImages: regularImages.slice(0, 6),
+            gridImages: regularImages.slice(0, 4),
+            areaPhotos: []
           });
         }
       } catch (error) {

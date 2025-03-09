@@ -20,6 +20,9 @@ export interface PropertyImage {
   description?: string;
 }
 
+// Define PropertyFloorplan as an alias to PropertyImage for compatibility
+export type PropertyFloorplan = PropertyImage;
+
 // Property area with all required fields
 export interface PropertyArea {
   id: string;
@@ -28,7 +31,6 @@ export interface PropertyArea {
   title: string;
   description: string;
   images: PropertyImage[]; 
-  // Remove unused imageIds field
   columns: number;
 }
 
@@ -102,11 +104,15 @@ export interface PropertyData {
   featuredImages?: string[];
   created_at?: string;
   updated_at?: string;
+  // Add these back for backward compatibility
+  coverImages?: PropertyImage[];
+  gridImages?: PropertyImage[];
 }
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends PropertyData {
-  // Remove unused fields: areaPhotos, coverImages, gridImages
+  // Add these back for backward compatibility in the form
+  areaPhotos?: PropertyImage[];
 }
 
 // Property submit data

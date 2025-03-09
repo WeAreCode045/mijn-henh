@@ -12,8 +12,9 @@ export const AreasSection = ({ property, settings, styles }: {
 }) => {
   return property.areas.map((area, index) => {
     const columns = area.columns || 2; // Default to 2 columns
+    const areaImages = area.images || [];
     const imagesPerPage = columns * 3; // 3 rows of configurable columns
-    const totalPages = Math.ceil((area.imageIds?.length || 0) / imagesPerPage);
+    const totalPages = Math.ceil(areaImages.length / imagesPerPage);
     
     return Array.from({ length: totalPages }).map((_, pageIndex) => {
       return (
@@ -31,10 +32,10 @@ export const AreasSection = ({ property, settings, styles }: {
             flexWrap: 'wrap',
             justifyContent: columns > 1 ? 'space-between' : 'flex-start'
           }}>
-            {(area.imageIds || [])
+            {areaImages
               .slice(pageIndex * imagesPerPage, (pageIndex + 1) * imagesPerPage)
-              .map((imageId, imgIndex) => {
-                const imageUrl = property.images.find(img => img.id === imageId)?.url;
+              .map((image, imgIndex) => {
+                const imageUrl = typeof image === 'string' ? image : image.url;
                 if (!imageUrl) return null;
 
                 return (
