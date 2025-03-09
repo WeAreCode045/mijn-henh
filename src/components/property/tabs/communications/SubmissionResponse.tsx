@@ -1,9 +1,13 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SendIcon } from 'lucide-react';
-import { SubmissionResponseProps } from './types';
+
+interface SubmissionResponseProps {
+  onSendResponse: (responseText: string) => Promise<void>;
+  isSending: boolean;
+}
 
 export function SubmissionResponse({ onSendResponse, isSending }: SubmissionResponseProps) {
   const [responseText, setResponseText] = useState('');
@@ -12,30 +16,36 @@ export function SubmissionResponse({ onSendResponse, isSending }: SubmissionResp
     e.preventDefault();
     if (!responseText.trim()) return;
     
-    try {
-      await onSendResponse(responseText);
-      setResponseText(''); // Clear the response text after successful send
-    } catch (error) {
-      console.error('Error sending response:', error);
-    }
+    await onSendResponse(responseText);
+    setResponseText('');
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3 className="font-medium mb-2">Reply</h3>
+      <h3 className="font-medium mb-2">Send a reply</h3>
       <Textarea
-        placeholder="Type your response here..."
-        className="min-h-[120px] mb-3"
         value={responseText}
         onChange={(e) => setResponseText(e.target.value)}
+        placeholder="Type your response..."
+        className="min-h-[120px]"
+        disabled={isSending}
       />
       <Button 
         type="submit" 
-        className="flex items-center gap-2"
+        className="mt-2 w-full md:w-auto" 
         disabled={!responseText.trim() || isSending}
       >
-        <SendIcon className="h-4 w-4" />
-        {isSending ? 'Sending...' : 'Send Response'}
+        {isSending ? (
+          <>
+            <span className="animate-spin mr-2">○</span>
+            Sending...
+          </>
+        ) : (
+          <>
+            <SendIcon className="w-4 h-4 mr-2" />
+            Send Response
+          </>
+        )}
       </Button>
     </form>
   );

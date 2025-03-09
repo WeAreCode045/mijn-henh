@@ -1,46 +1,68 @@
 
-import { useState } from 'react';
-import { useSubmissions } from '../communications/useSubmissions';
-import { useSubmissionActions } from '../communications/hooks/useSubmissionActions';
+import React, { useState, useEffect } from 'react';
 import { SubmissionsList } from '../communications/SubmissionsList';
 import { SubmissionDetail } from '../communications/SubmissionDetail';
+import { useSubmissions } from '../communications/useSubmissions';
+import { useSubmissionActions } from '../communications/hooks/useSubmissionActions';
 import { useMarkAsRead } from '../communications/hooks/useMarkAsRead';
 import { useSendResponse } from '../communications/hooks/useSendResponse';
-import { Submission } from '../communications/types';
 
-interface CommunicationsTabContentProps {
+interface Submission {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  inquiryType: string;
+  createdAt: string;
+  isRead: boolean;
   property: {
     id: string;
     title: string;
   };
+  replies: {
+    id: string;
+    submissionId: string;
+    replyText: string;
+    createdAt: string;
+    agent: {
+      id: string;
+      name: string;
+      email: string;
+      photoUrl?: string;
+    } | null;
+  }[];
 }
 
-export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-  
-  const { submissions, isLoading, fetchSubmissions } = useSubmissions(property.id);
-  const { handleMarkAsRead } = useMarkAsRead({
-    propertyId: property.id,
-    refetchSubmissions: fetchSubmissions
-  });
-  const { handleSendResponse, isSending } = useSendResponse({
-    propertyId: property.id, 
-    refetchSubmissions: fetchSubmissions
-  });
+interface CommunicationsTabContentProps {
+  propertyId: string;
+}
 
+export function CommunicationsTabContent({ propertyId }: CommunicationsTabContentProps) {
+  const { submissions, isLoading, selectedSubmission, setSelectedSubmission } = useSubmissions(propertyId);
+  
+  const { handleMarkAsRead } = useMarkAsRead();
+  const { handleSendResponse, isSending } = useSendResponse();
+  
   const handleSubmissionClick = (submission: Submission) => {
     setSelectedSubmission(submission);
     
-    // If the submission is not read, mark it as read
-    if (!submission.is_read) {
+    // Mark as read if not already read
+    if (!submission.isRead) {
       handleMarkAsRead(submission.id);
     }
   };
-
+  
+  const handleResponseSend = async (responseText: string) => {
+    if (!selectedSubmission) return;
+    
+    await handleSendResponse(responseText, selectedSubmission.id);
+  };
+  
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-1">
-        <SubmissionsList 
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="md:col-span-1">
+        <SubmissionsList
           submissions={submissions}
           isLoading={isLoading}
           selectedSubmission={selectedSubmission}
@@ -48,12 +70,11 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
           onMarkAsRead={handleMarkAsRead}
         />
       </div>
-      <div className="lg:col-span-2">
-        <SubmissionDetail 
-          submission={selectedSubmission} 
-          onSendResponse={handleSendResponse}
+      <div className="md:col-span-2">
+        <SubmissionDetail
+          submission={selectedSubmission}
+          onSendResponse={handleResponseSend}
           isSending={isSending}
-          onMarkAsRead={handleMarkAsRead}
         />
       </div>
     </div>

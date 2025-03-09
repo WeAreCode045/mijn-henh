@@ -1,124 +1,123 @@
 
+import React from 'react';
 import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { SubmissionReplies } from './SubmissionReplies';
 import { SubmissionResponse } from './SubmissionResponse';
-import { useEffect } from 'react';
-import { CheckIcon, MailIcon, PhoneIcon, TagIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Submission, SubmissionDetailProps } from './types';
 
-export function SubmissionDetail({ 
-  submission, 
-  onSendResponse, 
-  isSending,
-  onMarkAsRead 
-}: SubmissionDetailProps) {
-  useEffect(() => {
-    // Change page title when submission changes
-    if (submission) {
-      document.title = `Inquiry from ${submission.name} - Property Portal`;
-      return () => {
-        document.title = 'Property Portal';
-      };
-    }
-  }, [submission]);
+interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  photoUrl?: string;
+}
 
+interface Property {
+  id: string;
+  title: string;
+}
+
+interface SubmissionReply {
+  id: string;
+  submissionId: string;
+  replyText: string;
+  createdAt: string;
+  agent: Agent | null;
+}
+
+interface Submission {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  inquiryType: string;
+  createdAt: string;
+  isRead: boolean;
+  property: Property;
+  replies: SubmissionReply[];
+}
+
+interface SubmissionDetailProps {
+  submission: Submission | null;
+  onSendResponse: (responseText: string) => Promise<void>;
+  isSending: boolean;
+}
+
+export function SubmissionDetail({ submission, onSendResponse, isSending }: SubmissionDetailProps) {
   if (!submission) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-50 border rounded-lg">
-        <p className="text-gray-500">Select a message to view details</p>
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="text-muted-foreground">Select a submission to view details</p>
       </div>
     );
   }
 
-  const getInquiryTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      'information': 'Meer informatie',
-      'viewing': 'Bezichtiging',
-      'offer': 'Bod',
-      'other': 'Overig'
-    };
-    return types[type] || type;
-  };
-
   return (
-    <div className="bg-white border rounded-lg overflow-hidden">
-      {/* Header */}
-      <div className="p-6 border-b">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-xl font-semibold">{submission.name}</h2>
-            <p className="text-sm text-gray-500">
-              {format(new Date(submission.created_at), 'dd MMM yyyy HH:mm')}
-            </p>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Submission from {submission.name}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {format(new Date(submission.createdAt), 'PPP')} at {format(new Date(submission.createdAt), 'p')}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <Label>Inquiry Type</Label>
+              <p className="text-sm">{submission.inquiryType}</p>
+            </div>
+            
+            <div>
+              <Label>Property</Label>
+              <p className="text-sm">{submission.property.title}</p>
+            </div>
+            
+            <div>
+              <Label>Contact Information</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Name:</span> {submission.name}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Email:</span> {submission.email}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Phone:</span> {submission.phone}
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <Label>Message</Label>
+              <div className="border rounded-md p-3 text-sm mt-1 bg-slate-50">
+                {submission.message}
+              </div>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Replies</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SubmissionReplies 
+            replies={submission.replies}
+            submissionId={submission.id}
+          />
           
-          {!submission.is_read && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => onMarkAsRead(submission.id)}
-              className="flex items-center gap-1"
-            >
-              <CheckIcon className="h-4 w-4" />
-              Mark as read
-            </Button>
-          )}
-        </div>
-        
-        {/* Subject and type */}
-        <div className="mt-3 flex items-center gap-2">
-          <TagIcon className="h-4 w-4 text-blue-500" />
-          <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded">
-            {getInquiryTypeLabel(submission.inquiry_type)}
-          </span>
-        </div>
-        
-        {/* Property info */}
-        {submission.property && (
-          <div className="mt-2 text-sm text-gray-600">
-            Property: <span className="font-medium">{submission.property.title}</span>
+          <div className="mt-6">
+            <SubmissionResponse 
+              onSendResponse={onSendResponse} 
+              isSending={isSending}
+            />
           </div>
-        )}
-      </div>
-      
-      {/* Contact details */}
-      <div className="p-6 border-b bg-gray-50">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <MailIcon className="h-4 w-4 text-gray-500" />
-            <a href={`mailto:${submission.email}`} className="text-blue-600 hover:underline">
-              {submission.email}
-            </a>
-          </div>
-          <div className="flex items-center gap-2">
-            <PhoneIcon className="h-4 w-4 text-gray-500" />
-            <a href={`tel:${submission.phone}`} className="text-blue-600 hover:underline">
-              {submission.phone}
-            </a>
-          </div>
-        </div>
-      </div>
-      
-      {/* Message content */}
-      <div className="p-6 border-b">
-        <h3 className="font-medium mb-2">Message</h3>
-        <p className="text-gray-700 whitespace-pre-line">{submission.message}</p>
-      </div>
-      
-      {/* Replies */}
-      <div className="p-6 border-b bg-gray-50">
-        <h3 className="font-medium mb-3">Conversation</h3>
-        <SubmissionReplies replies={submission.replies || []} />
-      </div>
-      
-      {/* Response form */}
-      <div className="p-6">
-        <SubmissionResponse 
-          onSendResponse={onSendResponse}
-          isSending={isSending}
-        />
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

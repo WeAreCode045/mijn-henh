@@ -1,68 +1,64 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { SubmissionReply } from "./types";
+import React from 'react';
+import { format } from 'date-fns';
 
-interface SubmissionRepliesProps {
-  submissionId: string;
-  replies: SubmissionReply[];
+interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  photoUrl?: string;
 }
 
-export function SubmissionReplies({ submissionId, replies }: SubmissionRepliesProps) {
-  if (!replies || replies.length === 0) return null;
-  
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
-  
-  const getInitials = (name?: string) => {
-    if (!name) return "AA";
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
-  };
+interface SubmissionReply {
+  id: string;
+  submissionId: string;
+  replyText: string;
+  createdAt: string;
+  agent: Agent | null;
+}
+
+interface SubmissionRepliesProps {
+  replies: SubmissionReply[];
+  submissionId: string;
+}
+
+export function SubmissionReplies({ replies, submissionId }: SubmissionRepliesProps) {
+  if (!replies || replies.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-4">
+        No replies yet
+      </div>
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Responses</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {replies.map((reply) => (
-            <div key={reply.id} className="flex gap-4">
-              <Avatar>
-                {reply.agent?.agent_photo ? (
-                  <AvatarImage src={reply.agent.agent_photo} alt={reply.agent?.full_name || 'Agent'} />
-                ) : (
-                  <AvatarFallback>{getInitials(reply.agent?.full_name)}</AvatarFallback>
-                )}
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div className="font-medium">{reply.agent?.full_name || 'Agent'}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatDate(reply.created_at)}
-                  </div>
-                </div>
-                <div className="mt-1 p-3 bg-muted rounded-md whitespace-pre-wrap">
-                  {reply.reply_text}
-                </div>
+    <div className="space-y-4 mt-4">
+      {replies.map((reply) => (
+        <div key={reply.id} className="border rounded-lg p-4 bg-slate-50">
+          <div className="flex items-center gap-2 mb-2">
+            {reply.agent?.photoUrl ? (
+              <img 
+                src={reply.agent.photoUrl} 
+                alt={reply.agent.name} 
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+                {reply.agent?.name?.[0] || 'A'}
               </div>
+            )}
+            <div>
+              <p className="font-medium">{reply.agent?.name || 'Agent'}</p>
+              <p className="text-xs text-muted-foreground">
+                {format(new Date(reply.createdAt), 'MMM d, yyyy - h:mm a')}
+              </p>
             </div>
-          ))}
+          </div>
+          <div className="mt-2 text-sm prose max-w-none">
+            <p>{reply.replyText}</p>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 }
