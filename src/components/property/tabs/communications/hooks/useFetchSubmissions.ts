@@ -1,79 +1,56 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Submission } from "../types";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Submission } from '../types';
 
-export function useFetchSubmissions(propertyId: string) {
+export function useFetchSubmissions(propertyId?: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
 
-  const fetchSubmissions = useCallback(async () => {
+  const fetchSubmissions = async () => {
+    if (!propertyId) return;
+    
     setIsLoading(true);
     try {
-      console.log("Fetching submissions for property:", propertyId);
-      
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select('*')
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching submissions:", error);
-        throw error;
-      }
+        
+      if (error) throw error;
       
-      console.log("Fetched submissions:", data);
-      setSubmissions(data || []);
+      // Create default Submission objects with empty replies arrays
+      const transformedSubmissions: Submission[] = data.map(item => ({
+        id: item.id,
+        property_id: item.property_id,
+        name: item.name,
+        email: item.email,
+        phone: item.phone,
+        message: item.message,
+        inquiry_type: item.inquiry_type,
+        is_read: item.is_read,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        agent_id: item.agent_id,
+        replies: [] // Initialize with empty array
+      }));
       
+      setSubmissions(transformedSubmissions);
     } catch (error) {
       console.error('Error fetching submissions:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load contact submissions',
-        variant: 'destructive',
-      });
     } finally {
       setIsLoading(false);
     }
-  }, [propertyId, toast]);
+  };
 
   useEffect(() => {
     fetchSubmissions();
-    
-    // Set up a subscription to listen for changes in the submissions table
-    const channel = supabase
-      .channel('property_submissions')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'property_contact_submissions',
-          filter: `property_id=eq.${propertyId}`
-        },
-        (payload) => {
-          console.log("Real-time update received for property submissions:", payload);
-          // When a change is detected, refetch the submissions
-          fetchSubmissions();
-        }
-      )
-      .subscribe();
-
-    console.log("Subscription to property_contact_submissions set up for property:", propertyId);
-    
-    return () => {
-      console.log("Cleaning up submission subscription");
-      supabase.removeChannel(channel);
-    };
-  }, [propertyId, fetchSubmissions]);
+  }, [propertyId]);
 
   return {
     submissions,
     isLoading,
-    refreshSubmissions: fetchSubmissions,
-    setSubmissions
+    fetchSubmissions
   };
 }

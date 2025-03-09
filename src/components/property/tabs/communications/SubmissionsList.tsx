@@ -1,85 +1,46 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { Search } from "lucide-react";
+import React from "react";
 import { SubmissionItem } from "./SubmissionItem";
+import { Submission } from "./types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MessageCircle } from "lucide-react";
 
-type Submission = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  inquiry_type: string;
-  message: string;
-  created_at: string;
-  is_read: boolean;
-  response?: string;
-  response_date?: string;
-};
-
-interface SubmissionsListProps {
+export interface SubmissionsListProps {
   submissions: Submission[];
   isLoading: boolean;
   selectedSubmission: Submission | null;
-  onSelectSubmission: (submission: Submission) => void;
-  onMarkAsRead: (id: string) => void;
+  onSubmissionClick: (submission: Submission) => void;
 }
 
-export function SubmissionsList({ 
-  submissions, 
-  isLoading, 
-  selectedSubmission, 
-  onSelectSubmission,
-  onMarkAsRead
+export function SubmissionsList({
+  submissions,
+  isLoading,
+  selectedSubmission,
+  onSubmissionClick
 }: SubmissionsListProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredSubmissions = submissions.filter(submission =>
-    submission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.message?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Contact Submissions</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            {submissions.length} total
-          </span>
-        </CardTitle>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Search submissions..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Inquiries ({submissions.length})</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <Spinner />
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
           </div>
-        ) : filteredSubmissions.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">
-            {searchTerm ? "No matching submissions found" : "No submissions yet"}
-          </p>
+        ) : submissions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <MessageCircle className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">No inquiries yet</p>
+          </div>
         ) : (
-          <div className="space-y-2">
-            {filteredSubmissions.map((submission) => (
+          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+            {submissions.map(submission => (
               <SubmissionItem
                 key={submission.id}
                 submission={submission}
                 isSelected={selectedSubmission?.id === submission.id}
-                onClick={() => onSelectSubmission(submission)}
-                onMarkAsRead={onMarkAsRead}
+                onClick={() => onSubmissionClick(submission)}
               />
             ))}
           </div>

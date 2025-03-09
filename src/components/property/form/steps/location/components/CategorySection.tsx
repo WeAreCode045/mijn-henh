@@ -31,10 +31,11 @@ export function CategorySection({
             <PlaceItem 
               key={place.id || idx} 
               place={place} 
-              onRemove={onRemovePlace ? () => onRemovePlace(place.index || idx) : undefined}
-              toggleVisibility={toggleVisibility ? 
-                () => toggleVisibility(place.index || idx, !isVisible(place)) : undefined}
-              isVisible={isVisible ? isVisible(place) : true}
+              index={idx}
+              originalIndex={place.id ? parseInt(place.id) : idx}
+              category={category}
+              onRemove={onRemovePlace ? () => onRemovePlace(idx) : undefined}
+              onVisibilityChange={toggleVisibility || (() => {})}
             />
           ))}
         </div>

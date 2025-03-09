@@ -8,10 +8,10 @@ import { getTransportationType } from "../utils/categoryUtils";
 
 interface PlaceItemProps {
   place: PropertyPlaceType;
-  index: number;
-  originalIndex: number;
   onRemove?: (index: number) => void;
   onVisibilityChange: (index: number, visible: boolean) => void;
+  index: number;
+  originalIndex: number;
   category: string;
 }
 

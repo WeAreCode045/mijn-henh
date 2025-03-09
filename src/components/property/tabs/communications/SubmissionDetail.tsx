@@ -1,49 +1,42 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { UserIcon, MailIcon, PhoneIcon, CalendarIcon, CheckIcon, XIcon } from "lucide-react";
+import React from "react";
+import { Submission, SubmissionReply } from "./types";
+import { SubmissionReplies } from "./SubmissionReplies";
+import { SubmissionReplyForm } from "./SubmissionReplyForm";
 import { Badge } from "@/components/ui/badge";
-import { SubmissionReplies } from './SubmissionReplies';
-import { SubmissionResponse } from './SubmissionResponse';
-import { Submission, SubmissionReply } from './types';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail, Phone, Calendar, Check, X, User, MessageSquare } from "lucide-react";
 import { formatDate } from "@/utils/dateUtils";
-import { PropertyData } from "@/types/property";
 
 interface SubmissionDetailProps {
   submission: Submission;
   onMarkAsRead: (submissionId: string) => Promise<void>;
-  onSendResponse: (text: string) => Promise<void>;
+  onSendResponse: (responseText: string) => Promise<void>;
   isSending: boolean;
-  property: PropertyData;
-  replies: SubmissionReply[];
 }
 
 export function SubmissionDetail({
   submission,
   onMarkAsRead,
   onSendResponse,
-  isSending,
-  property,
-  replies
+  isSending
 }: SubmissionDetailProps) {
-  if (!submission) return null;
-
-  const handleToggleReadStatus = async () => {
-    await onMarkAsRead(submission.id);
-  };
-
-  const handleResponseSubmit = async (responseText: string) => {
-    await onSendResponse(responseText);
-  };
+  if (!submission) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <p className="text-muted-foreground">Select a submission to view details</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <Card className={submission.is_read ? "" : "border-l-4 border-l-blue-500"}>
+      <Card>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
             <div className="flex items-center">
-              <UserIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+              <User className="h-5 w-5 mr-2 text-muted-foreground" />
               <CardTitle className="text-lg">{submission.name}</CardTitle>
               <Badge className="ml-3" variant={
                 submission.inquiry_type === 'viewing' ? "default" : 
@@ -56,12 +49,12 @@ export function SubmissionDetail({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={handleToggleReadStatus}
+                onClick={() => onMarkAsRead(submission.id)}
               >
                 {submission.is_read ? (
-                  <XIcon className="h-4 w-4 mr-1" />
+                  <X className="h-4 w-4 mr-1" />
                 ) : (
-                  <CheckIcon className="h-4 w-4 mr-1" />
+                  <Check className="h-4 w-4 mr-1" />
                 )}
                 {submission.is_read ? 'Mark Unread' : 'Mark Read'}
               </Button>
@@ -71,19 +64,19 @@ export function SubmissionDetail({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="flex items-center">
-              <MailIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
               <a href={`mailto:${submission.email}`} className="text-blue-600 hover:underline">
                 {submission.email}
               </a>
             </div>
             <div className="flex items-center">
-              <PhoneIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
               <a href={`tel:${submission.phone}`} className="text-blue-600 hover:underline">
                 {submission.phone}
               </a>
             </div>
             <div className="flex items-center">
-              <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
               <span className="text-muted-foreground">
                 {formatDate(submission.created_at)}
               </span>
@@ -91,40 +84,34 @@ export function SubmissionDetail({
           </div>
           
           <div className="mt-4 bg-muted p-4 rounded-md">
-            <h4 className="font-semibold mb-2">Message:</h4>
+            <div className="flex items-center mb-2">
+              <MessageSquare className="h-4 w-4 mr-2 text-muted-foreground" /> 
+              <h4 className="font-semibold">Message:</h4>
+            </div>
             <p className="whitespace-pre-line">{submission.message}</p>
-          </div>
-          
-          <div className="mt-4 flex space-x-2">
-            <Button variant="outline" size="sm" asChild>
-              <a href={`mailto:${submission.email}?subject=RE: Inquiry about ${property.title}`}>
-                <MailIcon className="h-4 w-4 mr-2" />
-                Reply by Email
-              </a>
-            </Button>
-            {submission.phone && (
-              <Button variant="outline" size="sm" asChild>
-                <a href={`tel:${submission.phone}`}>
-                  <PhoneIcon className="h-4 w-4 mr-2" />
-                  Call
-                </a>
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Display submission replies */}
-      <SubmissionReplies
-        submissionId={submission.id}
-        replies={replies}
-      />
-
-      {/* Reply form */}
-      <SubmissionResponse
-        onSendResponse={handleResponseSubmit}
-        isSending={isSending}
-      />
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Communication History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SubmissionReplies 
+            submissionId={submission.id} 
+            replies={submission.replies || []}
+          />
+          
+          <div className="mt-6">
+            <h4 className="font-semibold mb-3">Send Response</h4>
+            <SubmissionReplyForm 
+              onSendResponse={onSendResponse}
+              isSending={isSending}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

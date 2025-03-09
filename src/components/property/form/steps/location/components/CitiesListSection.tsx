@@ -3,12 +3,17 @@ import { PropertyCity } from "@/types/property";
 import { CityItem } from "./CityItem";
 
 interface CitiesListSectionProps {
-  nearbyCities: PropertyCity[];
-  toggleCityVisibility: (cityIndex: number, visible: boolean) => void;
+  cities: PropertyCity[];
+  toggleVisibility: (cityIndex: number, visible: boolean) => void;
+  isVisible: (city: PropertyCity) => boolean;
 }
 
-export function CitiesListSection({ nearbyCities, toggleCityVisibility }: CitiesListSectionProps) {
-  if (nearbyCities.length === 0) {
+export function CitiesListSection({ 
+  cities, 
+  toggleVisibility, 
+  isVisible 
+}: CitiesListSectionProps) {
+  if (cities.length === 0) {
     return (
       <p className="text-sm text-gray-500">No nearby cities found. Use the button above to fetch data.</p>
     );
@@ -16,12 +21,12 @@ export function CitiesListSection({ nearbyCities, toggleCityVisibility }: Cities
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-      {nearbyCities.map((city, index) => (
+      {cities.map((city, index) => (
         <CityItem
           key={index}
           city={city}
           index={index}
-          onVisibilityChange={toggleCityVisibility}
+          onVisibilityChange={toggleVisibility}
         />
       ))}
     </div>

@@ -11,7 +11,7 @@ export interface SubmissionReply {
   submission_id: string;
   reply_text: string;
   created_at: string;
-  agent?: SubmissionAgent;
+  agent?: SubmissionAgent | null;
 }
 
 export interface Submission {

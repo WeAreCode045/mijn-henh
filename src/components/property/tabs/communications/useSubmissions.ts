@@ -1,53 +1,56 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Submission, SubmissionReply, SubmissionAgent } from './types';
+import { Submission, SubmissionReply } from './types';
 
-export function useSubmissions(propertyId: string) {
+export function useSubmissions(propertyId?: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchSubmissions = async () => {
+    if (!propertyId) return;
+    
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select(`
           *,
-          property:properties(*),
+          property:property_id(*),
           replies:property_submission_replies(
             *,
-            agent:profiles(*)
+            agent:agent_id(*)
           )
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
-
+        
       if (error) throw error;
-
-      // Transform data to match the Submission type
-      const transformedData: Submission[] = (data || []).map(item => {
-        // Transform replies to include agent info
+      
+      // Transform data to match our types
+      const transformedSubmissions: Submission[] = data.map(item => {
+        // Transform replies to match our SubmissionReply type
         const transformedReplies: SubmissionReply[] = (item.replies || []).map(reply => {
-          // Create a safe agent object that handles possible null values
-          const agentData: SubmissionAgent = {
-            id: reply.agent?.id || '',
-            full_name: reply.agent?.full_name || '',
-            email: reply.agent?.email || '',
-            agent_photo: reply.agent?.agent_photo || ''
-          };
-
+          let agentData = null;
+          if (reply.agent && typeof reply.agent === 'object') {
+            agentData = {
+              id: reply.agent.id || '',
+              full_name: reply.agent.full_name || '',
+              email: reply.agent.email || '',
+              agent_photo: reply.agent.agent_photo || ''
+            };
+          }
+          
           return {
             id: reply.id,
-            submission_id: reply.submission_id,
+            submission_id: reply.submission_id || item.id,
             reply_text: reply.reply_text,
             created_at: reply.created_at,
             agent: agentData
           };
         });
-
+        
         return {
           id: item.id,
           property_id: item.property_id,
@@ -64,15 +67,11 @@ export function useSubmissions(propertyId: string) {
           replies: transformedReplies
         };
       });
-
-      setSubmissions(transformedData);
       
-      // If we have a selected submission, update it with fresh data
-      if (selectedSubmission) {
-        const updatedSelection = transformedData.find(s => s.id === selectedSubmission.id);
-        if (updatedSelection) {
-          setSelectedSubmission(updatedSelection);
-        }
+      setSubmissions(transformedSubmissions as Submission[]);
+      
+      if (transformedSubmissions.length > 0 && !selectedSubmission) {
+        setSelectedSubmission(transformedSubmissions[0]);
       }
     } catch (error) {
       console.error('Error fetching submissions:', error);
@@ -81,73 +80,23 @@ export function useSubmissions(propertyId: string) {
     }
   };
 
-  const handleMarkAsRead = async (submissionId: string) => {
-    try {
-      const submission = submissions.find(s => s.id === submissionId);
-      if (!submission) return;
-
-      const { error } = await supabase
-        .from('property_contact_submissions')
-        .update({ is_read: !submission.is_read })
-        .eq('id', submissionId);
-
-      if (error) throw error;
-
-      // Refresh submissions data
-      await fetchSubmissions();
-    } catch (error) {
-      console.error('Error marking submission as read:', error);
-    }
-  };
-
-  const handleSendResponse = async (responseText: string) => {
-    if (!selectedSubmission || !responseText.trim()) return;
-    
-    setIsSending(true);
-    try {
-      // Get the user's profile ID (agent ID)
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
-
-      // Insert the reply
-      const { error } = await supabase
-        .from('property_submission_replies')
-        .insert({
-          submission_id: selectedSubmission.id,
-          reply_text: responseText,
-          agent_id: userId
-        });
-
-      if (error) throw error;
-
-      // Refresh submissions data
-      await fetchSubmissions();
-    } catch (error) {
-      console.error('Error sending reply:', error);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  // Initial fetch
   useEffect(() => {
-    if (propertyId) {
-      fetchSubmissions();
-    }
+    fetchSubmissions();
   }, [propertyId]);
+
+  const handleSubmissionClick = (submission: Submission) => {
+    setSelectedSubmission(submission);
+  };
+
+  const refreshSubmissions = () => {
+    fetchSubmissions();
+  };
 
   return {
     submissions,
-    isLoading,
     selectedSubmission,
-    setSelectedSubmission,
-    isSending,
-    handleMarkAsRead,
-    handleSendResponse,
-    refreshSubmissions: fetchSubmissions
+    isLoading,
+    handleSubmissionClick,
+    refreshSubmissions
   };
 }

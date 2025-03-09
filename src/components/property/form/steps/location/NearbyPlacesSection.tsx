@@ -32,7 +32,8 @@ export function NearbyPlacesSection({
     if (!placesByCategory[category]) {
       placesByCategory[category] = [];
     }
-    placesByCategory[category].push({...place, index}); // Add index for removal
+    // We don't modify the original place object with index property
+    placesByCategory[category].push(place);
   });
   
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
