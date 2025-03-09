@@ -91,12 +91,16 @@ export function transformSupabaseData(
   // Ensure areas is an array
   const dataAreas = Array.isArray(data.areas) ? data.areas : [];
   
-  // Transform areas to include imageIds
+  // Transform areas to include images from property_images table
   const transformedAreas = dataAreas.map((area: any) => ({
     ...area,
-    imageIds: data.property_images
+    images: data.property_images
       .filter((img) => img.area === area.id)
-      .map((img) => img.id),
+      .map((img) => ({
+        id: img.id,
+        url: img.url,
+        area: img.area
+      }))
   }));
 
   // Ensure features is always an array
@@ -127,7 +131,6 @@ export function transformSupabaseData(
     images: images,
     featuredImage: featuredImage,
     featuredImages: featuredImages,
-    coverImages: featuredImages, // For backward compatibility
     areas: transformedAreas,
     nearby_places: nearbyPlaces,
     latitude: data.latitude,
@@ -148,7 +151,6 @@ export function transformSupabaseData(
     template_id: data.template_id,
     floorplanEmbedScript: data.floorplanEmbedScript || "", // Ensure floorplanEmbedScript is passed through
     floorplans: [], // Add empty floorplans array
-    gridImages: featuredImages // For backward compatibility with components that still use gridImages
   };
 
   console.log('transformSupabaseData - Returning transformed data with floorplan script:', {

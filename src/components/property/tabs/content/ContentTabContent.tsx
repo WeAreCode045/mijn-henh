@@ -56,7 +56,6 @@ export function ContentTabContent({
         </CardHeader>
         <CardContent>
           <PropertyContentForm
-            step={currentStep}
             formData={formData}
             onFieldChange={onFieldChange}
             onAddFeature={onAddFeature}
@@ -68,6 +67,7 @@ export function ContentTabContent({
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
+            currentStep={currentStep}
             handleStepClick={handleStepClick}
             handleNext={handleNext}
             handlePrevious={handlePrevious}
@@ -75,7 +75,7 @@ export function ContentTabContent({
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
             setPendingChanges={setPendingChanges || (() => {})}
-            currentStep={currentStep}
+            step={currentStep}
           />
         </CardContent>
       </Card>

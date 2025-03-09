@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyForm } from "@/components/PropertyForm";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
-import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { useAuth } from "@/providers/AuthProvider";
@@ -139,7 +139,7 @@ export function PropertyFormContainer() {
       onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
-      images={images.map(img => img.url)}
+      images={images.map(img => typeof img === 'string' ? img : img.url)}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
       isSubmitting={isSubmitting}

@@ -19,7 +19,6 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     const id = (area as any).id || '';
     const title = (area as any).title || '';
     const description = (area as any).description || '';
-    const imageIds = (area as any).imageIds || [];
     const columns = (area as any).columns || 2; // Default to 2 columns if not specified
     const name = (area as any).name || '';
     const size = (area as any).size || '';
@@ -29,7 +28,6 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
       id,
       title,
       description,
-      imageIds,
       columns,
       name,
       size,

@@ -20,7 +20,6 @@ interface PropertyFormContentProps {
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage?: (index: number) => void;
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
   handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -34,6 +33,11 @@ interface PropertyFormContentProps {
   isUploadingFloorplan?: boolean;
   setPendingChanges?: (changes: boolean) => void;
   isLoadingLocationData?: boolean;
+  // Additional props to match PropertyContentForm
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
 }
 
 export function PropertyFormContent({
@@ -63,7 +67,12 @@ export function PropertyFormContent({
   isUploading,
   isUploadingFloorplan,
   setPendingChanges,
-  isLoadingLocationData
+  isLoadingLocationData,
+  // Additional props
+  currentStep,
+  handleStepClick,
+  handleNext,
+  handlePrevious
 }: PropertyFormContentProps) {
   const renderStep = () => {
     switch (step) {

@@ -227,7 +227,6 @@ export type Database = {
       properties: {
         Row: {
           address: string | null
-          agent: string | null
           agent_id: string | null
           areaPhotos: string[] | null
           areas: Json[] | null
@@ -262,7 +261,6 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          agent?: string | null
           agent_id?: string | null
           areaPhotos?: string[] | null
           areas?: Json[] | null
@@ -297,7 +295,6 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          agent?: string | null
           agent_id?: string | null
           areaPhotos?: string[] | null
           areas?: Json[] | null

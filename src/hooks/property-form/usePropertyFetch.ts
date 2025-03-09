@@ -109,9 +109,6 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImage: featuredImage,
             featuredImages: featuredImages,
             agent: agentData,
-            // Legacy fields for backward compatibility
-            coverImages: featuredImages,
-            gridImages: featuredImages
           });
         }
       } catch (error) {

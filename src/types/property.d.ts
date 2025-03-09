@@ -28,7 +28,7 @@ export interface PropertyArea {
   title: string;
   description: string;
   images: PropertyImage[]; 
-  imageIds: string[];
+  // Remove unused imageIds field
   columns: number;
 }
 
@@ -106,10 +106,7 @@ export interface PropertyData {
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends PropertyData {
-  areaPhotos?: string[];
-  coverImages?: string[];
-  gridImages?: string[];
-  nearby_cities?: PropertyCity[];
+  // Remove unused fields: areaPhotos, coverImages, gridImages
 }
 
 // Property submit data
