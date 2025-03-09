@@ -1,102 +1,117 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Submission, SubmissionReply } from './types';
 
-interface SubmissionAgent {
-  id: string;
-  name: string;
-  email: string;
-  photo?: string | null;
-}
-
-interface SubmissionReply {
-  id: string;
-  reply_text: string;
-  created_at: string;
-  agent: SubmissionAgent;
-}
-
-export interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  inquiry_type: string;
-  created_at: string;
-  is_read: boolean;
-  replies: SubmissionReply[];
-  property: {
-    id: string;
-    title: string;
-  };
-}
-
-export const useSubmissions = (propertyId: string) => {
+export function useSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchSubmissions = async () => {
     setIsLoading(true);
+    setError(null);
+
     try {
-      const { data, error } = await supabase
-        .from('property_submissions')
+      // First fetch the submissions for this property
+      const { data: submissionsData, error: submissionsError } = await supabase
+        .from('property_contact_submissions')
         .select(`
-          *,
-          property:property_id(id, title),
-          replies:property_submission_replies(
-            *,
-            agent:agent_id(id, full_name, email, agent_photo)
-          )
+          id, 
+          name, 
+          email, 
+          phone, 
+          message, 
+          inquiry_type, 
+          property_id, 
+          agent_id,
+          created_at, 
+          is_read,
+          property:properties(id, title)
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (submissionsError) throw submissionsError;
 
-      // Transform data to match Submission interface
-      const transformedData = data.map(item => {
-        // Process replies to handle possible null values in agent
-        const transformedReplies = (item.replies || []).map(reply => ({
-          id: reply.id,
-          reply_text: reply.reply_text,
-          created_at: reply.created_at,
-          agent: {
-            id: reply.agent?.id || 'unknown',
-            name: reply.agent?.full_name || 'Unknown Agent',
-            email: reply.agent?.email || '',
-            photo: reply.agent?.agent_photo || null
+      // If no submissions found, return empty array
+      if (!submissionsData || submissionsData.length === 0) {
+        setSubmissions([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // For each submission, fetch its replies
+      const submissionsWithReplies = await Promise.all(
+        submissionsData.map(async (submission) => {
+          const { data: repliesData, error: repliesError } = await supabase
+            .from('property_submission_replies')
+            .select(`
+              id,
+              submission_id,
+              message,
+              created_at,
+              agent:profiles(id, full_name, email, agent_photo)
+            `)
+            .eq('submission_id', submission.id)
+            .order('created_at', { ascending: true });
+
+          if (repliesError) {
+            console.error('Error fetching replies:', repliesError);
+            return {
+              ...submission,
+              replies: []
+            };
           }
-        }));
 
-        return {
-          id: item.id,
-          name: item.name,
-          email: item.email,
-          phone: item.phone,
-          message: item.message || '',
-          inquiry_type: item.inquiry_type,
-          created_at: item.created_at,
-          is_read: item.is_read,
-          replies: transformedReplies,
-          property: {
-            id: item.property.id,
-            title: item.property.title
-          }
-        } as Submission;
-      });
+          // Map replies to correct type
+          const typedReplies: SubmissionReply[] = repliesData?.map(reply => ({
+            id: reply.id,
+            submission_id: reply.submission_id,
+            message: reply.message,
+            created_at: reply.created_at,
+            agent: reply.agent ? {
+              id: reply.agent.id,
+              full_name: reply.agent.full_name,
+              email: reply.agent.email,
+              agent_photo: reply.agent.agent_photo
+            } : null
+          })) || [];
 
-      setSubmissions(transformedData);
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
+          return {
+            id: submission.id,
+            name: submission.name,
+            email: submission.email,
+            phone: submission.phone,
+            message: submission.message,
+            inquiry_type: submission.inquiry_type,
+            property_id: submission.property_id,
+            agent_id: submission.agent_id,
+            created_at: submission.created_at,
+            is_read: submission.is_read,
+            property: submission.property ? {
+              id: submission.property.id,
+              title: submission.property.title
+            } : undefined,
+            replies: typedReplies
+          };
+        })
+      );
+
+      setSubmissions(submissionsWithReplies);
+    } catch (err) {
+      console.error('Error fetching submissions:', err);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSubmissions();
+    if (propertyId) {
+      fetchSubmissions();
+    }
   }, [propertyId]);
 
-  return { submissions, isLoading, fetchSubmissions };
-};
+  return { submissions, isLoading, error, fetchSubmissions };
+}

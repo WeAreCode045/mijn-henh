@@ -1,28 +1,39 @@
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { PropertyCity } from "@/types/property";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CityItemProps {
   city: PropertyCity;
   index: number;
-  onVisibilityChange: (index: number, visible: boolean) => void;
+  onVisibilityChange: (cityIndex: number, visible: boolean) => void;
+  isVisible: boolean;
 }
 
-export function CityItem({ city, index, onVisibilityChange }: CityItemProps) {
+export function CityItem({ 
+  city, 
+  index, 
+  onVisibilityChange,
+  isVisible
+}: CityItemProps) {
   return (
-    <div className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+    <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md">
       <div className="flex items-start gap-2">
         <Checkbox 
           id={`city-${index}`}
-          checked={city.visible_in_webview !== false}
+          checked={isVisible}
           onCheckedChange={(checked) => {
             onVisibilityChange(index, checked === true);
           }}
         />
         <div>
           <div className="font-medium">{city.name}</div>
-          <div className="text-sm text-gray-500">{city.distance} km</div>
+          {city.distance && (
+            <div className="text-sm text-gray-500">
+              {typeof city.distance === 'number' 
+                ? `${city.distance.toFixed(1)} km` 
+                : city.distance}
+            </div>
+          )}
         </div>
       </div>
     </div>

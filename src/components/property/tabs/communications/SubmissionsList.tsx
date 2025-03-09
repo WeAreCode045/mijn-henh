@@ -1,63 +1,47 @@
 
-import { Submission } from "./useSubmissions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SubmissionItem } from "./SubmissionItem";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { SubmissionItem } from './SubmissionItem';
+import { Submission, SubmissionsListProps } from './types';
 
-interface SubmissionsListProps {
-  submissions: Submission[];
-  isLoading: boolean;
-  selectedSubmission: Submission | null;
-  onSubmissionSelect: (submission: Submission) => void;
-  onMarkAsRead: (id: string) => void;
-}
-
-export function SubmissionsList({
-  submissions,
-  isLoading,
-  selectedSubmission,
-  onSubmissionSelect,
+export function SubmissionsList({ 
+  submissions, 
+  isLoading, 
+  selectedSubmission, 
+  onSubmissionClick,
   onMarkAsRead
 }: SubmissionsListProps) {
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Messages</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center py-6">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="p-6 border rounded-lg bg-white">
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-md"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (submissions.length === 0) {
+    return (
+      <div className="p-6 border rounded-lg bg-white">
+        <p className="text-center text-gray-500">No messages found</p>
+      </div>
     );
   }
 
   return (
-    <Card className="h-[calc(100vh-280px)]">
-      <CardHeader>
-        <CardTitle>Messages ({submissions.length})</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-[calc(100vh-350px)]">
-          {submissions.length === 0 ? (
-            <p className="text-center py-6 text-muted-foreground">No messages yet</p>
-          ) : (
-            <div className="divide-y">
-              {submissions.map((submission) => (
-                <SubmissionItem 
-                  key={submission.id} 
-                  submission={submission} 
-                  isSelected={selectedSubmission?.id === submission.id} 
-                  onClick={() => onSubmissionSelect(submission)} 
-                  onMarkAsRead={onMarkAsRead}
-                />
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-      </CardContent>
-    </Card>
+    <div className="border rounded-lg bg-white overflow-hidden">
+      <div className="divide-y">
+        {submissions.map((submission) => (
+          <SubmissionItem
+            key={submission.id}
+            submission={submission}
+            isSelected={selectedSubmission?.id === submission.id}
+            onClick={() => onSubmissionClick(submission)}
+            onMarkAsRead={onMarkAsRead}
+          />
+        ))}
+      </div>
+    </div>
   );
 }

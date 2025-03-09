@@ -1,48 +1,60 @@
 
 export interface SubmissionAgent {
   id: string;
-  full_name?: string;
-  email?: string;
+  full_name: string;
+  email: string;
   agent_photo?: string;
+}
+
+export interface SubmissionProperty {
+  id: string;
+  title: string;
 }
 
 export interface SubmissionReply {
   id: string;
   submission_id: string;
-  reply_text: string;
+  message: string;
   created_at: string;
-  agent?: SubmissionAgent | null;
+  agent: SubmissionAgent | null;
 }
 
 export interface Submission {
   id: string;
-  property_id: string;
   name: string;
   email: string;
   phone: string;
   message: string;
   inquiry_type: string;
-  is_read: boolean;
+  property_id: string;
   created_at: string;
-  updated_at: string;
+  is_read: boolean;
   agent_id?: string;
-  property?: any;
-  replies: SubmissionReply[];
+  property?: SubmissionProperty;
+  replies?: SubmissionReply[];
 }
 
-export interface SubmissionRepliesProps {
-  submissionId: string;
-  replies: SubmissionReply[];
+export interface UseSubmissionActionsProps {
+  propertyId: string;
+  refetchSubmissions: () => void;
 }
 
-export interface SubmissionReplyFormProps {
-  onSendResponse: (text: string) => Promise<void>;
-  isSending: boolean;
+export interface SubmissionResponse {
+  id: string;
+  success: boolean;
+  message: string;
 }
 
 export interface SubmissionResponseProps {
-  onSendResponse: (text: string) => Promise<void>;
+  onSendResponse: (responseText: string) => Promise<void>;
   isSending: boolean;
+}
+
+export interface SubmissionItemProps {
+  submission: Submission;
+  isSelected: boolean;
+  onClick: () => void;
+  onMarkAsRead: (id: string) => void;
 }
 
 export interface SubmissionsListProps {
@@ -50,12 +62,12 @@ export interface SubmissionsListProps {
   isLoading: boolean;
   selectedSubmission: Submission | null;
   onSubmissionClick: (submission: Submission) => void;
+  onMarkAsRead: (id: string) => void;
 }
 
-export interface UseMarkAsReadProps {
-  handleMarkAsRead: (submissionId: string) => Promise<void>;
-}
-
-export interface UseSendResponseProps {
-  handleSendResponse: (responseText: string) => Promise<void>;
+export interface SubmissionDetailProps {
+  submission: Submission | null;
+  onSendResponse: (responseText: string) => Promise<void>;
+  isSending: boolean;
+  onMarkAsRead: (id: string) => Promise<void>;
 }
