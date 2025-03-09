@@ -96,9 +96,15 @@ export function usePropertyFetch(id: string | undefined) {
           // Handle nearby_cities with fallback for older database entries
           let nearby_cities: PropertyCity[] = [];
           
-          // For older database entries that might not have the nearby_cities field
-          if (propertyData.nearby_cities !== undefined) {
-            nearby_cities = safeParseArray(propertyData.nearby_cities);
+          try {
+            // For older database entries that might not have the nearby_cities field
+            // Using a try-catch as propertyData.nearby_cities might not exist in type definition
+            if (propertyData.nearby_cities !== undefined) {
+              nearby_cities = safeParseArray(propertyData.nearby_cities);
+            }
+          } catch (error) {
+            console.warn('No nearby_cities property found, using empty array');
+            nearby_cities = [];
           }
           
           // Process agent data for backward compatibility

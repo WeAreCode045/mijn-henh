@@ -1,21 +1,13 @@
 
-import { useState } from "react";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFormData } from "@/types/property";
-import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
-import { steps } from "@/components/property/form/formSteps";
-import { usePropertyContentAutoSave } from "@/hooks/usePropertyContentAutoSave";
-import { usePropertyContentStepNavigation } from "@/hooks/usePropertyContentStepNavigation";
-import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 import { PropertyContentForm } from "./content/PropertyContentForm";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
+import { useState } from "react";
 
 interface PropertyContentTabProps {
-  formData: PropertyFormData;
-  currentStep?: number;
-  handleStepClick?: (step: number) => void;
-  handleNext?: () => void;
-  handlePrevious?: () => void;
-  onSubmit?: () => void;
+  property: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -26,30 +18,13 @@ interface PropertyContentTabProps {
   onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage: (index: number) => void;
-  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
-  handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  isUpdateMode: boolean;
-  isUploading?: boolean;
-  isUploadingFloorplan?: boolean;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
   isLoadingLocationData?: boolean;
 }
 
 export function PropertyContentTab({
-  formData,
-  currentStep: externalCurrentStep,
-  handleStepClick: externalHandleStepClick,
-  handleNext: externalHandleNext,
-  handlePrevious: externalHandlePrevious,
-  onSubmit: externalOnSubmit,
+  property,
   onFieldChange,
   onAddFeature,
   onRemoveFeature,
@@ -60,106 +35,99 @@ export function PropertyContentTab({
   onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
-  handleImageUpload,
-  handleAreaPhotosUpload,
-  handleRemoveImage,
-  handleRemoveAreaPhoto,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  isUpdateMode,
-  isUploading,
-  isUploadingFloorplan,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage,
   isLoadingLocationData,
 }: PropertyContentTabProps) {
-  const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   const [pendingChanges, setPendingChanges] = useState(false);
-  
-  const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
-  
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Use the step navigation hook
   const { 
-    autosaveData, 
-    isSaving, 
-    lastSaved, 
-    setLastSaved 
-  } = usePropertyAutoSave();
-  
-  const handleSave = () => {
-    if (formData.id) {
-      console.log("PropertyContentTab - Manual save triggered");
-      autosaveData(formData).then(() => {
-        setPendingChanges(false);
-      });
-    }
-  };
-  
-  const { handleStepClick, handleNext, handlePrevious } = usePropertyContentStepNavigation(
-    formData,
-    currentStep,
-    setInternalCurrentStep,
+    currentStep, 
+    handleStepClick, 
+    handleNext, 
+    handlePrevious 
+  } = usePropertyStepNavigation(
+    property,
     pendingChanges,
     setPendingChanges,
-    setLastSaved,
-    externalHandleStepClick,
-    externalHandleNext,
-    externalHandlePrevious
+    setLastSaved
   );
-  
-  const { onSubmit } = usePropertyContentSubmit(
-    formData,
-    setPendingChanges,
-    setLastSaved,
-    externalOnSubmit
-  );
+
+  // Create wrapper functions to handle type mismatches
+  const handleAreaImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // We need to extract the area ID from a data attribute or similar
+      const areaId = e.target.getAttribute('data-area-id');
+      if (areaId) {
+        onAreaImageUpload(areaId, e.target.files);
+      }
+    }
+  };
+
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      // Just pass the FileList to the original handler
+      onAreaImageUpload("main", e.target.files);
+    }
+  };
+
+  const handleRemoveImageByIndex = (index: number) => {
+    // Convert index to string ID for compatibility
+    onAreaImageRemove("main", index.toString());
+  };
+
+  const handleFloorplanInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      // Just pass the FileList to the original handler
+      onAreaImageUpload("floorplan", e.target.files);
+    }
+  };
+
+  const handleRemoveFloorplanByIndex = (index: number) => {
+    // Convert index to string ID for compatibility
+    onAreaImageRemove("floorplan", index.toString());
+  };
 
   return (
     <div className="space-y-4">
-      <FormStepNavigation
-        steps={steps}
-        currentStep={currentStep}
-        onStepClick={handleStepClick}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onSubmit={onSubmit}
-        onSave={handleSave}
-        isUpdateMode={isUpdateMode}
-        lastSaved={lastSaved}
-        isSaving={isSaving}
-      />
-      
-      <PropertyContentForm
-        step={currentStep}
-        formData={formData}
-        onFieldChange={onFieldChange}
-        onAddFeature={onAddFeature}
-        onRemoveFeature={onRemoveFeature}
-        onUpdateFeature={onUpdateFeature}
-        onAddArea={onAddArea}
-        onRemoveArea={onRemoveArea}
-        onUpdateArea={onUpdateArea}
-        onAreaImageUpload={onAreaImageUpload}
-        onAreaImageRemove={onAreaImageRemove}
-        onAreaImagesSelect={onAreaImagesSelect}
-        handleImageUpload={handleImageUpload}
-        handleAreaPhotosUpload={handleAreaPhotosUpload}
-        handleRemoveImage={handleRemoveImage}
-        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-        handleFloorplanUpload={handleFloorplanUpload}
-        handleRemoveFloorplan={handleRemoveFloorplan}
-        handleMapImageDelete={handleMapImageDelete}
-        onFetchLocationData={onFetchLocationData}
-        onRemoveNearbyPlace={onRemoveNearbyPlace}
-        handleSetFeaturedImage={handleSetFeaturedImage}
-        handleToggleFeaturedImage={handleToggleFeaturedImage}
-        isUploading={isUploading}
-        isUploadingFloorplan={isUploadingFloorplan}
-        setPendingChanges={setPendingChanges}
-        isLoadingLocationData={isLoadingLocationData}
-      />
+      <h2 className="text-2xl font-bold">Content</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Property Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PropertyContentForm
+            step={currentStep}
+            formData={property}
+            onFieldChange={onFieldChange}
+            onAddFeature={onAddFeature}
+            onRemoveFeature={onRemoveFeature}
+            onUpdateFeature={onUpdateFeature}
+            onAddArea={onAddArea}
+            onRemoveArea={onRemoveArea}
+            onUpdateArea={onUpdateArea}
+            onAreaImageUpload={onAreaImageUpload}
+            onAreaImageRemove={onAreaImageRemove}
+            onAreaImagesSelect={onAreaImagesSelect}
+            handleAreaPhotosUpload={handleAreaImageInputChange}
+            handleImageUpload={handleImageInputChange}
+            handleRemoveImage={handleRemoveImageByIndex}
+            handleFloorplanUpload={handleFloorplanInputChange}
+            handleRemoveFloorplan={handleRemoveFloorplanByIndex}
+            onFetchLocationData={onFetchLocationData}
+            onRemoveNearbyPlace={onRemoveNearbyPlace}
+            isLoadingLocationData={isLoadingLocationData}
+            setPendingChanges={setPendingChanges}
+            // Pass the required navigation props
+            currentStep={currentStep}
+            handleStepClick={handleStepClick}
+            handleNext={handleNext}
+            handlePrevious={handlePrevious}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
