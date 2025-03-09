@@ -1,89 +1,77 @@
 
-import { PropertyImage } from "@/types/property";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2 } from "lucide-react";
-import { SortableFloorplanGrid } from "./floorplans/SortableFloorplanGrid";
-import { FloorplanUploader } from "./floorplans/FloorplanUploader";
 import { Button } from "@/components/ui/button";
-import { useSortableFloorplans } from "@/hooks/images/useSortableFloorplans";
-import { DragEndEvent } from "@dnd-kit/core";
-import { Dispatch, SetStateAction } from "react";
+import { PlusIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import { PropertyImage } from "@/types/property";
+import { SortableFloorplanGrid } from "./floorplans/SortableFloorplanGrid";
 
 interface FloorplansCardProps {
   floorplans: PropertyImage[];
-  setFloorplans: Dispatch<SetStateAction<PropertyImage[]>>;
-  propertyId: string;
-  onDelete: (id: string) => void;
-  onUpload: (files: FileList) => Promise<void>;
+  onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan: (index: number) => void;
   isUploading: boolean;
+  propertyId?: string;
 }
 
-export function FloorplansCard({
-  floorplans,
-  setFloorplans,
-  propertyId,
-  onDelete,
-  onUpload,
+export function FloorplansCard({ 
+  floorplans, 
+  onFloorplanUpload, 
+  onRemoveFloorplan, 
   isUploading,
+  propertyId = "" 
 }: FloorplansCardProps) {
-  const { handleDragEnd, isSavingOrder } = useSortableFloorplans(propertyId);
-
-  const handleDragEndWrapper = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (active.id !== over?.id) {
-      const oldIndex = floorplans.findIndex(item => item.id === active.id);
-      const newIndex = floorplans.findIndex(item => item.id === over?.id);
-      
-      const newFloorplans = [...floorplans];
-      const [movedItem] = newFloorplans.splice(oldIndex, 1);
-      newFloorplans.splice(newIndex, 0, movedItem);
-      
-      setFloorplans(newFloorplans);
-      await handleDragEnd(event);
-    }
+  // Convert event handler to match expected type
+  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFloorplanUpload(e);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Floorplans</CardTitle>
+        <CardTitle className="flex justify-between items-center">
+          <span>Floorplans</span>
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              className="hidden"
+              multiple
+              accept="image/*"
+              onChange={handleFloorplanUpload}
+              disabled={isUploading}
+            />
+            <Button variant="outline" size="sm" disabled={isUploading}>
+              <UploadIcon className="mr-2 h-4 w-4" />
+              Upload Floorplans
+            </Button>
+          </label>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <FloorplanUploader onUpload={onUpload} isUploading={isUploading} />
-        
-        {floorplans.length > 0 ? (
-          <SortableFloorplanGrid
-            items={floorplans}
-            onDragEnd={handleDragEndWrapper}
-            isSaving={isSavingOrder}
-            renderItem={(item) => (
-              <div className="relative group">
-                <img 
-                  src={item.url} 
-                  alt="Floorplan" 
-                  className="w-full h-40 object-contain border rounded-md"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => onDelete(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            )}
-          />
-        ) : (
-          <div className="text-center py-8 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground mb-2">No floorplans yet</p>
-            <p className="text-sm text-muted-foreground">
-              Upload floorplans to showcase the property layout
-            </p>
+        {(!floorplans || floorplans.length === 0) ? (
+          <div className="text-center py-12 border-2 border-dashed rounded-md">
+            <p className="text-muted-foreground mb-4">No floorplans uploaded yet</p>
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                className="hidden"
+                multiple
+                accept="image/*"
+                onChange={handleFloorplanUpload}
+                disabled={isUploading}
+              />
+              <Button variant="secondary" disabled={isUploading}>
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Upload Floorplans
+              </Button>
+            </label>
           </div>
+        ) : (
+          <SortableFloorplanGrid 
+            floorplans={floorplans} 
+            onRemoveFloorplan={onRemoveFloorplan}
+            propertyId={propertyId}
+          />
         )}
       </CardContent>
     </Card>

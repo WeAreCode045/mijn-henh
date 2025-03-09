@@ -1,54 +1,54 @@
 
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
-import { SortableFloorplanItem } from './SortableFloorplanItem';
-import { PropertyImage } from '@/types/property';
-import { Loader2 } from 'lucide-react';
+import React from "react";
+import { PropertyImage } from "@/types/property";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { SortableFloorplanItem } from "./SortableFloorplanItem";
+import { useSortableFloorplans } from "@/hooks/images/useSortableFloorplans";
 
 interface SortableFloorplanGridProps {
-  items: PropertyImage[];
-  onDragEnd: (event: DragEndEvent) => void;
-  renderItem: (item: PropertyImage) => React.ReactNode;
-  isSaving?: boolean;
+  floorplans: PropertyImage[];
+  onRemoveFloorplan: (index: number) => void;
+  propertyId: string;
 }
 
 export function SortableFloorplanGrid({ 
-  items, 
-  onDragEnd, 
-  renderItem,
-  isSaving = false
+  floorplans, 
+  onRemoveFloorplan,
+  propertyId 
 }: SortableFloorplanGridProps) {
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
-
+  const { 
+    activeId,
+    sortedFloorplans,
+    isSaving,
+    handleDragStart,
+    handleDragEnd
+  } = useSortableFloorplans(floorplans, propertyId);
+  
   return (
-    <div className="relative mt-4">
-      {isSaving && (
-        <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="ml-2">Saving order...</span>
-        </div>
-      )}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={onDragEnd}
+    <DndContext 
+      id="floorplan-grid-dnd-context"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext 
+        items={sortedFloorplans.map(floorplan => floorplan.id)} 
+        strategy={rectSortingStrategy}
       >
-        <SortableContext items={items.map(item => item.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {items.map((item) => (
-              <SortableFloorplanItem key={item.id} id={item.id}>
-                {renderItem(item)}
-              </SortableFloorplanItem>
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-    </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {sortedFloorplans.map((floorplan, index) => (
+            <SortableFloorplanItem
+              key={floorplan.id}
+              id={floorplan.id}
+              isActive={activeId === floorplan.id}
+              floorplan={floorplan}
+              index={index}
+              onRemove={() => onRemoveFloorplan(index)}
+              isUpdating={isSaving}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
   );
 }

@@ -1,69 +1,89 @@
 
-import { PropertyImage } from "@/types/property";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImageUploader } from "./images/ImageUploader";
+import { Button } from "@/components/ui/button";
+import { PlusIcon, UploadIcon } from "lucide-react";
+import { PropertyImage } from "@/types/property";
 import { SortableImageGrid } from "./images/SortableImageGrid";
-import { useSortableImages } from "@/hooks/images/useSortableImages";
-import { DragEndEvent } from "@dnd-kit/core";
-import { Dispatch, SetStateAction } from "react";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
-  setImages: Dispatch<SetStateAction<PropertyImage[]>>;
-  propertyId: string;
-  onUpload: (files: FileList) => Promise<void>;
-  onDelete: (id: string) => void;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveImage: (index: number) => void;
   isUploading: boolean;
+  onSetFeaturedImage?: (url: string | null) => void;
+  onToggleFeaturedImage?: (url: string) => void;
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  propertyId?: string;
 }
 
-export function PropertyImagesCard({
-  images,
-  setImages,
-  propertyId,
-  onUpload,
-  onDelete,
+export function PropertyImagesCard({ 
+  images, 
+  onImageUpload, 
+  onRemoveImage, 
   isUploading,
+  onSetFeaturedImage,
+  onToggleFeaturedImage,
+  featuredImage,
+  featuredImages = [],
+  propertyId = ""
 }: PropertyImagesCardProps) {
-  const { handleDragEnd, isSavingOrder } = useSortableImages(propertyId);
-
-  const handleDragEndWrapper = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (active.id !== over?.id) {
-      const oldIndex = images.findIndex(item => item.id === active.id);
-      const newIndex = images.findIndex(item => item.id === over?.id);
-      
-      const newImages = [...images];
-      const [movedItem] = newImages.splice(oldIndex, 1);
-      newImages.splice(newIndex, 0, movedItem);
-      
-      setImages(newImages);
-      await handleDragEnd(event);
-    }
+  // Handler to properly match the expected type
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onImageUpload(e);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Property Images</CardTitle>
+        <CardTitle className="flex justify-between items-center">
+          <span>Property Images</span>
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              className="hidden"
+              multiple
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={isUploading}
+            />
+            <Button variant="outline" size="sm" disabled={isUploading}>
+              <UploadIcon className="mr-2 h-4 w-4" />
+              Upload Images
+            </Button>
+          </label>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <ImageUploader onUpload={onUpload} isUploading={isUploading} />
-        
-        {images.length > 0 ? (
-          <SortableImageGrid
-            items={images}
-            onDragEnd={handleDragEndWrapper}
-            onDelete={onDelete}
-            isSaving={isSavingOrder}
-          />
-        ) : (
-          <div className="text-center py-8 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground mb-2">No images yet</p>
-            <p className="text-sm text-muted-foreground">
-              Upload images to showcase the property
-            </p>
+        {(!images || images.length === 0) ? (
+          <div className="text-center py-12 border-2 border-dashed rounded-md">
+            <p className="text-muted-foreground mb-4">No images uploaded yet</p>
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                className="hidden"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={isUploading}
+              />
+              <Button variant="secondary" disabled={isUploading}>
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Upload Images
+              </Button>
+            </label>
           </div>
+        ) : (
+          <SortableImageGrid 
+            images={images} 
+            onRemoveImage={onRemoveImage}
+            onSetFeaturedImage={onSetFeaturedImage}
+            onToggleFeaturedImage={onToggleFeaturedImage}
+            featuredImage={featuredImage}
+            featuredImages={featuredImages}
+            propertyId={propertyId}
+          />
         )}
       </CardContent>
     </Card>

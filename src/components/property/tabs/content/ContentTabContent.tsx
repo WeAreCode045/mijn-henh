@@ -1,10 +1,8 @@
 
-import React from "react";
+import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormData } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyContentForm } from "./PropertyContentForm";
-import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
-import { steps } from "@/components/property/form/formSteps";
+import { PropertyStepContent } from "@/components/property/form/PropertyStepContent";
+import { useLocationDataFetch } from "@/hooks/useLocationDataFetch";
 
 interface ContentTabContentProps {
   formData: PropertyFormData;
@@ -54,10 +52,7 @@ export function ContentTabContent({
   handleStepClick,
   handleNext,
   handlePrevious,
-  onFetchLocationData,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  setPendingChanges = () => {},
+  setPendingChanges,
   handleImageUpload,
   handleRemoveImage,
   handleFloorplanUpload,
@@ -67,95 +62,50 @@ export function ContentTabContent({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
-  isUploadingFloorplan,
+  isUploadingFloorplan
 }: ContentTabContentProps) {
-  
-  // Create wrapper functions to handle type mismatches
-  const handleAreaImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      // We need to extract the area ID from a data attribute or similar
-      const areaId = e.target.getAttribute('data-area-id');
-      if (areaId) {
-        onAreaImageUpload(areaId, e.target.files);
-      }
-    }
-  };
-
-  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && handleImageUpload) {
-      handleImageUpload(e);
-    }
-  };
-
-  const handleRemoveImageByIndex = (index: number) => {
-    if (handleRemoveImage) {
-      handleRemoveImage(index);
-    }
-  };
-
-  const handleFloorplanInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && handleFloorplanUpload) {
-      handleFloorplanUpload(e);
-    }
-  };
-
-  const handleRemoveFloorplanByIndex = (index: number) => {
-    if (handleRemoveFloorplan) {
-      handleRemoveFloorplan(index);
-    }
-  };
+  // Use the location data fetch hook
+  const { 
+    fetchLocationData,
+    generateLocationDescription,
+    removeNearbyPlace,
+    isLoading: isLoadingLocation
+  } = useLocationDataFetch(formData, onFieldChange);
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Content</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Pass all required navigation props to FormStepNavigation */}
-          <FormStepNavigation 
-            steps={steps}
-            currentStep={currentStep}
-            onStepClick={handleStepClick}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-          />
-          
-          <PropertyContentForm
-            step={currentStep}
-            formData={formData}
-            onFieldChange={onFieldChange}
-            onAddFeature={onAddFeature}
-            onRemoveFeature={onRemoveFeature}
-            onUpdateFeature={onUpdateFeature}
-            onAddArea={onAddArea}
-            onRemoveArea={onRemoveArea}
-            onUpdateArea={onUpdateArea}
-            onAreaImageUpload={onAreaImageUpload}
-            onAreaImageRemove={onAreaImageRemove}
-            onAreaImagesSelect={onAreaImagesSelect}
-            currentStep={currentStep}
-            handleStepClick={handleStepClick}
-            handleNext={handleNext}
-            handlePrevious={handlePrevious}
-            onFetchLocationData={onFetchLocationData}
-            onRemoveNearbyPlace={onRemoveNearbyPlace}
-            isLoadingLocationData={isLoadingLocationData}
-            setPendingChanges={setPendingChanges}
-            // Pass adapter functions for type compatibility
-            handleAreaPhotosUpload={handleAreaImageInputChange}
-            handleImageUpload={handleImageInputChange}
-            handleRemoveImage={handleRemoveImageByIndex}
-            handleFloorplanUpload={handleFloorplanInputChange}
-            handleRemoveFloorplan={handleRemoveFloorplanByIndex}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleFeaturedImage={handleToggleFeaturedImage}
-            isUploading={isUploading}
-            isUploadingFloorplan={isUploadingFloorplan}
-          />
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <PropertyStepContent
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onAddFeature={onAddFeature}
+        onRemoveFeature={onRemoveFeature}
+        onUpdateFeature={onUpdateFeature}
+        onAddArea={onAddArea}
+        onRemoveArea={onRemoveArea}
+        onUpdateArea={onUpdateArea}
+        onAreaImageUpload={onAreaImageUpload}
+        onAreaImageRemove={onAreaImageRemove}
+        onAreaImagesSelect={onAreaImagesSelect}
+        currentStep={currentStep}
+        handleStepClick={handleStepClick}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+        onFetchLocationData={fetchLocationData}
+        onGenerateLocationDescription={generateLocationDescription}
+        onRemoveNearbyPlace={removeNearbyPlace}
+        isLoadingLocationData={isLoadingLocation}
+        setPendingChanges={setPendingChanges}
+        handleImageUpload={handleImageUpload}
+        handleRemoveImage={handleRemoveImage}
+        handleFloorplanUpload={handleFloorplanUpload}
+        handleRemoveFloorplan={handleRemoveFloorplan}
+        handleAreaPhotosUpload={handleAreaPhotosUpload}
+        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+        handleSetFeaturedImage={handleSetFeaturedImage}
+        handleToggleFeaturedImage={handleToggleFeaturedImage}
+        isUploading={isUploading}
+        isUploadingFloorplan={isUploadingFloorplan}
+      />
     </div>
   );
 }

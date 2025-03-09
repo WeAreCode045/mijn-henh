@@ -1,36 +1,160 @@
 
-import { PropertyArea, PropertyFeature, PropertyFloorplan, PropertyFormData } from "@/types/property";
-import { ReactNode } from "react";
+import React from "react";
+import { PropertyFormData } from "@/types/property";
+import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
+import { GeneralInfoStep } from "@/components/property/form/steps/general-info/GeneralInfoStep";
+import { FeaturesStep } from "@/components/property/form/steps/FeaturesStep";
+import { AreasStep } from "@/components/property/form/steps/AreasStep";
+import { LocationStep } from "@/components/property/form/steps/LocationStep";
+import { ImagesStep } from "@/components/property/form/steps/ImagesStep";
 
 interface PropertyStepContentProps {
-  step: number;
-  children: ReactNode;
-  formData?: PropertyFormData;
+  formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature?: () => void;
   onRemoveFeature?: (id: string) => void;
   onUpdateFeature?: (id: string, description: string) => void;
   onAddArea?: () => void;
   onRemoveArea?: (id: string) => void;
-  onUpdateArea?: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
-  onAreaImageUpload?: (id: string, files: FileList) => void;
-  onAreaImageRemove?: (id: string, imageId: string) => void;
-  onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
+  onUpdateArea?: (id: string, field: any, value: any) => void;
+  onAreaImageUpload?: (areaId: string, files: FileList) => void;
+  onAreaImageRemove?: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
+  onFetchLocationData?: () => Promise<void>;
+  onGenerateLocationDescription?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
   handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage?: (index: number) => void;
-  handleRemoveAreaPhoto?: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan?: (index: number) => void;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleGridImage?: (url: string) => void;
-  handleMapImageDelete?: () => Promise<void>;
+  handleToggleFeaturedImage?: (url: string) => void;
+  isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
 }
 
-export function PropertyStepContent({ children, step }: PropertyStepContentProps) {
+export function PropertyStepContent({
+  formData,
+  onFieldChange,
+  onAddFeature,
+  onRemoveFeature,
+  onUpdateFeature,
+  onAddArea,
+  onRemoveArea,
+  onUpdateArea,
+  onAreaImageUpload,
+  onAreaImageRemove,
+  onAreaImagesSelect,
+  currentStep,
+  handleStepClick,
+  handleNext,
+  handlePrevious,
+  onFetchLocationData,
+  onGenerateLocationDescription,
+  onRemoveNearbyPlace,
+  isLoadingLocationData,
+  setPendingChanges,
+  handleImageUpload,
+  handleRemoveImage,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  handleAreaPhotosUpload,
+  handleRemoveAreaPhoto,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage,
+  isUploading,
+  isUploadingFloorplan
+}: PropertyStepContentProps) {
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <GeneralInfoStep
+            formData={formData}
+            onFieldChange={onFieldChange}
+            setPendingChanges={setPendingChanges}
+            handleImageUpload={handleImageUpload}
+            handleRemoveImage={handleRemoveImage}
+            handleSetFeaturedImage={handleSetFeaturedImage}
+            handleToggleFeaturedImage={handleToggleFeaturedImage}
+          />
+        );
+      case 1:
+        return (
+          <LocationStep
+            formData={formData}
+            onFieldChange={onFieldChange}
+            onFetchLocationData={onFetchLocationData}
+            onGenerateLocationDescription={onGenerateLocationDescription}
+            onRemoveNearbyPlace={onRemoveNearbyPlace}
+            isLoadingLocationData={isLoadingLocationData}
+            setPendingChanges={setPendingChanges}
+          />
+        );
+      case 2:
+        return (
+          <FeaturesStep
+            formData={formData}
+            onFieldChange={onFieldChange}
+            onAddFeature={onAddFeature}
+            onRemoveFeature={onRemoveFeature}
+            onUpdateFeature={onUpdateFeature}
+            setPendingChanges={setPendingChanges}
+          />
+        );
+      case 3:
+        return (
+          <AreasStep
+            formData={formData}
+            onAddArea={onAddArea}
+            onRemoveArea={onRemoveArea}
+            onUpdateArea={onUpdateArea}
+            onAreaImageUpload={onAreaImageUpload}
+            onAreaImageRemove={onAreaImageRemove}
+            onAreaImagesSelect={onAreaImagesSelect}
+            setPendingChanges={setPendingChanges}
+            handleAreaPhotosUpload={handleAreaPhotosUpload}
+            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+          />
+        );
+      case 4:
+        return (
+          <ImagesStep
+            formData={formData}
+            onFieldChange={onFieldChange}
+            handleImageUpload={handleImageUpload}
+            handleRemoveImage={handleRemoveImage}
+            handleFloorplanUpload={handleFloorplanUpload}
+            handleRemoveFloorplan={handleRemoveFloorplan}
+            isUploading={isUploading}
+            isUploadingFloorplan={isUploadingFloorplan}
+            setPendingChanges={setPendingChanges}
+          />
+        );
+      default:
+        return <div>Unknown step</div>;
+    }
+  };
+
   return (
-    <div className="py-4 animate-fadeIn">
-      {children}
+    <div className="space-y-6">
+      <FormStepNavigation
+        currentStep={currentStep}
+        handleStepClick={handleStepClick}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+      />
+      <div className="mt-6">
+        {renderStep()}
+      </div>
     </div>
   );
 }

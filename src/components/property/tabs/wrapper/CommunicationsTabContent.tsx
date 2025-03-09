@@ -1,126 +1,107 @@
 
-import { useState, useEffect } from "react";
-import { useSubmissions } from "@/components/property/tabs/communications/useSubmissions";
-import { useSendResponse } from "@/components/property/tabs/communications/hooks/useSendResponse";
-import { useMarkAsRead } from "@/components/property/tabs/communications/hooks/useMarkAsRead";
-import { SubmissionsList } from "@/components/property/tabs/communications/SubmissionsList";
-import { SubmissionDetail } from "@/components/property/tabs/communications/SubmissionDetail";
+import { useState } from "react";
+import { PropertyData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { Submission } from "@/components/property/tabs/communications/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { SubmissionsList } from "../communications/SubmissionsList";
+import { SubmissionDetail } from "../communications/SubmissionDetail";
+import { useSubmissions } from "../communications/useSubmissions";
+import { useSendResponse } from "../communications/hooks/useSendResponse";
+import { useMarkAsRead } from "../communications/hooks/useMarkAsRead";
 
 interface CommunicationsTabContentProps {
-  propertyId: string;
-  agentId?: string;
+  property: PropertyData;
 }
 
-export function CommunicationsTabContent({
-  propertyId,
-  agentId,
-}: CommunicationsTabContentProps) {
-  const { toast } = useToast();
-  const {
-    submissions,
-    isLoading,
-    totalSubmissions,
-    setSubmissions,
-    fetchSubmissions,
-  } = useSubmissions(propertyId);
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(
-    null
-  );
+export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
+  // Use the submissions hook
+  const { 
+    submissions, 
+    isLoading, 
+    selectedSubmission, 
+    setSelectedSubmission,
+    isSending,
+    handleMarkAsRead,
+    handleSendResponse,
+    refreshSubmissions
+  } = useSubmissions(property.id);
 
-  useEffect(() => {
-    if (submissions && submissions.length > 0 && !selectedSubmission) {
-      setSelectedSubmission(submissions[0]);
-    }
-  }, [submissions, selectedSubmission]);
+  // Get the selected submission ID
+  const selectedSubmissionId = selectedSubmission?.id || "";
 
-  const { sendResponse, isLoading: isSending } = useSendResponse({
-    onSuccess: () => {
-      toast({
-        title: "Response sent",
-        description: "Your response has been sent successfully",
-      });
-      fetchSubmissions();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send response",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const { markAsRead } = useMarkAsRead({
-    onSuccess: (updatedSubmission) => {
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub.id === updatedSubmission.id ? updatedSubmission : sub
-        )
-      );
-      setSelectedSubmission((prev) =>
-        prev?.id === updatedSubmission.id ? updatedSubmission : prev
-      );
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to mark as read",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSubmissionClick = (submission: Submission) => {
+  // Handle submission selection
+  const handleSubmissionClick = (submission: any) => {
     setSelectedSubmission(submission);
-  };
-
-  const handleSendResponse = async (responseText: string) => {
-    if (!selectedSubmission || !agentId) return;
     
-    await sendResponse({
-      submissionId: selectedSubmission.id,
-      replyText: responseText,
-      agentId: agentId
-    });
+    // Mark as read if not already read
+    if (!submission.is_read) {
+      handleMarkAsRead(submission.id);
+    }
   };
 
-  const handleMarkAsRead = async (submissionId: string) => {
-    await markAsRead(submissionId);
+  // Handle sending a response
+  const handleSendReply = async (responseText: string) => {
+    if (!selectedSubmission) return;
+    
+    await handleSendResponse(responseText);
+    await refreshSubmissions();
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="md:col-span-1">
-        <SubmissionsList
-          submissions={submissions}
-          isLoading={isLoading}
-          totalSubmissions={totalSubmissions}
-          selectedSubmissionId={selectedSubmission?.id}
-          onSubmissionClick={handleSubmissionClick}
-        />
-      </div>
-      <div className="md:col-span-2">
-        {selectedSubmission ? (
-          <SubmissionDetail 
-            submission={selectedSubmission} 
-            onMarkAsRead={handleMarkAsRead}
-            onSendResponse={handleSendResponse}
-          />
-        ) : (
-          <Card>
-            <CardContent className="pt-6 text-center text-muted-foreground">
-              {isLoading 
-                ? "Loading submissions..." 
-                : submissions.length === 0 
-                  ? "No submissions found" 
-                  : "Select a submission to view details"}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Communications</h2>
+
+      {property.id ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Left panel: Submissions list */}
+          <div className="md:col-span-1">
+            <SubmissionsList 
+              submissions={submissions}
+              isLoading={isLoading}
+              selectedSubmissionId={selectedSubmissionId}
+              onSubmissionClick={handleSubmissionClick}
+            />
+          </div>
+
+          {/* Right panel: Submission details */}
+          <div className="md:col-span-2">
+            {selectedSubmission ? (
+              <SubmissionDetail 
+                submission={selectedSubmission}
+                onSendReply={handleSendReply}
+                isSending={isSending}
+                propertyData={property}
+                onMarkAsRead={handleMarkAsRead}
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>No submission selected</AlertTitle>
+                    <AlertDescription>
+                      Select a submission from the list to view details.
+                    </AlertDescription>
+                  </Alert>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>No property ID</AlertTitle>
+              <AlertDescription>
+                This property must be saved before you can manage communications.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
