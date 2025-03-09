@@ -1,106 +1,115 @@
 
 import { useState, useEffect } from "react";
 import { PropertyImage } from "@/types/property";
-import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { DragEndEvent } from "@dnd-kit/core";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export function useSortableImages(
-  images: PropertyImage[] = [],
-  propertyId?: string
+  propertyId: string | undefined,
+  initialImages: PropertyImage[] = []
 ) {
-  const [sortableImages, setSortableImages] = useState<PropertyImage[]>([]);
-  const { toast } = useToast();
+  const [images, setImages] = useState<PropertyImage[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
-  // Initialize and update sortable images when input images change
   useEffect(() => {
-    if (images && images.length > 0) {
-      const sortedImages = [...images].sort((a, b) => {
-        if (a.sort_order !== undefined && b.sort_order !== undefined) {
-          return a.sort_order - b.sort_order;
-        }
-        return 0;
+    // Initialize images from props
+    if (initialImages && initialImages.length > 0) {
+      // Sort images by sort_order if available
+      const sortedImages = [...initialImages].sort((a, b) => {
+        const aOrder = typeof a === 'object' && a.sort_order ? a.sort_order : 0;
+        const bOrder = typeof b === 'object' && b.sort_order ? b.sort_order : 0;
+        return aOrder - bOrder;
       });
       
-      setSortableImages(sortedImages);
-      console.log("useSortableImages - Updated with sorted images:", sortedImages);
+      setImages(sortedImages);
     } else {
-      setSortableImages([]);
+      setImages([]);
     }
-  }, [images]);
+  }, [initialImages]);
 
-  // Handle drag end event
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
-    if (over && active.id !== over.id) {
-      setSortableImages((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        
-        const newItems = arrayMove(items, oldIndex, newIndex);
-        
-        // Update each item with a new sort_order based on its position
-        const updatedItems = newItems.map((item, index) => ({
-          ...item,
-          sort_order: index + 1 // 1-based indexing for sort_order
-        }));
-        
-        // Update sort_order in the database
-        if (propertyId) {
-          updateImageSortOrderInDatabase(updatedItems);
-        }
-        
-        return updatedItems;
-      });
+    if (!over || active.id === over.id) {
+      return;
+    }
+    
+    // Find the indices of the items
+    const oldIndex = images.findIndex(item => 
+      typeof item === 'object' && item.id === active.id
+    );
+    
+    const newIndex = images.findIndex(item => 
+      typeof item === 'object' && item.id === over.id
+    );
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+    
+    // Update the local state immediately for a responsive UI
+    const newImages = arrayMove(images, oldIndex, newIndex);
+    setImages(newImages);
+    
+    // Update the sort_order in the database
+    if (propertyId) {
+      saveImageOrder(newImages);
     }
   };
 
-  // Update image sort order in the database
-  const updateImageSortOrderInDatabase = async (images: PropertyImage[]) => {
+  const saveImageOrder = async (sortedImages: PropertyImage[]) => {
     if (!propertyId) return;
     
+    setIsSavingOrder(true);
+    
     try {
-      console.log('Updating image sort order in database...');
-      
-      // Create an array of promises for each update operation
-      const updatePromises = images.map((image, index) => {
-        // Skip images without a valid database ID
-        if (!image.id || typeof image.id !== 'string' || image.id.startsWith('temp-')) {
-          console.log('Skipping image without valid ID:', image);
-          return Promise.resolve();
+      // Assign new sort_order values
+      const updatedImages = sortedImages.map((image, index) => {
+        if (typeof image === 'object') {
+          return {
+            ...image,
+            sort_order: index + 1
+          };
         }
-        
-        console.log(`Setting image ${image.id} to sort_order ${index + 1}`);
-        
-        return supabase
-          .from('property_images')
-          .update({ sort_order: index + 1 }) // 1-based index for sort_order
-          .eq('id', image.id);
+        return image;
       });
       
-      // Execute all update operations in parallel
-      await Promise.all(updatePromises);
-      console.log('Image sort order updated successfully');
+      // Update each image in the database
+      for (const [index, image] of updatedImages.entries()) {
+        if (typeof image === 'object' && image.id) {
+          const { error } = await supabase
+            .from('property_images')
+            .update({ sort_order: index + 1 })
+            .eq('id', image.id)
+            .eq('property_id', propertyId);
+            
+          if (error) {
+            console.error("Error updating image order:", error);
+            throw error;
+          }
+        }
+      }
       
-      toast({
-        title: "Order updated",
-        description: "Image order has been saved",
-      });
+      toast.success("Image order updated successfully");
     } catch (error) {
-      console.error('Error updating image sort order:', error);
+      console.error("Error saving image order:", error);
+      toast.error("Failed to update image order");
       
-      toast({
-        title: "Error",
-        description: "Failed to save image order",
-        variant: "destructive",
-      });
+      // Revert to initial images if there's an error
+      if (initialImages && initialImages.length > 0) {
+        setImages([...initialImages]);
+      }
+    } finally {
+      setIsSavingOrder(false);
     }
   };
 
   return {
-    sortableImages,
-    handleDragEnd
+    images,
+    setImages,
+    handleDragEnd,
+    isSavingOrder
   };
 }

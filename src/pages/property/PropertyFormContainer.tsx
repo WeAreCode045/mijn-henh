@@ -13,6 +13,8 @@ import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Save, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export function PropertyFormContainer() {
   const { id } = useParams();
@@ -126,6 +128,56 @@ export function PropertyFormContainer() {
     }
   };
 
+  const handleAgentChange = async (agentId: string) => {
+    if (!formData) return;
+    
+    setSelectedAgent(agentId);
+    
+    // Update the form data with the selected agent
+    setFormData({
+      ...formData,
+      agent_id: agentId
+    });
+    
+    // If we have a property ID, update it in the database
+    if (formData.id) {
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ agent_id: agentId })
+          .eq('id', formData.id);
+        
+        if (error) throw error;
+        
+        // Find the agent info to display
+        const agent = agents.find(a => a.id === agentId);
+        if (agent) {
+          setAgentInfo({ id: agent.id, name: agent.full_name });
+        }
+        
+        toast({
+          title: "Success",
+          description: "Agent updated successfully",
+        });
+      } catch (error) {
+        console.error("Error updating agent:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update agent",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  if (isLoading || !formData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <PropertyFormLayout
       title={id ? "Edit Property" : "Add New Property"}
@@ -134,7 +186,7 @@ export function PropertyFormContainer() {
       isAdmin={isAdmin}
       agents={agents}
       selectedAgent={selectedAgent}
-      onAgentSelect={setSelectedAgent}
+      onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
       onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}

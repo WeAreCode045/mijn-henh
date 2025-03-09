@@ -6,6 +6,7 @@ import { steps } from '@/components/property/form/formSteps';
 import { useToast } from '@/components/ui/use-toast';
 import { useLocationDataFetch } from './useLocationDataFetch';
 import { usePropertyFormSubmit } from './usePropertyFormSubmit';
+import { usePropertyAutoSave } from './usePropertyAutoSave';
 
 export function usePropertyContent(
   formData: PropertyFormData,
@@ -15,6 +16,7 @@ export function usePropertyContent(
   const [pendingChanges, setPendingChanges] = useState(false);
   const { toast } = useToast();
   const { handleSubmit } = usePropertyFormSubmit();
+  const { autosaveData, isSaving, lastSaved } = usePropertyAutoSave();
   
   const { 
     fetchLocationData, 
@@ -28,6 +30,7 @@ export function usePropertyContent(
     if (!formData || !pendingChanges) return;
     
     try {
+      console.log("Saving changes to property");
       const event = {} as React.FormEvent;
       const result = await handleSubmit(event, formData, false);
       
@@ -38,6 +41,7 @@ export function usePropertyContent(
           description: "Changes saved successfully",
         });
       }
+      return result;
     } catch (error) {
       console.error("Error saving changes:", error);
       toast({
@@ -45,33 +49,34 @@ export function usePropertyContent(
         description: "Failed to save changes",
         variant: "destructive",
       });
+      return false;
     }
   };
 
-  const handleStepClick = (stepId: number) => {
+  const handleStepClick = async (stepId: number) => {
     console.log(`usePropertyContent - Setting current step to ${stepId}`);
     
     // First save any pending changes
     if (pendingChanges) {
-      handleSave().then(() => {
+      const saveResult = await handleSave();
+      if (saveResult) {
         setCurrentStep(stepId);
-      });
+      }
     } else {
       setCurrentStep(stepId);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     console.log(`usePropertyContent - Current step: ${currentStep}, max steps: ${steps.length}`);
     
     // Save changes before moving to next step
     if (pendingChanges) {
-      handleSave().then(() => {
-        if (currentStep < steps.length) {
-          console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-          setCurrentStep(prevStep => prevStep + 1);
-        }
-      });
+      const saveResult = await handleSave();
+      if (saveResult && currentStep < steps.length) {
+        console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
+        setCurrentStep(prevStep => prevStep + 1);
+      }
     } else if (currentStep < steps.length) {
       console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
       setCurrentStep(prevStep => prevStep + 1);
@@ -80,15 +85,14 @@ export function usePropertyContent(
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
     // Save changes before moving to previous step
     if (pendingChanges) {
-      handleSave().then(() => {
-        if (currentStep > 1) {
-          console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-          setCurrentStep(prevStep => prevStep - 1);
-        }
-      });
+      const saveResult = await handleSave();
+      if (saveResult && currentStep > 1) {
+        console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
+        setCurrentStep(prevStep => prevStep - 1);
+      }
     } else if (currentStep > 1) {
       console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
       setCurrentStep(prevStep => prevStep - 1);
@@ -97,13 +101,12 @@ export function usePropertyContent(
     }
   };
 
-  const onSubmit = () => {
-    handleSave().then(() => {
-      console.log('usePropertyContent - Form submitted and saved');
-      toast({
-        title: "Form submitted",
-        description: "Your changes have been saved."
-      });
+  const onSubmit = async () => {
+    await handleSave();
+    console.log('usePropertyContent - Form submitted and saved');
+    toast({
+      title: "Form submitted",
+      description: "Your changes have been saved."
     });
   };
 
@@ -181,6 +184,8 @@ export function usePropertyContent(
     // Change tracking
     pendingChanges,
     setPendingChanges,
-    handleSave
+    handleSave,
+    isSaving,
+    lastSaved
   };
 }

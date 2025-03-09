@@ -1,108 +1,116 @@
 
 import { useState, useEffect } from "react";
-import { PropertyFloorplan } from "@/types/property";
-import { DragEndEvent } from "@dnd-kit/core";
+import { PropertyImage } from "@/types/property";
 import { arrayMove } from "@dnd-kit/sortable";
+import { DragEndEvent } from "@dnd-kit/core";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 export function useSortableFloorplans(
-  floorplans: PropertyFloorplan[] = [],
-  propertyId?: string
+  propertyId: string | undefined,
+  initialFloorplans: PropertyImage[] = []
 ) {
-  const [sortableFloorplans, setSortableFloorplans] = useState<PropertyFloorplan[]>([]);
-  const { toast } = useToast();
+  const [floorplans, setFloorplans] = useState<PropertyImage[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
-  // Initialize and update sortable floorplans when input floorplans change
   useEffect(() => {
-    if (floorplans && floorplans.length > 0) {
-      const sortedFloorplans = [...floorplans].sort((a, b) => {
-        if (a.sort_order !== undefined && b.sort_order !== undefined) {
-          return a.sort_order - b.sort_order;
-        }
-        return 0;
+    // Initialize floorplans from props
+    if (initialFloorplans && initialFloorplans.length > 0) {
+      // Sort floorplans by sort_order if available
+      const sortedFloorplans = [...initialFloorplans].sort((a, b) => {
+        const aOrder = typeof a === 'object' && a.sort_order ? a.sort_order : 0;
+        const bOrder = typeof b === 'object' && b.sort_order ? b.sort_order : 0;
+        return aOrder - bOrder;
       });
       
-      setSortableFloorplans(sortedFloorplans);
-      console.log("useSortableFloorplans - Updated with sorted floorplans:", sortedFloorplans);
+      setFloorplans(sortedFloorplans);
     } else {
-      setSortableFloorplans([]);
+      setFloorplans([]);
     }
-  }, [floorplans]);
+  }, [initialFloorplans]);
 
-  // Handle drag end event
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
-    if (over && active.id !== over.id) {
-      setSortableFloorplans((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        
-        const newItems = arrayMove(items, oldIndex, newIndex);
-        
-        // Update each item with a new sort_order based on its position
-        const updatedItems = newItems.map((item, index) => ({
-          ...item,
-          sort_order: index + 1 // 1-based indexing for sort_order
-        }));
-        
-        // Update sort_order in the database
-        if (propertyId) {
-          updateFloorplanSortOrderInDatabase(updatedItems);
-        }
-        
-        return updatedItems;
-      });
+    if (!over || active.id === over.id) {
+      return;
+    }
+    
+    // Find the indices of the items
+    const oldIndex = floorplans.findIndex(item => 
+      typeof item === 'object' && item.id === active.id
+    );
+    
+    const newIndex = floorplans.findIndex(item => 
+      typeof item === 'object' && item.id === over.id
+    );
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+    
+    // Update the local state immediately for a responsive UI
+    const newFloorplans = arrayMove(floorplans, oldIndex, newIndex);
+    setFloorplans(newFloorplans);
+    
+    // Update the sort_order in the database
+    if (propertyId) {
+      saveFloorplanOrder(newFloorplans);
     }
   };
 
-  // Update floorplan sort order in the database
-  const updateFloorplanSortOrderInDatabase = async (floorplans: PropertyFloorplan[]) => {
+  const saveFloorplanOrder = async (sortedFloorplans: PropertyImage[]) => {
     if (!propertyId) return;
     
+    setIsSavingOrder(true);
+    
     try {
-      console.log('Updating floorplan sort order in database...');
-      
-      // Create an array of promises for each update operation
-      const updatePromises = floorplans.map((floorplan, index) => {
-        // Skip floorplans without a valid database ID
-        if (!floorplan.id || typeof floorplan.id !== 'string' || floorplan.id.startsWith('temp-')) {
-          console.log('Skipping floorplan without valid ID:', floorplan);
-          return Promise.resolve();
+      // Assign new sort_order values
+      const updatedFloorplans = sortedFloorplans.map((floorplan, index) => {
+        if (typeof floorplan === 'object') {
+          return {
+            ...floorplan,
+            sort_order: index + 1
+          };
         }
-        
-        console.log(`Setting floorplan ${floorplan.id} to sort_order ${index + 1}`);
-        
-        return supabase
-          .from('property_images')
-          .update({ sort_order: index + 1 }) // 1-based index for sort_order
-          .eq('id', floorplan.id)
-          .eq('property_id', propertyId)
-          .eq('type', 'floorplan');
+        return floorplan;
       });
       
-      // Execute all update operations in parallel
-      await Promise.all(updatePromises);
-      console.log('Floorplan sort order updated successfully');
+      // Update each floorplan in the database
+      for (const [index, floorplan] of updatedFloorplans.entries()) {
+        if (typeof floorplan === 'object' && floorplan.id) {
+          const { error } = await supabase
+            .from('property_images')
+            .update({ sort_order: index + 1 })
+            .eq('id', floorplan.id)
+            .eq('property_id', propertyId)
+            .eq('type', 'floorplan');
+            
+          if (error) {
+            console.error("Error updating floorplan order:", error);
+            throw error;
+          }
+        }
+      }
       
-      toast({
-        title: "Order updated",
-        description: "Floorplan order has been saved",
-      });
+      toast.success("Floorplan order updated successfully");
     } catch (error) {
-      console.error('Error updating floorplan sort order:', error);
+      console.error("Error saving floorplan order:", error);
+      toast.error("Failed to update floorplan order");
       
-      toast({
-        title: "Error",
-        description: "Failed to save floorplan order",
-        variant: "destructive",
-      });
+      // Revert to initial floorplans if there's an error
+      if (initialFloorplans && initialFloorplans.length > 0) {
+        setFloorplans([...initialFloorplans]);
+      }
+    } finally {
+      setIsSavingOrder(false);
     }
   };
 
   return {
-    sortableFloorplans,
-    handleDragEnd
+    floorplans,
+    setFloorplans,
+    handleDragEnd,
+    isSavingOrder
   };
 }

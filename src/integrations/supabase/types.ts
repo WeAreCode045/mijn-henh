@@ -202,6 +202,7 @@ export type Database = {
           location_description: string | null
           longitude: number | null
           map_image: string | null
+          nearby_cities: Json | null
           nearby_places: Json | null
           notes: string | null
           object_id: string | null
@@ -234,6 +235,7 @@ export type Database = {
           location_description?: string | null
           longitude?: number | null
           map_image?: string | null
+          nearby_cities?: Json | null
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
@@ -266,6 +268,7 @@ export type Database = {
           location_description?: string | null
           longitude?: number | null
           map_image?: string | null
+          nearby_cities?: Json | null
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
@@ -384,6 +387,41 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_submission_replies: {
+        Row: {
+          agent_id: string | null
+          created_at: string
+          id: string
+          reply_text: string
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          reply_text: string
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string
+          id?: string
+          reply_text?: string
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_submission_replies_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "property_contact_submissions"
             referencedColumns: ["id"]
           },
         ]
