@@ -62,9 +62,9 @@ export function ContentTabContent({
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}
-            onAddArea={addArea}
-            onRemoveArea={removeArea}
-            onUpdateArea={updateArea}
+            onAddArea={onAddArea}
+            onRemoveArea={onRemoveArea}
+            onUpdateArea={onUpdateArea}
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}

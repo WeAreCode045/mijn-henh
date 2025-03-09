@@ -5,7 +5,7 @@ export interface PropertyFeature {
   description: string;
 }
 
-// Image type definition
+// Image type definition aligned with property_images table
 export interface PropertyImage {
   id: string;
   url: string;
@@ -53,28 +53,6 @@ export interface PropertyCity {
   visible_in_webview?: boolean;
 }
 
-// Floor plan type
-export interface PropertyFloorplan {
-  id: string;
-  url: string;
-  title?: string;
-  description?: string;
-  property_id?: string;
-  sort_order?: number;
-  filePath?: string;
-  columns?: number;
-}
-
-// Property agent
-export interface PropertyAgent {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  photoUrl?: string;
-  address?: string;
-}
-
 // Property data interface
 export interface PropertyData {
   id: string;
@@ -106,7 +84,7 @@ export interface PropertyData {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  floorplans?: PropertyFloorplan[];
+  floorplans?: PropertyImage[];
   floorplanEmbedScript?: string;
   featuredImage?: string | null;
   featuredImages?: string[];
@@ -115,6 +93,16 @@ export interface PropertyData {
   areaPhotos?: string[];
   created_at?: string;
   updated_at?: string;
+}
+
+// Property agent
+export interface PropertyAgent {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  address?: string;
 }
 
 // Property form data extends PropertyData
