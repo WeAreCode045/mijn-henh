@@ -56,7 +56,10 @@ export interface PropertyTabProps {
     handlePrevious: () => void;
     onSubmit: () => void;
     formState: PropertyFormData;
-    onAddTechnicalItem?: () => void;
+    // Optional handlers
+    onFetchLocationData?: () => Promise<void>;
+    onRemoveNearbyPlace?: (index: number) => void;
+    isLoadingLocationData?: boolean;
     // Use the standardized signature
     handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
   };

@@ -25,25 +25,25 @@ export interface PropertyArea {
   size: string;
   title: string;
   description: string;
-  images: string[] | { url: string }[];
+  images: PropertyImage[] | string[] | { url: string }[];
   imageIds: string[];
   columns: number;
 }
 
-// Place type enum
-export type PropertyPlaceType = 'restaurant' | 'cafe' | 'shopping' | 'school' | 'transport' | 'park' | 'health' | 'entertainment' | 'other';
-
-// Nearby place
+// PropertyPlaceType as interface instead of enum
 export interface PropertyNearbyPlace {
   id: string;
   name: string;
   distance: string | number;
-  type: PropertyPlaceType;
+  type: string;
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
   visible_in_webview?: boolean;
 }
+
+// Define the place type as string literal union for backwards compatibility
+export type PropertyPlaceType = 'restaurant' | 'cafe' | 'shopping' | 'school' | 'transport' | 'park' | 'health' | 'entertainment' | 'other' | PropertyNearbyPlace;
 
 // City type
 export interface PropertyCity {
@@ -61,6 +61,8 @@ export interface PropertyFloorplan {
   description?: string;
   property_id?: string;
   sort_order?: number;
+  filePath?: string;
+  columns?: number;
 }
 
 // Property agent

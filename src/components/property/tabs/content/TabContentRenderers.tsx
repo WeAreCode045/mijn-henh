@@ -1,8 +1,10 @@
+
 import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 import { DashboardTabContent } from "./DashboardTabContent";
 import { PropertyContentTab } from "../PropertyContentTab";
 import { MediaTabContent } from "../wrapper/MediaTabContent";
 import { CommunicationsTabContent } from "./CommunicationsTabContent";
+import { normalizeImages } from "@/utils/imageHelpers";
 
 export function renderDashboardTab({ activeTab, property }: PropertyTabProps) {
   if (activeTab !== 'dashboard') return null;
@@ -16,6 +18,11 @@ export function renderDashboardTab({ activeTab, property }: PropertyTabProps) {
 
 export function renderContentTab({ activeTab, formState, handlers }: PropertyTabProps) {
   if (activeTab !== 'content') return null;
+  
+  // Create fallback handlers for optional properties
+  const onFetchLocationData = handlers.onFetchLocationData || (() => Promise.resolve());
+  const onRemoveNearbyPlace = handlers.onRemoveNearbyPlace || (() => {});
+  const isLoadingLocationData = handlers.isLoadingLocationData || false;
   
   return (
     <PropertyContentTab
@@ -46,9 +53,9 @@ export function renderContentTab({ activeTab, formState, handlers }: PropertyTab
       handleNext={handlers.handleNext}
       handlePrevious={handlers.handlePrevious}
       onSubmit={handlers.onSubmit}
-      onFetchLocationData={handlers.onFetchLocationData}
-      onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-      isLoadingLocationData={handlers.isLoadingLocationData}
+      onFetchLocationData={onFetchLocationData}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
     />
   );
 }
@@ -56,11 +63,14 @@ export function renderContentTab({ activeTab, formState, handlers }: PropertyTab
 export function renderMediaTab({ activeTab, property, formState, handlers }: PropertyTabProps) {
   if (activeTab !== 'media') return null;
 
+  // Normalize images to PropertyImage format
+  const normalizedImages = normalizeImages(formState.images || []);
+
   return (
     <MediaTabContent
       id={property.id}
       title={property.title}
-      images={formState.images || []}
+      images={normalizedImages}
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
       floorplanEmbedScript={property.floorplanEmbedScript}

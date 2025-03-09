@@ -69,3 +69,22 @@ export function getImageId(image: string | PropertyImage | { url: string }): str
   
   return `img-${Date.now()}`;
 }
+
+/**
+ * Converts any image format to PropertyImage[] format
+ */
+export function normalizeImages(images: PropertyImage[] | string[] | { url: string }[]): PropertyImage[] {
+  if (!images || !Array.isArray(images)) return [];
+  
+  return images.map(img => normalizeImage(img));
+}
+
+/**
+ * Check if an image is of a specific format
+ */
+export function isImageOfType(image: any, type: 'string' | 'object' | 'property-image'): boolean {
+  if (type === 'string') return typeof image === 'string';
+  if (type === 'object') return typeof image === 'object' && image !== null;
+  if (type === 'property-image') return typeof image === 'object' && image !== null && 'id' in image && 'url' in image;
+  return false;
+}
