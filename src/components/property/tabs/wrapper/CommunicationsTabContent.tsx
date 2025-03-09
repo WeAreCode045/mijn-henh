@@ -1,59 +1,77 @@
 
-import React from "react";
-import { useSubmissions } from "../communications/useSubmissions";
-import { useSendResponse } from "../communications/hooks/useSendResponse";
-import { useMarkAsRead } from "../communications/hooks/useMarkAsRead";
+import { useState, useEffect } from "react";
+import { PropertyData } from "@/types/property";
+import { useSubmissions, Submission } from "../communications/useSubmissions";
 import { SubmissionsList } from "../communications/SubmissionsList";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
-import { PropertyData } from "@/types/property";
+import { useSubmissionActions } from "../communications/hooks/useSubmissionActions";
+import { Card } from "@/components/ui/card";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
 }
 
 export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const { 
-    submissions, 
-    selectedSubmission, 
-    isLoading, 
-    handleSubmissionClick,
-    refreshSubmissions
-  } = useSubmissions(property.id);
+  const { submissions, isLoading, fetchSubmissions } = useSubmissions(property.id);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   
   const { 
-    handleSendResponse, 
-    isSending 
-  } = useSendResponse(selectedSubmission?.id, refreshSubmissions);
-  
-  const { 
-    handleMarkAsRead 
-  } = useMarkAsRead(refreshSubmissions);
+    handleSendResponse,
+    markAsRead,
+    isSending
+  } = useSubmissionActions(fetchSubmissions);
+
+  // When submissions change, update the selected submission
+  useEffect(() => {
+    if (selectedSubmission && submissions.length > 0) {
+      const updated = submissions.find(s => s.id === selectedSubmission.id);
+      if (updated) {
+        setSelectedSubmission(updated);
+      }
+    } else if (!selectedSubmission && submissions.length > 0) {
+      setSelectedSubmission(submissions[0]);
+    }
+  }, [submissions, selectedSubmission]);
+
+  const handleSubmissionClick = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    if (!submission.is_read) {
+      markAsRead(submission.id);
+    }
+  };
+
+  const handleMarkAsRead = (id: string) => {
+    markAsRead(id);
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="md:col-span-1">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="md:col-span-4">
         <SubmissionsList 
           submissions={submissions} 
-          isLoading={isLoading}
-          selectedSubmission={selectedSubmission}
-          onSubmissionClick={handleSubmissionClick}
+          isLoading={isLoading} 
+          selectedSubmission={selectedSubmission} 
+          onSubmissionSelect={handleSubmissionClick}
+          onMarkAsRead={handleMarkAsRead}
         />
       </div>
-      
-      <div className="md:col-span-2">
+      <div className="md:col-span-8">
         {selectedSubmission ? (
           <SubmissionDetail 
-            submission={selectedSubmission}
-            onMarkAsRead={handleMarkAsRead}
+            submission={selectedSubmission} 
             onSendResponse={handleSendResponse}
             isSending={isSending}
           />
         ) : (
-          <div className="h-64 flex items-center justify-center border rounded-md">
-            <p className="text-muted-foreground">
-              {isLoading ? 'Loading...' : 'Select an inquiry to view details'}
+          <Card className="p-6">
+            <p className="text-center text-gray-500">
+              {isLoading ? "Loading..." : (
+                submissions.length === 0 
+                  ? "No messages for this property yet." 
+                  : "Select a message to view details."
+              )}
             </p>
-          </div>
+          </Card>
         )}
       </div>
     </div>

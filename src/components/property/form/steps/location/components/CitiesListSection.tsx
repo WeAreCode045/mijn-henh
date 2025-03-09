@@ -27,6 +27,7 @@ export function CitiesListSection({
           city={city}
           index={index}
           onVisibilityChange={toggleVisibility}
+          isVisible={isVisible(city)}
         />
       ))}
     </div>
