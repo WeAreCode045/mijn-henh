@@ -1,5 +1,5 @@
 
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyCity } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { CitiesListSection } from "./components/CitiesListSection";

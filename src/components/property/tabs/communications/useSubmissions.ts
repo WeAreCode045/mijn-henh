@@ -1,38 +1,8 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/providers/AuthProvider";
-
-// Define the Submission type for better type safety
-export interface Submission {
-  id: string;
-  property_id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  created_at: string;
-  is_read: boolean;
-  agent_id?: string;
-  inquiry_type?: string;
-  replies?: Array<{
-    id: string;
-    submission_id: string;
-    reply_text: string;
-    created_at: string;
-    agent?: {
-      id: string;
-      full_name?: string;
-      email?: string;
-      agent_photo?: string;
-    } | null;
-  }>;
-  property?: {
-    title: string;
-    address: string;
-  } | null;
-}
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
+import { Submission, SubmissionReply } from './types';
 
 export function useSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -40,55 +10,74 @@ export function useSubmissions(propertyId: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
 
-  // Fetch submissions for the property
   const fetchSubmissions = useCallback(async () => {
-    if (!propertyId) {
-      setIsLoading(false);
-      return;
-    }
-
+    if (!propertyId) return;
+    
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select(`
           *,
-          property:properties(title, address),
-          replies:property_submission_replies(
-            id,
-            reply_text,
+          property:property_id (id, title),
+          replies:property_submission_replies (
+            id, 
+            reply_text, 
             created_at,
-            agent:profiles(id, full_name, email, agent_photo)
+            agent:agent_id (
+              id, 
+              full_name, 
+              email, 
+              agent_photo
+            )
           )
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
-
+        
       if (error) throw error;
-
-      setSubmissions(data || []);
-
-      // If we had a selected submission, refresh it
+      
+      // Transform the data to match our expected shape
+      const transformedData = data.map(item => {
+        const transformedReplies = item.replies?.map(reply => ({
+          ...reply,
+          submission_id: item.id, // Add the submission_id field
+          agent: reply.agent || undefined,
+        })) || [];
+        
+        return {
+          ...item,
+          replies: transformedReplies,
+        };
+      });
+      
+      setSubmissions(transformedData as Submission[]);
+      
+      // If we have a selected submission, update it with the fresh data
       if (selectedSubmission) {
-        const updated = data?.find(sub => sub.id === selectedSubmission.id);
-        if (updated) {
-          setSelectedSubmission(updated);
+        const updatedSubmission = transformedData.find(s => s.id === selectedSubmission.id);
+        if (updatedSubmission) {
+          setSelectedSubmission(updatedSubmission as Submission);
         }
       }
-
+      
     } catch (error) {
       console.error('Error fetching submissions:', error);
       toast({
-        title: "Error",
-        description: "Failed to load submissions",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load contact submissions',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   }, [propertyId, selectedSubmission, toast]);
+
+  // Fetch submissions on component mount and when propertyId changes
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   // Mark a submission as read
   const handleMarkAsRead = async (submissionId: string) => {
@@ -97,88 +86,72 @@ export function useSubmissions(propertyId: string) {
         .from('property_contact_submissions')
         .update({ is_read: true })
         .eq('id', submissionId);
-
+        
       if (error) throw error;
-
-      // Update local state to reflect the change
-      setSubmissions(prev => 
-        prev.map(sub => 
+      
+      // Update local state
+      setSubmissions(prevSubmissions => 
+        prevSubmissions.map(sub => 
           sub.id === submissionId ? { ...sub, is_read: true } : sub
         )
       );
-
-      // Update selected submission if needed
-      if (selectedSubmission?.id === submissionId) {
-        setSelectedSubmission(prev => prev ? { ...prev, is_read: true } : null);
+      
+      if (selectedSubmission && selectedSubmission.id === submissionId) {
+        setSelectedSubmission({ ...selectedSubmission, is_read: true });
       }
-
+      
+      toast({
+        title: 'Success',
+        description: 'Submission marked as read',
+      });
+      
     } catch (error) {
       console.error('Error marking submission as read:', error);
       toast({
-        title: "Error",
-        description: "Failed to mark as read",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to mark submission as read',
+        variant: 'destructive',
       });
     }
   };
 
   // Send a response to a submission
   const handleSendResponse = async (responseText: string) => {
-    if (!selectedSubmission || !user?.id) return;
-
+    if (!selectedSubmission || !responseText.trim()) return;
+    
     setIsSending(true);
     try {
-      // First save the reply to the database
-      const { error } = await supabase
-        .from('property_submission_replies')
-        .insert({
-          submission_id: selectedSubmission.id,
-          reply_text: responseText,
-          agent_id: user.id
-        });
-
-      if (error) throw error;
-
-      // Then call the Edge Function to process the email sending
-      const { error: functionError } = await supabase.functions.invoke('send-submission-reply', {
+      // Call Supabase Edge Function to send the email
+      const { error } = await supabase.functions.invoke('send-submission-reply', {
         body: {
           submissionId: selectedSubmission.id,
-          replyText: responseText,
-          agentId: user.id
-        }
+          responseText,
+          recipientEmail: selectedSubmission.email,
+          recipientName: selectedSubmission.name,
+          propertyTitle: selectedSubmission.property?.title || 'Property',
+        },
       });
-
-      if (functionError) throw functionError;
-
+      
+      if (error) throw error;
+      
+      await fetchSubmissions(); // Refresh the submissions
+      
       toast({
-        title: "Success",
-        description: "Response sent successfully",
+        title: 'Response Sent',
+        description: 'Your response has been sent successfully',
       });
-
-      // Refresh the submissions to see the new reply
-      await fetchSubmissions();
-
+      
     } catch (error) {
       console.error('Error sending response:', error);
       toast({
-        title: "Error",
-        description: "Failed to send response",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to send response',
+        variant: 'destructive',
       });
     } finally {
       setIsSending(false);
     }
   };
-
-  // Initial fetch
-  useEffect(() => {
-    fetchSubmissions();
-  }, [fetchSubmissions]);
-
-  // Refresh function for external use
-  const refreshSubmissions = useCallback(() => {
-    return fetchSubmissions();
-  }, [fetchSubmissions]);
 
   return {
     submissions,
@@ -188,6 +161,6 @@ export function useSubmissions(propertyId: string) {
     isSending,
     handleMarkAsRead,
     handleSendResponse,
-    refreshSubmissions
+    refreshSubmissions: fetchSubmissions,
   };
 }

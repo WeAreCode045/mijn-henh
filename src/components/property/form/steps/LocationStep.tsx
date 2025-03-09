@@ -53,18 +53,20 @@ export function LocationStep({
             />
             
             <MapPreviewSection 
-              latitude={formData.latitude}
-              longitude={formData.longitude}
-              mapImage={formData.map_image}
+              formData={formData}
             />
             
             <NearbyPlacesSection 
-              nearbyPlaces={formData.nearby_places || []}
+              formData={formData}
               onRemovePlace={onRemoveNearbyPlace}
+              onFieldChange={onFieldChange}
             />
             
             <NearbyCitiesSection 
-              nearbyCities={formData.nearby_cities || []}
+              formData={formData}
+              onFetchLocationData={onFetchLocationData}
+              isLoadingLocationData={isLoadingLocationData}
+              onFieldChange={onFieldChange}
             />
           </div>
         </CardContent>

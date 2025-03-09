@@ -80,9 +80,6 @@ export function PropertyStepContent({
           <GeneralInfoStep
             formData={formData}
             onFieldChange={onFieldChange}
-            setPendingChanges={setPendingChanges}
-            handleImageUpload={handleImageUpload}
-            handleRemoveImage={handleRemoveImage}
             handleSetFeaturedImage={handleSetFeaturedImage}
             handleToggleFeaturedImage={handleToggleFeaturedImage}
           />
@@ -103,10 +100,10 @@ export function PropertyStepContent({
         return (
           <FeaturesStep
             formData={formData}
-            onFieldChange={onFieldChange}
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}
+            onFieldChange={onFieldChange}
             setPendingChanges={setPendingChanges}
           />
         );
@@ -134,6 +131,10 @@ export function PropertyStepContent({
             handleRemoveImage={handleRemoveImage}
             handleFloorplanUpload={handleFloorplanUpload}
             handleRemoveFloorplan={handleRemoveFloorplan}
+            handleAreaPhotosUpload={handleAreaPhotosUpload}
+            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+            handleSetFeaturedImage={handleSetFeaturedImage}
+            handleToggleFeaturedImage={handleToggleFeaturedImage}
             isUploading={isUploading}
             isUploadingFloorplan={isUploadingFloorplan}
             setPendingChanges={setPendingChanges}
@@ -148,7 +149,7 @@ export function PropertyStepContent({
     <div className="space-y-6">
       <FormStepNavigation
         currentStep={currentStep}
-        handleStepClick={handleStepClick}
+        onStepClick={handleStepClick}
         handleNext={handleNext}
         handlePrevious={handlePrevious}
       />

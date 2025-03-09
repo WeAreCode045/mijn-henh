@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,6 +17,7 @@ interface ImagesStepProps {
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
   isUploadingFloorplan?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function ImagesStep({
@@ -31,13 +31,20 @@ export function ImagesStep({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
-  isUploadingFloorplan
+  isUploadingFloorplan,
+  setPendingChanges
 }: ImagesStepProps) {
   // Helper function to safely get the URL from an image
   const getImageUrl = (image: any): string => {
     if (typeof image === 'string') return image;
     if (image && typeof image === 'object' && 'url' in image) return image.url;
     return '';
+  };
+
+  const handleImageChange = () => {
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
   return (
@@ -48,7 +55,10 @@ export function ImagesStep({
             <Label>Main Property Images</Label>
             {handleImageUpload && (
               <ImageUploader 
-                onUpload={handleImageUpload} 
+                onUpload={(e) => {
+                  handleImageUpload(e);
+                  handleImageChange();
+                }} 
                 isUploading={isUploading}
                 label="Upload Main Images"
               />
@@ -62,11 +72,22 @@ export function ImagesStep({
                     <ImagePreview
                       key={index}
                       url={imageUrl}
-                      onRemove={() => handleRemoveImage && handleRemoveImage(index)}
+                      onRemove={() => {
+                        if (handleRemoveImage) {
+                          handleRemoveImage(index);
+                          handleImageChange();
+                        }
+                      }}
                       isFeatured={formData.featuredImage === imageUrl}
-                      onSetFeatured={handleSetFeaturedImage ? () => handleSetFeaturedImage(imageUrl) : undefined}
+                      onSetFeatured={handleSetFeaturedImage ? () => {
+                        handleSetFeaturedImage(imageUrl);
+                        handleImageChange();
+                      } : undefined}
                       isInFeatured={formData.featuredImages?.includes(imageUrl)}
-                      onToggleFeatured={handleToggleFeaturedImage ? () => handleToggleFeaturedImage(imageUrl) : undefined}
+                      onToggleFeatured={handleToggleFeaturedImage ? () => {
+                        handleToggleFeaturedImage(imageUrl);
+                        handleImageChange();
+                      } : undefined}
                     />
                   );
                 })}

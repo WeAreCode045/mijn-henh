@@ -1,31 +1,26 @@
 
-import { PropertyFormData, PropertyPlaceType } from "@/types/property";
+import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin } from "lucide-react";
-import { useLocationCategories } from "./useLocationCategories";
-import { getCategory } from "./utils/categoryUtils";
 import { CategoryFilters } from "./components/CategoryFilters";
 import { CategorySection } from "./components/CategorySection";
+import { useLocationCategories } from "./useLocationCategories";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
-  onRemoveNearbyPlace?: (index: number) => void;
-  onFetchLocationData?: () => Promise<void>;
-  isLoadingLocationData?: boolean;
+  onRemovePlace?: (index: number) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
 }
 
 export function NearbyPlacesSection({
   formData,
-  onRemoveNearbyPlace,
-  onFetchLocationData,
-  isLoadingLocationData = false,
+  onRemovePlace,
   onFieldChange
 }: NearbyPlacesSectionProps) {
-  const nearbyPlaces = formData.nearby_places || [];
-  const { showCategories, toggleCategory } = useLocationCategories();
+  const { categories, handleFilterChange, activeFilters } = useLocationCategories(
+    formData.nearby_places || []
+  );
   
   // Toggle place visibility in webview
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
@@ -39,66 +34,39 @@ export function NearbyPlacesSection({
     
     onFieldChange('nearby_places', updatedPlaces);
   };
-
-  // Group places by category
-  const groupedPlaces: Record<string, PropertyPlaceType[]> = {};
-  nearbyPlaces.forEach((place) => {
-    const category = getCategory(place);
-    if (!groupedPlaces[category]) {
-      groupedPlaces[category] = [];
-    }
-    groupedPlaces[category].push(place);
-  });
   
   return (
-    <Card className="mt-6">
+    <Card>
       <CardContent className="pt-6">
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <Label>Nearby Places</Label>
-            
-            {onFetchLocationData && (
-              <Button 
-                type="button" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  onFetchLocationData();
-                }}
-                className="flex items-center gap-2"
-                disabled={isLoadingLocationData}
-              >
-                {isLoadingLocationData ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <MapPin className="h-4 w-4" />
-                )}
-                {isLoadingLocationData ? "Fetching Places..." : "Get Nearby Places"}
-              </Button>
-            )}
-          </div>
+          <Label>Nearby Places</Label>
           
-          {nearbyPlaces.length > 0 ? (
-            <div className="space-y-6">
-              <CategoryFilters
-                showCategories={showCategories}
-                toggleCategory={toggleCategory}
+          {(formData.nearby_places && formData.nearby_places.length > 0) ? (
+            <>
+              <CategoryFilters 
+                categories={categories}
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
               />
               
-              {Object.keys(groupedPlaces).map((category) => (
-                showCategories[category] && (
-                  <CategorySection
-                    key={category}
-                    category={category}
-                    places={groupedPlaces[category]}
-                    allPlaces={nearbyPlaces}
-                    onRemoveNearbyPlace={onRemoveNearbyPlace}
-                    togglePlaceVisibility={togglePlaceVisibility}
-                  />
-                )
+              {categories.map(category => (
+                <CategorySection 
+                  key={category.name}
+                  category={category}
+                  places={formData.nearby_places?.filter(place => place.type === category.name) || []}
+                  onRemovePlace={onRemovePlace}
+                  toggleVisibility={togglePlaceVisibility}
+                  isVisible={activeFilters.includes(category.name)}
+                />
               ))}
-            </div>
+            </>
           ) : (
-            <p className="text-sm text-gray-500">No nearby places found. Use the button above to fetch places data.</p>
+            <div className="text-center py-6">
+              <p className="text-muted-foreground">No nearby places found.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Use the "Fetch Location Data" button in the Address section to get nearby places.
+              </p>
+            </div>
           )}
         </div>
       </CardContent>
