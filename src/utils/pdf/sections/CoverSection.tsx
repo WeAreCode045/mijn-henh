@@ -1,4 +1,3 @@
-
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
