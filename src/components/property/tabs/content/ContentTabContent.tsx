@@ -113,11 +113,13 @@ export function ContentTabContent({
           <CardTitle>Property Details</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Add the step navigation component here */}
+          {/* Pass all required navigation props to FormStepNavigation */}
           <FormStepNavigation 
             steps={steps}
             currentStep={currentStep}
             onStepClick={handleStepClick}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
           />
           
           <PropertyContentForm
@@ -152,25 +154,6 @@ export function ContentTabContent({
             isUploading={isUploading}
             isUploadingFloorplan={isUploadingFloorplan}
           />
-          
-          <div className="flex justify-between mt-6">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              className="px-4 py-2 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-50"
-              disabled={currentStep === 1}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
-              disabled={currentStep === steps.length}
-            >
-              {currentStep === steps.length ? "Finish" : "Next"}
-            </button>
-          </div>
         </CardContent>
       </Card>
     </div>

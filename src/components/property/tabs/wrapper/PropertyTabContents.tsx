@@ -56,6 +56,7 @@ interface PropertyTabContentsProps {
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function PropertyTabContents({
@@ -99,7 +100,8 @@ export function PropertyTabContents({
   handleRemoveAreaPhoto,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  isLoadingLocationData
+  isLoadingLocationData,
+  setPendingChanges = () => {}
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -139,7 +141,8 @@ export function PropertyTabContents({
     }),
     onFetchLocationData,
     onRemoveNearbyPlace,
-    isLoadingLocationData
+    isLoadingLocationData,
+    setPendingChanges // Add the missing setPendingChanges to the handlers object
   };
 
   const tabProps = {

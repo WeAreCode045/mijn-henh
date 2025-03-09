@@ -68,5 +68,7 @@ export interface PropertyTabProps {
     isLoadingLocationData?: boolean;
     // Use the standardized signature
     handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
+    // Add the missing setPendingChanges property
+    setPendingChanges?: (pending: boolean) => void;
   };
 }

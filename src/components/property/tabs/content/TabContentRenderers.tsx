@@ -36,7 +36,7 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           onFetchLocationData={handlers.onFetchLocationData}
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
-          setPendingChanges={handlers.setPendingChanges}
+          setPendingChanges={handlers.setPendingChanges || (() => {})}
           handleImageUpload={handlers.handleImageUpload}
           handleRemoveImage={handlers.handleRemoveImage}
           handleFloorplanUpload={handlers.handleFloorplanUpload}
