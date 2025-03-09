@@ -97,6 +97,7 @@ export function ContentTabContent({
       onFetchLocationData={onFetchLocationData}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
       isLoadingLocationData={isLoadingLocationData}
+      setPendingChanges={() => {}} // Adding missing prop
     />
   );
 }
