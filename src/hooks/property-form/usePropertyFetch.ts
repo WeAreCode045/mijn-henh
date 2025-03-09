@@ -1,108 +1,83 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyFormData } from "@/types/property";
 import { initialFormData } from "./initialFormData";
-import type { PropertyFormData, PropertyAgent, PropertyImage } from "@/types/property";
-import { transformFeatures, transformAreas, transformNearbyPlaces } from "./propertyDataTransformer";
 
 export function usePropertyFetch(id: string | undefined) {
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
   useEffect(() => {
-    if (id) {
-      fetchPropertyData(id);
-    }
-  }, [id]);
-
-  const fetchPropertyData = async (propertyId: string) => {
-    setIsLoading(true);
-    
-    try {
-      // Fetch base property data
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single();
-        
-      if (error) {
-        throw error;
-      }
+    async function fetchProperty() {
+      if (!id) return;
       
-      if (data) {
-        // Fetch all images
-        const { data: allImages, error: imagesError } = await supabase
-          .from('property_images')
+      setIsLoading(true);
+      
+      try {
+        // Fetch the property from the database
+        const { data: propertyData, error } = await supabase
+          .from('properties')
           .select('*')
-          .eq('property_id', propertyId);
-          
-        if (imagesError) {
-          console.error("Error fetching property images:", imagesError);
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          throw error;
         }
         
-        // Transform data for the form
-        const transformedFeatures = transformFeatures(Array.isArray(data.features) ? data.features : []);
-        const transformedAreas = transformAreas(Array.isArray(data.areas) ? data.areas : []);
-        const transformedNearbyPlaces = transformNearbyPlaces(Array.isArray(data.nearby_places) ? data.nearby_places : []);
-        
-        const featuredImages = allImages
-          ? allImages.filter(img => img.is_featured_image).map(img => img.url)
-          : [];
+        if (propertyData) {
+          // Parse JSON strings from the database to objects
+          const features = propertyData.features ? 
+            (typeof propertyData.features === 'string' ? 
+              JSON.parse(propertyData.features) : propertyData.features) : [];
           
-        const featuredImage = allImages
-          ? allImages.find(img => img.is_main)?.url || null
-          : null;
-        
-        // Create a proper agent object if agent_id exists
-        let agentData: PropertyAgent | undefined;
-        if (data.agent_id) {
-          const { data: agentProfile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.agent_id)
-            .single();
-            
-          if (agentProfile) {
-            agentData = {
-              id: agentProfile.id,
-              name: agentProfile.full_name || '',
-              email: agentProfile.email || '',
-              phone: agentProfile.phone || '',
-              photoUrl: agentProfile.agent_photo || '',
-              address: ''
-            };
-          }
-        }
-        
-        setFormData({
-          ...initialFormData,
-          ...data,
-          id: propertyId,
-          features: transformedFeatures,
-          areas: transformedAreas,
-          nearby_places: transformedNearbyPlaces,
-          featuredImages: featuredImages,
-          coverImages: featuredImages, // Keep for backward compatibility
-          featuredImage: featuredImage,
-          agent: agentData,
-          images: allImages
-            ? allImages.filter(img => img.type !== 'floorplan').map(img => ({ 
-                id: img.id, 
-                url: img.url,
-                area: img.area,
-                is_main: img.is_main,
-                is_featured_image: img.is_featured_image
-              })) 
-            : []
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching property data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+          const areas = propertyData.areas ? 
+            (typeof propertyData.areas === 'string' ? 
+              JSON.parse(propertyData.areas) : propertyData.areas) : [];
+          
+          const nearby_places = propertyData.nearby_places ? 
+            (typeof propertyData.nearby_places === 'string' ? 
+              JSON.parse(propertyData.nearby_places) : propertyData.nearby_places) : [];
 
+          const nearby_cities = propertyData.nearby_cities ? 
+            (typeof propertyData.nearby_cities === 'string' ? 
+              JSON.parse(propertyData.nearby_cities) : propertyData.nearby_cities) : [];
+
+          // Get images and floorplans as arrays
+          const images = Array.isArray(propertyData.images) ? 
+            propertyData.images : 
+            (propertyData.images ? [propertyData.images] : []);
+          
+          const floorplans = Array.isArray(propertyData.floorplans) ? 
+            propertyData.floorplans : 
+            (propertyData.floorplans ? [propertyData.floorplans] : []);
+          
+          // Set the form data
+          setFormData({
+            ...initialFormData,
+            ...propertyData,
+            features,
+            areas,
+            nearby_places,
+            nearby_cities,
+            featuredImages: propertyData.featuredImages || [],
+            coverImages: propertyData.coverImages || [],
+            gridImages: propertyData.gridImages || [],
+            areaPhotos: propertyData.areaPhotos || [],
+            hasGarden: propertyData.hasGarden || false,
+            images,
+            floorplans,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching property:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchProperty();
+  }, [id]);
+  
   return { formData, setFormData, isLoading };
 }

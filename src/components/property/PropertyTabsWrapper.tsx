@@ -1,3 +1,4 @@
+
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -62,9 +63,7 @@ export function PropertyTabsWrapper({
               handleStepClick,
               handleNext,
               handlePrevious,
-              propertyWithRequiredProps,
-              onAddTechnicalItem,
-              onRemoveTechnicalItem
+              propertyWithRequiredProps
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
