@@ -1,13 +1,34 @@
 
-export type Submission = {
+export interface Submission {
   id: string;
+  property_id: string;
   name: string;
   email: string;
   phone: string;
-  inquiry_type: string;
   message: string;
   created_at: string;
   is_read: boolean;
-  response?: string;
-  response_date?: string;
-};
+  inquiry_type: string;
+  property?: {
+    title: string;
+    address: string;
+  };
+}
+
+export interface SubmissionReply {
+  id: string;
+  reply_text: string;
+  created_at: string;
+  agent_id: string;
+  agent: {
+    full_name: string;
+    email: string;
+    agent_photo: string;
+  };
+}
+
+export interface SubmissionResponse {
+  submissionId: string;
+  replyText: string;
+  agentId: string;
+}

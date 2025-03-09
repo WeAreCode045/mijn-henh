@@ -1,70 +1,54 @@
 
-import { PropertyFloorplan } from "@/types/property";
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
-import { SortableFloorplanItem } from "./SortableFloorplanItem";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
+import { SortableFloorplanItem } from './SortableFloorplanItem';
+import { PropertyImage } from '@/types/property';
+import { Loader2 } from 'lucide-react';
 
 interface SortableFloorplanGridProps {
-  floorplans: PropertyFloorplan[];
-  onRemoveFloorplan: (index: number) => void;
-  onDragEnd: any; // Use the DragEndEvent type here
+  items: PropertyImage[];
+  onDragEnd: (event: DragEndEvent) => void;
+  renderItem: (item: PropertyImage) => React.ReactNode;
+  isSaving?: boolean;
 }
 
-export function SortableFloorplanGrid({
-  floorplans,
-  onRemoveFloorplan,
-  onDragEnd
+export function SortableFloorplanGrid({ 
+  items, 
+  onDragEnd, 
+  renderItem,
+  isSaving = false
 }: SortableFloorplanGridProps) {
   const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
     })
   );
 
-  if (!floorplans || floorplans.length === 0) {
-    return (
-      <div className="col-span-full py-8 text-center text-gray-500">
-        No floorplans uploaded yet. Click "Upload Floorplans" to add floorplans.
-      </div>
-    );
-  }
-  
-  // Helper function to get the URL from a floorplan object
-  const getFloorplanUrl = (floorplan: any): string => {
-    if (typeof floorplan === 'string') return floorplan;
-    if (floorplan && typeof floorplan === 'object' && 'url' in floorplan) return floorplan.url;
-    return '';
-  };
-  
   return (
-    <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={onDragEnd}
-    >
-      <SortableContext 
-        items={floorplans.map(floorplan => floorplan.id)}
-        strategy={rectSortingStrategy}
-      >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {floorplans.map((floorplan, index) => {
-            const url = getFloorplanUrl(floorplan);
-            const label = floorplan.title || `Floorplan ${index + 1}`;
-            
-            return (
-              <SortableFloorplanItem
-                key={floorplan.id}
-                id={floorplan.id}
-                url={url}
-                label={label}
-                onRemove={() => onRemoveFloorplan(index)}
-                sort_order={floorplan.sort_order}
-              />
-            );
-          })}
+    <div className="relative mt-4">
+      {isSaving && (
+        <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2">Saving order...</span>
         </div>
-      </SortableContext>
-    </DndContext>
+      )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
+        <SortableContext items={items.map(item => item.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {items.map((item) => (
+              <SortableFloorplanItem key={item.id} id={item.id}>
+                {renderItem(item)}
+              </SortableFloorplanItem>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
   );
 }

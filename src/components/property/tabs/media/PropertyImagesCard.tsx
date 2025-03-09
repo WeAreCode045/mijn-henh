@@ -1,86 +1,70 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyImage } from "@/types/property";
-import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUploader } from "./images/ImageUploader";
 import { SortableImageGrid } from "./images/SortableImageGrid";
 import { useSortableImages } from "@/hooks/images/useSortableImages";
+import { DragEndEvent } from "@dnd-kit/core";
+import { Dispatch, SetStateAction } from "react";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveImage: (index: number) => void;
-  onSetFeatured?: (url: string) => void; 
-  onToggleFeatured?: (url: string) => void;
-  featuredImageUrl?: string | null;
-  featuredImageUrls?: string[];
-  isUploading?: boolean;
-  propertyId?: string;
+  setImages: Dispatch<SetStateAction<PropertyImage[]>>;
+  propertyId: string;
+  onUpload: (files: FileList) => Promise<void>;
+  onDelete: (id: string) => void;
+  isUploading: boolean;
 }
 
 export function PropertyImagesCard({
-  images = [],
-  onImageUpload,
-  onRemoveImage,
-  onSetFeatured,
-  onToggleFeatured,
-  featuredImageUrl,
-  featuredImageUrls = [],
-  isUploading = false,
+  images,
+  setImages,
   propertyId,
+  onUpload,
+  onDelete,
+  isUploading,
 }: PropertyImagesCardProps) {
-  const [uploading, setUploading] = useState(isUploading);
-  
-  const { sortableImages, handleDragEnd } = useSortableImages(images, propertyId);
+  const { handleDragEnd, isSavingOrder } = useSortableImages(propertyId);
 
-  useEffect(() => {
-    setUploading(isUploading);
-  }, [isUploading]);
-
-  const handleSetFeatured = (e: React.MouseEvent, url: string) => {
-    e.preventDefault(); // Prevent form submission
-    if (onSetFeatured) {
-      onSetFeatured(url);
+  const handleDragEndWrapper = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      const oldIndex = images.findIndex(item => item.id === active.id);
+      const newIndex = images.findIndex(item => item.id === over?.id);
+      
+      const newImages = [...images];
+      const [movedItem] = newImages.splice(oldIndex, 1);
+      newImages.splice(newIndex, 0, movedItem);
+      
+      setImages(newImages);
+      await handleDragEnd(event);
     }
   };
-
-  const handleToggleFeatured = (e: React.MouseEvent, url: string) => {
-    e.preventDefault(); // Prevent form submission
-    if (onToggleFeatured) {
-      onToggleFeatured(url);
-    }
-  };
-
-  // Debug logging for rendering
-  console.log("Rendering PropertyImagesCard with:", {
-    imageCount: sortableImages.length,
-    sortOrders: sortableImages.map(i => i.sort_order || 'none'),
-    featuredImageUrl,
-    featuredImageUrls
-  });
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Property Images</CardTitle>
+      <CardHeader>
+        <CardTitle className="text-xl">Property Images</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col space-y-4">
-          <ImageUploader 
-            onImageUpload={onImageUpload}
-            isUploading={uploading}
+      <CardContent>
+        <ImageUploader onUpload={onUpload} isUploading={isUploading} />
+        
+        {images.length > 0 ? (
+          <SortableImageGrid
+            items={images}
+            onDragEnd={handleDragEndWrapper}
+            onDelete={onDelete}
+            isSaving={isSavingOrder}
           />
-          
-          <SortableImageGrid 
-            images={sortableImages}
-            onRemoveImage={onRemoveImage}
-            handleSetFeatured={handleSetFeatured}
-            handleToggleFeatured={handleToggleFeatured}
-            featuredImageUrl={featuredImageUrl}
-            featuredImageUrls={featuredImageUrls}
-            onDragEnd={handleDragEnd}
-          />
-        </div>
+        ) : (
+          <div className="text-center py-8 border-2 border-dashed rounded-md">
+            <p className="text-muted-foreground mb-2">No images yet</p>
+            <p className="text-sm text-muted-foreground">
+              Upload images to showcase the property
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

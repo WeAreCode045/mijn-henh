@@ -1,37 +1,27 @@
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { ImagePreview } from "@/components/ui/ImagePreview";
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface SortableFloorplanItemProps {
   id: string;
-  url: string;
-  label: string;
-  onRemove: () => void;
-  sort_order?: number; // Add sort_order prop to the interface
+  children: React.ReactNode;
 }
 
-export function SortableFloorplanItem({ 
-  id, 
-  url, 
-  label, 
-  onRemove,
-  sort_order // Add sort_order to the props destructuring
-}: SortableFloorplanItemProps) {
+export function SortableFloorplanItem({ id, children }: SortableFloorplanItemProps) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging
+    isDragging,
   } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 10 : 1,
-    opacity: isDragging ? 0.8 : 1,
+    zIndex: isDragging ? 1 : 0,
+    opacity: isDragging ? 0.5 : 1,
     cursor: 'grab',
   };
 
@@ -42,11 +32,7 @@ export function SortableFloorplanItem({
       {...attributes}
       {...listeners}
     >
-      <ImagePreview
-        url={url}
-        onRemove={onRemove}
-        label={label}
-      />
+      {children}
     </div>
   );
 }

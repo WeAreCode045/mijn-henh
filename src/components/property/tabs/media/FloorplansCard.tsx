@@ -1,103 +1,90 @@
 
+import { PropertyImage } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState, useEffect } from "react";
-import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
-import { PropertyFloorplan } from "@/types/property";
-import { FloorplanUploader } from "./floorplans/FloorplanUploader";
+import { Trash2 } from "lucide-react";
 import { SortableFloorplanGrid } from "./floorplans/SortableFloorplanGrid";
+import { FloorplanUploader } from "./floorplans/FloorplanUploader";
+import { Button } from "@/components/ui/button";
 import { useSortableFloorplans } from "@/hooks/images/useSortableFloorplans";
+import { DragEndEvent } from "@dnd-kit/core";
+import { Dispatch, SetStateAction } from "react";
 
-interface FloorplanCardProps {
-  id?: string;
-  floorplans?: any[];
-  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan?: (index: number) => void;
-  isUploading?: boolean;
+interface FloorplansCardProps {
+  floorplans: PropertyImage[];
+  setFloorplans: Dispatch<SetStateAction<PropertyImage[]>>;
+  propertyId: string;
+  onDelete: (id: string) => void;
+  onUpload: (files: FileList) => Promise<void>;
+  isUploading: boolean;
 }
 
 export function FloorplansCard({
-  id,
-  floorplans = [],
-  onFloorplanUpload,
-  onRemoveFloorplan,
-  isUploading = false,
-}: FloorplanCardProps) {
-  const [uploading, setUploading] = useState(isUploading);
-  const [displayFloorplans, setDisplayFloorplans] = useState<PropertyFloorplan[]>(
-    Array.isArray(floorplans) ? floorplans : []
-  );
+  floorplans,
+  setFloorplans,
+  propertyId,
+  onDelete,
+  onUpload,
+  isUploading,
+}: FloorplansCardProps) {
+  const { handleDragEnd, isSavingOrder } = useSortableFloorplans(propertyId);
 
-  // Use our custom hook for drag and drop functionality
-  const { sortableFloorplans, handleDragEnd } = useSortableFloorplans(displayFloorplans, id);
-
-  useEffect(() => {
-    setUploading(isUploading);
-  }, [isUploading]);
-
-  useEffect(() => {
-    if (floorplans && floorplans.length > 0) {
-      // Sort floorplans by sort_order when they come in
-      const sortedFloorplans = [...floorplans].sort((a, b) => {
-        if (a.sort_order !== undefined && b.sort_order !== undefined) {
-          return a.sort_order - b.sort_order;
-        }
-        return 0;
-      });
-      setDisplayFloorplans(sortedFloorplans);
-    }
-  }, [floorplans]);
-
-  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUploading(true);
-    if (onFloorplanUpload) {
-      onFloorplanUpload(e);
-    }
-    // Reset the file input value
-    e.target.value = '';
-  };
-
-  const handleFetchComplete = (fetchedFloorplans: PropertyFloorplan[]) => {
-    if (fetchedFloorplans.length > 0) {
-      // Ensure floorplans are sorted by sort_order
-      const sortedFloorplans = [...fetchedFloorplans].sort((a, b) => {
-        if (a.sort_order !== undefined && b.sort_order !== undefined) {
-          return a.sort_order - b.sort_order;
-        }
-        return 0;
-      });
-      setDisplayFloorplans(sortedFloorplans);
+  const handleDragEndWrapper = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      const oldIndex = floorplans.findIndex(item => item.id === active.id);
+      const newIndex = floorplans.findIndex(item => item.id === over?.id);
+      
+      const newFloorplans = [...floorplans];
+      const [movedItem] = newFloorplans.splice(oldIndex, 1);
+      newFloorplans.splice(newIndex, 0, movedItem);
+      
+      setFloorplans(newFloorplans);
+      await handleDragEnd(event);
     }
   };
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Floorplans</CardTitle>
+      <CardHeader>
+        <CardTitle className="text-xl">Floorplans</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Hidden database fetcher component */}
-        {id && (
-          <FloorplanDatabaseFetcher
-            propertyId={id}
-            floorplans={displayFloorplans}
-            onFetchComplete={handleFetchComplete}
+      <CardContent>
+        <FloorplanUploader onUpload={onUpload} isUploading={isUploading} />
+        
+        {floorplans.length > 0 ? (
+          <SortableFloorplanGrid
+            items={floorplans}
+            onDragEnd={handleDragEndWrapper}
+            isSaving={isSavingOrder}
+            renderItem={(item) => (
+              <div className="relative group">
+                <img 
+                  src={item.url} 
+                  alt="Floorplan" 
+                  className="w-full h-40 object-contain border rounded-md"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => onDelete(item.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
           />
-        )}
-
-        <div className="flex flex-col space-y-4">
-          <FloorplanUploader 
-            onFloorplanUpload={handleFloorplanUpload}
-            isUploading={uploading}
-          />
-          
-          <div className="w-full">
-            <SortableFloorplanGrid 
-              floorplans={sortableFloorplans}
-              onRemoveFloorplan={onRemoveFloorplan || (() => {})}
-              onDragEnd={handleDragEnd}
-            />
+        ) : (
+          <div className="text-center py-8 border-2 border-dashed rounded-md">
+            <p className="text-muted-foreground mb-2">No floorplans yet</p>
+            <p className="text-sm text-muted-foreground">
+              Upload floorplans to showcase the property layout
+            </p>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
