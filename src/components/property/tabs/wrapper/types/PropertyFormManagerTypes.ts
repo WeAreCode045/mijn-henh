@@ -39,6 +39,4 @@ export interface PropertyFormManagerChildrenProps {
   propertyWithRequiredProps: PropertyData;
   lastSaved: Date | null;
   isSaving: boolean;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (idOrIndex: number | string) => void; // Updated to handle both number and string parameters
 }

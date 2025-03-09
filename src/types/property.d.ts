@@ -65,13 +65,6 @@ export interface PropertyFloorplan {
   columns?: number;
 }
 
-// Property technical item
-export interface PropertyTechnicalItem {
-  id: string;
-  title: string;
-  value: string;
-}
-
 // Property agent
 export interface PropertyAgent {
   id: string;
@@ -120,7 +113,6 @@ export interface PropertyData {
   coverImages?: string[];
   gridImages?: string[];
   areaPhotos?: string[];
-  technicalItems?: PropertyTechnicalItem[];
   created_at?: string;
   updated_at?: string;
 }
@@ -166,5 +158,4 @@ export interface PropertySubmitData {
   featuredImage?: string | null;
   featuredImages?: string[];
   floorplanEmbedScript?: string;
-  technicalItems?: string;
 }

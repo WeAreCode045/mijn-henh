@@ -10,11 +10,11 @@ import { PropertyData } from "@/types/property";
 
 export function renderTabContent({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }: PropertyTabProps) {
   // Cast property to PropertyData with all required fields for type safety
-  const propertyWithRequiredFields = property as PropertyData;
+  const propertyData = property as PropertyData;
   
   switch (activeTab) {
     case "dashboard":
-      return <DashboardTabContent property={propertyWithRequiredFields} />;
+      return <DashboardTabContent property={propertyData} />;
     case "content":
       return (
         <ContentTabContent
@@ -42,15 +42,15 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
       return (
         <MediaTabContent
           property={{
-            ...propertyWithRequiredFields,
+            ...propertyData,
             images: normalizeImages(property.images)
           }}
         />
       );
     case "floorplans":
-      return <FloorplansTabContent property={propertyWithRequiredFields} />;
+      return <FloorplansTabContent property={propertyData} />;
     case "communications":
-      return <CommunicationsTabContent property={propertyWithRequiredFields} />;
+      return <CommunicationsTabContent property={propertyData} />;
     default:
       return null;
   }
