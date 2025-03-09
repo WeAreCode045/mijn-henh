@@ -72,6 +72,7 @@ export function ContentTabContent({
             onFetchLocationData={onFetchLocationData}
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
+            setPendingChanges={() => {}}
           />
         </CardContent>
       </Card>

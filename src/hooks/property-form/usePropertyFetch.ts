@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { initialFormData } from "./initialFormData";
-import type { PropertyFormData, PropertyAgent } from "@/types/property";
+import type { PropertyFormData, PropertyAgent, PropertyTechnicalItem } from "@/types/property";
 import { transformFeatures, transformAreas, transformNearbyPlaces } from "./propertyDataTransformer";
 
 export function usePropertyFetch(id: string | undefined) {
@@ -75,6 +75,18 @@ export function usePropertyFetch(id: string | undefined) {
           }
         }
         
+        // Transform technical items to the correct format
+        const technicalItems: PropertyTechnicalItem[] = data.technicalItems ? 
+          (Array.isArray(data.technicalItems) ? 
+            data.technicalItems.map((item: any) => ({
+              id: item.id || crypto.randomUUID(),
+              title: item.title || '',
+              value: item.value || ''
+            })) : 
+            []
+          ) : 
+          [];
+        
         setFormData({
           ...initialFormData,
           ...data,
@@ -86,6 +98,7 @@ export function usePropertyFetch(id: string | undefined) {
           coverImages: featuredImages, // Keep for backward compatibility
           featuredImage: featuredImage,
           agent: agentData,
+          technicalItems: technicalItems,
           images: allImages
             ? allImages.filter(img => img.type !== 'floorplan').map(img => ({ 
                 id: img.id, 

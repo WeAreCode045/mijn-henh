@@ -6,11 +6,15 @@ import { FloorplansTabContent } from "../floorplans/FloorplansTabContent";
 import { CommunicationsTabContent } from "./CommunicationsTabContent";
 import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
 import { normalizeImages } from "@/utils/imageHelpers";
+import { PropertyData } from "@/types/property";
 
 export function renderTabContent({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }: PropertyTabProps) {
+  // Cast property to PropertyData with all required fields for type safety
+  const propertyWithRequiredFields = property as PropertyData;
+  
   switch (activeTab) {
     case "dashboard":
-      return <DashboardTabContent property={property} />;
+      return <DashboardTabContent property={propertyWithRequiredFields} />;
     case "content":
       return (
         <ContentTabContent
@@ -38,15 +42,15 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
       return (
         <MediaTabContent
           property={{
-            ...property,
+            ...propertyWithRequiredFields,
             images: normalizeImages(property.images)
           }}
         />
       );
     case "floorplans":
-      return <FloorplansTabContent property={property} />;
+      return <FloorplansTabContent property={propertyWithRequiredFields} />;
     case "communications":
-      return <CommunicationsTabContent property={property} />;
+      return <CommunicationsTabContent property={propertyWithRequiredFields} />;
     default:
       return null;
   }
