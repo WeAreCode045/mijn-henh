@@ -7,7 +7,8 @@ import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { useState } from "react";
 
 interface PropertyContentTabProps {
-  property: PropertyFormData;
+  // Changed "property" to "formData" to match what's passed in ContentTabContent.tsx
+  formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -21,10 +22,19 @@ interface PropertyContentTabProps {
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
+  // Required navigation props
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
+  // Added setPendingChanges prop
+  setPendingChanges: (pending: boolean) => void;
+  isUpdateMode?: boolean;
+  onSubmit?: () => void;
 }
 
 export function PropertyContentTab({
-  property,
+  formData,  // Changed from "property" to "formData"
   onFieldChange,
   onAddFeature,
   onRemoveFeature,
@@ -38,22 +48,16 @@ export function PropertyContentTab({
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
+  currentStep,
+  handleStepClick,
+  handleNext,
+  handlePrevious,
+  setPendingChanges,
+  isUpdateMode,
+  onSubmit
 }: PropertyContentTabProps) {
-  const [pendingChanges, setPendingChanges] = useState(false);
+  const [pendingChanges, setPendingChangesInternal] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-
-  // Use the step navigation hook
-  const { 
-    currentStep, 
-    handleStepClick, 
-    handleNext, 
-    handlePrevious 
-  } = usePropertyStepNavigation(
-    property,
-    pendingChanges,
-    setPendingChanges,
-    setLastSaved
-  );
 
   // Create wrapper functions to handle type mismatches
   const handleAreaImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +104,7 @@ export function PropertyContentTab({
         <CardContent>
           <PropertyContentForm
             step={currentStep}
-            formData={property}
+            formData={formData}
             onFieldChange={onFieldChange}
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
