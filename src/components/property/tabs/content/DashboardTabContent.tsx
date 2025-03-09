@@ -61,7 +61,7 @@ export function DashboardTabContent({ property, onDelete, onSave, onWebView }: D
                   </div>
                   <div>
                     <p className="font-semibold">Type</p>
-                    <p>{property.propertyType || "Not specified"}</p>
+                    <p>{"Not specified"}</p>
                   </div>
                 </div>
               </div>
@@ -257,11 +257,11 @@ export function DashboardTabContent({ property, onDelete, onSave, onWebView }: D
               </div>
               <div>
                 <p className="font-medium">Webview Opens</p>
-                <p>{property.webViewCount || 0}</p>
+                <p>{0}</p>
               </div>
               <div>
                 <p className="font-medium">Submissions</p>
-                <p>{property.submissionCount || 0}</p>
+                <p>{0}</p>
               </div>
             </div>
           </CardContent>
