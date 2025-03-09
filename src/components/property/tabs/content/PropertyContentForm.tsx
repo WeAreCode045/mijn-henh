@@ -31,6 +31,10 @@ interface PropertyContentFormProps {
   setPendingChanges: (pending: boolean) => void;
   isLoadingLocationData?: boolean;
   onSubmit?: () => void;
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
 }
 
 export function PropertyContentForm({
@@ -60,7 +64,11 @@ export function PropertyContentForm({
   isUploading,
   setPendingChanges,
   isLoadingLocationData,
-  onSubmit
+  onSubmit,
+  currentStep,
+  handleStepClick,
+  handleNext,
+  handlePrevious
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
     console.log(`Field changed: ${String(field)}`, value);

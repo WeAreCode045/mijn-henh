@@ -68,7 +68,6 @@ export function ContentTabContent({
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
-            currentStep={currentStep}
             handleStepClick={handleStepClick}
             handleNext={handleNext}
             handlePrevious={handlePrevious}
@@ -76,6 +75,7 @@ export function ContentTabContent({
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
             setPendingChanges={setPendingChanges || (() => {})}
+            currentStep={currentStep}
           />
         </CardContent>
       </Card>

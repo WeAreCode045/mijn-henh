@@ -19,10 +19,10 @@ interface PropertyFormContentProps {
   onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage: (index: number) => void;
-  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
   handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;

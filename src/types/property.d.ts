@@ -16,6 +16,8 @@ export interface PropertyImage {
   area?: string | null;
   sort_order?: number;
   filePath?: string;
+  title?: string;
+  description?: string;
 }
 
 // Property area with all required fields
@@ -53,6 +55,16 @@ export interface PropertyCity {
   visible_in_webview?: boolean;
 }
 
+// Property agent
+export interface PropertyAgent {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  address?: string;
+}
+
 // Property data interface
 export interface PropertyData {
   id: string;
@@ -88,21 +100,8 @@ export interface PropertyData {
   floorplanEmbedScript?: string;
   featuredImage?: string | null;
   featuredImages?: string[];
-  coverImages?: string[];
-  gridImages?: string[];
-  areaPhotos?: string[];
   created_at?: string;
   updated_at?: string;
-}
-
-// Property agent
-export interface PropertyAgent {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  photoUrl?: string;
-  address?: string;
 }
 
 // Property form data extends PropertyData

@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { PropertyFormData, PropertyFloorplan } from "@/types/property";
+import { PropertyFormData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -65,15 +66,15 @@ export function usePropertyFloorplans(
           .from('properties')
           .getPublicUrl(filePath);
           
-        // Return a new PropertyFloorplan object
+        // Return a new PropertyImage object
         return {
           id: crypto.randomUUID(),
           url: publicUrl,
           filePath,
-          columns: 12,  // Default column width
           title: fileName.split('-').pop() || 'Floorplan',
+          type: 'floorplan',
           sort_order: 0 // Temporary value, will be updated later
-        };
+        } as PropertyImage;
       });
       
       // Wait for all uploads to complete
