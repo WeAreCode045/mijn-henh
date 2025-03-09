@@ -3,6 +3,8 @@ import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyContentForm } from "./PropertyContentForm";
+import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
+import { steps } from "@/components/property/form/formSteps";
 
 interface ContentTabContentProps {
   formData: PropertyFormData;
@@ -24,6 +26,16 @@ interface ContentTabContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
+  isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
 }
 
 export function ContentTabContent({
@@ -46,6 +58,16 @@ export function ContentTabContent({
   onRemoveNearbyPlace,
   isLoadingLocationData,
   setPendingChanges = () => {},
+  handleImageUpload,
+  handleRemoveImage,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  handleAreaPhotosUpload,
+  handleRemoveAreaPhoto,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage,
+  isUploading,
+  isUploadingFloorplan,
 }: ContentTabContentProps) {
   
   // Create wrapper functions to handle type mismatches
@@ -60,27 +82,27 @@ export function ContentTabContent({
   };
 
   const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      // Just pass the FileList to the original handler
-      onAreaImageUpload("main", e.target.files);
+    if (e.target.files && handleImageUpload) {
+      handleImageUpload(e);
     }
   };
 
   const handleRemoveImageByIndex = (index: number) => {
-    // Convert index to string ID for compatibility
-    onAreaImageRemove("main", index.toString());
+    if (handleRemoveImage) {
+      handleRemoveImage(index);
+    }
   };
 
   const handleFloorplanInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      // Just pass the FileList to the original handler
-      onAreaImageUpload("floorplan", e.target.files);
+    if (e.target.files && handleFloorplanUpload) {
+      handleFloorplanUpload(e);
     }
   };
 
   const handleRemoveFloorplanByIndex = (index: number) => {
-    // Convert index to string ID for compatibility
-    onAreaImageRemove("floorplan", index.toString());
+    if (handleRemoveFloorplan) {
+      handleRemoveFloorplan(index);
+    }
   };
 
   return (
@@ -91,6 +113,13 @@ export function ContentTabContent({
           <CardTitle>Property Details</CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Add the step navigation component here */}
+          <FormStepNavigation 
+            steps={steps}
+            currentStep={currentStep}
+            onStepClick={handleStepClick}
+          />
+          
           <PropertyContentForm
             step={currentStep}
             formData={formData}
@@ -118,7 +147,30 @@ export function ContentTabContent({
             handleRemoveImage={handleRemoveImageByIndex}
             handleFloorplanUpload={handleFloorplanInputChange}
             handleRemoveFloorplan={handleRemoveFloorplanByIndex}
+            handleSetFeaturedImage={handleSetFeaturedImage}
+            handleToggleFeaturedImage={handleToggleFeaturedImage}
+            isUploading={isUploading}
+            isUploadingFloorplan={isUploadingFloorplan}
           />
+          
+          <div className="flex justify-between mt-6">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className="px-4 py-2 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-50"
+              disabled={currentStep === 1}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              disabled={currentStep === steps.length}
+            >
+              {currentStep === steps.length ? "Finish" : "Next"}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>

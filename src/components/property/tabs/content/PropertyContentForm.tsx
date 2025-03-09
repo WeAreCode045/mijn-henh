@@ -63,6 +63,7 @@ export function PropertyContentForm({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
+  isUploadingFloorplan,
   setPendingChanges,
   isLoadingLocationData,
   onSubmit,
@@ -147,6 +148,7 @@ export function PropertyContentForm({
       handleSetFeaturedImage={safeSetFeaturedImage}
       handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}
+      isUploadingFloorplan={isUploadingFloorplan}
       setPendingChanges={setPendingChanges}
       isLoadingLocationData={isLoadingLocationData}
       // Pass through step navigation props

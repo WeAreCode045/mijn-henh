@@ -98,11 +98,11 @@ export function usePropertyFetch(id: string | undefined) {
           let nearby_cities: PropertyCity[] = [];
           
           try {
-            // Type assertion to any to safely access potentially missing property
-            const dbPropertyData = propertyData as any;
+            // Use type assertion to safely access the property
+            const dbData = propertyData as any;
             
-            if (dbPropertyData && typeof dbPropertyData === 'object' && 'nearby_cities' in dbPropertyData) {
-              nearby_cities = safeParseArray(dbPropertyData.nearby_cities);
+            if (dbData && typeof dbData === 'object' && 'nearby_cities' in dbData) {
+              nearby_cities = safeParseArray(dbData.nearby_cities);
             } else {
               console.warn('No nearby_cities property found in database record, using empty array');
               nearby_cities = [];
