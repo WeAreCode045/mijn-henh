@@ -1,10 +1,8 @@
 
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { useLocationCategories } from "../../../form/steps/location/useLocationCategories";
 import { CategoryFilters } from "./components/CategoryFilters";
 import { CategorySection } from "./components/CategorySection";
-import { useLocationCategories } from "./useLocationCategories";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -12,62 +10,76 @@ interface NearbyPlacesSectionProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
 }
 
-export function NearbyPlacesSection({
+export function NearbyPlacesSection({ 
   formData,
   onRemovePlace,
   onFieldChange
 }: NearbyPlacesSectionProps) {
   const nearbyPlaces = formData.nearby_places || [];
-  const { categories, handleFilterChange, activeFilters } = useLocationCategories(nearbyPlaces);
+  const { categories, activeFilters, handleFilterChange } = useLocationCategories(nearbyPlaces);
+
+  // Group places by category
+  const placesByCategory: Record<string, PropertyNearbyPlace[]> = {};
   
-  // Toggle place visibility in webview
+  // Initialize categories that exist in the filter list
+  activeFilters.forEach(category => {
+    placesByCategory[category] = [];
+  });
+  
+  // Add places to their respective categories
+  nearbyPlaces.forEach((place, index) => {
+    const category = place.type || 'other';
+    if (!placesByCategory[category]) {
+      placesByCategory[category] = [];
+    }
+    placesByCategory[category].push({...place, index}); // Add index for removal
+  });
+  
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
     if (!onFieldChange || !formData.nearby_places) return;
     
-    const updatedPlaces = [...formData.nearby_places];
-    updatedPlaces[placeIndex] = {
-      ...updatedPlaces[placeIndex],
-      visible_in_webview: visible
-    };
+    const updatedPlaces = formData.nearby_places.map((place, idx) => 
+      idx === placeIndex ? { ...place, visible_in_webview: visible } : place
+    );
     
     onFieldChange('nearby_places', updatedPlaces);
   };
-  
+
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <Label>Nearby Places</Label>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Nearby Places</h3>
+      
+      <CategoryFilters 
+        categories={categories} 
+        activeFilters={activeFilters} 
+        onFilterChange={handleFilterChange} 
+      />
+      
+      <div className="space-y-4 mt-4">
+        {Object.entries(placesByCategory).map(([category, places]) => {
+          // Only show categories that are in the active filters and have places
+          if (!activeFilters.includes(category) || places.length === 0) return null;
           
-          {(nearbyPlaces && nearbyPlaces.length > 0) ? (
-            <>
-              <CategoryFilters 
-                categories={categories}
-                activeFilters={activeFilters}
-                onFilterChange={handleFilterChange}
-              />
-              
-              {categories.map(category => (
-                <CategorySection 
-                  key={category.name}
-                  category={category}
-                  places={nearbyPlaces.filter(place => place.type === category.name)}
-                  allPlaces={nearbyPlaces}
-                  toggleVisibility={togglePlaceVisibility}
-                  isVisible={activeFilters.includes(category.name)}
-                />
-              ))}
-            </>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">No nearby places found.</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Use the "Fetch Location Data" button in the Address section to get nearby places.
-              </p>
-            </div>
-          )}
+          return (
+            <CategorySection
+              key={category}
+              category={category}
+              places={places}
+              onRemovePlace={onRemovePlace}
+              toggleVisibility={togglePlaceVisibility}
+              isVisible={(place) => !!place.visible_in_webview}
+            />
+          );
+        })}
+      </div>
+      
+      {nearbyPlaces.length === 0 && (
+        <div className="text-center py-6 border border-dashed rounded-md">
+          <p className="text-muted-foreground">
+            No nearby places found. Try fetching location data to discover places near this property.
+          </p>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

@@ -14,6 +14,7 @@ interface LocationStepProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
+  handleMapImageDelete?: () => Promise<void>;
 }
 
 export function LocationStep({
@@ -23,7 +24,8 @@ export function LocationStep({
   onGenerateLocationDescription,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges
+  setPendingChanges,
+  handleMapImageDelete
 }: LocationStepProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (onFieldChange) {
@@ -54,6 +56,7 @@ export function LocationStep({
             
             <MapPreviewSection 
               formData={formData}
+              onDeleteMapImage={handleMapImageDelete}
             />
             
             <NearbyPlacesSection 

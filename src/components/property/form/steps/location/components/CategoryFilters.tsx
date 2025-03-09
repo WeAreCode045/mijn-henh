@@ -1,12 +1,12 @@
 
 import { Badge } from "@/components/ui/badge";
 
-interface Category {
+export interface Category {
   name: string;
   count: number;
 }
 
-interface CategoryFiltersProps {
+export interface CategoryFiltersProps {
   categories: Category[];
   activeFilters: string[];
   onFilterChange: (category: string) => void;

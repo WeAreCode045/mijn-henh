@@ -1,42 +1,44 @@
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyNearbyPlace } from "@/types/property";
 import { PlaceItem } from "./PlaceItem";
 
 interface CategorySectionProps {
-  category: { name: string; count: number };
+  category: string;
   places: PropertyNearbyPlace[];
-  allPlaces: PropertyNearbyPlace[];
-  toggleVisibility: (placeIndex: number, visible: boolean) => void;
-  isVisible: boolean;
+  onRemovePlace?: (index: number) => void;
+  toggleVisibility?: (placeIndex: number, visible: boolean) => void;
+  isVisible?: (place: PropertyNearbyPlace) => boolean;
 }
 
-export function CategorySection({
-  category,
-  places,
-  allPlaces,
+export function CategorySection({ 
+  category, 
+  places, 
+  onRemovePlace,
   toggleVisibility,
-  isVisible
+  isVisible = () => true
 }: CategorySectionProps) {
-  if (!isVisible || places.length === 0) return null;
+  const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
   
   return (
-    <div className="space-y-2">
-      <h3 className="text-lg font-medium capitalize">{category.name}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {places.map((place, index) => {
-          const originalIndex = allPlaces.findIndex(p => p.id === place.id);
-          return (
-            <PlaceItem
-              key={place.id || index}
-              place={place}
-              index={index}
-              originalIndex={originalIndex}
-              onVisibilityChange={toggleVisibility}
-              category={category.name}
+    <Card>
+      <CardHeader className="py-3">
+        <CardTitle className="text-md">{formattedCategory} ({places.length})</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {places.map((place, idx) => (
+            <PlaceItem 
+              key={place.id || idx} 
+              place={place} 
+              onRemove={onRemovePlace ? () => onRemovePlace(place.index || idx) : undefined}
+              toggleVisibility={toggleVisibility ? 
+                () => toggleVisibility(place.index || idx, !isVisible(place)) : undefined}
+              isVisible={isVisible ? isVisible(place) : true}
             />
-          );
-        })}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,92 +1,130 @@
 
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { UserIcon, MailIcon, PhoneIcon, CalendarIcon, CheckIcon, XIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { SubmissionReplyForm } from "./SubmissionReplyForm";
-import { SubmissionReplies } from "./SubmissionReplies";
-import { Submission } from "./types";
+import { SubmissionReplies } from './SubmissionReplies';
+import { SubmissionResponse } from './SubmissionResponse';
+import { Submission, SubmissionReply } from './types';
+import { formatDate } from "@/utils/dateUtils";
+import { PropertyData } from "@/types/property";
 
 interface SubmissionDetailProps {
   submission: Submission;
-  onSendResponse: (responseText: string) => Promise<void>;
+  onMarkAsRead: (submissionId: string) => Promise<void>;
+  onSendResponse: (text: string) => Promise<void>;
   isSending: boolean;
+  property: PropertyData;
+  replies: SubmissionReply[];
 }
 
-export function SubmissionDetail({ 
-  submission, 
+export function SubmissionDetail({
+  submission,
+  onMarkAsRead,
   onSendResponse,
-  isSending
+  isSending,
+  property,
+  replies
 }: SubmissionDetailProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
+  if (!submission) return null;
+
+  const handleToggleReadStatus = async () => {
+    await onMarkAsRead(submission.id);
+  };
+
+  const handleResponseSubmit = async (responseText: string) => {
+    await onSendResponse(responseText);
   };
 
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className={submission.is_read ? "" : "border-l-4 border-l-blue-500"}>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg">
-              Inquiry from {submission.name}
-              {!submission.is_read && (
-                <Badge className="ml-2 bg-blue-500">New</Badge>
-              )}
-            </CardTitle>
-            <Badge variant="outline">
-              {submission.inquiry_type || 'General Inquiry'}
-            </Badge>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {formatDate(submission.created_at)}
+            <div className="flex items-center">
+              <UserIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+              <CardTitle className="text-lg">{submission.name}</CardTitle>
+              <Badge className="ml-3" variant={
+                submission.inquiry_type === 'viewing' ? "default" : 
+                submission.inquiry_type === 'question' ? "secondary" : "outline"
+              }>
+                {submission.inquiry_type.charAt(0).toUpperCase() + submission.inquiry_type.slice(1)}
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleToggleReadStatus}
+              >
+                {submission.is_read ? (
+                  <XIcon className="h-4 w-4 mr-1" />
+                ) : (
+                  <CheckIcon className="h-4 w-4 mr-1" />
+                )}
+                {submission.is_read ? 'Mark Unread' : 'Mark Read'}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-sm font-medium">Email</div>
-                <div>{submission.email}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium">Phone</div>
-                <div>{submission.phone}</div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="flex items-center">
+              <MailIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <a href={`mailto:${submission.email}`} className="text-blue-600 hover:underline">
+                {submission.email}
+              </a>
             </div>
-            
-            <div>
-              <div className="text-sm font-medium mb-1">Message</div>
-              <div className="p-3 bg-muted rounded-md whitespace-pre-wrap">
-                {submission.message}
-              </div>
+            <div className="flex items-center">
+              <PhoneIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <a href={`tel:${submission.phone}`} className="text-blue-600 hover:underline">
+                {submission.phone}
+              </a>
             </div>
+            <div className="flex items-center">
+              <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                {formatDate(submission.created_at)}
+              </span>
+            </div>
+          </div>
+          
+          <div className="mt-4 bg-muted p-4 rounded-md">
+            <h4 className="font-semibold mb-2">Message:</h4>
+            <p className="whitespace-pre-line">{submission.message}</p>
+          </div>
+          
+          <div className="mt-4 flex space-x-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href={`mailto:${submission.email}?subject=RE: Inquiry about ${property.title}`}>
+                <MailIcon className="h-4 w-4 mr-2" />
+                Reply by Email
+              </a>
+            </Button>
+            {submission.phone && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={`tel:${submission.phone}`}>
+                  <PhoneIcon className="h-4 w-4 mr-2" />
+                  Call
+                </a>
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
-      
-      {submission.replies && submission.replies.length > 0 && (
-        <SubmissionReplies
-          submissionId={submission.id}
-          replies={submission.replies}
-        />
-      )}
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Reply</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SubmissionReplyForm
-            onSend={onSendResponse}
-            isSubmitting={isSending}
-          />
-        </CardContent>
-      </Card>
+
+      {/* Display submission replies */}
+      <SubmissionReplies
+        submissionId={submission.id}
+        replies={replies}
+      />
+
+      {/* Reply form */}
+      <SubmissionResponse
+        onSendResponse={handleResponseSubmit}
+        isSending={isSending}
+      />
     </div>
   );
 }

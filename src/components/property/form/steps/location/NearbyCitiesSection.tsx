@@ -1,7 +1,6 @@
 
-import { PropertyFormData, PropertyCity } from "@/types/property";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { PropertyFormData } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CitiesListSection } from "./components/CitiesListSection";
 import { FetchCitiesButton } from "./components/FetchCitiesButton";
 
@@ -12,48 +11,51 @@ interface NearbyCitiesSectionProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
 }
 
-export function NearbyCitiesSection({
+export function NearbyCitiesSection({ 
   formData,
   onFetchLocationData,
-  isLoadingLocationData = false,
+  isLoadingLocationData,
   onFieldChange
 }: NearbyCitiesSectionProps) {
   const nearbyCities = formData.nearby_cities || [];
-  
-  // Toggle city visibility in webview
+
   const toggleCityVisibility = (cityIndex: number, visible: boolean) => {
     if (!onFieldChange || !formData.nearby_cities) return;
     
-    const updatedCities = [...formData.nearby_cities];
-    updatedCities[cityIndex] = {
-      ...updatedCities[cityIndex],
-      visible_in_webview: visible
-    };
+    const updatedCities = formData.nearby_cities.map((city, idx) => 
+      idx === cityIndex ? { ...city, visible_in_webview: visible } : city
+    );
     
     onFieldChange('nearby_cities', updatedCities);
   };
-  
+
   return (
-    <Card className="mt-6">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <Label>Nearby Cities</Label>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Nearby Cities</h3>
+      
+      {nearbyCities.length > 0 ? (
+        <CitiesListSection 
+          cities={nearbyCities}
+          toggleVisibility={toggleCityVisibility}
+          isVisible={(city) => !!city.visible_in_webview}
+        />
+      ) : (
+        <Card>
+          <CardHeader className="py-3">
+            <CardTitle className="text-md">No Cities Found</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              No nearby cities data available. Fetch location data to discover cities near this property.
+            </p>
             
-            {onFetchLocationData && (
-              <FetchCitiesButton 
-                onFetch={onFetchLocationData}
-                isLoading={isLoadingLocationData}
-              />
-            )}
-          </div>
-          
-          <CitiesListSection 
-            nearbyCities={nearbyCities}
-            toggleCityVisibility={toggleCityVisibility}
-          />
-        </div>
-      </CardContent>
-    </Card>
+            <FetchCitiesButton 
+              onFetch={onFetchLocationData}
+              isLoading={isLoadingLocationData}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
