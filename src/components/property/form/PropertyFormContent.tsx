@@ -4,6 +4,7 @@ import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
 import { LocationStep } from "./steps/LocationStep";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 interface PropertyFormContentProps {
   step: number;
@@ -94,7 +95,7 @@ export function PropertyFormContent({
           <form id="areasForm">
             <AreasStep
               areas={formData.areas || []}
-              images={formData.images || []}
+              images={formData.images ? formData.images.map(img => normalizeImage(img)) : []}
               propertyId={formData.id}
               onAddArea={onAddArea}
               onRemoveArea={onRemoveArea}

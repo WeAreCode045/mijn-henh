@@ -1,4 +1,3 @@
-
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -108,8 +107,6 @@ export function PropertyTabsWrapper({
                       handleNext={handleNext}
                       handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
-                      onAddTechnicalItem={onAddTechnicalItem}
-                      onRemoveTechnicalItem={onRemoveTechnicalItem}
                     />
                   </PropertyTabs>
                 </Tabs>

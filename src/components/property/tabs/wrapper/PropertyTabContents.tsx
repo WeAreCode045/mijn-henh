@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { 
   renderDashboardTab, 
@@ -147,7 +146,6 @@ export function PropertyTabContents({
     isLoadingLocationData
   };
 
-  // Define tabProps before using it
   const tabProps = {
     activeTab,
     property,

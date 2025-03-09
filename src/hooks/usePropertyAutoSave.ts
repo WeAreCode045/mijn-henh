@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,93 +20,41 @@ export function usePropertyAutoSave() {
   }, []);
 
   const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
-    if (!formData.id) {
-      console.log('No ID available, auto-save skipped');
-      return false;
-    }
-
-    setIsSaving(true);
-    console.log('Auto-saving property data...', formData);
-
+    if (!formData.id) return false;
+    
     try {
-      const {
-        title,
-        price,
-        address,
-        bedrooms,
-        bathrooms,
-        sqft,
-        livingArea,
-        buildYear,
-        garages,
-        energyLabel,
-        hasGarden,
-        description,
-        location_description,
-        features,
-        areas,
-        nearby_places,
-        latitude,
-        longitude,
-        map_image,
-        agent_id,
-        virtualTourUrl,
-        youtubeUrl,
-        notes,
-        template_id,
-        technicalItems,
-        floorplanEmbedScript
-      } = formData;
-
-      if (!formData.id) {
-        console.log('Property ID not available for auto-save');
-        return false;
-      }
-
-      const transformedAreas = prepareAreasForFormSubmission(areas);
-      const transformedFeatures = preparePropertiesForJsonField(features);
-      const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
+      setIsSaving(true);
       
-      const technicalItemsArray = Array.isArray(technicalItems) ? technicalItems : [];
-      const transformedTechnicalItems = preparePropertiesForJsonField(technicalItemsArray);
-      
-      console.log('Transformed technical items:', transformedTechnicalItems);
-      console.log('floorplanEmbedScript for autosave:', floorplanEmbedScript);
-
-      const updateData = {
-        title,
-        price,
-        address,
-        bedrooms,
-        bathrooms,
-        sqft,
-        livingArea,
-        buildYear,
-        garages,
-        energyLabel,
-        hasGarden,
-        description,
-        location_description,
-        features: transformedFeatures,
-        areas: transformedAreas,
-        nearby_places: transformedNearbyPlaces,
-        latitude,
-        longitude,
-        map_image,
-        agent_id,
-        virtualTourUrl,
-        youtubeUrl,
-        notes,
-        template_id,
-        technicalItems: transformedTechnicalItems,
-        floorplanEmbedScript
+      const submitData = {
+        title: formData.title,
+        price: formData.price,
+        address: formData.address,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        sqft: formData.sqft,
+        living_area: formData.livingArea,
+        build_year: formData.buildYear,
+        garages: formData.garages,
+        energy_label: formData.energyLabel,
+        has_garden: formData.hasGarden,
+        description: formData.description,
+        location_description: formData.location_description,
+        features: JSON.stringify(formData.features),
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        object_id: formData.object_id,
+        agent_id: formData.agent_id,
+        template_id: formData.template_id,
+        virtual_tour_url: formData.virtualTourUrl,
+        youtube_url: formData.youtubeUrl,
+        floorplan_embed_script: formData.floorplanEmbedScript,
       };
-
-      console.log('Saving to database:', updateData);
+      
+      console.log('Auto-saving property data...', formData);
 
       const { error } = await supabase
         .from('properties')
-        .update(updateData)
+        .update(submitData)
         .eq('id', formData.id);
 
       if (error) {

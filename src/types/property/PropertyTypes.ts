@@ -9,13 +9,13 @@ export interface PropertyFeature {
 
 export interface PropertyArea {
   id: string;
-  name: string;
-  size: string;
   title: string;
   description: string;
-  images: string[];
   imageIds: string[];
   columns: number;
+  name: string;
+  size: string;
+  images: string[];
 }
 
 export interface PropertyImage {
@@ -33,6 +33,7 @@ export interface PropertyFloorplan {
   title?: string;
   sort_order?: number;
   filePath?: string; // Used during upload process
+  columns?: number; // Used for layout
 }
 
 export interface PropertyNearbyPlace {
@@ -43,6 +44,7 @@ export interface PropertyNearbyPlace {
   user_ratings_total: number;
   type: string;
   visible_in_webview?: boolean;
+  distance?: number;
 }
 
 export interface PropertyCity {
@@ -68,7 +70,7 @@ export interface PropertyFormData {
   description: string;
   location_description: string;
   features: PropertyFeature[];
-  images: string[] | PropertyImage[] | { url: string }[];
+  images: PropertyImage[] | string[] | { url: string }[];
   featuredImage: string | null;
   featuredImages: string[];
   areas: PropertyArea[];
@@ -122,5 +124,5 @@ export interface PropertySubmitData {
   floorplanEmbedScript: string;
 }
 
-// Export the PropertyPlaceType as a string union of the possible place types
+// Export PropertyPlaceType as the interface itself (not a string union)
 export type PropertyPlaceType = PropertyNearbyPlace;
