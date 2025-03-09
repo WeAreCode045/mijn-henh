@@ -18,6 +18,7 @@ export interface PropertyImage {
   filePath?: string;
   title?: string;
   description?: string;
+  columns?: number; // Added for FloorplanProcessor compatibility
 }
 
 // Define PropertyFloorplan as an alias to PropertyImage for compatibility
@@ -105,8 +106,8 @@ export interface PropertyData {
   created_at?: string;
   updated_at?: string;
   // For backward compatibility
-  coverImages?: PropertyImage[];
-  gridImages?: PropertyImage[];
+  coverImages?: PropertyImage[] | string[];
+  gridImages?: PropertyImage[] | string[];
 }
 
 // Property form data extends PropertyData

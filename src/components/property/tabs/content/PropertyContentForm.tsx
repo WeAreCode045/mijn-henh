@@ -148,6 +148,11 @@ export function PropertyContentForm({
       isUploading={isUploading}
       setPendingChanges={setPendingChanges}
       isLoadingLocationData={isLoadingLocationData}
+      // Pass through step navigation props
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
     />
   );
 }

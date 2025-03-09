@@ -1,7 +1,6 @@
 
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
-import type { Section } from '@/components/brochure/TemplateBuilder';
 
 export const generatePropertyPDF = async (property: PropertyData, settings: AgencySettings, templateId?: string) => {
   try {

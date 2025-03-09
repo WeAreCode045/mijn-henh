@@ -1,7 +1,6 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData } from "@/types/property";
+import type { PropertyFormData, PropertyImage } from "@/types/property";
 
 export function useImageRemoveHandler(
   formData: PropertyFormData,
@@ -34,13 +33,24 @@ export function useImageRemoveHandler(
       // Update featured images if they include the removed image
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
+      // Convert featuredImages to PropertyImage[] for coverImages if needed
+      const updatedCoverImages = updatedFeaturedImages.map(url => {
+        // If it's already a PropertyImage, return it
+        if (typeof url !== 'string') return url;
+        // Otherwise create a new PropertyImage
+        return {
+          id: `temp-${Date.now()}-${Math.random()}`,
+          url: url
+        };
+      });
+      
       // Create an updated form data object
       const updatedFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedFeaturedImages // For backward compatibility
+        coverImages: updatedCoverImages // Properly typed coverImages
       };
       
       // Update the form state
@@ -122,13 +132,24 @@ export function useImageRemoveHandler(
       // Update featured images if they include the removed image
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
+      // Convert featuredImages to PropertyImage[] for coverImages if needed
+      const updatedCoverImages = updatedFeaturedImages.map(url => {
+        // If it's already a PropertyImage, return it
+        if (typeof url !== 'string') return url;
+        // Otherwise create a new PropertyImage
+        return {
+          id: `temp-${Date.now()}-${Math.random()}`,
+          url: url
+        };
+      });
+      
       // Create an updated form data object
       const updatedFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedFeaturedImages // For backward compatibility
+        coverImages: updatedCoverImages // Properly typed coverImages
       };
       
       // Update the form state

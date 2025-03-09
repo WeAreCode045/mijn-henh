@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData, PropertyImage, PropertyAgent } from "@/types/property";
+import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity } from "@/types/property";
 import { initialFormData } from "./initialFormData";
 
 // Helper function to safely convert JSON or array to array
@@ -92,7 +92,15 @@ export function usePropertyFetch(id: string | undefined) {
           const features = safeParseArray(propertyData.features);
           const areas = safeParseArray(propertyData.areas);
           const nearby_places = safeParseArray(propertyData.nearby_places);
-          const nearby_cities = safeParseArray(propertyData.nearby_cities || '[]');
+          
+          // Handle nearby_cities with fallback for older database entries
+          let nearby_cities: PropertyCity[] = [];
+          if (propertyData.nearby_cities) {
+            nearby_cities = safeParseArray(propertyData.nearby_cities);
+          } else {
+            // For backward compatibility, create empty array
+            nearby_cities = [];
+          }
           
           // Process agent data for backward compatibility
           const agentId = propertyData.agent_id;
@@ -104,6 +112,12 @@ export function usePropertyFetch(id: string | undefined) {
               name: 'Unknown Agent'
             };
           }
+          
+          // Convert featuredImages to PropertyImages for coverImages
+          const coverImages = featuredImages.map(url => ({
+            id: `cover-${Date.now()}-${Math.random()}`,
+            url
+          }));
           
           // Set the form data with safe defaults for new fields
           setFormData({
@@ -120,8 +134,8 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImages: featuredImages,
             agent: agentData,
             // Add backward compatibility fields
-            coverImages: regularImages.slice(0, 6).map(img => img),
-            gridImages: regularImages.slice(0, 4).map(img => img),
+            coverImages, // Now as PropertyImage[]
+            gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
             areaPhotos: []
           });
         }

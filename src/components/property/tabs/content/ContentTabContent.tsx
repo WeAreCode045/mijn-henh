@@ -24,14 +24,6 @@ interface ContentTabContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
-  handleAreaPhotosUpload?: (areaId: string, files: FileList) => void;
-  handleImageUpload?: (files: FileList) => void;
-  handleRemoveImage?: (imageId: string) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload?: (files: FileList) => void;
-  handleRemoveFloorplan?: (imageId: string) => void;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
 }
 
 export function ContentTabContent({
@@ -54,15 +46,43 @@ export function ContentTabContent({
   onRemoveNearbyPlace,
   isLoadingLocationData,
   setPendingChanges = () => {},
-  handleAreaPhotosUpload,
-  handleImageUpload,
-  handleRemoveImage,
-  handleRemoveAreaPhoto,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage
 }: ContentTabContentProps) {
+  
+  // Create wrapper functions to handle type mismatches
+  const handleAreaImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // We need to extract the area ID from a data attribute or similar
+      const areaId = e.target.getAttribute('data-area-id');
+      if (areaId) {
+        onAreaImageUpload(areaId, e.target.files);
+      }
+    }
+  };
+
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      // Just pass the FileList to the original handler
+      onAreaImageUpload("main", e.target.files);
+    }
+  };
+
+  const handleRemoveImageByIndex = (index: number) => {
+    // Convert index to string ID for compatibility
+    onAreaImageRemove("main", index.toString());
+  };
+
+  const handleFloorplanInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      // Just pass the FileList to the original handler
+      onAreaImageUpload("floorplan", e.target.files);
+    }
+  };
+
+  const handleRemoveFloorplanByIndex = (index: number) => {
+    // Convert index to string ID for compatibility
+    onAreaImageRemove("floorplan", index.toString());
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Content</h2>
@@ -91,15 +111,12 @@ export function ContentTabContent({
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
             setPendingChanges={setPendingChanges}
-            step={currentStep}
-            handleAreaPhotosUpload={handleAreaPhotosUpload}
-            handleImageUpload={handleImageUpload}
-            handleRemoveImage={handleRemoveImage}
-            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-            handleFloorplanUpload={handleFloorplanUpload}
-            handleRemoveFloorplan={handleRemoveFloorplan}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleFeaturedImage={handleToggleFeaturedImage}
+            // Pass adapter functions for type compatibility
+            handleAreaPhotosUpload={handleAreaImageInputChange}
+            handleImageUpload={handleImageInputChange}
+            handleRemoveImage={handleRemoveImageByIndex}
+            handleFloorplanUpload={handleFloorplanInputChange}
+            handleRemoveFloorplan={handleRemoveFloorplanByIndex}
           />
         </CardContent>
       </Card>
