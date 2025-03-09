@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
@@ -39,34 +40,37 @@ export function usePropertyFetch(id: string | undefined) {
             (typeof propertyData.nearby_places === 'string' ? 
               JSON.parse(propertyData.nearby_places) : propertyData.nearby_places) : [];
 
+          // Handle nearby_cities safely with optional chaining and default to empty array
           const nearby_cities = propertyData.nearby_cities ? 
             (typeof propertyData.nearby_cities === 'string' ? 
               JSON.parse(propertyData.nearby_cities) : propertyData.nearby_cities) : [];
 
-          // Get images and floorplans as arrays
+          // Get images as array safely
           const images = Array.isArray(propertyData.images) ? 
             propertyData.images : 
             (propertyData.images ? [propertyData.images] : []);
           
-          const floorplans = Array.isArray(propertyData.floorplans) ? 
-            propertyData.floorplans : 
-            (propertyData.floorplans ? [propertyData.floorplans] : []);
+          // Handle floorplans safely with optional chaining and default to empty array
+          const floorplans = propertyData.floorplans ? 
+            (Array.isArray(propertyData.floorplans) ? 
+              propertyData.floorplans : 
+              (propertyData.floorplans ? [propertyData.floorplans] : [])) : [];
           
-          // Set the form data
+          // Set the form data with safe defaults for new fields
           setFormData({
             ...initialFormData,
             ...propertyData,
             features,
             areas,
             nearby_places,
-            nearby_cities,
+            nearby_cities: nearby_cities || [],
+            hasGarden: propertyData.hasGarden || false,
+            images: images || [],
+            floorplans: floorplans || [],
             featuredImages: propertyData.featuredImages || [],
             coverImages: propertyData.coverImages || [],
             gridImages: propertyData.gridImages || [],
-            areaPhotos: propertyData.areaPhotos || [],
-            hasGarden: propertyData.hasGarden || false,
-            images,
-            floorplans,
+            areaPhotos: propertyData.areaPhotos || []
           });
         }
       } catch (error) {

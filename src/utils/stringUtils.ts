@@ -1,18 +1,11 @@
 
 /**
- * Safely converts a value to string, handling null, undefined, or objects without toString
- * @param value The value to convert to string
- * @returns A string representation of the value or an empty string if conversion isn't possible
+ * Safely converts any value to a string
+ * Handles undefined and null values by returning an empty string
  */
-export function safeToString(value: any): string {
-  if (value === null || value === undefined) {
+export const safeToString = (value: any): string => {
+  if (value === undefined || value === null) {
     return '';
   }
-  
-  try {
-    return String(value);
-  } catch (error) {
-    console.error("Error converting value to string:", error);
-    return '';
-  }
-}
+  return String(value);
+};

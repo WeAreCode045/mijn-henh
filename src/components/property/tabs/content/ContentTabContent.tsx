@@ -56,14 +56,15 @@ export function ContentTabContent({
         </CardHeader>
         <CardContent>
           <PropertyContentForm
+            step={currentStep}
             formData={formData}
             onFieldChange={onFieldChange}
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}
-            onAddArea={onAddArea}
-            onRemoveArea={onRemoveArea}
-            onUpdateArea={onUpdateArea}
+            onAddArea={addArea}
+            onRemoveArea={removeArea}
+            onUpdateArea={updateArea}
             onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
