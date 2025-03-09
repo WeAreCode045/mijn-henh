@@ -8,21 +8,18 @@ export const CoverSection = ({ property, settings, styles }: {
   settings: AgencySettings; 
   styles: any; 
 }) => {
-  // Get the main image (main image or first featured image or first regular image)
-  const mainImage = property.featuredImage || 
-                   (property.featuredImages?.length > 0 ? property.featuredImages[0] : null) || 
-                   (property.images?.length > 0 ? property.images[0].url : null);
+  // Get the main image (from property images where is_main=true or first image)
+  const mainImage = property.images.find(img => img.is_main)?.url || 
+                   (property.images.length > 0 ? property.images[0].url : null);
   
-  // Get featured images (from featuredImages or from images with is_featured_image=true)
-  let displayImages: string[] = [];
+  // Get featured images (from images with is_featured_image=true)
+  let displayImages: string[] = property.images
+    .filter(img => img.is_featured_image)
+    .map(img => img.url);
   
-  if (property.featuredImages && property.featuredImages.length > 0) {
+  // For backward compatibility
+  if (displayImages.length === 0 && property.featuredImages && property.featuredImages.length > 0) {
     displayImages = property.featuredImages;
-  } else if (property.images) {
-    // Filter images with is_featured_image=true
-    displayImages = property.images
-      .filter(img => img.is_featured_image)
-      .map(img => img.url);
   }
   
   // Limit to max 4 images

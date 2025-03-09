@@ -12,28 +12,17 @@ export const createCoverPage = ({
   settings: AgencySettings;
   styles: any;
 }) => {
-  // Get the main image (from featuredImage or first image)
-  const mainImage = property.featuredImage || 
-                   (property.featuredImages && property.featuredImages.length > 0 
-                      ? property.featuredImages[0] 
-                      : property.images.length > 0 
-                        ? property.images[0].url 
-                        : null);
+  // Get the main image (from property images where is_main=true or first image)
+  const mainImage = property.images.find(img => img.is_main)?.url || 
+                   (property.images.length > 0 ? property.images[0].url : null);
   
-  // Get featured images (from featuredImages or from images with is_featured_image=true)
-  let gridImages: string[] = [];
-  
-  if (property.featuredImages && property.featuredImages.length > 0) {
-    gridImages = property.featuredImages;
-  } else if (property.images) {
-    // Filter images with is_featured_image=true
-    gridImages = property.images
-      .filter(img => img.is_featured_image)
-      .map(img => img.url);
-  }
+  // Get featured images (from images with is_featured_image=true)
+  const gridImages = property.images
+    .filter(img => img.is_featured_image)
+    .map(img => img.url);
   
   // Limit to max 4 images
-  gridImages = gridImages.slice(0, 4);
+  const displayGridImages = gridImages.slice(0, 4);
   
   return (
     <Page size="A4" style={styles.page}>
@@ -53,9 +42,9 @@ export const createCoverPage = ({
       )}
       
       {/* Grid Images */}
-      {gridImages.length > 0 && (
+      {displayGridImages.length > 0 && (
         <View style={styles.gridContainer}>
-          {gridImages.map((imageUrl, index) => (
+          {displayGridImages.map((imageUrl, index) => (
             <Image key={`grid-${index}`} src={imageUrl} style={styles.gridImage} />
           ))}
         </View>

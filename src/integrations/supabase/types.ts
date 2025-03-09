@@ -144,50 +144,6 @@ export type Database = {
         }
         Relationships: []
       }
-      form_submissions: {
-        Row: {
-          created_at: string | null
-          email: string
-          id: string
-          message: string | null
-          name: string
-          phone: string | null
-          property_id: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email: string
-          id?: string
-          message?: string | null
-          name: string
-          phone?: string | null
-          property_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string
-          id?: string
-          message?: string | null
-          name?: string
-          phone?: string | null
-          property_id?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "form_submissions_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           agent_photo: string | null
@@ -251,7 +207,6 @@ export type Database = {
           object_id: string | null
           price: string | null
           sqft: string | null
-          technicalItems: Json | null
           template_id: string | null
           title: string | null
           updated_at: string
@@ -284,7 +239,6 @@ export type Database = {
           object_id?: string | null
           price?: string | null
           sqft?: string | null
-          technicalItems?: Json | null
           template_id?: string | null
           title?: string | null
           updated_at?: string
@@ -317,7 +271,6 @@ export type Database = {
           object_id?: string | null
           price?: string | null
           sqft?: string | null
-          technicalItems?: Json | null
           template_id?: string | null
           title?: string | null
           updated_at?: string
