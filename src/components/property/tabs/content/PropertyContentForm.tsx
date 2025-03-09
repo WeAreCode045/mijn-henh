@@ -30,6 +30,7 @@ interface PropertyContentFormProps {
   isUploadingFloorplan?: boolean;
   setPendingChanges: (pending: boolean) => void;
   isLoadingLocationData?: boolean;
+  onSubmit?: () => void;
 }
 
 export function PropertyContentForm({
@@ -58,7 +59,8 @@ export function PropertyContentForm({
   handleToggleFeaturedImage,
   isUploading,
   setPendingChanges,
-  isLoadingLocationData
+  isLoadingLocationData,
+  onSubmit
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
     console.log(`Field changed: ${String(field)}`, value);

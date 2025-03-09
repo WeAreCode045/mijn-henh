@@ -20,29 +20,40 @@ export function usePropertyDatabase() {
         data.areas = transformedAreas as any;
       }
 
-      // Transform features to the correct format
-      if (data.features && Array.isArray(data.features)) {
-        // Make sure we're passing an array to preparePropertiesForJsonField
-        data.features = preparePropertiesForJsonField(data.features);
-      }
+      // Convert features JSON to string format if it's not already a string
+      const featuresJson = typeof data.features === 'string' 
+        ? data.features 
+        : JSON.stringify(data.features);
 
-      // Transform nearby_places to the correct format
-      if (data.nearby_places && Array.isArray(data.nearby_places)) {
-        // Make sure we're passing an array to preparePropertiesForJsonField
-        data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
-      }
+      // Convert nearby_places JSON to string format if it's not already a string
+      const nearby_placesJson = typeof data.nearby_places === 'string'
+        ? data.nearby_places
+        : JSON.stringify(data.nearby_places);
 
+      // Convert nearby_cities JSON to string format if it's not already a string
+      const nearby_citiesJson = typeof data.nearby_cities === 'string'
+        ? data.nearby_cities
+        : JSON.stringify(data.nearby_cities);
+      
       // Make a copy of data without fields that don't exist in the database
       const { featuredImage, featuredImages, coverImages, floorplans, ...dataToUpdate } = data as any;
       
-      // Ensure floorplanEmbedScript is included in the data to update
-      console.log("usePropertyDatabase - floorplanEmbedScript value:", dataToUpdate.floorplanEmbedScript);
+      // Update with properly stringified JSON values
+      const finalDataToUpdate = {
+        ...dataToUpdate,
+        features: featuresJson,
+        nearby_places: nearby_placesJson,
+        nearby_cities: nearby_citiesJson
+      };
       
-      console.log("usePropertyDatabase - Final update data:", dataToUpdate);
+      // Ensure floorplanEmbedScript is included in the data to update
+      console.log("usePropertyDatabase - floorplanEmbedScript value:", finalDataToUpdate.floorplanEmbedScript);
+      
+      console.log("usePropertyDatabase - Final update data:", finalDataToUpdate);
       
       const { error, data: updatedData } = await supabase
         .from('properties')
-        .update(dataToUpdate)
+        .update(finalDataToUpdate)
         .eq('id', id)
         .select();
         
@@ -81,17 +92,20 @@ export function usePropertyDatabase() {
         data.areas = transformedAreas as any;
       }
 
-      // Transform features to the correct format
-      if (data.features && Array.isArray(data.features)) {
-        // Make sure we're passing an array to preparePropertiesForJsonField
-        data.features = preparePropertiesForJsonField(data.features);
-      }
+      // Convert features JSON to string format if it's not already a string
+      const featuresJson = typeof data.features === 'string' 
+        ? data.features 
+        : JSON.stringify(data.features);
 
-      // Transform nearby_places to the correct format
-      if (data.nearby_places && Array.isArray(data.nearby_places)) {
-        // Make sure we're passing an array to preparePropertiesForJsonField
-        data.nearby_places = preparePropertiesForJsonField(data.nearby_places);
-      }
+      // Convert nearby_places JSON to string format if it's not already a string
+      const nearby_placesJson = typeof data.nearby_places === 'string'
+        ? data.nearby_places
+        : JSON.stringify(data.nearby_places);
+
+      // Convert nearby_cities JSON to string format if it's not already a string
+      const nearby_citiesJson = typeof data.nearby_cities === 'string'
+        ? data.nearby_cities
+        : JSON.stringify(data.nearby_cities);
 
       // Ensure floorplanEmbedScript is included in the data
       console.log("usePropertyDatabase - floorplanEmbedScript value for new property:", data.floorplanEmbedScript);
@@ -99,11 +113,19 @@ export function usePropertyDatabase() {
       // Make a copy of data without fields that don't exist in the database
       const { featuredImage, featuredImages, coverImages, floorplans, ...dataToCreate } = data as any;
 
-      console.log("usePropertyDatabase - Final create data:", dataToCreate);
+      // Update with properly stringified JSON values
+      const finalDataToCreate = {
+        ...dataToCreate,
+        features: featuresJson,
+        nearby_places: nearby_placesJson,
+        nearby_cities: nearby_citiesJson
+      };
+
+      console.log("usePropertyDatabase - Final create data:", finalDataToCreate);
       
       const { error, data: createdData } = await supabase
         .from('properties')
-        .insert(dataToCreate)
+        .insert(finalDataToCreate)
         .select();
         
       if (error) {

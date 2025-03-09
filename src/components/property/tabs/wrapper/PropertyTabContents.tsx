@@ -1,10 +1,6 @@
+
 import { PropertyFormData } from "@/types/property";
-import { 
-  renderDashboardTab, 
-  renderContentTab, 
-  renderMediaTab,
-  renderCommunicationsTab
-} from "../content/TabContentRenderers";
+import { renderTabContent } from "../content/TabContentRenderers";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -158,12 +154,5 @@ export function PropertyTabContents({
 
   console.log("PropertyTabContents - Active tab:", activeTab);
 
-  return (
-    <>
-      {renderDashboardTab(tabProps)}
-      {renderContentTab(tabProps)}
-      {renderMediaTab(tabProps)}
-      {renderCommunicationsTab(tabProps)}
-    </>
-  );
+  return renderTabContent(tabProps);
 }

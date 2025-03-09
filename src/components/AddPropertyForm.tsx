@@ -1,56 +1,41 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { PropertyFormData } from "@/types/property";
-import { PropertyFormContent } from "./property/form/PropertyFormContent";
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Save, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { usePropertyFormSubmit } from "@/hooks/property-form/usePropertyFormSubmit";
+import { PropertyFormData, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage } from "@/types/property";
+import { initialFormData } from "@/hooks/property-form/initialFormData";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeImages } from "@/utils/imageHelpers";
 
 export function AddPropertyForm() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { formData, setFormData } = usePropertyForm(id);
-  const { handleSubmit } = usePropertyFormSubmit();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isUploading, setIsUploading] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (id && !formData) {
-      // Fetch property data if ID is present but form data is not yet loaded
-      // This assumes usePropertyForm hook handles fetching data based on ID
-    }
-  }, [id, formData]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      [name]: checked
-    }));
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData(prev => ({ ...prev, [name]: checked }));
   };
 
   const handleAddFeature = () => {
+    const newFeature: PropertyFeature = {
+      id: crypto.randomUUID(),
+      description: ""
+    };
+    
     setFormData(prevFormData => ({
       ...prevFormData,
-      features: [
-        ...prevFormData.features,
-        {
-          id: crypto.randomUUID(),
-          description: `Feature ${prevFormData.features.length + 1}`
-        }
-      ]
+      features: [...prevFormData.features, newFeature]
     }));
   };
 
@@ -64,28 +49,27 @@ export function AddPropertyForm() {
   const handleUpdateFeature = (id: string, description: string) => {
     setFormData(prevFormData => ({
       ...prevFormData,
-      features: prevFormData.features.map(feature =>
+      features: prevFormData.features.map(feature => 
         feature.id === id ? { ...feature, description } : feature
       )
     }));
   };
 
   const handleAddArea = () => {
+    const newArea: PropertyArea = {
+      id: crypto.randomUUID(),
+      name: "",
+      size: "",
+      title: "",
+      description: "",
+      imageIds: [],
+      columns: 2,
+      images: []
+    };
+    
     setFormData(prevFormData => ({
       ...prevFormData,
-      areas: [
-        ...prevFormData.areas,
-        {
-          id: crypto.randomUUID(),
-          title: `Area ${prevFormData.areas.length + 1}`,
-          description: "",
-          imageIds: [],
-          columns: 2,
-          name: "",
-          size: "",
-          images: []
-        }
-      ]
+      areas: [...prevFormData.areas, newArea]
     }));
   };
 
@@ -96,216 +80,309 @@ export function AddPropertyForm() {
     }));
   };
 
-  const handleUpdateArea = (id: string, field: keyof PropertyFormData, value: any) => {
+  const handleUpdateArea = (id: string, field: keyof PropertyArea, value: any) => {
     setFormData(prevFormData => ({
       ...prevFormData,
-      areas: prevFormData.areas.map(area =>
+      areas: prevFormData.areas.map(area => 
         area.id === id ? { ...area, [field]: value } : area
       )
     }));
   };
 
-  const handleAreaImageUpload = (areaId: string, files: FileList) => {
-    // Placeholder for area image upload logic
-    console.log(`Uploading images for area ${areaId}`, files);
-  };
-
-  const handleAreaImageRemove = (areaId: string, imageId: string) => {
-    // Placeholder for area image removal logic
-    console.log(`Removing image ${imageId} from area ${areaId}`);
-  };
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      return;
-    }
-
-    setIsUploading(true);
-    const files = Array.from(e.target.files);
+    if (!e.target.files || e.target.files.length === 0) return;
 
     try {
-      // Upload each file to Supabase storage
+      const files = Array.from(e.target.files);
+      const newImages: PropertyImage[] = [];
+
       for (const file of files) {
         const fileExt = file.name.split('.').pop();
-        const filePath = `properties/${id ? id : 'temp'}/${crypto.randomUUID()}.${fileExt}`;
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `properties/${fileName}`;
 
-        const { data, error } = await supabase.storage
-          .from('properties')
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from('property-images')
           .upload(filePath, file);
 
-        if (error) {
-          console.error('Error uploading image:', error);
-          toast({
-            title: "Error",
-            description: "Failed to upload image",
-            variant: "destructive",
-          });
-          continue; // Skip to the next file
-        }
+        if (uploadError) throw uploadError;
 
         // Get public URL
-        const { data: publicUrlData } = supabase.storage
-          .from('properties')
+        const { data } = supabase.storage
+          .from('property-images')
           .getPublicUrl(filePath);
 
-        if (!publicUrlData || !publicUrlData.publicUrl) {
-          console.error('Could not get public URL');
-          continue;
+        if (data.publicUrl) {
+          newImages.push({
+            id: crypto.randomUUID(),
+            url: data.publicUrl,
+            filePath
+          });
         }
-
-        // Update form data with new image URL
-        setFormData(prevFormData => ({
-          ...prevFormData,
-          images: [...prevFormData.images, publicUrlData.publicUrl]
-        }));
       }
+
+      // Update form data with new images
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        images: [...normalizeImages(prevFormData.images), ...newImages]
+      }));
 
       toast({
         title: "Success",
-        description: "Images uploaded successfully",
+        description: `Uploaded ${files.length} image(s)`,
       });
     } catch (error) {
-      console.error('Error in image upload:', error);
+      console.error("Error uploading image:", error);
       toast({
         title: "Error",
-        description: "Error uploading images. Please try again.",
+        description: "Failed to upload image",
         variant: "destructive",
       });
-    } finally {
-      setIsUploading(false);
     }
-  };
-
-  const handleAreaPhotosUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Placeholder for area photos upload logic
-    console.log('Uploading area photos', e.target.files);
   };
 
   const handleRemoveImage = (index: number) => {
     setFormData(prevFormData => {
-      const updatedImages = [...prevFormData.images];
-      updatedImages.splice(index, 1);
-      return { ...prevFormData, images: updatedImages };
+      const newImages = [...normalizeImages(prevFormData.images)];
+      newImages.splice(index, 1);
+      return {
+        ...prevFormData,
+        images: newImages
+      };
     });
   };
 
-  const handleRemoveAreaPhoto = (areaId: string, imageId: string) => {
-    // Placeholder for area photo removal logic
-    console.log(`Removing area photo ${imageId} from area ${areaId}`);
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  const handleSubmitForm = async (e: React.FormEvent) => {
-    setIsSubmitting(true);
     try {
-      await handleSubmit(e, formData);
-      toast({
-        title: "Success",
-        description: "Property saved successfully",
-      });
-      navigate('/properties');
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!id) {
-      toast({
-        title: "Error",
-        description: "Property ID is missing",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('properties')
-        .delete()
-        .eq('id', id);
+        .insert([
+          {
+            title: formData.title,
+            price: formData.price,
+            address: formData.address,
+            bedrooms: formData.bedrooms,
+            bathrooms: formData.bathrooms,
+            sqft: formData.sqft,
+            livingArea: formData.livingArea,
+            buildYear: formData.buildYear,
+            garages: formData.garages,
+            energyLabel: formData.energyLabel,
+            hasGarden: formData.hasGarden,
+            description: formData.description,
+            features: formData.features,
+            areas: formData.areas
+          }
+        ])
+        .select();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
+      console.log("Property created:", data);
+      
       toast({
         title: "Success",
-        description: "Property deleted successfully",
+        description: "Property created successfully",
       });
-      navigate('/properties');
+      
+      navigate("/properties");
     } catch (error) {
-      console.error("Error deleting property:", error);
+      console.error("Error creating property:", error);
       toast({
         title: "Error",
-        description: "Failed to delete property",
+        description: "Failed to create property",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  if (!formData) {
-    return <div>Loading...</div>;
-  }
+  // This function adapter is needed for compatibility
+  const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{id ? "Edit Property" : "Add New Property"}</h1>
-
-      <form onSubmit={handleSubmitForm} className="space-y-4">
-        <PropertyFormContent
-          step={currentStep}
-          formData={formData}
-          onFieldChange={handleInputChange}
-          onAddFeature={handleAddFeature}
-          onRemoveFeature={handleRemoveFeature}
-          onUpdateFeature={handleUpdateFeature}
-          onAddArea={handleAddArea}
-          onRemoveArea={handleRemoveArea}
-          onUpdateArea={handleUpdateArea}
-          onAreaImageUpload={handleAreaImageUpload}
-          onAreaImageRemove={handleAreaImageRemove}
-          handleImageUpload={handleImageUpload}
-          handleAreaPhotosUpload={handleAreaPhotosUpload}
-          handleRemoveImage={handleRemoveImage}
-          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-          handleFloorplanUpload={() => {}}
-          handleRemoveFloorplan={() => {}}
-          isUploading={isUploading}
-        />
-
-        <div className="flex justify-between">
-          <Button
-            variant="destructive"
-            type="button"
-            onClick={handleDelete}
-            disabled={isSubmitting}
-            className="flex items-center gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Basic Information */}
+        <div className="space-y-4">
           <div>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              Save Property
-            </Button>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              required
+            />
           </div>
         </div>
-      </form>
-    </div>
+
+        {/* Property Details */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="bedrooms">Bedrooms</Label>
+              <Input
+                id="bedrooms"
+                name="bedrooms"
+                value={formData.bedrooms}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="bathrooms">Bathrooms</Label>
+              <Input
+                id="bathrooms"
+                name="bathrooms"
+                value={formData.bathrooms}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="sqft">Square Feet</Label>
+              <Input
+                id="sqft"
+                name="sqft"
+                value={formData.sqft}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="livingArea">Living Area</Label>
+              <Input
+                id="livingArea"
+                name="livingArea"
+                value={formData.livingArea}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="buildYear">Build Year</Label>
+              <Input
+                id="buildYear"
+                name="buildYear"
+                value={formData.buildYear}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="garages">Garages</Label>
+              <Input
+                id="garages"
+                name="garages"
+                value={formData.garages}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="energyLabel">Energy Label</Label>
+            <Input
+              id="energyLabel"
+              name="energyLabel"
+              value={formData.energyLabel}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="hasGarden"
+              checked={formData.hasGarden}
+              onCheckedChange={(checked) => handleCheckboxChange("hasGarden", checked === true)}
+            />
+            <Label htmlFor="hasGarden">Has Garden</Label>
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          rows={5}
+        />
+      </div>
+
+      {/* Images section would go here */}
+      <div>
+        <Label>Images</Label>
+        <div className="mt-2">
+          <Input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+          />
+        </div>
+        {formData.images.length > 0 && (
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+            {normalizeImages(formData.images).map((image, index) => (
+              <div key={image.id || index} className="relative">
+                <img
+                  src={image.url}
+                  alt={`Property ${index}`}
+                  className="h-24 w-full object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? "Creating..." : "Create Property"}
+      </Button>
+    </form>
   );
 }

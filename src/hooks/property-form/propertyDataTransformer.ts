@@ -48,6 +48,11 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           }
         }
         
+        // Process area images - ensure it's an array of PropertyImage
+        const processedImages = Array.isArray(area.images) 
+          ? area.images.map((img: any) => normalizeImage(img))
+          : [];
+        
         return {
           id: area.id || crypto.randomUUID(),
           title: area.title || "",
@@ -56,7 +61,7 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           columns: typeof area.columns === 'number' ? area.columns : 2,
           name: area.name || "",
           size: area.size || "",
-          images: normalizeImage(area.images || [])
+          images: processedImages
         };
       })
     : [];

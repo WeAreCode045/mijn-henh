@@ -1,50 +1,100 @@
-import { PropertySubmitData, PropertyData } from "@/types/property";
-import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
+
+import { PropertyData } from "@/types/property";
+import { Json } from "@/integrations/supabase/types";
+import { transformFeatures, transformAreas, transformNearbyPlaces } from "@/hooks/property-form/propertyDataTransformer";
+import { normalizeImages } from "@/utils/imageHelpers";
 
 interface PropertyDataAdapterProps {
-  propertyData: PropertyData;
-  onSubmit: (data: PropertySubmitData) => Promise<void>;
+  supabaseData: any;
+  children: (propertyData: PropertyData) => React.ReactNode;
 }
 
-export const PropertyDataAdapter = ({ propertyData, onSubmit }: PropertyDataAdapterProps) => {
-  const handleSubmit = async () => {
-    if (!propertyData) return;
+export function PropertyDataAdapter({ supabaseData, children }: PropertyDataAdapterProps) {
+  if (!supabaseData) {
+    return null;
+  }
 
-    // Transform the data to match the expected types
-    const featuresJson = preparePropertiesForJsonField(propertyData.features);
-    const areasJson = prepareAreasForFormSubmission(propertyData.areas);
-    const nearbyPlacesJson = preparePropertiesForJsonField(propertyData.nearby_places || []);
+  // Parse string JSON fields or use provided objects
+  let features = [];
+  try {
+    features = Array.isArray(supabaseData.features) 
+      ? supabaseData.features 
+      : (typeof supabaseData.features === 'string' 
+          ? JSON.parse(supabaseData.features) 
+          : []);
+  } catch (e) {
+    console.error('Error parsing features:', e);
+  }
 
-    const submitData: PropertySubmitData = {
-      id: propertyData.id,
-      title: propertyData.title,
-      price: propertyData.price,
-      address: propertyData.address,
-      bedrooms: propertyData.bedrooms,
-      bathrooms: propertyData.bathrooms,
-      sqft: propertyData.sqft,
-      livingArea: propertyData.livingArea,
-      buildYear: propertyData.buildYear,
-      garages: propertyData.garages,
-      energyLabel: propertyData.energyLabel,
-      hasGarden: propertyData.hasGarden,
-      description: propertyData.description,
-      location_description: propertyData.location_description,
-      features: featuresJson,
-      featuredImage: propertyData.featuredImage,
-      featuredImages: propertyData.featuredImages || [],
-      coverImages: propertyData.coverImages || [],
-      areas: areasJson,
-      map_image: propertyData.map_image,
-      nearby_places: nearbyPlacesJson,
-      latitude: propertyData.latitude,
-      longitude: propertyData.longitude,
-      images: propertyData.images.map(img => typeof img === 'string' ? img : img.url),
-      agent_id: propertyData.agent_id
-    };
+  let areas = [];
+  try {
+    areas = Array.isArray(supabaseData.areas) 
+      ? supabaseData.areas 
+      : (typeof supabaseData.areas === 'string' 
+          ? JSON.parse(supabaseData.areas) 
+          : []);
+  } catch (e) {
+    console.error('Error parsing areas:', e);
+  }
 
-    await onSubmit(submitData);
+  let nearby_places = [];
+  try {
+    nearby_places = Array.isArray(supabaseData.nearby_places) 
+      ? supabaseData.nearby_places 
+      : (typeof supabaseData.nearby_places === 'string' 
+          ? JSON.parse(supabaseData.nearby_places) 
+          : []);
+  } catch (e) {
+    console.error('Error parsing nearby_places:', e);
+  }
+
+  // Transform data into typed objects
+  const transformedFeatures = transformFeatures(features);
+  const transformedAreas = transformAreas(areas);
+  const transformedNearbyPlaces = transformNearbyPlaces(nearby_places);
+  
+  // Process images
+  const images = normalizeImages(supabaseData.images || []);
+
+  // Create standardized property data object
+  const propertyData: PropertyData = {
+    id: supabaseData.id,
+    title: supabaseData.title || '',
+    price: String(supabaseData.price || ''),
+    address: supabaseData.address || '',
+    bedrooms: String(supabaseData.bedrooms || ''),
+    bathrooms: String(supabaseData.bathrooms || ''),
+    sqft: String(supabaseData.sqft || ''),
+    livingArea: String(supabaseData.livingArea || ''),
+    buildYear: String(supabaseData.buildYear || ''),
+    garages: String(supabaseData.garages || ''),
+    energyLabel: String(supabaseData.energyLabel || ''),
+    hasGarden: Boolean(supabaseData.hasGarden),
+    description: supabaseData.description || '',
+    location_description: supabaseData.location_description || '',
+    features: transformedFeatures,
+    images: images,
+    areas: transformedAreas,
+    nearby_places: transformedNearbyPlaces,
+    object_id: supabaseData.object_id,
+    agent_id: supabaseData.agent_id,
+    template_id: supabaseData.template_id || 'default',
+    virtualTourUrl: supabaseData.virtualTourUrl || '',
+    youtubeUrl: supabaseData.youtubeUrl || '',
+    notes: supabaseData.notes || '',
+    map_image: supabaseData.map_image,
+    latitude: supabaseData.latitude,
+    longitude: supabaseData.longitude,
+    floorplans: supabaseData.floorplans || [],
+    floorplanEmbedScript: supabaseData.floorplanEmbedScript || '',
+    featuredImage: supabaseData.featuredImage || null,
+    featuredImages: supabaseData.featuredImages || [],
+    coverImages: supabaseData.coverImages || [],
+    gridImages: supabaseData.gridImages || [],
+    areaPhotos: supabaseData.areaPhotos || [],
+    created_at: supabaseData.created_at,
+    updated_at: supabaseData.updated_at
   };
 
-  return null; // This component doesn't render anything
-};
+  return children(propertyData);
+}
