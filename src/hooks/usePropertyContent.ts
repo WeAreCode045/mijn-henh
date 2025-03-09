@@ -12,7 +12,7 @@ export function usePropertyContent(
   formData: PropertyFormData,
   onFieldChange: (field: keyof PropertyFormData, value: any) => void
 ) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [pendingChanges, setPendingChanges] = useState(false);
   const { toast } = useToast();
   const { handleSubmit } = usePropertyFormSubmit();
@@ -73,11 +73,11 @@ export function usePropertyContent(
     // Save changes before moving to next step
     if (pendingChanges) {
       const saveResult = await handleSave();
-      if (saveResult && currentStep < steps.length) {
+      if (saveResult && currentStep < steps.length - 1) {
         console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
         setCurrentStep(prevStep => prevStep + 1);
       }
-    } else if (currentStep < steps.length) {
+    } else if (currentStep < steps.length - 1) {
       console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
       setCurrentStep(prevStep => prevStep + 1);
     } else {
@@ -89,11 +89,11 @@ export function usePropertyContent(
     // Save changes before moving to previous step
     if (pendingChanges) {
       const saveResult = await handleSave();
-      if (saveResult && currentStep > 1) {
+      if (saveResult && currentStep > 0) {
         console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
         setCurrentStep(prevStep => prevStep - 1);
       }
-    } else if (currentStep > 1) {
+    } else if (currentStep > 0) {
       console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
       setCurrentStep(prevStep => prevStep - 1);
     } else {

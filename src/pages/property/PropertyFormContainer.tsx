@@ -13,8 +13,6 @@ import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Save, Trash2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 
 export function PropertyFormContainer() {
   const { id } = useParams();
@@ -61,7 +59,11 @@ export function PropertyFormContainer() {
           
           if (data) {
             setAgentInfo({ id: data.id, name: data.full_name });
+          } else {
+            setAgentInfo(null);
           }
+        } else {
+          setAgentInfo(null);
         }
       };
 
@@ -131,12 +133,15 @@ export function PropertyFormContainer() {
   const handleAgentChange = async (agentId: string) => {
     if (!formData) return;
     
-    setSelectedAgent(agentId);
+    // Set to null if it's an empty string
+    const finalAgentId = agentId.trim() === '' ? null : agentId;
+    
+    setSelectedAgent(finalAgentId || '');
     
     // Update the form data with the selected agent
     setFormData({
       ...formData,
-      agent_id: agentId
+      agent_id: finalAgentId
     });
     
     // If we have a property ID, update it in the database
@@ -144,15 +149,21 @@ export function PropertyFormContainer() {
       try {
         const { error } = await supabase
           .from('properties')
-          .update({ agent_id: agentId })
+          .update({ agent_id: finalAgentId })
           .eq('id', formData.id);
         
         if (error) throw error;
         
         // Find the agent info to display
-        const agent = agents.find(a => a.id === agentId);
-        if (agent) {
-          setAgentInfo({ id: agent.id, name: agent.full_name });
+        if (finalAgentId) {
+          const agent = agents.find(a => a.id === finalAgentId);
+          if (agent) {
+            setAgentInfo({ id: agent.id, name: agent.full_name });
+          } else {
+            setAgentInfo(null);
+          }
+        } else {
+          setAgentInfo(null);
         }
         
         toast({

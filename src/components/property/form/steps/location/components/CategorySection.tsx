@@ -35,7 +35,10 @@ export function CategorySection({
               originalIndex={place.id ? parseInt(place.id) : idx}
               category={category}
               onRemove={onRemovePlace ? () => onRemovePlace(idx) : undefined}
-              onVisibilityChange={toggleVisibility || (() => {})}
+              onVisibilityChange={toggleVisibility ? 
+                (index, visible) => toggleVisibility(index, visible) : 
+                () => {}}
+              isVisible={isVisible ? isVisible(place) : true}
             />
           ))}
         </div>
