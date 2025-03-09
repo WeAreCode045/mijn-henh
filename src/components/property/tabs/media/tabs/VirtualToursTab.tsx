@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { YoutubeIcon, Camera3Icon } from "lucide-react";
+import { YoutubeIcon, Camera } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface VirtualToursTabProps {
@@ -40,7 +40,7 @@ export function VirtualToursTab({ property, setProperty }: VirtualToursTabProps)
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Camera3Icon className="mr-2 h-5 w-5" />
+            <Camera className="mr-2 h-5 w-5" />
             Virtual Tour
           </CardTitle>
         </CardHeader>

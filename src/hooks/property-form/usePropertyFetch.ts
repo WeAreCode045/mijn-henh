@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity } from "@/types/property";
 import { initialFormData } from "./initialFormData";
+import { Json } from "@/integrations/supabase/types";
 
 // Helper function to safely convert JSON or array to array
 const safeParseArray = (value: any, defaultValue: any[] = []): any[] => {
@@ -98,12 +99,14 @@ export function usePropertyFetch(id: string | undefined) {
           
           try {
             // For older database entries that might not have the nearby_cities field
-            // Using a try-catch as propertyData.nearby_cities might not exist in type definition
             if (propertyData.nearby_cities !== undefined) {
               nearby_cities = safeParseArray(propertyData.nearby_cities);
+            } else {
+              console.warn('No nearby_cities property found in database record, using empty array');
+              nearby_cities = [];
             }
           } catch (error) {
-            console.warn('No nearby_cities property found, using empty array');
+            console.warn('Error parsing nearby_cities, using empty array');
             nearby_cities = [];
           }
           
