@@ -14,7 +14,14 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
   
   switch (activeTab) {
     case "dashboard":
-      return <DashboardTabContent property={propertyData} />;
+      return (
+        <DashboardTabContent 
+          property={propertyData} 
+          onDelete={handlers.onDelete}
+          onSave={handlers.onSave}
+          onWebView={handlers.handleWebView}
+        />
+      );
     case "content":
       return (
         <ContentTabContent
