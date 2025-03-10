@@ -3,18 +3,10 @@ import React, { useState, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Mail, Phone, Calendar, Eye, EyeOff } from 'lucide-react';
-import { Submission } from './types';
+import { Submission, SubmissionDetailProps } from './types';
 import { SubmissionReplies } from './SubmissionReplies';
 import { SubmissionResponse } from './SubmissionResponse';
 import { formatDate } from '@/utils/dateUtils';
-
-interface SubmissionDetailProps {
-  submission: Submission;
-  onMarkAsRead: () => Promise<void>;
-  isMarking: boolean;
-  onSendReply: (text: string) => Promise<void>;
-  isSending: boolean;
-}
 
 export function SubmissionDetail({ 
   submission, 
@@ -99,7 +91,6 @@ export function SubmissionDetail({
       
       <SubmissionReplies 
         replies={submission.replies || []}
-        submissionId={submission.id}
       />
       
       <Card>

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Submission } from '../communications/types';
 import { SubmissionsList } from '../communications/SubmissionsList';
 import { SubmissionDetail } from '../communications/SubmissionDetail';
-import { useSubmissions } from '../communications/useSubmissions';
+import { useSubmissions } from '../communications/hooks/useSubmissions';
 import { useMarkAsRead } from '../communications/hooks/useMarkAsRead';
 import { useSendResponse } from '../communications/hooks/useSendResponse';
 

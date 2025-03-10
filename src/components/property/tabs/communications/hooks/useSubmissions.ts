@@ -38,15 +38,16 @@ export function useSubmissions(propertyId: string) {
             .eq('submission_id', submission.id)
             .order('created_at', { ascending: true });
 
-          // Map database reply fields to our SubmissionReply type
+          // Transform replies to match SubmissionReply type
           const replies: SubmissionReply[] = (repliesData || []).map(reply => ({
             id: reply.id,
-            text: reply.reply_text,
+            reply_text: reply.reply_text,
             created_at: reply.created_at,
-            agent_id: reply.agent_id
+            agent_id: reply.agent_id,
+            submission_id: reply.submission_id
           }));
 
-          // Map database submission fields to our Submission type
+          // Transform submission to match Submission type
           return {
             id: submission.id,
             property_id: submission.property_id,

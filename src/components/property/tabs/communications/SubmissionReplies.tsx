@@ -28,7 +28,7 @@ export function SubmissionReplies({ replies }: SubmissionRepliesProps) {
                     {formatDate(reply.created_at)}
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-line">{reply.text}</p>
+                <p className="text-sm whitespace-pre-line">{reply.reply_text}</p>
               </div>
             </div>
           </CardContent>

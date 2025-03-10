@@ -23,9 +23,10 @@ export interface Submission {
 
 export interface SubmissionReply {
   id: string;
-  text: string;
+  reply_text: string;
   created_at: string;
   agent_id: string;
+  submission_id: string;
 }
 
 export interface SubmissionDetailProps {

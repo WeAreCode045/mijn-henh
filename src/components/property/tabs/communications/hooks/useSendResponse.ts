@@ -1,61 +1,52 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 
-interface UseSendResponseProps {
+interface UseSendResponseOptions {
   submissionId: string;
-  onSuccess?: () => void;
+  onSuccess: () => Promise<void>;
 }
 
-export function useSendResponse({ submissionId, onSuccess }: UseSendResponseProps = { submissionId: '' }) {
+export function useSendResponse({ submissionId, onSuccess }: UseSendResponseOptions) {
   const [isSending, setIsSending] = useState(false);
-  const { toast } = useToast();
 
-  const sendResponse = async (text: string) => {
-    if (!submissionId || !text.trim()) return;
-    
+  const sendResponse = async (replyText: string) => {
+    if (!submissionId || !replyText.trim()) {
+      console.error('Missing submission ID or reply text');
+      return;
+    }
+
     setIsSending(true);
     try {
-      // First, get the current user (agent)
+      // Get current user info (agent)
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
         throw new Error('Not authenticated');
       }
-      
-      // Add reply to database
+
+      // Insert reply
       const { error } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
-          agent_id: user.id,
-          reply_text: text.trim()
+          reply_text: replyText,
+          agent_id: user.id
         });
-        
-      if (error) throw error;
-      
-      // Update submission to mark as read
+
+      if (error) {
+        throw error;
+      }
+
+      // Mark the submission as read
       await supabase
         .from('property_contact_submissions')
         .update({ is_read: true })
         .eq('id', submissionId);
-      
-      toast({
-        title: 'Response sent',
-        description: 'Your response has been sent successfully',
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
+
+      await onSuccess();
     } catch (error) {
-      console.error('Error sending response:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to send response',
-        variant: 'destructive',
-      });
+      console.error('Error sending reply:', error);
     } finally {
       setIsSending(false);
     }
