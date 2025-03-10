@@ -19,7 +19,6 @@ interface AreaCardProps {
   isFirstArea?: boolean;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
-  onImageUpload: (id: string, files: FileList) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
@@ -40,7 +39,6 @@ export function AreaCard({
   isFirstArea = false,
   onRemove,
   onUpdate,
-  onImageUpload,
   onImageRemove,
   onImagesSelect,
 }: AreaCardProps) {

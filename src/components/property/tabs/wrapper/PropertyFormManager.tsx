@@ -6,7 +6,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
   // Use the custom hook that combines all form-related functionality
   const formManagerProps = usePropertyFormManager(property);
   
-  // Filter out handleAreaImageUpload from props before passing them to children
+  // Extract all the props we need to pass to children
   const { 
     formState,
     handleFieldChange,
