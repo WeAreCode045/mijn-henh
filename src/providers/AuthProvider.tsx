@@ -28,7 +28,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const session = useSession();
-  // We'll use the direct import as a fallback
+  // We'll use the direct import as a fallback - always ensure we have a valid client
   const supabaseFromHook = useSupabaseClient<Database>();
   const supabaseClient = supabaseFromHook || supabase;
   
@@ -40,48 +40,63 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     console.log("AuthProvider: Setting up auth state listener");
-    // Check if supabaseClient is available before setting up auth listener
-    if (!supabaseClient || !supabaseClient.auth) {
+    
+    // Check if the supabase client is valid and has auth
+    if (!supabaseClient) {
       console.error('Supabase client not available');
       setIsError(true);
       setIsLoading(false);
       return () => {};
     }
 
-    // Set up auth state listener
-    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log('Auth state changed:', event, newSession?.user?.id);
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (newSession?.user) {
-            console.log('User signed in or token refreshed:', newSession.user.id);
-            const userData: User = {
-              id: newSession.user.id,
-              email: newSession.user.email,
-              full_name: null,
-              phone: null,
-              whatsapp_number: null,
-              role: null,
-              avatar_url: null
-            };
-            setUser(userData);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing user data');
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      }
-    );
+    if (!supabaseClient.auth) {
+      console.error('Supabase auth not available on client');
+      setIsError(true);
+      setIsLoading(false);
+      return () => {};
+    }
 
-    return () => {
-      // Clean up listener
-      console.log("Cleaning up auth state listener");
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
+    try {
+      // Set up auth state listener
+      const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+        (event, newSession) => {
+          console.log('Auth state changed:', event, newSession?.user?.id);
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            if (newSession?.user) {
+              console.log('User signed in or token refreshed:', newSession.user.id);
+              const userData: User = {
+                id: newSession.user.id,
+                email: newSession.user.email,
+                full_name: null,
+                phone: null,
+                whatsapp_number: null,
+                role: null,
+                avatar_url: null
+              };
+              setUser(userData);
+            }
+          } else if (event === 'SIGNED_OUT') {
+            console.log('User signed out, clearing user data');
+            setUser(null);
+            setProfile(null);
+            setIsAdmin(false);
+          }
+        }
+      );
+
+      return () => {
+        // Clean up listener
+        console.log("Cleaning up auth state listener");
+        if (authListener && authListener.subscription) {
+          authListener.subscription.unsubscribe();
+        }
+      };
+    } catch (error) {
+      console.error('Error setting up auth listener:', error);
+      setIsError(true);
+      setIsLoading(false);
+      return () => {};
+    }
   }, [supabaseClient]);
 
   useEffect(() => {

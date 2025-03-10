@@ -19,8 +19,22 @@ export default function Auth() {
   const navigate = useNavigate();
   const { session, supabaseClient } = useAuth();
   
-  // Use the client from context if available, otherwise use the direct import
-  const authClient = supabaseClient?.auth ? supabaseClient : supabase;
+  // Ensure we have a valid client
+  const getValidClient = () => {
+    // First try the client from the context
+    if (supabaseClient?.auth) {
+      return supabaseClient;
+    }
+    
+    // Fall back to the direct import
+    if (supabase?.auth) {
+      return supabase;
+    }
+    
+    // If neither is valid, log error and return null
+    console.error("No valid Supabase client available");
+    return null;
+  };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -35,7 +49,9 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      if (!authClient.auth) {
+      const authClient = getValidClient();
+      
+      if (!authClient) {
         throw new Error("Authentication client not available");
       }
 
