@@ -48,10 +48,8 @@ export function usePropertyFormManager(property: PropertyData) {
     addArea,
     removeArea,
     updateArea,
-    handleAreaImageUpload,
     handleAreaImageRemove,
-    handleAreaImagesSelect,
-    isUploading
+    handleAreaImagesSelect
   } = usePropertyAreas(
     formState, 
     setFormStateWithTracking
@@ -63,6 +61,12 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
+    isUploading,
+    handleAreaPhotosUpload,
+    handleRemoveAreaPhoto,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
     images
   } = usePropertyImages(
     formState, 
@@ -112,7 +116,6 @@ export function usePropertyFormManager(property: PropertyData) {
     addArea,
     removeArea,
     updateArea,
-    handleAreaImageUpload,
     handleAreaImageRemove,
     handleAreaImagesSelect,
     handleImageUpload,
@@ -120,6 +123,11 @@ export function usePropertyFormManager(property: PropertyData) {
     isUploading,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
+    handleAreaPhotosUpload,
+    handleRemoveAreaPhoto,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
     onSubmit,
     currentStep,
     handleStepClick,

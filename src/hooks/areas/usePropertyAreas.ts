@@ -2,7 +2,6 @@
 import type { PropertyFormData } from '@/types/property';
 import { Dispatch, SetStateAction } from 'react';
 import { useAreaManagement } from './useAreaManagement';
-import { useAreaImageUpload } from './useAreaImageUpload';
 import { useAreaImageRemove } from './useAreaImageRemove';
 import { useAreaImageSelect } from './useAreaImageSelect';
 
@@ -12,7 +11,6 @@ export function usePropertyAreas(
 ) {
   // Use all the smaller, focused hooks
   const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormData);
-  const { handleAreaImageUpload, isUploading } = useAreaImageUpload(formData, setFormData);
   const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormData);
   const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormData);
 
@@ -21,9 +19,7 @@ export function usePropertyAreas(
     addArea,
     removeArea,
     updateArea,
-    handleAreaImageUpload,
     handleAreaImageRemove,
-    handleAreaImagesSelect,
-    isUploading
+    handleAreaImagesSelect
   };
 }

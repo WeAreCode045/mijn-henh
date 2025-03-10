@@ -13,10 +13,8 @@ interface PropertyAreasProps {
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
-  onImageUpload: (id: string, files: FileList) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (areaId: string, imageIds: string[]) => void;
-  isUploading?: boolean;
 }
 
 export function PropertyAreas({
@@ -26,10 +24,8 @@ export function PropertyAreas({
   onAdd,
   onRemove,
   onUpdate,
-  onImageUpload,
   onImageRemove,
   onImagesSelect,
-  isUploading,
 }: PropertyAreasProps) {
   useEffect(() => {
     console.log("PropertyAreas - Current areas:", areas);
@@ -64,7 +60,6 @@ export function PropertyAreas({
           size="sm" 
           className="flex items-center" 
           type="button"
-          disabled={isUploading}
         >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Area
@@ -84,7 +79,6 @@ export function PropertyAreas({
               isFirstArea={index === 0}
               onRemove={onRemove}
               onUpdate={onUpdate}
-              onImageUpload={onImageUpload}
               onImageRemove={onImageRemove}
               onImagesSelect={onImagesSelect}
             />

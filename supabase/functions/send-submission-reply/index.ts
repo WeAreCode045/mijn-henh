@@ -14,12 +14,12 @@ serve(async (req) => {
   }
 
   try {
-    const { submissionId, replyText, agentId } = await req.json();
+    const { submissionId, replyText } = await req.json();
 
-    if (!submissionId || !replyText || !agentId) {
+    if (!submissionId || !replyText) {
       return new Response(
         JSON.stringify({ 
-          error: "Missing required data. Required: submissionId, replyText, agentId" 
+          error: "Missing required data. Required: submissionId, replyText" 
         }),
         {
           status: 400,
@@ -33,6 +33,35 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
+    
+    // Extract the JWT token from the authorization header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "No authorization header" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Get the user from the JWT token
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    const userId = user.id;
 
     // 1. Get the submission details
     const { data: submission, error: submissionError } = await supabaseAdmin
@@ -58,19 +87,19 @@ serve(async (req) => {
       throw new Error(`Submission with ID ${submissionId} not found`);
     }
 
-    // 2. Get the agent details
-    const { data: agent, error: agentError } = await supabaseAdmin
+    // 2. Get the user who is replying (could be an agent or admin)
+    const { data: replyingUser, error: userError } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, email, phone, agent_photo")
-      .eq("id", agentId)
+      .eq("id", userId)
       .single();
 
-    if (agentError) {
-      throw new Error(`Error fetching agent: ${agentError.message}`);
+    if (userError) {
+      throw new Error(`Error fetching user: ${userError.message}`);
     }
 
-    if (!agent) {
-      throw new Error(`Agent with ID ${agentId} not found`);
+    if (!replyingUser) {
+      throw new Error(`User with ID ${userId} not found`);
     }
 
     // 3. Get agency settings for email configuration
@@ -91,8 +120,8 @@ serve(async (req) => {
     const emailContent = {
       to: submission.email,
       from: {
-        email: settings.smtp_from_email || agent.email,
-        name: agent.full_name
+        email: settings.smtp_from_email || replyingUser.email,
+        name: replyingUser.full_name
       },
       subject: `Re: Your inquiry about ${submission.property?.title || 'our property'}`,
       html: `
@@ -104,11 +133,11 @@ serve(async (req) => {
           </div>
           <div style="margin-top: 30px;">
             <div style="display: flex; align-items: center;">
-              ${agent.agent_photo ? `<img src="${agent.agent_photo}" alt="${agent.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
+              ${replyingUser.agent_photo ? `<img src="${replyingUser.agent_photo}" alt="${replyingUser.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
               <div>
-                <p style="margin: 0; font-weight: bold;">${agent.full_name}</p>
-                <p style="margin: 5px 0;">${agent.email}</p>
-                ${agent.phone ? `<p style="margin: 0;">${agent.phone}</p>` : ''}
+                <p style="margin: 0; font-weight: bold;">${replyingUser.full_name}</p>
+                <p style="margin: 5px 0;">${replyingUser.email}</p>
+                ${replyingUser.phone ? `<p style="margin: 0;">${replyingUser.phone}</p>` : ''}
               </div>
             </div>
           </div>
@@ -121,8 +150,21 @@ serve(async (req) => {
       // We'll use the Edge Function or EmailEngine if set up
       // For now, we're just recording the reply in the database
     };
+    
+    // 5. Save the reply to the database
+    const { error: replyError } = await supabaseAdmin
+      .from("property_submission_replies")
+      .insert({
+        submission_id: submissionId,
+        user_id: userId, // Use the authenticated user's ID
+        reply_text: replyText
+      });
+    
+    if (replyError) {
+      throw new Error(`Error saving reply: ${replyError.message}`);
+    }
 
-    // 5. Call email sending function if it's available
+    // 6. Call email sending function if it's available
     let emailResult = null;
     try {
       if (settings.smtp_host && settings.smtp_username && settings.smtp_password) {

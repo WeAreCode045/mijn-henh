@@ -7,10 +7,8 @@ interface AreasStepProps {
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  isUploading?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
 
@@ -19,10 +17,8 @@ export function AreasStep({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
-  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
-  isUploading,
   setPendingChanges
 }: AreasStepProps) {
   return (
@@ -39,10 +35,8 @@ export function AreasStep({
         onAdd={onAddArea}
         onRemove={onRemoveArea}
         onUpdate={onUpdateArea}
-        onImageUpload={onAreaImageUpload}
         onImageRemove={onAreaImageRemove}
         onImagesSelect={onAreaImagesSelect}
-        isUploading={isUploading}
       />
     </div>
   );
