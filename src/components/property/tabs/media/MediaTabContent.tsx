@@ -19,6 +19,40 @@ export function MediaTabContent({ property }: MediaTabContentProps) {
     setLocalProperty(property);
   }, [property]);
 
+  // Handlers for image operations (these would typically be connected to API calls)
+  const handleSetFeaturedImage = (url: string | null) => {
+    setLocalProperty(prev => ({
+      ...prev,
+      featuredImage: url
+    }));
+    console.log("Set featured image:", url);
+  };
+
+  const handleToggleFeaturedImage = (url: string) => {
+    setLocalProperty(prev => {
+      const currentFeatured = prev.featuredImages || [];
+      const isFeatured = currentFeatured.includes(url);
+      
+      const updatedFeatured = isFeatured
+        ? currentFeatured.filter(img => img !== url)
+        : [...currentFeatured, url];
+        
+      return {
+        ...prev,
+        featuredImages: updatedFeatured
+      };
+    });
+    console.log("Toggle featured image:", url);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    console.log("Remove image at index:", index);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Image upload triggered");
+  };
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -31,11 +65,13 @@ export function MediaTabContent({ property }: MediaTabContentProps) {
         <TabsContent value="images" className="space-y-6">
           <PropertyImagesCard 
             images={localProperty.images || []} 
-            onImageUpload={() => {}} 
-            onRemoveImage={() => {}} 
+            onImageUpload={handleImageUpload} 
+            onRemoveImage={handleRemoveImage} 
             isUploading={false}
             featuredImage={localProperty.featuredImage}
             featuredImages={localProperty.featuredImages}
+            onSetFeaturedImage={handleSetFeaturedImage}
+            onToggleFeaturedImage={handleToggleFeaturedImage}
             propertyId={localProperty.id}
           />
         </TabsContent>

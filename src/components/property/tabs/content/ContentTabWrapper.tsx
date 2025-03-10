@@ -1,10 +1,9 @@
 
 import React from "react";
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { PropertyStepContent } from "../PropertyStepContent";
 
-interface ContentTabWrapperProps {
-  property: PropertyData;
+export interface ContentTabWrapperProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
@@ -12,15 +11,19 @@ interface ContentTabWrapperProps {
   onUpdateFeature: (id: string, description: string) => void;
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, data: any) => void;
-  onAreaImageRemove: (areaId: string, imageIndex: number) => void;
-  onAreaImagesSelect: (areaId: string, images: any[]) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => void;
-  isUploading: boolean;
+  onUpdateArea: (id: string, field: string, value: any) => void;
+  onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
+  isUploading?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function ContentTabWrapper({
-  property,
   formData,
   onFieldChange,
   onAddFeature,
@@ -31,27 +34,35 @@ export function ContentTabWrapper({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  onAreaImageUpload,
-  isUploading
+  handleAreaImageUpload,
+  currentStep,
+  handleStepClick,
+  handleNext,
+  handlePrevious,
+  isUploading = false,
+  setPendingChanges = () => {}
 }: ContentTabWrapperProps) {
+  // You can add any additional logic needed for the content tab wrapper here
+  
   return (
-    <div className="space-y-6">
-      <PropertyStepContent
-        formData={formData}
-        handlers={{
-          onFieldChange,
-          onAddFeature,
-          onRemoveFeature,
-          onUpdateFeature,
-          onAddArea,
-          onRemoveArea,
-          onUpdateArea,
-          onAreaImageRemove,
-          onAreaImagesSelect,
-          onAreaImageUpload,
-          isUploading
-        }}
-      />
-    </div>
+    <PropertyStepContent
+      formData={formData}
+      step={currentStep}
+      onFieldChange={onFieldChange}
+      onAddFeature={onAddFeature}
+      onRemoveFeature={onRemoveFeature}
+      onUpdateFeature={onUpdateFeature}
+      onAddArea={onAddArea}
+      onRemoveArea={onRemoveArea}
+      onUpdateArea={onUpdateArea}
+      onAreaImageRemove={onAreaImageRemove}
+      onAreaImagesSelect={onAreaImagesSelect}
+      onAreaImageUpload={handleAreaImageUpload}
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      isUploading={isUploading}
+    />
   );
 }
