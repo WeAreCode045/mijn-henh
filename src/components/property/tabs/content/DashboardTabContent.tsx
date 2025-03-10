@@ -30,15 +30,15 @@ export function DashboardTabContent({
   const [agents, setAgents] = useState<{id: string, name: string}[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
 
-  // Fetch agents for the dropdown
+  // Fetch agents for the dropdown, include admin users who can also be agents
   useEffect(() => {
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, full_name')
-          .eq('role', 'agent');
+          .select('id, full_name, role')
+          .or('role.eq.agent,role.eq.admin'); // Include both agent and admin roles
         
         if (error) throw error;
         
@@ -70,7 +70,10 @@ export function DashboardTabContent({
 
   const handleAgentChange = (agentId: string) => {
     if (handleSaveAgent) {
-      handleSaveAgent(agentId);
+      // Handle the special case for "no-agent"
+      const finalAgentId = agentId === "no-agent" ? "" : agentId;
+      handleSaveAgent(finalAgentId);
+      
       toast({
         title: "Agent updated",
         description: "The property agent has been updated",
@@ -201,7 +204,7 @@ export function DashboardTabContent({
           </CardHeader>
           <CardContent>
             <Select 
-              value={property.agent_id || ''} 
+              value={property.agent_id || 'no-agent'} 
               onValueChange={handleAgentChange}
               disabled={isLoadingAgents}
             >
