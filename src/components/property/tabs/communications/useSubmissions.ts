@@ -7,11 +7,11 @@ export interface SubmissionReply {
   submission_id: string;
   reply_text: string;
   created_at: string;
-  agent?: {
-    id?: string;
-    full_name?: string;
-    email?: string;
-    photo_url?: string;
+  user: {
+    id: string;
+    full_name: string;
+    email: string;
+    photo_url: string;
   } | null;
 }
 
@@ -82,7 +82,7 @@ export function useSubmissions(propertyId: string) {
             submission_id, 
             reply_text, 
             created_at,
-            agent:agent_id (id, full_name, email, photo_url)
+            user:user_id (id, full_name, email, agent_photo)
           `)
           .eq('submission_id', submission.id)
           .order('created_at', { ascending: true });
@@ -95,13 +95,13 @@ export function useSubmissions(propertyId: string) {
           };
         }
         
-        // Map the replies with safe agent data
+        // Map the replies with safe user data
         const mappedReplies = (repliesData || []).map(reply => {
-          const safeAgent = reply.agent ? {
-            id: reply.agent.id || '',
-            full_name: reply.agent.full_name || '',
-            email: reply.agent.email || '',
-            photo_url: reply.agent.photo_url || ''
+          const safeUser = reply.user ? {
+            id: reply.user.id || '',
+            full_name: reply.user.full_name || '',
+            email: reply.user.email || '',
+            photo_url: reply.user.agent_photo || ''
           } : null;
           
           return {
@@ -109,7 +109,7 @@ export function useSubmissions(propertyId: string) {
             submission_id: reply.submission_id,
             reply_text: reply.reply_text,
             created_at: reply.created_at,
-            agent: safeAgent
+            user: safeUser
           };
         });
         

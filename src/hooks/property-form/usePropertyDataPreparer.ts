@@ -42,8 +42,9 @@ export function usePropertyDataPreparer() {
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      floorplanEmbedScript: formData.floorplanEmbedScript || ""
-      // images field is removed as it's not part of the properties table
+      floorplanEmbedScript: formData.floorplanEmbedScript || "",
+      // We need to include images for type compatibility, but it will be removed in the database hook
+      images: formData.images || []
     };
   };
 
