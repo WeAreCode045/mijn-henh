@@ -41,6 +41,12 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     isSaving
   } = formManagerProps;
   
+  // Create a placeholder for handleAreaImageUpload if it doesn't exist
+  const handleAreaImageUpload = (areaId: string, files: FileList) => {
+    console.log(`Placeholder for handleAreaImageUpload: area ${areaId}, ${files.length} files`);
+    return Promise.resolve();
+  };
+  
   // Pass all the props to the children render function
   return children({
     formState,
@@ -73,6 +79,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handlePrevious,
     propertyWithRequiredProps,
     lastSaved,
-    isSaving
+    isSaving,
+    handleAreaImageUpload // Add the missing handler
   });
 }

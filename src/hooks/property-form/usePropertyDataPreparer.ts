@@ -43,8 +43,10 @@ export function usePropertyDataPreparer() {
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       floorplanEmbedScript: formData.floorplanEmbedScript || "",
-      // We need to include images for type compatibility, but it will be removed in the database hook
-      images: formData.images || []
+      // Extract just the URLs for type compatibility
+      images: Array.isArray(formData.images) 
+        ? formData.images.map(img => typeof img === 'string' ? img : img.url) 
+        : []
     };
   };
 

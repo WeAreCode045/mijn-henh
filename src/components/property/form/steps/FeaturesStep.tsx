@@ -9,6 +9,8 @@ interface FeaturesStepProps {
   onUpdateFeature: (id: string, description: string) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   setPendingChanges?: (pending: boolean) => void;
+  // Add the missing features property
+  features?: PropertyFeature[];
 }
 
 export function FeaturesStep({

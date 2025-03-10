@@ -1,6 +1,6 @@
 
 import { PropertyAreas } from "@/components/property/PropertyAreas";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
 
 interface AreasStepProps {
   formData: PropertyFormData;
@@ -10,6 +10,11 @@ interface AreasStepProps {
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   setPendingChanges?: (pending: boolean) => void;
+  // Add missing properties based on the errors
+  areas?: PropertyArea[];
+  images?: PropertyImage[];
+  propertyId?: string;
+  onAreaImageUpload?: (areaId: string, files: FileList) => void;
 }
 
 export function AreasStep({
