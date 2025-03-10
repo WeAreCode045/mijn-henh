@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/providers/AuthProvider';
 
-interface UseSendResponseOptions {
+export interface UseSendResponseOptions {
   submissionId: string;
   onSuccess: () => Promise<void>;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,8 +88,9 @@ export function SubmissionDetail({
         </CardContent>
       </Card>
       
-      <SubmissionReplies 
-        replies={submission.replies || []}
+      <SubmissionReplies
+        replies={submission.replies}
+        submissionId={submission.id}
       />
       
       <Card>

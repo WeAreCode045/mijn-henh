@@ -7,21 +7,21 @@ import { Submission } from './types';
 
 interface SubmissionsListProps {
   submissions: Submission[];
-  selectedSubmission: Submission | null;
-  onSelect: (submission: Submission) => void;
+  selectedSubmissionId: string;
+  onSelectSubmission: (submission: Submission) => void;
   isLoading?: boolean;
 }
 
-export function SubmissionsList({ 
+export const SubmissionsList = ({ 
   submissions, 
-  selectedSubmission, 
-  onSelect,
+  selectedSubmissionId, 
+  onSelectSubmission,
   isLoading = false
-}: SubmissionsListProps) {
+}: SubmissionsListProps) => {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">Loading submissions...</p>
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-estate-800"></div>
       </div>
     );
   }
@@ -48,9 +48,9 @@ export function SubmissionsList({
           {submissions.map((submission) => (
             <button
               key={submission.id}
-              onClick={() => onSelect(submission)}
+              onClick={() => onSelectSubmission(submission)}
               className={`w-full text-left p-4 hover:bg-muted/50 transition-colors ${
-                selectedSubmission?.id === submission.id ? 'bg-muted' : ''
+                selectedSubmissionId === submission.id ? 'bg-muted' : ''
               } ${!submission.is_read ? 'border-l-4 border-l-blue-500 pl-3' : ''}`}
             >
               <div className="flex justify-between items-start mb-1">
@@ -86,4 +86,4 @@ export function SubmissionsList({
       </ScrollArea>
     </div>
   );
-}
+};
