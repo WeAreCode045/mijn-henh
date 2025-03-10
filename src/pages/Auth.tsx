@@ -17,24 +17,13 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { session, supabaseClient } = useAuth();
+  const { session } = useAuth();
   
-  // Ensure we have a valid client
-  const getValidClient = () => {
-    // First try the client from the context
-    if (supabaseClient?.auth) {
-      return supabaseClient;
-    }
-    
-    // Fall back to the direct import
-    if (supabase?.auth) {
-      return supabase;
-    }
-    
-    // If neither is valid, log error and return null
-    console.error("No valid Supabase client available");
-    return null;
-  };
+  // Client safety check and logging
+  console.log("Auth component - initialization", { 
+    hasDirectClientAuth: !!supabase?.auth,
+    hasSession: !!session
+  });
 
   // Redirect if already logged in
   useEffect(() => {
@@ -49,14 +38,14 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const authClient = getValidClient();
-      
-      if (!authClient) {
-        throw new Error("Authentication client not available");
+      // Use the directly imported supabase client
+      if (!supabase?.auth) {
+        throw new Error("Supabase auth client not available");
       }
 
       if (isSignUp) {
-        const { data, error } = await authClient.auth.signUp({
+        console.log("Attempting sign up with email:", email);
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -72,8 +61,10 @@ export default function Auth() {
           title: "Success",
           description: "Please check your email to confirm your account",
         });
+        console.log("Sign up successful:", data);
       } else {
-        const { data, error } = await authClient.auth.signInWithPassword({
+        console.log("Attempting sign in with email:", email);
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -85,8 +76,7 @@ export default function Auth() {
           description: "Successfully logged in",
         });
         
-        // Force navigation to index page after successful sign in
-        console.log("Login successful, explicitly navigating to index page");
+        console.log("Login successful, navigating to index page");
         navigate('/');
       }
     } catch (error: any) {

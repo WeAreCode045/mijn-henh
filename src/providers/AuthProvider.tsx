@@ -28,37 +28,34 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const session = useSession();
-  // We'll use the direct import as a fallback - always ensure we have a valid client
   const supabaseFromHook = useSupabaseClient<Database>();
-  const supabaseClient = supabaseFromHook || supabase;
-  
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
+  
+  // Log client availability to help with debugging
+  console.log("AuthProvider - Initialization", {
+    hasHookClient: !!supabaseFromHook?.auth,
+    hasDirectClient: !!supabase?.auth,
+    hasSession: !!session
+  });
 
   useEffect(() => {
     console.log("AuthProvider: Setting up auth state listener");
     
-    // Check if the supabase client is valid and has auth
-    if (!supabaseClient) {
-      console.error('Supabase client not available');
-      setIsError(true);
-      setIsLoading(false);
-      return () => {};
-    }
-
-    if (!supabaseClient.auth) {
-      console.error('Supabase auth not available on client');
+    // Always use the direct import for consistency
+    if (!supabase?.auth) {
+      console.error('Supabase auth not available');
       setIsError(true);
       setIsLoading(false);
       return () => {};
     }
 
     try {
-      // Set up auth state listener
-      const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      // Set up auth state listener using the direct import
+      const { data: authListener } = supabase.auth.onAuthStateChange(
         (event, newSession) => {
           console.log('Auth state changed:', event, newSession?.user?.id);
           if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
@@ -97,12 +94,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(false);
       return () => {};
     }
-  }, [supabaseClient]);
+  }, []);  // Remove the dependency on supabaseClient to avoid re-running
 
   useEffect(() => {
     async function fetchProfile() {
-      // Check if supabaseClient is available before fetching profile
-      if (!supabaseClient || !supabaseClient.from) {
+      // Always use the direct import for consistency
+      if (!supabase || !supabase.from) {
         console.error('Supabase client not available for fetching profile');
         setIsError(true);
         setIsLoading(false);
@@ -114,7 +111,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (session?.user?.id) {
         try {
-          const { data, error } = await supabaseClient
+          const { data, error } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
@@ -168,16 +165,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
       setIsLoading(false);
     }
-  }, [session, supabaseClient]);
+  }, [session]);
 
   const signOut = async () => {
     console.log('Signing out...');
     try {
-      if (!supabaseClient || !supabaseClient.auth) {
+      if (!supabase || !supabase.auth) {
         throw new Error('Supabase client not available for sign out');
       }
       
-      const { error } = await supabaseClient.auth.signOut();
+      const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);
       }
@@ -186,6 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // Use the direct import client for consistency
   const value: AuthContextProps = {
     session,
     user,
@@ -193,7 +191,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin,
     isLoading,
     isError,
-    supabaseClient,
+    supabaseClient: supabase,
     signOut,
   };
 
