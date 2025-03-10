@@ -30,7 +30,7 @@ export function useSendResponse({ submissionId, onSuccess }: UseSendResponseProp
         .insert({
           submission_id: submissionId,
           agent_id: user.id,
-          text: text.trim()
+          reply_text: text.trim()
         });
         
       if (error) throw error;

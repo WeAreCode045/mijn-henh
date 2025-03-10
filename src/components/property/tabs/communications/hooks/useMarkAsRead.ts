@@ -3,13 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
-interface UseMarkAsReadProps {
-  submissionId: string;
-  isRead: boolean;
-  onSuccess?: () => void;
-}
-
-export function useMarkAsRead({ submissionId, isRead, onSuccess }: UseMarkAsReadProps = { submissionId: '', isRead: false }) {
+export function useMarkAsRead(submissionId: string, onSuccess?: () => void) {
   const [isMarking, setIsMarking] = useState(false);
   const { toast } = useToast();
 
@@ -20,24 +14,24 @@ export function useMarkAsRead({ submissionId, isRead, onSuccess }: UseMarkAsRead
     try {
       const { error } = await supabase
         .from('property_contact_submissions')
-        .update({ is_read: !isRead })
+        .update({ is_read: true })
         .eq('id', submissionId);
         
       if (error) throw error;
       
       toast({
-        title: `Marked as ${!isRead ? 'read' : 'unread'}`,
-        description: 'Submission status updated successfully',
+        title: 'Marked as read',
+        description: 'The submission has been marked as read',
       });
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      console.error('Error marking submission:', error);
+      console.error('Error marking as read:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update submission status',
+        description: 'Failed to mark as read',
         variant: 'destructive',
       });
     } finally {
