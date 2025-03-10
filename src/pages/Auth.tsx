@@ -25,6 +25,7 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (session) {
+      console.log("User already authenticated, redirecting to index page");
       navigate('/');
     }
   }, [session, navigate]);
@@ -63,11 +64,14 @@ export default function Auth() {
         
         if (error) throw error;
         
-        // We don't need to navigate here as the AuthProvider will handle session changes
         toast({
           title: "Success",
           description: "Successfully logged in",
         });
+        
+        // Force navigation to index page after successful sign in
+        console.log("Login successful, explicitly navigating to index page");
+        navigate('/');
       }
     } catch (error: any) {
       console.error("Auth error:", error);

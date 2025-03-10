@@ -39,6 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log("AuthProvider: Setting up auth state listener");
     // Check if supabaseClient is available before setting up auth listener
     if (!supabaseClient || !supabaseClient.auth) {
       console.error('Supabase client not available');
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('Auth state changed:', event, newSession?.user?.id);
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           if (newSession?.user) {
+            console.log('User signed in or token refreshed:', newSession.user.id);
             const userData: User = {
               id: newSession.user.id,
               email: newSession.user.email,
@@ -65,6 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(userData);
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log('User signed out, clearing user data');
           setUser(null);
           setProfile(null);
           setIsAdmin(false);
@@ -74,6 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return () => {
       // Clean up listener
+      console.log("Cleaning up auth state listener");
       if (authListener && authListener.subscription) {
         authListener.subscription.unsubscribe();
       }
