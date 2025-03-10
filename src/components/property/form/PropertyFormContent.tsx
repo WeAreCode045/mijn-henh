@@ -1,10 +1,11 @@
 
-import { PropertyFormData, PropertyImage } from "@/types/property";
+import { PropertyArea, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
+import { ImagesStep } from "./steps/ImagesStep";
 import { LocationStep } from "./steps/LocationStep";
-import { normalizeImages } from "@/utils/imageHelpers";
+import { TechnicalDataStep } from "./steps/TechnicalDataStep";
 
 interface PropertyFormContentProps {
   step: number;
@@ -19,26 +20,22 @@ interface PropertyFormContentProps {
   onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
-  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage?: (index: number) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage: (index: number) => void;
+  handleRemoveAreaPhoto: (index: number) => void;
+  handleRemoveFloorplan: (index: number) => void;
+  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
+  onAddTechnicalItem?: (e?: React.MouseEvent) => void;
+  onRemoveTechnicalItem?: (id: string) => void;
+  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
-  isUploadingFloorplan?: boolean;
-  setPendingChanges?: (changes: boolean) => void;
-  isLoadingLocationData?: boolean;
-  // Required props for navigation
-  currentStep: number;
-  handleStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
 }
 
 export function PropertyFormContent({
@@ -56,24 +53,20 @@ export function PropertyFormContent({
   onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
+  handleFloorplanUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
-  handleFloorplanUpload,
   handleRemoveFloorplan,
+  handleUpdateFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
+  onUpdateTechnicalItem,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading,
-  isUploadingFloorplan,
-  setPendingChanges,
-  isLoadingLocationData,
-  // Additional props
-  currentStep,
-  handleStepClick,
-  handleNext,
-  handlePrevious
+  isUploading
 }: PropertyFormContentProps) {
   const renderStep = () => {
     switch (step) {
@@ -102,10 +95,28 @@ export function PropertyFormContent({
         );
       case 3:
         return (
+          <form id="imagesForm">
+            <ImagesStep
+              formData={formData}
+              onFieldChange={onFieldChange}
+              handleImageUpload={handleImageUpload}
+              handleAreaPhotosUpload={handleAreaPhotosUpload}
+              handleFloorplanUpload={handleFloorplanUpload}
+              handleRemoveImage={handleRemoveImage}
+              handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+              handleRemoveFloorplan={handleRemoveFloorplan}
+              handleSetFeaturedImage={handleSetFeaturedImage}
+              handleToggleFeaturedImage={handleToggleFeaturedImage}
+              isUploading={isUploading}
+            />
+          </form>
+        );
+      case 4:
+        return (
           <form id="areasForm">
             <AreasStep
               areas={formData.areas || []}
-              images={normalizeImages(formData.images)}
+              images={formData.images || []}
               propertyId={formData.id}
               onAddArea={onAddArea}
               onRemoveArea={onRemoveArea}
@@ -117,7 +128,7 @@ export function PropertyFormContent({
             />
           </form>
         );
-      case 4:
+      case 5:
         return (
           <form id="locationForm">
             <LocationStep
@@ -126,7 +137,22 @@ export function PropertyFormContent({
               onFetchLocationData={onFetchLocationData}
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               handleMapImageDelete={handleMapImageDelete}
-              isLoadingLocationData={isLoadingLocationData}
+            />
+          </form>
+        );
+      case 6:
+        return (
+          <form id="technicalDataForm">
+            <TechnicalDataStep
+              formData={formData}
+              onFieldChange={onFieldChange}
+              onAddTechnicalItem={onAddTechnicalItem}
+              onRemoveTechnicalItem={onRemoveTechnicalItem}
+              onUpdateTechnicalItem={onUpdateTechnicalItem}
+              onFloorplanUpload={handleFloorplanUpload}
+              onRemoveFloorplan={handleRemoveFloorplan}
+              onUpdateFloorplan={handleUpdateFloorplan}
+              isUploading={isUploading}
             />
           </form>
         );

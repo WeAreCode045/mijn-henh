@@ -32,9 +32,6 @@ export interface Settings {
   smtp_from_name?: string | null;
   smtp_secure?: boolean | null;
   
-  // OpenAI API key
-  openai_api_key?: string | null;
-  
   // Add property aliases to match AgencySettings expected properties
   primaryColor?: string;
   secondaryColor?: string;

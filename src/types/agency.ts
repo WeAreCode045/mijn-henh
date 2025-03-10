@@ -32,7 +32,4 @@ export interface AgencySettings {
   smtp_from_email?: string | null;
   smtp_from_name?: string | null;
   smtp_secure?: boolean | null;
-  
-  // OpenAI API key
-  openai_api_key?: string | null;
 }

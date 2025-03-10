@@ -29,7 +29,6 @@ export type Database = {
           instagram_url: string | null
           logo_url: string | null
           name: string
-          openai_api_key: string | null
           phone: string | null
           primary_color: string | null
           secondary_color: string | null
@@ -63,7 +62,6 @@ export type Database = {
           instagram_url?: string | null
           logo_url?: string | null
           name: string
-          openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
@@ -97,7 +95,6 @@ export type Database = {
           instagram_url?: string | null
           logo_url?: string | null
           name?: string
-          openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
           secondary_color?: string | null
@@ -143,6 +140,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      form_submissions: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+          property_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_submissions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -197,12 +238,12 @@ export type Database = {
           garages: string | null
           hasGarden: boolean | null
           id: string
+          images: Json[] | null
           latitude: number | null
           livingArea: string | null
           location_description: string | null
           longitude: number | null
           map_image: string | null
-          nearby_cities: Json | null
           nearby_places: Json | null
           notes: string | null
           object_id: string | null
@@ -230,12 +271,12 @@ export type Database = {
           garages?: string | null
           hasGarden?: boolean | null
           id?: string
+          images?: Json[] | null
           latitude?: number | null
           livingArea?: string | null
           location_description?: string | null
           longitude?: number | null
           map_image?: string | null
-          nearby_cities?: Json | null
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
@@ -263,12 +304,12 @@ export type Database = {
           garages?: string | null
           hasGarden?: boolean | null
           id?: string
+          images?: Json[] | null
           latitude?: number | null
           livingArea?: string | null
           location_description?: string | null
           longitude?: number | null
           map_image?: string | null
-          nearby_cities?: Json | null
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
@@ -355,7 +396,6 @@ export type Database = {
           is_featured_image: boolean | null
           is_main: boolean | null
           property_id: string | null
-          sort_order: number | null
           type: string | null
           url: string
         }
@@ -366,7 +406,6 @@ export type Database = {
           is_featured_image?: boolean | null
           is_main?: boolean | null
           property_id?: string | null
-          sort_order?: number | null
           type?: string | null
           url: string
         }
@@ -377,7 +416,6 @@ export type Database = {
           is_featured_image?: boolean | null
           is_main?: boolean | null
           property_id?: string | null
-          sort_order?: number | null
           type?: string | null
           url?: string
         }
@@ -387,41 +425,6 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_submission_replies: {
-        Row: {
-          agent_id: string | null
-          created_at: string
-          id: string
-          reply_text: string
-          submission_id: string
-          updated_at: string
-        }
-        Insert: {
-          agent_id?: string | null
-          created_at?: string
-          id?: string
-          reply_text: string
-          submission_id: string
-          updated_at?: string
-        }
-        Update: {
-          agent_id?: string | null
-          created_at?: string
-          id?: string
-          reply_text?: string
-          submission_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_submission_replies_submission_id_fkey"
-            columns: ["submission_id"]
-            isOneToOne: false
-            referencedRelation: "property_contact_submissions"
             referencedColumns: ["id"]
           },
         ]

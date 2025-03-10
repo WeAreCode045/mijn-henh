@@ -82,10 +82,7 @@ export function FloorplansTab({
           />
 
           {/* Visible UI components */}
-          <FloorplanUploader 
-            onFloorplanUpload={handleUpload}
-            isUploading={isUploading}
-          />
+          <FloorplanUploader isLoading={isUploading} onUpload={handleUpload} />
           
           <FloorplanEmbed 
             embedScript={floorplanEmbedScript} 

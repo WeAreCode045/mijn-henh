@@ -1,42 +1,17 @@
 
-import { useState } from "react";
-import { PropertyFormData, PropertyImage } from "@/types/property";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { PropertyFormData, PropertyFloorplan } from '@/types/property';
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
-  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Helper function to get the next sort order
-  const getNextSortOrder = async (propertyId: string): Promise<number> => {
-    // Get the highest current sort_order for floorplans
-    const { data, error } = await supabase
-      .from('property_images')
-      .select('sort_order')
-      .eq('property_id', propertyId)
-      .eq('type', 'floorplan')
-      .order('sort_order', { ascending: false })
-      .limit(1);
-      
-    if (error) {
-      console.error('Error getting max sort order:', error);
-      return 1; // Default to 1 if there's an error
-    }
-    
-    // If no data or no sort_order, start with 1
-    if (!data || data.length === 0 || !data[0].sort_order) {
-      return 1;
-    }
-    
-    // Otherwise, use the next number
-    return data[0].sort_order + 1;
-  };
-
-  // Handle floorplan upload
+  // Handle floorplan image upload
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
@@ -44,14 +19,14 @@ export function usePropertyFloorplans(
     
     try {
       const files = Array.from(e.target.files);
-      const uploadPromises = files.map(async (file, index) => {
-        // Sanitize the file name
+      const uploadPromises = files.map(async (file) => {
+        // Sanitize the file name to remove non-ASCII characters
         const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
         
-        // Create a unique file name
+        // Create a unique file name with UUID to prevent collisions
         const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
         
-        // Define the file path in the storage bucket
+        // Define the file path in the storage bucket - Using floorplans subfolder
         const filePath = `properties/${formData.id || 'new'}/floorplans/${fileName}`;
         
         // Upload the file to Supabase storage
@@ -66,15 +41,13 @@ export function usePropertyFloorplans(
           .from('properties')
           .getPublicUrl(filePath);
           
-        // Return a new PropertyImage object
+        // Return a new PropertyFloorplan object
         return {
           id: crypto.randomUUID(),
           url: publicUrl,
           filePath,
-          title: fileName.split('-').pop() || 'Floorplan',
-          type: 'floorplan',
-          sort_order: 0 // Temporary value, will be updated later
-        } as PropertyImage;
+          columns: 2 // Default to 2 columns
+        };
       });
       
       // Wait for all uploads to complete
@@ -83,6 +56,11 @@ export function usePropertyFloorplans(
       // Create a new array with all existing and new floorplans
       const currentFloorplans = Array.isArray(formData.floorplans) ? formData.floorplans : [];
       const updatedFloorplans = [...currentFloorplans, ...newFloorplans];
+      
+      // Log for debugging
+      console.log("Previous floorplans:", currentFloorplans);
+      console.log("New floorplans:", newFloorplans);
+      console.log("Updated floorplans:", updatedFloorplans);
       
       // Update form state
       setFormData({
@@ -93,9 +71,6 @@ export function usePropertyFloorplans(
       // If the property is already saved in the database, update it immediately
       if (formData.id) {
         try {
-          // Get the next sort order to use
-          let nextSortOrder = await getNextSortOrder(formData.id);
-          
           // Add floorplans to the property_images table for tracking
           for (const floorplan of newFloorplans) {
             const { error } = await supabase
@@ -103,8 +78,7 @@ export function usePropertyFloorplans(
               .insert({
                 property_id: formData.id,
                 url: floorplan.url,
-                type: 'floorplan',
-                sort_order: nextSortOrder++ // Assign and increment
+                type: 'floorplan' // Set type as 'floorplan' to distinguish from regular images
               });
               
             if (error) {
@@ -132,67 +106,96 @@ export function usePropertyFloorplans(
     }
   };
 
-  // Handle floorplan removal
+  // Remove a floorplan
   const handleRemoveFloorplan = async (index: number) => {
-    // Ensure floorplans array exists
-    if (!Array.isArray(formData.floorplans) || index < 0 || index >= formData.floorplans.length) {
-      console.error('Invalid floorplan index or floorplans array is not defined');
-      return;
+    try {
+      const floorplanToRemove = formData.floorplans?.[index];
+      if (!floorplanToRemove) return;
+      
+      // Create a new array without the floorplan to remove
+      const updatedFloorplans = formData.floorplans?.filter((_, i) => i !== index) || [];
+      
+      // Update form state
+      setFormData({
+        ...formData,
+        floorplans: updatedFloorplans
+      });
+      
+      // If the property is already saved in the database and we have the floorplan's url, delete it
+      if (formData.id && floorplanToRemove.url) {
+        try {
+          // Remove the floorplan from the property_images table
+          const { error } = await supabase
+            .from('property_images')
+            .delete()
+            .eq('property_id', formData.id)
+            .eq('url', floorplanToRemove.url)
+            .eq('type', 'floorplan');
+            
+          if (error) {
+            console.error('Error removing floorplan from database:', error);
+          }
+          
+          // If we have a file path, delete the file from storage
+          if (floorplanToRemove.filePath) {
+            const { error: storageError } = await supabase.storage
+              .from('properties')
+              .remove([floorplanToRemove.filePath]);
+              
+            if (storageError) {
+              console.error('Error removing floorplan from storage:', storageError);
+            }
+          }
+        } catch (error) {
+          console.error('Exception deleting floorplan:', error);
+        }
+      }
+      
+      toast({
+        title: "Success",
+        description: "Floorplan removed successfully",
+      });
+    } catch (error) {
+      console.error('Error removing floorplan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove floorplan",
+        variant: "destructive",
+      });
     }
+  };
+
+  // Update a floorplan's properties
+  const handleUpdateFloorplan = (index: number, field: keyof PropertyFloorplan, value: any) => {
+    if (!formData.floorplans) return;
     
-    // Get the floorplan to be removed
-    const floorplanToRemove = formData.floorplans[index];
+    const updatedFloorplans = [...formData.floorplans];
+    updatedFloorplans[index] = {
+      ...updatedFloorplans[index],
+      [field]: value
+    };
     
-    // Create a copy of the floorplans array without the removed floorplan
-    const updatedFloorplans = formData.floorplans.filter((_, i) => i !== index);
-    
-    // Update the form state
     setFormData({
       ...formData,
       floorplans: updatedFloorplans
     });
     
-    // If the floorplan has a file path, attempt to delete it from storage
-    if (floorplanToRemove.filePath) {
+    // If property exists in database and field is "columns", update the property_images record
+    if (formData.id && field === "columns" && updatedFloorplans[index].url) {
       try {
-        const { error } = await supabase.storage
-          .from('properties')
-          .remove([floorplanToRemove.filePath]);
-          
-        if (error) {
-          console.error('Error deleting floorplan from storage:', error);
-        }
+        // We currently don't have a columns field in property_images, so we'd need to implement this later
+        // This would require a schema update to add a columns field to property_images
+        console.log("Floorplan columns updated in local state only; database schema update needed to persist this");
       } catch (error) {
-        console.error('Error in file deletion process:', error);
+        console.error('Error updating floorplan columns in database:', error);
       }
     }
-    
-    // If property exists in database, delete the floorplan from property_images table
-    if (formData.id && floorplanToRemove.url) {
-      try {
-        const { error } = await supabase
-          .from('property_images')
-          .delete()
-          .eq('url', floorplanToRemove.url)
-          .eq('property_id', formData.id);
-          
-        if (error) {
-          console.error('Error removing floorplan from database:', error);
-        }
-      } catch (error) {
-        console.error('Error removing floorplan from database:', error);
-      }
-    }
-    
-    toast({
-      title: "Success",
-      description: "Floorplan removed successfully",
-    });
   };
 
   return {
     handleFloorplanUpload,
     handleRemoveFloorplan,
-    isUploadingFloorplan: isUploading
+    handleUpdateFloorplan,
+    isUploading
   };
 }

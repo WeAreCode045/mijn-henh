@@ -81,20 +81,6 @@ const App = () => (
                 </Suspense>
               } />
               
-              {/* Public webview routes - accessible without login */}
-              <Route path="/property/:id/webview" element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PropertyWebView />
-                </Suspense>
-              } />
-              
-              <Route path="/share/:id" element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <PropertyWebView />
-                </Suspense>
-              } />
-              
-              {/* Legacy view route - maintained for backward compatibility */}
               <Route path="/property/view/:id" element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <PropertyWebView />
@@ -155,6 +141,12 @@ const App = () => (
                     <PropertyFormPage />
                   </PropertyLayout>
                 </ProtectedRoute>
+              } />
+              
+              <Route path="/property/:id/webview" element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <PropertyWebView />
+                </Suspense>
               } />
               
               <Route path="/property/:id/edit" element={

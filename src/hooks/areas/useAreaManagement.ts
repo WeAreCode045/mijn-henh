@@ -16,10 +16,8 @@ export function useAreaManagement(
       id: crypto.randomUUID(),
       title: '',
       description: '',
-      columns: 2, // Default to 2 columns
-      name: '',
-      size: '',
-      images: []
+      imageIds: [],
+      columns: 2 // Default to 2 columns
     };
     
     console.log("Adding new area with default columns:", newArea);

@@ -22,14 +22,17 @@ export function useAreaImageRemove(
         throw new Error(`Area with ID ${areaId} not found`);
       }
       
-      // First update the area's images in the local state
+      // Ensure imageIds is an array before filtering
+      const currentImageIds = Array.isArray(areaToUpdate.imageIds) ? areaToUpdate.imageIds : [];
+      
+      // First update the area's imageIds in the local state
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          const updatedImages = area.images.filter(img => img.id !== imageId);
-          console.log(`Updating area ${areaId} images after removal:`, updatedImages);
+          const updatedImageIds = currentImageIds.filter(id => id !== imageId);
+          console.log(`Updating area ${areaId} imageIds after removal:`, updatedImageIds);
           return {
             ...area,
-            images: updatedImages
+            imageIds: updatedImageIds
           };
         }
         return area;

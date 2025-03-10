@@ -22,7 +22,6 @@ export function PropertyWebViewDialog({
             property={propertyData}
             open={isOpen} 
             onOpenChange={onOpenChange} 
-            isDialog={true}
           />
         </div>
       </DialogContent>

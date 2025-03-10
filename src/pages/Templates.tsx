@@ -3,7 +3,14 @@ import { TemplateBuilder } from "@/components/brochure/TemplateBuilder";
 import { TemplateList } from "@/components/brochure/TemplateList";
 import { DndContext } from '@dnd-kit/core';
 import { useState } from "react";
-import type { Template } from "@/components/brochure/types/templateTypes";
+
+export interface Template {
+  id: string;
+  name: string;
+  description: string | null;
+  sections: any;
+  created_at: string;
+}
 
 export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);

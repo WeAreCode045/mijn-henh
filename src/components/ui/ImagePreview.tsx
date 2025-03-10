@@ -9,7 +9,6 @@ interface ImagePreviewProps {
   onSetFeatured?: (e: React.MouseEvent) => void;
   isInFeatured?: boolean;
   onToggleFeatured?: (e: React.MouseEvent) => void;
-  label?: string; // Added label prop
 }
 
 export function ImagePreview({
@@ -18,8 +17,7 @@ export function ImagePreview({
   isFeatured,
   onSetFeatured,
   isInFeatured,
-  onToggleFeatured,
-  label
+  onToggleFeatured
 }: ImagePreviewProps) {
   return (
     <div className="relative group border border-gray-200 rounded-md overflow-hidden">
@@ -88,13 +86,6 @@ export function ImagePreview({
       {isInFeatured && isFeatured && (
         <div className="absolute top-6 right-1 bg-blue-500 text-white text-xs px-1 rounded">
           Featured
-        </div>
-      )}
-      
-      {/* Display label if provided */}
-      {label && (
-        <div className="p-2 bg-white/90 text-center font-medium">
-          {label}
         </div>
       )}
     </div>

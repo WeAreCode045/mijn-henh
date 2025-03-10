@@ -1,78 +1,95 @@
 
-import React from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlusIcon, Trash2Icon, UploadIcon } from "lucide-react";
-import { PropertyImage } from "@/types/property";
-import { SortableFloorplanGrid } from "./floorplans/SortableFloorplanGrid";
+import { PropertyFloorplan } from "@/types/property";
+import { FloorplanProcessor } from "./floorplans/FloorplanProcessor";
+import { FloorplanGrid } from "./floorplans/FloorplanGrid";
+import { FloorplanUploader } from "./floorplans/FloorplanUploader";
+import { FloorplanEmbed } from "./floorplans/FloorplanEmbed";
+import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
 
 interface FloorplansCardProps {
-  floorplans: PropertyImage[];
-  onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan: (index: number) => void;
-  isUploading: boolean;
-  propertyId?: string;
+  floorplans: PropertyFloorplan[] | string[];
+  floorplanEmbedScript?: string;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan?: (index: number) => void;
+  onUpdateFloorplanEmbedScript?: (script: string) => void;
+  propertyId?: string; // Add property ID to fetch floorplans directly if needed
 }
 
-export function FloorplansCard({ 
-  floorplans, 
-  onFloorplanUpload, 
-  onRemoveFloorplan, 
-  isUploading,
-  propertyId = "" 
+export function FloorplansCard({
+  floorplans = [],
+  floorplanEmbedScript = "",
+  onFloorplanUpload,
+  onRemoveFloorplan,
+  onUpdateFloorplanEmbedScript,
+  propertyId,
 }: FloorplansCardProps) {
-  // Convert event handler to match expected type
-  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFloorplanUpload(e);
+  const [isLoading, setIsLoading] = useState(false);
+  const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
+  
+  // Use a key to force re-render when floorplans array changes
+  const [floorplansKey, setFloorplansKey] = useState(Date.now());
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onFloorplanUpload) {
+      setIsLoading(true);
+      try {
+        onFloorplanUpload(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (onUpdateFloorplanEmbedScript) {
+      onUpdateFloorplanEmbedScript(e.target.value);
+    }
+  };
+
+  const handleFloorplansProcessed = (processed: PropertyFloorplan[]) => {
+    setParsedFloorplans(processed);
+    setFloorplansKey(Date.now()); // Update key to force re-render
+  };
+
+  const handleDatabaseFloorplansFetched = (dbFloorplans: PropertyFloorplan[]) => {
+    setParsedFloorplans(dbFloorplans);
+    setFloorplansKey(Date.now()); // Force re-render
   };
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Floorplans</span>
-          <label className="cursor-pointer">
-            <input
-              type="file"
-              className="hidden"
-              multiple
-              accept="image/*"
-              onChange={handleFloorplanUpload}
-              disabled={isUploading}
-            />
-            <Button variant="outline" size="sm" disabled={isUploading}>
-              <UploadIcon className="mr-2 h-4 w-4" />
-              Upload Floorplans
-            </Button>
-          </label>
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-medium">Floorplans</CardTitle>
       </CardHeader>
-      <CardContent>
-        {(!floorplans || floorplans.length === 0) ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground mb-4">No floorplans uploaded yet</p>
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                className="hidden"
-                multiple
-                accept="image/*"
-                onChange={handleFloorplanUpload}
-                disabled={isUploading}
-              />
-              <Button variant="secondary" disabled={isUploading}>
-                <PlusIcon className="mr-2 h-4 w-4" />
-                Upload Floorplans
-              </Button>
-            </label>
-          </div>
-        ) : (
-          <SortableFloorplanGrid 
-            floorplans={floorplans} 
-            onRemoveFloorplan={onRemoveFloorplan}
-            propertyId={propertyId}
-          />
-        )}
+      <CardContent className="space-y-4">
+        {/* Hidden processor components that handle data transformation */}
+        <FloorplanProcessor 
+          floorplans={floorplans} 
+          propertyId={propertyId}
+          onProcessed={handleFloorplansProcessed} 
+        />
+        
+        <FloorplanDatabaseFetcher
+          propertyId={propertyId}
+          floorplans={parsedFloorplans}
+          onFetchComplete={handleDatabaseFloorplansFetched}
+        />
+
+        {/* Visible UI components */}
+        <FloorplanUploader isLoading={isLoading} onUpload={handleUpload} />
+        
+        <FloorplanEmbed 
+          embedScript={floorplanEmbedScript} 
+          onChange={handleEmbedScriptChange} 
+        />
+
+        <FloorplanGrid 
+          floorplans={parsedFloorplans} 
+          gridKey={floorplansKey} 
+          onRemoveFloorplan={onRemoveFloorplan} 
+        />
       </CardContent>
     </Card>
   );

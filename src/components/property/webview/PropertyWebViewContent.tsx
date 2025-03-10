@@ -1,59 +1,140 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { useEffect, useState } from "react";
-import { useContactForm } from "./hooks/useContactForm";
-import { usePageCalculation } from "./hooks/usePageCalculation";
-import { getPrintStylesContent } from "./PrintStyles";
-import { WebViewSectionContent } from "./components/WebViewSectionContent";
-import { useWebViewContent } from "./hooks/useWebViewContent";
+import { getSections } from "./config/sectionConfig";
+import { ImagePreviewDialog } from "./components/ImagePreviewDialog";
+import { WebViewHeader } from "./WebViewHeader";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CSSProperties } from "react";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
   settings: AgencySettings;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  selectedImage: string | null;
+  setSelectedImage: (image: string | null) => void;
+  handleShare: (platform: string) => Promise<void>;
+  handlePrint: () => void;
+  handleDownload: () => Promise<void>;
   isPrintView?: boolean;
   waitForPlaces?: boolean;
-  currentPage?: number;
-  setCurrentPage?: (page: number) => void;
-  selectedImage?: string | null;
-  setSelectedImage?: (image: string | null) => void;
-  handleShare?: (platform: string) => Promise<void>;
-  handlePrint?: () => void;
-  handleDownload?: () => Promise<void>;
 }
 
 export function PropertyWebViewContent({
   property,
   settings,
-  isPrintView = false,
-  waitForPlaces = false,
-  currentPage: externalCurrentPage,
-  setCurrentPage: externalSetCurrentPage,
+  currentPage,
+  setCurrentPage,
   selectedImage,
   setSelectedImage,
   handleShare,
   handlePrint,
-  handleDownload
+  handleDownload,
+  isPrintView = false,
+  waitForPlaces = false
 }: PropertyWebViewContentProps) {
-  const [internalCurrentPage, setInternalCurrentPage] = useState(0);
-  
-  // Use external state if provided, otherwise use internal state
-  const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
-  const setCurrentPageFn = externalSetCurrentPage || setInternalCurrentPage;
-  
+  const sections = getSections({ 
+    property, 
+    settings, 
+    currentPage, 
+    isPrintView,
+    waitForPlaces
+  });
+
+  const handleNext = () => {
+    if (currentPage < sections.length - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Apply background image to all pages except Overview (page 0)
+  const backgroundStyle: CSSProperties = 
+    currentPage !== 0 && settings?.webviewBackgroundUrl 
+      ? {
+          backgroundImage: `url(${settings.webviewBackgroundUrl})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'right bottom',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.2,
+          position: 'absolute' as const,
+          bottom: -10,
+          right: -120,
+          width: '100%',
+          height: '85%',
+          zIndex: 0
+        } 
+      : {};
+
   return (
-    <div className="p-6 h-full overflow-y-auto">
-      {isPrintView && (
-        <style type="text/css" dangerouslySetInnerHTML={{ __html: getPrintStylesContent() }} />
+    <div className="flex flex-col h-full relative">
+      {/* Background Image */}
+      {currentPage !== 0 && settings?.webviewBackgroundUrl && (
+        <div style={backgroundStyle}></div>
       )}
-      
-      <WebViewSectionContent 
-        property={property}
-        settings={settings}
-        currentPage={currentPage}
-        isPrintView={isPrintView}
-        waitForPlaces={waitForPlaces}
+
+      {/* Header */}
+      <div className="border-b flex-shrink-0 bg-white relative z-10">
+        <WebViewHeader settings={settings} />
+      </div>
+
+      {/* Content Section */}
+      <div className="flex-1 overflow-y-auto min-h-0 relative z-10">
+        <div className="p-4 pb-24">
+          {sections[currentPage]?.content}
+        </div>
+      </div>
+
+      <ImagePreviewDialog 
+        selectedImage={selectedImage}
+        onClose={() => setSelectedImage(null)}
       />
+
+      {/* Fixed Navigation Footer */}
+      {!isPrintView && (
+        <div 
+          className="absolute bottom-0 left-0 right-0 p-4 border-t bg-opacity-95 z-10"
+          style={{ backgroundColor: settings?.primaryColor || '#9b87f5' }}
+        >
+          <div className="flex justify-between items-center">
+            <Button
+              variant="ghost"
+              onClick={handlePrevious}
+              disabled={currentPage === 0}
+              className="text-white hover:bg-white/20"
+            >
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
+            
+            <div className="flex flex-col items-center">
+              <span className="font-semibold text-white">
+                {sections[currentPage]?.title}
+              </span>
+              <span className="text-white/80 text-sm">
+                Page {currentPage + 1} of {sections.length}
+              </span>
+            </div>
+
+            <Button
+              variant="ghost"
+              onClick={handleNext}
+              disabled={currentPage === sections.length - 1}
+              className="text-white hover:bg-white/20"
+            >
+              Next
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

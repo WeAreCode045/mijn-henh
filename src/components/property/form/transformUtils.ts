@@ -1,15 +1,28 @@
 
-import { PropertyNearbyPlace } from "@/types/property";
+import type { PropertyPlaceType } from "@/types/property";
+import type { Json } from "@/integrations/supabase/types";
 
-export function transformPropertyNearbyPlaces(placesData: any[]): PropertyNearbyPlace[] {
-  return placesData.map(place => ({
-    id: place.id || "",
-    name: place.name || "",
-    type: place.type || "other",
-    vicinity: place.vicinity || "",
-    rating: place.rating || 0,
-    user_ratings_total: place.user_ratings_total || 0,
-    visible_in_webview: place.visible_in_webview || false,
-    distance: place.distance || 0
-  }));
-}
+export const transformNearbyPlaces = (places: Json | null): PropertyPlaceType[] => {
+  if (!places || !Array.isArray(places)) return [];
+  
+  return places.map(place => {
+    if (typeof place === 'object' && place !== null && !Array.isArray(place)) {
+      return {
+        id: String(place.id || ''),
+        name: String(place.name || ''),
+        type: String(place.type || ''),
+        vicinity: String(place.vicinity || ''),
+        rating: Number(place.rating || 0),
+        user_ratings_total: Number(place.user_ratings_total || 0)
+      };
+    }
+    return {
+      id: '',
+      name: '',
+      type: '',
+      vicinity: '',
+      rating: 0,
+      user_ratings_total: 0
+    };
+  });
+};

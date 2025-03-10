@@ -14,13 +14,12 @@ interface PropertyTabActionsHandlerProps {
 
 export function PropertyTabActionsHandler({ propertyId, children }: PropertyTabActionsHandlerProps) {
   const [webViewOpen, setWebViewOpen] = useState(false);
-  const { handleGeneratePDF, handleWebView } = usePropertyActions(propertyId);
+  const { handleGeneratePDF } = usePropertyActions(propertyId);
 
-  // Web view functions - now opens in new tab instead of dialog
+  // Web view functions
   const handleOpenWebView = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    // Use the direct navigation function instead of opening the dialog
-    handleWebView(e);
+    setWebViewOpen(true);
   };
 
   return children({

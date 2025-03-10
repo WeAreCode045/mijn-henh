@@ -33,11 +33,11 @@ export function usePropertyWebView() {
   };
 
   const handleNext = () => {
-    setCurrentPage(currentPage + 1);
+    setCurrentPage(prev => prev + 1);
   };
 
   const handlePrevious = () => {
-    setCurrentPage(currentPage - 1);
+    setCurrentPage(prev => prev - 1);
   };
 
   return {

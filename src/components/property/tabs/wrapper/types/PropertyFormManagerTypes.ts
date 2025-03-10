@@ -1,5 +1,5 @@
 
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
@@ -15,19 +15,23 @@ export interface PropertyFormManagerChildrenProps {
   addFeature: () => void;
   removeFeature: (id: string) => void;
   updateFeature: (id: string, description: string) => void;
+  addTechnicalItem: () => void;
+  removeTechnicalItem: (id: string) => void;
+  updateTechnicalItem: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   addArea: () => void;
   removeArea: (id: string) => void;
   updateArea: (id: string, field: any, value: any) => void;
+  handleAreaImageUpload: (areaId: string, files: FileList) => void;
   handleAreaImageRemove: (areaId: string, imageId: string) => void;
   handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void; 
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
-  isUploadingFloorplan: boolean;
+  handleUpdateFloorplan: (index: number, field: any, value: any) => void;
   handleSetFeaturedImage: (url: string | null) => void;
   handleToggleFeaturedImage: (url: string) => void;
   onSubmit: () => void;

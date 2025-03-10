@@ -8,17 +8,13 @@ interface MediaTabContentProps {
   images: PropertyImage[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  floorplanEmbedScript?: string;
-  floorplans?: any[];
+  notes?: string;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
-  onFloorplanEmbedScriptUpdate?: (script: string) => void;
+  onNotesUpdate?: (notes: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
-  isUploadingFloorplan?: boolean;
   // Add onUpload as an alias for onImageUpload
   onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   // Updated properties for main and featured images
@@ -34,17 +30,13 @@ export function MediaTabContent({
   images,
   virtualTourUrl,
   youtubeUrl,
-  floorplanEmbedScript,
-  floorplans,
+  notes,
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
-  onFloorplanEmbedScriptUpdate,
+  onNotesUpdate,
   onImageUpload,
   onRemoveImage,
-  onFloorplanUpload,
-  onRemoveFloorplan,
   isUploading,
-  isUploadingFloorplan,
   onUpload,
   featuredImageUrl,
   featuredImageUrls,
@@ -53,8 +45,6 @@ export function MediaTabContent({
 }: MediaTabContentProps) {
   // Use aliases if provided, fall back to original props
   const effectiveImageUpload = onUpload || onImageUpload;
-  
-  console.log("MediaTabContent: floorplanEmbedScript =", floorplanEmbedScript);
 
   return (
     <PropertyMediaTab
@@ -63,17 +53,13 @@ export function MediaTabContent({
       images={images}
       virtualTourUrl={virtualTourUrl}
       youtubeUrl={youtubeUrl}
-      floorplanEmbedScript={floorplanEmbedScript}
-      floorplans={floorplans}
+      notes={notes}
       onVirtualTourUpdate={onVirtualTourUpdate}
       onYoutubeUrlUpdate={onYoutubeUrlUpdate}
-      onFloorplanEmbedScriptUpdate={onFloorplanEmbedScriptUpdate}
+      onNotesUpdate={onNotesUpdate}
       onImageUpload={effectiveImageUpload}
       onRemoveImage={onRemoveImage}
-      onFloorplanUpload={onFloorplanUpload}
-      onRemoveFloorplan={onRemoveFloorplan}
       isUploading={isUploading}
-      isUploadingFloorplan={isUploadingFloorplan}
       featuredImageUrl={featuredImageUrl}
       featuredImageUrls={featuredImageUrls}
       onSetFeatured={onSetFeatured}

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyImage } from '@/types/property';
+import type { PropertyFormData } from '@/types/property';
 
 export function useAreaImageUpload(
   formData: PropertyFormData,
@@ -56,11 +56,11 @@ export function useAreaImageUpload(
           }
           
           // Return the database record ID and URL
-          return { id: imageData.id, url: publicUrl } as PropertyImage;
+          return { id: imageData.id, url: publicUrl };
         }
         
         // If no property ID yet, just return a temporary ID
-        return { id: crypto.randomUUID(), url: publicUrl } as PropertyImage;
+        return { id: crypto.randomUUID(), url: publicUrl };
       });
       
       const newImages = await Promise.all(uploadPromises);
@@ -74,12 +74,16 @@ export function useAreaImageUpload(
         throw new Error(`Area with ID ${areaId} not found`);
       }
       
-      // Create updated areas array with the new images
+      // Add the new image IDs to the area (for backward compatibility)
+      const updatedImageIds = [...(areaToUpdate.imageIds || []), ...newImages.map(img => img.id)];
+      console.log(`Updating area ${areaId} with new imageIds:`, updatedImageIds);
+      
+      // Create updated areas array with the new imageIds
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
           return {
             ...area,
-            images: [...(area.images || []), ...newImages]
+            imageIds: updatedImageIds
           };
         }
         return area;

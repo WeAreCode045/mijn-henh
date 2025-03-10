@@ -1,5 +1,5 @@
 
-import type { PropertyArea } from "@/types/property";
+import type { PropertyArea, PropertyFloorplan } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 
 /**
@@ -19,55 +19,61 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     const id = (area as any).id || '';
     const title = (area as any).title || '';
     const description = (area as any).description || '';
+    const imageIds = (area as any).imageIds || [];
     const columns = (area as any).columns || 2; // Default to 2 columns if not specified
-    const name = (area as any).name || '';
-    const size = (area as any).size || '';
-    const images = (area as any).images || [];
     
     return {
       id,
       title,
       description,
-      columns,
-      name,
-      size,
-      images
+      imageIds,
+      columns
     };
   });
 }
 
 /**
+ * Transforms floorplan objects array into JSON for database storage
+ * Note: This is kept for backward compatibility, but we now store floorplans in property_images
+ */
+export function prepareFloorplansForFormSubmission(floorplans: PropertyFloorplan[] | undefined) {
+  if (!floorplans || !Array.isArray(floorplans)) {
+    return [];
+  }
+  
+  console.log("prepareFloorplansForFormSubmission - input:", floorplans);
+  
+  // Filter out any undefined or null values to ensure we only process valid floorplans
+  const preparedFloorplans = floorplans
+    .filter(floorplan => floorplan && (typeof floorplan === 'string' || floorplan.id))
+    .map(floorplan => {
+      // If it's a string, it's already in the right format
+      if (typeof floorplan === 'string') {
+        return floorplan;
+      }
+      
+      // Otherwise, convert it to JSON
+      const floorplanData = {
+        id: floorplan.id || crypto.randomUUID(), // Ensure we preserve or create an ID
+        url: floorplan.url,
+        filePath: floorplan.filePath || '',   // Preserve file path for storage operations
+        columns: floorplan.columns || 1
+      };
+      
+      return floorplanData;
+    });
+    
+  console.log("prepareFloorplansForFormSubmission - output:", preparedFloorplans);
+  return preparedFloorplans;
+}
+
+/**
  * Prepare property properties for JSON field
  * Works with any array of objects or primitive values
- * Returns Json type compatible with Supabase
  */
 export function preparePropertiesForJsonField(properties: any[]): Json {
   if (!properties || !Array.isArray(properties)) {
     return [];
   }
-  return properties as Json;
-}
-
-/**
- * Prepare images for submission
- * Converts image objects to URLs
- */
-export function prepareImagesForSubmission(images: any[]): string[] {
-  if (!images || !Array.isArray(images)) {
-    return [];
-  }
-  
-  return images.map(img => {
-    if (typeof img === 'string') return img;
-    if (img && typeof img === 'object' && 'url' in img) return img.url;
-    return '';
-  }).filter(url => url !== '');
-}
-
-/**
- * Prepare floorplans for JSON field
- * This is a compatibility function to keep the API consistent
- */
-export function prepareFloorplansForFormSubmission(floorplans: any[]): Json {
-  return preparePropertiesForJsonField(floorplans || []);
+  return properties;
 }

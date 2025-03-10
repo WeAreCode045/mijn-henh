@@ -31,8 +31,6 @@ interface AgencySettingsData {
   smtp_from_email?: string;
   smtp_from_name?: string;
   smtp_secure?: boolean;
-  // OpenAI API key
-  openai_api_key?: string;
 }
 
 export const agencySettingsService = {
@@ -94,8 +92,6 @@ export const agencySettingsService = {
       smtp_from_email: data.smtp_from_email || null,
       smtp_from_name: data.smtp_from_name || null,
       smtp_secure: data.smtp_secure || false,
-      // OpenAI API key
-      openai_api_key: data.openai_api_key || null,
     };
 
     const { error } = await supabase

@@ -1,6 +1,11 @@
 
-import { PropertyFormData } from "@/types/property";
-import { renderTabContent } from "../content/TabContentRenderers";
+import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { 
+  renderDashboardTab, 
+  renderContentTab, 
+  renderMediaTab,
+  renderCommunicationsTab
+} from "../content/TabContentRenderers";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -12,7 +17,6 @@ interface PropertyTabContentsProps {
     created_at?: string;
     updated_at?: string;
     images: any[];
-    floorplans?: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
@@ -28,6 +32,7 @@ interface PropertyTabContentsProps {
   handleSaveTemplate: (templateId: string) => void;
   handleGeneratePDF: () => void;
   handleWebView: () => void;
+  // Content tab props
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -35,27 +40,31 @@ interface PropertyTabContentsProps {
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: any, value: any) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  // Media tab props
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
+  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
+  // Technical data props
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (id: string) => void;
+  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
+  // Step navigation props
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
   handlePrevious: () => void;
   onSubmit: () => void;
+  // Main image and featured images props
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
-  isUploadingFloorplan?: boolean;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  onFetchLocationData?: () => Promise<void>;
-  onRemoveNearbyPlace?: (index: number) => void;
-  isLoadingLocationData?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function PropertyTabContents({
@@ -79,6 +88,7 @@ export function PropertyTabContents({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
+  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
   handleImageUpload,
@@ -86,21 +96,31 @@ export function PropertyTabContents({
   isUploading,
   handleAreaPhotosUpload,
   handleFloorplanUpload,
+  handleRemoveAreaPhoto,
   handleRemoveFloorplan,
+  handleUpdateFloorplan,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
+  onUpdateTechnicalItem,
   currentStep,
   handleStepClick,
   handleNext,
   handlePrevious,
   onSubmit,
   handleSetFeaturedImage,
-  handleToggleFeaturedImage,
-  isUploadingFloorplan,
-  handleRemoveAreaPhoto,
-  onFetchLocationData,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  setPendingChanges = () => {}
+  handleToggleFeaturedImage
 }: PropertyTabContentsProps) {
+  const safeAddTechnicalItem = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (onAddTechnicalItem) {
+      console.log("PropertyTabContents - Adding technical item");
+      onAddTechnicalItem();
+    }
+  };
+
   const handlers = {
     onSave,
     onDelete,
@@ -116,6 +136,7 @@ export function PropertyTabContents({
     onAddArea,
     onRemoveArea,
     onUpdateArea,
+    onAreaImageUpload,
     onAreaImageRemove,
     onAreaImagesSelect,
     handleImageUpload,
@@ -123,28 +144,29 @@ export function PropertyTabContents({
     isUploading,
     handleAreaPhotosUpload,
     handleFloorplanUpload,
+    handleRemoveAreaPhoto,
     handleRemoveFloorplan,
+    handleUpdateFloorplan,
+    onAddTechnicalItem: safeAddTechnicalItem,
+    onRemoveTechnicalItem,
+    onUpdateTechnicalItem,
     currentStep,
     handleStepClick,
     handleNext,
     handlePrevious,
     onSubmit,
     formState,
-    isUploadingFloorplan,
     handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
-    handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
-    handleRemoveAreaPhoto: handleRemoveAreaPhoto || ((areaId: string, imageId: string) => {
-      console.warn("Area photo removal functionality not available");
-    }),
-    onFetchLocationData,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    setPendingChanges // Add the missing setPendingChanges to the handlers object
+    handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available"))
   };
 
   const tabProps = {
     activeTab,
-    property,
+    property: {
+      ...property,
+      featuredImage: formState.featuredImage || "",
+      featuredImages: formState.featuredImages || []
+    },
     formState,
     agentInfo,
     templateInfo,
@@ -154,5 +176,12 @@ export function PropertyTabContents({
 
   console.log("PropertyTabContents - Active tab:", activeTab);
 
-  return renderTabContent(tabProps);
+  return (
+    <>
+      {renderDashboardTab(tabProps)}
+      {renderContentTab(tabProps)}
+      {renderMediaTab(tabProps)}
+      {renderCommunicationsTab(tabProps)}
+    </>
+  );
 }

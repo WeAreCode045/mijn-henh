@@ -1,76 +1,58 @@
+import { Json } from "@/integrations/supabase/types";
 
-// Type for property features
 export interface PropertyFeature {
   id: string;
   description: string;
 }
 
-// Image type definition aligned with property_images table
 export interface PropertyImage {
   id: string;
   url: string;
-  property_id?: string;
-  is_main?: boolean;
-  is_featured_image?: boolean;
-  type?: string;
-  area?: string | null;
-  sort_order?: number;
-  filePath?: string;
-  title?: string;
-  description?: string;
-  columns?: number; // Added for FloorplanProcessor compatibility
+  property_id: string;
+  type: string;
+  created_at: string;
+  area?: string | null; // Added the area property to fix type errors
 }
 
-// Define PropertyFloorplan as an alias to PropertyImage for compatibility
-export type PropertyFloorplan = PropertyImage;
-
-// Property area with all required fields
 export interface PropertyArea {
   id: string;
-  name: string;
-  size: string;
   title: string;
   description: string;
-  images: PropertyImage[]; 
-  columns: number;
+  imageIds: string[];
+  columns?: number; // Field for grid column count
 }
 
-// Property nearby place
-export interface PropertyNearbyPlace {
+export interface PropertyFloorplan {
+  url: string;
+  columns?: number; // New field for grid column count
+}
+
+export interface PropertyPlaceType {
   id: string;
   name: string;
-  distance: string | number;
   type: string;
-  vicinity?: string;
-  rating?: number;
-  user_ratings_total?: number;
-  visible_in_webview?: boolean;
+  vicinity: string;
+  rating: number;
+  user_ratings_total: number;
 }
 
-// Define PropertyPlaceType as PropertyNearbyPlace (not a union type)
-export type PropertyPlaceType = PropertyNearbyPlace;
-
-// City type
-export interface PropertyCity {
+export interface PropertyGridImage {
   id: string;
-  name: string;
-  distance?: string | number;
-  visible_in_webview?: boolean;
+  url: string;
 }
 
-// Property agent
+// Agent interface for property
 export interface PropertyAgent {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   email?: string;
   phone?: string;
   photoUrl?: string;
   address?: string;
 }
 
-// Property data interface
-export interface PropertyData {
-  id: string;
+// Base interface with common properties
+interface BasePropertyData {
   title: string;
   price: string;
   address: string;
@@ -86,38 +68,38 @@ export interface PropertyData {
   location_description?: string;
   features: PropertyFeature[];
   images: PropertyImage[];
+  floorplans: PropertyFloorplan[]; // Updated to structured objects
+  featuredImage: string | null;
+  gridImages: string[];
   areas: PropertyArea[];
+  areaPhotos?: string[];
+  currentPath?: string;
+  object_id?: string;
   map_image?: string | null;
+  nearby_places?: PropertyPlaceType[];
   latitude?: number | null;
   longitude?: number | null;
-  nearby_places?: PropertyNearbyPlace[];
-  nearby_cities?: PropertyCity[];
-  object_id?: string;
   agent_id?: string;
   agent?: PropertyAgent;
-  template_id?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  notes?: string;
-  floorplans?: PropertyImage[];
-  floorplanEmbedScript?: string;
-  featuredImage?: string | null;
-  featuredImages?: string[];
   created_at?: string;
   updated_at?: string;
-  // For backward compatibility - can be PropertyImage[] or string[]
-  coverImages?: PropertyImage[] | string[];
-  gridImages?: PropertyImage[] | string[];
+  notes?: string;
 }
 
-// Property form data extends PropertyData
-export interface PropertyFormData extends PropertyData {
-  // For backward compatibility in the form
-  areaPhotos?: PropertyImage[];
+// PropertyData requires id
+export interface PropertyData extends BasePropertyData {
+  id: string;
 }
 
-// Property submit data
+// PropertyFormData makes id optional
+export interface PropertyFormData extends BasePropertyData {
+  id?: string;
+}
+
 export interface PropertySubmitData {
+  id?: string;
   title: string;
   price: string;
   address: string;
@@ -131,22 +113,54 @@ export interface PropertySubmitData {
   hasGarden: boolean;
   description: string;
   location_description?: string;
-  features: string;
-  images: string[];
-  areas: PropertyArea[];
+  floorplans: Json; // Updated to Json for structured floorplans
+  featuredImage: string | null;
+  gridImages: string[];
+  areaPhotos?: string[];
+  object_id?: string;
   map_image?: string | null;
   latitude?: number | null;
   longitude?: number | null;
-  nearby_places?: string;
-  nearby_cities?: string;
-  object_id?: string;
+  features: Json;
+  areas: Json[];
+  nearby_places: Json;
+  images: string[];
   agent_id?: string;
-  template_id?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  floorplans?: string[];
+}
+
+export interface PropertyDatabaseData {
+  id?: string;
+  title?: string;
+  price?: string;
+  address?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  sqft?: string;
+  livingArea?: string;
+  buildYear?: string;
+  garages?: string;
+  energyLabel?: string;
+  hasGarden?: boolean;
+  description?: string;
+  location_description?: string;
+  floorplans?: Json; // Updated to Json for structured floorplans
   featuredImage?: string | null;
-  featuredImages?: string[];
-  floorplanEmbedScript?: string;
+  gridImages?: string[];
+  areaPhotos?: string[];
+  map_image?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  features?: Json;
+  areas?: Json[];
+  nearby_places?: Json;
+  images?: string[];
+  created_at?: string;
+  updated_at?: string;
+  agent_id?: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
 }

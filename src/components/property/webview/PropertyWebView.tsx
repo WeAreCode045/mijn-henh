@@ -1,14 +1,15 @@
+
 import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { usePropertyWebView } from "@/components/property/usePropertyWebView";
+import { usePropertyWebView } from "./usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
-import { Dispatch, SetStateAction, useRef } from "react";
-import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
-import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
-import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
-import { WebViewFooter } from "@/components/property/webview/WebViewFooter";
-import { usePropertyData } from "@/components/property/webview/hooks/usePropertyData";
-import { usePageCalculation } from "@/components/property/webview/hooks/usePageCalculation";
+import { Dispatch, SetStateAction, useRef, useEffect } from "react";
+import { PropertyWebViewDialog } from "./PropertyWebViewDialog";
+import { PropertyWebViewMain } from "./PropertyWebViewMain";
+import { PropertyBreadcrumb } from "./PropertyBreadcrumb";
+import { WebViewFooter } from "./WebViewFooter";
+import { usePropertyData } from "./hooks/usePropertyData";
+import { usePageCalculation } from "./hooks/usePageCalculation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,17 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     handleNext,
     handlePrevious
   } = usePropertyWebView();
+
+  // Add useEffect to prevent unnecessary reloads
+  useEffect(() => {
+    // Log when component mounts
+    console.log("PropertyWebView mounted with ID:", id);
+    
+    // Return cleanup function
+    return () => {
+      console.log("PropertyWebView unmounted");
+    };
+  }, [id]);
 
   // Loading state
   if (isLoading) {
@@ -79,15 +91,15 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     );
   }
 
+  // Calculate total pages only after we have propertyData
   const totalPages = calculateTotalPages(propertyData);
 
   if (typeof open !== 'undefined' && onOpenChange) {
     return (
       <PropertyWebViewDialog
-        propertyData={propertyData}
-        isOpen={open}
         open={open}
         onOpenChange={onOpenChange}
+        propertyData={propertyData}
         settings={settings}
         contentRef={contentRef}
         printContentRef={printContentRef}
@@ -102,16 +114,6 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     );
   }
 
-  // Use the new URL structure
-  const handleBackNavigation = () => {
-    // Use the new URL structure
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigate('/properties');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white relative">
       {/* Fixed Breadcrumb */}
@@ -119,7 +121,7 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
         <div className="container mx-auto px-4">
           <PropertyBreadcrumb 
             title={propertyData.title}
-            onBack={handleBackNavigation}
+            onBack={() => navigate('/properties')}
           />
         </div>
       </div>

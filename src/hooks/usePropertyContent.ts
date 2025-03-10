@@ -1,125 +1,49 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PropertyFeature, PropertyFormData } from '@/types/property';
+import { PropertyFeature, PropertyFormData, PropertyTechnicalItem } from '@/types/property';
 import { steps } from '@/components/property/form/formSteps';
 import { useToast } from '@/components/ui/use-toast';
-import { useLocationDataFetch } from './useLocationDataFetch';
-import { usePropertyFormSubmit } from './usePropertyFormSubmit';
-import { usePropertyAutoSave } from './usePropertyAutoSave';
 
 export function usePropertyContent(
   formData: PropertyFormData,
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void,
+  handleFloorplanUpload?: (file: File) => Promise<{id: string, url: string, filePath?: string}>
 ) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [pendingChanges, setPendingChanges] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
-  const { handleSubmit } = usePropertyFormSubmit();
-  const { autosaveData, isSaving, lastSaved } = usePropertyAutoSave();
-  
-  const { 
-    fetchLocationData, 
-    generateLocationDescription,
-    removeNearbyPlace, 
-    isLoading: isLoadingLocationData 
-  } = useLocationDataFetch(formData, onFieldChange);
 
-  // Save when step changes or when triggered manually
-  const handleSave = async () => {
-    if (!formData || !pendingChanges) return;
-    
-    try {
-      console.log("Saving changes to property");
-      const event = {} as React.FormEvent;
-      const result = await handleSubmit(event, formData, false);
-      
-      if (result) {
-        setPendingChanges(false);
-        toast({
-          title: "Success",
-          description: "Changes saved successfully",
-        });
-      }
-      return result;
-    } catch (error) {
-      console.error("Error saving changes:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save changes",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  const handleStepClick = async (stepId: number) => {
+  const handleStepClick = (stepId: number) => {
     console.log(`usePropertyContent - Setting current step to ${stepId}`);
-    
-    // First save any pending changes
-    if (pendingChanges) {
-      const saveResult = await handleSave();
-      if (saveResult) {
-        setCurrentStep(stepId);
-      }
-    } else {
-      setCurrentStep(stepId);
-    }
+    setCurrentStep(stepId);
   };
 
-  // Improved step navigation handling
-  const handleNext = async () => {
+  const handleNext = () => {
     console.log(`usePropertyContent - Current step: ${currentStep}, max steps: ${steps.length}`);
-    
-    if (currentStep < steps.length - 1) {
-      // Save changes before moving to next step
-      if (pendingChanges) {
-        const saveResult = await handleSave();
-        if (saveResult) {
-          console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-          setCurrentStep(currentStep + 1);
-        }
-      } else {
-        console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-        setCurrentStep(currentStep + 1);
-      }
+    if (currentStep < steps.length) {
+      console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
+      setCurrentStep(prevStep => prevStep + 1);
     } else {
       console.log('usePropertyContent - Already at the last step');
     }
   };
 
-  const handlePrevious = async () => {
-    if (currentStep > 0) {
-      // Save changes before moving to previous step
-      if (pendingChanges) {
-        const saveResult = await handleSave();
-        if (saveResult) {
-          console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-          setCurrentStep(currentStep - 1);
-        }
-      } else {
-        console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-        setCurrentStep(currentStep - 1);
-      }
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
+      setCurrentStep(prevStep => prevStep - 1);
     } else {
       console.log('usePropertyContent - Already at the first step');
     }
   };
 
-  const onSubmit = async () => {
-    await handleSave();
-    console.log('usePropertyContent - Form submitted and saved');
+  const onSubmit = () => {
+    console.log('usePropertyContent - Form submitted');
     toast({
       title: "Form submitted",
       description: "Your changes have been saved."
     });
   };
-
-  // Handle field changes and track if there are pending changes
-  const handleFieldChangeWithTracking = useCallback((field: keyof PropertyFormData, value: any) => {
-    onFieldChange(field, value);
-    setPendingChanges(true);
-  }, [onFieldChange]);
 
   // Feature management functions
   const addFeature = useCallback(() => {
@@ -133,7 +57,6 @@ export function usePropertyContent(
     const updatedFeatures = [...(formData.features || []), newFeature];
     console.log("usePropertyContent - Updated features:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
-    setPendingChanges(true);
   }, [formData, onFieldChange]);
 
   const removeFeature = useCallback((id: string) => {
@@ -141,7 +64,6 @@ export function usePropertyContent(
     const updatedFeatures = (formData.features || []).filter(feature => feature.id !== id);
     console.log("usePropertyContent - Updated features after removal:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
-    setPendingChanges(true);
   }, [formData, onFieldChange]);
 
   const updateFeature = useCallback((id: string, description: string) => {
@@ -151,24 +73,80 @@ export function usePropertyContent(
     );
     console.log("usePropertyContent - Updated features after update:", updatedFeatures);
     onFieldChange('features', updatedFeatures);
-    setPendingChanges(true);
   }, [formData, onFieldChange]);
 
-  // Call the functions from useLocationDataFetch
-  const handleFetchLocationData = async () => {
-    await fetchLocationData();
-    setPendingChanges(true);
-  };
+  // Technical item management functions
+  const addTechnicalItem = useCallback((e?: React.MouseEvent) => {
+    // Prevent default behavior to avoid form submission
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log("usePropertyContent - Adding new technical item");
+    
+    const newItem: PropertyTechnicalItem = {
+      id: uuidv4(),
+      title: '',
+      size: '',
+      description: '',
+      floorplanId: null
+    };
+    
+    const currentItems = formData.technicalItems || [];
+    onFieldChange('technicalItems', [...currentItems, newItem]);
+  }, [formData, onFieldChange]);
 
-  const handleGenerateLocationDescription = async () => {
-    await generateLocationDescription();
-    setPendingChanges(true);
-  };
+  const removeTechnicalItem = useCallback((id: string) => {
+    const currentItems = formData.technicalItems || [];
+    const updatedItems = currentItems.filter(item => item.id !== id);
+    onFieldChange('technicalItems', updatedItems);
+  }, [formData, onFieldChange]);
 
-  const handleRemoveNearbyPlace = (index: number) => {
-    removeNearbyPlace(index);
-    setPendingChanges(true);
-  };
+  const updateTechnicalItem = useCallback((id: string, field: keyof PropertyTechnicalItem, value: any) => {
+    const currentItems = formData.technicalItems || [];
+    const updatedItems = currentItems.map(item => 
+      item.id === id ? { ...item, [field]: value } : item
+    );
+    onFieldChange('technicalItems', updatedItems);
+  }, [formData, onFieldChange]);
+
+  // Handle floorplan upload for technical items
+  const handleTechnicalItemFloorplanUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>, technicalItemId: string) => {
+    if (!handleFloorplanUpload || !e.target.files || e.target.files.length === 0) return;
+    
+    try {
+      const file = e.target.files[0];
+      const result = await handleFloorplanUpload(file);
+      
+      // If we have a result with ID and URL
+      if (result?.id && result?.url) {
+        // Add the floorplan to the floorplans array if it doesn't exist yet
+        const existingFloorplans = [...(formData.floorplans || [])];
+        const floorplanExists = existingFloorplans.some(f => f.id === result.id);
+        
+        if (!floorplanExists) {
+          // Add the new floorplan
+          onFieldChange('floorplans', [...existingFloorplans, result]);
+        }
+        
+        // Update the technical item to reference this floorplan
+        updateTechnicalItem(technicalItemId, 'floorplanId', result.id);
+        
+        toast({
+          title: "Success",
+          description: "Floorplan image uploaded successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading floorplan for technical item:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload floorplan image.",
+        variant: "destructive",
+      });
+    }
+  }, [formData, onFieldChange, updateTechnicalItem, handleFloorplanUpload, toast]);
 
   return {
     currentStep,
@@ -176,21 +154,15 @@ export function usePropertyContent(
     handleNext,
     handlePrevious,
     onSubmit,
-    handleFieldChange: handleFieldChangeWithTracking,
+    handleFieldChange: onFieldChange,
     // Feature management
     addFeature,
     removeFeature,
     updateFeature,
-    // Location management
-    onFetchLocationData: handleFetchLocationData,
-    onGenerateLocationDescription: handleGenerateLocationDescription,
-    onRemoveNearbyPlace: handleRemoveNearbyPlace,
-    isLoadingLocationData,
-    // Change tracking
-    pendingChanges,
-    setPendingChanges,
-    handleSave,
-    isSaving,
-    lastSaved
+    // Technical item management
+    addTechnicalItem,
+    removeTechnicalItem,
+    updateTechnicalItem,
+    handleTechnicalItemFloorplanUpload
   };
 }

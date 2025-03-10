@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
@@ -11,36 +10,28 @@ interface GeneralInfoStepProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
+  handleToggleCoverImage?: (url: string) => void;
   isUploading?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function GeneralInfoStep({
   formData,
   onFieldChange,
   handleSetFeaturedImage,
-  handleToggleFeaturedImage,
-  isUploading,
-  setPendingChanges
+  handleToggleCoverImage,
+  isUploading
 }: GeneralInfoStepProps) {
   const handleFeaturedImageSelect = (url: string | null) => {
     console.log("Featured image selected in GeneralInfoStep:", url);
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
     }
   };
 
   const handleFeaturedImageToggle = (url: string) => {
     console.log("Featured image toggled in GeneralInfoStep:", url);
-    if (handleToggleFeaturedImage) {
-      handleToggleFeaturedImage(url);
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
+    if (handleToggleCoverImage) {
+      handleToggleCoverImage(url);
     }
   };
 
@@ -52,32 +43,25 @@ export function GeneralInfoStep({
     return img;
   }) || [];
 
-  const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
-    onFieldChange(field, value);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <Card>
         <BasicDetails 
           formData={formData} 
-          onFieldChange={handleFieldChange} 
+          onFieldChange={onFieldChange} 
         />
       </Card>
 
       <Card>
         <PropertySpecs 
           formData={formData} 
-          onFieldChange={handleFieldChange} 
+          onFieldChange={onFieldChange} 
         />
       </Card>
 
       <DescriptionSection 
         formData={formData}
-        onFieldChange={handleFieldChange} 
+        onFieldChange={onFieldChange} 
       />
 
       {/* Only render image selections if there are images */}

@@ -23,15 +23,8 @@ export function AreaImageGrid({ areaImages = [], areaId, areaTitle, onImageRemov
     setImageLoadErrors({});
   }, [areaImages]);
   
-  // Filter out images with load errors and sort by sort_order
-  const validAreaImages = areaImages
-    .filter(image => !imageLoadErrors[image.id])
-    .sort((a, b) => {
-      if (a.sort_order !== undefined && b.sort_order !== undefined) {
-        return a.sort_order - b.sort_order;
-      }
-      return 0;
-    });
+  // Filter out images with load errors
+  const validAreaImages = areaImages.filter(image => !imageLoadErrors[image.id]);
   
   const handleImageError = (imageId: string) => {
     console.log(`Image loading error for ${imageId} in area ${areaId}`);

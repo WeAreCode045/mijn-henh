@@ -2,9 +2,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Template, Section } from "@/components/brochure/types/templateTypes";
+import { Template } from "@/pages/Templates";
 import { FileType } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface PropertyTemplateSelectorProps {
   selectedTemplateId: string;
@@ -18,28 +18,19 @@ export function PropertyTemplateSelector({
   const [templates, setTemplates] = useState<Template[]>([]);
 
   // Fetch templates when component mounts
-  useEffect(() => {
+  useState(() => {
     const fetchTemplates = async () => {
       const { data, error } = await supabase
         .from('brochure_templates')
         .select('*');
       
       if (!error && data) {
-        // Transform the data to match the Template type
-        const transformedTemplates = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          sections: item.sections as unknown as Section[], // Cast sections to Section[] type
-          created_at: item.created_at
-        }));
-        
-        setTemplates(transformedTemplates);
+        setTemplates(data);
       }
     };
     
     fetchTemplates();
-  }, []);
+  });
 
   return (
     <Card className="mt-4">

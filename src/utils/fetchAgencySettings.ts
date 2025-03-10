@@ -25,9 +25,9 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     primaryColor: data.primary_color || defaultAgencySettings.primaryColor,
     secondaryColor: data.secondary_color || defaultAgencySettings.secondaryColor,
     logoUrl: data.logo_url,
-    pdfBackgroundUrl: data.description_background_url, // Use the existing column for PDF background
-    webviewBackgroundUrl: data.description_background_url, // Use the same field for webview background
-    webviewBgImage: data.description_background_url, // Use the same field for webview background image
+    pdfBackgroundUrl: data.description_background_url, // Updated to use existing column
+    webviewBackgroundUrl: data.description_background_url, // Using the same column for now
+    webviewBgImage: data.description_background_url, // Added this line
     instagramUrl: data.instagram_url || defaultAgencySettings.instagramUrl,
     youtubeUrl: data.youtube_url || defaultAgencySettings.youtubeUrl,
     facebookUrl: data.facebook_url || defaultAgencySettings.facebookUrl,
@@ -48,7 +48,5 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtp_from_email: data.smtp_from_email || null,
     smtp_from_name: data.smtp_from_name || null,
     smtp_secure: data.smtp_secure || false,
-    // OpenAI API key
-    openai_api_key: data.openai_api_key || null,
   };
 }

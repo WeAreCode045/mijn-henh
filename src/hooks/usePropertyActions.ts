@@ -28,9 +28,9 @@ export function usePropertyActions(propertyId: string) {
       e.preventDefault();
     }
     
-    // Open in a new tab instead of showing dialog
-    window.open(`/property/${propertyId}/webview`, '_blank');
-  }, [propertyId]);
+    // For direct webview navigation using the real property ID
+    navigate(`/property/${propertyId}/webview`);
+  }, [propertyId, navigate]);
 
   return {
     handleGeneratePDF,

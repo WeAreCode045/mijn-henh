@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
@@ -14,38 +14,20 @@ export function MediaDatabaseFetcher({
   images,
   onFetchComplete
 }: MediaDatabaseFetcherProps) {
-  const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
-  
-  // Force re-fetch every 3 seconds when uploads might be happening
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (propertyId) {
-        setLastFetchTime(Date.now());
-      }
-    }, 3000);
+    console.log("MediaDatabaseFetcher - checking if fetch needed", {propertyId, imagesLength: images?.length});
     
-    return () => clearInterval(interval);
-  }, [propertyId]);
-  
-  useEffect(() => {
-    console.log("MediaDatabaseFetcher - checking if fetch needed", {
-      propertyId, 
-      imagesLength: images?.length,
-      lastFetchTime
-    });
-    
-    if (propertyId) {
+    if (propertyId && (!images || images.length === 0)) {
       const fetchImages = async () => {
         try {
           console.log("MediaDatabaseFetcher - fetching images for property:", propertyId);
           
           const { data, error } = await supabase
             .from('property_images')
-            .select('id, url, is_main, is_featured_image, sort_order')
+            .select('id, url, is_main, is_featured_image')
             .eq('property_id', propertyId)
             .eq('type', 'image')
-            .order('sort_order', { ascending: true }) // Order by sort_order first
-            .order('created_at', { ascending: false }); // Then by created_at as fallback
+            .order('created_at', { ascending: false });
             
           if (error) {
             console.error("MediaDatabaseFetcher - Error fetching images:", error);
@@ -58,8 +40,7 @@ export function MediaDatabaseFetcher({
               id: item.id,
               url: item.url,
               is_main: item.is_main,
-              is_featured_image: item.is_featured_image,
-              sort_order: item.sort_order
+              is_featured_image: item.is_featured_image
             }));
             
             console.log("MediaDatabaseFetcher - Fetched images from DB:", dbImages);
@@ -76,7 +57,7 @@ export function MediaDatabaseFetcher({
       
       fetchImages();
     }
-  }, [propertyId, lastFetchTime, onFetchComplete]);
+  }, [propertyId, images, onFetchComplete]);
 
   return null; // This is a logic-only component with no UI
 }

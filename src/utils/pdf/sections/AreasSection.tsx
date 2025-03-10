@@ -11,12 +11,13 @@ export const AreasSection = ({ property, settings, styles }: {
   styles: any;
 }) => {
   return property.areas.map((area, index) => {
+    console.log(`Processing area ${area.title} with ${area.imageIds?.length} images`);
     const columns = area.columns || 2; // Default to 2 columns
-    const areaImages = area.images || [];
     const imagesPerPage = columns * 3; // 3 rows of configurable columns
-    const totalPages = Math.ceil(areaImages.length / imagesPerPage);
+    const totalPages = Math.ceil((area.imageIds?.length || 0) / imagesPerPage);
     
     return Array.from({ length: totalPages }).map((_, pageIndex) => {
+      console.log(`Creating page ${pageIndex + 1} of ${totalPages} for area ${area.title}`);
       return (
         <Page key={`${index}-${pageIndex}`} size="A4" style={styles.page}>
           <Header settings={settings} styles={styles} />
@@ -32,10 +33,11 @@ export const AreasSection = ({ property, settings, styles }: {
             flexWrap: 'wrap',
             justifyContent: columns > 1 ? 'space-between' : 'flex-start'
           }}>
-            {areaImages
+            {(area.imageIds || [])
               .slice(pageIndex * imagesPerPage, (pageIndex + 1) * imagesPerPage)
-              .map((image, imgIndex) => {
-                const imageUrl = typeof image === 'string' ? image : image.url;
+              .map((imageId, imgIndex) => {
+                const imageUrl = property.images.find(img => img.id === imageId)?.url;
+                console.log(`Processing image ${imgIndex + 1} with URL:`, imageUrl);
                 if (!imageUrl) return null;
 
                 return (

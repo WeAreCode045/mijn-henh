@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -48,19 +49,17 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         estate: {
-          50: "hsl(var(--estate-50))",
-          100: "hsl(var(--estate-100))",
-          200: "hsl(var(--estate-200))",
-          300: "hsl(var(--estate-300))",
-          400: "hsl(var(--estate-400))",
-          500: "hsl(var(--estate-500))",
-          600: "hsl(var(--estate-600))",
-          700: "hsl(var(--estate-700))",
-          800: "hsl(var(--estate-800))",
-          900: "hsl(var(--estate-900))",
+          50: "#F8FAFC",
+          100: "#F1F5F9",
+          200: "#E2E8F0",
+          300: "#CBD5E1",
+          400: "#94A3B8",
+          500: "#64748B",
+          600: "#475569",
+          700: "#334155",
+          800: "#1E293B",
+          900: "#0F172A",
         },
-        'primary-color': 'var(--primary-color)',
-        'secondary-color': 'var(--secondary-color)',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -90,18 +89,6 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: "fadeIn 0.5s ease-out",
         slideUp: "slideUp 0.5s ease-out",
-      },
-      backgroundColor: {
-        'primary-color': 'var(--primary-color)',
-        'secondary-color': 'var(--secondary-color)',
-      },
-      textColor: {
-        'primary-color': 'var(--primary-color)',
-        'secondary-color': 'var(--secondary-color)',
-      },
-      borderColor: {
-        'primary-color': 'var(--primary-color)',
-        'secondary-color': 'var(--secondary-color)',
       },
     },
   },

@@ -1,141 +1,108 @@
 
-import { useState } from "react";
-import { PropertyFormData, PropertyImage } from "@/types/property";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from "sonner";
+import type { PropertyFormData, PropertyImage } from "@/types/property";
 
 export function useImageUploadHandler(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void,
   setIsUploading: (isUploading: boolean) => void
 ) {
+  const { toast } = useToast();
+
+  // This function handles file uploads for main property images
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      return;
-    }
-
+    if (!e.target.files || e.target.files.length === 0) return;
+    
     setIsUploading(true);
-    const files = Array.from(e.target.files);
-    const newImages: PropertyImage[] = [];
-
+    
     try {
-      const currentImages = Array.isArray(formData.images) ? formData.images : [];
-      
-      // Find the highest sort_order for images only (not floorplans)
-      let highestSortOrder = 0;
-      
-      // First check the current state images
-      currentImages.forEach(img => {
-        if (typeof img === 'object' && img.sort_order && img.sort_order > highestSortOrder) {
-          highestSortOrder = img.sort_order;
-        }
-      });
-      
-      // If we have a property ID, also check the database for the highest sort_order
-      if (formData.id) {
-        const { data, error } = await supabase
-          .from('property_images')
-          .select('sort_order')
-          .eq('property_id', formData.id)
-          .eq('type', 'image')
-          .order('sort_order', { ascending: false })
-          .limit(1);
-          
-        if (!error && data && data.length > 0 && data[0].sort_order) {
-          highestSortOrder = Math.max(highestSortOrder, data[0].sort_order);
-        }
-      }
-
-      console.log("Starting upload for", files.length, "files. Property ID:", formData.id);
-
-      // Process each file
-      for (const file of files) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${uuidv4()}-${file.name}`;
-        const filePath = formData.id 
-          ? `properties/${formData.id}/${fileName}`
-          : `temp/${fileName}`;
-
-        console.log("Uploading file to path:", filePath);
-
-        // Upload to storage - CORRECTED BUCKET NAME
-        const { error: uploadError, data: uploadData } = await supabase.storage
+      const files = Array.from(e.target.files);
+      const uploadPromises = files.map(async (file) => {
+        // Sanitize the file name to remove non-ASCII characters
+        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
+        
+        // Create a unique file name with UUID to prevent collisions
+        const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
+        
+        // Define the file path in the storage bucket - Using media subfolder
+        const filePath = `properties/${formData.id || 'new'}/media/${fileName}`;
+        
+        // Upload the file to Supabase storage
+        const { error: uploadError } = await supabase.storage
           .from('properties')
           .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          toast.error(`Error uploading image: ${uploadError.message}`);
-          continue;
-        }
-
-        // Get public URL - CORRECTED BUCKET NAME
-        const { data: publicUrlData } = supabase.storage
+          
+        if (uploadError) throw uploadError;
+        
+        // Get the public URL for the uploaded file
+        const { data: { publicUrl } } = supabase.storage
           .from('properties')
           .getPublicUrl(filePath);
-
-        if (!publicUrlData || !publicUrlData.publicUrl) {
-          console.error('Could not get public URL');
-          continue;
-        }
-
-        console.log("File uploaded successfully, public URL:", publicUrlData.publicUrl);
-
-        // Increment the sort_order for each new image
-        highestSortOrder += 1;
-
-        // Create image record in database if we have a property ID
-        if (formData.id) {
-          console.log("Creating database record for image with property_id:", formData.id);
-          const { error: dbError, data: imageData } = await supabase
-            .from('property_images')
-            .insert({
-              property_id: formData.id,
-              type: 'image',
-              url: publicUrlData.publicUrl,
-              sort_order: highestSortOrder // Assign sort_order
-            })
-            .select()
-            .single();
-
-          if (dbError) {
-            console.error('Error recording image in database:', dbError);
-            toast.error(`Error saving image reference: ${dbError.message}`);
-          } else {
-            console.log("Database record created successfully:", imageData);
-            
-            // Use the returned database ID if available
-            newImages.push({
-              id: imageData.id || Date.now().toString() + Math.random().toString(),
-              url: publicUrlData.publicUrl,
-              sort_order: highestSortOrder
-            });
-          }
-        } else {
-          // If no property ID, just use a temporary ID
-          newImages.push({
-            id: Date.now().toString() + Math.random().toString(),
-            url: publicUrlData.publicUrl,
-            sort_order: highestSortOrder
-          });
-        }
-      }
-
-      // Update form data with new images
-      console.log("Adding new images to form state:", newImages);
-      setFormData({
-        ...formData,
-        images: [...currentImages, ...newImages]
+          
+        // Return a new PropertyImage object
+        return {
+          id: crypto.randomUUID(),
+          url: publicUrl,
+          filePath // Store the file path for potential deletion later
+        };
       });
       
-      if (newImages.length > 0) {
-        toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded successfully`);
+      // Wait for all uploads to complete
+      const newImages = await Promise.all(uploadPromises);
+      
+      // Create a new array with all existing and new images
+      // Ensure images is an array even if it's not defined in formData
+      const currentImages = Array.isArray(formData.images) ? formData.images : [];
+      const updatedImages = [...currentImages, ...newImages];
+      
+      // Log for debugging
+      console.log("Previous images:", currentImages);
+      console.log("New images:", newImages);
+      console.log("Updated images:", updatedImages);
+      
+      // Create a completely new object for React state detection
+      const updatedFormData = {
+        ...formData,
+        images: updatedImages
+      };
+      
+      // Update form state
+      setFormData(updatedFormData);
+      
+      // If the property is already saved in the database, update it immediately
+      if (formData.id) {
+        try {
+          // Add images to the property_images table for tracking
+          for (const image of newImages) {
+            const { error } = await supabase
+              .from('property_images')
+              .insert({
+                property_id: formData.id,
+                url: image.url,
+                type: 'image' // Set type as 'image' to distinguish from floorplans
+              });
+              
+            if (error) {
+              console.error('Error adding image to database:', error);
+            }
+          }
+        } catch (error) {
+          console.error('Exception updating images in database:', error);
+        }
       }
       
+      toast({
+        title: "Success",
+        description: `${newImages.length} image${newImages.length === 1 ? '' : 's'} uploaded successfully`,
+      });
     } catch (error) {
-      console.error('Error in image upload:', error);
-      toast.error('Error uploading images. Please try again.');
+      console.error('Error uploading images:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload images",
+        variant: "destructive",
+      });
     } finally {
       setIsUploading(false);
     }

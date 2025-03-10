@@ -1,17 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 interface VirtualTourCardProps {
   id: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
+  notes?: string;
   floorplanEmbedScript?: string;
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
+  onNotesUpdate?: (notes: string) => void;
   onFloorplanEmbedScriptUpdate?: (script: string) => void;
 }
 
@@ -19,16 +21,17 @@ export function VirtualTourCard({
   id,
   virtualTourUrl = "",
   youtubeUrl = "",
+  notes = "",
   floorplanEmbedScript = "",
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
+  onNotesUpdate,
   onFloorplanEmbedScriptUpdate
 }: VirtualTourCardProps) {
   const [localVirtualTourUrl, setLocalVirtualTourUrl] = useState(virtualTourUrl);
   const [localYoutubeUrl, setLocalYoutubeUrl] = useState(youtubeUrl);
-  const [localFloorplanEmbed, setLocalFloorplanEmbed] = useState(floorplanEmbedScript);
+  const [localNotes, setLocalNotes] = useState(notes);
   
-  // Update local state when props change
   useEffect(() => {
     setLocalVirtualTourUrl(virtualTourUrl);
   }, [virtualTourUrl]);
@@ -38,8 +41,8 @@ export function VirtualTourCard({
   }, [youtubeUrl]);
 
   useEffect(() => {
-    setLocalFloorplanEmbed(floorplanEmbedScript);
-  }, [floorplanEmbedScript]);
+    setLocalNotes(notes);
+  }, [notes]);
 
   const handleVirtualTourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
@@ -57,12 +60,11 @@ export function VirtualTourCard({
     }
   };
 
-  const handleFloorplanEmbedChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newScript = e.target.value;
-    setLocalFloorplanEmbed(newScript);
-    if (onFloorplanEmbedScriptUpdate) {
-      console.log("Updating floorplan embed script:", newScript);
-      onFloorplanEmbedScriptUpdate(newScript);
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNotes = e.target.value;
+    setLocalNotes(newNotes);
+    if (onNotesUpdate) {
+      onNotesUpdate(newNotes);
     }
   };
 
@@ -99,17 +101,14 @@ export function VirtualTourCard({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`floorplan-embed-${id}`}>Floorplan Embed Script</Label>
+          <Label htmlFor={`notes-${id}`}>Notes</Label>
           <Textarea
-            id={`floorplan-embed-${id}`}
-            placeholder="<iframe src='...' width='100%' height='500' frameborder='0'></iframe>"
-            className="min-h-[120px] font-mono text-sm"
-            value={localFloorplanEmbed}
-            onChange={handleFloorplanEmbedChange}
+            id={`notes-${id}`}
+            placeholder="Additional notes about the property..."
+            className="min-h-[100px]"
+            value={localNotes}
+            onChange={handleNotesChange}
           />
-          <p className="text-xs text-muted-foreground">
-            Paste the iframe embed code for an interactive floorplan
-          </p>
         </div>
       </CardContent>
     </Card>

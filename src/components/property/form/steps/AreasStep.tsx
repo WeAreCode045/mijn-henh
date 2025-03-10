@@ -1,43 +1,56 @@
 
 import { PropertyAreas } from "@/components/property/PropertyAreas";
-import { PropertyFormData } from "@/types/property";
+import type { PropertyArea, PropertyImage } from "@/types/property";
 
 interface AreasStepProps {
-  formData: PropertyFormData;
+  areas: PropertyArea[];
+  images: PropertyImage[];
+  propertyId?: string;
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  setPendingChanges?: (pending: boolean) => void;
+  onUpdateArea: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
+  onAreaImageUpload: (id: string, files: FileList) => void;
+  onAreaImageRemove: (id: string, imageId: string) => void;
+  onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
+  isUploading?: boolean;
 }
 
 export function AreasStep({
-  formData,
+  areas,
+  images,
+  propertyId,
   onAddArea,
   onRemoveArea,
   onUpdateArea,
+  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
-  setPendingChanges
+  isUploading
 }: AreasStepProps) {
+  console.log("AreasStep rendering with areas:", areas);
+  console.log("AreasStep images:", images);
+  console.log("AreasStep propertyId:", propertyId);
+  
+  const handleAddArea = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    onAddArea();
+  };
+  
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4">Property Areas</h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        Add all the rooms and areas of this property.
-      </p>
-      
-      <PropertyAreas 
-        areas={formData.areas || []}
-        images={formData.images || []}
-        propertyId={formData.id || ''}
-        onAdd={onAddArea}
-        onRemove={onRemoveArea}
-        onUpdate={onUpdateArea}
-        onImageRemove={onAreaImageRemove}
-        onImagesSelect={onAreaImagesSelect}
-      />
-    </div>
+    <PropertyAreas
+      areas={areas || []}
+      images={images || []}
+      propertyId={propertyId}
+      onAdd={handleAddArea}
+      onRemove={onRemoveArea}
+      onUpdate={onUpdateArea}
+      onImageUpload={onAreaImageUpload}
+      onImageRemove={onAreaImageRemove}
+      onImagesSelect={onAreaImagesSelect}
+      isUploading={isUploading}
+    />
   );
 }

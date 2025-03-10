@@ -1,5 +1,5 @@
 
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyTechnicalItem } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
@@ -9,6 +9,7 @@ import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
+import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
 
 export function usePropertyFormManager(property: PropertyData) {
   // Form state management
@@ -38,6 +39,9 @@ export function usePropertyFormManager(property: PropertyData) {
     addFeature,
     removeFeature,
     updateFeature,
+    addTechnicalItem,
+    removeTechnicalItem,
+    updateTechnicalItem,
   } = usePropertyContent(
     formState,
     handleFieldChangeWithTracking
@@ -48,8 +52,9 @@ export function usePropertyFormManager(property: PropertyData) {
     addArea,
     removeArea,
     updateArea,
+    handleAreaImageUpload,
     handleAreaImageRemove,
-    handleAreaImagesSelect
+    handleAreaImagesSelect,
   } = usePropertyAreas(
     formState, 
     setFormStateWithTracking
@@ -59,16 +64,20 @@ export function usePropertyFormManager(property: PropertyData) {
   const {
     handleImageUpload,
     handleRemoveImage,
-    handleSetFeaturedImage,
-    handleToggleFeaturedImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
     handleFloorplanUpload,
+    handleRemoveAreaPhoto,
     handleRemoveFloorplan,
-    isUploadingFloorplan,
+    handleUpdateFloorplan,
     images
   } = usePropertyImages(
+    formState, 
+    setFormStateWithTracking
+  );
+  
+  // Import directly instead of using require, and use updated method name
+  const { handleSetFeaturedImage, handleToggleFeaturedImage } = usePropertyMainImages(
     formState, 
     setFormStateWithTracking
   );
@@ -113,21 +122,25 @@ export function usePropertyFormManager(property: PropertyData) {
     addFeature,
     removeFeature,
     updateFeature,
+    addTechnicalItem,
+    removeTechnicalItem,
+    updateTechnicalItem,
     addArea,
     removeArea,
     updateArea,
+    handleAreaImageUpload,
     handleAreaImageRemove,
     handleAreaImagesSelect,
     handleImageUpload,
     handleRemoveImage,
     isUploading,
+    handleAreaPhotosUpload,
+    handleFloorplanUpload,
+    handleRemoveAreaPhoto,
+    handleRemoveFloorplan,
+    handleUpdateFloorplan,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan,
     onSubmit,
     currentStep,
     handleStepClick,

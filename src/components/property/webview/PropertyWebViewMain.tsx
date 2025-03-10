@@ -1,9 +1,7 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { MainContentView } from "./MainContentView";
-import { PrintContentView } from "./PrintContentView";
-import { useWebViewContent } from "./hooks/useWebViewContent";
+import { PropertyWebViewContent } from "./PropertyWebViewContent";
 
 interface PropertyWebViewMainProps {
   propertyData: PropertyData;
@@ -32,47 +30,41 @@ export function PropertyWebViewMain({
   handlePrint,
   handleDownload
 }: PropertyWebViewMainProps) {
-  // Use the custom hook for content-related logic
-  const { debugLog } = useWebViewContent({
-    propertyData,
-    currentPage,
-    setCurrentPage
-  });
-  
-  debugLog('PropertyWebViewMain rendered', { 
-    property: propertyData?.id, 
-    currentPage
-  });
-
   return (
-    <div className="w-full h-full">
-      {/* Main visible content */}
-      <MainContentView 
-        contentRef={contentRef}
-        propertyData={propertyData}
-        settings={settings}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-        handleShare={handleShare}
-        handlePrint={handlePrint}
-        handleDownload={handleDownload}
-      />
-      
+    <div className="w-full bg-white shadow-lg overflow-hidden h-full flex flex-col">
+      <div ref={contentRef} className="flex-1 min-h-0">
+        <PropertyWebViewContent 
+          property={propertyData}
+          settings={settings}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+          handleShare={handleShare}
+          handlePrint={handlePrint}
+          handleDownload={handleDownload}
+        />
+      </div>
       {/* Hidden print content */}
-      <PrintContentView 
-        printContentRef={printContentRef}
-        propertyData={propertyData}
-        settings={settings}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-        handleShare={handleShare}
-        handlePrint={handlePrint}
-        handleDownload={handleDownload}
-      />
+      <div 
+        ref={printContentRef}
+        id="print-content" 
+        className="fixed left-[-9999px] w-full"
+      >
+        <PropertyWebViewContent 
+          property={propertyData}
+          settings={settings}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+          handleShare={handleShare}
+          handlePrint={handlePrint}
+          handleDownload={handleDownload}
+          isPrintView={true}
+          waitForPlaces={true}
+        />
+      </div>
     </div>
   );
 }

@@ -1,64 +1,46 @@
 
-import { UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createRef } from "react";
+import { Upload } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface FloorplanUploaderProps {
-  onFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  isUploading: boolean;
-  // Add backward compatibility with isLoading prop
-  isLoading?: boolean;
-  // Add support for onUpload as an alias for onFloorplanUpload
-  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isLoading: boolean;
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function FloorplanUploader({ 
-  onFloorplanUpload, 
-  isUploading, 
-  isLoading, 
-  onUpload 
-}: FloorplanUploaderProps) {
-  const fileInputRef = createRef<HTMLInputElement>();
-  
-  // Use isLoading as fallback if isUploading is not provided
-  const uploading = isUploading || isLoading || false;
-  
-  // Use onUpload as fallback if onFloorplanUpload is not provided
-  const handleUpload = onFloorplanUpload || onUpload || (() => {});
-
-  const handleUploadClick = () => {
-    // Programmatically click the hidden file input
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleUpload(e);
-    // Reset the file input value
-    e.target.value = '';
-  };
-
+export function FloorplanUploader({ isLoading, onUpload }: FloorplanUploaderProps) {
   return (
-    <div>
-      <Button
-        type="button"
-        variant="outline"
+    <div className="flex items-center space-x-2">
+      <Button 
+        type="button" 
+        variant="outline" 
         className="w-full"
-        disabled={uploading}
-        onClick={handleUploadClick}
+        disabled={isLoading}
+        onClick={(e) => {
+          e.preventDefault(); // Prevent any default navigation
+          document.getElementById('floorplan-upload')?.click();
+        }}
       >
-        <UploadIcon className="w-4 h-4 mr-2" />
-        {uploading ? "Uploading..." : "Upload Floorplans"}
+        {isLoading ? (
+          <>
+            <Spinner className="h-4 w-4 mr-2" />
+            <span>Uploading...</span>
+          </>
+        ) : (
+          <>
+            <Upload className="h-4 w-4 mr-2" />
+            <span>Upload Floorplans</span>
+          </>
+        )}
       </Button>
       <input
-        ref={fileInputRef}
+        id="floorplan-upload"
         type="file"
-        multiple
         accept="image/*"
+        multiple
         className="hidden"
-        onChange={handleFileChange}
-        disabled={uploading}
+        onChange={onUpload}
+        disabled={isLoading}
       />
     </div>
   );

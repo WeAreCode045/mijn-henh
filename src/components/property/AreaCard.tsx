@@ -19,6 +19,7 @@ interface AreaCardProps {
   isFirstArea?: boolean;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
+  onImageUpload: (id: string, files: FileList) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
@@ -39,6 +40,7 @@ export function AreaCard({
   isFirstArea = false,
   onRemove,
   onUpdate,
+  onImageUpload,
   onImageRemove,
   onImagesSelect,
 }: AreaCardProps) {
@@ -77,9 +79,11 @@ export function AreaCard({
           console.error(`Error in fetching area images from property_images:`, err);
         }
       } else {
-        // Use area.images directly if available
-        if (area.images && area.images.length > 0) {
-          setAreaImages(area.images as AreaImage[]);
+        // Fallback to imageIds in area if propertyId is not available
+        const imageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
+        if (imageIds.length > 0 && images && images.length > 0) {
+          const foundImages = images.filter(img => imageIds.includes(img.id));
+          setAreaImages(foundImages as AreaImage[]);
         } else {
           setAreaImages([]);
         }
@@ -87,7 +91,7 @@ export function AreaCard({
     };
     
     fetchAreaImages();
-  }, [area, propertyId]);
+  }, [area, images, propertyId]);
 
   const handleUpdateTitle = (value: string) => {
     onUpdate(area.id, "title", value);

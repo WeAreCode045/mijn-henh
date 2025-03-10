@@ -45,14 +45,12 @@ interface PropertyDashboardTabProps {
   updatedAt?: string;
   onSave: () => void;
   onDelete: () => void;
-  handleGeneratePDF: (e: React.MouseEvent) => void;
-  handleWebView: (e: React.MouseEvent) => void;
-  handleSaveAgent: (agentId: string) => void;
-  handleSaveObjectId: (objectId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
+  onGeneratePDF: (e: React.MouseEvent) => void;
+  onWebView: (e: React.MouseEvent) => void;
+  onSaveAgent: (agentId: string) => void;
+  onSaveObjectId: (objectId: string) => void;
+  onSaveTemplate: (templateId: string) => void;
   isUpdating: boolean;
-  agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
 }
 
 export function PropertyDashboardTab({
@@ -67,14 +65,12 @@ export function PropertyDashboardTab({
   updatedAt,
   onSave,
   onDelete,
-  handleGeneratePDF,
-  handleWebView,
-  handleSaveAgent,
-  handleSaveObjectId,
-  handleSaveTemplate,
-  isUpdating,
-  agentInfo,
-  templateInfo
+  onGeneratePDF,
+  onWebView,
+  onSaveAgent,
+  onSaveObjectId,
+  onSaveTemplate,
+  isUpdating
 }: PropertyDashboardTabProps) {
   const [notes, setNotes] = useState<string>("");
   const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
@@ -176,19 +172,19 @@ export function PropertyDashboardTab({
     }
   };
 
-  const handleSaveAgentClick = (e: React.MouseEvent) => {
+  const handleSaveAgent = (e: React.MouseEvent) => {
     e.preventDefault();
-    handleSaveAgent(currentAgentId);
+    onSaveAgent(currentAgentId);
   };
 
-  const handleSaveObjectIdClick = (e: React.MouseEvent) => {
+  const handleSaveObjectId = (e: React.MouseEvent) => {
     e.preventDefault();
-    handleSaveObjectId(currentObjectId);
+    onSaveObjectId(currentObjectId);
   };
   
-  const handleSaveTemplateClick = (e: React.MouseEvent) => {
+  const handleSaveTemplate = (e: React.MouseEvent) => {
     e.preventDefault();
-    handleSaveTemplate(currentTemplateId);
+    onSaveTemplate(currentTemplateId);
   };
 
   return (
@@ -199,17 +195,10 @@ export function PropertyDashboardTab({
           <Button variant="outline" size="icon" onClick={onSave} title="Save">
             <Save className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            asChild
-            title="Web View"
-          >
-            <a href={`/property/${id}/webview`} target="_blank" rel="noopener noreferrer">
-              <Globe className="h-4 w-4" />
-            </a>
+          <Button variant="outline" size="icon" onClick={onWebView} title="Web View">
+            <Globe className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={handleGeneratePDF} title="Generate PDF">
+          <Button variant="outline" size="icon" onClick={onGeneratePDF} title="Generate PDF">
             <FileDown className="h-4 w-4" />
           </Button>
           <Button 
@@ -261,7 +250,7 @@ export function PropertyDashboardTab({
                   onChange={(e) => setCurrentObjectId(e.target.value)}
                   placeholder="Enter object ID"
                 />
-                <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size="sm">
+                <Button onClick={handleSaveObjectId} disabled={isUpdating} size="sm">
                   {isUpdating ? "Saving..." : "Save"}
                 </Button>
               </div>
@@ -329,7 +318,7 @@ export function PropertyDashboardTab({
               </Select>
             </div>
             
-            <Button onClick={handleSaveAgentClick} disabled={isUpdating}>
+            <Button onClick={handleSaveAgent} disabled={isUpdating}>
               <Save className="h-4 w-4 mr-2" />
               {isUpdating ? "Saving..." : "Assign Agent"}
             </Button>
@@ -364,7 +353,7 @@ export function PropertyDashboardTab({
               </Select>
             </div>
             
-            <Button onClick={handleSaveTemplateClick} disabled={isUpdating}>
+            <Button onClick={handleSaveTemplate} disabled={isUpdating}>
               <Save className="h-4 w-4 mr-2" />
               {isUpdating ? "Saving..." : "Set Template"}
             </Button>

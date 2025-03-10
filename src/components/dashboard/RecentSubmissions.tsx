@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,16 +20,12 @@ type Submission = {
   };
 };
 
-interface RecentSubmissionsProps {
-  propertyId?: string;
-}
-
-export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
+export function RecentSubmissions() {
   const { profile, isAdmin } = useAuth();
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
   const { data: recentSubmissions = [] } = useQuery({
-    queryKey: ['recent-submissions', profile?.id, isAdmin, propertyId],
+    queryKey: ['recent-submissions', profile?.id, isAdmin],
     queryFn: async () => {
       let query = supabase
         .from('property_contact_submissions')
@@ -39,10 +36,7 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (propertyId) {
-        query = query.eq('property_id', propertyId);
-      } 
-      else if (!isAdmin && profile?.id) {
+      if (!isAdmin) {
         query = query.eq('properties.agent_id', profile.id);
       }
 
@@ -53,35 +47,34 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
     },
   });
 
-  if (recentSubmissions.length === 0) {
-    return (
-      <div className="text-center py-4 text-muted-foreground">
-        No submissions received yet.
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="space-y-4">
-        {recentSubmissions.map((submission) => (
-          <div 
-            key={submission.id} 
-            className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-            onClick={() => setSelectedSubmission(submission)}
-          >
-            <div>
-              <h3 className="font-medium">{submission.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {submission.properties?.title}
-              </p>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {format(new Date(submission.created_at), 'dd/MM/yyyy HH:mm')}
-            </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Contact Form Submissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {recentSubmissions.map((submission) => (
+              <div 
+                key={submission.id} 
+                className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                onClick={() => setSelectedSubmission(submission)}
+              >
+                <div>
+                  <h3 className="font-medium">{submission.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {submission.properties?.title}
+                  </p>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {format(new Date(submission.created_at), 'dd/MM/yyyy HH:mm')}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </CardContent>
+      </Card>
 
       <Dialog open={!!selectedSubmission} onOpenChange={() => setSelectedSubmission(null)}>
         <DialogContent>

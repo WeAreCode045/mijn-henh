@@ -1,64 +1,116 @@
 
-import { DashboardTabContent } from "./DashboardTabContent";
-import { ContentTabContent } from "./ContentTabContent";
-import { MediaTabContent } from "../media/MediaTabContent";
-import { FloorplansTabContent } from "../floorplans/FloorplansTabContent";
-import { CommunicationsTabContent } from "./CommunicationsTabContent";
+import { DashboardTabContent } from "../wrapper/DashboardTabContent";
+import { ContentTabContent } from "../wrapper/ContentTabContent";
+import { MediaTabContent } from "../wrapper/MediaTabContent";
+import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
-import { normalizeImages } from "@/utils/imageHelpers";
-import { PropertyData } from "@/types/property";
 
-export function renderTabContent({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }: PropertyTabProps) {
-  // Cast property to PropertyData with all required fields for type safety
-  const propertyData = property as PropertyData;
+// Dashboard Tab
+export function renderDashboardTab(tabProps: PropertyTabProps) {
+  const { activeTab, property, agentInfo, templateInfo, isUpdating, handlers } = tabProps;
+
+  if (activeTab !== 'dashboard') return null;
+
+  return (
+    <DashboardTabContent
+      id={property.id}
+      title={property.title}
+      objectId={property.object_id}
+      agentId={agentInfo?.id}
+      agentName={agentInfo?.name}
+      templateId={templateInfo?.id}
+      templateName={templateInfo?.name}
+      createdAt={property.created_at}
+      updatedAt={property.updated_at}
+      onSave={handlers.onSave}
+      onDelete={handlers.onDelete}
+      onGeneratePDF={handlers.handleGeneratePDF}
+      onWebView={handlers.handleWebView}
+      onSaveAgent={handlers.handleSaveAgent}
+      onSaveObjectId={handlers.handleSaveObjectId}
+      onSaveTemplate={handlers.handleSaveTemplate}
+      isUpdating={isUpdating}
+    />
+  );
+}
+
+// Content Tab
+export function renderContentTab(tabProps: PropertyTabProps) {
+  const { activeTab, property, handlers } = tabProps;
+
+  if (activeTab !== 'content') return null;
+
+  return (
+    <ContentTabContent
+      formData={handlers.formState}
+      onFieldChange={handlers.onFieldChange}
+      onAddFeature={handlers.onAddFeature}
+      onRemoveFeature={handlers.onRemoveFeature}
+      onUpdateFeature={handlers.onUpdateFeature}
+      onAddArea={handlers.onAddArea}
+      onRemoveArea={handlers.onRemoveArea}
+      onUpdateArea={handlers.onUpdateArea}
+      onAreaImageUpload={handlers.onAreaImageUpload}
+      onAreaImageRemove={handlers.onAreaImageRemove}
+      onAreaImagesSelect={handlers.onAreaImagesSelect}
+      handleImageUpload={handlers.handleImageUpload}
+      handleAreaPhotosUpload={handlers.handleImageUpload} // Using same handler for simplicity
+      handleFloorplanUpload={handlers.handleImageUpload} // Using same handler for simplicity
+      handleRemoveImage={handlers.handleRemoveImage}
+      handleRemoveAreaPhoto={handlers.handleRemoveImage} // Using same handler for simplicity
+      handleRemoveFloorplan={handlers.handleRemoveImage} // Using same handler for simplicity
+      onAddTechnicalItem={handlers.onAddTechnicalItem}
+      onRemoveTechnicalItem={handlers.onRemoveTechnicalItem}
+      onUpdateTechnicalItem={handlers.onUpdateTechnicalItem}
+      currentStep={handlers.currentStep}
+      handleStepClick={handlers.handleStepClick}
+      handleNext={handlers.handleNext}
+      handlePrevious={handlers.handlePrevious}
+      onSubmit={handlers.onSubmit}
+      isUploading={handlers.isUploading}
+    />
+  );
+}
+
+// Update the renderMediaTab function to pass the featured images properties
+export function renderMediaTab(tabProps: PropertyTabProps) {
+  const { activeTab, property, handlers } = tabProps;
   
-  switch (activeTab) {
-    case "dashboard":
-      return (
-        <DashboardTabContent 
-          property={propertyData} 
-          onDelete={handlers.onDelete}
-          onSave={handlers.onSave}
-          onWebView={handlers.handleWebView}
-        />
-      );
-    case "content":
-      return (
-        <ContentTabContent
-          formData={formState}
-          onFieldChange={handlers.onFieldChange}
-          onAddFeature={handlers.onAddFeature}
-          onRemoveFeature={handlers.onRemoveFeature}
-          onUpdateFeature={handlers.onUpdateFeature}
-          onAddArea={handlers.onAddArea}
-          onRemoveArea={handlers.onRemoveArea}
-          onUpdateArea={handlers.onUpdateArea}
-          onAreaImageRemove={handlers.onAreaImageRemove}
-          onAreaImagesSelect={handlers.onAreaImagesSelect}
-          currentStep={handlers.currentStep}
-          handleStepClick={handlers.handleStepClick}
-          handleNext={handlers.handleNext}
-          handlePrevious={handlers.handlePrevious}
-          onFetchLocationData={handlers.onFetchLocationData}
-          onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-          isLoadingLocationData={handlers.isLoadingLocationData}
-          setPendingChanges={handlers.setPendingChanges || (() => {})}
-        />
-      );
-    case "media":
-      return (
-        <MediaTabContent
-          property={{
-            ...propertyData,
-            images: normalizeImages(property.images)
-          }}
-        />
-      );
-    case "floorplans":
-      return <FloorplansTabContent property={propertyData} />;
-    case "communications":
-      return <CommunicationsTabContent property={propertyData} />;
-    default:
-      return null;
-  }
+  if (activeTab !== 'media') return null;
+  
+  return (
+    <MediaTabContent
+      id={property.id}
+      title={property.title}
+      images={property.images || []}
+      virtualTourUrl={property.virtualTourUrl}
+      youtubeUrl={property.youtubeUrl}
+      notes={property.notes}
+      onVirtualTourUpdate={(url) => handlers.onFieldChange('virtualTourUrl', url)}
+      onYoutubeUrlUpdate={(url) => handlers.onFieldChange('youtubeUrl', url)}
+      onNotesUpdate={(notes) => handlers.onFieldChange('notes', notes)}
+      onImageUpload={handlers.handleImageUpload}
+      onRemoveImage={handlers.handleRemoveImage}
+      isUploading={handlers.isUploading}
+      // Use the renamed properties
+      featuredImageUrl={property.featuredImage}
+      featuredImageUrls={property.featuredImages}
+      onSetFeatured={handlers.handleSetFeaturedImage}
+      onToggleFeatured={handlers.handleToggleFeaturedImage}
+    />
+  );
+}
+
+// Communications Tab
+export function renderCommunicationsTab(tabProps: PropertyTabProps) {
+  const { activeTab, property } = tabProps;
+
+  if (activeTab !== 'communications') return null;
+
+  return (
+    <CommunicationsTabContent 
+      id={property.id}
+      title={property.title}
+    />
+  );
 }
