@@ -1,7 +1,7 @@
 
 import { PropertyFormData } from "@/types/property";
 
-export interface ContentTabWrapperProps {
+export interface PropertyContentTabProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
@@ -22,4 +22,5 @@ export interface ContentTabWrapperProps {
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
+  isUpdateMode?: boolean;
 }

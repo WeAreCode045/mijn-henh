@@ -2,7 +2,7 @@
 import { ChangeEvent } from 'react';
 
 export interface FloorplanEmbedProps {
-  script: string;
+  script: string;  // Changed from embedScript to script to match usage
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void; 
 }
 
