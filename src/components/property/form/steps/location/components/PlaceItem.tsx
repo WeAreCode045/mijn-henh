@@ -13,6 +13,7 @@ interface PlaceItemProps {
   index: number;
   originalIndex: number;
   category: string;
+  visible: boolean; // Changed from isVisible to visible
 }
 
 export function PlaceItem({ 
@@ -21,14 +22,15 @@ export function PlaceItem({
   originalIndex, 
   onRemove, 
   onVisibilityChange,
-  category
+  category,
+  visible
 }: PlaceItemProps) {
   return (
     <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md">
       <div className="flex items-start gap-2">
         <Checkbox 
           id={`place-${originalIndex}`}
-          checked={place.visible_in_webview !== false}
+          checked={visible}
           onCheckedChange={(checked) => {
             onVisibilityChange(originalIndex, checked === true);
           }}

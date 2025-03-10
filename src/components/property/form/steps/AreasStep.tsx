@@ -10,6 +10,10 @@ interface AreasStepProps {
   onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  isUploading?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
 }
 
 export function AreasStep({
@@ -19,7 +23,11 @@ export function AreasStep({
   onUpdateArea,
   onAreaImageUpload,
   onAreaImageRemove,
-  onAreaImagesSelect
+  onAreaImagesSelect,
+  isUploading,
+  setPendingChanges,
+  handleAreaPhotosUpload,
+  handleRemoveAreaPhoto
 }: AreasStepProps) {
   return (
     <div className="space-y-6">
@@ -32,12 +40,13 @@ export function AreasStep({
         areas={formData.areas || []}
         images={formData.images || []}
         propertyId={formData.id || ''}
-        onAddArea={onAddArea}
-        onRemoveArea={onRemoveArea}
-        onUpdateArea={onUpdateArea}
-        onAreaImageUpload={onAreaImageUpload}
-        onAreaImageRemove={onAreaImageRemove}
-        onAreaImagesSelect={onAreaImagesSelect}
+        onAdd={onAddArea}
+        onRemove={onRemoveArea}
+        onUpdate={onUpdateArea}
+        onImageUpload={onAreaImageUpload}
+        onImageRemove={onAreaImageRemove}
+        onImagesSelect={onAreaImagesSelect}
+        isUploading={isUploading}
       />
     </div>
   );
