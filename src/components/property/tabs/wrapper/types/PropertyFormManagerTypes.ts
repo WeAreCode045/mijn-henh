@@ -39,4 +39,5 @@ export interface PropertyFormManagerChildrenProps {
   propertyWithRequiredProps: PropertyData;
   lastSaved: Date | null;
   isSaving: boolean;
+  setPendingChanges: (pending: boolean) => void;
 }

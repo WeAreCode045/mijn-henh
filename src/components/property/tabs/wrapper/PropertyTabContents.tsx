@@ -37,6 +37,7 @@ interface PropertyTabContentsProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
@@ -81,6 +82,7 @@ export function PropertyTabContents({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
+  handleAreaImageUpload,
   handleImageUpload,
   handleRemoveImage,
   isUploading,
@@ -118,6 +120,7 @@ export function PropertyTabContents({
     onUpdateArea,
     onAreaImageRemove,
     onAreaImagesSelect,
+    handleAreaImageUpload,
     handleImageUpload,
     handleRemoveImage,
     isUploading,
@@ -139,7 +142,8 @@ export function PropertyTabContents({
     onFetchLocationData,
     onRemoveNearbyPlace,
     isLoadingLocationData,
-    setPendingChanges // Add the missing setPendingChanges to the handlers object
+    setPendingChanges, // Add the missing setPendingChanges to the handlers object
+    featuredImage: formState.featuredImage // Add missing featuredImage prop
   };
 
   const tabProps = {

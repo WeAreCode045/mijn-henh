@@ -1,115 +1,131 @@
 
 import { useState } from 'react';
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyImage } from '@/types/property';
+import { PropertyFormData, PropertyImage } from '@/types/property';
+import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function useAreaImageUpload(
   formData: PropertyFormData,
-  setFormData: React.Dispatch<React.SetStateAction<PropertyFormData>>
+  setFormData: (data: PropertyFormData) => void
 ) {
-  const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
 
-  // Handle image upload for a specific area
-  const handleAreaImageUpload = async (areaId: string, files: FileList) => {
-    if (!files || files.length === 0) return;
-    
+  // Upload images specifically for an area
+  const handleAreaImageUpload = async (areaId: string, files: FileList): Promise<void> => {
+    if (!files || files.length === 0) {
+      return Promise.resolve();
+    }
+
     setIsUploading(true);
+    const fileArray = Array.from(files);
     
     try {
-      console.log(`Uploading ${files.length} images for area ${areaId}`);
-      
-      const uploadPromises = Array.from(files).map(async (file) => {
-        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
-        const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;
-        const filePath = `properties/${formData.id || 'new'}/areas/${areaId}/${fileName}`;
-        
-        // Upload to Supabase storage
-        const { error: uploadError } = await supabase.storage
+      // Find the area to update
+      const areaIndex = formData.areas.findIndex(area => area.id === areaId);
+      if (areaIndex === -1) {
+        throw new Error(`Area with ID ${areaId} not found`);
+      }
+
+      const areaToUpdate = formData.areas[areaIndex];
+      const uploadedImages: PropertyImage[] = [];
+
+      // Process each file
+      for (const file of fileArray) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${uuidv4()}-${file.name}`;
+        const filePath = formData.id 
+          ? `properties/${formData.id}/areas/${areaId}/${fileName}`
+          : `temp/areas/${areaId}/${fileName}`;
+
+        console.log("Uploading area image to path:", filePath);
+
+        // Upload to storage
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from('properties')
           .upload(filePath, file);
-          
-        if (uploadError) throw uploadError;
-        
-        // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
+
+        if (uploadError) {
+          console.error('Error uploading area image:', uploadError);
+          toast.error(`Error uploading area image: ${uploadError.message}`);
+          continue;
+        }
+
+        // Get public URL
+        const { data: publicUrlData } = supabase.storage
           .from('properties')
           .getPublicUrl(filePath);
-          
-        // Save to property_images table if we have a property ID
+
+        if (!publicUrlData || !publicUrlData.publicUrl) {
+          console.error('Could not get public URL for area image');
+          continue;
+        }
+
+        console.log("Area image uploaded successfully, public URL:", publicUrlData.publicUrl);
+
+        // Create image record
+        const newImage: PropertyImage = {
+          id: uuidv4(),
+          url: publicUrlData.publicUrl,
+          property_id: formData.id,
+          area: areaId,
+          type: 'area',
+          sort_order: (areaToUpdate.images?.length || 0) + uploadedImages.length + 1
+        };
+
+        // If we have a property ID, store in database
         if (formData.id) {
-          const { data: imageData, error: dbError } = await supabase
+          console.log("Creating database record for area image");
+          const { error: dbError, data: imageData } = await supabase
             .from('property_images')
             .insert({
               property_id: formData.id,
-              url: publicUrl,
-              type: 'image',
-              area: areaId // Directly assign to the area
+              url: publicUrlData.publicUrl,
+              type: 'area',
+              area: areaId,
+              sort_order: newImage.sort_order
             })
-            .select('id')
+            .select()
             .single();
-            
+
           if (dbError) {
-            console.error('Database error saving image:', dbError);
-            throw dbError;
+            console.error('Error recording area image in database:', dbError);
+            toast.error(`Error saving area image reference: ${dbError.message}`);
+          } else if (imageData) {
+            newImage.id = imageData.id;
+            console.log("Database record created for area image:", imageData);
           }
-          
-          // Return the database record ID and URL
-          return { id: imageData.id, url: publicUrl } as PropertyImage;
         }
-        
-        // If no property ID yet, just return a temporary ID
-        return { id: crypto.randomUUID(), url: publicUrl } as PropertyImage;
-      });
-      
-      const newImages = await Promise.all(uploadPromises);
-      console.log("Uploaded new images:", newImages);
-      
-      // Find the area to update
-      const areaToUpdate = formData.areas.find(area => area.id === areaId);
-      
-      if (!areaToUpdate) {
-        console.error(`Area with ID ${areaId} not found`);
-        throw new Error(`Area with ID ${areaId} not found`);
+
+        uploadedImages.push(newImage);
       }
-      
-      // Create updated areas array with the new images
-      const updatedAreas = formData.areas.map(area => {
-        if (area.id === areaId) {
-          return {
-            ...area,
-            images: [...(area.images || []), ...newImages]
-          };
-        }
-        return area;
-      });
-      
-      // Add the new images to the form data images array
-      const updatedImages = [...(formData.images || []), ...newImages];
-      
-      // Update form data with both new images and updated area
-      setFormData({
-        ...formData,
-        images: updatedImages,
-        areas: updatedAreas
-      });
-      
-      toast({
-        title: "Success",
-        description: `Uploaded ${newImages.length} images to ${areaToUpdate.title || areaId}`,
-      });
-      
+
+      // Update the form state with new area images
+      if (uploadedImages.length > 0) {
+        const updatedArea = {
+          ...areaToUpdate,
+          images: [...(areaToUpdate.images || []), ...uploadedImages]
+        };
+
+        const updatedAreas = [...formData.areas];
+        updatedAreas[areaIndex] = updatedArea;
+
+        setFormData({
+          ...formData,
+          areas: updatedAreas
+        });
+
+        toast.success(`${uploadedImages.length} area image${uploadedImages.length > 1 ? 's' : ''} uploaded`);
+      }
+
     } catch (error) {
-      console.error('Error uploading area images:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload images",
-        variant: "destructive",
-      });
+      console.error('Error handling area image upload:', error);
+      toast.error('Failed to upload area images');
     } finally {
       setIsUploading(false);
     }
+    
+    return Promise.resolve();
   };
 
   return {

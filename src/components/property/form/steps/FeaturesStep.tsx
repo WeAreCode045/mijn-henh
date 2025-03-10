@@ -9,7 +9,6 @@ interface FeaturesStepProps {
   onUpdateFeature: (id: string, description: string) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   setPendingChanges?: (pending: boolean) => void;
-  // No need for a separate features property as it's part of formData
 }
 
 export function FeaturesStep({

@@ -46,11 +46,11 @@ export interface PropertyTabProps {
     onUpdateArea: (id: string, field: any, value: any) => void;
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
     handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>; // Add the missing handler
     handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveFloorplan: (index: number) => void;
     isUploadingFloorplan: boolean;
@@ -61,6 +61,7 @@ export interface PropertyTabProps {
     handleNext: () => void;
     handlePrevious: () => void;
     onSubmit: () => void;
+    formState: PropertyFormData;
     // Optional handlers
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
@@ -69,8 +70,7 @@ export interface PropertyTabProps {
     handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
     // Add the missing setPendingChanges property
     setPendingChanges?: (pending: boolean) => void;
-    // Add featuredImageUrl for backward compatibility
-    featuredImageUrl?: string;
-    featuredImage?: string | null; // Add this for compatibility
+    // Required props for compatibility
+    featuredImage?: string | null;
   };
 }

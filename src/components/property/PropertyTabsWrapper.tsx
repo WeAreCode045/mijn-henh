@@ -47,6 +47,7 @@ export function PropertyTabsWrapper({
               updateArea,
               handleAreaImageRemove,
               handleAreaImagesSelect,
+              handleAreaImageUpload,
               handleImageUpload,
               handleRemoveImage,
               isUploading,
@@ -62,7 +63,10 @@ export function PropertyTabsWrapper({
               handleStepClick,
               handleNext,
               handlePrevious,
-              propertyWithRequiredProps
+              propertyWithRequiredProps,
+              lastSaved,
+              isSaving,
+              setPendingChanges
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -90,6 +94,7 @@ export function PropertyTabsWrapper({
                       onUpdateArea={updateArea}
                       onAreaImageRemove={handleAreaImageRemove}
                       onAreaImagesSelect={handleAreaImagesSelect}
+                      handleAreaImageUpload={handleAreaImageUpload}
                       handleImageUpload={handleImageUpload}
                       handleRemoveImage={handleRemoveImage}
                       isUploading={isUploading}
@@ -105,6 +110,7 @@ export function PropertyTabsWrapper({
                       handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
                       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+                      setPendingChanges={setPendingChanges}
                     />
                   </PropertyTabs>
                 </Tabs>

@@ -50,7 +50,7 @@ export function usePropertyFormManager(property: PropertyData) {
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-    handleAreaImageUpload  // This should now be returned from usePropertyAreas
+    handleAreaImageUpload
   } = usePropertyAreas(
     formState, 
     setFormStateWithTracking
@@ -89,8 +89,8 @@ export function usePropertyFormManager(property: PropertyData) {
     handleFieldChange('object_id', id);
   };
 
-  const handleSaveAgent = (agentId: string) => {
-    const id = baseSaveAgent(agentId);
+  const handleSaveAgent = async (agentId: string) => {
+    const id = await baseSaveAgent(agentId);
     handleFieldChange('agent_id', id);
   };
 
@@ -119,7 +119,7 @@ export function usePropertyFormManager(property: PropertyData) {
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-    handleAreaImageUpload, // Include this in the returned object
+    handleAreaImageUpload,
     handleImageUpload,
     handleRemoveImage,
     isUploading,
@@ -137,6 +137,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handlePrevious,
     propertyWithRequiredProps: propertyWithRequiredId,
     lastSaved,
-    isSaving
+    isSaving,
+    setPendingChanges
   };
 }

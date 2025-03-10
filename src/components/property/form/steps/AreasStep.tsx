@@ -11,7 +11,7 @@ interface AreasStepProps {
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   setPendingChanges?: (pending: boolean) => void;
-  isUploading?: boolean; // Add this property
+  isUploading?: boolean;
 }
 
 export function AreasStep({
@@ -41,6 +41,8 @@ export function AreasStep({
         onUpdate={onUpdateArea}
         onImageRemove={onAreaImageRemove}
         onImagesSelect={onAreaImagesSelect}
+        onAreaImageUpload={onAreaImageUpload}
+        isUploading={isUploading}
       />
     </div>
   );
