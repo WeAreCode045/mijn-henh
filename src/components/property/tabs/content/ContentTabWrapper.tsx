@@ -22,4 +22,14 @@ export interface ContentTabWrapperProps {
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
+  isUpdateMode?: boolean;
+}
+
+export function ContentTabWrapper(props: ContentTabWrapperProps) {
+  // Component implementation here
+  return (
+    <div>
+      {/* Implementation */}
+    </div>
+  );
 }

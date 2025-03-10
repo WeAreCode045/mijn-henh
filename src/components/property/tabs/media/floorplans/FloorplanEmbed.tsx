@@ -2,8 +2,8 @@
 import { ChangeEvent } from 'react';
 
 export interface FloorplanEmbedProps {
-  script: string;  // Changed from embedScript to script to match usage
-  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void; 
+  script: string;
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 export function FloorplanEmbed({ script, onChange }: FloorplanEmbedProps) {
