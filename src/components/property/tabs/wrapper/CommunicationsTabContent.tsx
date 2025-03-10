@@ -1,37 +1,26 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Submission } from '../communications/types';
 import { SubmissionsList } from '../communications/SubmissionsList';
 import { SubmissionDetail } from '../communications/SubmissionDetail';
 import { useSubmissions } from '../communications/useSubmissions';
-import { Submission } from '../communications/types';
+import { useMarkAsRead } from '../communications/hooks/useMarkAsRead';
+import { useSendResponse } from '../communications/hooks/useSendResponse';
 
 export function CommunicationsTabContent({ propertyId }: { propertyId: string }) {
-  const { submissions, isLoading, error, refetch } = useSubmissions(propertyId);
-  const { markAsRead: handleMarkAsRead, isMarking } = useMarkAsRead();
-  const { sendResponse: handleSendResponse, isSending } = useSendResponse();
-  const [selectedSubmission, setSelectedSubmission] = React.useState<Submission | null>(null);
+  const { submissions, isLoading, error, fetchSubmissions } = useSubmissions(propertyId);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
-  const formattedSubmissions = submissions.map(sub => ({
-    id: sub.id,
-    property_id: sub.property_id,
-    name: sub.name,
-    email: sub.email,
-    phone: sub.phone,
-    message: sub.message,
-    inquiry_type: sub.inquiry_type,
-    is_read: sub.is_read,
-    created_at: sub.created_at,
-    updated_at: sub.updated_at,
-    agent_id: sub.agent_id,
-    agent: {
-      id: sub.agent?.id,
-      full_name: sub.agent?.full_name,
-      email: sub.agent?.email,
-      phone: sub.agent?.phone,
-      avatar_url: sub.agent?.avatar_url
-    },
-    replies: sub.replies
-  }));
+  const { markAsRead, isMarking } = useMarkAsRead({
+    submissionId: selectedSubmission?.id || '',
+    isRead: selectedSubmission?.is_read || false,
+    onSuccess: fetchSubmissions
+  });
+
+  const { sendResponse, isSending } = useSendResponse({
+    submissionId: selectedSubmission?.id || '',
+    onSuccess: fetchSubmissions
+  });
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -41,10 +30,18 @@ export function CommunicationsTabContent({ propertyId }: { propertyId: string })
     return <div>Error: {error.message}</div>;
   }
 
+  const handleSendReply = async (text: string) => {
+    await sendResponse(text);
+  };
+
+  const handleMarkAsRead = async () => {
+    await markAsRead();
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <SubmissionsList 
-        submissions={formattedSubmissions}
+        submissions={submissions}
         selectedSubmission={selectedSubmission}
         onSelect={setSelectedSubmission}
       />
@@ -54,7 +51,7 @@ export function CommunicationsTabContent({ propertyId }: { propertyId: string })
           submission={selectedSubmission}
           onMarkAsRead={handleMarkAsRead}
           isMarking={isMarking}
-          onSendReply={handleSendResponse}
+          onSendReply={handleSendReply}
           isSending={isSending}
         />
       )}

@@ -18,12 +18,14 @@ export interface Submission {
     phone?: string;
     avatar_url?: string;
   };
-  replies?: Array<{
-    id: string;
-    text: string;
-    created_at: string;
-    agent_id: string;
-  }>;
+  replies?: SubmissionReply[];
+}
+
+export interface SubmissionReply {
+  id: string;
+  text: string;
+  created_at: string;
+  agent_id: string;
 }
 
 export interface SubmissionDetailProps {
