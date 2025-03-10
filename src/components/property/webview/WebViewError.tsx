@@ -16,6 +16,8 @@ export function WebViewError({ error, isDialog = false }: WebViewErrorProps) {
     ? "We couldn't find the property you're looking for. It may have been removed or the URL is incorrect."
     : error || "There was a problem loading this property. Please try again later.";
   
+  console.error("WebView Error:", error);
+  
   return (
     <div className={`${isDialog ? "" : "min-h-screen"} bg-white flex flex-col items-center justify-center p-4`}>
       <div className="max-w-md w-full text-center space-y-6">

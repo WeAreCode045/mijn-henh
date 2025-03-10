@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function getOrCreateWebViewUrl(propertyId: string, objectId: string): Promise<string | null> {
   try {
+    console.log("getOrCreateWebViewUrl - Getting web view URL for property:", propertyId);
+    
     // First, try to get existing web view URL
     const { data: existingView, error } = await supabase
       .from('property_web_views')
@@ -22,7 +24,7 @@ export async function getOrCreateWebViewUrl(propertyId: string, objectId: string
     }
 
     // If no existing view, create a new one
-    console.log("Creating new web view for property:", propertyId);
+    console.log("Creating new web view for property:", propertyId, "with object_id:", objectId);
     const { error: insertError } = await supabase
       .from('property_web_views')
       .insert({

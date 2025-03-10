@@ -32,6 +32,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
 
     if (!id) {
       console.log("usePropertyData - No ID provided and no property data");
+      setError("No property ID provided");
       setIsLoading(false);
       return;
     }
@@ -86,7 +87,8 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             id: data?.id,
             objectId: data?.object_id,
             hasFloorplanScript: !!data?.floorplanEmbedScript,
-            scriptLength: data?.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0
+            scriptLength: data?.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
+            imageCount: data?.property_images?.length || 0
           });
 
           const propertyWithAgent = {
@@ -104,7 +106,8 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           console.log("usePropertyData - Transformed property data:", {
             id: transformedData.id,
             hasFloorplanScript: !!transformedData.floorplanEmbedScript,
-            scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0
+            scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0,
+            imageCount: transformedData.images?.length || 0
           });
           
           if (isMounted.current) {
