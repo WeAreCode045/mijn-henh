@@ -1,52 +1,40 @@
 
-import React, { useState } from 'react';
+import React, { FormEvent, Dispatch, SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SendIcon } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 interface SubmissionResponseProps {
-  onSendResponse: (responseText: string) => Promise<void>;
+  message: string;
+  setMessage: Dispatch<SetStateAction<string>>;
   isSending: boolean;
+  onSubmit: (e: FormEvent) => Promise<void>;
 }
 
-export function SubmissionResponse({ onSendResponse, isSending }: SubmissionResponseProps) {
-  const [responseText, setResponseText] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!responseText.trim()) return;
-    
-    await onSendResponse(responseText);
-    setResponseText('');
-  };
-
+export const SubmissionResponse = ({
+  message,
+  setMessage,
+  isSending,
+  onSubmit
+}: SubmissionResponseProps) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <h3 className="font-medium mb-2">Send a reply</h3>
+    <form onSubmit={onSubmit} className="w-full">
       <Textarea
-        value={responseText}
-        onChange={(e) => setResponseText(e.target.value)}
-        placeholder="Type your response..."
-        className="min-h-[120px]"
-        disabled={isSending}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type je antwoord hier..."
+        className="mb-2"
       />
-      <Button 
-        type="submit" 
-        className="mt-2 w-full md:w-auto" 
-        disabled={!responseText.trim() || isSending}
-      >
-        {isSending ? (
-          <>
-            <span className="animate-spin mr-2">○</span>
-            Sending...
-          </>
-        ) : (
-          <>
-            <SendIcon className="w-4 h-4 mr-2" />
-            Send Response
-          </>
-        )}
-      </Button>
+      <div className="flex justify-end">
+        <Button 
+          type="submit" 
+          disabled={!message.trim() || isSending}
+          className="flex items-center gap-2"
+        >
+          <Send className="h-4 w-4" />
+          {isSending ? 'Versturen...' : 'Verstuur antwoord'}
+        </Button>
+      </div>
     </form>
   );
-}
+};

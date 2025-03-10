@@ -1,9 +1,9 @@
+
 import React from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Camera, Youtube } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 

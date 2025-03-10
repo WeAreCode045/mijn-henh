@@ -1,117 +1,122 @@
-import React, { useState, FormEvent, Dispatch, SetStateAction } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
-import { Submission, Reply } from "./useSubmissions";
-import { SubmissionReplies } from "./SubmissionReplies";
-import { SubmissionResponse } from "./SubmissionResponse";
+
+import React, { useState, FormEvent, Dispatch, SetStateAction } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { format } from 'date-fns';
+import { SubmissionResponse } from './SubmissionResponse';
+import { SubmissionReplies } from './SubmissionReplies';
+import { Submission, Reply } from './useSubmissions';
 
 interface SubmissionDetailProps {
   submission: Submission;
+  propertyTitle: string;
   onMarkAsRead: (id: string) => void;
-  onReply: (id: string, text: string) => Promise<void>;
-  isSending: boolean;
+  onSendResponse: (id: string, message: string) => Promise<void>;
 }
 
-interface SubmissionResponseProps {
-  responseText: string; 
-  setResponseText: Dispatch<SetStateAction<string>>;
-  isSending: boolean;
-  onSubmit: (e: FormEvent<Element>) => Promise<void>;
-}
-
-export function SubmissionDetail({ 
-  submission, 
+export function SubmissionDetail({
+  submission,
+  propertyTitle,
   onMarkAsRead,
-  onReply,
-  isSending
+  onSendResponse
 }: SubmissionDetailProps) {
-  const [responseText, setResponseText] = useState("");
+  const [responseText, setResponseText] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
-  if (!submission) {
-    return (
-      <div className="bg-muted p-6 rounded-lg text-center">
-        <p className="text-muted-foreground">No submission selected</p>
-      </div>
-    );
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!responseText.trim()) return;
     
-    await onReply(submission.id, responseText);
-    setResponseText(""); // Clear after sending
+    setIsSending(true);
+    try {
+      await onSendResponse(submission.id, responseText);
+      setResponseText('');
+    } catch (error) {
+      console.error('Failed to send response:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const getInquiryTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      'information': 'Meer informatie',
+      'viewing': 'Bezichtiging',
+      'offer': 'Bod'
+    };
+    return types[type] || type;
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy HH:mm');
+    } catch (error) {
+      return 'Invalid date';
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-semibold">{submission.name}</h3>
-                <p className="text-sm text-muted-foreground">{submission.email}</p>
-                {submission.phone && (
-                  <p className="text-sm text-muted-foreground">{submission.phone}</p>
-                )}
-              </div>
-              <div className="text-right">
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(submission.created_at), "yyyy-MM-dd HH:mm:ss")}
-                </span>
-                <div className="mt-1">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    submission.is_read ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {submission.is_read ? 'Read' : 'Unread'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardTitle>
-          <CardDescription>
-            <div className="flex justify-between items-center">
-              <div>
-                <h4 className="text-sm font-medium mb-1">Inquiry Type</h4>
-                <p className="bg-muted p-2 rounded">{submission.inquiry_type || 'General inquiry'}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium mb-1">Message</h4>
-                <div className="bg-muted p-4 rounded whitespace-pre-wrap">
-                  {submission.message}
-                </div>
-              </div>
-            </div>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="pt-4">
-            <h4 className="text-sm font-medium mb-3">Conversation History</h4>
-            
-            {submission.replies && submission.replies.length > 0 ? (
-              <SubmissionReplies 
-                replies={submission.replies}
-                submissionId={submission.id}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground italic">
-                No replies yet. Be the first to respond.
-              </p>
-            )}
+    <Card className="mb-6">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg font-medium">
+              {submission.name}
+              {!submission.is_read && (
+                <Badge variant="default" className="ml-2 bg-blue-500">
+                  Nieuw
+                </Badge>
+              )}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {getInquiryTypeLabel(submission.inquiry_type)}
+            </p>
           </div>
-        </CardContent>
-        <CardFooter>
-          <SubmissionResponse
-            responseText={responseText}
-            setResponseText={setResponseText}
-            isSending={isSending}
-            onSubmit={handleSubmit}
-          />
-        </CardFooter>
-      </Card>
-    </div>
+          <div className="text-sm text-muted-foreground">
+            {formatDate(submission.created_at)}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">E-mail:</p>
+            <p className="font-medium">
+              <a href={`mailto:${submission.email}`} className="text-blue-600 hover:underline">
+                {submission.email}
+              </a>
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Telefoon:</p>
+            <p className="font-medium">
+              <a href={`tel:${submission.phone}`} className="text-blue-600 hover:underline">
+                {submission.phone}
+              </a>
+            </p>
+          </div>
+        </div>
+        
+        <p className="text-sm text-muted-foreground mb-1">Bericht:</p>
+        <p className="mb-4">{submission.message}</p>
+        
+        {submission.replies && submission.replies.length > 0 && (
+          <>
+            <Separator className="my-4" />
+            <SubmissionReplies replies={submission.replies as Reply[]} />
+          </>
+        )}
+      </CardContent>
+      <CardFooter className="flex flex-col items-stretch">
+        <SubmissionResponse
+          message={responseText}
+          setMessage={setResponseText}
+          isSending={isSending}
+          onSubmit={handleSubmit}
+        />
+      </CardFooter>
+    </Card>
   );
 }

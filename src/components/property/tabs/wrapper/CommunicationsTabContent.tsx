@@ -1,72 +1,97 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { useSubmissions } from "../communications/useSubmissions";
+import { useSubmissions, Submission } from "../communications/useSubmissions";
+import { useMarkAsRead, useSendResponse } from "../communications/hooks/useSubmissionActions";
 import { SubmissionsList } from "../communications/SubmissionsList";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
-import { useSubmissionActions } from "../communications/hooks/useSubmissionActions";
 
 interface CommunicationsTabContentProps {
   property: {
     id: string;
     title: string;
   };
-  handlers: any;
 }
 
 export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const { submissions, loading, error, fetchSubmissions } = useSubmissions(property.id);
-  const { markAsRead, sendResponse, isSending } = useSubmissionActions();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   
-  const handleSelectSubmission = (submission) => {
-    setSelectedSubmission(submission);
-    if (submission && !submission.is_read) {
+  const { submissions, loading, error, fetchSubmissions } = useSubmissions({ propertyId: property.id });
+  const { markAsRead, isLoading: isMarkingAsRead } = useMarkAsRead({ 
+    propertyId: property.id,
+    onSuccess: fetchSubmissions
+  });
+  const { sendResponse, isSending } = useSendResponse({
+    propertyId: property.id,
+    onSuccess: fetchSubmissions
+  });
+
+  const handleSelectSubmission = (submission: Submission) => {
+    if (!submission.is_read) {
       markAsRead(submission.id);
     }
+    setSelectedSubmission(submission);
   };
 
-  const handleSendResponse = async (id, text) => {
-    await sendResponse(id, text);
-    fetchSubmissions();
+  const handleSendResponse = async (id: string, message: string) => {
+    await sendResponse(id, message);
   };
+
+  // When submissions change, check if the selected one needs to be updated
+  useEffect(() => {
+    if (selectedSubmission) {
+      const updatedSubmission = submissions.find(s => s.id === selectedSubmission.id);
+      if (updatedSubmission) {
+        setSelectedSubmission(updatedSubmission);
+      }
+    }
+  }, [submissions, selectedSubmission]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-4 text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Communications</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="md:col-span-1">
+        <SubmissionsList
+          submissions={submissions}
+          selectedSubmissionId={selectedSubmission?.id}
+          onSelectSubmission={handleSelectSubmission}
+        />
+      </div>
       
-      {/* Submissions List */}
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold mb-2">Submissions</h3>
-        {loading ? (
-          <p>Loading submissions...</p>
-        ) : error ? (
-          <p>Error: {error}</p>
-        ) : (
-          <SubmissionsList 
-            submissions={submissions}
-            onSelectSubmission={handleSelectSubmission}
+      <div className="md:col-span-2">
+        {selectedSubmission ? (
+          <SubmissionDetail
+            submission={selectedSubmission}
+            propertyTitle={property.title}
+            onMarkAsRead={markAsRead}
+            onSendResponse={handleSendResponse}
           />
+        ) : (
+          <div className="flex justify-center items-center h-40 border rounded-md bg-gray-50">
+            <p className="text-gray-500">Selecteer een bericht om de details te bekijken</p>
+          </div>
         )}
       </div>
 
-      {/* Submission Detail */}
-      {selectedSubmission && (
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold mb-2">Submission Detail</h3>
-          <SubmissionDetail
-            submission={selectedSubmission}
-            onMarkAsRead={markAsRead}
-            onReply={handleSendResponse}
-            isSending={isSending}
-          />
-        </div>
-      )}
-
-      {/* Property Submissions Dialog */}
       <PropertySubmissionsDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         propertyTitle={property.title}
         submissions={submissions}
         onMarkAsRead={markAsRead}
