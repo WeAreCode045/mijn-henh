@@ -24,6 +24,13 @@ export function FloorplansTab({ property, setProperty }: FloorplansTabProps) {
     console.log("Remove floorplan triggered for index:", index);
   };
   
+  const handleFloorplanScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setProperty(prev => ({
+      ...prev,
+      floorplanEmbedScript: e.target.value
+    }));
+  };
+  
   return (
     <div className="space-y-6">
       <Card>
@@ -48,16 +55,17 @@ export function FloorplansTab({ property, setProperty }: FloorplansTabProps) {
         </CardContent>
       </Card>
       
-      {property.floorplanEmbedScript && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Floorplan Preview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FloorplanEmbed script={property.floorplanEmbedScript} />
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>3D Floorplan Embed</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FloorplanEmbed 
+            script={property.floorplanEmbedScript || ""} 
+            onChange={handleFloorplanScriptChange}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
