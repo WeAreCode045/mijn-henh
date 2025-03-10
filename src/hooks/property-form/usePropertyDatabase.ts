@@ -36,7 +36,14 @@ export function usePropertyDatabase() {
         : JSON.stringify(data.nearby_cities);
       
       // Make a copy of data without fields that don't exist in the database
-      const { featuredImage, featuredImages, coverImages, floorplans, ...dataToUpdate } = data as any;
+      const { 
+        featuredImage, 
+        featuredImages, 
+        coverImages, 
+        floorplans, 
+        images, // Remove the images field that doesn't exist in properties table
+        ...dataToUpdate 
+      } = data as any;
       
       // Update with properly stringified JSON values
       const finalDataToUpdate = {
@@ -111,7 +118,14 @@ export function usePropertyDatabase() {
       console.log("usePropertyDatabase - floorplanEmbedScript value for new property:", data.floorplanEmbedScript);
 
       // Make a copy of data without fields that don't exist in the database
-      const { featuredImage, featuredImages, coverImages, floorplans, ...dataToCreate } = data as any;
+      const { 
+        featuredImage, 
+        featuredImages, 
+        coverImages, 
+        floorplans, 
+        images, // Remove the images field that doesn't exist in properties table
+        ...dataToCreate 
+      } = data as any;
 
       // Update with properly stringified JSON values
       const finalDataToCreate = {
