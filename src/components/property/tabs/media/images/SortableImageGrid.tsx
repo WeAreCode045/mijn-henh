@@ -1,67 +1,70 @@
 
+import React from "react";
 import { PropertyImage } from "@/types/property";
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { SortableImageItem } from "./SortableImageItem";
+import { useSortableImages } from "@/hooks/images/useSortableImages";
 
 interface SortableImageGridProps {
   images: PropertyImage[];
   onRemoveImage: (index: number) => void;
-  handleSetFeatured?: (e: React.MouseEvent, url: string) => void;
-  handleToggleFeatured?: (e: React.MouseEvent, url: string) => void;
-  featuredImageUrl?: string | null;
-  featuredImageUrls?: string[];
-  onDragEnd: any; // Use the DragEndEvent type here
+  onSetFeaturedImage?: (url: string | null) => void;
+  onToggleFeaturedImage?: (url: string) => void;
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  propertyId: string;
 }
 
-export function SortableImageGrid({
-  images,
+export function SortableImageGrid({ 
+  images, 
   onRemoveImage,
-  handleSetFeatured,
-  handleToggleFeatured,
-  featuredImageUrl,
-  featuredImageUrls = [],
-  onDragEnd
+  onSetFeaturedImage,
+  onToggleFeaturedImage,
+  featuredImage,
+  featuredImages = [],
+  propertyId
 }: SortableImageGridProps) {
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  if (!images || images.length === 0) {
-    return (
-      <div className="col-span-full py-8 text-center text-gray-500">
-        No images uploaded yet. Click "Upload Images" to add images.
-      </div>
-    );
-  }
+  const { 
+    activeId, 
+    sortedImages, 
+    isSaving, 
+    handleDragStart, 
+    handleDragEnd 
+  } = useSortableImages(images, propertyId);
   
   return (
     <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={onDragEnd}
+      id="image-grid-dnd-context"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       <SortableContext 
-        items={images.map(image => image.id)}
+        items={sortedImages.map(image => image.id)} 
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {images.map((image, index) => (
-            <SortableImageItem
-              key={image.id || index}
-              id={image.id}
-              url={image.url}
-              onRemove={() => onRemoveImage(index)}
-              isFeatured={image.url === featuredImageUrl}
-              onSetFeatured={handleSetFeatured ? (e) => handleSetFeatured(e, image.url) : undefined}
-              isInFeatured={featuredImageUrls.includes(image.url)}
-              onToggleFeatured={handleToggleFeatured ? (e) => handleToggleFeatured(e, image.url) : undefined}
-              sort_order={image.sort_order}
-            />
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {sortedImages.map((image, index) => {
+            const imageUrl = typeof image === 'string' ? image : image.url;
+            const isMain = featuredImage === imageUrl;
+            const isFeatured = featuredImages.includes(imageUrl);
+            
+            return (
+              <SortableImageItem
+                key={image.id}
+                id={image.id}
+                isActive={activeId === image.id}
+                image={image}
+                index={index}
+                onRemove={() => onRemoveImage(index)}
+                isMain={isMain}
+                isFeatured={isFeatured}
+                onSetMain={onSetFeaturedImage ? () => onSetFeaturedImage(isMain ? null : imageUrl) : undefined}
+                onToggleFeatured={onToggleFeaturedImage ? () => onToggleFeaturedImage(imageUrl) : undefined}
+                isUpdating={isSaving}
+              />
+            );
+          })}
         </div>
       </SortableContext>
     </DndContext>

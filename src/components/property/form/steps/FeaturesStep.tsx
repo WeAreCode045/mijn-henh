@@ -1,21 +1,31 @@
 
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
-import type { PropertyFeature } from "@/types/property";
+import { PropertyFormData, PropertyFeature } from "@/types/property";
 
 interface FeaturesStepProps {
-  features: PropertyFeature[];
+  formData: PropertyFormData;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
   onUpdateFeature: (id: string, description: string) => void;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function FeaturesStep({
-  features = [], // Add default empty array to prevent null/undefined issues
+  formData,
   onAddFeature,
   onRemoveFeature,
   onUpdateFeature,
+  setPendingChanges
 }: FeaturesStepProps) {
-  console.log("FeaturesStep rendering with features:", features);
+  console.log("FeaturesStep rendering with features:", formData.features);
+  
+  const handleFeatureChange = (id: string, description: string) => {
+    onUpdateFeature(id, description);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -25,10 +35,20 @@ export function FeaturesStep({
       </p>
       
       <PropertyFeatures
-        features={features || []} // Ensure we always pass an array
-        onAdd={onAddFeature}
-        onRemove={onRemoveFeature}
-        onUpdate={onUpdateFeature}
+        features={formData.features || []} // Ensure we always pass an array
+        onAdd={() => {
+          onAddFeature();
+          if (setPendingChanges) {
+            setPendingChanges(true);
+          }
+        }}
+        onRemove={(id) => {
+          onRemoveFeature(id);
+          if (setPendingChanges) {
+            setPendingChanges(true);
+          }
+        }}
+        onUpdate={handleFeatureChange}
       />
     </div>
   );

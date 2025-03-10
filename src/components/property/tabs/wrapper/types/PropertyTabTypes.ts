@@ -18,6 +18,12 @@ export interface PropertyTabProps {
     created_at?: string;
     updated_at?: string;
     floorplanEmbedScript?: string;
+    price?: string;
+    address?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+    sqft?: string;
+    description?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
@@ -38,7 +44,6 @@ export interface PropertyTabProps {
     onAddArea: () => void;
     onRemoveArea: (id: string) => void;
     onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageUpload: (areaId: string, files: FileList) => void;
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -55,9 +60,13 @@ export interface PropertyTabProps {
     handleNext: () => void;
     handlePrevious: () => void;
     onSubmit: () => void;
-    formState: PropertyFormData;
-    onAddTechnicalItem?: () => void;
+    // Optional handlers
+    onFetchLocationData?: () => Promise<void>;
+    onRemoveNearbyPlace?: (index: number) => void;
+    isLoadingLocationData?: boolean;
     // Use the standardized signature
     handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
+    // Add the missing setPendingChanges property
+    setPendingChanges?: (pending: boolean) => void;
   };
 }

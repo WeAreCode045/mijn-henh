@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyForm } from "@/components/PropertyForm";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
-import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { useAuth } from "@/providers/AuthProvider";
@@ -59,7 +59,11 @@ export function PropertyFormContainer() {
           
           if (data) {
             setAgentInfo({ id: data.id, name: data.full_name });
+          } else {
+            setAgentInfo(null);
           }
+        } else {
+          setAgentInfo(null);
         }
       };
 
@@ -126,6 +130,65 @@ export function PropertyFormContainer() {
     }
   };
 
+  const handleAgentChange = async (agentId: string) => {
+    if (!formData) return;
+    
+    // Set to null if it's an empty string
+    const finalAgentId = agentId.trim() === '' ? null : agentId;
+    
+    setSelectedAgent(finalAgentId || '');
+    
+    // Update the form data with the selected agent
+    setFormData({
+      ...formData,
+      agent_id: finalAgentId
+    });
+    
+    // If we have a property ID, update it in the database
+    if (formData.id) {
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ agent_id: finalAgentId })
+          .eq('id', formData.id);
+        
+        if (error) throw error;
+        
+        // Find the agent info to display
+        if (finalAgentId) {
+          const agent = agents.find(a => a.id === finalAgentId);
+          if (agent) {
+            setAgentInfo({ id: agent.id, name: agent.full_name });
+          } else {
+            setAgentInfo(null);
+          }
+        } else {
+          setAgentInfo(null);
+        }
+        
+        toast({
+          title: "Success",
+          description: "Agent updated successfully",
+        });
+      } catch (error) {
+        console.error("Error updating agent:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update agent",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  if (isLoading || !formData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <PropertyFormLayout
       title={id ? "Edit Property" : "Add New Property"}
@@ -134,12 +197,12 @@ export function PropertyFormContainer() {
       isAdmin={isAdmin}
       agents={agents}
       selectedAgent={selectedAgent}
-      onAgentSelect={setSelectedAgent}
+      onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
       onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
-      images={images.map(img => img.url)}
+      images={images.map(img => typeof img === 'string' ? img : img.url)}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
       isSubmitting={isSubmitting}

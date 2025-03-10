@@ -1,11 +1,6 @@
 
 import { PropertyFormData } from "@/types/property";
-import { 
-  renderDashboardTab, 
-  renderContentTab, 
-  renderMediaTab,
-  renderCommunicationsTab
-} from "../content/TabContentRenderers";
+import { renderTabContent } from "../content/TabContentRenderers";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -40,7 +35,6 @@ interface PropertyTabContentsProps {
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -57,9 +51,11 @@ interface PropertyTabContentsProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploadingFloorplan?: boolean;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  onFetchLocationData?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function PropertyTabContents({
@@ -83,7 +79,6 @@ export function PropertyTabContents({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
-  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
   handleImageUpload,
@@ -100,9 +95,11 @@ export function PropertyTabContents({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploadingFloorplan,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  handleRemoveAreaPhoto
+  handleRemoveAreaPhoto,
+  onFetchLocationData,
+  onRemoveNearbyPlace,
+  isLoadingLocationData,
+  setPendingChanges = () => {}
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -119,7 +116,6 @@ export function PropertyTabContents({
     onAddArea,
     onRemoveArea,
     onUpdateArea,
-    onAreaImageUpload,
     onAreaImageRemove,
     onAreaImagesSelect,
     handleImageUpload,
@@ -137,21 +133,18 @@ export function PropertyTabContents({
     isUploadingFloorplan,
     handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
     handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
-    onAddTechnicalItem,
-    onRemoveTechnicalItem,
-    // Ensure we use the correct signature for handleRemoveAreaPhoto
     handleRemoveAreaPhoto: handleRemoveAreaPhoto || ((areaId: string, imageId: string) => {
       console.warn("Area photo removal functionality not available");
-    })
+    }),
+    onFetchLocationData,
+    onRemoveNearbyPlace,
+    isLoadingLocationData,
+    setPendingChanges // Add the missing setPendingChanges to the handlers object
   };
 
   const tabProps = {
     activeTab,
-    property: {
-      ...property,
-      featuredImage: formState.featuredImage || "",
-      featuredImages: formState.featuredImages || []
-    },
+    property,
     formState,
     agentInfo,
     templateInfo,
@@ -161,12 +154,5 @@ export function PropertyTabContents({
 
   console.log("PropertyTabContents - Active tab:", activeTab);
 
-  return (
-    <>
-      {renderDashboardTab(tabProps)}
-      {renderContentTab(tabProps)}
-      {renderMediaTab(tabProps)}
-      {renderCommunicationsTab(tabProps)}
-    </>
-  );
+  return renderTabContent(tabProps);
 }

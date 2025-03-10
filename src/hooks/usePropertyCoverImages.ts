@@ -1,8 +1,8 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyImage } from "@/types/property";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyCoverImages(
   formData: PropertyFormData,
@@ -11,87 +11,67 @@ export function usePropertyCoverImages(
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const handleSetFeaturedImage = async (url: string) => {
-    if (!formData.id || !url) return;
-
+  const handleSetCoverImage = async (imageUrl: string, index: number) => {
+    if (!formData.id) return;
+    
     setIsUpdating(true);
+    
     try {
-      setFormData({
-        ...formData,
-        featuredImage: url
-      });
-
-      if (formData.id) {
-        // Update in database - use is_main instead of is_featured
-        await supabase
-          .from('property_images')
-          .update({ is_main: false })
-          .eq('property_id', formData.id);
-
-        await supabase
-          .from('property_images')
-          .update({ is_main: true })
-          .eq('property_id', formData.id)
-          .eq('url', url);
+      // Find the image object from formData.images that has this URL
+      const imageObj = formData.images.find(img => img.url === imageUrl);
+      
+      if (!imageObj) {
+        console.error("Image not found in property images");
+        return;
       }
-
-      toast({
-        title: "Success",
-        description: "Featured image updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating featured image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update featured image",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  const handleToggleCoverImage = async (url: string) => {
-    if (!url) return;
-
-    setIsUpdating(true);
-    try {
-      const currentCoverImages = formData.coverImages || [];
-      const isInCover = currentCoverImages.includes(url);
-
-      let updatedCoverImages;
-      if (isInCover) {
-        updatedCoverImages = currentCoverImages.filter(img => img !== url);
+      
+      // Update the database entry
+      const { error } = await supabase
+        .from('property_images')
+        .update({ 
+          is_featured_image: true,
+          sort_order: index 
+        })
+        .eq('id', imageObj.id)
+        .eq('property_id', formData.id);
+        
+      if (error) throw error;
+      
+      // Update the formData
+      const updatedCoverImages = [...(formData.featuredImages || [])];
+      
+      // Add new image to position
+      if (index >= updatedCoverImages.length) {
+        // If index is beyond current array length, just append
+        updatedCoverImages.push(imageUrl);
       } else {
-        updatedCoverImages = [...currentCoverImages, url];
+        // If index is within array bounds, update at that position
+        updatedCoverImages[index] = imageUrl;
       }
-
+      
+      // Create temporary backward compatibility field
+      const tempCoverImages = updatedCoverImages.map(url => {
+        const img = formData.images.find(i => i.url === url);
+        return img || { id: "", url };
+      });
+      
       setFormData({
         ...formData,
-        coverImages: updatedCoverImages
+        featuredImages: updatedCoverImages,
+        // For backward compatibility
+        coverImages: tempCoverImages
       });
-
-      if (formData.id) {
-        // Update in database - use is_featured_image instead of is_grid_image
-        await supabase
-          .from('property_images')
-          .update({ is_featured_image: !isInCover })
-          .eq('property_id', formData.id)
-          .eq('url', url);
-      }
-
+      
       toast({
         title: "Success",
-        description: isInCover 
-          ? "Image removed from cover" 
-          : "Image added to cover",
+        description: `Cover image ${index + 1} updated`
       });
     } catch (error) {
-      console.error("Error toggling cover image:", error);
+      console.error("Error setting cover image:", error);
       toast({
         title: "Error",
         description: "Failed to update cover image",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsUpdating(false);
@@ -99,8 +79,7 @@ export function usePropertyCoverImages(
   };
 
   return {
-    handleSetFeaturedImage,
-    handleToggleCoverImage,
+    handleSetCoverImage,
     isUpdating
   };
 }

@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -60,6 +59,8 @@ export default {
           800: "hsl(var(--estate-800))",
           900: "hsl(var(--estate-900))",
         },
+        'primary-color': 'var(--primary-color)',
+        'secondary-color': 'var(--secondary-color)',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -89,6 +90,18 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: "fadeIn 0.5s ease-out",
         slideUp: "slideUp 0.5s ease-out",
+      },
+      backgroundColor: {
+        'primary-color': 'var(--primary-color)',
+        'secondary-color': 'var(--secondary-color)',
+      },
+      textColor: {
+        'primary-color': 'var(--primary-color)',
+        'secondary-color': 'var(--secondary-color)',
+      },
+      borderColor: {
+        'primary-color': 'var(--primary-color)',
+        'secondary-color': 'var(--secondary-color)',
       },
     },
   },

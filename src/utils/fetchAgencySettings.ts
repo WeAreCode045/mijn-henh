@@ -48,5 +48,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtp_from_email: data.smtp_from_email || null,
     smtp_from_name: data.smtp_from_name || null,
     smtp_secure: data.smtp_secure || false,
+    // OpenAI API key
+    openai_api_key: data.openai_api_key || null,
   };
 }

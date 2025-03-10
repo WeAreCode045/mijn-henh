@@ -2,7 +2,8 @@
 import { PropertyFormData, PropertySubmitData } from "@/types/property";
 import { 
   prepareAreasForFormSubmission, 
-  preparePropertiesForJsonField
+  preparePropertiesForJsonField,
+  prepareImagesForSubmission
 } from "./preparePropertyData";
 
 export function usePropertyDataPreparer() {
@@ -10,14 +11,10 @@ export function usePropertyDataPreparer() {
     const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
     const featuresJson = preparePropertiesForJsonField(formData.features);
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
+    const nearby_citiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
     
-    // Ensure technicalItems is treated as an array before transformation
-    const technicalItemsArray = Array.isArray(formData.technicalItems) ? formData.technicalItems : [];
-    const technicalItemsJson = preparePropertiesForJsonField(technicalItemsArray);
-    
-    console.log("usePropertyFormSubmit - Form submission - areas:", areasForSubmission);
-    console.log("usePropertyFormSubmit - Form submission - features:", featuresJson);
-    console.log("usePropertyFormSubmit - Form submission - technicalItems:", technicalItemsJson);
+    // Note: Since we use property_images table, we don't need to include image URLs in the property record
+    // Images are handled separately via the property_images table
     
     return {
       title: formData.title,
@@ -33,23 +30,20 @@ export function usePropertyDataPreparer() {
       hasGarden: formData.hasGarden,
       description: formData.description,
       location_description: formData.location_description,
-      features: featuresJson,
-      // Include these fields to satisfy TypeScript, but they'll be removed before database operations
-      featuredImage: formData.featuredImage,
-      featuredImages: formData.featuredImages || [],
-      map_image: formData.map_image,
+      features: featuresJson as string,
+      areas: areasForSubmission as any,
+      nearby_places: nearby_placesJson as string,
+      nearby_cities: nearby_citiesJson as string,
       latitude: formData.latitude,
       longitude: formData.longitude,
-      areas: areasForSubmission,
-      nearby_places: nearby_placesJson,
-      images: formData.images.map(img => typeof img === 'string' ? img : img.url),
+      map_image: formData.map_image,
       object_id: formData.object_id,
       agent_id: formData.agent_id,
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      technicalItems: technicalItemsJson,
-      floorplanEmbedScript: formData.floorplanEmbedScript
+      floorplanEmbedScript: formData.floorplanEmbedScript || ""
+      // images field is removed as it's not part of the properties table
     };
   };
 

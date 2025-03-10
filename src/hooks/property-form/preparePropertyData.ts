@@ -19,15 +19,19 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     const id = (area as any).id || '';
     const title = (area as any).title || '';
     const description = (area as any).description || '';
-    const imageIds = (area as any).imageIds || [];
     const columns = (area as any).columns || 2; // Default to 2 columns if not specified
+    const name = (area as any).name || '';
+    const size = (area as any).size || '';
+    const images = (area as any).images || [];
     
     return {
       id,
       title,
       description,
-      imageIds,
-      columns
+      columns,
+      name,
+      size,
+      images
     };
   });
 }
@@ -42,6 +46,22 @@ export function preparePropertiesForJsonField(properties: any[]): Json {
     return [];
   }
   return properties as Json;
+}
+
+/**
+ * Prepare images for submission
+ * Converts image objects to URLs
+ */
+export function prepareImagesForSubmission(images: any[]): string[] {
+  if (!images || !Array.isArray(images)) {
+    return [];
+  }
+  
+  return images.map(img => {
+    if (typeof img === 'string') return img;
+    if (img && typeof img === 'object' && 'url' in img) return img.url;
+    return '';
+  }).filter(url => url !== '');
 }
 
 /**

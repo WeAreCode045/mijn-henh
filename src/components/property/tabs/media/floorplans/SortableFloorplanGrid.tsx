@@ -1,68 +1,52 @@
 
-import { PropertyFloorplan } from "@/types/property";
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from "@dnd-kit/sortable";
+import React from "react";
+import { PropertyImage } from "@/types/property";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { SortableFloorplanItem } from "./SortableFloorplanItem";
+import { useSortableFloorplans } from "@/hooks/images/useSortableFloorplans";
 
 interface SortableFloorplanGridProps {
-  floorplans: PropertyFloorplan[];
+  floorplans: PropertyImage[];
   onRemoveFloorplan: (index: number) => void;
-  onDragEnd: any; // Use the DragEndEvent type here
+  propertyId: string;
 }
 
-export function SortableFloorplanGrid({
-  floorplans,
+export function SortableFloorplanGrid({ 
+  floorplans, 
   onRemoveFloorplan,
-  onDragEnd
+  propertyId 
 }: SortableFloorplanGridProps) {
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  if (!floorplans || floorplans.length === 0) {
-    return (
-      <div className="col-span-full py-8 text-center text-gray-500">
-        No floorplans uploaded yet. Click "Upload Floorplans" to add floorplans.
-      </div>
-    );
-  }
-  
-  // Helper function to get the URL from a floorplan object
-  const getFloorplanUrl = (floorplan: any): string => {
-    if (typeof floorplan === 'string') return floorplan;
-    if (floorplan && typeof floorplan === 'object' && 'url' in floorplan) return floorplan.url;
-    return '';
-  };
+  const { 
+    activeId,
+    sortedFloorplans,
+    isSaving,
+    handleDragStart,
+    handleDragEnd
+  } = useSortableFloorplans(floorplans, propertyId);
   
   return (
     <DndContext 
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={onDragEnd}
+      id="floorplan-grid-dnd-context"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       <SortableContext 
-        items={floorplans.map(floorplan => floorplan.id)}
+        items={sortedFloorplans.map(floorplan => floorplan.id)} 
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {floorplans.map((floorplan, index) => {
-            const url = getFloorplanUrl(floorplan);
-            const label = floorplan.title || `Floorplan ${index + 1}`;
-            
-            return (
-              <SortableFloorplanItem
-                key={floorplan.id}
-                id={floorplan.id}
-                url={url}
-                label={label}
-                onRemove={() => onRemoveFloorplan(index)}
-                sort_order={floorplan.sort_order}
-              />
-            );
-          })}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {sortedFloorplans.map((floorplan, index) => (
+            <SortableFloorplanItem
+              key={floorplan.id}
+              id={floorplan.id}
+              isActive={activeId === floorplan.id}
+              floorplan={floorplan}
+              index={index}
+              onRemove={() => onRemoveFloorplan(index)}
+              isUpdating={isSaving}
+            />
+          ))}
         </div>
       </SortableContext>
     </DndContext>

@@ -13,10 +13,8 @@ interface PropertyAreasProps {
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
-  onImageUpload: (id: string, files: FileList) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (areaId: string, imageIds: string[]) => void;
-  isUploading?: boolean;
 }
 
 export function PropertyAreas({
@@ -26,20 +24,18 @@ export function PropertyAreas({
   onAdd,
   onRemove,
   onUpdate,
-  onImageUpload,
   onImageRemove,
   onImagesSelect,
-  isUploading,
 }: PropertyAreasProps) {
   useEffect(() => {
     console.log("PropertyAreas - Current areas:", areas);
     console.log("PropertyAreas - Available images:", images);
     console.log("PropertyAreas - Property ID:", propertyId);
     
-    // Debug each area's imageIds
+    // Debug each area's images
     areas.forEach(area => {
-      console.log(`Area ${area.id} (${area.title}) - imageIds:`, 
-        Array.isArray(area.imageIds) ? area.imageIds : 'Not an array: ' + JSON.stringify(area.imageIds));
+      console.log(`Area ${area.id} (${area.title}) - images:`, 
+        Array.isArray(area.images) ? area.images : 'Not an array: ' + JSON.stringify(area.images));
     });
   }, [areas, images, propertyId]);
 
@@ -49,10 +45,10 @@ export function PropertyAreas({
     onAdd();
   };
 
-  // Make sure all areas have imageIds as arrays
+  // Make sure all areas have images as arrays
   const normalizedAreas = areas.map(area => ({
     ...area,
-    imageIds: Array.isArray(area.imageIds) ? area.imageIds : []
+    images: Array.isArray(area.images) ? area.images : []
   }));
 
   return (
@@ -64,7 +60,6 @@ export function PropertyAreas({
           size="sm" 
           className="flex items-center" 
           type="button"
-          disabled={isUploading}
         >
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Area
@@ -84,7 +79,6 @@ export function PropertyAreas({
               isFirstArea={index === 0}
               onRemove={onRemove}
               onUpdate={onUpdate}
-              onImageUpload={onImageUpload}
               onImageRemove={onImageRemove}
               onImagesSelect={onImagesSelect}
             />

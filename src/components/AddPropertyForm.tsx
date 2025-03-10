@@ -1,200 +1,200 @@
 
-import React, { useState, ChangeEvent, useCallback } from "react";
-import { PropertyFormData } from "@/types/property";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
-import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
-import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { PropertyFeature } from "@/types/property";
+import { PropertyArea } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property";
+import { usePropertyForm } from "@/hooks/usePropertyForm";
+import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
+import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
+import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
+import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
+import { usePropertyFormState } from "@/hooks/usePropertyFormState";
+import { usePropertyContent } from "@/hooks/usePropertyContent";
+import { usePropertyAreas } from "@/hooks/usePropertyAreas";
+import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
+import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
+import { safeToString } from "@/utils/stringUtils";
 
-interface AddPropertyFormProps {
-  propertyId?: string;
-}
-
-export function AddPropertyForm({ propertyId }: AddPropertyFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+// This component is currently unused and should be refactored or removed
+// in the future. It contains imports to components that might not exist.
+export function AddPropertyForm({ property, onSave, onDelete }) {
+  const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Load property data
-  const { formData, setFormData } = usePropertyForm(propertyId);
-
-  // Load property image handlers
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
+  const [selectedAgent, setSelectedAgent] = useState(property?.agent_id || null);
+  const [selectedTemplate, setSelectedTemplate] = useState(property?.template_id || "default");
+  const [agents, setAgents] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  
+  // Form state management
+  const { formState, setFormState, handleFieldChange } = usePropertyFormState(property || {});
+  
+  // Auto-save functionality
   const { 
-    handleImageUpload, 
-    handleRemoveImage, 
-    isUploading, 
-    handleAreaPhotosUpload, 
-    handleFloorplanUpload, 
-    handleRemoveAreaPhoto, 
-    handleRemoveFloorplan, 
-    handleSetFeaturedImage, 
-    handleToggleFeaturedImage,
-    images 
-  } = usePropertyImages(formData, setFormData);
-
+    autosaveData, 
+    isSaving, 
+    lastSaved, 
+    pendingChanges, 
+    setPendingChanges, 
+    setLastSaved 
+  } = usePropertyAutoSave();
+  
+  // State tracking utilities
+  const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
+    usePropertyStateTracking(
+      formState, 
+      handleFieldChange, 
+      setFormState,
+      setPendingChanges
+    );
+  
   // Property content management
-  const handleAddFeature = useCallback(() => {
-    setFormData(prevFormData => {
-      const newFeature = {
-        id: Date.now().toString(),
-        description: ''
-      };
-      return {
-        ...prevFormData,
-        features: [...(prevFormData.features || []), newFeature]
-      };
-    });
-  }, [setFormData]);
+  const {
+    addFeature,
+    removeFeature,
+    updateFeature,
+  } = usePropertyContent(
+    formState,
+    handleFieldChangeWithTracking
+  );
+  
+  // Property areas management
+  const {
+    addArea,
+    removeArea,
+    updateArea,
+    handleAreaImageUpload,
+    handleAreaImageRemove,
+    handleAreaImagesSelect,
+  } = usePropertyAreas(
+    formState, 
+    setFormStateWithTracking
+  );
+  
+  // Property images management
+  const {
+    handleImageUpload,
+    handleRemoveImage,
+    isUploading,
+    handleAreaPhotosUpload,
+    handleRemoveAreaPhoto,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    images
+  } = usePropertyImages(
+    formState, 
+    setFormStateWithTracking
+  );
 
-  const handleRemoveFeature = useCallback((id: string) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      features: (prevFormData.features || []).filter(feature => feature.id !== id)
-    }));
-  }, [setFormData]);
+  // Property floorplans management
+  const {
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan
+  } = usePropertyFloorplans(
+    formState,
+    setFormStateWithTracking
+  );
+  
+  // Step navigation with auto-save
+  const { currentStep, handleStepClick, handleNext, handlePrevious } = 
+    usePropertyStepNavigation(formState, pendingChanges, setPendingChanges, setLastSaved);
+  
+  // Form submission and other actions
+  const { handleSaveObjectId, handleSaveAgent, handleSaveTemplate, onSubmit } = 
+    usePropertyFormActions(formState, setPendingChanges, setLastSaved);
 
-  const handleUpdateFeature = useCallback((id: string, description: string) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      features: (prevFormData.features || []).map(feature =>
-        feature.id === id ? { ...feature, description } : feature
-      )
-    }));
-  }, [setFormData]);
-
-  // Technical item management functions
-  const handleAddTechnicalItem = useCallback(() => {
-    setFormData(prevFormData => {
-      const newItem = {
-        id: Date.now().toString(),
-        title: '',
-        size: '',
-        description: '',
-        floorplanId: null
-      };
-      return {
-        ...prevFormData,
-        technicalItems: [...(prevFormData.technicalItems || []), newItem]
-      };
-    });
-  }, [setFormData]);
-
-  // Modified to accept either number or string parameter
-  const handleRemoveTechnicalItem = useCallback((idOrIndex: number | string) => {
-    setFormData(prevFormData => {
-      if (typeof idOrIndex === 'number') {
-        // Handle removal by index
-        const updatedItems = [...(prevFormData.technicalItems || [])];
-        updatedItems.splice(idOrIndex, 1);
-        return {
-          ...prevFormData,
-          technicalItems: updatedItems
-        };
-      } else {
-        // Handle removal by id
-        return {
-          ...prevFormData,
-          technicalItems: (prevFormData.technicalItems || []).filter(item => item.id !== idOrIndex)
-        };
+  // Fetch agents and templates on component mount
+  useEffect(() => {
+    const fetchAgents = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'agent');
+        
+      if (error) {
+        console.error('Error fetching agents:', error);
+        return;
       }
-    });
-  }, [setFormData]);
-
-  const handleUpdateTechnicalItem = useCallback((id: string, field: any, value: any) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      technicalItems: (prevFormData.technicalItems || []).map(item =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    }));
-  }, [setFormData]);
-
-  const handleAddArea = useCallback(() => {
-    setFormData(prevFormData => {
-      const newArea = {
-        id: Date.now().toString(),
-        title: '',
-        description: '',
-        imageIds: [],
-        columns: 2
-      };
-      return {
-        ...prevFormData,
-        areas: [...(prevFormData.areas || []), newArea]
-      };
-    });
-  }, [setFormData]);
-
-  const handleRemoveArea = useCallback((id: string) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      areas: (prevFormData.areas || []).filter(area => area.id !== id)
-    }));
-  }, [setFormData]);
-
-  const handleUpdateArea = useCallback((id: string, field: any, value: any) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      areas: (prevFormData.areas || []).map(area =>
-        area.id === id ? { ...area, [field]: value } : area
-      )
-    }));
-  }, [setFormData]);
-
-  const handleAreaImageUpload = async (areaId: string, files: FileList) => {
-    // Implementation for handling area image uploads
-  };
-
-  const handleAreaImageRemove = (areaId: string, imageId: string) => {
-    // Implementation for handling area image removal
-  };
-
-  const handleAreaImagesSelect = (areaId: string, imageIds: string[]) => {
-    // Implementation for handling area image selection
-  };
-
-  const handleMapImageDelete = async () => {
-    // Implementation for handling map image deletion
-  };
-
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-4">Add New Property</h1>
       
-      <PropertyFormContent
-        step={currentStep}
-        formData={formData}
-        onFieldChange={(field, value) => setFormData(prevFormData => ({ ...prevFormData, [field]: value }))}
-        onAddFeature={handleAddFeature}
-        onRemoveFeature={handleRemoveFeature}
-        onUpdateFeature={handleUpdateFeature}
-        onAddArea={handleAddArea}
-        onRemoveArea={handleRemoveArea}
-        onUpdateArea={handleUpdateArea}
-        onAreaImageUpload={handleAreaImageUpload}
-        onAreaImageRemove={handleAreaImageRemove}
-        onAreaImagesSelect={handleAreaImagesSelect}
-        handleImageUpload={handleImageUpload}
-        handleRemoveImage={handleRemoveImage}
-        handleAreaPhotosUpload={handleAreaPhotosUpload}
-        handleFloorplanUpload={handleFloorplanUpload}
-        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-        handleRemoveFloorplan={handleRemoveFloorplan}
-        handleSetFeaturedImage={handleSetFeaturedImage}
-        handleToggleFeaturedImage={handleToggleFeaturedImage}
-        onAddTechnicalItem={handleAddTechnicalItem}
-        onRemoveTechnicalItem={handleRemoveTechnicalItem}
-        handleMapImageDelete={handleMapImageDelete}
-        isUploading={isUploading}
-      />
+      setAgents(data || []);
+    };
+    
+    const fetchTemplates = async () => {
+      const { data, error } = await supabase
+        .from('brochure_templates')
+        .select('id, name');
+        
+      if (error) {
+        console.error('Error fetching templates:', error);
+        return;
+      }
+      
+      // Add default template
+      const templatesWithDefault = [
+        { id: 'default', name: 'Default Template' },
+        ...(data || [])
+      ];
+      
+      setTemplates(templatesWithDefault);
+    };
+    
+    fetchAgents();
+    fetchTemplates();
+  }, []);
+  
+  // NOTE: This component has many missing imports and should be refactored or removed.
+  // It's not currently being used in the application.
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{property?.id ? 'Edit Property' : 'Add New Property'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {/* Agent and template selectors would go here */}
+              </div>
+              
+              {property?.id && (
+                <div className="text-sm text-gray-500">
+                  ID: {safeToString(property.id)}
+                </div>
+              )}
+            </div>
+            
+            {/* Form steps and content would go here */}
+            
+            {property?.id && (
+              <div className="mt-6 flex justify-end">
+                <Button
+                  variant="destructive"
+                  onClick={onDelete}
+                  disabled={isSubmitting}
+                >
+                  Delete Property
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

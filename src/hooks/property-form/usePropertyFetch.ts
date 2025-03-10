@@ -1,101 +1,163 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity } from "@/types/property";
 import { initialFormData } from "./initialFormData";
-import type { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
-import { transformFeatures, transformAreas, transformNearbyPlaces } from "./propertyDataTransformer";
+import { Json } from "@/integrations/supabase/types";
+
+// Helper function to safely convert JSON or array to array
+const safeParseArray = (value: any, defaultValue: any[] = []): any[] => {
+  if (!value) return defaultValue;
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : defaultValue;
+    } catch (e) {
+      return defaultValue;
+    }
+  }
+  return defaultValue;
+};
+
+// Helper function to safely convert agent data to PropertyAgent type
+const formatAgentData = (agentData: any): PropertyAgent | undefined => {
+  if (!agentData) return undefined;
+  
+  if (typeof agentData === 'string') {
+    return {
+      id: agentData,
+      name: 'Unknown Agent',
+    };
+  }
+  
+  if (typeof agentData === 'object') {
+    return {
+      id: agentData.id || '',
+      name: agentData.name || agentData.full_name || 'Unknown Agent',
+      email: agentData.email,
+      phone: agentData.phone,
+      photoUrl: agentData.photoUrl || agentData.photo_url,
+      address: agentData.address,
+    };
+  }
+  
+  return undefined;
+};
 
 export function usePropertyFetch(id: string | undefined) {
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
   useEffect(() => {
-    if (id) {
-      fetchPropertyData(id);
-    }
-  }, [id]);
-
-  const fetchPropertyData = async (propertyId: string) => {
-    setIsLoading(true);
-    
-    try {
-      // Fetch base property data
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single();
-        
-      if (error) {
-        throw error;
-      }
+    async function fetchProperty() {
+      if (!id) return;
       
-      if (data) {
-        // Fetch all images
-        const { data: allImages, error: imagesError } = await supabase
-          .from('property_images')
+      setIsLoading(true);
+      
+      try {
+        // Fetch the property from the database
+        const { data: propertyData, error } = await supabase
+          .from('properties')
           .select('*')
-          .eq('property_id', propertyId);
-          
-        if (imagesError) {
-          console.error("Error fetching property images:", imagesError);
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          throw error;
         }
         
-        // Transform data for the form
-        const transformedFeatures = transformFeatures(Array.isArray(data.features) ? data.features : []);
-        const transformedAreas = transformAreas(Array.isArray(data.areas) ? data.areas : []);
-        const transformedNearbyPlaces = transformNearbyPlaces(Array.isArray(data.nearby_places) ? data.nearby_places : []);
-        
-        // Transform technicalItems if present
-        const transformedTechnicalItems: PropertyTechnicalItem[] = data.technicalItems 
-          ? (Array.isArray(data.technicalItems) 
-              ? data.technicalItems.map((item: any) => ({
-                  id: item.id || '',
-                  title: item.title || '',
-                  size: item.size || '',
-                  description: item.description || '',
-                  floorplanId: item.floorplanId || null,
-                  columns: item.columns || undefined
-                }))
-              : []) 
-          : [];
-        
-        const featuredImages = allImages
-          ? allImages.filter(img => img.is_featured_image).map(img => img.url)
-          : [];
+        // Fetch images from property_images table
+        const { data: imageData, error: imageError } = await supabase
+          .from('property_images')
+          .select('*')
+          .eq('property_id', id)
+          .order('sort_order', { ascending: true });
           
-        const featuredImage = allImages
-          ? allImages.find(img => img.is_main)?.url || null
-          : null;
+        if (imageError) {
+          console.error('Error fetching property images:', imageError);
+        }
         
-        setFormData({
-          ...initialFormData,
-          ...data,
-          id: propertyId,
-          features: transformedFeatures,
-          areas: transformedAreas,
-          nearby_places: transformedNearbyPlaces,
-          technicalItems: transformedTechnicalItems,
-          featuredImages: featuredImages,
-          coverImages: featuredImages, // Keep for backward compatibility
-          featuredImage: featuredImage,
-          images: allImages
-            ? allImages.filter(img => img.type !== 'floorplan').map(img => ({ 
-                id: img.id, 
-                url: img.url,
-                area: img.area,
-                is_main: img.is_main,
-                is_featured_image: img.is_featured_image
-              })) 
-            : []
-        });
+        const images: PropertyImage[] = imageData || [];
+        
+        // Filter images by type and flags
+        const regularImages = images.filter(img => img.type === 'image' || !img.type);
+        const floorplanImages = images.filter(img => img.type === 'floorplan');
+        const featuredImage = regularImages.find(img => img.is_main)?.url || null;
+        const featuredImages = regularImages
+          .filter(img => img.is_featured_image)
+          .map(img => img.url);
+        
+        if (propertyData) {
+          // Parse JSON strings from the database to objects
+          const features = safeParseArray(propertyData.features);
+          const areas = safeParseArray(propertyData.areas);
+          const nearby_places = safeParseArray(propertyData.nearby_places);
+          
+          // Handle nearby_cities with fallback for older database entries
+          let nearby_cities: PropertyCity[] = [];
+          
+          try {
+            // Use type assertion to safely access the property
+            const dbData = propertyData as any;
+            
+            if (dbData && typeof dbData === 'object' && 'nearby_cities' in dbData) {
+              nearby_cities = safeParseArray(dbData.nearby_cities);
+            } else {
+              console.warn('No nearby_cities property found in database record, using empty array');
+              nearby_cities = [];
+            }
+          } catch (error) {
+            console.warn('Error parsing nearby_cities, using empty array', error);
+            nearby_cities = [];
+          }
+          
+          // Process agent data for backward compatibility
+          const agentId = propertyData.agent_id;
+          let agentData: PropertyAgent | undefined;
+          
+          if (agentId) {
+            agentData = {
+              id: agentId,
+              name: 'Unknown Agent'
+            };
+          }
+          
+          // Convert featuredImages to PropertyImages for coverImages
+          const coverImages = featuredImages.map(url => ({
+            id: `cover-${Date.now()}-${Math.random()}`,
+            url
+          }));
+          
+          // Set the form data with safe defaults for new fields
+          setFormData({
+            ...initialFormData,
+            ...propertyData,
+            features,
+            areas,
+            nearby_places,
+            nearby_cities,
+            hasGarden: propertyData.hasGarden || false,
+            images: regularImages,
+            floorplans: floorplanImages,
+            featuredImage: featuredImage,
+            featuredImages: featuredImages,
+            agent: agentData,
+            // Add backward compatibility fields
+            coverImages, // Now as PropertyImage[]
+            gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
+            areaPhotos: []
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching property:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching property data:", error);
-    } finally {
-      setIsLoading(false);
     }
-  };
-
+    
+    fetchProperty();
+  }, [id]);
+  
   return { formData, setFormData, isLoading };
 }

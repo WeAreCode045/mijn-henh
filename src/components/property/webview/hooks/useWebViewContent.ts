@@ -63,6 +63,19 @@ export function useWebViewContent({
     }
   };
   
+  // Debug logging
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('WebView Content Debug:', {
+        propertyId: propertyData?.id,
+        currentPage,
+        totalPages,
+        hasFloorplan: !!propertyData?.floorplanEmbedScript,
+        areaCount: propertyData?.areas?.length || 0
+      });
+    }
+  }, [propertyData, currentPage, totalPages]);
+  
   // Function to conditionally log when in development/debug
   const debugLog = (message: string, data?: any) => {
     if (process.env.NODE_ENV !== 'production') {

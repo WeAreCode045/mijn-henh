@@ -28,9 +28,14 @@ interface PropertyContentFormProps {
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
   isUploadingFloorplan?: boolean;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges: (pending: boolean) => void;
+  isLoadingLocationData?: boolean;
+  onSubmit?: () => void;
+  // Required navigation props
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
 }
 
 export function PropertyContentForm({
@@ -58,9 +63,14 @@ export function PropertyContentForm({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  setPendingChanges
+  isUploadingFloorplan,
+  setPendingChanges,
+  isLoadingLocationData,
+  onSubmit,
+  currentStep,
+  handleStepClick,
+  handleNext,
+  handlePrevious
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
     console.log(`Field changed: ${String(field)}`, value);
@@ -112,20 +122,6 @@ export function PropertyContentForm({
     }
   };
 
-  const wrappedAddTechnicalItem = () => {
-    if (onAddTechnicalItem) {
-      onAddTechnicalItem();
-      setPendingChanges(true);
-    }
-  };
-
-  const wrappedRemoveTechnicalItem = (index: number) => {
-    if (onRemoveTechnicalItem) {
-      onRemoveTechnicalItem(index);
-      setPendingChanges(true);
-    }
-  };
-
   return (
     <PropertyFormContent
       step={step}
@@ -152,9 +148,14 @@ export function PropertyContentForm({
       handleSetFeaturedImage={safeSetFeaturedImage}
       handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}
-      onAddTechnicalItem={wrappedAddTechnicalItem}
-      onRemoveTechnicalItem={wrappedRemoveTechnicalItem}
+      isUploadingFloorplan={isUploadingFloorplan}
       setPendingChanges={setPendingChanges}
+      isLoadingLocationData={isLoadingLocationData}
+      // Pass through step navigation props
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
     />
   );
 }

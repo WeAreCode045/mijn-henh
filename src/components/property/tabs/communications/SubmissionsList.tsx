@@ -1,84 +1,79 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { Search } from "lucide-react";
-import { SubmissionItem } from "./SubmissionItem";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SubmissionItem } from './SubmissionItem';
 
-type Submission = {
+interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  photoUrl?: string;
+}
+
+interface Property {
+  id: string;
+  title: string;
+}
+
+interface SubmissionReply {
+  id: string;
+  submissionId: string;
+  replyText: string;
+  createdAt: string;
+  agent: Agent | null;
+}
+
+interface Submission {
   id: string;
   name: string;
   email: string;
   phone: string;
-  inquiry_type: string;
   message: string;
-  created_at: string;
-  is_read: boolean;
-  response?: string;
-  response_date?: string;
-};
+  inquiryType: string;
+  createdAt: string;
+  isRead: boolean;
+  property: Property;
+  replies: SubmissionReply[];
+}
 
 interface SubmissionsListProps {
   submissions: Submission[];
   isLoading: boolean;
   selectedSubmission: Submission | null;
-  onSelectSubmission: (submission: Submission) => void;
-  onMarkAsRead: (id: string) => void;
+  onSubmissionClick: (submission: Submission) => void;
+  onMarkAsRead: (submissionId: string) => void;
 }
 
 export function SubmissionsList({ 
   submissions, 
   isLoading, 
   selectedSubmission, 
-  onSelectSubmission,
+  onSubmissionClick,
   onMarkAsRead
 }: SubmissionsListProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredSubmissions = submissions.filter(submission =>
-    submission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    submission.message?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Contact Submissions</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            {submissions.length} total
-          </span>
-        </CardTitle>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Search submissions..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <CardTitle>Property Inquiries</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Spinner />
+          <div className="py-8 text-center">
+            <div className="animate-spin h-6 w-6 border-2 border-primary mx-auto rounded-full border-t-transparent"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Loading submissions...</p>
           </div>
-        ) : filteredSubmissions.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">
-            {searchTerm ? "No matching submissions found" : "No submissions yet"}
-          </p>
+        ) : submissions.length === 0 ? (
+          <div className="py-8 text-center">
+            <p className="text-sm text-muted-foreground">No submissions found</p>
+          </div>
         ) : (
           <div className="space-y-2">
-            {filteredSubmissions.map((submission) => (
+            {submissions.map(submission => (
               <SubmissionItem
                 key={submission.id}
                 submission={submission}
                 isSelected={selectedSubmission?.id === submission.id}
-                onClick={() => onSelectSubmission(submission)}
+                onClick={() => onSubmissionClick(submission)}
                 onMarkAsRead={onMarkAsRead}
               />
             ))}

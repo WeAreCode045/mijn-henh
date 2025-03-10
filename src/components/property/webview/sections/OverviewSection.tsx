@@ -1,6 +1,7 @@
 
 import { WebViewSectionProps } from "../types";
 import { WebViewImageGrid } from "../WebViewImageGrid";
+import "../styles/WebViewStyles.css";
 
 export function OverviewSection({ property, settings }: WebViewSectionProps) {
   // Format price with thousand separators
@@ -37,11 +38,29 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               <img
                 src={mainImage}
                 alt={property.title}
-                className="w-full h-[400px] object-cover rounded-lg shadow-lg"
+                className="w-full h-[450px] object-cover rounded-lg shadow-lg"
               />
             </div>
             
-            {/* Blue bar with title and price */}
+         
+        
+        {/* Featured images grid (previously Grid images) */}
+        {property.featuredImages && property.featuredImages.length > 0 && (
+          <div className="px-6 mt-4">
+            <div className="grid grid-cols-4 gap-2">
+              {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
+                <div key={index} className="rounded-md overflow-hidden">
+                  <img 
+                    src={imageUrl} 
+                    alt={`Property ${index + 1}`}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+   {/* Blue bar with title and price */}
             <div 
               className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
               style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}
@@ -54,24 +73,7 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               </span>
             </div>
           </>
-        )}
-        
-        {/* Featured images grid (previously Grid images) */}
-        {property.featuredImages && property.featuredImages.length > 0 && (
-          <div className="px-6 mt-4">
-            <div className="grid grid-cols-2 gap-2">
-              {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
-                <div key={index} className="aspect-square rounded-md overflow-hidden">
-                  <img 
-                    src={imageUrl} 
-                    alt={`Property ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        )}        
       </div>
     </div>
   );

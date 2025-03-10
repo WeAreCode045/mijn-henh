@@ -11,7 +11,7 @@ export function usePropertyStepNavigation(
   setPendingChanges: (pending: boolean) => void,
   setLastSaved: (date: Date | null) => void
 ) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const { handleSubmit } = usePropertyFormSubmit();
   const { toast } = useToast();
   const maxSteps = steps.length;
@@ -66,14 +66,14 @@ export function usePropertyStepNavigation(
 
   const handleNext = () => {
     console.log("Next clicked", "Current formData:", formData);
-    if (currentStep < maxSteps) {
+    if (currentStep < maxSteps - 1) {
       saveBeforeStepChange(currentStep + 1);
     }
   };
 
   const handlePrevious = () => {
     console.log("Previous clicked", "Current formData:", formData);
-    if (currentStep > 1) {
+    if (currentStep > 0) {
       saveBeforeStepChange(currentStep - 1);
     }
   };
