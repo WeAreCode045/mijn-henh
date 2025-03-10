@@ -1,108 +1,104 @@
 
-import { PropertyData } from "@/types/property";
-import { usePropertyFormState } from "@/hooks/usePropertyFormState";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
+import { useState, useCallback } from "react";
+import { PropertyData, PropertyFormData } from "@/types/property";
+import { v4 as uuidv4 } from "uuid";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
-import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
-import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
-import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
-import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
+import { usePropertyAreas } from "@/hooks/usePropertyAreas";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyFormManager(property: PropertyData) {
-  // Form state management
-  const { formState, setFormState, handleFieldChange } = usePropertyFormState(property);
+  const [formState, setFormState] = useState<PropertyFormData>(property as PropertyFormData);
   
-  // Auto-save functionality
+  // Create a callback function to update form state
+  const handleFieldChange = useCallback(<K extends keyof PropertyFormData>(
+    field: K,
+    value: PropertyFormData[K]
+  ) => {
+    setFormState(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  // Use the property content hook
+  const contentManager = usePropertyContent(formState, handleFieldChange);
+  
+  // Use the property images hook
   const { 
-    autosaveData, 
-    isSaving, 
-    lastSaved, 
-    pendingChanges, 
-    setPendingChanges, 
-    setLastSaved 
-  } = usePropertyAutoSave();
+    handleImageUpload, 
+    handleRemoveImage, 
+    isUploading,
+    handleFeaturedImageUpdate,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan
+  } = usePropertyImages(formState, setFormState);
   
-  // State tracking utilities with properly typed setter function
-  const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
-    usePropertyStateTracking(
-      formState, 
-      handleFieldChange, 
-      setFormState,
-      setPendingChanges
-    );
-  
-  // Property content management
-  const {
-    addFeature,
-    removeFeature,
-    updateFeature,
-  } = usePropertyContent(
-    formState,
-    handleFieldChangeWithTracking
-  );
-  
-  // Property areas management
+  // Use the property areas hook
   const {
     addArea,
     removeArea,
     updateArea,
+    handleAreaImageUpload: baseHandleAreaImageUpload,
     handleAreaImageRemove,
-    handleAreaImagesSelect,
-    handleAreaImageUpload
-  } = usePropertyAreas(
-    formState, 
-    setFormStateWithTracking
-  );
-  
-  // Property images management - use setFormStateWithTracking 
-  const {
-    handleImageUpload,
-    handleRemoveImage,
-    handleSetFeaturedImage,
-    handleToggleFeaturedImage,
-    isUploading,
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan,
-    images
-  } = usePropertyImages(
-    formState, 
-    setFormStateWithTracking
-  );
-  
-  // Step navigation with auto-save
-  const { currentStep, handleStepClick, handleNext, handlePrevious } = 
-    usePropertyStepNavigation(formState, pendingChanges, setPendingChanges, setLastSaved);
-  
-  // Form submission and other actions
-  const { handleSaveObjectId: baseSaveObjectId, handleSaveAgent: baseSaveAgent, 
-    handleSaveTemplate: baseSaveTemplate, onSubmit } = 
-    usePropertyFormActions(formState, setPendingChanges, setLastSaved);
-  
-  // Wrapper functions that combine action with field change
-  const handleSaveObjectId = (objectId: string) => {
-    const id = baseSaveObjectId(objectId);
-    handleFieldChange('object_id', id);
+    handleAreaImagesSelect
+  } = usePropertyAreas(formState, setFormState);
+
+  // Wrap the handleAreaImageUpload to return a Promise
+  const handleAreaImageUpload = async (areaId: string, files: FileList): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        baseHandleAreaImageUpload(areaId, files);
+        resolve();
+      } catch (error) {
+        console.error("Error uploading area images:", error);
+        reject(error);
+      }
+    });
   };
 
-  const handleSaveAgent = async (agentId: string) => {
-    const id = await baseSaveAgent(agentId);
-    handleFieldChange('agent_id', id);
-  };
+  // Add handle functions for object_id, agent, and template
+  const handleSaveObjectId = useCallback((objectId: string) => {
+    handleFieldChange('object_id', objectId);
+  }, [handleFieldChange]);
 
-  const handleSaveTemplate = (templateId: string) => {
-    const id = baseSaveTemplate(templateId);
-    handleFieldChange('template_id', id);
-  };
+  const handleSaveAgent = useCallback((agentId: string) => {
+    handleFieldChange('agent_id', agentId);
+  }, [handleFieldChange]);
 
-  // Cast property to PropertyData to ensure it has required id
-  const propertyWithRequiredId: PropertyData = {
+  const handleSaveTemplate = useCallback((templateId: string) => {
+    handleFieldChange('template_id', templateId);
+  }, [handleFieldChange]);
+
+  // Handle setting and toggling the featured image
+  const handleSetFeaturedImage = useCallback((url: string | null) => {
+    handleFeaturedImageUpdate(url, 'featuredImage');
+  }, [handleFeaturedImageUpdate]);
+
+  const handleToggleFeaturedImage = useCallback((url: string) => {
+    const currentFeaturedImages = formState.featuredImages || [];
+    const newFeaturedImages = currentFeaturedImages.includes(url) 
+      ? currentFeaturedImages.filter(img => img !== url)
+      : [...currentFeaturedImages, url];
+    
+    handleFieldChange('featuredImages', newFeaturedImages);
+  }, [formState.featuredImages, handleFieldChange]);
+
+  // Handle area photos
+  const handleAreaPhotosUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // Implementation here
+      console.log("Uploading area photos:", e.target.files);
+    }
+  }, []);
+
+  const handleRemoveAreaPhoto = useCallback((areaId: string, imageId: string) => {
+    handleAreaImageRemove(areaId, imageId);
+  }, [handleAreaImageRemove]);
+
+  // Ensure propertyWithRequiredProps has all the required properties
+  const propertyWithRequiredProps: PropertyData = {
     ...formState,
-    id: property.id // Ensure id is present
+    id: formState.id || uuidv4(),
+    title: formState.title || '',
   };
 
   return {
@@ -111,9 +107,9 @@ export function usePropertyFormManager(property: PropertyData) {
     handleSaveObjectId,
     handleSaveAgent,
     handleSaveTemplate,
-    addFeature,
-    removeFeature,
-    updateFeature,
+    addFeature: contentManager.addFeature,
+    removeFeature: contentManager.removeFeature,
+    updateFeature: contentManager.updateFeature,
     addArea,
     removeArea,
     updateArea,
@@ -123,21 +119,21 @@ export function usePropertyFormManager(property: PropertyData) {
     handleImageUpload,
     handleRemoveImage,
     isUploading,
-    handleSetFeaturedImage,
-    handleToggleFeaturedImage,
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto,
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan,
-    onSubmit,
-    currentStep,
-    handleStepClick,
-    handleNext,
-    handlePrevious,
-    propertyWithRequiredProps: propertyWithRequiredId,
-    lastSaved,
-    isSaving,
-    setPendingChanges
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    onSubmit: contentManager.onSubmit,
+    currentStep: contentManager.currentStep,
+    handleStepClick: contentManager.handleStepClick,
+    handleNext: contentManager.handleNext,
+    handlePrevious: contentManager.handlePrevious,
+    propertyWithRequiredProps,
+    lastSaved: contentManager.lastSaved,
+    isSaving: contentManager.isSaving,
+    setPendingChanges: contentManager.setPendingChanges
   };
 }

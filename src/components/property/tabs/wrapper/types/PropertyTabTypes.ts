@@ -67,8 +67,6 @@ export interface PropertyTabProps {
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
-    // Use the standardized signature
-    handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
     // Add the missing setPendingChanges property
     setPendingChanges: (pending: boolean) => void;
     // Required props for compatibility
