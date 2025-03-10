@@ -154,7 +154,7 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-  */
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-estate-50 px-4">
@@ -237,7 +237,7 @@ export default function Auth() {
               {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
             </Button>
             
-            {/* Development helper button - only uncomment during development
+            { Development helper button - only uncomment during development
             <Button
               type="button"
               variant="outline"
@@ -247,7 +247,7 @@ export default function Auth() {
             >
               Dev Login (maurice@devtig-online.nl)
             </Button>
-            */}
+            }
           </form>
         </CardContent>
       </Card>
