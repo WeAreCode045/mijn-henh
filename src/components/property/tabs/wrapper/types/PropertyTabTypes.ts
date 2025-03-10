@@ -72,5 +72,8 @@ export interface PropertyTabProps {
     handleFloorplanEmbedScriptUpdate: (script: string) => void;
     // Required for setPendingChanges
     setPendingChanges: (pending: boolean) => void;
+    // For media components
+    onFeatureImageToggle?: (url: string) => void;
+    onSetMainImage?: (url: string) => void;
   };
 }

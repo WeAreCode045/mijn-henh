@@ -8,133 +8,79 @@ export interface Submission {
   email: string;
   phone: string;
   message: string;
-  inquiryType: string;
-  createdAt: string;
-  isRead: boolean;
-  replies: Reply[];
-  user?: {
-    id: string;
-    full_name: string;
-    email: string;
-    avatar_url: string;
-  } | null;
-  property_id: string;
-  inquiry_type: string;
   created_at: string;
   is_read: boolean;
+  property_id: string;
+  inquiry_type: string;
+  replies: Reply[];
 }
 
 export interface Reply {
   id: string;
-  text: string;
-  createdAt: string;
-  agent: {
-    id: string;
-    name: string;
-    email: string;
-    photoUrl: string;
-  } | null;
+  submission_id: string;
+  user_id: string;
+  reply_text: string;
+  created_at: string;
+  user_name: string;
+  user_email: string;
+  user_phone: string;
+  user_avatar: string;
 }
 
-interface UseSubmissionsProps {
-  propertyId: string;
-}
-
-export function useSubmissions({ propertyId }: UseSubmissionsProps) {
+export function useSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-
-  useEffect(() => {
-    fetchSubmissions();
-  }, [propertyId]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchSubmissions = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("property_contact_submissions")
-        .select(
-          `
-          id,
-          property_id,
-          name,
-          email,
-          phone,
-          message,
-          inquiry_type,
-          created_at,
-          is_read,
-          replies: property_contact_submission_replies (
-            id,
-            text,
-            created_at,
-            user: profiles (
-              id,
-              full_name,
-              email,
-              avatar_url
-            )
+        .from('property_contact_submissions')
+        .select(`
+          *,
+          replies:property_submission_replies(
+            *,
+            user:profiles(id, full_name, email, phone, avatar_url)
           )
-        `
-        )
-        .eq("property_id", propertyId)
-        .order("created_at", { ascending: false });
+        `)
+        .eq('property_id', propertyId)
+        .order('created_at', { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
 
-      if (data) {
-        const transformedSubmissions = data.map((submission) => {
+      // Transform the data to include proper user info for each reply
+      const transformedData = data?.map(submission => {
+        const transformedReplies = (submission.replies || []).map(reply => {
           return {
-            id: submission.id,
-            propertyId: submission.property_id,
-            name: submission.name,
-            email: submission.email,
-            phone: submission.phone,
-            message: submission.message,
-            inquiryType: submission.inquiry_type,
-            createdAt: submission.created_at,
-            isRead: submission.is_read,
-            replies: transformSubmissionReplies(
-              submission.replies as any[] | null
-            ),
-            property_id: submission.property_id,
-            inquiry_type: submission.inquiry_type,
-            created_at: submission.created_at,
-            is_read: submission.is_read,
+            ...reply,
+            user_name: reply.user?.full_name || 'Unknown',
+            user_email: reply.user?.email || '',
+            user_phone: reply.user?.phone || '',
+            user_avatar: reply.user?.avatar_url || ''
           };
         });
-        setSubmissions(transformedSubmissions as Submission[]);
-      }
-    } catch (err: any) {
-      setError(err.message);
+
+        return {
+          ...submission,
+          replies: transformedReplies
+        };
+      });
+
+      setSubmissions(transformedData || []);
+    } catch (err) {
+      console.error('Error fetching submissions:', err);
+      setError('Failed to fetch submissions');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (propertyId) {
+      fetchSubmissions();
+    }
+  }, [propertyId]);
+
   return { submissions, loading, error, fetchSubmissions };
-}
-
-function transformSubmissionReplies(replies: any[] | null): Reply[] {
-  if (!replies) {
-    return [];
-  }
-
-  return replies.map((reply) => {
-    const transformedReply = {
-      id: reply.id,
-      text: reply.text,
-      createdAt: reply.created_at,
-      agent: reply.user ? {
-        id: reply.user?.id ?? '',
-        name: reply.user?.full_name ?? 'Unknown',
-        email: reply.user?.email ?? '',
-        photoUrl: reply.user?.avatar_url ?? ''
-      } : null
-    };
-    return transformedReply;
-  });
 }

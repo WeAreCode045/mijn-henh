@@ -44,4 +44,7 @@ export interface PropertyFormManagerChildrenProps {
   handleVirtualTourUpdate: (url: string) => void;
   handleYoutubeUrlUpdate: (url: string) => void;
   handleFloorplanEmbedScriptUpdate: (script: string) => void;
+  // For media components
+  onFeatureImageToggle?: (url: string) => void;
+  onSetMainImage?: (url: string) => void;
 }

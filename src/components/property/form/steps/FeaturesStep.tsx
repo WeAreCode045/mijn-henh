@@ -4,6 +4,7 @@ import { PropertyFormData, PropertyFeature } from "@/types/property";
 
 interface FeaturesStepProps {
   formData: PropertyFormData;
+  features?: PropertyFeature[]; // Made this optional
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
   onUpdateFeature: (id: string, description: string) => void;

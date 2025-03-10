@@ -61,6 +61,9 @@ interface PropertyTabContentsProps {
   handleVirtualTourUpdate?: (url: string) => void;
   handleYoutubeUrlUpdate?: (url: string) => void;
   handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+  // Media components
+  onFeatureImageToggle?: (url: string) => void;
+  onSetMainImage?: (url: string) => void;
 }
 
 export function PropertyTabContents({
@@ -108,7 +111,9 @@ export function PropertyTabContents({
   setPendingChanges = () => {},
   handleVirtualTourUpdate = () => {},
   handleYoutubeUrlUpdate = () => {},
-  handleFloorplanEmbedScriptUpdate = () => {}
+  handleFloorplanEmbedScriptUpdate = () => {},
+  onFeatureImageToggle,
+  onSetMainImage
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -153,7 +158,9 @@ export function PropertyTabContents({
     featuredImage: formState.featuredImage,
     handleVirtualTourUpdate,
     handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate
+    handleFloorplanEmbedScriptUpdate,
+    onFeatureImageToggle,
+    onSetMainImage
   };
 
   const tabProps = {

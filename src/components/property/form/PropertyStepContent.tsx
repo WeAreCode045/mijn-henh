@@ -80,7 +80,6 @@ export function PropertyStepContent({
         return (
           <FeaturesStep
             formData={formData}
-            features={formData.features}
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}

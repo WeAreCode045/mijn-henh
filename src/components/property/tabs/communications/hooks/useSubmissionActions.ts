@@ -1,81 +1,79 @@
+
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/providers/AuthProvider";
 
 export interface UseMarkAsReadProps {
-  submissionId: string;
-  isRead: boolean;
-  setSubmissions: any; // Added this prop to match usage
+  propertyId?: string;
 }
 
 export interface UseSendResponseProps {
-  propertyId: string;
-  submissionId: string;
-  message: string;
-  selectedSubmission: any; // Added this prop to match usage
+  propertyId?: string;
 }
 
-export const useSubmissionActions = () => {
-  const markAsRead = async ({ submissionId, isRead, setSubmissions }: UseMarkAsReadProps) => {
+export function useSubmissionActions() {
+  const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
+  const { profile } = useAuth();
+
+  const markAsRead = async (submissionId: string) => {
     try {
       const { error } = await supabase
-        .from("property_contact_submissions")
-        .update({ is_read: isRead })
-        .eq("id", submissionId);
+        .from('property_contact_submissions')
+        .update({ is_read: true })
+        .eq('id', submissionId);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `Submission marked as ${isRead ? "read" : "unread"}`,
+        description: "Marked as read",
       });
 
-      setSubmissions((prevSubmissions: any) =>
-        prevSubmissions.map((submission: any) =>
-          submission.id === submissionId ? { ...submission, is_read: isRead } : submission
-        )
-      );
-    } catch (error: any) {
+      return true;
+    } catch (error) {
+      console.error("Error marking as read:", error);
       toast({
-        title: "Error",
-        description: error.message,
         variant: "destructive",
+        description: "Failed to mark as read",
       });
+      return false;
     }
   };
 
-  const sendResponse = async ({
-    propertyId,
-    submissionId,
-    message,
-    selectedSubmission,
-  }: UseSendResponseProps) => {
+  const sendResponse = async (submissionId: string, text: string) => {
+    setIsSending(true);
     try {
-      const { data: reply, error } = await supabase.from("submission_replies").insert({
-        submission_id: submissionId,
-        text: message,
-        user_id: supabase.auth.user()?.id,
-      }).single();
+      // Ensure user is authenticated
+      const authUser = supabase.auth.getUser();
+      if (!authUser) throw new Error("Not authenticated");
 
-      if (error) {
-        throw error;
-      }
+      // Insert reply to property_submission_replies table
+      const { error } = await supabase
+        .from('property_submission_replies')
+        .insert({
+          submission_id: submissionId,
+          user_id: profile.id,
+          reply_text: text
+        });
+
+      if (error) throw error;
 
       toast({
-        title: "Success",
         description: "Response sent successfully",
       });
-
-      selectedSubmission.replies = [...(selectedSubmission.replies || []), reply];
-    } catch (error: any) {
+      setIsSending(false);
+      return true;
+    } catch (error) {
+      console.error("Error sending response:", error);
       toast({
-        title: "Error",
-        description: error.message,
         variant: "destructive",
+        description: "Failed to send response",
       });
+      setIsSending(false);
+      return false;
     }
   };
 
-  return { markAsRead, sendResponse };
-};
+  return { markAsRead, sendResponse, isSending };
+}

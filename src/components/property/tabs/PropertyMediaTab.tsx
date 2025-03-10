@@ -24,16 +24,34 @@ interface FloorplansCardProps {
   isUploading: boolean;
 }
 
-export function PropertyMediaTab({
-  property,
-  handlers,
-  formState
-}: PropertyTabProps) {
-  const [mediaImages, setMediaImages] = useState<PropertyImage[]>(formState.images);
+export function PropertyMediaTab({ property, handlers }) {
+  const [formData, setFormData] = useState<PropertyFormData>(property);
+  const [activeTab, setActiveTab] = useState("images");
   
+  const {
+    handleImageUpload,
+    handleRemoveImage,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    isUploading,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate
+  } = handlers;
+  
+  const images = Array.isArray(property.images) 
+    ? property.images.map(img => typeof img === 'string' ? { id: img, url: img } : img)
+    : [];
+  
+  const featuredImage = property.featuredImage || null;
+  const featuredImages = property.featuredImages || [];
+
   console.log("PropertyMediaTab: floorplanEmbedScript =", property.floorplanEmbedScript);
-  console.log("PropertyMediaTab: featuredImageUrl =", formState.featuredImage);
-  console.log("PropertyMediaTab: featuredImageUrls =", formState.featuredImageUrls);
+  console.log("PropertyMediaTab: featuredImageUrl =", property.featuredImage);
+  console.log("PropertyMediaTab: featuredImageUrls =", property.featuredImages);
 
   const handleFetchComplete = (fetchedImages: PropertyImage[]) => {
     const sortedImages = [...fetchedImages].sort((a, b) => {
@@ -44,45 +62,45 @@ export function PropertyMediaTab({
     });
     
     console.log("PropertyMediaTab - Received sorted images:", sortedImages);
-    setMediaImages(sortedImages);
+    setFormData({ ...formData, images: sortedImages });
   };
 
   useEffect(() => {
-    if (formState.images && formState.images.length > 0) {
-      const sortedImages = [...formState.images].sort((a, b) => {
+    if (property.images && property.images.length > 0) {
+      const sortedImages = [...property.images].sort((a, b) => {
         if (a.sort_order !== undefined && b.sort_order !== undefined) {
           return a.sort_order - b.sort_order;
         }
         return 0;
       });
       
-      setMediaImages(sortedImages);
+      setFormData({ ...formData, images: sortedImages });
     }
-  }, [formState.images]);
+  }, [property.images]);
 
   return (
     <div className="space-y-6">
       <MediaDatabaseFetcher
         propertyId={property.id}
-        images={formState.images}
+        images={property.images}
         onFetchComplete={handleFetchComplete}
       />
 
       <PropertyImagesCard 
-        images={mediaImages || formState.images}
-        onImageUpload={handlers.handleImageUpload}
-        onRemoveImage={handlers.handleRemoveImage}
-        isUploading={handlers.isUploading || false}
-        featuredImage={formState.featuredImage}
-        onFeatureImageToggle={handlers.handleToggleFeaturedImage}
-        onSetMainImage={handlers.handleSetFeaturedImage}
+        images={formData.images || property.images}
+        onImageUpload={handleImageUpload}
+        onRemoveImage={handleRemoveImage}
+        isUploading={isUploading || false}
+        featuredImage={property.featuredImage}
+        onFeatureImageToggle={handleToggleFeaturedImage}
+        onSetMainImage={handleSetFeaturedImage}
       />
 
       <FloorplansCard 
-        floorplans={formState.floorplans || []}
-        onFloorplanUpload={handlers.handleFloorplanUpload}
-        onRemoveFloorplan={handlers.handleRemoveFloorplan}
-        isUploading={handlers.isUploadingFloorplan || false}
+        floorplans={property.floorplans || []}
+        onFloorplanUpload={handleFloorplanUpload}
+        onRemoveFloorplan={handleRemoveFloorplan}
+        isUploading={isUploadingFloorplan || false}
       />
 
       <VirtualTourCard 
@@ -90,9 +108,9 @@ export function PropertyMediaTab({
         virtualTourUrl={property.virtualTourUrl}
         youtubeUrl={property.youtubeUrl}
         floorplanEmbedScript={property.floorplanEmbedScript}
-        onVirtualTourUpdate={handlers.handleVirtualTourUpdate}
-        onYoutubeUrlUpdate={handlers.handleYoutubeUrlUpdate}
-        onFloorplanEmbedScriptUpdate={handlers.handleFloorplanEmbedScriptUpdate}
+        onVirtualTourUpdate={handleVirtualTourUpdate}
+        onYoutubeUrlUpdate={handleYoutubeUrlUpdate}
+        onFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
       />
     </div>
   );
