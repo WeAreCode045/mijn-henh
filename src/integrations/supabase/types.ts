@@ -146,7 +146,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar: string | null
+          avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -157,7 +157,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
-          avatar?: string | null
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -168,7 +168,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
-          avatar?: string | null
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null

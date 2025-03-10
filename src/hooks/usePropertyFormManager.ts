@@ -22,15 +22,7 @@ export function usePropertyFormManager(property: PropertyData) {
   const contentManager = usePropertyContent(formState, handleFieldChange);
   
   // Use the property images hook
-  const { 
-    handleImageUpload, 
-    handleRemoveImage, 
-    isUploading,
-    handleFeaturedImageUpdate,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan
-  } = usePropertyImages(formState, setFormState);
+  const imageManager = usePropertyImages(formState, setFormState);
   
   // Use the property areas hook
   const {
@@ -70,8 +62,18 @@ export function usePropertyFormManager(property: PropertyData) {
 
   // Handle setting and toggling the featured image
   const handleSetFeaturedImage = useCallback((url: string | null) => {
-    handleFeaturedImageUpdate(url, 'featuredImage');
-  }, [handleFeaturedImageUpdate]);
+    if (url) {
+      setFormState(prev => ({
+        ...prev,
+        featuredImage: url
+      }));
+    } else {
+      setFormState(prev => ({
+        ...prev,
+        featuredImage: null
+      }));
+    }
+  }, []);
 
   const handleToggleFeaturedImage = useCallback((url: string) => {
     const currentFeaturedImages = formState.featuredImages || [];
@@ -116,14 +118,14 @@ export function usePropertyFormManager(property: PropertyData) {
     handleAreaImageRemove,
     handleAreaImagesSelect,
     handleAreaImageUpload,
-    handleImageUpload,
-    handleRemoveImage,
-    isUploading,
+    handleImageUpload: imageManager.handleImageUpload,
+    handleRemoveImage: imageManager.handleRemoveImage,
+    isUploading: imageManager.isUploading,
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan,
+    handleFloorplanUpload: imageManager.handleFloorplanUpload,
+    handleRemoveFloorplan: imageManager.handleRemoveFloorplan,
+    isUploadingFloorplan: imageManager.isUploadingFloorplan,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     onSubmit: contentManager.onSubmit,

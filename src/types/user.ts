@@ -1,12 +1,12 @@
 
 export interface User {
   id: string;
-  email: string;
+  email: string | null;
   full_name: string | null;
   phone: string | null;
   whatsapp_number: string | null;
   role: "admin" | "agent" | null;
-  avatar_url: string | null;
+  avatar: string | null;
 }
 
 export interface UserFormData {
