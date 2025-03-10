@@ -124,6 +124,38 @@ export default function Auth() {
     }
   };
 
+  // Development helper function (only uncomment during development)
+  /*
+  const handleDevLogin = async () => {
+    setIsLoading(true);
+    try {
+      const client = await getSupabaseClient();
+      if (!client || !client.auth) {
+        throw new Error("No Supabase auth client available");
+      }
+      
+      const { data, error } = await client.auth.signInWithPassword({
+        email: "maurice@devtig-online.nl",
+        password: "your-dev-password-here", // Use a real password
+      });
+      
+      if (error) throw error;
+      
+      await syncSupabaseClients();
+      navigate('/');
+    } catch (error: any) {
+      console.error("Dev login error:", error);
+      toast({
+        title: "Dev Login Failed",
+        description: error.message || "Authentication failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  */
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-estate-50 px-4">
       <Card className="w-full max-w-md">
@@ -204,6 +236,18 @@ export default function Auth() {
             >
               {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
             </Button>
+            
+            {/* Development helper button - only uncomment during development
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mt-4"
+              onClick={handleDevLogin}
+              disabled={isLoading || clientStatus === 'unavailable'}
+            >
+              Dev Login (maurice@devtig-online.nl)
+            </Button>
+            */}
           </form>
         </CardContent>
       </Card>
