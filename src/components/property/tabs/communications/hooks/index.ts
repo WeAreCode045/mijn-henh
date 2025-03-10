@@ -1,17 +1,13 @@
 
-import { useMarkAsRead, UseMarkAsReadProps } from './useMarkAsRead';
-import { useSendResponse, UseSendResponseProps } from './useSendResponse';
-import { 
-  useSubmissionSelection, 
-  UseSubmissionSelectionProps, 
-  UseSubmissionSelectionReturn 
-} from './useSubmissionSelection';
+import { useMarkAsRead } from './useMarkAsRead';
+import { useSendResponse } from './useSendResponse';
+import { useSubmissionSelection } from './useSubmissionSelection';
 
-// Re-export hooks with explicit type annotation
-export type { UseMarkAsReadProps };
-export type { UseSendResponseProps };
-export type { UseSubmissionSelectionProps, UseSubmissionSelectionReturn };
-
+// Use export type for type definitions to avoid 'isolatedModules' issues
 export { useMarkAsRead };
 export { useSendResponse };
 export { useSubmissionSelection };
+
+// Re-export types
+export type { UseMarkAsReadProps } from './useMarkAsRead';
+export type { UseSendResponseProps } from './useSendResponse';

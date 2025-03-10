@@ -5,7 +5,8 @@ export interface SubmissionReply {
   id: string;
   submission_id: string;
   reply_text: string;
-  user_id: string | null;
+  user_id?: string;
+  agent_id?: string;
   created_at: string;
   updated_at: string;
   user_name?: string;
@@ -24,12 +25,14 @@ export interface Submission {
   created_at: string;
   updated_at: string;
   is_read: boolean;
-  inquiry_type?: string;
+  inquiry_type: string;
   replies?: SubmissionReply[];
   // Compatibility fields
-  propertyId: string;
-  inquiryType: string;
-  createdAt: string;
-  isRead: boolean;
+  propertyId?: string;
+  inquiryType?: string;
+  createdAt?: string;
+  isRead?: boolean;
   property?: PropertyData;
+  agent_id?: string;
+  agent?: any;
 }

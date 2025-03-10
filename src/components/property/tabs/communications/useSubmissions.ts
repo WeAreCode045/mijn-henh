@@ -1,82 +1,87 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Submission, SubmissionReply } from './types';
 
-export const useSubmissions = (propertyId: string) => {
+export function useSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchSubmissions = useCallback(async () => {
-    if (!propertyId) {
-      setError('Property ID is required');
-      return;
-    }
+  const fetchSubmissions = async () => {
+    if (!propertyId) return;
     
     setLoading(true);
-    setError('');
+    setError(null);
     
     try {
-      const { data, error } = await supabase
+      // Fetch submissions for this property
+      const { data: submissionsData, error: submissionsError } = await supabase
         .from('property_contact_submissions')
         .select(`
           *,
-          replies:property_submission_replies(
-            *,
-            user:profiles(
-              full_name, 
-              email, 
-              phone, 
-              avatar_url
-            )
-          )
+          agent:profiles(id, full_name, email, phone, avatar_url)
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-
-      if (data) {
-        // Transform data to match the expected format
-        const transformedData = data.map(submission => {
-          // Transform replies
-          const transformedReplies = submission.replies?.map(reply => {
-            // Handle potential missing user data
-            const userFullName = reply.user?.full_name || 'Unknown User';
-            const userEmail = reply.user?.email || '';
-            const userPhone = reply.user?.phone || '';
-            const userAvatar = reply.user?.avatar_url || '';
-
+      
+      if (submissionsError) throw submissionsError;
+      
+      // Fetch replies for each submission
+      const submissionsWithReplies = await Promise.all(
+        (submissionsData || []).map(async (submission) => {
+          const { data: repliesData, error: repliesError } = await supabase
+            .from('property_submission_replies')
+            .select(`
+              *,
+              user:profiles(id, full_name, email, phone, avatar_url)
+            `)
+            .eq('submission_id', submission.id)
+            .order('created_at', { ascending: true });
+          
+          if (repliesError) {
+            console.error('Error fetching replies:', repliesError);
+            return { ...submission, replies: [] };
+          }
+          
+          // Transform the replies data to match our expected format
+          const transformedReplies = (repliesData || []).map((reply): SubmissionReply => {
+            // Safely handle the user field which might be a SelectQueryError
+            const user = reply.user || {};
             return {
               ...reply,
-              user_name: userFullName,
-              user_email: userEmail,
-              user_phone: userPhone,
-              user_avatar: userAvatar
+              user_id: reply.agent_id, // Use agent_id as user_id since that's what we have
+              user_name: user.full_name || 'Unknown',
+              user_email: user.email || '',
+              user_phone: user.phone || '',
+              user_avatar: user.avatar_url || ''
             } as SubmissionReply;
-          }) || [];
-
-          // Create a submission object with all fields needed
-          return {
+          });
+          
+          return { 
             ...submission,
-            replies: transformedReplies,
+            // Add compatibility fields
             propertyId: submission.property_id,
-            inquiryType: submission.inquiry_type || 'contact',
+            inquiryType: submission.inquiry_type,
             createdAt: submission.created_at,
-            isRead: submission.is_read
-          } as Submission;
-        });
-
-        setSubmissions(transformedData);
-      }
+            isRead: submission.is_read,
+            replies: transformedReplies 
+          };
+        })
+      );
+      
+      setSubmissions(submissionsWithReplies);
     } catch (err) {
       console.error('Error fetching submissions:', err);
-      setError('Failed to fetch submissions');
+      setError('Failed to load submissions');
     } finally {
       setLoading(false);
     }
+  };
+  
+  useEffect(() => {
+    fetchSubmissions();
   }, [propertyId]);
-
+  
   return { submissions, loading, error, fetchSubmissions };
-};
+}

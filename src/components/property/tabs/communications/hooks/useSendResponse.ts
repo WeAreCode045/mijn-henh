@@ -1,19 +1,20 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/providers/AuthProvider";
 
 export interface UseSendResponseProps {
-  propertyId: string;
+  propertyId?: string;
+  submissionId?: string;
+  onSuccess?: () => void;
 }
 
-export function useSendResponse({ propertyId }: UseSendResponseProps) {
+export function useSendResponse({ propertyId, submissionId, onSuccess }: UseSendResponseProps) {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
 
-  const handleSendResponse = async (responseText: string) => {
-    if (!responseText.trim()) {
+  const sendResponse = async (responseText: string) => {
+    if (!responseText.trim() || !submissionId) {
       toast({
         title: "Error",
         description: "Response cannot be empty",
@@ -25,24 +26,35 @@ export function useSendResponse({ propertyId }: UseSendResponseProps) {
     setIsSending(true);
     
     try {
-      // Here you would insert the reply to the database
-      // You'd need information like the submissionId for this to work
-      // This is a placeholder for the actual implementation
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) throw userError;
+      
+      const { error } = await supabase
+        .from('property_submission_replies')
+        .insert({
+          submission_id: submissionId,
+          reply_text: responseText,
+          agent_id: userData.user?.id
+        });
+        
+      if (error) throw error;
+      
       toast({
-        title: "Success",
-        description: "Response sent successfully",
+        description: 'Response sent successfully'
       });
+      
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Error sending response:', error);
       toast({
-        title: "Error",
-        description: "Failed to send response",
-        variant: "destructive",
+        variant: 'destructive',
+        description: 'Failed to send response'
       });
     } finally {
       setIsSending(false);
     }
   };
 
-  return { handleSendResponse, isSending };
+  return { sendResponse, isSending };
 }

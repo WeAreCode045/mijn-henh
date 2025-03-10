@@ -1,36 +1,57 @@
 
-import React from 'react';
-import { PropertyFormData } from "@/types/property";
-import { PropertyStepContent } from "@/components/property/form/PropertyStepContent";
+import React from "react";
+import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyStepContent } from "../PropertyStepContent";
 
 interface ContentTabWrapperProps {
-  formData: any;
-  handlers: any;
+  property: PropertyData;
+  formData: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onAddFeature: () => void;
+  onRemoveFeature: (id: string) => void;
+  onUpdateFeature: (id: string, description: string) => void;
+  onAddArea: () => void;
+  onRemoveArea: (id: string) => void;
+  onUpdateArea: (id: string, data: any) => void;
+  onAreaImageRemove: (areaId: string, imageIndex: number) => void;
+  onAreaImagesSelect: (areaId: string, images: any[]) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => void;
+  isUploading: boolean;
 }
 
-export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
+export function ContentTabWrapper({
+  property,
+  formData,
+  onFieldChange,
+  onAddFeature,
+  onRemoveFeature,
+  onUpdateFeature,
+  onAddArea,
+  onRemoveArea,
+  onUpdateArea,
+  onAreaImageRemove,
+  onAreaImagesSelect,
+  onAreaImageUpload,
+  isUploading
+}: ContentTabWrapperProps) {
   return (
-    <PropertyStepContent
-      formData={formData}
-      onFieldChange={handlers.onFieldChange}
-      onAddFeature={handlers.onAddFeature}
-      onRemoveFeature={handlers.onRemoveFeature}
-      onUpdateFeature={handlers.onUpdateFeature}
-      onAddArea={handlers.onAddArea}
-      onRemoveArea={handlers.onRemoveArea}
-      onUpdateArea={handlers.onUpdateArea}
-      onAreaImageRemove={handlers.onAreaImageRemove}
-      onAreaImagesSelect={handlers.onAreaImagesSelect}
-      handleAreaImageUpload={handlers.handleAreaImageUpload}
-      currentStep={handlers.currentStep}
-      handleStepClick={handlers.handleStepClick}
-      handleNext={handlers.handleNext}
-      handlePrevious={handlers.handlePrevious}
-      onFetchLocationData={handlers.onFetchLocationData}
-      onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-      isLoadingLocationData={handlers.isLoadingLocationData}
-      setPendingChanges={handlers.setPendingChanges}
-      isUploading={handlers.isUploading}
-    />
+    <div className="space-y-6">
+      <PropertyStepContent
+        formData={formData}
+        handlers={{
+          onFieldChange,
+          onAddFeature,
+          onRemoveFeature,
+          onUpdateFeature,
+          onAddArea,
+          onRemoveArea,
+          onUpdateArea,
+          onAreaImageRemove,
+          onAreaImagesSelect,
+          onAreaImageUpload,
+          isUploading
+        }}
+      />
+    </div>
   );
 }

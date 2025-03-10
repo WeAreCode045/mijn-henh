@@ -1,7 +1,7 @@
 
 import React, { useState, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Mail, Phone, Calendar, Eye, EyeOff } from 'lucide-react';
 import { Submission, SubmissionReply } from './types';
 import { SubmissionReplies } from './SubmissionReplies';
@@ -18,10 +18,10 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
   const [responseText, setResponseText] = useState('');
   
   // Use the markAsRead hook
-  const { markAsRead, isUpdating } = useMarkAsRead({
+  const { markAsRead, isMarking } = useMarkAsRead({
     submissionId: submission.id,
     isRead: submission.isRead || submission.is_read,
-    onSuccess: onBack
+    onSuccess: () => console.log("Marked as read")
   });
   
   // Use the sendResponse hook
@@ -55,7 +55,7 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
         <Button
           variant="outline"
           onClick={markAsRead}
-          disabled={isUpdating}
+          disabled={isMarking}
           className="flex items-center gap-1"
         >
           {submission.isRead || submission.is_read ? (
@@ -115,8 +115,8 @@ export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) 
         </CardHeader>
         <CardContent>
           <SubmissionResponse 
-            responseText={responseText}
-            setResponseText={setResponseText}
+            value={responseText}
+            onChange={setResponseText}
             isSending={isSending}
             onSubmit={handleSubmit}
           />

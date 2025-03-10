@@ -1,10 +1,9 @@
 
-import React from "react";
-import { PropertyData } from "@/types/property";
+import React, { useState } from "react";
+import { PropertyData, PropertyImage } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileUp } from "lucide-react";
-import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
 import { FloorplanUploader } from "../floorplans/FloorplanUploader";
+import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
 import { FloorplanEmbed } from "../floorplans/FloorplanEmbed";
 
 interface FloorplansTabProps {
@@ -13,63 +12,52 @@ interface FloorplansTabProps {
 }
 
 export function FloorplansTab({ property, setProperty }: FloorplansTabProps) {
-  const handleFloorplanEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setProperty(prev => ({
-      ...prev,
-      floorplanEmbedScript: e.target.value
-    }));
+  const [isUploading, setIsUploading] = useState(false);
+  
+  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Implementation would go here
+    console.log("Floorplan upload triggered");
   };
-
-  // Mock function for handling floorplan removal
+  
   const handleRemoveFloorplan = (index: number) => {
-    if (property.floorplans) {
-      const newFloorplans = [...property.floorplans];
-      newFloorplans.splice(index, 1);
-      setProperty(prev => ({
-        ...prev,
-        floorplans: newFloorplans
-      }));
-    }
+    // Implementation would go here
+    console.log("Remove floorplan triggered for index:", index);
   };
-
+  
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileUp className="mr-2 h-5 w-5" />
-            Floorplan Images
-          </CardTitle>
+          <CardTitle>Property Floorplans</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <FloorplanUploader 
-            onFloorplanUpload={() => {}} 
-            isUploading={false} 
+            onFloorplanUpload={handleFloorplanUpload} 
+            isUploading={isUploading}
           />
           
-          {property.floorplans && property.floorplans.length > 0 && (
-            <div className="mt-6">
-              <SortableFloorplanGrid
-                floorplans={property.floorplans}
-                propertyId={property.id}
-                onRemoveFloorplan={handleRemoveFloorplan}
-              />
-            </div>
+          {property.floorplans && property.floorplans.length > 0 ? (
+            <SortableFloorplanGrid 
+              floorplans={property.floorplans} 
+              propertyId={property.id}
+              onRemoveFloorplan={handleRemoveFloorplan}
+            />
+          ) : (
+            <p className="text-center text-muted-foreground">No floorplans uploaded yet.</p>
           )}
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Interactive Floorplan Embed</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FloorplanEmbed 
-            embedScript={property.floorplanEmbedScript || ''} 
-            onChange={handleFloorplanEmbedScriptChange}
-          />
-        </CardContent>
-      </Card>
+      
+      {property.floorplanEmbedScript && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Floorplan Preview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FloorplanEmbed script={property.floorplanEmbedScript} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

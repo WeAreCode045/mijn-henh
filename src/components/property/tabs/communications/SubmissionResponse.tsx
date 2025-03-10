@@ -1,43 +1,41 @@
 
-import React, { FormEvent, Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 
-interface SubmissionResponseProps {
-  responseText: string;
-  setResponseText: Dispatch<SetStateAction<string>>;
+export interface SubmissionResponseProps {
+  value: string;
+  onChange: (value: string) => void;
   isSending: boolean;
-  onSubmit: (e: FormEvent) => Promise<void>;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
 export function SubmissionResponse({ 
-  responseText, 
-  setResponseText, 
+  value, 
+  onChange, 
   isSending, 
   onSubmit 
 }: SubmissionResponseProps) {
   return (
-    <form onSubmit={onSubmit}>
-      <div className="space-y-4">
-        <Textarea
-          placeholder="Type your response..."
-          value={responseText}
-          onChange={(e) => setResponseText(e.target.value)}
-          rows={5}
-          className="resize-none"
-          required
-        />
-        <div className="flex justify-end">
-          <Button 
-            type="submit" 
-            disabled={isSending || !responseText.trim()}
-            className="flex items-center gap-2"
-          >
-            <Send className="h-4 w-4" />
-            {isSending ? 'Sending...' : 'Send Reply'}
-          </Button>
-        </div>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <Textarea
+        placeholder="Type your response here..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={5}
+        disabled={isSending}
+        className="resize-none"
+      />
+      <div className="flex justify-end">
+        <Button 
+          type="submit" 
+          disabled={!value.trim() || isSending}
+          className="flex items-center gap-2"
+        >
+          <Send className="h-4 w-4" />
+          {isSending ? 'Sending...' : 'Send Response'}
+        </Button>
       </div>
     </form>
   );
