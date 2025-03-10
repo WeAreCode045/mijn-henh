@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { formatDate } from '@/utils/dateUtils';
 import { Badge } from '@/components/ui/badge';
@@ -10,13 +9,23 @@ interface SubmissionsListProps {
   submissions: Submission[];
   selectedSubmission: Submission | null;
   onSelect: (submission: Submission) => void;
+  isLoading?: boolean;
 }
 
 export function SubmissionsList({ 
   submissions, 
   selectedSubmission, 
-  onSelect 
+  onSelect,
+  isLoading = false
 }: SubmissionsListProps) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Loading submissions...</p>
+      </div>
+    );
+  }
+
   if (submissions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 border rounded-md p-8 bg-muted/10">

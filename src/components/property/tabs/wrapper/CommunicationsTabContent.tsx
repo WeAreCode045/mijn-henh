@@ -18,8 +18,8 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
   const { selectedSubmission, setSelectedSubmission } = useSubmissionSelection();
   
   const { markAsRead, isMarking } = useMarkAsRead({
-    submissionId: selectedSubmission?.id || '',
-    isRead: selectedSubmission?.is_read || false,
+    submission_id: selectedSubmission?.id || '',
+    is_read: selectedSubmission?.is_read || false,
     onSuccess: fetchSubmissions
   });
 
@@ -33,9 +33,9 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
       <div className="md:col-span-1">
         <SubmissionsList 
           submissions={submissions}
+          selectedSubmission={selectedSubmission}
+          onSelect={setSelectedSubmission}
           isLoading={isLoading}
-          selectedSubmissionId={selectedSubmission?.id}
-          onSelectSubmission={setSelectedSubmission}
         />
       </div>
       
