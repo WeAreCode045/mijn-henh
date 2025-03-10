@@ -37,7 +37,7 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
       name: agentData.name || agentData.full_name || 'Unknown Agent',
       email: agentData.email,
       phone: agentData.phone,
-      photoUrl: agentData.avatar_url, // Using avatar_url instead of agent_photo
+      photoUrl: agentData.photoUrl || agentData.photo_url,
       address: agentData.address,
     };
   }
@@ -117,27 +117,10 @@ export function usePropertyFetch(id: string | undefined) {
           let agentData: PropertyAgent | undefined;
           
           if (agentId) {
-            // Fetch agent information from profiles table
-            const { data: agentProfile } = await supabase
-              .from('profiles')
-              .select('id, full_name, email, phone, avatar_url')
-              .eq('id', agentId)
-              .single();
-            
-            if (agentProfile) {
-              agentData = {
-                id: agentProfile.id,
-                name: agentProfile.full_name || 'Unknown Agent',
-                email: agentProfile.email,
-                phone: agentProfile.phone,
-                photoUrl: agentProfile.avatar_url
-              };
-            } else {
-              agentData = {
-                id: agentId,
-                name: 'Unknown Agent'
-              };
-            }
+            agentData = {
+              id: agentId,
+              name: 'Unknown Agent'
+            };
           }
           
           // Convert featuredImages to PropertyImages for coverImages

@@ -19,7 +19,7 @@ export function useAgentSelect(initialAgentId?: string) {
         const { data, error } = await supabase
           .from('profiles')
           .select('id, full_name')
-          .or('role.eq.agent,role.eq.admin'); // Include both agent and admin roles
+          .eq('role', 'agent');
         
         if (!error && data) {
           setAgents(data);

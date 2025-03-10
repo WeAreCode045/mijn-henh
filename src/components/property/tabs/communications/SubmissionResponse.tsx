@@ -1,40 +1,52 @@
 
-import React, { FormEvent, Dispatch, SetStateAction } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send } from 'lucide-react';
+import { SendIcon } from 'lucide-react';
 
 interface SubmissionResponseProps {
-  message: string;
-  setMessage: Dispatch<SetStateAction<string>>;
+  onSendResponse: (responseText: string) => Promise<void>;
   isSending: boolean;
-  onSubmit: (e: FormEvent) => Promise<void>;
 }
 
-export const SubmissionResponse = ({
-  message,
-  setMessage,
-  isSending,
-  onSubmit
-}: SubmissionResponseProps) => {
+export function SubmissionResponse({ onSendResponse, isSending }: SubmissionResponseProps) {
+  const [responseText, setResponseText] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!responseText.trim()) return;
+    
+    await onSendResponse(responseText);
+    setResponseText('');
+  };
+
   return (
-    <form onSubmit={onSubmit} className="w-full">
+    <form onSubmit={handleSubmit}>
+      <h3 className="font-medium mb-2">Send a reply</h3>
       <Textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type je antwoord hier..."
-        className="mb-2"
+        value={responseText}
+        onChange={(e) => setResponseText(e.target.value)}
+        placeholder="Type your response..."
+        className="min-h-[120px]"
+        disabled={isSending}
       />
-      <div className="flex justify-end">
-        <Button 
-          type="submit" 
-          disabled={!message.trim() || isSending}
-          className="flex items-center gap-2"
-        >
-          <Send className="h-4 w-4" />
-          {isSending ? 'Versturen...' : 'Verstuur antwoord'}
-        </Button>
-      </div>
+      <Button 
+        type="submit" 
+        className="mt-2 w-full md:w-auto" 
+        disabled={!responseText.trim() || isSending}
+      >
+        {isSending ? (
+          <>
+            <span className="animate-spin mr-2">○</span>
+            Sending...
+          </>
+        ) : (
+          <>
+            <SendIcon className="w-4 h-4 mr-2" />
+            Send Response
+          </>
+        )}
+      </Button>
     </form>
   );
-};
+}

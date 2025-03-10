@@ -16,7 +16,7 @@ export const useProperties = () => {
       .select(`
         *,
         property_images(*),
-        agent:profiles(id, full_name, email, phone, avatar_url)
+        agent:profiles(id, full_name, email, phone, photo_url:agent_photo)
       `);
 
     if (!isAdmin) {

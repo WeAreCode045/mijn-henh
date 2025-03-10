@@ -146,7 +146,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar_url: string | null
+          agent_photo: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -157,7 +157,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
-          avatar_url?: string | null
+          agent_photo?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -168,7 +168,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
-          avatar_url?: string | null
+          agent_photo?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -393,28 +393,28 @@ export type Database = {
       }
       property_submission_replies: {
         Row: {
+          agent_id: string | null
           created_at: string
           id: string
           reply_text: string
           submission_id: string
           updated_at: string
-          user_id: string | null
         }
         Insert: {
+          agent_id?: string | null
           created_at?: string
           id?: string
           reply_text: string
           submission_id: string
           updated_at?: string
-          user_id?: string | null
         }
         Update: {
+          agent_id?: string | null
           created_at?: string
           id?: string
           reply_text?: string
           submission_id?: string
           updated_at?: string
-          user_id?: string | null
         }
         Relationships: [
           {

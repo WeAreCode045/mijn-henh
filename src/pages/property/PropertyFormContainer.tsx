@@ -133,8 +133,8 @@ export function PropertyFormContainer() {
   const handleAgentChange = async (agentId: string) => {
     if (!formData) return;
     
-    // Set to null if it's an empty string or "no-agent"
-    const finalAgentId = agentId === "no-agent" || agentId.trim() === '' ? null : agentId;
+    // Set to null if it's an empty string
+    const finalAgentId = agentId.trim() === '' ? null : agentId;
     
     setSelectedAgent(finalAgentId || '');
     

@@ -1,8 +1,9 @@
+
 export interface SubmissionAgent {
   id: string;
   full_name: string;
   email: string;
-  avatar_url?: string; // Changed from agent_photo to avatar_url
+  agent_photo?: string;
 }
 
 export interface SubmissionProperty {

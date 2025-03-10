@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +50,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           .select(`
             *,
             property_images(*),
-            agent:profiles(id, full_name, email, phone, photo_url:avatar)
+            agent:profiles(id, full_name, email, phone, photo_url:agent_photo)
           `)
           .eq('object_id', id)
           .maybeSingle();
@@ -61,7 +62,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             .select(`
               *,
               property_images(*),
-              agent:profiles(id, full_name, email, phone, photo_url:avatar)
+              agent:profiles(id, full_name, email, phone, photo_url:agent_photo)
             `)
             .eq('id', id)
             .maybeSingle();
@@ -86,9 +87,11 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
         });
 
         if (data) {
+          // Make sure agent is properly structured
           const propertyWithAgent = {
             ...data,
             agent: data.agent || null,
+            // Ensure these are always arrays, even if they're not in the database
             features: Array.isArray(data.features) ? data.features : 
                      (data.features ? [data.features] : []),
             nearby_places: Array.isArray(data.nearby_places) ? data.nearby_places : 

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +20,7 @@ export function RecentProperties() {
       try {
         let query = supabase
           .from('properties')
-          .select('*, property_images(*), agent:profiles(id, full_name, email, phone, avatar_url)')
+          .select('*, property_images(*), agent:profiles(id, full_name, email, phone, photo_url:agent_photo)')
           .order('created_at', { ascending: false })
           .limit(3);
 
@@ -35,6 +36,7 @@ export function RecentProperties() {
         }
 
         return (data || []).map(item => {
+          // Ensure the item has the agent property structured correctly
           const itemWithAgent = {
             ...item,
             agent: item.agent || null
@@ -47,8 +49,8 @@ export function RecentProperties() {
       }
     },
     retry: 2,
-    staleTime: 30000,
-    gcTime: 300000,
+    staleTime: 30000, // Data remains fresh for 30 seconds
+    gcTime: 300000, // Time before unused data is garbage collected (replaces cacheTime)
   });
 
   if (error) {
@@ -101,6 +103,7 @@ export function RecentProperties() {
       <CardContent>
         <div className="space-y-4">
           {(recentProperties || []).map((property: PropertyData) => {
+            // Use featured image if available, otherwise fallback to first image
             const displayImage = property.featuredImage || 
                                (property.images?.[0]?.url || '/placeholder.svg');
             

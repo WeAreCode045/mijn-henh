@@ -16,7 +16,6 @@ interface PropertyTabContentsProps {
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
-    floorplanEmbedScript?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
@@ -38,7 +37,6 @@ interface PropertyTabContentsProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
@@ -58,12 +56,6 @@ interface PropertyTabContentsProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
-  handleVirtualTourUpdate?: (url: string) => void;
-  handleYoutubeUrlUpdate?: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
-  // Media components
-  onFeatureImageToggle?: (url: string) => void;
-  onSetMainImage?: (url: string) => void;
 }
 
 export function PropertyTabContents({
@@ -89,7 +81,6 @@ export function PropertyTabContents({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  handleAreaImageUpload,
   handleImageUpload,
   handleRemoveImage,
   isUploading,
@@ -108,12 +99,7 @@ export function PropertyTabContents({
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges = () => {},
-  handleVirtualTourUpdate = () => {},
-  handleYoutubeUrlUpdate = () => {},
-  handleFloorplanEmbedScriptUpdate = () => {},
-  onFeatureImageToggle,
-  onSetMainImage
+  setPendingChanges = () => {}
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -132,7 +118,6 @@ export function PropertyTabContents({
     onUpdateArea,
     onAreaImageRemove,
     onAreaImagesSelect,
-    handleAreaImageUpload,
     handleImageUpload,
     handleRemoveImage,
     isUploading,
@@ -154,13 +139,7 @@ export function PropertyTabContents({
     onFetchLocationData,
     onRemoveNearbyPlace,
     isLoadingLocationData,
-    setPendingChanges,
-    featuredImage: formState.featuredImage,
-    handleVirtualTourUpdate,
-    handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate,
-    onFeatureImageToggle,
-    onSetMainImage
+    setPendingChanges // Add the missing setPendingChanges to the handlers object
   };
 
   const tabProps = {

@@ -1,101 +1,65 @@
 
-import { useState, useEffect } from "react";
-import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { useSubmissions, Submission } from "../communications/useSubmissions";
-import { useMarkAsRead, useSendResponse } from "../communications/hooks/useSubmissionActions";
-import { SubmissionsList } from "../communications/SubmissionsList";
+import { PropertyData } from "@/types/property";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
+import { SubmissionsList } from "../communications/SubmissionsList";
+import { useSubmissions } from "../communications/useSubmissions";
+import { useSubmissionSelection } from "../communications/hooks/useSubmissionSelection";
+import { useSubmissionActions } from "../communications/hooks/useSubmissionActions";
+import { useMarkAsRead } from "../communications/hooks/useMarkAsRead";
+import { useSendResponse } from "../communications/hooks/useSendResponse";
 
 interface CommunicationsTabContentProps {
-  property: {
-    id: string;
-    title: string;
-  };
+  property: PropertyData;
 }
 
 export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  const { submissions, loading, error, fetchSubmissions } = useSubmissions(property.id);
+  const { selectedSubmission, setSelectedSubmission } = useSubmissionSelection();
   
-  const { submissions, loading, error, fetchSubmissions } = useSubmissions({ propertyId: property.id });
-  const { markAsRead, isLoading: isMarkingAsRead } = useMarkAsRead({ 
-    propertyId: property.id,
-    onSuccess: fetchSubmissions
-  });
-  const { sendResponse, isSending } = useSendResponse({
-    propertyId: property.id,
-    onSuccess: fetchSubmissions
-  });
-
-  const handleSelectSubmission = (submission: Submission) => {
-    if (!submission.is_read) {
-      markAsRead(submission.id);
+  // Use the hooks with correct arguments
+  const { handleMarkAsRead } = useMarkAsRead({ propertyId: property.id });
+  const { handleSendResponse, isSending } = useSendResponse({ propertyId: property.id });
+  
+  // Handle selection and mark as read
+  const handleSelectSubmission = (submissionId: string) => {
+    setSelectedSubmission(submissionId);
+    
+    // Mark as read when selecting
+    if (submissionId) {
+      handleMarkAsRead(submissionId);
     }
-    setSelectedSubmission(submission);
   };
-
-  const handleSendResponse = async (id: string, message: string) => {
-    await sendResponse(id, message);
-  };
-
-  // When submissions change, check if the selected one needs to be updated
-  useEffect(() => {
-    if (selectedSubmission) {
-      const updatedSubmission = submissions.find(s => s.id === selectedSubmission.id);
-      if (updatedSubmission) {
-        setSelectedSubmission(updatedSubmission);
-      }
-    }
-  }, [submissions, selectedSubmission]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-4 text-red-500">
-        {error}
-      </div>
-    );
-  }
-
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-1">
-        <SubmissionsList
-          submissions={submissions}
-          selectedSubmissionId={selectedSubmission?.id}
-          onSelectSubmission={handleSelectSubmission}
-        />
-      </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Inquiries & Communications</h2>
       
-      <div className="md:col-span-2">
-        {selectedSubmission ? (
-          <SubmissionDetail
-            submission={selectedSubmission}
-            propertyTitle={property.title}
-            onMarkAsRead={markAsRead}
-            onSendResponse={handleSendResponse}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <SubmissionsList 
+            submissions={submissions}
+            selectedSubmissionId={selectedSubmission}
+            onSelectSubmission={handleSelectSubmission}
+            isLoading={loading}
+            error={error}
           />
-        ) : (
-          <div className="flex justify-center items-center h-40 border rounded-md bg-gray-50">
-            <p className="text-gray-500">Selecteer een bericht om de details te bekijken</p>
-          </div>
-        )}
+        </div>
+        
+        <div className="lg:col-span-2">
+          {selectedSubmission ? (
+            <SubmissionDetail
+              submission={submissions.find(s => s.id === selectedSubmission)}
+              onSendResponse={(responseText) => handleSendResponse(responseText)}
+              isSending={isSending}
+              propertyId={property.id}
+            />
+          ) : (
+            <div className="bg-muted p-6 rounded-lg text-center">
+              <p className="text-muted-foreground">Select an inquiry to view details</p>
+            </div>
+          )}
+        </div>
       </div>
-
-      <PropertySubmissionsDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        propertyTitle={property.title}
-        submissions={submissions}
-        onMarkAsRead={markAsRead}
-      />
     </div>
   );
 }
