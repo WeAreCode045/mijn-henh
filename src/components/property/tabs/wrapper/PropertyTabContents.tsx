@@ -16,6 +16,7 @@ interface PropertyTabContentsProps {
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
+    floorplanEmbedScript?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
@@ -57,6 +58,9 @@ interface PropertyTabContentsProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
+  handleVirtualTourUpdate?: (url: string) => void;
+  handleYoutubeUrlUpdate?: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
 }
 
 export function PropertyTabContents({
@@ -101,7 +105,10 @@ export function PropertyTabContents({
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges = () => {}
+  setPendingChanges = () => {},
+  handleVirtualTourUpdate = () => {},
+  handleYoutubeUrlUpdate = () => {},
+  handleFloorplanEmbedScriptUpdate = () => {}
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -143,7 +150,10 @@ export function PropertyTabContents({
     onRemoveNearbyPlace,
     isLoadingLocationData,
     setPendingChanges,
-    featuredImage: formState.featuredImage
+    featuredImage: formState.featuredImage,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate
   };
 
   const tabProps = {

@@ -40,4 +40,8 @@ export interface PropertyFormManagerChildrenProps {
   lastSaved: Date | null;
   isSaving: boolean;
   setPendingChanges: (pending: boolean) => void;
+  // Add these new handlers
+  handleVirtualTourUpdate: (url: string) => void;
+  handleYoutubeUrlUpdate: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate: (script: string) => void;
 }

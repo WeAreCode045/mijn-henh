@@ -17,7 +17,7 @@ export const useProperties = () => {
         *,
         property_images(*),
         agent:profiles(id, full_name, email, phone, avatar_url)
-      `); // Updated from photo_url to avatar_url
+      `);
 
     if (!isAdmin) {
       query = query.eq('agent_id', profile.id);

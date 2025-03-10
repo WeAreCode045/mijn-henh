@@ -51,7 +51,6 @@ export interface PropertyTabProps {
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
     handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
     handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveFloorplan: (index: number) => void;
     isUploadingFloorplan: boolean;
@@ -67,9 +66,11 @@ export interface PropertyTabProps {
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
-    // Add the missing setPendingChanges property
+    // Add new handlers for media tab
+    handleVirtualTourUpdate: (url: string) => void;
+    handleYoutubeUrlUpdate: (url: string) => void;
+    handleFloorplanEmbedScriptUpdate: (script: string) => void;
+    // Required for setPendingChanges
     setPendingChanges: (pending: boolean) => void;
-    // Required props for compatibility
-    featuredImage?: string | null;
   };
 }

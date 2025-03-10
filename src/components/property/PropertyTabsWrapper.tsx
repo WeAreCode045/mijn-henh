@@ -58,6 +58,9 @@ export function PropertyTabsWrapper({
               isUploadingFloorplan,
               handleSetFeaturedImage,
               handleToggleFeaturedImage,
+              handleVirtualTourUpdate,
+              handleYoutubeUrlUpdate,
+              handleFloorplanEmbedScriptUpdate,
               onSubmit,
               currentStep,
               handleStepClick,
@@ -104,6 +107,9 @@ export function PropertyTabsWrapper({
                       isUploadingFloorplan={isUploadingFloorplan}
                       handleSetFeaturedImage={handleSetFeaturedImage}
                       handleToggleFeaturedImage={handleToggleFeaturedImage}
+                      handleVirtualTourUpdate={handleVirtualTourUpdate}
+                      handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
+                      handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
                       currentStep={currentStep}
                       handleStepClick={handleStepClick}
                       handleNext={handleNext}

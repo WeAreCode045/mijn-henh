@@ -16,10 +16,10 @@ interface SubmissionDetailProps {
 }
 
 interface SubmissionResponseProps {
-  responseText: string;
-  setResponseText: Dispatch<SetStateAction<string>>;
+  message: string;
+  setMessage: Dispatch<SetStateAction<string>>;
   isSending: boolean;
-  onSubmit: (e: FormEvent) => Promise<void>;
+  onSubmit: (e: FormEvent<Element>) => Promise<void>;
 }
 
 export function SubmissionDetail({ 
@@ -29,7 +29,7 @@ export function SubmissionDetail({
   propertyId,
   onBack
 }: SubmissionDetailProps) {
-  const [responseText, setResponseText] = useState("");
+  const [message, setMessage] = useState("");
   
   if (!submission) {
     return (
@@ -41,10 +41,10 @@ export function SubmissionDetail({
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!responseText.trim()) return;
+    if (!message.trim()) return;
     
-    await onSendResponse(responseText);
-    setResponseText(""); // Clear after sending
+    await onSendResponse(message);
+    setMessage(""); // Clear after sending
   };
   
   return (
@@ -104,8 +104,8 @@ export function SubmissionDetail({
         </CardContent>
         <CardFooter>
           <SubmissionResponse
-            responseText={responseText}
-            setResponseText={setResponseText}
+            message={message}
+            setMessage={setMessage}
             isSending={isSending}
             onSubmit={handleSubmit}
           />

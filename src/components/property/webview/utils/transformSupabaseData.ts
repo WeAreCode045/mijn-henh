@@ -30,7 +30,7 @@ export interface SupabasePropertyData {
     full_name: string;
     email: string;
     phone: string;
-    avatar_url: string; // Updated from photo_url to avatar_url
+    avatar_url: string; // This is now correct
   } | null;
   property_images: {
     id: string;
@@ -143,7 +143,7 @@ export function transformSupabaseData(
           name: data.agent.full_name,
           email: data.agent.email,
           phone: data.agent.phone,
-          photoUrl: data.agent.avatar_url, // Updated from photo_url to avatar_url
+          photoUrl: data.agent.avatar_url,
         }
       : undefined,
     created_at: data.created_at,
