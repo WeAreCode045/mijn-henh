@@ -1,3 +1,3 @@
 
-// Import directly from the source file instead of using the index
+// Simply re-export from areas/usePropertyAreas
 export { usePropertyAreas } from './areas/usePropertyAreas';
