@@ -142,8 +142,8 @@ export function PropertyTabContents({
     onFetchLocationData,
     onRemoveNearbyPlace,
     isLoadingLocationData,
-    setPendingChanges, // Add the missing setPendingChanges to the handlers object
-    featuredImage: formState.featuredImage // Add missing featuredImage prop
+    setPendingChanges,
+    featuredImage: formState.featuredImage
   };
 
   const tabProps = {

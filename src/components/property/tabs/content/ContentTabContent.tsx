@@ -1,8 +1,6 @@
 
-import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormData } from "@/types/property";
 import { PropertyStepContent } from "@/components/property/form/PropertyStepContent";
-import { useLocationDataFetch } from "@/hooks/useLocationDataFetch";
 
 interface ContentTabContentProps {
   formData: PropertyFormData;
@@ -15,6 +13,7 @@ interface ContentTabContentProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
@@ -23,6 +22,7 @@ interface ContentTabContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
+  isUploading?: boolean;
 }
 
 export function ContentTabContent({
@@ -36,6 +36,7 @@ export function ContentTabContent({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
+  handleAreaImageUpload,
   currentStep,
   handleStepClick,
   handleNext,
@@ -43,37 +44,31 @@ export function ContentTabContent({
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges
+  setPendingChanges,
+  isUploading
 }: ContentTabContentProps) {
-  // Use the location data fetch hook
-  const { 
-    generateLocationDescription,
-    isLoading: isLoadingLocation
-  } = useLocationDataFetch(formData, onFieldChange);
-
   return (
-    <div className="space-y-6">
-      <PropertyStepContent
-        formData={formData}
-        onFieldChange={onFieldChange}
-        onAddFeature={onAddFeature}
-        onRemoveFeature={onRemoveFeature}
-        onUpdateFeature={onUpdateFeature}
-        onAddArea={onAddArea}
-        onRemoveArea={onRemoveArea}
-        onUpdateArea={onUpdateArea}
-        onAreaImageRemove={onAreaImageRemove}
-        onAreaImagesSelect={onAreaImagesSelect}
-        currentStep={currentStep}
-        handleStepClick={handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
-        onFetchLocationData={onFetchLocationData}
-        onGenerateLocationDescription={generateLocationDescription}
-        onRemoveNearbyPlace={onRemoveNearbyPlace}
-        isLoadingLocationData={isLoadingLocation || isLoadingLocationData}
-        setPendingChanges={setPendingChanges}
-      />
-    </div>
+    <PropertyStepContent
+      formData={formData}
+      onFieldChange={onFieldChange}
+      onAddFeature={onAddFeature}
+      onRemoveFeature={onRemoveFeature}
+      onUpdateFeature={onUpdateFeature}
+      onAddArea={onAddArea}
+      onRemoveArea={onRemoveArea}
+      onUpdateArea={onUpdateArea}
+      onAreaImageRemove={onAreaImageRemove}
+      onAreaImagesSelect={onAreaImagesSelect}
+      onAreaImageUpload={handleAreaImageUpload}
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      onFetchLocationData={onFetchLocationData}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
+      setPendingChanges={setPendingChanges}
+      isUploading={isUploading}
+    />
   );
 }

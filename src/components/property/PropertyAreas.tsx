@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { PropertyArea, PropertyImage } from "@/types/property";
@@ -9,12 +8,14 @@ import { EmptyAreaMessage } from "./EmptyAreaMessage";
 interface PropertyAreasProps {
   areas: PropertyArea[];
   images: PropertyImage[];
-  propertyId?: string;
+  propertyId: string;
   onAdd: () => void;
   onRemove: (id: string) => void;
-  onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
-  onImageRemove: (id: string, imageId: string) => void;
-  onImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  onUpdate: (id: string, field: any, value: any) => void;
+  onImageRemove: (areaId: string, imageId: string) => void;
+  onImagesSelect: (areaId: string, imageIds: string[]) => void;
+  onImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  isUploading?: boolean;
 }
 
 export function PropertyAreas({
@@ -26,6 +27,8 @@ export function PropertyAreas({
   onUpdate,
   onImageRemove,
   onImagesSelect,
+  onImageUpload,
+  isUploading,
 }: PropertyAreasProps) {
   useEffect(() => {
     console.log("PropertyAreas - Current areas:", areas);

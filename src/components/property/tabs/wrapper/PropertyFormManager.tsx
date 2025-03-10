@@ -21,7 +21,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-    handleAreaImageUpload, // This should come from usePropertyFormManager
+    handleAreaImageUpload,
     handleImageUpload,
     handleRemoveImage,
     isUploading,
@@ -39,7 +39,8 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handlePrevious,
     propertyWithRequiredProps,
     lastSaved,
-    isSaving
+    isSaving,
+    setPendingChanges
   } = formManagerProps;
   
   // Pass all the props to the children render function
@@ -75,6 +76,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handlePrevious,
     propertyWithRequiredProps,
     lastSaved,
-    isSaving
+    isSaving,
+    setPendingChanges
   });
 }

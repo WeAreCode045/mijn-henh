@@ -51,6 +51,7 @@ export interface PropertyTabProps {
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
     handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
     handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveFloorplan: (index: number) => void;
     isUploadingFloorplan: boolean;
@@ -69,7 +70,7 @@ export interface PropertyTabProps {
     // Use the standardized signature
     handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
     // Add the missing setPendingChanges property
-    setPendingChanges?: (pending: boolean) => void;
+    setPendingChanges: (pending: boolean) => void;
     // Required props for compatibility
     featuredImage?: string | null;
   };

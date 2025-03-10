@@ -41,7 +41,7 @@ export function AreasStep({
         onUpdate={onUpdateArea}
         onImageRemove={onAreaImageRemove}
         onImagesSelect={onAreaImagesSelect}
-        onAreaImageUpload={onAreaImageUpload}
+        onImageUpload={onAreaImageUpload}
         isUploading={isUploading}
       />
     </div>
