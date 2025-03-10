@@ -125,7 +125,7 @@ export default function Auth() {
   };
 
   // Development helper function (only uncomment during development)
-  /*
+  
   const handleDevLogin = async () => {
     setIsLoading(true);
     try {
