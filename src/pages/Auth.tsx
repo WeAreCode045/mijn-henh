@@ -125,7 +125,7 @@ export default function Auth() {
   };
 
   // Development helper function (only uncomment during development)
-  /*
+  
   const handleDevLogin = async () => {
     setIsLoading(true);
     try {
@@ -136,7 +136,7 @@ export default function Auth() {
       
       const { data, error } = await client.auth.signInWithPassword({
         email: "maurice@devtig-online.nl",
-        password: "your-dev-password-here", // Use a real password
+        password: "Code001!", // Use a real password
       });
       
       if (error) throw error;
