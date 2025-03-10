@@ -1,32 +1,33 @@
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ChangeEvent } from 'react';
 
-interface FloorplanEmbedProps {
-  script: string;
+export interface FloorplanEmbedProps {
+  script: string; // Changed from embedScript to script
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void; 
 }
 
-export function FloorplanEmbed({ script }: FloorplanEmbedProps) {
-  if (!script) {
-    return (
-      <Card>
-        <CardContent className="py-6">
-          <div className="text-center text-muted-foreground">
-            No floorplan embed script provided
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
+export function FloorplanEmbed({ script, onChange }: FloorplanEmbedProps) {
   return (
-    <Card>
-      <CardContent className="py-6">
-        <div
-          className="w-full aspect-video"
-          dangerouslySetInnerHTML={{ __html: script }}
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <label className="block text-sm font-medium">
+        Floorplan Embed Script
+      </label>
+      <textarea
+        value={script}
+        onChange={onChange}
+        rows={6}
+        className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Paste 3D floorplan embed script here..."
+      />
+      
+      {script && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Preview:</h3>
+          <div className="p-4 border rounded-md bg-gray-50 min-h-[300px]">
+            <div dangerouslySetInnerHTML={{ __html: script }} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

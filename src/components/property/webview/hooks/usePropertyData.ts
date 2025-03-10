@@ -52,7 +52,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           .select(`
             *,
             property_images(*),
-            agent:profiles(id, full_name, email, phone, avatar)
+            agent:profiles(id, full_name, email, phone, avatar_url)
           `)
           .eq('object_id', id)
           .maybeSingle();
@@ -65,7 +65,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             .select(`
               *,
               property_images(*),
-              agent:profiles(id, full_name, email, phone, avatar)
+              agent:profiles(id, full_name, email, phone, avatar_url)
             `)
             .eq('id', id)
             .maybeSingle();

@@ -31,7 +31,7 @@ export interface SupabasePropertyData {
     full_name: string;
     email: string;
     phone: string;
-    avatar: string; // Using avatar instead of avatar_url
+    avatar_url: string; // This is the field from the database
   } | null;
   property_images: {
     id: string;
@@ -147,7 +147,7 @@ export function transformSupabaseData(
           name: data.agent.full_name,
           email: data.agent.email,
           phone: data.agent.phone,
-          photoUrl: data.agent.avatar,
+          photoUrl: data.agent.avatar_url, // Map avatar_url to photoUrl
         }
       : undefined,
     created_at: data.created_at,
