@@ -1,9 +1,16 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabaseClient } from "@/integrations/supabase/clientManager";
 
 export async function getOrCreateWebViewUrl(propertyId: string, objectId: string): Promise<string | null> {
   try {
     console.log("getOrCreateWebViewUrl - Getting web view URL for property:", propertyId);
+    
+    // Get the best available client
+    const supabase = await getSupabaseClient();
+    if (!supabase) {
+      console.error('No Supabase client available');
+      return null;
+    }
     
     // First, try to get existing web view URL
     const { data: existingView, error } = await supabase

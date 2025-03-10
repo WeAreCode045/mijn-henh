@@ -5,9 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
+import { 
+  getSupabaseClient, 
+  syncSupabaseClients 
+} from "@/integrations/supabase/clientManager";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,16 +19,37 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [clientStatus, setClientStatus] = useState<'checking' | 'available' | 'backup' | 'unavailable'>('checking');
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, isUsingBackupClient } = useAuth();
   
-  // Client safety check and logging
-  console.log("Auth component - initialization", { 
-    hasDirectClientAuth: !!supabase?.auth,
-    hasSession: !!session
-  });
-
+  useEffect(() => {
+    // Check client availability
+    const checkClient = async () => {
+      try {
+        setClientStatus('checking');
+        const client = await getSupabaseClient();
+        
+        if (!client) {
+          setClientStatus('unavailable');
+          return;
+        }
+        
+        setClientStatus(isUsingBackupClient ? 'backup' : 'available');
+      } catch (error) {
+        console.error("Error checking client:", error);
+        setClientStatus('unavailable');
+      }
+    };
+    
+    checkClient();
+    
+    // Check periodically
+    const interval = setInterval(checkClient, 10000);
+    return () => clearInterval(interval);
+  }, [isUsingBackupClient]);
+  
   // Redirect if already logged in
   useEffect(() => {
     if (session) {
@@ -38,14 +63,16 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      // Use the directly imported supabase client
-      if (!supabase?.auth) {
-        throw new Error("Supabase auth client not available");
+      // Get the best available client
+      const client = await getSupabaseClient();
+      
+      if (!client || !client.auth) {
+        throw new Error("No Supabase auth client available");
       }
 
       if (isSignUp) {
         console.log("Attempting sign up with email:", email);
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await client.auth.signUp({
           email,
           password,
           options: {
@@ -57,6 +84,9 @@ export default function Auth() {
         
         if (error) throw error;
         
+        // Sync the session to all clients
+        await syncSupabaseClients();
+        
         toast({
           title: "Success",
           description: "Please check your email to confirm your account",
@@ -64,12 +94,15 @@ export default function Auth() {
         console.log("Sign up successful:", data);
       } else {
         console.log("Attempting sign in with email:", email);
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await client.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) throw error;
+        
+        // Sync the session to all clients
+        await syncSupabaseClients();
         
         toast({
           title: "Success",
@@ -96,6 +129,32 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>{isSignUp ? "Create Account" : "Sign In"}</CardTitle>
+          <div className="flex items-center gap-2 text-sm mt-2">
+            {clientStatus === 'checking' && (
+              <div className="flex items-center text-amber-500">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                Checking connection...
+              </div>
+            )}
+            {clientStatus === 'available' && (
+              <div className="flex items-center text-green-500">
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Connected to main server
+              </div>
+            )}
+            {clientStatus === 'backup' && (
+              <div className="flex items-center text-amber-500">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                Using backup connection
+              </div>
+            )}
+            {clientStatus === 'unavailable' && (
+              <div className="flex items-center text-red-500">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                No connection available
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -130,7 +189,11 @@ export default function Auth() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading || clientStatus === 'unavailable'}
+            >
               {isLoading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
             </Button>
             <Button
