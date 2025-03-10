@@ -54,16 +54,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
           if (data) {
-            const user: User = {
+            const userProfile: User = {
               id: data.id,
               email: data.email,
               full_name: data.full_name,
               phone: data.phone,
               whatsapp_number: data.whatsapp_number,
               role: data.role,
-              avatar_url: data.avatar_url, // Changed from avatar to avatar_url
+              avatar_url: data.avatar_url,
             };
-            setProfile(user);
+            setProfile(userProfile);
             setIsAdmin(data.role === 'admin');
           }
         } catch (error) {
@@ -79,7 +79,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    setUser(session?.user || null);
+    if (session?.user) {
+      const userData: User = {
+        id: session.user.id,
+        email: session.user.email,
+        full_name: null,
+        phone: null,
+        whatsapp_number: null,
+        role: null,
+        avatar_url: null
+      };
+      setUser(userData);
+    } else {
+      setUser(null);
+    }
     fetchProfile();
   }, [session, supabaseClient]);
 
