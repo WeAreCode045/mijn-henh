@@ -48,7 +48,6 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
         />
       );
     case "media":
-      // Pass the property data to the MediaTabContent component
       return (
         <MediaTabContent
           property={{

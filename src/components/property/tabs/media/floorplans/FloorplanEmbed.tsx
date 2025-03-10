@@ -1,32 +1,26 @@
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface FloorplanEmbedProps {
-  script: string;
+  embedScript: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-export function FloorplanEmbed({ script }: FloorplanEmbedProps) {
-  if (!script) {
-    return (
-      <Card>
-        <CardContent className="py-6">
-          <div className="text-center text-muted-foreground">
-            No floorplan embed script provided
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
+export function FloorplanEmbed({ embedScript, onChange }: FloorplanEmbedProps) {
   return (
-    <Card>
-      <CardContent className="py-6">
-        <div
-          className="w-full aspect-video"
-          dangerouslySetInnerHTML={{ __html: script }}
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-2">
+      <Label htmlFor="floorplan-embed">Floorplan Embed Script</Label>
+      <Textarea
+        id="floorplan-embed"
+        placeholder="Paste your 3D/virtual floorplan embed script here..."
+        className="min-h-[100px] font-mono text-xs"
+        value={embedScript}
+        onChange={onChange}
+      />
+      <p className="text-xs text-muted-foreground">
+        Paste embed code from Matterport, iGuide, or other 3D tour providers
+      </p>
+    </div>
   );
 }

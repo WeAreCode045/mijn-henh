@@ -393,28 +393,28 @@ export type Database = {
       }
       property_submission_replies: {
         Row: {
-          agent_id: string | null
           created_at: string
           id: string
           reply_text: string
           submission_id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
-          agent_id?: string | null
           created_at?: string
           id?: string
           reply_text: string
           submission_id: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
-          agent_id?: string | null
           created_at?: string
           id?: string
           reply_text?: string
           submission_id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {

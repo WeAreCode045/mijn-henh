@@ -1,92 +1,100 @@
 
 import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
+import { Submission } from '../useSubmissions';
 
 export interface UseMarkAsReadProps {
-  submissionId: string;
-  isRead: boolean;
+  propertyId: string;
   onSuccess?: () => void;
 }
 
-export const useMarkAsRead = ({ submissionId, isRead, onSuccess }: UseMarkAsReadProps) => {
-  const [isUpdating, setIsUpdating] = useState(false);
+export interface UseSendResponseProps {
+  propertyId: string;
+  onSuccess?: () => void;
+}
+
+export function useMarkAsRead({ propertyId, onSuccess }: UseMarkAsReadProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const markAsRead = async () => {
+  const markAsRead = async (submissionId: string) => {
     if (!submissionId) return;
     
-    setIsUpdating(true);
+    setIsLoading(true);
+    
     try {
       const { error } = await supabase
         .from('property_contact_submissions')
-        .update({ is_read: !isRead })
+        .update({ is_read: true })
         .eq('id', submissionId);
-        
+      
       if (error) throw error;
       
       toast({
-        description: `Submission marked as ${!isRead ? 'read' : 'unread'}`
+        title: "Bericht gemarkeerd als gelezen",
+        description: "Het bericht is succesvol gemarkeerd als gelezen.",
       });
       
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Error updating submission status:', error);
+      console.error('Error marking submission as read:', error);
       toast({
-        variant: 'destructive',
-        description: 'Failed to update submission status'
+        title: "Fout",
+        description: "Er is een fout opgetreden bij het markeren van het bericht als gelezen.",
+        variant: "destructive"
       });
     } finally {
-      setIsUpdating(false);
+      setIsLoading(false);
     }
   };
-
-  return { markAsRead, isUpdating };
-};
-
-export interface UseSendResponseProps {
-  submissionId: string;
-  onSuccess?: () => void;
+  
+  return { markAsRead, isLoading };
 }
 
-export const useSendResponse = ({ submissionId, onSuccess }: UseSendResponseProps) => {
+export function useSendResponse({ propertyId, onSuccess }: UseSendResponseProps) {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
-
-  const sendResponse = async (text: string) => {
-    if (!submissionId || !text.trim()) return;
+  
+  const sendResponse = async (submissionId: string, message: string) => {
+    if (!submissionId || !message.trim()) return;
     
     setIsSending(true);
+    
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (userError) throw userError;
+      if (!user) throw new Error('User not authenticated');
       
+      // Insert reply
       const { error } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
-          reply_text: text,
-          user_id: userData.user?.id
+          reply_text: message,
+          user_id: user.id
         });
-        
+      
       if (error) throw error;
       
       toast({
-        description: 'Response sent successfully'
+        title: "Antwoord verzonden",
+        description: "Je antwoord is succesvol verzonden.",
       });
       
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Error sending response:', error);
       toast({
-        variant: 'destructive',
-        description: 'Failed to send response'
+        title: "Fout",
+        description: "Er is een fout opgetreden bij het versturen van je antwoord.",
+        variant: "destructive"
       });
     } finally {
       setIsSending(false);
     }
   };
-
+  
   return { sendResponse, isSending };
-};
+}

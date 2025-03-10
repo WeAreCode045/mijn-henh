@@ -1,42 +1,40 @@
 
-import React from 'react';
+import React, { FormEvent, Dispatch, SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
 
-export interface SubmissionResponseProps {
-  value: string;
-  onChange: (value: string) => void;
+interface SubmissionResponseProps {
+  message: string;
+  setMessage: Dispatch<SetStateAction<string>>;
   isSending: boolean;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: FormEvent) => Promise<void>;
 }
 
-export function SubmissionResponse({ 
-  value, 
-  onChange, 
-  isSending, 
-  onSubmit 
-}: SubmissionResponseProps) {
+export const SubmissionResponse = ({
+  message,
+  setMessage,
+  isSending,
+  onSubmit
+}: SubmissionResponseProps) => {
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="w-full">
       <Textarea
-        placeholder="Type your response here..."
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={5}
-        disabled={isSending}
-        className="resize-none"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type je antwoord hier..."
+        className="mb-2"
       />
       <div className="flex justify-end">
         <Button 
           type="submit" 
-          disabled={!value.trim() || isSending}
+          disabled={!message.trim() || isSending}
           className="flex items-center gap-2"
         >
           <Send className="h-4 w-4" />
-          {isSending ? 'Sending...' : 'Send Response'}
+          {isSending ? 'Versturen...' : 'Verstuur antwoord'}
         </Button>
       </div>
     </form>
   );
-}
+};
