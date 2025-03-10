@@ -5,12 +5,10 @@ import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
-import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
 
 export function usePropertyFormManager(property: PropertyData) {
   // Form state management
@@ -53,6 +51,7 @@ export function usePropertyFormManager(property: PropertyData) {
     handleAreaImageUpload,
     handleAreaImageRemove,
     handleAreaImagesSelect,
+    isUploading
   } = usePropertyAreas(
     formState, 
     setFormStateWithTracking
@@ -62,24 +61,11 @@ export function usePropertyFormManager(property: PropertyData) {
   const {
     handleImageUpload,
     handleRemoveImage,
-    isUploading,
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     images
   } = usePropertyImages(
     formState, 
-    setFormStateWithTracking
-  );
-
-  // Property floorplans management
-  const {
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan
-  } = usePropertyFloorplans(
-    formState,
     setFormStateWithTracking
   );
   
@@ -132,13 +118,8 @@ export function usePropertyFormManager(property: PropertyData) {
     handleImageUpload,
     handleRemoveImage,
     isUploading,
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan,
     onSubmit,
     currentStep,
     handleStepClick,

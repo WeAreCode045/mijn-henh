@@ -24,16 +24,7 @@ interface ContentTabContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
-  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage?: (index: number) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
-  isUploadingFloorplan?: boolean;
 }
 
 export function ContentTabContent({
@@ -53,16 +44,7 @@ export function ContentTabContent({
   handleNext,
   handlePrevious,
   setPendingChanges,
-  handleImageUpload,
-  handleRemoveImage,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  handleAreaPhotosUpload,
-  handleRemoveAreaPhoto,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage,
-  isUploading,
-  isUploadingFloorplan
+  isUploading
 }: ContentTabContentProps) {
   // Use the location data fetch hook
   const { 
@@ -95,16 +77,7 @@ export function ContentTabContent({
         onRemoveNearbyPlace={removeNearbyPlace}
         isLoadingLocationData={isLoadingLocation}
         setPendingChanges={setPendingChanges}
-        handleImageUpload={handleImageUpload}
-        handleRemoveImage={handleRemoveImage}
-        handleFloorplanUpload={handleFloorplanUpload}
-        handleRemoveFloorplan={handleRemoveFloorplan}
-        handleAreaPhotosUpload={handleAreaPhotosUpload}
-        handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-        handleSetFeaturedImage={handleSetFeaturedImage}
-        handleToggleFeaturedImage={handleToggleFeaturedImage}
         isUploading={isUploading}
-        isUploadingFloorplan={isUploadingFloorplan}
       />
     </div>
   );

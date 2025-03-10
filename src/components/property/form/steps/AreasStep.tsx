@@ -1,6 +1,6 @@
 
 import { PropertyAreas } from "@/components/property/PropertyAreas";
-import { PropertyArea, PropertyFormData, PropertyImage } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 
 interface AreasStepProps {
   formData: PropertyFormData;
@@ -12,8 +12,6 @@ interface AreasStepProps {
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   isUploading?: boolean;
   setPendingChanges?: (pending: boolean) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
 }
 
 export function AreasStep({
@@ -25,9 +23,7 @@ export function AreasStep({
   onAreaImageRemove,
   onAreaImagesSelect,
   isUploading,
-  setPendingChanges,
-  handleAreaPhotosUpload,
-  handleRemoveAreaPhoto
+  setPendingChanges
 }: AreasStepProps) {
   return (
     <div className="space-y-6">

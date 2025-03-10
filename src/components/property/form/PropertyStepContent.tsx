@@ -6,7 +6,6 @@ import { GeneralInfoStep } from "@/components/property/form/steps/general-info/G
 import { FeaturesStep } from "@/components/property/form/steps/FeaturesStep";
 import { AreasStep } from "@/components/property/form/steps/AreasStep";
 import { LocationStep } from "@/components/property/form/steps/LocationStep";
-import { ImagesStep } from "@/components/property/form/steps/ImagesStep";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
@@ -29,16 +28,7 @@ interface PropertyStepContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
-  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage?: (index: number) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
-  isUploadingFloorplan?: boolean;
 }
 
 export function PropertyStepContent({
@@ -62,16 +52,7 @@ export function PropertyStepContent({
   onRemoveNearbyPlace,
   isLoadingLocationData,
   setPendingChanges,
-  handleImageUpload,
-  handleRemoveImage,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  handleAreaPhotosUpload,
-  handleRemoveAreaPhoto,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage,
   isUploading,
-  isUploadingFloorplan
 }: PropertyStepContentProps) {
   const renderStep = () => {
     switch (currentStep) {
@@ -80,8 +61,6 @@ export function PropertyStepContent({
           <GeneralInfoStep
             formData={formData}
             onFieldChange={onFieldChange}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleFeaturedImage={handleToggleFeaturedImage}
             setPendingChanges={setPendingChanges}
           />
         );
@@ -119,26 +98,6 @@ export function PropertyStepContent({
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
             isUploading={isUploading}
-            setPendingChanges={setPendingChanges}
-            handleAreaPhotosUpload={handleAreaPhotosUpload}
-            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-          />
-        );
-      case 4:
-        return (
-          <ImagesStep
-            formData={formData}
-            onFieldChange={onFieldChange}
-            handleImageUpload={handleImageUpload}
-            handleRemoveImage={handleRemoveImage}
-            handleFloorplanUpload={handleFloorplanUpload}
-            handleRemoveFloorplan={handleRemoveFloorplan}
-            handleAreaPhotosUpload={handleAreaPhotosUpload}
-            handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-            handleSetFeaturedImage={handleSetFeaturedImage}
-            handleToggleFeaturedImage={handleToggleFeaturedImage}
-            isUploading={isUploading}
-            isUploadingFloorplan={isUploadingFloorplan}
             setPendingChanges={setPendingChanges}
           />
         );
