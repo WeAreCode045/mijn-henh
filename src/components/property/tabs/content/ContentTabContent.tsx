@@ -13,7 +13,6 @@ interface ContentTabContentProps {
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   currentStep: number;
@@ -24,7 +23,6 @@ interface ContentTabContentProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
-  isUploading?: boolean;
 }
 
 export function ContentTabContent({
@@ -36,21 +34,20 @@ export function ContentTabContent({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
-  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
   currentStep,
   handleStepClick,
   handleNext,
   handlePrevious,
-  setPendingChanges,
-  isUploading
+  onFetchLocationData,
+  onRemoveNearbyPlace,
+  isLoadingLocationData,
+  setPendingChanges
 }: ContentTabContentProps) {
   // Use the location data fetch hook
   const { 
-    fetchLocationData,
     generateLocationDescription,
-    removeNearbyPlace,
     isLoading: isLoadingLocation
   } = useLocationDataFetch(formData, onFieldChange);
 
@@ -65,19 +62,17 @@ export function ContentTabContent({
         onAddArea={onAddArea}
         onRemoveArea={onRemoveArea}
         onUpdateArea={onUpdateArea}
-        onAreaImageUpload={onAreaImageUpload}
         onAreaImageRemove={onAreaImageRemove}
         onAreaImagesSelect={onAreaImagesSelect}
         currentStep={currentStep}
         handleStepClick={handleStepClick}
         handleNext={handleNext}
         handlePrevious={handlePrevious}
-        onFetchLocationData={fetchLocationData}
+        onFetchLocationData={onFetchLocationData}
         onGenerateLocationDescription={generateLocationDescription}
-        onRemoveNearbyPlace={removeNearbyPlace}
-        isLoadingLocationData={isLoadingLocation}
+        onRemoveNearbyPlace={onRemoveNearbyPlace}
+        isLoadingLocationData={isLoadingLocation || isLoadingLocationData}
         setPendingChanges={setPendingChanges}
-        isUploading={isUploading}
       />
     </div>
   );

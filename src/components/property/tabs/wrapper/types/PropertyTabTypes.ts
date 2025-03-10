@@ -44,7 +44,6 @@ export interface PropertyTabProps {
     onAddArea: () => void;
     onRemoveArea: (id: string) => void;
     onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageUpload: (areaId: string, files: FileList) => void;
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -61,7 +60,6 @@ export interface PropertyTabProps {
     handleNext: () => void;
     handlePrevious: () => void;
     onSubmit: () => void;
-    formState: PropertyFormData;
     // Optional handlers
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;

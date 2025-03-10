@@ -16,7 +16,6 @@ interface PropertyStepContentProps {
   onAddArea?: () => void;
   onRemoveArea?: (id: string) => void;
   onUpdateArea?: (id: string, field: any, value: any) => void;
-  onAreaImageUpload?: (areaId: string, files: FileList) => void;
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   currentStep: number;
@@ -40,7 +39,6 @@ export function PropertyStepContent({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
-  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
   currentStep,
@@ -94,10 +92,8 @@ export function PropertyStepContent({
             onAddArea={onAddArea}
             onRemoveArea={onRemoveArea}
             onUpdateArea={onUpdateArea}
-            onAreaImageUpload={onAreaImageUpload}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
-            isUploading={isUploading}
             setPendingChanges={setPendingChanges}
           />
         );

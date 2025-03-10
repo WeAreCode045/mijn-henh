@@ -45,7 +45,6 @@ export function PropertyTabsWrapper({
               addArea,
               removeArea,
               updateArea,
-              handleAreaImageUpload,
               handleAreaImageRemove,
               handleAreaImagesSelect,
               handleImageUpload,
@@ -89,7 +88,6 @@ export function PropertyTabsWrapper({
                       onAddArea={addArea}
                       onRemoveArea={removeArea}
                       onUpdateArea={updateArea}
-                      onAreaImageUpload={handleAreaImageUpload}
                       onAreaImageRemove={handleAreaImageRemove}
                       onAreaImagesSelect={handleAreaImagesSelect}
                       handleImageUpload={handleImageUpload}
@@ -106,6 +104,7 @@ export function PropertyTabsWrapper({
                       handleNext={handleNext}
                       handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
+                      handleRemoveAreaPhoto={handleRemoveAreaPhoto}
                     />
                   </PropertyTabs>
                 </Tabs>

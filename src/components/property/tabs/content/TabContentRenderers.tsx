@@ -33,7 +33,6 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           onAddArea={handlers.onAddArea}
           onRemoveArea={handlers.onRemoveArea}
           onUpdateArea={handlers.onUpdateArea}
-          onAreaImageUpload={handlers.onAreaImageUpload}
           onAreaImageRemove={handlers.onAreaImageRemove}
           onAreaImagesSelect={handlers.onAreaImagesSelect}
           currentStep={handlers.currentStep}
@@ -44,16 +43,6 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
           setPendingChanges={handlers.setPendingChanges || (() => {})}
-          handleImageUpload={handlers.handleImageUpload}
-          handleRemoveImage={handlers.handleRemoveImage}
-          handleFloorplanUpload={handlers.handleFloorplanUpload}
-          handleRemoveFloorplan={handlers.handleRemoveFloorplan}
-          handleAreaPhotosUpload={handlers.handleAreaPhotosUpload}
-          handleRemoveAreaPhoto={handlers.handleRemoveAreaPhoto}
-          handleSetFeaturedImage={handlers.handleSetFeaturedImage}
-          handleToggleFeaturedImage={handlers.handleToggleFeaturedImage}
-          isUploading={handlers.isUploading}
-          isUploadingFloorplan={handlers.isUploadingFloorplan}
         />
       );
     case "media":

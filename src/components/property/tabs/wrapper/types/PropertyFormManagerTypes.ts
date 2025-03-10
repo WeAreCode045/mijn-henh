@@ -18,14 +18,13 @@ export interface PropertyFormManagerChildrenProps {
   addArea: () => void;
   removeArea: (id: string) => void;
   updateArea: (id: string, field: any, value: any) => void;
-  handleAreaImageUpload: (areaId: string, files: FileList) => void;
   handleAreaImageRemove: (areaId: string, imageId: string) => void;
   handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void; // Updated signature to match AreaCard
+  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void; 
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan: (index: number) => void;
   isUploadingFloorplan: boolean;

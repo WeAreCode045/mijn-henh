@@ -35,7 +35,6 @@ interface PropertyTabContentsProps {
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -80,7 +79,6 @@ export function PropertyTabContents({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
-  onAreaImageUpload,
   onAreaImageRemove,
   onAreaImagesSelect,
   handleImageUpload,
@@ -118,7 +116,6 @@ export function PropertyTabContents({
     onAddArea,
     onRemoveArea,
     onUpdateArea,
-    onAreaImageUpload,
     onAreaImageRemove,
     onAreaImagesSelect,
     handleImageUpload,
