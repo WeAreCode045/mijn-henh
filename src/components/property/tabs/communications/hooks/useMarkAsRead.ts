@@ -1,47 +1,43 @@
 
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Submission } from "../types";
+import { useToast } from "@/components/ui/use-toast";
 
-interface UseMarkAsReadProps {
-  setSubmissions: (updater: (prevSubmissions: Submission[]) => Submission[]) => void;
-  setSelectedSubmission: (submission: Submission | null | ((prev: Submission | null) => Submission | null)) => void;
-  toast: any;
+export interface UseMarkAsReadProps {
+  propertyId: string;
 }
 
-export function useMarkAsRead({ 
-  setSubmissions, 
-  setSelectedSubmission, 
-  toast 
-}: UseMarkAsReadProps) {
-  
+export function useMarkAsRead({ propertyId }: UseMarkAsReadProps) {
+  const [isMarking, setIsMarking] = useState(false);
+  const { toast } = useToast();
+
   const handleMarkAsRead = async (submissionId: string) => {
+    if (!submissionId) return;
+
+    setIsMarking(true);
+    
     try {
-      await supabase
+      // Update the is_read flag to true
+      const { error } = await supabase
         .from('property_contact_submissions')
         .update({ is_read: true })
-        .eq('id', submissionId);
-
-      setSubmissions(subs => 
-        subs.map(sub => sub.id === submissionId ? { ...sub, is_read: true } : sub)
-      );
+        .eq('id', submissionId)
+        .eq('property_id', propertyId);
       
-      setSelectedSubmission(prev => 
-        prev && prev.id === submissionId ? { ...prev, is_read: true } : prev
-      );
-
-      toast({
-        title: 'Marked as read',
-        description: 'The submission has been marked as read',
-      });
+      if (error) throw error;
+      
+      console.log('Marked submission as read:', submissionId);
     } catch (error) {
       console.error('Error marking submission as read:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to mark submission as read',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to mark message as read",
+        variant: "destructive",
       });
+    } finally {
+      setIsMarking(false);
     }
   };
 
-  return { handleMarkAsRead };
+  return { handleMarkAsRead, isMarking };
 }

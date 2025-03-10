@@ -1,81 +1,64 @@
 
-import React, { useState, useEffect } from 'react';
-import { SubmissionsList } from '../communications/SubmissionsList';
-import { SubmissionDetail } from '../communications/SubmissionDetail';
-import { useSubmissions } from '../communications/useSubmissions';
-import { useSubmissionActions } from '../communications/hooks/useSubmissionActions';
-import { useMarkAsRead } from '../communications/hooks/useMarkAsRead';
-import { useSendResponse } from '../communications/hooks/useSendResponse';
-
-interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  inquiryType: string;
-  createdAt: string;
-  isRead: boolean;
-  property: {
-    id: string;
-    title: string;
-  };
-  replies: {
-    id: string;
-    submissionId: string;
-    replyText: string;
-    createdAt: string;
-    agent: {
-      id: string;
-      name: string;
-      email: string;
-      photoUrl?: string;
-    } | null;
-  }[];
-}
+import { PropertyData } from "@/types/property";
+import { SubmissionDetail } from "../communications/SubmissionDetail";
+import { SubmissionsList } from "../communications/SubmissionsList";
+import { useSubmissions } from "../communications/useSubmissions";
+import { useSubmissionSelection } from "../communications/hooks/useSubmissionSelection";
+import { useSubmissionActions } from "../communications/hooks/useSubmissionActions";
+import { useMarkAsRead } from "../communications/hooks/useMarkAsRead";
+import { useSendResponse } from "../communications/hooks/useSendResponse";
 
 interface CommunicationsTabContentProps {
-  propertyId: string;
+  property: PropertyData;
 }
 
-export function CommunicationsTabContent({ propertyId }: CommunicationsTabContentProps) {
-  const { submissions, isLoading, selectedSubmission, setSelectedSubmission } = useSubmissions(propertyId);
+export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
+  const { submissions, loading, error, fetchSubmissions } = useSubmissions(property.id);
+  const { selectedSubmission, setSelectedSubmission } = useSubmissionSelection();
   
-  const { handleMarkAsRead } = useMarkAsRead();
-  const { handleSendResponse, isSending } = useSendResponse();
+  // Use the hooks with correct arguments
+  const { handleMarkAsRead } = useMarkAsRead({ propertyId: property.id });
+  const { handleSendResponse, isSending } = useSendResponse({ propertyId: property.id });
   
-  const handleSubmissionClick = (submission: Submission) => {
-    setSelectedSubmission(submission);
+  // Handle selection and mark as read
+  const handleSelectSubmission = (submissionId: string) => {
+    setSelectedSubmission(submissionId);
     
-    // Mark as read if not already read
-    if (!submission.isRead) {
-      handleMarkAsRead(submission.id);
+    // Mark as read when selecting
+    if (submissionId) {
+      handleMarkAsRead(submissionId);
     }
   };
   
-  const handleResponseSend = async (responseText: string) => {
-    if (!selectedSubmission) return;
-    
-    await handleSendResponse(responseText, selectedSubmission.id);
-  };
-  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="md:col-span-1">
-        <SubmissionsList
-          submissions={submissions}
-          isLoading={isLoading}
-          selectedSubmission={selectedSubmission}
-          onSubmissionClick={handleSubmissionClick}
-          onMarkAsRead={handleMarkAsRead}
-        />
-      </div>
-      <div className="md:col-span-2">
-        <SubmissionDetail
-          submission={selectedSubmission}
-          onSendResponse={handleResponseSend}
-          isSending={isSending}
-        />
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Inquiries & Communications</h2>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <SubmissionsList 
+            submissions={submissions}
+            selectedSubmissionId={selectedSubmission}
+            onSelectSubmission={handleSelectSubmission}
+            isLoading={loading}
+            error={error}
+          />
+        </div>
+        
+        <div className="lg:col-span-2">
+          {selectedSubmission ? (
+            <SubmissionDetail
+              submission={submissions.find(s => s.id === selectedSubmission)}
+              onSendResponse={(responseText) => handleSendResponse(responseText)}
+              isSending={isSending}
+              propertyId={property.id}
+            />
+          ) : (
+            <div className="bg-muted p-6 rounded-lg text-center">
+              <p className="text-muted-foreground">Select an inquiry to view details</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

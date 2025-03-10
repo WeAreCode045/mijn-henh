@@ -38,7 +38,7 @@ export function CategorySection({
               onVisibilityChange={toggleVisibility ? 
                 (index, visible) => toggleVisibility(index, visible) : 
                 () => {}}
-              isVisible={isVisible ? isVisible(place) : true}
+              visible={isVisible(place)} // Changed isVisible to visible to match PlaceItem props
             />
           ))}
         </div>

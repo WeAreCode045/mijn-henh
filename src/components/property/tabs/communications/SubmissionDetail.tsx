@@ -1,122 +1,107 @@
 
-import React from 'react';
-import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { SubmissionReplies } from './SubmissionReplies';
-import { SubmissionResponse } from './SubmissionResponse';
-
-interface Agent {
-  id: string;
-  name: string;
-  email: string;
-  photoUrl?: string;
-}
-
-interface Property {
-  id: string;
-  title: string;
-}
-
-interface SubmissionReply {
-  id: string;
-  submissionId: string;
-  replyText: string;
-  createdAt: string;
-  agent: Agent | null;
-}
-
-interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  inquiryType: string;
-  createdAt: string;
-  isRead: boolean;
-  property: Property;
-  replies: SubmissionReply[];
-}
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
+import { Submission, SubmissionReply } from "./useSubmissions";
+import { SubmissionReplies } from "./SubmissionReplies";
+import { SubmissionResponse } from "./SubmissionResponse";
 
 interface SubmissionDetailProps {
-  submission: Submission | null;
+  submission: Submission | undefined;
   onSendResponse: (responseText: string) => Promise<void>;
   isSending: boolean;
+  propertyId: string;
 }
 
-export function SubmissionDetail({ submission, onSendResponse, isSending }: SubmissionDetailProps) {
+export function SubmissionDetail({ 
+  submission, 
+  onSendResponse,
+  isSending,
+  propertyId
+}: SubmissionDetailProps) {
+  const [responseText, setResponseText] = useState("");
+  
   if (!submission) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <p className="text-muted-foreground">Select a submission to view details</p>
+      <div className="bg-muted p-6 rounded-lg text-center">
+        <p className="text-muted-foreground">No submission selected</p>
       </div>
     );
   }
-
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!responseText.trim()) return;
+    
+    await onSendResponse(responseText);
+    setResponseText(""); // Clear after sending
+  };
+  
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Submission from {submission.name}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {format(new Date(submission.createdAt), 'PPP')} at {format(new Date(submission.createdAt), 'p')}
-          </p>
+          <CardTitle>
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-xl font-semibold">{submission.name}</h3>
+                <p className="text-sm text-muted-foreground">{submission.email}</p>
+                {submission.phone && (
+                  <p className="text-sm text-muted-foreground">{submission.phone}</p>
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-sm text-muted-foreground">
+                  {formatDistanceToNow(new Date(submission.created_at), { addSuffix: true })}
+                </span>
+                <div className="mt-1">
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    submission.is_read ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {submission.is_read ? 'Read' : 'Unread'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label>Inquiry Type</Label>
-              <p className="text-sm">{submission.inquiryType}</p>
-            </div>
-            
-            <div>
-              <Label>Property</Label>
-              <p className="text-sm">{submission.property.title}</p>
-            </div>
-            
-            <div>
-              <Label>Contact Information</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Name:</span> {submission.name}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Email:</span> {submission.email}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Phone:</span> {submission.phone}
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              <Label>Message</Label>
-              <div className="border rounded-md p-3 text-sm mt-1 bg-slate-50">
-                {submission.message}
-              </div>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium mb-1">Inquiry Type</h4>
+            <p className="bg-muted p-2 rounded">{submission.inquiry_type || 'General inquiry'}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium mb-1">Message</h4>
+            <div className="bg-muted p-4 rounded whitespace-pre-wrap">
+              {submission.message}
             </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Replies</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SubmissionReplies 
-            replies={submission.replies}
-            submissionId={submission.id}
-          />
           
-          <div className="mt-6">
-            <SubmissionResponse 
-              onSendResponse={onSendResponse} 
-              isSending={isSending}
-            />
+          <div className="pt-4">
+            <h4 className="text-sm font-medium mb-3">Conversation History</h4>
+            
+            {submission.replies && submission.replies.length > 0 ? (
+              <SubmissionReplies 
+                replies={submission.replies}
+                submissionId={submission.id}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                No replies yet. Be the first to respond.
+              </p>
+            )}
           </div>
         </CardContent>
+        <CardFooter>
+          <SubmissionResponse
+            onSubmit={handleSubmit}
+            responseText={responseText}
+            setResponseText={setResponseText}
+            isSending={isSending}
+          />
+        </CardFooter>
       </Card>
     </div>
   );

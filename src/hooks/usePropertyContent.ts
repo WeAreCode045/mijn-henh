@@ -67,35 +67,40 @@ export function usePropertyContent(
     }
   };
 
+  // Improved step navigation handling
   const handleNext = async () => {
     console.log(`usePropertyContent - Current step: ${currentStep}, max steps: ${steps.length}`);
     
-    // Save changes before moving to next step
-    if (pendingChanges) {
-      const saveResult = await handleSave();
-      if (saveResult && currentStep < steps.length - 1) {
+    if (currentStep < steps.length - 1) {
+      // Save changes before moving to next step
+      if (pendingChanges) {
+        const saveResult = await handleSave();
+        if (saveResult) {
+          console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
+          setCurrentStep(currentStep + 1);
+        }
+      } else {
         console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-        setCurrentStep(prevStep => prevStep + 1);
+        setCurrentStep(currentStep + 1);
       }
-    } else if (currentStep < steps.length - 1) {
-      console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-      setCurrentStep(prevStep => prevStep + 1);
     } else {
       console.log('usePropertyContent - Already at the last step');
     }
   };
 
   const handlePrevious = async () => {
-    // Save changes before moving to previous step
-    if (pendingChanges) {
-      const saveResult = await handleSave();
-      if (saveResult && currentStep > 0) {
+    if (currentStep > 0) {
+      // Save changes before moving to previous step
+      if (pendingChanges) {
+        const saveResult = await handleSave();
+        if (saveResult) {
+          console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
+          setCurrentStep(currentStep - 1);
+        }
+      } else {
         console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-        setCurrentStep(prevStep => prevStep - 1);
+        setCurrentStep(currentStep - 1);
       }
-    } else if (currentStep > 0) {
-      console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-      setCurrentStep(prevStep => prevStep - 1);
     } else {
       console.log('usePropertyContent - Already at the first step');
     }

@@ -1,19 +1,15 @@
 
 import { PropertyAreas } from "@/components/property/PropertyAreas";
-import type { PropertyArea, PropertyImage, PropertyFormData } from "@/types/property";
+import { PropertyArea, PropertyFormData, PropertyImage } from "@/types/property";
 
 interface AreasStepProps {
   formData: PropertyFormData;
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
-  onAreaImageUpload: (id: string, files: FileList) => void;
-  onAreaImageRemove: (id: string, imageId: string) => void;
-  onAreaImagesSelect?: (id: string, imageIds: string[]) => void;
-  isUploading?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  onUpdateArea: (id: string, field: any, value: any) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => void;
+  onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
 }
 
 export function AreasStep({
@@ -23,51 +19,26 @@ export function AreasStep({
   onUpdateArea,
   onAreaImageUpload,
   onAreaImageRemove,
-  onAreaImagesSelect,
-  isUploading,
-  setPendingChanges,
-  handleAreaPhotosUpload,
-  handleRemoveAreaPhoto
+  onAreaImagesSelect
 }: AreasStepProps) {
-  console.log("AreasStep rendering with areas:", formData.areas);
-  
-  const handleAddArea = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    onAddArea();
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
-  };
-  
-  const handleRemoveArea = (id: string) => {
-    onRemoveArea(id);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
-  };
-  
-  const handleUpdateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
-    onUpdateArea(id, field, value);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
-  };
-  
   return (
-    <PropertyAreas
-      areas={formData.areas || []}
-      images={formData.images || []}
-      propertyId={formData.id}
-      onAdd={handleAddArea}
-      onRemove={handleRemoveArea}
-      onUpdate={handleUpdateArea}
-      onImageUpload={onAreaImageUpload}
-      onImageRemove={onAreaImageRemove}
-      onImagesSelect={onAreaImagesSelect}
-      isUploading={isUploading}
-    />
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold mb-4">Property Areas</h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Add all the rooms and areas of this property.
+      </p>
+      
+      <PropertyAreas 
+        areas={formData.areas || []}
+        images={formData.images || []}
+        propertyId={formData.id || ''}
+        onAddArea={onAddArea}
+        onRemoveArea={onRemoveArea}
+        onUpdateArea={onUpdateArea}
+        onAreaImageUpload={onAreaImageUpload}
+        onAreaImageRemove={onAreaImageRemove}
+        onAreaImagesSelect={onAreaImagesSelect}
+      />
+    </div>
   );
 }
