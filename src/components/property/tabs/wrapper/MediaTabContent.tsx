@@ -1,83 +1,53 @@
 
-import { PropertyMediaTab } from "../PropertyMediaTab";
-import { PropertyImage } from "@/types/property";
+import React from "react";
+import { PropertyData } from "@/types/property";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PropertyImagesCard } from "../media/PropertyImagesCard";
+import { FloorplansTab } from "../media/tabs/FloorplansTab";
+import { VirtualToursTab } from "../media/tabs/VirtualToursTab";
 
 interface MediaTabContentProps {
-  id: string;
-  title: string;
-  images: PropertyImage[];
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  floorplanEmbedScript?: string;
-  floorplans?: any[];
-  onVirtualTourUpdate?: (url: string) => void;
-  onYoutubeUrlUpdate?: (url: string) => void;
-  onFloorplanEmbedScriptUpdate?: (script: string) => void;
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveImage: (index: number) => void;
-  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveFloorplan?: (index: number) => void;
-  isUploading?: boolean;
-  isUploadingFloorplan?: boolean;
-  // Add onUpload as an alias for onImageUpload
-  onUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  // Updated properties for main and featured images
-  featuredImageUrl?: string | null;
-  featuredImageUrls?: string[];
-  onSetFeatured?: (url: string) => void;
-  onToggleFeatured?: (url: string) => void;
+  property: PropertyData;
 }
 
-export function MediaTabContent({
-  id,
-  title,
-  images,
-  virtualTourUrl,
-  youtubeUrl,
-  floorplanEmbedScript,
-  floorplans,
-  onVirtualTourUpdate,
-  onYoutubeUrlUpdate,
-  onFloorplanEmbedScriptUpdate,
-  onImageUpload,
-  onRemoveImage,
-  onFloorplanUpload,
-  onRemoveFloorplan,
-  isUploading,
-  isUploadingFloorplan,
-  onUpload,
-  featuredImageUrl,
-  featuredImageUrls,
-  onSetFeatured,
-  onToggleFeatured,
-}: MediaTabContentProps) {
-  // Use aliases if provided, fall back to original props
-  const effectiveImageUpload = onUpload || onImageUpload;
-  
-  console.log("MediaTabContent: floorplanEmbedScript =", floorplanEmbedScript);
+export function MediaTabContent({ property }: MediaTabContentProps) {
+  const [activeTab, setActiveTab] = React.useState("images");
+  const [localProperty, setLocalProperty] = React.useState<PropertyData>(property);
+
+  // Update localProperty when property changes
+  React.useEffect(() => {
+    setLocalProperty(property);
+  }, [property]);
 
   return (
-    <PropertyMediaTab
-      id={id}
-      title={title}
-      images={images}
-      virtualTourUrl={virtualTourUrl}
-      youtubeUrl={youtubeUrl}
-      floorplanEmbedScript={floorplanEmbedScript}
-      floorplans={floorplans}
-      onVirtualTourUpdate={onVirtualTourUpdate}
-      onYoutubeUrlUpdate={onYoutubeUrlUpdate}
-      onFloorplanEmbedScriptUpdate={onFloorplanEmbedScriptUpdate}
-      onImageUpload={effectiveImageUpload}
-      onRemoveImage={onRemoveImage}
-      onFloorplanUpload={onFloorplanUpload}
-      onRemoveFloorplan={onRemoveFloorplan}
-      isUploading={isUploading}
-      isUploadingFloorplan={isUploadingFloorplan}
-      featuredImageUrl={featuredImageUrl}
-      featuredImageUrls={featuredImageUrls}
-      onSetFeatured={onSetFeatured}
-      onToggleFeatured={onToggleFeatured}
-    />
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-3 w-full mb-6">
+          <TabsTrigger value="images">Images</TabsTrigger>
+          <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
+          <TabsTrigger value="virtual-tours">Virtual Tours</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="images" className="space-y-6">
+          <PropertyImagesCard 
+            images={localProperty.images || []} 
+            onImageUpload={() => {}} 
+            onRemoveImage={() => {}} 
+            isUploading={false}
+            featuredImage={localProperty.featuredImage}
+            featuredImages={localProperty.featuredImages}
+            propertyId={localProperty.id}
+          />
+        </TabsContent>
+        
+        <TabsContent value="floorplans" className="space-y-6">
+          <FloorplansTab property={localProperty} setProperty={setLocalProperty} />
+        </TabsContent>
+        
+        <TabsContent value="virtual-tours" className="space-y-6">
+          <VirtualToursTab property={localProperty} setProperty={setLocalProperty} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

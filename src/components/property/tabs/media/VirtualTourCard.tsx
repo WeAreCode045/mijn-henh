@@ -1,115 +1,80 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface VirtualTourCardProps {
-  id: string;
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  floorplanEmbedScript?: string;
-  onVirtualTourUpdate?: (url: string) => void;
-  onYoutubeUrlUpdate?: (url: string) => void;
-  onFloorplanEmbedScriptUpdate?: (script: string) => void;
+  id?: string; // Added required id prop
+  virtualTourUrl: string;
+  youtubeUrl: string;
+  onVirtualTourUpdate: (url: string) => void;
+  onYoutubeUrlUpdate: (url: string) => void;
 }
 
 export function VirtualTourCard({
-  id,
+  id = "", // Default value
   virtualTourUrl = "",
   youtubeUrl = "",
-  floorplanEmbedScript = "",
   onVirtualTourUpdate,
-  onYoutubeUrlUpdate,
-  onFloorplanEmbedScriptUpdate
+  onYoutubeUrlUpdate
 }: VirtualTourCardProps) {
   const [localVirtualTourUrl, setLocalVirtualTourUrl] = useState(virtualTourUrl);
   const [localYoutubeUrl, setLocalYoutubeUrl] = useState(youtubeUrl);
-  const [localFloorplanEmbed, setLocalFloorplanEmbed] = useState(floorplanEmbedScript);
-  
-  // Update local state when props change
-  useEffect(() => {
-    setLocalVirtualTourUrl(virtualTourUrl);
-  }, [virtualTourUrl]);
 
-  useEffect(() => {
-    setLocalYoutubeUrl(youtubeUrl);
-  }, [youtubeUrl]);
-
-  useEffect(() => {
-    setLocalFloorplanEmbed(floorplanEmbedScript);
-  }, [floorplanEmbedScript]);
-
-  const handleVirtualTourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setLocalVirtualTourUrl(newUrl);
-    if (onVirtualTourUpdate) {
-      onVirtualTourUpdate(newUrl);
-    }
+  const handleVirtualTourSubmit = () => {
+    onVirtualTourUpdate(localVirtualTourUrl);
   };
 
-  const handleYoutubeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setLocalYoutubeUrl(newUrl);
-    if (onYoutubeUrlUpdate) {
-      onYoutubeUrlUpdate(newUrl);
-    }
-  };
-
-  const handleFloorplanEmbedChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newScript = e.target.value;
-    setLocalFloorplanEmbed(newScript);
-    if (onFloorplanEmbedScriptUpdate) {
-      console.log("Updating floorplan embed script:", newScript);
-      onFloorplanEmbedScriptUpdate(newScript);
-    }
+  const handleYoutubeUrlSubmit = () => {
+    onYoutubeUrlUpdate(localYoutubeUrl);
   };
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Virtual Tour & Video</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 pt-6">
         <div className="space-y-2">
-          <Label htmlFor={`virtual-tour-${id}`}>Virtual Tour URL</Label>
-          <Input
-            id={`virtual-tour-${id}`}
-            placeholder="https://my-virtual-tour.com/property123"
-            value={localVirtualTourUrl}
-            onChange={handleVirtualTourChange}
-          />
-          <p className="text-xs text-muted-foreground">
-            Enter the URL for your Matterport or other virtual tour
-          </p>
+          <h3 className="text-sm font-medium">Matterport or other 3D Tour URL</h3>
+          <div className="flex gap-2">
+            <Input
+              value={localVirtualTourUrl}
+              onChange={(e) => setLocalVirtualTourUrl(e.target.value)}
+              placeholder="Paste 3D tour embed URL here"
+            />
+            <Button onClick={handleVirtualTourSubmit}>Save</Button>
+          </div>
+          {virtualTourUrl && (
+            <div className="mt-4 aspect-video w-full">
+              <iframe
+                src={virtualTourUrl}
+                className="w-full h-full border-0"
+                allowFullScreen
+                title="Virtual Tour"
+              />
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`youtube-${id}`}>YouTube Video URL</Label>
-          <Input
-            id={`youtube-${id}`}
-            placeholder="https://www.youtube.com/watch?v=abcdefg"
-            value={localYoutubeUrl}
-            onChange={handleYoutubeUrlChange}
-          />
-          <p className="text-xs text-muted-foreground">
-            Enter the URL of a YouTube video for this property
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor={`floorplan-embed-${id}`}>Floorplan Embed Script</Label>
-          <Textarea
-            id={`floorplan-embed-${id}`}
-            placeholder="<iframe src='...' width='100%' height='500' frameborder='0'></iframe>"
-            className="min-h-[120px] font-mono text-sm"
-            value={localFloorplanEmbed}
-            onChange={handleFloorplanEmbedChange}
-          />
-          <p className="text-xs text-muted-foreground">
-            Paste the iframe embed code for an interactive floorplan
-          </p>
+          <h3 className="text-sm font-medium">YouTube Video URL</h3>
+          <div className="flex gap-2">
+            <Input
+              value={localYoutubeUrl}
+              onChange={(e) => setLocalYoutubeUrl(e.target.value)}
+              placeholder="Paste YouTube video URL here"
+            />
+            <Button onClick={handleYoutubeUrlSubmit}>Save</Button>
+          </div>
+          {youtubeUrl && (
+            <div className="mt-4 aspect-video w-full">
+              <iframe
+                src={youtubeUrl.replace("watch?v=", "embed/")}
+                className="w-full h-full border-0"
+                allowFullScreen
+                title="YouTube video"
+              />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

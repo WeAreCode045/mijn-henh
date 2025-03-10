@@ -1,25 +1,34 @@
 
-import type { PropertyFormData } from '@/types/property';
-import { Dispatch, SetStateAction } from 'react';
-import { useAreaManagement } from './useAreaManagement';
-import { useAreaImageRemove } from './useAreaImageRemove';
+import { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { PropertyFormData, PropertyArea, PropertyImage } from '@/types/property';
+import { useAreaImageUpload } from './useAreaImageUpload';
 import { useAreaImageSelect } from './useAreaImageSelect';
+import { useAreaImageRemove } from './useAreaImageRemove';
+import { useAreaManagement } from './useAreaManagement';
 
 export function usePropertyAreas(
   formData: PropertyFormData,
-  setFormData: Dispatch<SetStateAction<PropertyFormData>>
+  setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>
 ) {
-  // Use all the smaller, focused hooks
-  const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormData);
-  const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormData);
-  const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormData);
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // Use specialized area management utilities
+  const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormState);
+  const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormState);
+  const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormState);
+  const { handleAreaImageUpload } = useAreaImageUpload(formData, setFormState, setIsUploading);
 
-  // Return all the functions and state from the smaller hooks
   return {
+    // Area management
     addArea,
     removeArea,
     updateArea,
+    
+    // Image management
     handleAreaImageRemove,
-    handleAreaImagesSelect
+    handleAreaImagesSelect,
+    handleAreaImageUpload,
+    isUploading
   };
 }

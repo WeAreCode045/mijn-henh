@@ -1,73 +1,38 @@
 
-export interface SubmissionAgent {
-  id: string;
-  full_name: string;
-  email: string;
-  agent_photo?: string;
-}
-
-export interface SubmissionProperty {
-  id: string;
-  title: string;
-}
+import { PropertyData } from "@/types/property";
 
 export interface SubmissionReply {
   id: string;
   submission_id: string;
-  message: string;
+  reply_text: string;
+  user_id?: string;
+  agent_id?: string;
   created_at: string;
-  agent: SubmissionAgent | null;
+  updated_at: string;
+  user_name?: string;
+  user_email?: string;
+  user_phone?: string;
+  user_avatar?: string;
 }
 
 export interface Submission {
   id: string;
+  property_id: string;
   name: string;
   email: string;
   phone: string;
   message: string;
-  inquiry_type: string;
-  property_id: string;
   created_at: string;
+  updated_at: string;
   is_read: boolean;
-  agent_id?: string;
-  property?: SubmissionProperty;
+  inquiry_type: string;
   replies?: SubmissionReply[];
-}
-
-export interface UseSubmissionActionsProps {
-  propertyId: string;
-  refetchSubmissions: () => void;
-}
-
-export interface SubmissionResponse {
-  id: string;
-  success: boolean;
-  message: string;
-}
-
-export interface SubmissionResponseProps {
-  onSendResponse: (responseText: string) => Promise<void>;
-  isSending: boolean;
-}
-
-export interface SubmissionItemProps {
-  submission: Submission;
-  isSelected: boolean;
-  onClick: () => void;
-  onMarkAsRead: (id: string) => void;
-}
-
-export interface SubmissionsListProps {
-  submissions: Submission[];
-  isLoading: boolean;
-  selectedSubmission: Submission | null;
-  onSubmissionClick: (submission: Submission) => void;
-  onMarkAsRead: (id: string) => void;
-}
-
-export interface SubmissionDetailProps {
-  submission: Submission | null;
-  onSendResponse: (responseText: string) => Promise<void>;
-  isSending: boolean;
-  onMarkAsRead: (id: string) => Promise<void>;
+  // Compatibility fields
+  propertyId?: string;
+  inquiryType?: string;
+  createdAt?: string;
+  isRead?: boolean;
+  property?: PropertyData;
+  agent_id?: string;
+  agent?: any;
 }

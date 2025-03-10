@@ -28,7 +28,7 @@ export function useUsers() {
         phone: user.phone || null,
         whatsapp_number: user.whatsapp_number || null,
         role: user.role || null,
-        agent_photo: user.agent_photo || null
+        avatar: user.avatar_url || null // Updated from avatar to avatar_url
       }));
 
       return transformedData;

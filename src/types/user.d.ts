@@ -5,8 +5,8 @@ export interface User {
   full_name: string | null;
   phone: string | null;
   whatsapp_number: string | null;
-  role: "admin" | "agent" | null;
-  avatar: string | null; // Using avatar instead of agent_photo
+  role: string | null;
+  avatar: string | null;
 }
 
 export interface UserFormData {

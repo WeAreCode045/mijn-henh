@@ -18,6 +18,7 @@ interface PropertyStepContentProps {
   onUpdateArea?: (id: string, field: any, value: any) => void;
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
   handleNext: () => void;
@@ -41,6 +42,7 @@ export function PropertyStepContent({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
+  onAreaImageUpload,
   currentStep,
   handleStepClick,
   handleNext,
@@ -94,7 +96,9 @@ export function PropertyStepContent({
             onUpdateArea={onUpdateArea}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
+            onAreaImageUpload={onAreaImageUpload}
             setPendingChanges={setPendingChanges}
+            isUploading={isUploading}
           />
         );
       default:

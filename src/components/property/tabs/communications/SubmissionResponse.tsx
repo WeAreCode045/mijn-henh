@@ -1,52 +1,42 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SendIcon } from 'lucide-react';
+import { Send } from 'lucide-react';
 
-interface SubmissionResponseProps {
-  onSendResponse: (responseText: string) => Promise<void>;
+export interface SubmissionResponseProps {
+  value: string;
+  onChange: (value: string) => void;
   isSending: boolean;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
-export function SubmissionResponse({ onSendResponse, isSending }: SubmissionResponseProps) {
-  const [responseText, setResponseText] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!responseText.trim()) return;
-    
-    await onSendResponse(responseText);
-    setResponseText('');
-  };
-
+export function SubmissionResponse({ 
+  value, 
+  onChange, 
+  isSending, 
+  onSubmit 
+}: SubmissionResponseProps) {
   return (
-    <form onSubmit={handleSubmit}>
-      <h3 className="font-medium mb-2">Send a reply</h3>
+    <form onSubmit={onSubmit} className="space-y-4">
       <Textarea
-        value={responseText}
-        onChange={(e) => setResponseText(e.target.value)}
-        placeholder="Type your response..."
-        className="min-h-[120px]"
+        placeholder="Type your response here..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={5}
         disabled={isSending}
+        className="resize-none"
       />
-      <Button 
-        type="submit" 
-        className="mt-2 w-full md:w-auto" 
-        disabled={!responseText.trim() || isSending}
-      >
-        {isSending ? (
-          <>
-            <span className="animate-spin mr-2">○</span>
-            Sending...
-          </>
-        ) : (
-          <>
-            <SendIcon className="w-4 h-4 mr-2" />
-            Send Response
-          </>
-        )}
-      </Button>
+      <div className="flex justify-end">
+        <Button 
+          type="submit" 
+          disabled={!value.trim() || isSending}
+          className="flex items-center gap-2"
+        >
+          <Send className="h-4 w-4" />
+          {isSending ? 'Sending...' : 'Send Response'}
+        </Button>
+      </div>
     </form>
   );
 }

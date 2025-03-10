@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Submission } from '../types';
 
@@ -7,14 +6,22 @@ export function useFetchSubmissions(propertyId?: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     if (!propertyId) return;
     
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('property_contact_submissions')
-        .select('*')
+        .select(`
+          *,
+          agent:agent_id (
+            id,
+            email,
+            full_name,
+            avatar_url
+          )
+        `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
         
@@ -33,6 +40,7 @@ export function useFetchSubmissions(propertyId?: string) {
         created_at: item.created_at,
         updated_at: item.updated_at,
         agent_id: item.agent_id,
+        agent: item.agent, // Include agent profile information
         replies: [] // Initialize with empty array
       }));
       
@@ -42,11 +50,11 @@ export function useFetchSubmissions(propertyId?: string) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [propertyId]);
 
   useEffect(() => {
     fetchSubmissions();
-  }, [propertyId]);
+  }, [propertyId, fetchSubmissions]);
 
   return {
     submissions,

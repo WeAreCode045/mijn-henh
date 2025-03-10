@@ -13,8 +13,10 @@ export function usePropertyDataPreparer() {
     const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
     const nearby_citiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
     
-    // Note: Since we use property_images table, we don't need to include image URLs in the property record
-    // Images are handled separately via the property_images table
+    // Extract just the URLs for type compatibility
+    const imageUrls = Array.isArray(formData.images)
+      ? formData.images.map(img => typeof img === 'string' ? img : img.url)
+      : [];
     
     return {
       title: formData.title,
@@ -42,8 +44,9 @@ export function usePropertyDataPreparer() {
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      floorplanEmbedScript: formData.floorplanEmbedScript || ""
-      // images field is removed as it's not part of the properties table
+      floorplanEmbedScript: formData.floorplanEmbedScript || "",
+      // Use the extracted URL strings
+      images: imageUrls
     };
   };
 

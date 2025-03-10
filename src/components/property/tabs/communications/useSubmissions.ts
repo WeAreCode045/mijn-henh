@@ -1,138 +1,202 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { PropertyFormData } from '@/types/property';
+import { Dispatch, SetStateAction } from 'react';
+import { toast } from 'sonner';
 
-export interface SubmissionReply {
-  id: string;
-  submission_id: string;
-  reply_text: string;
-  created_at: string;
-  agent?: {
-    id?: string;
-    full_name?: string;
-    email?: string;
-    photo_url?: string;
-  } | null;
-}
-
+// Define the submission type for this custom hook
 export interface Submission {
   id: string;
+  propertyId: string;
   name: string;
   email: string;
   phone: string;
   message: string;
-  inquiry_type: string;
-  created_at: string;
-  is_read: boolean;
-  property?: {
+  inquiryType: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  agentId: string | null;
+  agent?: {
     id: string;
-    title: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    avatarUrl: string | null;
   } | null;
   replies: SubmissionReply[];
 }
 
-export function useSubmissions(propertyId: string) {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export interface SubmissionReply {
+  id: string;
+  submissionId: string;
+  replyText: string;
+  createdAt: string;
+  updatedAt: string;
+  agentId: string | null;
+  userId: string | null;
+  userName: string | null;
+  userEmail: string | null;
+  userPhone: string | null;
+  userAvatar: string | null;
+}
 
-  const fetchSubmissions = async () => {
-    setLoading(true);
-    setError(null);
+export function usePropertyMainImages(
+  formData: PropertyFormData,
+  setFormData: Dispatch<SetStateAction<PropertyFormData>>
+) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Set an image as the main image (previously featured image)
+  const handleSetFeaturedImage = async (url: string | null) => {
+    if (!formData.id) return;
     
+    setIsUpdating(true);
     try {
-      console.log('Fetching submissions for property:', propertyId);
-      
-      // First get the submissions
-      const { data: submissionsData, error: submissionsError } = await supabase
-        .from('property_contact_submissions')
-        .select(`
-          id, 
-          name, 
-          email, 
-          phone, 
-          message, 
-          inquiry_type, 
-          created_at, 
-          is_read,
-          property:property_id (id, title)
-        `)
-        .eq('property_id', propertyId)
-        .order('created_at', { ascending: false });
-      
-      if (submissionsError) {
-        throw submissionsError;
+      // First, unmark all images as main
+      const { error: resetError } = await supabase
+        .from('property_images')
+        .update({ is_main: false })
+        .eq('property_id', formData.id);
+        
+      if (resetError) {
+        throw resetError;
       }
       
-      if (!submissionsData || submissionsData.length === 0) {
-        console.log('No submissions found for property:', propertyId);
-        setSubmissions([]);
-        setLoading(false);
-        return;
-      }
-      
-      console.log('Found submissions:', submissionsData.length);
-      
-      // For each submission, get its replies
-      const submissionsWithReplies = await Promise.all(submissionsData.map(async (submission) => {
-        const { data: repliesData, error: repliesError } = await supabase
-          .from('property_submission_replies')
-          .select(`
-            id, 
-            submission_id, 
-            reply_text, 
-            created_at,
-            agent:agent_id (id, full_name, email, photo_url)
-          `)
-          .eq('submission_id', submission.id)
-          .order('created_at', { ascending: true });
-        
-        if (repliesError) {
-          console.error('Error fetching replies for submission:', submission.id, repliesError);
-          return {
-            ...submission,
-            replies: []
-          };
-        }
-        
-        // Map the replies with safe agent data
-        const mappedReplies = (repliesData || []).map(reply => {
-          const safeAgent = reply.agent ? {
-            id: reply.agent.id || '',
-            full_name: reply.agent.full_name || '',
-            email: reply.agent.email || '',
-            photo_url: reply.agent.photo_url || ''
-          } : null;
+      if (url) {
+        // Mark the selected image as main
+        const { error: updateError } = await supabase
+          .from('property_images')
+          .update({ is_main: true })
+          .eq('property_id', formData.id)
+          .eq('url', url);
           
-          return {
-            id: reply.id,
-            submission_id: reply.submission_id,
-            reply_text: reply.reply_text,
-            created_at: reply.created_at,
-            agent: safeAgent
-          };
-        });
+        if (updateError) {
+          throw updateError;
+        }
+          
+        // Update local state
+        setFormData(prevState => ({
+          ...prevState,
+          featuredImage: url
+        }));
         
-        return {
-          ...submission,
-          replies: mappedReplies
-        };
-      }));
-      
-      setSubmissions(submissionsWithReplies);
-    } catch (err) {
-      console.error('Error fetching submissions:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        toast.success("Main image updated successfully.");
+      } else {
+        // If url is null, just clear the main image
+        setFormData(prevState => ({
+          ...prevState,
+          featuredImage: null
+        }));
+      }
+    } catch (error) {
+      console.error("Error updating main image:", error);
+      toast.error("Failed to update main image.");
     } finally {
-      setLoading(false);
+      setIsUpdating(false);
     }
   };
-  
-  useEffect(() => {
-    if (propertyId) {
-      fetchSubmissions();
+
+  // Toggle whether an image is in the featured images collection
+  const handleToggleFeaturedImage = async (url: string) => {
+    if (!formData.id) return;
+    
+    setIsUpdating(true);
+    try {
+      // Check if the image is already in the featured images
+      const isInFeatured = formData.featuredImages?.includes(url) || false;
+      
+      if (!isInFeatured) {
+        // Check if we already have 4 featured images
+        const currentFeaturedImages = formData.featuredImages || [];
+        if (currentFeaturedImages.length >= 4) {
+          // Remove the oldest featured image
+          const oldestFeaturedImage = currentFeaturedImages[0];
+          
+          // Unmark it in the database
+          const { error: resetError } = await supabase
+            .from('property_images')
+            .update({ is_featured_image: false })
+            .eq('property_id', formData.id)
+            .eq('url', oldestFeaturedImage);
+            
+          if (resetError) {
+            throw resetError;
+          }
+        }
+      }
+      
+      // Toggle the is_featured_image flag in the database
+      const { error: updateError } = await supabase
+        .from('property_images')
+        .update({ is_featured_image: !isInFeatured })
+        .eq('property_id', formData.id)
+        .eq('url', url);
+        
+      if (updateError) {
+        throw updateError;
+      }
+      
+      // Update local state
+      setFormData(prevState => {
+        const currentFeaturedImages = prevState.featuredImages || [];
+        let updatedFeaturedImages;
+        
+        if (isInFeatured) {
+          // Remove from featured
+          updatedFeaturedImages = currentFeaturedImages.filter(img => img !== url);
+        } else {
+          // Add to featured, maintaining max 4 images
+          updatedFeaturedImages = [...currentFeaturedImages, url];
+          if (updatedFeaturedImages.length > 4) {
+            updatedFeaturedImages = updatedFeaturedImages.slice(1); // Remove oldest
+          }
+        }
+        
+        return {
+          ...prevState,
+          featuredImages: updatedFeaturedImages,
+          // Update legacy fields for backward compatibility
+          coverImages: updatedFeaturedImages
+        };
+      });
+      
+      toast.success(isInFeatured 
+        ? "Image removed from featured images." 
+        : "Image added to featured images.");
+    } catch (error) {
+      console.error("Error toggling featured image:", error);
+      toast.error("Failed to update featured image.");
+    } finally {
+      setIsUpdating(false);
     }
-  }, [propertyId]);
-  
-  return { submissions, loading, error, fetchSubmissions };
+  };
+
+  // Handle reply data safely
+  const processReplyData = (reply: any): SubmissionReply => {
+    // Safely extract user data, providing defaults for missing properties
+    const userData = reply.user || {};
+    
+    return {
+      id: reply.id,
+      submissionId: reply.submission_id,
+      replyText: reply.reply_text,
+      createdAt: reply.created_at,
+      updatedAt: reply.updated_at,
+      agentId: reply.agent_id,
+      userId: reply.user_id || null,
+      userName: userData.full_name || "Unknown User",
+      userEmail: userData.email || "no-email@example.com",
+      userPhone: userData.phone || "N/A",
+      userAvatar: userData.avatar_url || null
+    };
+  };
+
+  return {
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    isUpdating,
+    processReplyData
+  };
 }

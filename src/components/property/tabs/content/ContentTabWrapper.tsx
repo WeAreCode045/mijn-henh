@@ -1,8 +1,9 @@
 
+import React from "react";
 import { PropertyFormData } from "@/types/property";
-import { PropertyStepContent } from "@/components/property/form/PropertyStepContent";
+import { PropertyStepContent } from "../PropertyStepContent";
 
-interface ContentTabContentProps {
+export interface ContentTabWrapperProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
@@ -10,7 +11,7 @@ interface ContentTabContentProps {
   onUpdateFeature: (id: string, description: string) => void;
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: any, value: any) => void;
+  onUpdateArea: (id: string, field: string, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
@@ -18,14 +19,11 @@ interface ContentTabContentProps {
   handleStepClick: (step: number) => void;
   handleNext: () => void;
   handlePrevious: () => void;
-  onFetchLocationData?: () => Promise<void>;
-  onRemoveNearbyPlace?: (index: number) => void;
-  isLoadingLocationData?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
-export function ContentTabContent({
+export function ContentTabWrapper({
   formData,
   onFieldChange,
   onAddFeature,
@@ -41,15 +39,15 @@ export function ContentTabContent({
   handleStepClick,
   handleNext,
   handlePrevious,
-  onFetchLocationData,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  setPendingChanges,
-  isUploading
-}: ContentTabContentProps) {
+  isUploading = false,
+  setPendingChanges = () => {}
+}: ContentTabWrapperProps) {
+  // You can add any additional logic needed for the content tab wrapper here
+  
   return (
     <PropertyStepContent
       formData={formData}
+      step={currentStep}
       onFieldChange={onFieldChange}
       onAddFeature={onAddFeature}
       onRemoveFeature={onRemoveFeature}
@@ -64,10 +62,6 @@ export function ContentTabContent({
       handleStepClick={handleStepClick}
       handleNext={handleNext}
       handlePrevious={handlePrevious}
-      onFetchLocationData={onFetchLocationData}
-      onRemoveNearbyPlace={onRemoveNearbyPlace}
-      isLoadingLocationData={isLoadingLocationData}
-      setPendingChanges={setPendingChanges}
       isUploading={isUploading}
     />
   );

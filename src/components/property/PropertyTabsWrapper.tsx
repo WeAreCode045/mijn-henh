@@ -47,6 +47,7 @@ export function PropertyTabsWrapper({
               updateArea,
               handleAreaImageRemove,
               handleAreaImagesSelect,
+              handleAreaImageUpload,
               handleImageUpload,
               handleRemoveImage,
               isUploading,
@@ -57,12 +58,18 @@ export function PropertyTabsWrapper({
               isUploadingFloorplan,
               handleSetFeaturedImage,
               handleToggleFeaturedImage,
+              handleVirtualTourUpdate,
+              handleYoutubeUrlUpdate,
+              handleFloorplanEmbedScriptUpdate,
               onSubmit,
               currentStep,
               handleStepClick,
               handleNext,
               handlePrevious,
-              propertyWithRequiredProps
+              propertyWithRequiredProps,
+              lastSaved,
+              isSaving,
+              setPendingChanges
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -90,6 +97,7 @@ export function PropertyTabsWrapper({
                       onUpdateArea={updateArea}
                       onAreaImageRemove={handleAreaImageRemove}
                       onAreaImagesSelect={handleAreaImagesSelect}
+                      handleAreaImageUpload={handleAreaImageUpload}
                       handleImageUpload={handleImageUpload}
                       handleRemoveImage={handleRemoveImage}
                       isUploading={isUploading}
@@ -99,12 +107,16 @@ export function PropertyTabsWrapper({
                       isUploadingFloorplan={isUploadingFloorplan}
                       handleSetFeaturedImage={handleSetFeaturedImage}
                       handleToggleFeaturedImage={handleToggleFeaturedImage}
+                      handleVirtualTourUpdate={handleVirtualTourUpdate}
+                      handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
+                      handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
                       currentStep={currentStep}
                       handleStepClick={handleStepClick}
                       handleNext={handleNext}
                       handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
                       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+                      setPendingChanges={setPendingChanges}
                     />
                   </PropertyTabs>
                 </Tabs>

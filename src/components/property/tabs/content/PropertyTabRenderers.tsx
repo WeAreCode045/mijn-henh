@@ -1,62 +1,19 @@
 
-import { PropertyContentTab } from "../PropertyContentTab";
-import { PropertyDashboardTab } from "../PropertyDashboardTab";
-import { PropertyMediaTab } from "../PropertyMediaTab";
-import { FloorplansTab } from "../FloorplansTab";
-import { MediaTabContent } from "../wrapper/MediaTabContent";
+import { PropertyData } from "@/types/property";
+import { MediaTabContent } from "../media/MediaTabContent";
 
-export function renderMediaTab(tabProps: any) {
-  if (tabProps.activeTab !== 'media') return null;
+interface MediaTabRendererProps {
+  property: PropertyData;
+  onVirtualTourUpdate: (url: any) => any;
+  onYoutubeUrlUpdate: (url: any) => any;
+  onFloorplanEmbedScriptUpdate: (script: any) => any;
+  onImageUpload: any;
+  onRemoveImage: any;
+  isUploading: any;
+}
 
+export function MediaTabRenderer(props: MediaTabRendererProps) {
   return (
-    <MediaTabContent
-      id={tabProps.property.id}
-      title={tabProps.property.title}
-      images={tabProps.formState.images || []}
-      virtualTourUrl={tabProps.formState.virtualTourUrl}
-      youtubeUrl={tabProps.formState.youtubeUrl}
-      floorplanEmbedScript={tabProps.formState.floorplanEmbedScript}
-      onVirtualTourUpdate={(url) => tabProps.handlers.onFieldChange('virtualTourUrl', url)}
-      onYoutubeUrlUpdate={(url) => tabProps.handlers.onFieldChange('youtubeUrl', url)}
-      onFloorplanEmbedScriptUpdate={(script) => tabProps.handlers.onFieldChange('floorplanEmbedScript', script)}
-      onImageUpload={tabProps.handlers.handleImageUpload}
-      onRemoveImage={tabProps.handlers.handleRemoveImage}
-      isUploading={tabProps.handlers.isUploading}
-    />
+    <MediaTabContent property={props.property} />
   );
-}
-
-// Add other renderers as needed from the original file
-export function renderDashboardTab(tabProps: any) {
-  // Implementation from original file
-  if (tabProps.activeTab !== 'dashboard') return null;
-  return null; // Placeholder
-}
-
-export function renderContentTab(tabProps: any) {
-  // Implementation from original file
-  if (tabProps.activeTab !== 'content') return null;
-  return null; // Placeholder
-}
-
-export function renderFloorplansTab(tabProps: any) {
-  if (tabProps.activeTab !== 'floorplans') return null;
-  
-  return (
-    <FloorplansTab
-      id={tabProps.property.id}
-      floorplans={tabProps.formState?.floorplans || []}
-      floorplanEmbedScript={tabProps.formState?.floorplanEmbedScript}
-      onFloorplanUpload={tabProps.handlers.handleFloorplanUpload}
-      onRemoveFloorplan={tabProps.handlers.handleRemoveFloorplan}
-      onFloorplanEmbedScriptUpdate={(script) => tabProps.handlers.onFieldChange('floorplanEmbedScript', script)}
-      isUploading={tabProps.handlers.isUploading}
-    />
-  );
-}
-
-export function renderCommunicationsTab(tabProps: any) {
-  // Implementation from original file
-  if (tabProps.activeTab !== 'communications') return null;
-  return null; // Placeholder
 }

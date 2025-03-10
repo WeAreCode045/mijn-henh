@@ -30,7 +30,7 @@ export interface SupabasePropertyData {
     full_name: string;
     email: string;
     phone: string;
-    photo_url: string;
+    avatar_url: string; // This is now correct
   } | null;
   property_images: {
     id: string;
@@ -44,7 +44,7 @@ export interface SupabasePropertyData {
   created_at: string;
   updated_at: string;
   template_id: string;
-  floorplanEmbedScript?: string; // Added explicit type for floorplanEmbedScript
+  floorplanEmbedScript?: string;
 }
 
 export function transformSupabaseData(
@@ -143,14 +143,14 @@ export function transformSupabaseData(
           name: data.agent.full_name,
           email: data.agent.email,
           phone: data.agent.phone,
-          photoUrl: data.agent.photo_url,
+          photoUrl: data.agent.avatar_url,
         }
       : undefined,
     created_at: data.created_at,
     updated_at: data.updated_at,
     template_id: data.template_id,
-    floorplanEmbedScript: data.floorplanEmbedScript || "", // Ensure floorplanEmbedScript is passed through
-    floorplans: [], // Add empty floorplans array
+    floorplanEmbedScript: data.floorplanEmbedScript || "",
+    floorplans: [],
   };
 
   console.log('transformSupabaseData - Returning transformed data with floorplan script:', {

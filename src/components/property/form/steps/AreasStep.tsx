@@ -1,6 +1,6 @@
 
 import { PropertyAreas } from "@/components/property/PropertyAreas";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
 
 interface AreasStepProps {
   formData: PropertyFormData;
@@ -9,7 +9,9 @@ interface AreasStepProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   setPendingChanges?: (pending: boolean) => void;
+  isUploading?: boolean;
 }
 
 export function AreasStep({
@@ -19,7 +21,9 @@ export function AreasStep({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  setPendingChanges
+  onAreaImageUpload,
+  setPendingChanges,
+  isUploading
 }: AreasStepProps) {
   return (
     <div className="space-y-6">
@@ -37,6 +41,8 @@ export function AreasStep({
         onUpdate={onUpdateArea}
         onImageRemove={onAreaImageRemove}
         onImagesSelect={onAreaImagesSelect}
+        onImageUpload={onAreaImageUpload}
+        isUploading={isUploading}
       />
     </div>
   );
