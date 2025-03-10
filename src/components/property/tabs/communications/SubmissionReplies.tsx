@@ -1,7 +1,16 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
-import { SubmissionReply } from "./useSubmissions";
+
+export interface SubmissionReply {
+  id: string;
+  created_at: string;
+  reply_text: string;
+  agent?: {
+    full_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
+}
 
 interface SubmissionRepliesProps {
   replies: SubmissionReply[];
@@ -22,7 +31,7 @@ export function SubmissionReplies({ replies, submissionId }: SubmissionRepliesPr
             {reply.agent ? (
               <Avatar>
                 <AvatarImage 
-                  src={reply.agent.photo_url || ''} 
+                  src={reply.agent.avatar_url || ''} 
                   alt={reply.agent.full_name || 'Agent'} 
                 />
                 <AvatarFallback>

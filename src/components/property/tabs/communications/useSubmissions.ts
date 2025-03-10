@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,8 +10,8 @@ export interface SubmissionReply {
     id: string;
     full_name: string;
     email: string;
-    photo_url: string;
-  } | null;
+    avatar_url: string; // Changed from photo_url to avatar_url
+  } ;
 }
 
 export interface Submission {
@@ -82,7 +81,7 @@ export function useSubmissions(propertyId: string) {
             submission_id, 
             reply_text, 
             created_at,
-            user:user_id (id, full_name, email, agent_photo)
+            user:user_id (id, full_name, email, avatar_url)
           `)
           .eq('submission_id', submission.id)
           .order('created_at', { ascending: true });
@@ -97,11 +96,11 @@ export function useSubmissions(propertyId: string) {
         
         // Map the replies with safe user data
         const mappedReplies = (repliesData || []).map(reply => {
-          const safeUser = reply.user ? {
-            id: reply.user.id || '',
+          const safeUser = reply.user && typeof reply.user === 'object' ? {
+            id: reply.user?.id || '',
             full_name: reply.user.full_name || '',
             email: reply.user.email || '',
-            photo_url: reply.user.agent_photo || ''
+            avatar_url: reply.user.avatar_url || '' // Changed from photo_url to avatar_url
           } : null;
           
           return {

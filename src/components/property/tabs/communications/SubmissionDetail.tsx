@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +12,13 @@ interface SubmissionDetailProps {
   onSendResponse: (responseText: string) => Promise<void>;
   isSending: boolean;
   propertyId: string;
+}
+
+interface SubmissionResponseProps {
+  onSubmit: (e: React.FormEvent) => Promise<void>;
+  responseText: string;
+  setResponseText: React.Dispatch<React.SetStateAction<string>>;
+  isSending: boolean;
 }
 
 export function SubmissionDetail({ 
