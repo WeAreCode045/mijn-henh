@@ -1,65 +1,102 @@
+import React, { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+import { useSubmissions } from '../communications/useSubmissions';
+import { SubmissionDetail } from '../communications/SubmissionDetail';
 
-import { PropertyData } from "@/types/property";
-import { SubmissionDetail } from "../communications/SubmissionDetail";
-import { SubmissionsList } from "../communications/SubmissionsList";
-import { useSubmissions } from "../communications/useSubmissions";
-import { useSubmissionSelection } from "../communications/hooks/useSubmissionSelection";
-import { useSubmissionActions } from "../communications/hooks/useSubmissionActions";
-import { useMarkAsRead } from "../communications/hooks/useMarkAsRead";
-import { useSendResponse } from "../communications/hooks/useSendResponse";
-
-interface CommunicationsTabContentProps {
-  property: PropertyData;
+// Let's ensure the Submission type is fully defined
+interface Submission {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  inquiryType: string;
+  createdAt: string;
+  isRead: boolean;
+  // Add any other fields needed
 }
 
-export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const { submissions, loading, error, fetchSubmissions } = useSubmissions(property.id);
-  const { selectedSubmission, setSelectedSubmission } = useSubmissionSelection();
-  
-  // Use the hooks with correct arguments
-  const { handleMarkAsRead } = useMarkAsRead({ propertyId: property.id });
-  const { handleSendResponse, isSending } = useSendResponse({ propertyId: property.id });
-  
-  // Handle selection and mark as read
-  const handleSelectSubmission = (submissionId: string) => {
-    setSelectedSubmission(submissionId);
-    
-    // Mark as read when selecting
-    if (submissionId) {
-      handleMarkAsRead(submissionId);
-    }
+export function CommunicationsTabContent({ property }: { property: any }) {
+  // Use a proper empty submission object
+  const emptySubmission: Submission = {
+    id: '',
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+    inquiryType: '',
+    createdAt: '',
+    isRead: false
   };
   
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission>(emptySubmission);
+  const { submissions, isLoading, error, markAsRead } = useSubmissions();
+
+  const handleSelectSubmission = (submission: Submission) => {
+    setSelectedSubmission(submission);
+  };
+  
+  // Fix the comparison to check for ID property
+  const isSelected = (submission: Submission) => {
+    return selectedSubmission.id === submission.id;
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Inquiries & Communications</h2>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <SubmissionsList 
-            submissions={submissions}
-            selectedSubmissionId={selectedSubmission}
-            onSelectSubmission={handleSelectSubmission}
-            isLoading={loading}
-            error={error}
-          />
-        </div>
-        
-        <div className="lg:col-span-2">
-          {selectedSubmission ? (
-            <SubmissionDetail
-              submission={submissions.find(s => s.id === selectedSubmission)}
-              onSendResponse={(responseText) => handleSendResponse(responseText)}
-              isSending={isSending}
-              propertyId={property.id}
-            />
-          ) : (
-            <div className="bg-muted p-6 rounded-lg text-center">
-              <p className="text-muted-foreground">Select an inquiry to view details</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    <Tabs defaultValue="inquiries" className="w-[400px]">
+      <TabsList>
+        <TabsTrigger value="inquiries">Inquiries</TabsTrigger>
+        <TabsTrigger value="submission-detail" disabled={!selectedSubmission.id}>Submission Detail</TabsTrigger>
+      </TabsList>
+      <TabsContent value="inquiries">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Inquiries</CardTitle>
+            <CardDescription>
+              Here are the most recent inquiries for this property.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            {submissions.map((submission) => (
+              <div
+                key={submission.id}
+                className={`border rounded-md p-4 mb-2 cursor-pointer ${isSelected(submission) ? 'bg-accent' : ''}`}
+                onClick={() => handleSelectSubmission(submission)}
+              >
+                <h3 className="text-lg font-semibold">{submission.name}</h3>
+                <p className="text-sm">{submission.email}</p>
+                <p className="text-sm">{submission.message.substring(0, 50)}...</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="submission-detail">
+        {selectedSubmission.id ? (
+          <SubmissionDetail submission={selectedSubmission} />
+        ) : (
+          <div>No submission selected.</div>
+        )}
+      </TabsContent>
+    </Tabs>
   );
 }

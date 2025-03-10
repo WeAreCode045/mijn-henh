@@ -12,20 +12,22 @@ interface SubmissionDetailProps {
   onSendResponse: (responseText: string) => Promise<void>;
   isSending: boolean;
   propertyId: string;
+  onBack: () => void;
 }
 
 interface SubmissionResponseProps {
-  onSubmit: (e: React.FormEvent) => Promise<void>;
   responseText: string;
-  setResponseText: React.Dispatch<React.SetStateAction<string>>;
+  setResponseText: Dispatch<SetStateAction<string>>;
   isSending: boolean;
+  onSubmit: (e: FormEvent) => Promise<void>;
 }
 
 export function SubmissionDetail({ 
   submission, 
   onSendResponse,
   isSending,
-  propertyId
+  propertyId,
+  onBack
 }: SubmissionDetailProps) {
   const [responseText, setResponseText] = useState("");
   
@@ -102,10 +104,10 @@ export function SubmissionDetail({
         </CardContent>
         <CardFooter>
           <SubmissionResponse
-            onSubmit={handleSubmit}
             responseText={responseText}
             setResponseText={setResponseText}
             isSending={isSending}
+            onSubmit={handleSubmit}
           />
         </CardFooter>
       </Card>

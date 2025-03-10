@@ -10,8 +10,8 @@ export interface SubmissionReply {
     id: string;
     full_name: string;
     email: string;
-    avatar_url: string; // Changed from photo_url to avatar_url
-  } ;
+    avatar_url: string;
+  };
 }
 
 export interface Submission {
@@ -42,7 +42,6 @@ export function useSubmissions(propertyId: string) {
     try {
       console.log('Fetching submissions for property:', propertyId);
       
-      // First get the submissions
       const { data: submissionsData, error: submissionsError } = await supabase
         .from('property_contact_submissions')
         .select(`
@@ -72,7 +71,6 @@ export function useSubmissions(propertyId: string) {
       
       console.log('Found submissions:', submissionsData.length);
       
-      // For each submission, get its replies
       const submissionsWithReplies = await Promise.all(submissionsData.map(async (submission) => {
         const { data: repliesData, error: repliesError } = await supabase
           .from('property_submission_replies')
@@ -94,13 +92,12 @@ export function useSubmissions(propertyId: string) {
           };
         }
         
-        // Map the replies with safe user data
         const mappedReplies = (repliesData || []).map(reply => {
           const safeUser = reply.user && typeof reply.user === 'object' ? {
             id: reply.user?.id || '',
             full_name: reply.user.full_name || '',
             email: reply.user.email || '',
-            avatar_url: reply.user.avatar_url || '' // Changed from photo_url to avatar_url
+            avatar_url: reply.user.avatar_url || ''
           } : null;
           
           return {

@@ -1,9 +1,8 @@
-
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { Submission } from "../types";
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
+import { useAgencySettings } from '@/hooks/useAgencySettings';
+import { Submission } from '../types';
 import { useMarkAsRead } from "./useMarkAsRead";
 import { useSendResponse } from "./useSendResponse";
 
@@ -13,6 +12,20 @@ interface UseSubmissionActionsProps {
   selectedSubmission: Submission | null;
   setSelectedSubmission: (submission: Submission | null) => void;
   setSubmissions: (updater: (prevSubmissions: Submission[]) => Submission[]) => void;
+}
+
+interface UseMarkAsReadProps {
+  setSubmissions: React.Dispatch<React.SetStateAction<any[]>>;
+  setSelectedSubmission: (submission: Submission | null) => void;
+  toast: any;
+}
+
+interface UseSendResponseProps {
+  selectedSubmission: any;
+  refreshSubmissions: () => Promise<void>;
+  settings: any;
+  toast: any;
+  setIsSending: (isSending: boolean) => void;
 }
 
 export function useSubmissionActions({
