@@ -20,7 +20,7 @@ export function RecentProperties() {
       try {
         let query = supabase
           .from('properties')
-          .select('*, property_images(*), agent:profiles(id, full_name, email, phone, photo_url:agent_photo)')
+          .select('*, property_images(*), agent:profiles(id, full_name, email, phone, photo_url:avatar)')
           .order('created_at', { ascending: false })
           .limit(3);
 

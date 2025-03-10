@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
@@ -28,7 +27,7 @@ export function useUsers() {
         phone: user.phone || null,
         whatsapp_number: user.whatsapp_number || null,
         role: user.role || null,
-        agent_photo: user.agent_photo || null
+        avatar: user.avatar || null
       }));
 
       return transformedData;
