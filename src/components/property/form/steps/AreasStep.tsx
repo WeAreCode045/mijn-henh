@@ -9,12 +9,9 @@ interface AreasStepProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   setPendingChanges?: (pending: boolean) => void;
-  // Add missing properties based on the errors
-  areas?: PropertyArea[];
-  images?: PropertyImage[];
-  propertyId?: string;
-  onAreaImageUpload?: (areaId: string, files: FileList) => void;
+  isUploading?: boolean; // Add this property
 }
 
 export function AreasStep({
@@ -24,7 +21,9 @@ export function AreasStep({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  setPendingChanges
+  onAreaImageUpload,
+  setPendingChanges,
+  isUploading
 }: AreasStepProps) {
   return (
     <div className="space-y-6">

@@ -20,6 +20,7 @@ export interface PropertyFormManagerChildrenProps {
   updateArea: (id: string, field: any, value: any) => void;
   handleAreaImageRemove: (areaId: string, imageId: string) => void;
   handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
@@ -38,6 +39,4 @@ export interface PropertyFormManagerChildrenProps {
   propertyWithRequiredProps: PropertyData;
   lastSaved: Date | null;
   isSaving: boolean;
-  // Add the missing handleAreaImageUpload function
-  handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
 }

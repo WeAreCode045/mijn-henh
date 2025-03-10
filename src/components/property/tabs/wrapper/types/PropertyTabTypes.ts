@@ -50,7 +50,7 @@ export interface PropertyTabProps {
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
     handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleAreaImageUpload?: (areaId: string, files: FileList) => void; // Add the missing handler
+    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>; // Add the missing handler
     handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveFloorplan: (index: number) => void;
     isUploadingFloorplan: boolean;
@@ -71,5 +71,6 @@ export interface PropertyTabProps {
     setPendingChanges?: (pending: boolean) => void;
     // Add featuredImageUrl for backward compatibility
     featuredImageUrl?: string;
+    featuredImage?: string | null; // Add this for compatibility
   };
 }

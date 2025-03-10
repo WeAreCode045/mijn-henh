@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { useAreaManagement } from './useAreaManagement';
 import { useAreaImageRemove } from './useAreaImageRemove';
 import { useAreaImageSelect } from './useAreaImageSelect';
+import { useAreaImageUpload } from './useAreaImageUpload';
 
 export function usePropertyAreas(
   formData: PropertyFormData,
@@ -13,15 +14,7 @@ export function usePropertyAreas(
   const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormData);
   const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormData);
   const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormData);
-
-  // Add the missing handleAreaImageUpload function
-  const handleAreaImageUpload = (areaId: string, files: FileList) => {
-    console.log(`Uploading images for area ${areaId}`, files);
-    // This function would typically handle file uploads
-    // Since it seems this is handled elsewhere or not implemented,
-    // we'll provide a placeholder implementation
-    return Promise.resolve();
-  };
+  const { handleAreaImageUpload } = useAreaImageUpload(formData, setFormData);
 
   // Return all the functions and state from the smaller hooks
   return {

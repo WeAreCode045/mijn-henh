@@ -49,7 +49,8 @@ export function usePropertyFormManager(property: PropertyData) {
     removeArea,
     updateArea,
     handleAreaImageRemove,
-    handleAreaImagesSelect
+    handleAreaImagesSelect,
+    handleAreaImageUpload  // This should now be returned from usePropertyAreas
   } = usePropertyAreas(
     formState, 
     setFormStateWithTracking
@@ -118,6 +119,7 @@ export function usePropertyFormManager(property: PropertyData) {
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
+    handleAreaImageUpload, // Include this in the returned object
     handleImageUpload,
     handleRemoveImage,
     isUploading,
