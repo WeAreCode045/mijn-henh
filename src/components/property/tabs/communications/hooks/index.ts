@@ -1,18 +1,13 @@
 
-// Re-export the hooks with renamed interfaces to avoid naming conflicts
-import { 
-  useMarkAsRead, 
-  useSendResponse,
-  UseMarkAsReadProps as MarkAsReadProps,
-  UseSendResponseProps as SendResponseProps
-} from './useSubmissionActions';
+import { useFetchSubmissions } from './useFetchSubmissions';
+import { useMarkAsRead } from './useMarkAsRead';
+import { useSendResponse } from './useSendResponse';
+import { useSubmissionActions } from './useSubmissionActions';
 import { useSubmissionSelection } from './useSubmissionSelection';
 
-export {
-  useMarkAsRead,
-  useSendResponse,
-  useSubmissionSelection,
-  // Export the renamed interfaces
-  MarkAsReadProps as UseMarkAsReadProps,
-  SendResponseProps as UseSendResponseProps
-};
+// Re-export hooks
+export { useFetchSubmissions, useMarkAsRead, useSendResponse, useSubmissionActions, useSubmissionSelection };
+
+// Re-export types using 'export type' to fix TS1205 error
+export type { UseMarkAsReadProps } from './useMarkAsRead';
+export type { UseSendResponseProps } from './useSendResponse';

@@ -1,75 +1,51 @@
+
+import React from "react";
+import { Reply } from "./useSubmissions";
+import { formatDate } from "@/utils/dateUtils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
 
-export interface SubmissionReply {
-  id: string;
-  created_at: string;
-  reply_text: string;
-  agent?: {
-    full_name?: string;
-    email?: string;
-    avatar_url?: string;
-  };
-}
-
-interface SubmissionRepliesProps {
-  replies: SubmissionReply[];
+export interface SubmissionRepliesProps {
+  replies: Reply[];
   submissionId: string;
 }
 
 export function SubmissionReplies({ replies, submissionId }: SubmissionRepliesProps) {
-  // Sort replies by created_at
-  const sortedReplies = [...replies].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  );
-  
+  if (!replies || replies.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
-      {sortedReplies.map((reply) => (
-        <div key={reply.id} className="flex gap-3">
-          <div className="flex-shrink-0">
-            {reply.agent ? (
-              <Avatar>
-                <AvatarImage 
-                  src={reply.agent.avatar_url || ''} 
-                  alt={reply.agent.full_name || 'Agent'} 
-                />
-                <AvatarFallback>
-                  {reply.agent.full_name 
-                    ? reply.agent.full_name.charAt(0).toUpperCase() 
-                    : 'A'}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <Avatar>
-                <AvatarFallback>S</AvatarFallback>
-              </Avatar>
-            )}
-          </div>
-          <div className="flex-1">
-            <div className="bg-muted p-3 rounded-lg">
-              <div className="flex justify-between items-start mb-2">
+      <h3 className="font-semibold">Previous Responses</h3>
+      <div className="space-y-4">
+        {replies.map((reply) => (
+          <div key={reply.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={reply.user_avatar} />
+              <AvatarFallback>{getInitials(reply.user_name || 'Unknown')}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex justify-between items-start">
                 <div>
-                  <span className="font-medium">
-                    {reply.agent?.full_name || 'System'}
-                  </span>
-                  {reply.agent?.email && (
-                    <span className="text-xs text-muted-foreground ml-2">
-                      ({reply.agent.email})
-                    </span>
-                  )}
+                  <p className="font-semibold text-sm">{reply.user_name || 'Agent'}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(reply.created_at)}</p>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
-                </span>
               </div>
-              <div className="whitespace-pre-wrap">
-                {reply.reply_text}
-              </div>
+              <p className="mt-2 text-sm whitespace-pre-wrap">{reply.reply_text}</p>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
+}
+
+// Helper function to get initials from a name
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part.charAt(0))
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
 }

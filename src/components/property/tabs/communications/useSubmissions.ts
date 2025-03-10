@@ -1,18 +1,20 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { PropertyData } from "@/types/property";
 
 export interface Reply {
   id: string;
   submission_id: string;
   reply_text: string;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
-  user_id: string | null;
-  user_name: string | null;
-  user_email: string | null;
-  user_phone: string | null;
-  user_avatar: string | null;
+  user_name?: string;
+  user_email?: string;
+  user_phone?: string;
+  user_avatar?: string;
+  user?: any;
 }
 
 export interface Submission {
@@ -22,90 +24,83 @@ export interface Submission {
   email: string;
   phone: string;
   message: string;
-  inquiry_type: string;
+  inquiry_type?: string;
   created_at: string;
   updated_at: string | null;
+  subject: string | null;
   is_read: boolean;
-  agent_id: string | null;
+  property?: PropertyData;
   replies: Reply[];
-  propertyId?: string;
-  inquiryType?: string;
-  createdAt?: string;
-  isRead?: boolean;
-  property?: any;
 }
 
-interface UseSubmissionsProps {
-  propertyId: string;
-}
-
-export function useSubmissions({ propertyId }: UseSubmissionsProps) {
+export function useSubmissions(propertyId?: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchSubmissions = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const { data, error } = await supabase
-        .from('property_contact_submissions')
+      let query = supabase
+        .from("property_contact_submissions")
         .select(`
           *,
           property:property_id(*),
           replies:property_submission_replies(
             *,
-            user:user_id(*)
+            user:user_id(id, full_name, email, phone, avatar_url)
           )
         `)
-        .eq('property_id', propertyId)
-        .order('created_at', { ascending: false });
+        .order("created_at", { ascending: false });
 
-      if (error) {
-        throw error;
+      if (propertyId) {
+        query = query.eq("property_id", propertyId);
       }
 
-      // Process the data to handle potential errors in the user relation
-      const processedData = data.map((submission) => {
-        // Handle case where replies might be an error or null
-        const replies = Array.isArray(submission.replies) 
-          ? submission.replies.map((reply) => {
-              // If user data fetch failed, provide fallback values
-              return {
-                ...reply,
-                user_name: reply.user && typeof reply.user !== 'string' ? reply.user.full_name : 'Unknown User',
-                user_email: reply.user && typeof reply.user !== 'string' ? reply.user.email : null,
-                user_phone: reply.user && typeof reply.user !== 'string' ? reply.user.phone : null,
-                user_avatar: reply.user && typeof reply.user !== 'string' ? reply.user.avatar_url : null
-              };
-            })
-          : [];
+      const { data, error: fetchError } = await query;
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      // Process the submissions to handle possible null values in user data
+      const processedSubmissions = data.map((submission: any) => {
+        // Process the replies to handle user data safely
+        const processedReplies = submission.replies?.map((reply: any) => {
+          // Set user data with safe fallbacks
+          const user_name = reply.user?.full_name || 'Unknown User';
+          const user_email = reply.user?.email || '';
+          const user_phone = reply.user?.phone || '';
+          const user_avatar = reply.user?.avatar_url || '';
+          
+          return {
+            ...reply,
+            user_name,
+            user_email,
+            user_phone,
+            user_avatar
+          };
+        }) || [];
 
         return {
           ...submission,
-          replies,
-          // Add properties needed for compatibility
-          propertyId: submission.property_id,
-          inquiryType: submission.inquiry_type,
-          createdAt: submission.created_at,
-          isRead: submission.is_read
+          replies: processedReplies
         };
       });
 
-      setSubmissions(processedData);
-    } catch (err) {
-      console.error('Error fetching submissions:', err);
-      setError('Failed to load submissions');
+      setSubmissions(processedSubmissions);
+    } catch (err: any) {
+      console.error("Error fetching submissions:", err);
+      setError(err.message || "Failed to fetch submissions");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (propertyId) {
-      fetchSubmissions();
-    }
+    fetchSubmissions();
   }, [propertyId]);
 
   return {

@@ -1,122 +1,86 @@
 
-import React, { useState, FormEvent, Dispatch, SetStateAction } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { format } from 'date-fns';
-import { SubmissionResponse } from './SubmissionResponse';
-import { SubmissionReplies } from './SubmissionReplies';
-import { Submission, Reply } from './useSubmissions';
+import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/utils/dateUtils";
+import { Reply, Submission } from "./useSubmissions";
+import { SubmissionReplies } from "./SubmissionReplies";
+import { SubmissionResponse } from "./SubmissionReplyForm";
 
 interface SubmissionDetailProps {
   submission: Submission;
-  propertyTitle: string;
-  onMarkAsRead: (id: string) => void;
-  onSendResponse: (id: string, message: string) => Promise<void>;
+  onClose: () => void;
+  onSendResponse: (submissionId: string, message: string) => Promise<void>;
+  isSending: boolean;
 }
 
-export function SubmissionDetail({
-  submission,
-  propertyTitle,
-  onMarkAsRead,
-  onSendResponse
+export function SubmissionDetail({ 
+  submission, 
+  onClose, 
+  onSendResponse,
+  isSending 
 }: SubmissionDetailProps) {
-  const [responseText, setResponseText] = useState('');
-  const [isSending, setIsSending] = useState(false);
-
-  const handleSubmit = async (e: FormEvent) => {
+  const [responseText, setResponseText] = useState("");
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!responseText.trim()) return;
     
-    setIsSending(true);
-    try {
-      await onSendResponse(submission.id, responseText);
-      setResponseText('');
-    } catch (error) {
-      console.error('Failed to send response:', error);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  const getInquiryTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      'information': 'Meer informatie',
-      'viewing': 'Bezichtiging',
-      'offer': 'Bod'
-    };
-    return types[type] || type;
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'dd/MM/yyyy HH:mm');
-    } catch (error) {
-      return 'Invalid date';
-    }
+    await onSendResponse(submission.id, responseText);
+    setResponseText("");
   };
 
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg font-medium">
-              {submission.name}
-              {!submission.is_read && (
-                <Badge variant="default" className="ml-2 bg-blue-500">
-                  Nieuw
-                </Badge>
-              )}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {getInquiryTypeLabel(submission.inquiry_type)}
-            </p>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {formatDate(submission.created_at)}
-          </div>
-        </div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex justify-between">
+          <span>{submission.name}</span>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </CardTitle>
+        <CardDescription>
+          {submission.email} • {submission.phone} • {formatDate(submission.created_at)}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">E-mail:</p>
-            <p className="font-medium">
-              <a href={`mailto:${submission.email}`} className="text-blue-600 hover:underline">
-                {submission.email}
-              </a>
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Telefoon:</p>
-            <p className="font-medium">
-              <a href={`tel:${submission.phone}`} className="text-blue-600 hover:underline">
-                {submission.phone}
-              </a>
-            </p>
-          </div>
+      <CardContent className="space-y-4">
+        <div>
+          <h3 className="font-semibold mb-1">Subject</h3>
+          <p>{submission.subject || "Property Inquiry"}</p>
         </div>
-        
-        <p className="text-sm text-muted-foreground mb-1">Bericht:</p>
-        <p className="mb-4">{submission.message}</p>
-        
-        {submission.replies && submission.replies.length > 0 && (
-          <>
-            <Separator className="my-4" />
-            <SubmissionReplies replies={submission.replies as Reply[]} />
-          </>
+
+        <div>
+          <h3 className="font-semibold mb-1">Message</h3>
+          <p className="whitespace-pre-wrap">{submission.message}</p>
+        </div>
+
+        {submission.property && (
+          <div>
+            <h3 className="font-semibold mb-1">Property</h3>
+            <p>{submission.property.title || "Unknown Property"}</p>
+            <p className="text-sm text-muted-foreground">{submission.property.address || ""}</p>
+          </div>
         )}
+
+        <Separator />
+
+        {submission.replies && submission.replies.length > 0 && (
+          <SubmissionReplies 
+            replies={submission.replies} 
+            submissionId={submission.id}
+          />
+        )}
+
+        <CardFooter className="px-0 pt-4 flex-col items-start">
+          <SubmissionResponse
+            responseText={responseText}
+            setResponseText={setResponseText}
+            isSending={isSending}
+            onSubmit={handleSubmit}
+          />
+        </CardFooter>
       </CardContent>
-      <CardFooter className="flex flex-col items-stretch">
-        <SubmissionResponse
-          message={responseText}
-          setMessage={setResponseText}
-          isSending={isSending}
-          onSubmit={handleSubmit}
-        />
-      </CardFooter>
     </Card>
   );
 }
