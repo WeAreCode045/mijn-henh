@@ -1,100 +1,103 @@
 
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { useSubmissions, Submission } from "../communications/useSubmissions";
+import React, { useState, useEffect } from "react";
+import { PropertyData, PropertyAgent } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSubmissions } from "../communications/useSubmissions";
+import { Submission } from "../communications/types";
 import { SubmissionsList } from "../communications/SubmissionsList";
 import { SubmissionDetail } from "../communications/SubmissionDetail";
-import { useSubmissionActions } from "../communications/hooks/useSubmissionActions";
-import { useToast } from "@/components/ui/use-toast";
 
 interface CommunicationsTabContentProps {
-  property: {
-    id: string;
-    title: string;
-  };
+  property: PropertyData;
+}
+
+// Create a combined type that satisfies both interfaces
+interface CombinedSubmission {
+  id: string;
+  property_id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  created_at: string;
+  updated_at: string;
+  is_read: boolean;
+  propertyId?: string;
+  inquiryType?: string;
+  createdAt?: string;
+  isRead?: boolean;
+  property?: PropertyData;
+  inquiry_type?: string;
+  replies?: any[];
 }
 
 export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const { submissions, loading, error, fetchSubmissions } = useSubmissions(property.id);
-  const { toast } = useToast();
-  const { 
-    markAsRead,
-    sendResponse,
-    isSendingResponse
-  } = useSubmissionActions({
-    onSuccess: () => {
-      fetchSubmissions();
-      toast({
-        title: "Success",
-        description: "Action completed successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error || "An error occurred",
-        variant: "destructive",
-      });
-    }
-  });
+  const [selectedSubmission, setSelectedSubmission] = useState<CombinedSubmission | null>(null);
 
-  const handleSelectSubmission = (submission: Submission) => {
-    setSelectedSubmission(submission);
-    
-    // If the submission is not marked as read, mark it as read
-    if (!submission.is_read) {
-      markAsRead(submission.id);
-    }
+  // Function to normalize submissions to the expected format
+  const normalizeSubmissions = (subs: any[]): CombinedSubmission[] => {
+    return subs.map(sub => ({
+      ...sub,
+      propertyId: sub.property_id,
+      inquiryType: sub.inquiry_type || "contact",
+      createdAt: sub.created_at,
+      isRead: sub.is_read,
+      property: property,
+      replies: sub.replies || []
+    }));
   };
 
-  const handleCloseDetail = () => {
+  // Fetch submissions when component mounts or property changes
+  useEffect(() => {
+    fetchSubmissions();
+  }, [property.id]);
+
+  // Handle selecting a submission
+  const handleSelectSubmission = (submission: CombinedSubmission) => {
+    setSelectedSubmission(submission);
+  };
+
+  const handleBackToList = () => {
     setSelectedSubmission(null);
   };
 
-  const handleSendResponse = async (submissionId: string, message: string) => {
-    await sendResponse(submissionId, message);
-    fetchSubmissions();
-  };
-
-  // Show error message if there's an error
-  if (error) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-red-500">
-          <p>Error loading submissions: {error}</p>
-        </div>
-      </Card>
-    );
-  }
+  // Convert submissions to the expected format
+  const normalizedSubmissions = normalizeSubmissions(submissions);
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <div>
-        <SubmissionsList
-          submissions={submissions as Submission[]}
-          loading={loading}
-          onSelect={handleSelectSubmission}
-          selectedId={selectedSubmission?.id}
-        />
-      </div>
-      
-      <div>
-        {selectedSubmission ? (
-          <SubmissionDetail
-            submission={selectedSubmission}
-            onClose={handleCloseDetail}
-            onSendResponse={handleSendResponse}
-            isSending={isSendingResponse}
-          />
-        ) : (
-          <Card className="p-6">
-            <div className="text-center text-muted-foreground">
-              <p>Select a submission to view details</p>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Communications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="py-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-2 text-sm text-muted-foreground">Loading submissions...</p>
             </div>
-          </Card>
-        )}
-      </div>
+          ) : error ? (
+            <div className="py-8 text-center">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : (
+            <div>
+              {selectedSubmission ? (
+                <SubmissionDetail 
+                  submission={selectedSubmission as any} 
+                  onBack={handleBackToList}
+                />
+              ) : (
+                <SubmissionsList 
+                  submissions={normalizedSubmissions as any[]} 
+                  onSelectSubmission={handleSelectSubmission}
+                />
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

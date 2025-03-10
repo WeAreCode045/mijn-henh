@@ -1,13 +1,17 @@
 
-import { useFetchSubmissions } from './useFetchSubmissions';
-import { useMarkAsRead } from './useMarkAsRead';
-import { useSendResponse } from './useSendResponse';
-import { useSubmissionActions } from './useSubmissionActions';
-import { useSubmissionSelection } from './useSubmissionSelection';
+import { useMarkAsRead, UseMarkAsReadProps } from './useMarkAsRead';
+import { useSendResponse, UseSendResponseProps } from './useSendResponse';
+import { 
+  useSubmissionSelection, 
+  UseSubmissionSelectionProps, 
+  UseSubmissionSelectionReturn 
+} from './useSubmissionSelection';
 
-// Re-export hooks
-export { useFetchSubmissions, useMarkAsRead, useSendResponse, useSubmissionActions, useSubmissionSelection };
+// Re-export hooks with explicit type annotation
+export type { UseMarkAsReadProps };
+export type { UseSendResponseProps };
+export type { UseSubmissionSelectionProps, UseSubmissionSelectionReturn };
 
-// Re-export types using 'export type' to fix TS1205 error
-export type { UseMarkAsReadProps } from './useMarkAsRead';
-export type { UseSendResponseProps } from './useSendResponse';
+export { useMarkAsRead };
+export { useSendResponse };
+export { useSubmissionSelection };

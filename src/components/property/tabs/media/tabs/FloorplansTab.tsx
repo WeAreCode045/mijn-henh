@@ -20,6 +20,18 @@ export function FloorplansTab({ property, setProperty }: FloorplansTabProps) {
     }));
   };
 
+  // Mock function for handling floorplan removal
+  const handleRemoveFloorplan = (index: number) => {
+    if (property.floorplans) {
+      const newFloorplans = [...property.floorplans];
+      newFloorplans.splice(index, 1);
+      setProperty(prev => ({
+        ...prev,
+        floorplans: newFloorplans
+      }));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -30,13 +42,17 @@ export function FloorplansTab({ property, setProperty }: FloorplansTabProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <FloorplanUploader property={property} />
+          <FloorplanUploader 
+            onFloorplanUpload={() => {}} 
+            isUploading={false} 
+          />
           
           {property.floorplans && property.floorplans.length > 0 && (
             <div className="mt-6">
               <SortableFloorplanGrid
                 floorplans={property.floorplans}
                 propertyId={property.id}
+                onRemoveFloorplan={handleRemoveFloorplan}
               />
             </div>
           )}

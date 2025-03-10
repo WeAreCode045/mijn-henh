@@ -29,7 +29,15 @@ export function MediaTabContent({ property }: MediaTabContentProps) {
         </TabsList>
         
         <TabsContent value="images" className="space-y-6">
-          <PropertyImagesCard property={localProperty} />
+          <PropertyImagesCard 
+            images={localProperty.images || []} 
+            onImageUpload={() => {}} 
+            onRemoveImage={() => {}} 
+            isUploading={false}
+            featuredImage={localProperty.featuredImage}
+            featuredImages={localProperty.featuredImages}
+            propertyId={localProperty.id}
+          />
         </TabsContent>
         
         <TabsContent value="floorplans" className="space-y-6">
