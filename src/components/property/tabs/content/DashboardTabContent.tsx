@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,14 +83,12 @@ export function DashboardTabContent({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Row 1: Left - Property Overview (3/4 width) */}
         <Card className="md:col-span-3">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Property Overview</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-6">
-              {/* Property details */}
               <div className="flex-1">
                 <h3 className="font-semibold text-xl mb-2">{property.title}</h3>
                 <p className="text-muted-foreground mb-4">{property.address}</p>
@@ -114,8 +111,6 @@ export function DashboardTabContent({
                   </div>
                 </div>
               </div>
-              
-              {/* Main image */}
               <div className="w-full md:w-40 h-40 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                 {mainImage ? (
                   <img 
@@ -133,7 +128,6 @@ export function DashboardTabContent({
           </CardContent>
         </Card>
 
-        {/* Row 1: Right - Dates and Actions (1/4 width) */}
         <Card className="md:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Dates & Actions</CardTitle>
@@ -191,9 +185,7 @@ export function DashboardTabContent({
         </Card>
       </div>
 
-      {/* Row 2: Submissions and Agent */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Left: Submission overview */}
         <Card className="md:col-span-3">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Recent Submissions</CardTitle>
@@ -203,7 +195,6 @@ export function DashboardTabContent({
           </CardContent>
         </Card>
 
-        {/* Right: Agent assignment */}
         <Card className="md:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Assigned Agent</CardTitle>
@@ -218,7 +209,7 @@ export function DashboardTabContent({
                 <SelectValue placeholder="Select an agent" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No agent assigned</SelectItem>
+                <SelectItem value="no-agent">No agent assigned</SelectItem>
                 {agents.map(agent => (
                   <SelectItem key={agent.id} value={agent.id}>
                     {agent.name}
@@ -248,9 +239,7 @@ export function DashboardTabContent({
         </Card>
       </div>
 
-      {/* Row 3: External Links and Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left: External Links */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">External Links</CardTitle>
@@ -291,7 +280,6 @@ export function DashboardTabContent({
           </CardContent>
         </Card>
 
-        {/* Right: Stats */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Property Stats</CardTitle>
