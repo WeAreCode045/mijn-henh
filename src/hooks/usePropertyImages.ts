@@ -4,8 +4,8 @@ import { PropertyFormData } from "@/types/property";
 import { useImageUploadHandler } from "./images/uploads/useImageUploadHandler";
 import { useImageRemoveHandler } from "./images/uploads/useImageRemoveHandler";
 import { usePropertyAreaPhotos } from "./images/usePropertyAreaPhotos";
-import { usePropertyFloorplans } from "./images/usePropertyFloorplans";
 import { usePropertyMainImages } from "./images/usePropertyMainImages";
+import { usePropertyFloorplans } from "./images/usePropertyFloorplans";
 
 export function usePropertyImages(
   formData: PropertyFormData,
@@ -28,8 +28,7 @@ export function usePropertyImages(
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
-    handleUpdateFloorplan,
-    isUploading: isUploadingFloorplans
+    isUploadingFloorplan
   } = usePropertyFloorplans(formData, setFormData);
 
   // Main image selections (main and featured)
@@ -39,17 +38,17 @@ export function usePropertyImages(
   } = usePropertyMainImages(formData, setFormData);
 
   // Combine all upload states
-  const isCombinedUploading = isUploading || isUploadingAreaPhotos || isUploadingFloorplans;
+  const isCombinedUploading = isUploading || isUploadingAreaPhotos || isUploadingFloorplan;
 
   return {
     handleImageUpload,
     handleRemoveImage,
     isUploading: isCombinedUploading,
     handleAreaPhotosUpload,
+    handleRemoveAreaPhoto,
     handleFloorplanUpload,
     handleRemoveFloorplan,
-    handleUpdateFloorplan,
-    handleRemoveAreaPhoto,
+    isUploadingFloorplan,
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     // Direct access to the images for components

@@ -12,7 +12,6 @@ export function usePropertyAutoSave() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Cleanup function for the timeout
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -22,17 +21,15 @@ export function usePropertyAutoSave() {
   }, []);
 
   const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
-    // Don't save if there's no ID (new property that hasn't been saved initially)
     if (!formData.id) {
       console.log('No ID available, auto-save skipped');
       return false;
     }
 
     setIsSaving(true);
-    console.log('Auto-saving property data...');
+    console.log('Auto-saving property data...', formData);
 
     try {
-      // Extract the fields we want to update
       const {
         title,
         price,
@@ -58,19 +55,24 @@ export function usePropertyAutoSave() {
         youtubeUrl,
         notes,
         template_id,
+        technicalItems,
         floorplanEmbedScript
       } = formData;
 
-      // If still new or draft state (no ID), return false
       if (!formData.id) {
         console.log('Property ID not available for auto-save');
         return false;
       }
 
-      // Transform the features and areas to the correct JSON format
       const transformedAreas = prepareAreasForFormSubmission(areas);
       const transformedFeatures = preparePropertiesForJsonField(features);
       const transformedNearbyPlaces = preparePropertiesForJsonField(nearby_places || []);
+      
+      const technicalItemsArray = Array.isArray(technicalItems) ? technicalItems : [];
+      const transformedTechnicalItems = preparePropertiesForJsonField(technicalItemsArray);
+      
+      console.log('Transformed technical items:', transformedTechnicalItems);
+      console.log('floorplanEmbedScript for autosave:', floorplanEmbedScript);
 
       const updateData = {
         title,
@@ -97,8 +99,11 @@ export function usePropertyAutoSave() {
         youtubeUrl,
         notes,
         template_id,
+        technicalItems: transformedTechnicalItems,
         floorplanEmbedScript
       };
+
+      console.log('Saving to database:', updateData);
 
       const { error } = await supabase
         .from('properties')
@@ -108,6 +113,33 @@ export function usePropertyAutoSave() {
       if (error) {
         console.error('Auto-save error:', error);
         throw error;
+      }
+
+      if (formData.floorplans && formData.floorplans.length > 0) {
+        try {
+          const { data: existingFloorplans } = await supabase
+            .from('property_images')
+            .select('id, url')
+            .eq('property_id', formData.id)
+            .eq('type', 'floorplan');
+            
+          const existingUrls = existingFloorplans?.map(f => f.url) || [];
+          
+          for (const floorplan of formData.floorplans) {
+            const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+            if (!floorplanUrl || existingUrls.includes(floorplanUrl)) continue;
+            
+            await supabase
+              .from('property_images')
+              .insert({
+                property_id: formData.id,
+                url: floorplanUrl,
+                type: 'floorplan'
+              });
+          }
+        } catch (error) {
+          console.error('Error updating floorplans:', error);
+        }
       }
 
       setLastSaved(new Date());

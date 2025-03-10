@@ -3,7 +3,8 @@ import { PropertyImage } from "@/types/property";
 import { PropertyImagesCard } from "./media/PropertyImagesCard";
 import { VirtualTourCard } from "./media/VirtualTourCard";
 import { MediaDatabaseFetcher } from "./media/MediaDatabaseFetcher";
-import { useState } from "react";
+import { FloorplansCard } from "./media/FloorplansCard";
+import { useState, useEffect } from "react";
 
 interface PropertyMediaTabProps {
   id: string;
@@ -11,13 +12,17 @@ interface PropertyMediaTabProps {
   images: PropertyImage[];
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  notes?: string;
+  floorplanEmbedScript?: string;
+  floorplans?: any[];
   onVirtualTourUpdate?: (url: string) => void;
   onYoutubeUrlUpdate?: (url: string) => void;
-  onNotesUpdate?: (notes: string) => void;
+  onFloorplanEmbedScriptUpdate?: (script: string) => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveFloorplan?: (index: number) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
   // Updated properties for main and featured images
   featuredImageUrl?: string | null;
   featuredImageUrls?: string[];
@@ -31,23 +36,56 @@ export function PropertyMediaTab({
   images = [],
   virtualTourUrl = "",
   youtubeUrl = "",
-  notes = "",
+  floorplanEmbedScript = "",
+  floorplans = [],
   onVirtualTourUpdate,
   onYoutubeUrlUpdate,
-  onNotesUpdate,
+  onFloorplanEmbedScriptUpdate,
   onImageUpload,
   onRemoveImage,
+  onFloorplanUpload,
+  onRemoveFloorplan,
   isUploading = false,
+  isUploadingFloorplan = false,
   featuredImageUrl,
   featuredImageUrls = [],
   onSetFeatured,
   onToggleFeatured,
 }: PropertyMediaTabProps) {
   const [mediaImages, setMediaImages] = useState<PropertyImage[]>(images);
+  
+  console.log("PropertyMediaTab: floorplanEmbedScript =", floorplanEmbedScript);
 
   const handleFetchComplete = (fetchedImages: PropertyImage[]) => {
-    setMediaImages(fetchedImages);
+    // Sort images if they come with sort_order values
+    const sortedImages = [...fetchedImages].sort((a, b) => {
+      // Use sort_order as primary sort criteria
+      if (a.sort_order !== undefined && b.sort_order !== undefined) {
+        return a.sort_order - b.sort_order;
+      }
+      // Fall back to using array order if sort_order is not available
+      return 0;
+    });
+    
+    console.log("PropertyMediaTab - Received sorted images:", sortedImages);
+    setMediaImages(sortedImages);
   };
+
+  // Update mediaImages when images prop changes
+  useEffect(() => {
+    if (images && images.length > 0) {
+      // This ensures we update our state when parent component updates images
+      // Apply the same sorting logic
+      const sortedImages = [...images].sort((a, b) => {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      
+      setMediaImages(sortedImages);
+    }
+  }, [images]);
 
   return (
     <div className="space-y-6">
@@ -67,16 +105,25 @@ export function PropertyMediaTab({
         featuredImageUrls={featuredImageUrls}
         onSetFeatured={onSetFeatured}
         onToggleFeatured={onToggleFeatured}
+        propertyId={id}
+      />
+
+      <FloorplansCard
+        id={id}
+        floorplans={floorplans}
+        onFloorplanUpload={onFloorplanUpload}
+        onRemoveFloorplan={onRemoveFloorplan}
+        isUploading={isUploadingFloorplan}
       />
 
       <VirtualTourCard 
         id={id}
         virtualTourUrl={virtualTourUrl}
         youtubeUrl={youtubeUrl}
-        notes={notes}
+        floorplanEmbedScript={floorplanEmbedScript}
         onVirtualTourUpdate={onVirtualTourUpdate}
         onYoutubeUrlUpdate={onYoutubeUrlUpdate}
-        onNotesUpdate={onNotesUpdate}
+        onFloorplanEmbedScriptUpdate={onFloorplanEmbedScriptUpdate}
       />
     </div>
   );

@@ -1,10 +1,10 @@
+
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { getOrCreateWebViewUrl } from "@/utils/webViewUtils";
 import { PropertyQROverlay } from "./PropertyQROverlay";
 import { supabase } from "@/integrations/supabase/client";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { PropertyCardActions } from "./PropertyCardActions";
 import { PropertySubmissionsDialog } from "./PropertySubmissionsDialog";
 import { PropertyData } from "@/types/property";
 import { useNavigate } from "react-router-dom";
@@ -95,7 +95,7 @@ export const PropertyCard = ({
   };
 
   const handleCardClick = () => {
-    navigate(`/property/${property.id}/edit`);
+    navigate(`/property/${property.id}/dashboard`);
   };
 
   // Get the main display image (featured image first, then first regular image)
@@ -124,15 +124,12 @@ export const PropertyCard = ({
         <div>
           <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
           <p className="text-lg font-medium">{property.price}</p>
+          {unreadCount > 0 && (
+            <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              {unreadCount} new {unreadCount === 1 ? 'message' : 'messages'}
+            </div>
+          )}
         </div>
-
-        <PropertyCardActions
-          property={property}
-          settings={settings}
-          onDelete={onDelete}
-          unreadCount={unreadCount}
-          onShowSubmissions={() => setShowSubmissions(true)}
-        />
       </Card>
 
       <PropertySubmissionsDialog

@@ -76,11 +76,24 @@ export function usePropertyAreaPhotos(
     }
   };
 
-  const handleRemoveAreaPhoto = (index: number) => {
-    setFormData({
-      ...formData,
-      areaPhotos: formData.areaPhotos?.filter((_, i) => i !== index) || []
-    });
+  // Update to match the expected signature (areaId, imageId)
+  const handleRemoveAreaPhoto = (areaId: string, imageId: string) => {
+    // For area photos, we'll use the index to remove the photo
+    // Convert imageId to index if it matches the expected pattern
+    let index = -1;
+    
+    if (imageId.startsWith('area-photo-')) {
+      index = parseInt(imageId.replace('area-photo-', ''), 10);
+    }
+    
+    if (index >= 0 && formData.areaPhotos && index < formData.areaPhotos.length) {
+      setFormData({
+        ...formData,
+        areaPhotos: formData.areaPhotos.filter((_, i) => i !== index)
+      });
+    } else {
+      console.warn(`Could not remove area photo with areaId=${areaId}, imageId=${imageId}`);
+    }
   };
 
   return {

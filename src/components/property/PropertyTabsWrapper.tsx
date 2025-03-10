@@ -42,9 +42,6 @@ export function PropertyTabsWrapper({
               addFeature,
               removeFeature,
               updateFeature,
-              addTechnicalItem,
-              removeTechnicalItem,
-              updateTechnicalItem,
               addArea,
               removeArea,
               updateArea,
@@ -55,10 +52,10 @@ export function PropertyTabsWrapper({
               handleRemoveImage,
               isUploading,
               handleAreaPhotosUpload,
-              handleFloorplanUpload,
               handleRemoveAreaPhoto,
+              handleFloorplanUpload,
               handleRemoveFloorplan,
-              handleUpdateFloorplan,
+              isUploadingFloorplan,
               handleSetFeaturedImage,
               handleToggleFeaturedImage,
               onSubmit,
@@ -66,7 +63,9 @@ export function PropertyTabsWrapper({
               handleStepClick,
               handleNext,
               handlePrevious,
-              propertyWithRequiredProps
+              propertyWithRequiredProps,
+              onAddTechnicalItem,
+              onRemoveTechnicalItem
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -100,19 +99,17 @@ export function PropertyTabsWrapper({
                       isUploading={isUploading}
                       handleAreaPhotosUpload={handleAreaPhotosUpload}
                       handleFloorplanUpload={handleFloorplanUpload}
-                      handleRemoveAreaPhoto={handleRemoveAreaPhoto}
                       handleRemoveFloorplan={handleRemoveFloorplan}
-                      handleUpdateFloorplan={handleUpdateFloorplan}
+                      isUploadingFloorplan={isUploadingFloorplan}
                       handleSetFeaturedImage={handleSetFeaturedImage}
                       handleToggleFeaturedImage={handleToggleFeaturedImage}
-                      onAddTechnicalItem={addTechnicalItem}
-                      onRemoveTechnicalItem={removeTechnicalItem}
-                      onUpdateTechnicalItem={updateTechnicalItem}
                       currentStep={currentStep}
                       handleStepClick={handleStepClick}
                       handleNext={handleNext}
                       handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
+                      onAddTechnicalItem={onAddTechnicalItem}
+                      onRemoveTechnicalItem={onRemoveTechnicalItem}
                     />
                   </PropertyTabs>
                 </Tabs>

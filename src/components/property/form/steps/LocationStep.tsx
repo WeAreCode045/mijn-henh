@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -12,6 +11,7 @@ interface LocationStepProps {
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;
+  onAddTechnicalItem?: () => void;
 }
 
 export function LocationStep({

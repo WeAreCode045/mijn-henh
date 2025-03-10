@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyForm } from "@/components/PropertyForm";
@@ -6,7 +5,6 @@ import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
-import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { useAuth } from "@/providers/AuthProvider";
@@ -26,15 +24,12 @@ export function PropertyFormContainer() {
   const [templateInfo, setTemplateInfo] = useState<{id: string, name: string} | null>(null);
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
 
-  // Load property data
   const { formData, setFormData, isLoading } = usePropertyForm(id);
   const { agents, selectedAgent, setSelectedAgent } = useAgentSelect(formData?.agent_id);
   const { handleSubmit } = usePropertyFormSubmit();
 
-  // Fetch template info and agent info
   useEffect(() => {
     if (formData && formData.id) {
-      // Fetch template info
       const fetchTemplateInfo = async () => {
         const templateId = formData.template_id || 'default';
         
@@ -51,11 +46,9 @@ export function PropertyFormContainer() {
           }
         }
         
-        // Set default if no template or fetching failed
         setTemplateInfo({ id: 'default', name: 'Default Template' });
       };
 
-      // Fetch agent info if agent_id exists
       const fetchAgentInfo = async () => {
         if (formData.agent_id) {
           const { data } = await supabase
@@ -75,7 +68,6 @@ export function PropertyFormContainer() {
     }
   }, [formData]);
 
-  // Load property image handlers
   const {
     handleImageUpload,
     handleRemoveImage,
@@ -114,7 +106,6 @@ export function PropertyFormContainer() {
     setIsSubmitting(true);
     try {
       const event = {} as React.FormEvent;
-      // Pass false for shouldRedirect to prevent navigation after save
       const result = await handleSubmit(event, formData, false);
       
       if (result) {
@@ -148,7 +139,7 @@ export function PropertyFormContainer() {
       onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
-      images={images.map(img => img.url)} // Convert PropertyImage[] to string[] by extracting the URL
+      images={images.map(img => img.url)}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
       isSubmitting={isSubmitting}

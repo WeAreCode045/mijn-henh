@@ -1,5 +1,5 @@
 
-import { PropertyData, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
@@ -15,9 +15,6 @@ export interface PropertyFormManagerChildrenProps {
   addFeature: () => void;
   removeFeature: (id: string) => void;
   updateFeature: (id: string, description: string) => void;
-  addTechnicalItem: () => void;
-  removeTechnicalItem: (id: string) => void;
-  updateTechnicalItem: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   addArea: () => void;
   removeArea: (id: string) => void;
   updateArea: (id: string, field: any, value: any) => void;
@@ -28,10 +25,10 @@ export interface PropertyFormManagerChildrenProps {
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void; // Updated signature to match AreaCard
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto: (index: number) => void;
   handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan: (index: number, field: any, value: any) => void;
+  isUploadingFloorplan: boolean;
   handleSetFeaturedImage: (url: string | null) => void;
   handleToggleFeaturedImage: (url: string) => void;
   onSubmit: () => void;
@@ -42,4 +39,6 @@ export interface PropertyFormManagerChildrenProps {
   propertyWithRequiredProps: PropertyData;
   lastSaved: Date | null;
   isSaving: boolean;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (idOrIndex: number | string) => void; // Updated to handle both number and string parameters
 }

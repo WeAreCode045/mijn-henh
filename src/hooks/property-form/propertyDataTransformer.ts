@@ -1,5 +1,5 @@
 
-import type { PropertyFeature, PropertyArea, PropertyFloorplan, PropertyPlaceType } from "@/types/property";
+import type { PropertyFeature, PropertyArea, PropertyPlaceType } from "@/types/property";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
   return Array.isArray(features)
@@ -46,10 +46,6 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           }
         }
         
-        // Log the transformation for debugging
-        console.log(`Area ${area.id || 'new'} - Input imageIds:`, area.imageIds);
-        console.log(`Area ${area.id || 'new'} - Transformed imageIds:`, imageIds);
-        
         return {
           id: area.id || crypto.randomUUID(),
           title: area.title || "",
@@ -59,49 +55,6 @@ export function transformAreas(areas: any[]): PropertyArea[] {
         };
       })
     : [];
-}
-
-export function transformFloorplans(floorplans: any[]): PropertyFloorplan[] {
-  if (!Array.isArray(floorplans)) return [];
-  
-  return floorplans.map((floorplan: any) => {
-    if (typeof floorplan === 'string') {
-      try {
-        // Try to parse as JSON if it's a stringified object
-        const parsedFloorplan = JSON.parse(floorplan);
-        return {
-          id: parsedFloorplan.id || crypto.randomUUID(),
-          url: parsedFloorplan.url || '',
-          filePath: parsedFloorplan.filePath || '', 
-          columns: typeof parsedFloorplan.columns === 'number' ? parsedFloorplan.columns : 1
-        };
-      } catch (e) {
-        // If parsing fails, treat it as a plain URL string
-        return { 
-          id: crypto.randomUUID(),
-          url: floorplan, 
-          filePath: '', 
-          columns: 1 
-        };
-      }
-    } else if (typeof floorplan === 'object' && floorplan !== null) {
-      // If it's already an object
-      return {
-        id: floorplan.id || crypto.randomUUID(),
-        url: floorplan.url || '',
-        filePath: floorplan.filePath || '',
-        columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
-      };
-    } else {
-      // Fallback for any other case
-      return { 
-        id: crypto.randomUUID(),
-        url: '', 
-        filePath: '',
-        columns: 1 
-      };
-    }
-  }).filter(f => f.url); // Filter out any items with empty URLs
 }
 
 export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {

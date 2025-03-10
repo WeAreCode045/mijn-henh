@@ -1,3 +1,4 @@
+
 import React, { useState, ChangeEvent, useCallback } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Input } from "@/components/ui/input";
@@ -86,11 +87,25 @@ export function AddPropertyForm({ propertyId }: AddPropertyFormProps) {
     });
   }, [setFormData]);
 
-  const handleRemoveTechnicalItem = useCallback((id: string) => {
-    setFormData(prevFormData => ({
-      ...prevFormData,
-      technicalItems: (prevFormData.technicalItems || []).filter(item => item.id !== id)
-    }));
+  // Modified to accept either number or string parameter
+  const handleRemoveTechnicalItem = useCallback((idOrIndex: number | string) => {
+    setFormData(prevFormData => {
+      if (typeof idOrIndex === 'number') {
+        // Handle removal by index
+        const updatedItems = [...(prevFormData.technicalItems || [])];
+        updatedItems.splice(idOrIndex, 1);
+        return {
+          ...prevFormData,
+          technicalItems: updatedItems
+        };
+      } else {
+        // Handle removal by id
+        return {
+          ...prevFormData,
+          technicalItems: (prevFormData.technicalItems || []).filter(item => item.id !== idOrIndex)
+        };
+      }
+    });
   }, [setFormData]);
 
   const handleUpdateTechnicalItem = useCallback((id: string, field: any, value: any) => {
@@ -177,7 +192,6 @@ export function AddPropertyForm({ propertyId }: AddPropertyFormProps) {
         handleToggleFeaturedImage={handleToggleFeaturedImage}
         onAddTechnicalItem={handleAddTechnicalItem}
         onRemoveTechnicalItem={handleRemoveTechnicalItem}
-        onUpdateTechnicalItem={handleUpdateTechnicalItem}
         handleMapImageDelete={handleMapImageDelete}
         isUploading={isUploading}
       />

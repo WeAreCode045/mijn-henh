@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
 import { steps } from "@/components/property/form/formSteps";
 import { usePropertyContentAutoSave } from "@/hooks/usePropertyContentAutoSave";
@@ -28,21 +28,20 @@ interface PropertyContentTabProps {
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
-  handleRemoveAreaPhoto: (index: number) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
+  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   isUpdateMode: boolean;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (idOrIndex: number | string) => void;
 }
 
 export function PropertyContentTab({
@@ -64,29 +63,26 @@ export function PropertyContentTab({
   onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
   handleRemoveFloorplan,
-  handleUpdateFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   isUpdateMode,
   isUploading,
+  isUploadingFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
 }: PropertyContentTabProps) {
   const [internalCurrentStep, setInternalCurrentStep] = useState(1);
   const [pendingChanges, setPendingChanges] = useState(false);
   
-  // Use the provided step if available, otherwise use internal state
   const currentStep = externalCurrentStep !== undefined ? externalCurrentStep : internalCurrentStep;
   
-  // Use the property auto save hook directly
   const { 
     autosaveData, 
     isSaving, 
@@ -94,7 +90,6 @@ export function PropertyContentTab({
     setLastSaved 
   } = usePropertyAutoSave();
   
-  // Handle manual save
   const handleSave = () => {
     if (formData.id) {
       console.log("PropertyContentTab - Manual save triggered");
@@ -153,20 +148,19 @@ export function PropertyContentTab({
         onAreaImagesSelect={onAreaImagesSelect}
         handleImageUpload={handleImageUpload}
         handleAreaPhotosUpload={handleAreaPhotosUpload}
-        handleFloorplanUpload={handleFloorplanUpload}
         handleRemoveImage={handleRemoveImage}
         handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+        handleFloorplanUpload={handleFloorplanUpload}
         handleRemoveFloorplan={handleRemoveFloorplan}
-        handleUpdateFloorplan={handleUpdateFloorplan}
         handleMapImageDelete={handleMapImageDelete}
         onFetchLocationData={onFetchLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
-        onAddTechnicalItem={onAddTechnicalItem}
-        onRemoveTechnicalItem={onRemoveTechnicalItem}
-        onUpdateTechnicalItem={onUpdateTechnicalItem}
         handleSetFeaturedImage={handleSetFeaturedImage}
         handleToggleFeaturedImage={handleToggleFeaturedImage}
         isUploading={isUploading}
+        isUploadingFloorplan={isUploadingFloorplan}
+        onAddTechnicalItem={onAddTechnicalItem}
+        onRemoveTechnicalItem={onRemoveTechnicalItem}
         setPendingChanges={setPendingChanges}
       />
     </div>

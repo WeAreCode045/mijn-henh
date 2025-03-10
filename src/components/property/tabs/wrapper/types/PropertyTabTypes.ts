@@ -11,11 +11,13 @@ export interface PropertyTabProps {
     featuredImage?: string | null;
     featuredImages?: string[];
     images: any[];
+    floorplans?: any[];
     virtualTourUrl?: string;
     youtubeUrl?: string;
     notes?: string;
     created_at?: string;
     updated_at?: string;
+    floorplanEmbedScript?: string;
   };
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
@@ -42,16 +44,20 @@ export interface PropertyTabProps {
     handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleRemoveImage: (index: number) => void;
     isUploading: boolean;
+    handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleRemoveFloorplan: (index: number) => void;
+    isUploadingFloorplan: boolean;
     handleSetFeaturedImage: (url: string | null) => void;
     handleToggleFeaturedImage: (url: string) => void;
-    onAddTechnicalItem: (e?: React.MouseEvent) => void;
-    onRemoveTechnicalItem?: (id: string) => void;
-    onUpdateTechnicalItem?: (id: string, field: any, value: any) => void;
     currentStep: number;
     handleStepClick: (step: number) => void;
     handleNext: () => void;
     handlePrevious: () => void;
     onSubmit: () => void;
     formState: PropertyFormData;
+    onAddTechnicalItem?: () => void;
+    // Use the standardized signature
+    handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
   };
 }

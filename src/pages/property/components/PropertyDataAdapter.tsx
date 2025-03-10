@@ -1,8 +1,5 @@
-
-// Fix Json type issues by using the preparePropertiesForJsonField and similar helper functions
-
 import { PropertySubmitData, PropertyData } from "@/types/property";
-import { prepareAreasForFormSubmission, preparePropertiesForJsonField, prepareFloorplansForFormSubmission } from "@/hooks/property-form/preparePropertyData";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 interface PropertyDataAdapterProps {
   propertyData: PropertyData;
@@ -15,7 +12,6 @@ export const PropertyDataAdapter = ({ propertyData, onSubmit }: PropertyDataAdap
 
     // Transform the data to match the expected types
     const featuresJson = preparePropertiesForJsonField(propertyData.features);
-    const floorplansJson = prepareFloorplansForFormSubmission(propertyData.floorplans);
     const areasJson = prepareAreasForFormSubmission(propertyData.areas);
     const nearbyPlacesJson = preparePropertiesForJsonField(propertyData.nearby_places || []);
 
@@ -35,7 +31,6 @@ export const PropertyDataAdapter = ({ propertyData, onSubmit }: PropertyDataAdap
       description: propertyData.description,
       location_description: propertyData.location_description,
       features: featuresJson,
-      floorplans: floorplansJson,
       featuredImage: propertyData.featuredImage,
       featuredImages: propertyData.featuredImages || [],
       coverImages: propertyData.coverImages || [],

@@ -44,7 +44,6 @@ export interface SupabasePropertyData {
   created_at: string;
   updated_at: string;
   template_id: string;
-  floorplanEmbedScript: string;
 }
 
 export function transformSupabaseData(
@@ -53,19 +52,13 @@ export function transformSupabaseData(
 ): PropertyData {
   // Extract images from property_images
   const images: PropertyImage[] = [];
-  const floorplans: any[] = [];
   let featuredImage: string | null = null;
   const featuredImages: string[] = [];
 
   // Process property images
   if (data.property_images && data.property_images.length > 0) {
     data.property_images.forEach((img) => {
-      if (img.type === "floorplan") {
-        floorplans.push({
-          id: img.id,
-          url: img.url,
-        });
-      } else {
+      if (img.type !== "floorplan") {
         // Regular image
         images.push({
           id: img.id,
@@ -123,7 +116,6 @@ export function transformSupabaseData(
     location_description: data.location_description || "",
     features: dataFeatures,
     images: images,
-    floorplans: floorplans,
     featuredImage: featuredImage,
     featuredImages: featuredImages,
     coverImages: featuredImages, // For backward compatibility
@@ -145,9 +137,8 @@ export function transformSupabaseData(
     created_at: data.created_at,
     updated_at: data.updated_at,
     template_id: data.template_id,
-    floorplanEmbedScript: data.floorplanEmbedScript,
-    // For backward compatibility with components that still use gridImages
-    gridImages: featuredImages
+    floorplans: [], // Add empty floorplans array
+    gridImages: featuredImages // For backward compatibility with components that still use gridImages
   };
 
   return transformedData;

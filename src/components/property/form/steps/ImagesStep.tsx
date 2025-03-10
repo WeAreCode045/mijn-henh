@@ -11,12 +11,13 @@ interface ImagesStepProps {
   handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage?: (index: number) => void;
   handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;  // Updated signature
   handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (index: number) => void;
   handleRemoveFloorplan?: (index: number) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
 }
 
 export function ImagesStep({
@@ -24,12 +25,13 @@ export function ImagesStep({
   handleImageUpload,
   handleRemoveImage,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
   handleRemoveFloorplan,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading
+  isUploading,
+  isUploadingFloorplan
 }: ImagesStepProps) {
   // Helper function to safely get the URL from an image
   const getImageUrl = (image: any): string => {
@@ -90,11 +92,14 @@ export function ImagesStep({
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {formData.areaPhotos.map((photo, index) => {
                   const photoUrl = getImageUrl(photo);
+                  const areaId = "general"; // We use a default area ID for general area photos
+                  const imageId = `area-photo-${index}`; // Generate an ID for the image
+                  
                   return (
                     <ImagePreview
                       key={index}
                       url={photoUrl}
-                      onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(index)}
+                      onRemove={() => handleRemoveAreaPhoto && handleRemoveAreaPhoto(areaId, imageId)}
                     />
                   );
                 })}
@@ -111,7 +116,7 @@ export function ImagesStep({
             {handleFloorplanUpload && (
               <ImageUploader 
                 onUpload={handleFloorplanUpload} 
-                isUploading={isUploading}
+                isUploading={isUploadingFloorplan}
                 label="Upload Floorplans"
               />
             )}

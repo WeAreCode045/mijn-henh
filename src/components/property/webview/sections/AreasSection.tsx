@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
-// Update the interface to correctly extend PropertyImage with boolean properties
 interface PropertyImageWithArea extends PropertyImage {
   area?: string | null;
-  [key: string]: string | boolean | null | undefined; // Updated index signature to include boolean
+  [key: string]: string | boolean | number | null | undefined;
 }
 
 export function AreasSection({ property, settings }: WebViewSectionProps) {
@@ -18,7 +17,6 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
       if (!property.id || !property.areas || property.areas.length === 0) return;
       
       try {
-        // Fetch images from property_images table
         const { data, error } = await supabase
           .from('property_images')
           .select('*')
@@ -30,12 +28,10 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
           return;
         }
         
-        // Group images by area
         const imagesByArea: Record<string, PropertyImageWithArea[]> = {};
         
         if (data && data.length > 0) {
           data.forEach(img => {
-            // Cast to PropertyImageWithArea since we know it matches our updated interface
             const image = img as PropertyImageWithArea;
             if (image.area) {
               if (!imagesByArea[image.area]) {
@@ -46,7 +42,6 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
           });
         }
         
-        console.log('Area images from property_images table:', imagesByArea);
         setAreaImages(imagesByArea);
       } catch (err) {
         console.error('Error fetching area images:', err);
@@ -56,42 +51,36 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
     fetchAreaImages();
   }, [property.id, property.areas]);
 
-  if (!property.areas || property.areas.length === 0) return null;
+  if (!property.areas || property.areas.length === 0) {
+    return (
+      <div className="p-4 bg-white/90 rounded-lg shadow-sm">
+        <p className="text-gray-500 text-center">No areas available for this property</p>
+      </div>
+    );
+  }
 
-  // Calculate which areas should be shown on this page based on the page number
-  const pageMatch = property.currentPath?.match(/areas-(\d+)/);
-  const pageIndex = pageMatch ? parseInt(pageMatch[1]) : 0;
-  const startIndex = pageIndex * 2;
-  const areasForThisPage = property.areas.slice(startIndex, startIndex + 2);
+  // Ensure we have valid areas to display
+  const areasToDisplay = property.areas.slice(0, 2);
   
-  // Get image URLs for an area
   const getAreaImages = (areaId: string): string[] => {
-    // First check if we have images from the property_images table
     if (areaImages[areaId]) {
       return areaImages[areaId].map(img => img.url);
     }
     
-    // Fallback to using imageIds from the area in the property.images array
     const area = property.areas?.find(a => a.id === areaId);
     if (!area || !area.imageIds || !property.images) return [];
     
-    // Find matching images based on ID
     return property.images
       .filter(img => area.imageIds.includes(img.id))
       .map(img => img.url);
   };
 
-  console.log("AreasSection - property.areas:", property.areas);
-
   return (
     <div className="space-y-4 pb-24">
       <div className="px-6 space-y-8">
-        {areasForThisPage.map((area, index) => {
+        {areasToDisplay.map((area, index) => {
           const areaImagesUrls = getAreaImages(area.id);
-          const columnCount = area.columns || 2; // Default to 2 columns if not specified
-          
-          console.log(`Area ${index} (${area.title}) - columns:`, columnCount);
-          console.log(`Area ${index} (${area.title}) - resolved images:`, areaImagesUrls);
+          const columnCount = area.columns || 2;
           
           return (
             <div key={index} className="space-y-4 bg-white/90 p-4 rounded-lg shadow-sm">

@@ -1,10 +1,11 @@
 
-import { PropertyData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyData } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
+import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
@@ -39,9 +40,6 @@ export function usePropertyFormManager(property: PropertyData) {
     addFeature,
     removeFeature,
     updateFeature,
-    addTechnicalItem,
-    removeTechnicalItem,
-    updateTechnicalItem,
   } = usePropertyContent(
     formState,
     handleFieldChangeWithTracking
@@ -66,19 +64,22 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleFloorplanUpload,
-    handleRemoveAreaPhoto,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
+    handleRemoveAreaPhoto,  // Make sure this is properly exposed from usePropertyImages
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
     images
   } = usePropertyImages(
     formState, 
     setFormStateWithTracking
   );
-  
-  // Import directly instead of using require, and use updated method name
-  const { handleSetFeaturedImage, handleToggleFeaturedImage } = usePropertyMainImages(
-    formState, 
+
+  // Property floorplans management
+  const {
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan
+  } = usePropertyFloorplans(
+    formState,
     setFormStateWithTracking
   );
   
@@ -107,6 +108,42 @@ export function usePropertyFormManager(property: PropertyData) {
     handleFieldChange('template_id', id);
   };
 
+  // Technical items management
+  const onAddTechnicalItem = () => {
+    setFormStateWithTracking({
+      ...formState,
+      technicalItems: [
+        ...(formState.technicalItems || []),
+        {
+          id: Date.now().toString(),
+          title: '',
+          size: '',
+          description: '',
+          floorplanId: null
+        }
+      ]
+    });
+  };
+
+  // Create a function that can handle both number and string parameters
+  const onRemoveTechnicalItem = (idOrIndex: number | string) => {
+    if (typeof idOrIndex === 'number') {
+      // Handle removal by index
+      const updatedItems = [...(formState.technicalItems || [])];
+      updatedItems.splice(idOrIndex, 1);
+      setFormStateWithTracking({
+        ...formState,
+        technicalItems: updatedItems
+      });
+    } else {
+      // Handle removal by id
+      setFormStateWithTracking({
+        ...formState,
+        technicalItems: (formState.technicalItems || []).filter(item => item.id !== idOrIndex)
+      });
+    }
+  };
+
   // Cast property to PropertyData to ensure it has required id
   const propertyWithRequiredId: PropertyData = {
     ...formState,
@@ -122,9 +159,6 @@ export function usePropertyFormManager(property: PropertyData) {
     addFeature,
     removeFeature,
     updateFeature,
-    addTechnicalItem,
-    removeTechnicalItem,
-    updateTechnicalItem,
     addArea,
     removeArea,
     updateArea,
@@ -135,12 +169,12 @@ export function usePropertyFormManager(property: PropertyData) {
     handleRemoveImage,
     isUploading,
     handleAreaPhotosUpload,
-    handleFloorplanUpload,
-    handleRemoveAreaPhoto,
-    handleRemoveFloorplan,
-    handleUpdateFloorplan,
+    handleRemoveAreaPhoto,  // Make sure to include this in the return object
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
     onSubmit,
     currentStep,
     handleStepClick,
@@ -148,6 +182,8 @@ export function usePropertyFormManager(property: PropertyData) {
     handlePrevious,
     propertyWithRequiredProps: propertyWithRequiredId,
     lastSaved,
-    isSaving
+    isSaving,
+    onAddTechnicalItem,
+    onRemoveTechnicalItem
   };
 }

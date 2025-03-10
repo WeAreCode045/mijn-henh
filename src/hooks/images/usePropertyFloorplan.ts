@@ -29,10 +29,12 @@ export function usePropertyFloorplan(
           .from('properties')
           .getPublicUrl(filePath);
 
+        // Create a valid PropertyFloorplan object with required id
         return {
+          id: crypto.randomUUID(), // Generate an ID for the floorplan
           url: publicUrl,
           columns: 1 // Default to 1 column
-        };
+        } as PropertyFloorplan;
       });
 
       const newFloorplan = await Promise.all(uploadPromises);

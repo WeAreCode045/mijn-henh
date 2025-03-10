@@ -14,7 +14,8 @@ export interface PropertyImage {
   type?: string;
   is_main?: boolean; // Updated from is_featured to is_main
   is_featured_image?: boolean; // Updated from is_grid_image to is_featured_image
-  [key: string]: string | boolean | null | undefined; // Updated index signature to include boolean
+  sort_order?: number; // Added sort_order field for sorting
+  [key: string]: string | boolean | number | null | undefined; // Updated index signature to include number
 }
 
 export interface PropertyArea {
@@ -35,10 +36,12 @@ export interface PropertyTechnicalItem {
 }
 
 export interface PropertyFloorplan {
-  id?: string;     // Added ID property for tracking floorplans
+  id: string;
   url: string;
-  filePath?: string; // Added filePath for storage deletion
-  columns?: number; // Field for grid column count
+  filePath?: string;
+  columns?: number;
+  title?: string;
+  sort_order?: number; // Added sort_order for ordering
 }
 
 export interface PropertyPlaceType {
@@ -84,7 +87,7 @@ interface BasePropertyData {
   location_description?: string;
   features: PropertyFeature[];
   images: PropertyImage[];
-  floorplans: PropertyFloorplan[]; // Updated to structured objects
+  floorplans?: PropertyFloorplan[]; // Made optional
   technicalItems?: PropertyTechnicalItem[]; // New field for technical items
   featuredImage: string | null;
   featuredImages: string[]; // Changed from coverImages to featuredImages
@@ -136,7 +139,7 @@ export interface PropertySubmitData {
   hasGarden: boolean;
   description: string;
   location_description?: string;
-  floorplans: Json; // Updated to Json for structured floorplans
+  floorplans?: Json; // Made optional
   technicalItems?: Json; // New field for technical items
   featuredImage: string | null;
   featuredImages: string[]; // Changed from coverImages to featuredImages
@@ -175,7 +178,7 @@ export interface PropertyDatabaseData {
   description?: string;
   location_description?: string;
   features?: Json;
-  floorplans?: Json;
+  floorplans?: Json; // Made optional
   featuredImage?: string | null;
   featuredImages?: string[]; // Changed from coverImages to featuredImages
   coverImages?: string[]; // Keep for backward compatibility

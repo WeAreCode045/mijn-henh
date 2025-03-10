@@ -1,61 +1,72 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyFloorplan } from "@/types/property";
-import { FloorplanProcessor } from "./floorplans/FloorplanProcessor";
-import { FloorplanGrid } from "./floorplans/FloorplanGrid";
-import { FloorplanUploader } from "./floorplans/FloorplanUploader";
-import { FloorplanEmbed } from "./floorplans/FloorplanEmbed";
+import { useState, useEffect } from "react";
 import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
+import { PropertyFloorplan } from "@/types/property";
+import { FloorplanUploader } from "./floorplans/FloorplanUploader";
+import { SortableFloorplanGrid } from "./floorplans/SortableFloorplanGrid";
+import { useSortableFloorplans } from "@/hooks/images/useSortableFloorplans";
 
-interface FloorplansCardProps {
-  floorplans: PropertyFloorplan[] | string[];
-  floorplanEmbedScript?: string;
+interface FloorplanCardProps {
+  id?: string;
+  floorplans?: any[];
   onFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveFloorplan?: (index: number) => void;
-  onUpdateFloorplanEmbedScript?: (script: string) => void;
-  propertyId?: string; // Add property ID to fetch floorplans directly if needed
+  isUploading?: boolean;
 }
 
 export function FloorplansCard({
+  id,
   floorplans = [],
-  floorplanEmbedScript = "",
   onFloorplanUpload,
   onRemoveFloorplan,
-  onUpdateFloorplanEmbedScript,
-  propertyId,
-}: FloorplansCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [parsedFloorplans, setParsedFloorplans] = useState<PropertyFloorplan[]>([]);
-  
-  // Use a key to force re-render when floorplans array changes
-  const [floorplansKey, setFloorplansKey] = useState(Date.now());
+  isUploading = false,
+}: FloorplanCardProps) {
+  const [uploading, setUploading] = useState(isUploading);
+  const [displayFloorplans, setDisplayFloorplans] = useState<PropertyFloorplan[]>(
+    Array.isArray(floorplans) ? floorplans : []
+  );
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Use our custom hook for drag and drop functionality
+  const { sortableFloorplans, handleDragEnd } = useSortableFloorplans(displayFloorplans, id);
+
+  useEffect(() => {
+    setUploading(isUploading);
+  }, [isUploading]);
+
+  useEffect(() => {
+    if (floorplans && floorplans.length > 0) {
+      // Sort floorplans by sort_order when they come in
+      const sortedFloorplans = [...floorplans].sort((a, b) => {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      setDisplayFloorplans(sortedFloorplans);
+    }
+  }, [floorplans]);
+
+  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploading(true);
     if (onFloorplanUpload) {
-      setIsLoading(true);
-      try {
-        onFloorplanUpload(e);
-      } finally {
-        setIsLoading(false);
-      }
+      onFloorplanUpload(e);
     }
+    // Reset the file input value
+    e.target.value = '';
   };
 
-  const handleEmbedScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onUpdateFloorplanEmbedScript) {
-      onUpdateFloorplanEmbedScript(e.target.value);
+  const handleFetchComplete = (fetchedFloorplans: PropertyFloorplan[]) => {
+    if (fetchedFloorplans.length > 0) {
+      // Ensure floorplans are sorted by sort_order
+      const sortedFloorplans = [...fetchedFloorplans].sort((a, b) => {
+        if (a.sort_order !== undefined && b.sort_order !== undefined) {
+          return a.sort_order - b.sort_order;
+        }
+        return 0;
+      });
+      setDisplayFloorplans(sortedFloorplans);
     }
-  };
-
-  const handleFloorplansProcessed = (processed: PropertyFloorplan[]) => {
-    setParsedFloorplans(processed);
-    setFloorplansKey(Date.now()); // Update key to force re-render
-  };
-
-  const handleDatabaseFloorplansFetched = (dbFloorplans: PropertyFloorplan[]) => {
-    setParsedFloorplans(dbFloorplans);
-    setFloorplansKey(Date.now()); // Force re-render
   };
 
   return (
@@ -64,32 +75,29 @@ export function FloorplansCard({
         <CardTitle className="text-lg font-medium">Floorplans</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Hidden processor components that handle data transformation */}
-        <FloorplanProcessor 
-          floorplans={floorplans} 
-          propertyId={propertyId}
-          onProcessed={handleFloorplansProcessed} 
-        />
-        
-        <FloorplanDatabaseFetcher
-          propertyId={propertyId}
-          floorplans={parsedFloorplans}
-          onFetchComplete={handleDatabaseFloorplansFetched}
-        />
+        {/* Hidden database fetcher component */}
+        {id && (
+          <FloorplanDatabaseFetcher
+            propertyId={id}
+            floorplans={displayFloorplans}
+            onFetchComplete={handleFetchComplete}
+          />
+        )}
 
-        {/* Visible UI components */}
-        <FloorplanUploader isLoading={isLoading} onUpload={handleUpload} />
-        
-        <FloorplanEmbed 
-          embedScript={floorplanEmbedScript} 
-          onChange={handleEmbedScriptChange} 
-        />
-
-        <FloorplanGrid 
-          floorplans={parsedFloorplans} 
-          gridKey={floorplansKey} 
-          onRemoveFloorplan={onRemoveFloorplan} 
-        />
+        <div className="flex flex-col space-y-4">
+          <FloorplanUploader 
+            onFloorplanUpload={handleFloorplanUpload}
+            isUploading={uploading}
+          />
+          
+          <div className="w-full">
+            <SortableFloorplanGrid 
+              floorplans={sortableFloorplans}
+              onRemoveFloorplan={onRemoveFloorplan || (() => {})}
+              onDragEnd={handleDragEnd}
+            />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useState } from "react";
 
 interface DesignTabProps {
   settings: AgencySettings;
@@ -21,6 +22,21 @@ export function DesignTab({
   onPdfBackgroundUpload,
   onWebviewBackgroundUpload
 }: DesignTabProps) {
+  const [previewStyle, setPreviewStyle] = useState<React.CSSProperties>({});
+  
+  // Update preview style when webview background changes
+  useEffect(() => {
+    if (settings.webviewBackgroundUrl) {
+      setPreviewStyle({
+        backgroundImage: `url(${settings.webviewBackgroundUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      });
+    } else {
+      setPreviewStyle({});
+    }
+  }, [settings.webviewBackgroundUrl]);
+
   return (
     <div className="space-y-8">
       <Tabs defaultValue="global" className="w-full">
@@ -107,6 +123,26 @@ export function DesignTab({
                   onChange={onWebviewBackgroundUpload}
                   accept="image/*"
                 />
+                
+                <div className="mt-4 border rounded-lg overflow-hidden">
+                  <div className="p-2 bg-gray-50 border-b">
+                    <h5 className="text-sm font-medium">Background Preview</h5>
+                  </div>
+                  <div 
+                    className="h-40 w-full p-4 flex items-center justify-center" 
+                    style={previewStyle}
+                  >
+                    {settings.webviewBackgroundUrl ? (
+                      <div className="bg-white bg-opacity-80 p-4 rounded shadow text-center">
+                        <p className="font-medium">Content will appear like this</p>
+                        <p className="text-xs text-gray-600">With your background image behind</p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400">No background image set</p>
+                    )}
+                  </div>
+                </div>
+                
                 {settings.webviewBackgroundUrl && (
                   <div className="mt-2">
                     <img

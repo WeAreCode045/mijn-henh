@@ -1,5 +1,5 @@
 
-import { PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { PropertyFormContent } from "@/components/property/form/PropertyFormContent";
 
 interface PropertyContentFormProps {
@@ -15,22 +15,21 @@ interface PropertyContentFormProps {
   onAreaImageUpload: (areaId: string, files: FileList) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage: (index: number) => void;
-  handleRemoveAreaPhoto: (index: number) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onAddTechnicalItem?: () => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (index: number) => void;
   setPendingChanges: (pending: boolean) => void;
 }
 
@@ -49,23 +48,22 @@ export function PropertyContentForm({
   onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
   handleRemoveFloorplan,
-  handleUpdateFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
   setPendingChanges
 }: PropertyContentFormProps) {
   const handleFieldChangeWithTracking = (field: keyof PropertyFormData, value: any) => {
+    console.log(`Field changed: ${String(field)}`, value);
     onFieldChange(field, value);
     setPendingChanges(true);
   };
@@ -100,27 +98,6 @@ export function PropertyContentForm({
     setPendingChanges(true);
   };
 
-  const safeAddTechnicalItem = () => {
-    if (onAddTechnicalItem) {
-      onAddTechnicalItem();
-      setPendingChanges(true);
-    }
-  };
-
-  const safeRemoveTechnicalItem = (id: string) => {
-    if (onRemoveTechnicalItem) {
-      onRemoveTechnicalItem(id);
-      setPendingChanges(true);
-    }
-  };
-
-  const safeUpdateTechnicalItem = (id: string, field: keyof PropertyTechnicalItem, value: any) => {
-    if (onUpdateTechnicalItem) {
-      onUpdateTechnicalItem(id, field, value);
-      setPendingChanges(true);
-    }
-  };
-
   const safeSetFeaturedImage = (url: string | null) => {
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
@@ -131,6 +108,20 @@ export function PropertyContentForm({
   const safeToggleFeaturedImage = (url: string) => {
     if (handleToggleFeaturedImage) {
       handleToggleFeaturedImage(url);
+      setPendingChanges(true);
+    }
+  };
+
+  const wrappedAddTechnicalItem = () => {
+    if (onAddTechnicalItem) {
+      onAddTechnicalItem();
+      setPendingChanges(true);
+    }
+  };
+
+  const wrappedRemoveTechnicalItem = (index: number) => {
+    if (onRemoveTechnicalItem) {
+      onRemoveTechnicalItem(index);
       setPendingChanges(true);
     }
   };
@@ -151,20 +142,19 @@ export function PropertyContentForm({
       onAreaImagesSelect={onAreaImagesSelect}
       handleImageUpload={handleImageUpload}
       handleAreaPhotosUpload={handleAreaPhotosUpload}
-      handleFloorplanUpload={handleFloorplanUpload}
       handleRemoveImage={handleRemoveImage}
       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
+      handleFloorplanUpload={handleFloorplanUpload}
       handleRemoveFloorplan={handleRemoveFloorplan}
-      handleUpdateFloorplan={handleUpdateFloorplan}
       handleMapImageDelete={handleMapImageDelete}
       onFetchLocationData={onFetchLocationData}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
-      onAddTechnicalItem={safeAddTechnicalItem}
-      onRemoveTechnicalItem={safeRemoveTechnicalItem}
-      onUpdateTechnicalItem={safeUpdateTechnicalItem}
       handleSetFeaturedImage={safeSetFeaturedImage}
       handleToggleFeaturedImage={safeToggleFeaturedImage}
       isUploading={isUploading}
+      onAddTechnicalItem={wrappedAddTechnicalItem}
+      onRemoveTechnicalItem={wrappedRemoveTechnicalItem}
+      setPendingChanges={setPendingChanges}
     />
   );
 }

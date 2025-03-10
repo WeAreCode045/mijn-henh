@@ -1,11 +1,9 @@
-
-import { PropertyArea, PropertyFormData, PropertyTechnicalItem } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { AreasStep } from "./steps/AreasStep";
 import { FeaturesStep } from "./steps/FeaturesStep";
 import { GeneralInfoStep } from "./steps/GeneralInfoStep";
-import { ImagesStep } from "./steps/ImagesStep";
 import { LocationStep } from "./steps/LocationStep";
-import { TechnicalDataStep } from "./steps/TechnicalDataStep";
+import { ConstructionStep } from "./steps/ConstructionStep";
 
 interface PropertyFormContentProps {
   step: number;
@@ -22,20 +20,20 @@ interface PropertyFormContentProps {
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
-  handleRemoveAreaPhoto: (index: number) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  handleUpdateFloorplan?: (index: number, field: any, value: any) => void;
+  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
   handleMapImageDelete?: () => Promise<void>;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onAddTechnicalItem?: (e?: React.MouseEvent) => void;
-  onRemoveTechnicalItem?: (id: string) => void;
-  onUpdateTechnicalItem?: (id: string, field: keyof PropertyTechnicalItem, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  isUploadingFloorplan?: boolean;
+  onAddTechnicalItem?: () => void;
+  onRemoveTechnicalItem?: (index: number) => void;
+  setPendingChanges?: (changes: boolean) => void;
 }
 
 export function PropertyFormContent({
@@ -53,20 +51,20 @@ export function PropertyFormContent({
   onAreaImagesSelect,
   handleImageUpload,
   handleAreaPhotosUpload,
-  handleFloorplanUpload,
   handleRemoveImage,
   handleRemoveAreaPhoto,
+  handleFloorplanUpload,
   handleRemoveFloorplan,
-  handleUpdateFloorplan,
   handleMapImageDelete,
   onFetchLocationData,
   onRemoveNearbyPlace,
-  onAddTechnicalItem,
-  onRemoveTechnicalItem,
-  onUpdateTechnicalItem,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading
+  isUploading,
+  isUploadingFloorplan,
+  onAddTechnicalItem,
+  onRemoveTechnicalItem,
+  setPendingChanges
 }: PropertyFormContentProps) {
   const renderStep = () => {
     switch (step) {
@@ -95,24 +93,6 @@ export function PropertyFormContent({
         );
       case 3:
         return (
-          <form id="imagesForm">
-            <ImagesStep
-              formData={formData}
-              onFieldChange={onFieldChange}
-              handleImageUpload={handleImageUpload}
-              handleAreaPhotosUpload={handleAreaPhotosUpload}
-              handleFloorplanUpload={handleFloorplanUpload}
-              handleRemoveImage={handleRemoveImage}
-              handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-              handleRemoveFloorplan={handleRemoveFloorplan}
-              handleSetFeaturedImage={handleSetFeaturedImage}
-              handleToggleFeaturedImage={handleToggleFeaturedImage}
-              isUploading={isUploading}
-            />
-          </form>
-        );
-      case 4:
-        return (
           <form id="areasForm">
             <AreasStep
               areas={formData.areas || []}
@@ -128,7 +108,7 @@ export function PropertyFormContent({
             />
           </form>
         );
-      case 5:
+      case 4:
         return (
           <form id="locationForm">
             <LocationStep
@@ -140,19 +120,15 @@ export function PropertyFormContent({
             />
           </form>
         );
-      case 6:
+      case 5:
         return (
-          <form id="technicalDataForm">
-            <TechnicalDataStep
+          <form id="constructionForm">
+            <ConstructionStep
               formData={formData}
-              onFieldChange={onFieldChange}
               onAddTechnicalItem={onAddTechnicalItem}
               onRemoveTechnicalItem={onRemoveTechnicalItem}
-              onUpdateTechnicalItem={onUpdateTechnicalItem}
-              onFloorplanUpload={handleFloorplanUpload}
-              onRemoveFloorplan={handleRemoveFloorplan}
-              onUpdateFloorplan={handleUpdateFloorplan}
-              isUploading={isUploading}
+              onFieldChange={onFieldChange}
+              floorplans={formData.floorplans || []}
             />
           </form>
         );

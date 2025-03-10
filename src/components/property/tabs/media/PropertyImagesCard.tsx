@@ -1,10 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { UploadIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
-import { useState } from "react";
-import { ImagePreview } from "@/components/ui/ImagePreview";
+import { useState, useEffect } from "react";
+import { ImageUploader } from "./images/ImageUploader";
+import { SortableImageGrid } from "./images/SortableImageGrid";
+import { useSortableImages } from "@/hooks/images/useSortableImages";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
@@ -15,6 +15,7 @@ interface PropertyImagesCardProps {
   featuredImageUrl?: string | null;
   featuredImageUrls?: string[];
   isUploading?: boolean;
+  propertyId?: string;
 }
 
 export function PropertyImagesCard({
@@ -26,18 +27,16 @@ export function PropertyImagesCard({
   featuredImageUrl,
   featuredImageUrls = [],
   isUploading = false,
+  propertyId,
 }: PropertyImagesCardProps) {
-  // File input ref
   const [uploading, setUploading] = useState(isUploading);
+  
+  const { sortableImages, handleDragEnd } = useSortableImages(images, propertyId);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUploading(true);
-    onImageUpload(e);
-    // Reset the file input value
-    e.target.value = '';
-  };
+  useEffect(() => {
+    setUploading(isUploading);
+  }, [isUploading]);
 
-  // Add methods to handle main and featured image actions with preventDefault
   const handleSetFeatured = (e: React.MouseEvent, url: string) => {
     e.preventDefault(); // Prevent form submission
     if (onSetFeatured) {
@@ -52,6 +51,12 @@ export function PropertyImagesCard({
     }
   };
 
+  // Debug logging for rendering
+  console.log("Rendering PropertyImagesCard with:", {
+    imageCount: sortableImages.length,
+    sortOrders: sortableImages.map(i => i.sort_order || 'none')
+  });
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -59,46 +64,20 @@ export function PropertyImagesCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col space-y-4">
-          <label htmlFor="image-upload" className="w-full">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              disabled={uploading}
-            >
-              <UploadIcon className="w-4 h-4 mr-2" />
-              {uploading ? "Uploading..." : "Upload Images"}
-            </Button>
-            <input
-              id="image-upload"
-              type="file"
-              multiple
-              accept="image/*"
-              className="sr-only"
-              onChange={handleImageUpload}
-              disabled={uploading}
-            />
-          </label>
+          <ImageUploader 
+            onImageUpload={onImageUpload}
+            isUploading={uploading}
+          />
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-            {images && images.length > 0 ? (
-              images.map((image, index) => (
-                <ImagePreview
-                  key={image.id || index}
-                  url={image.url}
-                  onRemove={() => onRemoveImage(index)}
-                  isFeatured={image.url === featuredImageUrl}
-                  onSetFeatured={(e) => handleSetFeatured(e, image.url)}
-                  isInFeatured={featuredImageUrls.includes(image.url)}
-                  onToggleFeatured={(e) => handleToggleFeatured(e, image.url)}
-                />
-              ))
-            ) : (
-              <div className="col-span-full py-8 text-center text-gray-500">
-                No images uploaded yet. Click "Upload Images" to add images.
-              </div>
-            )}
-          </div>
+          <SortableImageGrid 
+            images={sortableImages}
+            onRemoveImage={onRemoveImage}
+            handleSetFeatured={handleSetFeatured}
+            handleToggleFeatured={handleToggleFeatured}
+            featuredImageUrl={featuredImageUrl}
+            featuredImageUrls={featuredImageUrls}
+            onDragEnd={handleDragEnd}
+          />
         </div>
       </CardContent>
     </Card>
