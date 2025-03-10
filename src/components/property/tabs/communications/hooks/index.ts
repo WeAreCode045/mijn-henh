@@ -1,10 +1,11 @@
 
-import { useMarkAsRead } from './useMarkAsRead';
-import { useSendResponse } from './useSendResponse';
-import { useSubmissions } from './useSubmissions';
+// Re-export all communication hooks
+export { useMarkAsRead } from './useMarkAsRead';
+export { useSendResponse } from './useSendResponse';
+export { useSubmissionActions } from './useSubmissionActions';
+export { useSubmissionSelection } from './useSubmissionSelection';
+export { useFetchSubmissions } from './useFetchSubmissions';
 
-export {
-  useMarkAsRead,
-  useSendResponse,
-  useSubmissions
-};
+// Export hook types as needed
+export type { UseMarkAsReadOptions } from './useMarkAsRead';
+export type { UseSendResponseOptions } from './useSendResponse';

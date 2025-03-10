@@ -39,4 +39,5 @@ export interface SubmissionDetailProps {
 
 export interface SubmissionRepliesProps {
   replies: SubmissionReply[];
+  submissionId: string;
 }
