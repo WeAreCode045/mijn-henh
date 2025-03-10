@@ -7,6 +7,7 @@ import {
 } from '@supabase/auth-helpers-react';
 import { Database } from '@/integrations/supabase/types';
 import { User } from '@/types/user';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextProps {
   session: Session | null;
@@ -27,7 +28,10 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const session = useSession();
-  const supabaseClient = useSupabaseClient<Database>();
+  // We'll use the direct import as a fallback
+  const supabaseFromHook = useSupabaseClient<Database>();
+  const supabaseClient = supabaseFromHook || supabase;
+  
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -35,6 +39,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
+    // Check if supabaseClient is available before setting up auth listener
+    if (!supabaseClient || !supabaseClient.auth) {
+      console.error('Supabase client not available');
+      setIsError(true);
+      setIsLoading(false);
+      return () => {};
+    }
+
     // Set up auth state listener
     const { data: authListener } = supabaseClient.auth.onAuthStateChange(
       (event, newSession) => {
@@ -70,6 +82,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     async function fetchProfile() {
+      // Check if supabaseClient is available before fetching profile
+      if (!supabaseClient || !supabaseClient.from) {
+        console.error('Supabase client not available for fetching profile');
+        setIsError(true);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setIsError(false);
 
@@ -134,6 +154,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async () => {
     console.log('Signing out...');
     try {
+      if (!supabaseClient || !supabaseClient.auth) {
+        throw new Error('Supabase client not available for sign out');
+      }
+      
       const { error } = await supabaseClient.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);

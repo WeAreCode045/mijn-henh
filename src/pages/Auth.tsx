@@ -17,7 +17,10 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, supabaseClient } = useAuth();
+  
+  // Use the client from context if available, otherwise use the direct import
+  const authClient = supabaseClient?.auth ? supabaseClient : supabase;
 
   // Redirect if already logged in
   useEffect(() => {
@@ -31,8 +34,12 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
+      if (!authClient.auth) {
+        throw new Error("Authentication client not available");
+      }
+
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await authClient.auth.signUp({
           email,
           password,
           options: {
@@ -49,7 +56,7 @@ export default function Auth() {
           description: "Please check your email to confirm your account",
         });
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await authClient.auth.signInWithPassword({
           email,
           password,
         });
