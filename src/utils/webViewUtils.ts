@@ -16,11 +16,13 @@ export async function getOrCreateWebViewUrl(propertyId: string, objectId: string
     }
 
     if (existingView) {
-      // Use new URL structure format
+      console.log("Found existing web view for property:", propertyId);
+      // Use property ID for the URL to be consistent
       return `/property/${propertyId}/webview`;
     }
 
     // If no existing view, create a new one
+    console.log("Creating new web view for property:", propertyId);
     const { error: insertError } = await supabase
       .from('property_web_views')
       .insert({
@@ -33,7 +35,7 @@ export async function getOrCreateWebViewUrl(propertyId: string, objectId: string
       return null;
     }
 
-    // Use new URL structure format
+    // Use property ID for consistent URLs
     return `/property/${propertyId}/webview`;
   } catch (error) {
     console.error('Unexpected error in getOrCreateWebViewUrl:', error);

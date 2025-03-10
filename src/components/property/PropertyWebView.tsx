@@ -1,3 +1,4 @@
+
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,6 +26,12 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
   const { settings } = useAgencySettings();
   const contentRef = useRef<HTMLDivElement>(null);
   const printContentRef = useRef<HTMLDivElement>(null);
+  
+  // Debugging the id parameter
+  useEffect(() => {
+    console.log("PropertyWebView - Received ID parameter:", id);
+    console.log("PropertyWebView - Received property prop:", property?.id);
+  }, [id, property]);
   
   const { propertyData, isLoading, error } = usePropertyData(id, property);
   
@@ -66,6 +73,7 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
 
   // Error state
   if (error || !propertyData) {
+    console.error("PropertyWebView - Error or no property data:", error);
     return <WebViewError error={error} isDialog={isDialog} />;
   }
 

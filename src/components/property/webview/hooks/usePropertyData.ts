@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,16 +45,18 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
       try {
         console.log("usePropertyData - Fetching property with ID:", id);
         
+        // First try to fetch by object_id (most likely for webview URLs)
         let { data, error } = await supabase
           .from('properties')
           .select(`
             *,
             property_images(*),
-            agent:profiles(id, full_name, email, phone, photo_url:avatar)
+            agent:profiles(id, full_name, email, phone, avatar)
           `)
           .eq('object_id', id)
           .maybeSingle();
 
+        // If not found by object_id, try by UUID
         if (!data && !error) {
           console.log("usePropertyData - Not found by object_id, trying UUID:", id);
           const { data: uuidData, error: uuidError } = await supabase
@@ -61,7 +64,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             .select(`
               *,
               property_images(*),
-              agent:profiles(id, full_name, email, phone, photo_url:avatar)
+              agent:profiles(id, full_name, email, phone, avatar)
             `)
             .eq('id', id)
             .maybeSingle();
@@ -78,14 +81,14 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
           data = uuidData;
         }
 
-        console.log("usePropertyData - Raw data from Supabase:", {
-          id: data?.id,
-          hasFloorplanScript: !!data?.floorplanEmbedScript,
-          scriptLength: data?.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
-          scriptPreview: data?.floorplanEmbedScript ? data.floorplanEmbedScript.substring(0, 50) + '...' : 'none'
-        });
-
         if (data) {
+          console.log("usePropertyData - Raw data from Supabase:", {
+            id: data?.id,
+            objectId: data?.object_id,
+            hasFloorplanScript: !!data?.floorplanEmbedScript,
+            scriptLength: data?.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0
+          });
+
           const propertyWithAgent = {
             ...data,
             agent: data.agent || null,
@@ -109,7 +112,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             setIsLoading(false);
           }
         } else {
-          console.log("usePropertyData - No property found with ID:", id);
+          console.error("usePropertyData - No property found with ID:", id);
           if (isMounted.current) {
             setError(`Property not found with ID: ${id}`);
             setIsLoading(false);

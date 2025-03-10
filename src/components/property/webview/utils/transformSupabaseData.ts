@@ -25,12 +25,13 @@ export interface SupabasePropertyData {
   longitude: number | null;
   map_image: string | null;
   agent_id: string | null;
+  object_id: string | null;
   agent: {
     id: string;
     full_name: string;
     email: string;
     phone: string;
-    avatar_url: string; // This is now correct
+    avatar: string; // Using avatar instead of avatar_url
   } | null;
   property_images: {
     id: string;
@@ -51,12 +52,14 @@ export function transformSupabaseData(
   data: SupabasePropertyData,
   settings?: AgencySettings
 ): PropertyData {
-  // Debug log for floorplan script
+  // Debug log for incoming data
   console.log('transformSupabaseData - Processing property:', {
     id: data.id,
+    objectId: data.object_id,
     hasFloorplanScript: !!data.floorplanEmbedScript,
     scriptLength: data.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
-    scriptType: typeof data.floorplanEmbedScript
+    scriptType: typeof data.floorplanEmbedScript,
+    imageCount: data.property_images?.length || 0
   });
 
   // Extract images from property_images
@@ -114,6 +117,7 @@ export function transformSupabaseData(
   // Create the transformed property data
   const transformedData: PropertyData = {
     id: data.id,
+    object_id: data.object_id || undefined,
     title: data.title || "",
     price: data.price || "",
     address: data.address || "",
@@ -143,7 +147,7 @@ export function transformSupabaseData(
           name: data.agent.full_name,
           email: data.agent.email,
           phone: data.agent.phone,
-          photoUrl: data.agent.avatar_url,
+          photoUrl: data.agent.avatar,
         }
       : undefined,
     created_at: data.created_at,
@@ -153,10 +157,13 @@ export function transformSupabaseData(
     floorplans: [],
   };
 
-  console.log('transformSupabaseData - Returning transformed data with floorplan script:', {
+  console.log('transformSupabaseData - Returning transformed data:', {
     id: transformedData.id,
+    objectId: transformedData.object_id,
     hasFloorplanScript: !!transformedData.floorplanEmbedScript,
-    scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0
+    scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0,
+    imageCount: transformedData.images.length,
+    areaCount: transformedData.areas.length
   });
 
   return transformedData;
