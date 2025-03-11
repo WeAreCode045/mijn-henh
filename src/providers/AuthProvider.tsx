@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   Session,
@@ -53,16 +54,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
           if (data) {
-            const user: User = {
+            const userData: User = {
               id: data.id,
               email: data.email,
               full_name: data.full_name,
               phone: data.phone,
               whatsapp_number: data.whatsapp_number,
               role: data.role,
-              avatar_url: data.avatar_url, // Changed from avatar to avatar_url
+              avatar_url: data.avatar_url,
             };
-            setProfile(user);
+            setProfile(userData);
             setIsAdmin(data.role === 'admin');
           }
         } catch (error) {
