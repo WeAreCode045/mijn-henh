@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,30 @@ export default function Auth() {
     }
   };
 
+  /* Uncomment this for development purposes only
+  const handleDevLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: "maurice@devtig-online.nl",
+        password: "REPLACE_WITH_ACTUAL_PASSWORD",
+      });
+      
+      if (error) throw error;
+      navigate('/');
+    } catch (error: any) {
+      console.error("Dev login error:", error);
+      toast({
+        title: "Dev Login Failed",
+        description: error.message || "Authentication failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  */
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-estate-50 px-4">
       <Card className="w-full max-w-md">
@@ -106,6 +130,18 @@ export default function Auth() {
             >
               {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
             </Button>
+            
+            {/* Uncomment for development only
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mt-4"
+              onClick={handleDevLogin}
+              disabled={isLoading}
+            >
+              Dev Login (maurice@devtig-online.nl)
+            </Button>
+            */}
           </form>
         </CardContent>
       </Card>
