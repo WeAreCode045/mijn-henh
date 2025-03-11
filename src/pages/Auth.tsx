@@ -17,6 +17,31 @@ export default function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check if user is already logged in and redirect
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/');
+      }
+    };
+    
+    checkSession();
+    
+    // Setup auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          navigate('/');
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -38,12 +63,21 @@ export default function Auth() {
           description: "Please check your email to confirm your account",
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
         if (error) throw error;
-        navigate('/');
+        
+        // Navigate to dashboard on successful login
+        if (data.session) {
+          toast({
+            title: "Success",
+            description: "Logged in successfully",
+          });
+          navigate('/');
+        }
       }
     } catch (error: any) {
       toast({

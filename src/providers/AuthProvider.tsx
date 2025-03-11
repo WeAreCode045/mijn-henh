@@ -79,7 +79,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    setUser(session?.user || null);
+    if (session?.user) {
+      // Create a properly structured User object
+      const userData: User = {
+        id: session.user.id,
+        email: session.user.email,
+        full_name: session.user.user_metadata.full_name || null,
+        phone: null,
+        whatsapp_number: null,
+        role: null,
+        avatar_url: null
+      };
+      setUser(userData);
+    } else {
+      setUser(null);
+    }
+    
     fetchProfile();
   }, [session, supabaseClient]);
 
