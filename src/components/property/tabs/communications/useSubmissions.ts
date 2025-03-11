@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Submission, SubmissionReply } from './types';
+import { Submission } from './types';
 
 export function useSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -38,35 +38,14 @@ export function useSubmissions(propertyId: string) {
             .eq('submission_id', submission.id)
             .order('created_at', { ascending: true });
 
-          // Map database reply fields to our SubmissionReply type
-          const mappedReplies: SubmissionReply[] = (repliesData || []).map(reply => ({
-            id: reply.id,
-            reply_text: reply.reply_text,
-            created_at: reply.created_at,
-            agent_id: reply.agent_id,
-            submission_id: reply.submission_id
-          }));
-
-          // Map database submission fields to our Submission type
           return {
-            id: submission.id,
-            property_id: submission.property_id,
-            name: submission.name,
-            email: submission.email,
-            phone: submission.phone,
-            message: submission.message,
-            inquiry_type: submission.inquiry_type,
-            is_read: submission.is_read,
-            created_at: submission.created_at,
-            updated_at: submission.updated_at,
-            agent_id: submission.agent_id,
-            agent: submission.agent,
-            replies: mappedReplies
-          } as Submission;
+            ...submission,
+            replies: repliesData || []
+          };
         })
       );
 
-      setSubmissions(submissionsWithReplies);
+      setSubmissions(submissionsWithReplies as Submission[]);
     } catch (err) {
       console.error('Error fetching submissions:', err);
       setError(err instanceof Error ? err : new Error('Unknown error fetching submissions'));

@@ -3,11 +3,7 @@ import React from 'react';
 import { formatDate } from '@/utils/dateUtils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import { SubmissionReply } from './types';
-
-interface SubmissionRepliesProps {
-  replies: SubmissionReply[];
-}
+import { SubmissionReply, SubmissionRepliesProps } from './types';
 
 export function SubmissionReplies({ replies }: SubmissionRepliesProps) {
   if (!replies || replies.length === 0) {

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { formatDate } from '@/utils/dateUtils';
 import { Badge } from '@/components/ui/badge';
@@ -7,25 +8,15 @@ import { Submission } from './types';
 
 interface SubmissionsListProps {
   submissions: Submission[];
-  selectedSubmissionId: string;
-  onSelectSubmission: (submission: Submission) => void;
-  isLoading?: boolean;
+  selectedSubmission: Submission | null;
+  onSelect: (submission: Submission) => void;
 }
 
-export const SubmissionsList = ({ 
+export function SubmissionsList({ 
   submissions, 
-  selectedSubmissionId, 
-  onSelectSubmission,
-  isLoading = false
-}: SubmissionsListProps) => {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-estate-800"></div>
-      </div>
-    );
-  }
-
+  selectedSubmission, 
+  onSelect 
+}: SubmissionsListProps) {
   if (submissions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 border rounded-md p-8 bg-muted/10">
@@ -48,9 +39,9 @@ export const SubmissionsList = ({
           {submissions.map((submission) => (
             <button
               key={submission.id}
-              onClick={() => onSelectSubmission(submission)}
+              onClick={() => onSelect(submission)}
               className={`w-full text-left p-4 hover:bg-muted/50 transition-colors ${
-                selectedSubmissionId === submission.id ? 'bg-muted' : ''
+                selectedSubmission?.id === submission.id ? 'bg-muted' : ''
               } ${!submission.is_read ? 'border-l-4 border-l-blue-500 pl-3' : ''}`}
             >
               <div className="flex justify-between items-start mb-1">
@@ -86,4 +77,4 @@ export const SubmissionsList = ({
       </ScrollArea>
     </div>
   );
-};
+}

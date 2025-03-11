@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/providers/AuthProvider";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,14 +16,6 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { session } = useAuth();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (session) {
-      navigate('/');
-    }
-  }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +23,7 @@ export default function Auth() {
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -41,32 +32,23 @@ export default function Auth() {
             },
           },
         });
-        
         if (error) throw error;
-        
         toast({
           title: "Success",
           description: "Please check your email to confirm your account",
         });
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        
         if (error) throw error;
-        
-        // We don't need to navigate here as the AuthProvider will handle session changes
-        toast({
-          title: "Success",
-          description: "Successfully logged in",
-        });
+        navigate('/');
       }
     } catch (error: any) {
-      console.error("Auth error:", error);
       toast({
         title: "Error",
-        description: error.message || "Authentication failed",
+        description: error.message,
         variant: "destructive",
       });
     } finally {

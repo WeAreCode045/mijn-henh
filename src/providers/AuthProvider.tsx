@@ -35,40 +35,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log('Auth state changed:', event, newSession?.user?.id);
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (newSession?.user) {
-            const userData: User = {
-              id: newSession.user.id,
-              email: newSession.user.email,
-              full_name: null,
-              phone: null,
-              whatsapp_number: null,
-              role: null,
-              avatar_url: null
-            };
-            setUser(userData);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      }
-    );
-
-    return () => {
-      // Clean up listener
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
-    };
-  }, [supabaseClient]);
-
-  useEffect(() => {
     async function fetchProfile() {
       setIsLoading(true);
       setIsError(false);
@@ -124,23 +90,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         avatar_url: null
       };
       setUser(userData);
-      fetchProfile();
     } else {
       setUser(null);
-      setIsLoading(false);
     }
+    fetchProfile();
   }, [session, supabaseClient]);
 
   const signOut = async () => {
-    console.log('Signing out...');
-    try {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-      }
-    } catch (error) {
-      console.error('Unexpected error during sign out:', error);
-    }
+    await supabaseClient.auth.signOut();
   };
 
   const value: AuthContextProps = {
