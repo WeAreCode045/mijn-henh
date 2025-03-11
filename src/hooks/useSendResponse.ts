@@ -32,7 +32,7 @@ export function useSendResponse({
         .insert({
           submission_id: submissionId,
           agent_id: agentId,
-          message: responseText
+          reply_text: responseText // Changed from 'message' to 'reply_text' to match the database schema
         });
 
       if (error) throw error;
