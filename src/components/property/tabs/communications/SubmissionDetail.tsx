@@ -3,25 +3,40 @@ import React, { useState, FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Mail, Phone, Calendar, Eye, EyeOff } from 'lucide-react';
-import { Submission, SubmissionDetailProps } from './types';
+import { Submission, SubmissionReply } from './types';
 import { SubmissionReplies } from './SubmissionReplies';
 import { SubmissionResponse } from './SubmissionResponse';
 import { formatDate } from '@/utils/dateUtils';
+import { useMarkAsRead, useSendResponse } from './hooks';
 
-export function SubmissionDetail({ 
-  submission, 
-  onMarkAsRead, 
-  isMarking,
-  onSendReply,
-  isSending 
-}: SubmissionDetailProps) {
+interface SubmissionDetailProps {
+  submission: Submission;
+  onBack: () => void;
+}
+
+export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) {
   const [responseText, setResponseText] = useState('');
+  
+  // Use the markAsRead hook
+  const { markAsRead, isMarking } = useMarkAsRead({
+    submissionId: submission.id,
+    isRead: submission.isRead || submission.is_read,
+    onSuccess: () => console.log("Marked as read")
+  });
+  
+  // Use the sendResponse hook
+  const { sendResponse, isSending } = useSendResponse({
+    submissionId: submission.id,
+    onSuccess: () => {
+      setResponseText('');
+      onBack();
+    }
+  });
   
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (responseText.trim()) {
-      await onSendReply(responseText);
-      setResponseText('');
+      await sendResponse(responseText);
     }
   };
 
@@ -30,7 +45,7 @@ export function SubmissionDetail({
       <div className="flex items-center justify-between">
         <Button 
           variant="ghost" 
-          onClick={() => {}} 
+          onClick={onBack} 
           className="flex items-center gap-1"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -39,11 +54,11 @@ export function SubmissionDetail({
         
         <Button
           variant="outline"
-          onClick={onMarkAsRead}
+          onClick={markAsRead}
           disabled={isMarking}
           className="flex items-center gap-1"
         >
-          {submission.is_read ? (
+          {submission.isRead || submission.is_read ? (
             <>
               <EyeOff className="h-4 w-4" />
               Mark as unread
@@ -77,7 +92,7 @@ export function SubmissionDetail({
               )}
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <span>{formatDate(submission.created_at)}</span>
+                <span>{formatDate(submission.createdAt || submission.created_at)}</span>
               </div>
             </div>
           </div>
@@ -91,6 +106,7 @@ export function SubmissionDetail({
       
       <SubmissionReplies 
         replies={submission.replies || []}
+        submissionId={submission.id}
       />
       
       <Card>

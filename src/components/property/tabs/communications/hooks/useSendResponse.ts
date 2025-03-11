@@ -1,52 +1,56 @@
 
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
-interface UseSendResponseOptions {
-  submissionId: string;
-  onSuccess: () => Promise<void>;
+export interface UseSendResponseProps {
+  propertyId?: string;
+  submissionId?: string;
+  onSuccess?: () => void;
 }
 
-export function useSendResponse({ submissionId, onSuccess }: UseSendResponseOptions) {
+export function useSendResponse({ propertyId, submissionId, onSuccess }: UseSendResponseProps) {
   const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
 
-  const sendResponse = async (replyText: string) => {
-    if (!submissionId || !replyText.trim()) {
-      console.error('Missing submission ID or reply text');
+  const sendResponse = async (responseText: string) => {
+    if (!responseText.trim() || !submissionId) {
+      toast({
+        title: "Error",
+        description: "Response cannot be empty",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsSending(true);
+    
     try {
-      // Get current user info (agent)
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       
-      if (!user) {
-        throw new Error('Not authenticated');
-      }
-
-      // Insert reply
+      if (userError) throw userError;
+      
       const { error } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
-          reply_text: replyText,
-          agent_id: user.id
+          reply_text: responseText,
+          agent_id: userData.user?.id
         });
-
-      if (error) {
-        throw error;
-      }
-
-      // Mark the submission as read
-      await supabase
-        .from('property_contact_submissions')
-        .update({ is_read: true })
-        .eq('id', submissionId);
-
-      await onSuccess();
+        
+      if (error) throw error;
+      
+      toast({
+        description: 'Response sent successfully'
+      });
+      
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Error sending reply:', error);
+      console.error('Error sending response:', error);
+      toast({
+        variant: 'destructive',
+        description: 'Failed to send response'
+      });
     } finally {
       setIsSending(false);
     }

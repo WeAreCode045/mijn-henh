@@ -31,7 +31,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
     role: (initialData?.role as "admin" | "agent") || "agent"
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string>(initialData?.avatar_url || "");
+  const [photoPreview, setPhotoPreview] = useState<string>(initialData?.avatar || "");
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -88,7 +88,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             whatsapp_number: formData.whatsappNumber,
             role: formData.role,
             updated_at: new Date().toISOString(),
-            ...(photoUrl && { avatar_url: photoUrl })
+            ...(photoUrl && { avatar: photoUrl })
           })
           .eq("id", initialData.id);
 
@@ -125,7 +125,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
               phone: formData.phone,
               whatsapp_number: formData.whatsappNumber,
               updated_at: new Date().toISOString(),
-              ...(photoUrl && { avatar_url: photoUrl })
+              ...(photoUrl && { avatar: photoUrl })
             })
             .eq("id", authData.user.id);
 

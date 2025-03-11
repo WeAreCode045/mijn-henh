@@ -88,7 +88,7 @@ export function FloorplansTab({
           />
           
           <FloorplanEmbed 
-            script={floorplanEmbedScript} 
+            embedScript={floorplanEmbedScript} 
             onChange={handleEmbedScriptChange} 
           />
 

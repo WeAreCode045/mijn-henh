@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   Session,
@@ -54,16 +53,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
 
           if (data) {
-            const userProfile: User = {
+            const user: User = {
               id: data.id,
               email: data.email,
               full_name: data.full_name,
               phone: data.phone,
               whatsapp_number: data.whatsapp_number,
               role: data.role,
-              avatar_url: data.avatar_url,
+              avatar_url: data.avatar_url, // Changed from avatar to avatar_url
             };
-            setProfile(userProfile);
+            setProfile(user);
             setIsAdmin(data.role === 'admin');
           }
         } catch (error) {
@@ -79,20 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    if (session?.user) {
-      const userData: User = {
-        id: session.user.id,
-        email: session.user.email,
-        full_name: null,
-        phone: null,
-        whatsapp_number: null,
-        role: null,
-        avatar_url: null
-      };
-      setUser(userData);
-    } else {
-      setUser(null);
-    }
+    setUser(session?.user || null);
     fetchProfile();
   }, [session, supabaseClient]);
 
