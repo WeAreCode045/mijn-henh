@@ -23,7 +23,7 @@ interface ContentTabContentProps {
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: () => void; // Added missing onSubmit prop
+  onSubmit?: () => void;
 }
 
 export function ContentTabContent({
@@ -71,6 +71,7 @@ export function ContentTabContent({
       isLoadingLocationData={isLoadingLocationData}
       setPendingChanges={setPendingChanges}
       isUploading={isUploading}
+      onSubmit={onSubmit}
     />
   );
 }

@@ -20,10 +20,11 @@ export function useSendResponse(submissionId: string, agentId: string, onSuccess
     setIsSending(true);
     try {
       const { error } = await supabase
-        .from('submission_replies')
+        .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
           agent_id: agentId,
+          reply_text: responseText,
           message: responseText
         });
 

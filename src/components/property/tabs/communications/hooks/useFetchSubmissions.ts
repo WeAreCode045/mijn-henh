@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Submission } from '../types';
@@ -19,6 +20,7 @@ export function useFetchSubmissions(propertyId?: string) {
             id,
             email,
             full_name,
+            phone,
             avatar_url
           )
         `)
@@ -28,7 +30,7 @@ export function useFetchSubmissions(propertyId?: string) {
       if (error) throw error;
       
       // Create default Submission objects with empty replies arrays
-      const transformedSubmissions: Submission[] = data.map(item => ({
+      const transformedSubmissions: Submission[] = (data || []).map(item => ({
         id: item.id,
         property_id: item.property_id,
         name: item.name,
@@ -40,8 +42,14 @@ export function useFetchSubmissions(propertyId?: string) {
         created_at: item.created_at,
         updated_at: item.updated_at,
         agent_id: item.agent_id,
-        agent: item.agent, // Include agent profile information
-        replies: [] // Initialize with empty array
+        agent: item.agent ? {
+          id: item.agent.id,
+          full_name: item.agent.full_name,
+          email: item.agent.email,
+          phone: item.agent.phone || '',
+          avatar_url: item.agent.avatar_url
+        } : undefined,
+        replies: []
       }));
       
       setSubmissions(transformedSubmissions);
@@ -59,6 +67,7 @@ export function useFetchSubmissions(propertyId?: string) {
   return {
     submissions,
     isLoading,
-    fetchSubmissions
+    fetchSubmissions,
+    refetch: fetchSubmissions
   };
 }

@@ -11,7 +11,7 @@ export function useMarkAsRead(submissionId: string, onSuccess?: () => void) {
     setIsMarking(true);
     try {
       const { error } = await supabase
-        .from('property_submissions')
+        .from('property_contact_submissions')
         .update({ is_read: true })
         .eq('id', submissionId);
 

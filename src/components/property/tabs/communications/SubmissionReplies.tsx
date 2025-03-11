@@ -34,22 +34,22 @@ export function SubmissionReplies({ replies, submissionId }: SubmissionRepliesPr
           <div key={reply.id} className="border-b last:border-b-0 pb-4 last:pb-0">
             <div className="flex items-start gap-3">
               <Avatar className="h-8 w-8">
-                {reply.user_avatar ? (
-                  <AvatarImage src={reply.user_avatar} alt={reply.user_name || 'User'} />
+                {reply.user_avatar || (reply.agent?.avatar_url) ? (
+                  <AvatarImage src={reply.user_avatar || reply.agent?.avatar_url || ''} alt={(reply.user_name || reply.agent?.full_name || 'User')} />
                 ) : (
                   <AvatarFallback>
-                    {(reply.user_name || 'U').charAt(0).toUpperCase()}
+                    {((reply.user_name || reply.agent?.full_name || 'U')).charAt(0).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
               <div className="flex-1">
                 <div className="flex justify-between items-start">
-                  <h4 className="font-medium">{reply.user_name || 'Staff Member'}</h4>
+                  <h4 className="font-medium">{reply.user_name || reply.agent?.full_name || 'Staff Member'}</h4>
                   <span className="text-xs text-muted-foreground">
                     {formatDate(reply.created_at)}
                   </span>
                 </div>
-                <p className="mt-1 whitespace-pre-line">{reply.reply_text}</p>
+                <p className="mt-1 whitespace-pre-line">{reply.reply_text || reply.message}</p>
               </div>
             </div>
           </div>
