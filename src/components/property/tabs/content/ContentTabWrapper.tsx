@@ -1,6 +1,7 @@
 
-import { ReactNode } from 'react';
-import { PropertyFormData } from '@/types/property';
+import React from 'react';
+import { PropertyFormData } from "@/types/property";
+import { PropertyContentTab } from '../PropertyContentTab';
 
 export interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -11,26 +12,27 @@ export interface ContentTabWrapperProps {
     onUpdateFeature: (id: string, description: string) => void;
     onAddArea: () => void;
     onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: string, value: any) => void;
+    onUpdateArea: (id: string, field: any, value: any) => void;
+    onAreaImageRemove: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
     handleNext: () => void;
     handlePrevious: () => void;
-    onSubmit: () => void;
-    isUploading?: boolean;
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
-    // And any other handlers needed
+    isUploading?: boolean;
+    onSubmit: () => void; // Added missing onSubmit property
   };
-  children?: ReactNode;
 }
 
-export function ContentTabWrapper({ formData, handlers, children }: ContentTabWrapperProps) {
+export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
   return (
     <div className="space-y-6">
-      {children}
+      <PropertyContentTab formData={formData} handlers={handlers} />
     </div>
   );
 }

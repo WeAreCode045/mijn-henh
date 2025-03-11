@@ -1,13 +1,16 @@
 
+import { useSubmissions } from './useSubmissions';
 import { useMarkAsRead } from './useMarkAsRead';
 import { useSendResponse } from './useSendResponse';
+import { useSubmissionActions } from './useSubmissionActions';
 import { useSubmissionSelection } from './useSubmissionSelection';
+import { useFetchSubmissions } from './useFetchSubmissions';
 
-// Use export type for type definitions to avoid 'isolatedModules' issues
-export { useMarkAsRead };
-export { useSendResponse };
-export { useSubmissionSelection };
-
-// Re-export types
-export type { UseMarkAsReadProps } from './useMarkAsRead';
-export type { UseSendResponseProps } from './useSendResponse';
+export {
+  useSubmissions,
+  useMarkAsRead,
+  useSendResponse,
+  useSubmissionActions,
+  useSubmissionSelection,
+  useFetchSubmissions
+};

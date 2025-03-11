@@ -1,127 +1,68 @@
 
-import React, { useState, FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Mail, Phone, Calendar, Eye, EyeOff } from 'lucide-react';
-import { Submission, SubmissionReply } from './types';
-import { SubmissionReplies } from './SubmissionReplies';
-import { SubmissionResponse } from './SubmissionResponse';
-import { formatDate } from '@/utils/dateUtils';
-import { useMarkAsRead, useSendResponse } from './hooks';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { CheckCircle } from 'lucide-react';
+import { useMarkAsRead } from './hooks';
+import { useSendResponse } from './hooks';
+import { Submission } from './types';
 
 interface SubmissionDetailProps {
   submission: Submission;
-  onBack: () => void;
+  onSendReply: (text: string) => Promise<void>;
+  isSending: boolean;
+  onMarkAsRead: () => void;
+  isMarking: boolean;
 }
 
-export function SubmissionDetail({ submission, onBack }: SubmissionDetailProps) {
-  const [responseText, setResponseText] = useState('');
-  
-  // Use the markAsRead hook
-  const { markAsRead, isMarking } = useMarkAsRead({
-    submissionId: submission.id,
-    isRead: submission.isRead || submission.is_read,
-    onSuccess: () => console.log("Marked as read")
-  });
-  
-  // Use the sendResponse hook
-  const { sendResponse, isSending } = useSendResponse({
-    submissionId: submission.id,
-    onSuccess: () => {
-      setResponseText('');
-      onBack();
+export function SubmissionDetail({ submission, onSendReply, isSending, onMarkAsRead, isMarking }: SubmissionDetailProps) {
+  const handleMarkAsReadClick = () => {
+    if (onMarkAsRead) {
+      onMarkAsRead();
     }
-  });
-  
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (responseText.trim()) {
-      await sendResponse(responseText);
+  };
+
+  const handleReplySubmit = (text: string) => {
+    if (onSendReply) {
+      onSendReply(text);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="p-4 border rounded-lg">
+      <div className="flex justify-between items-start">
+        <h3 className="text-lg font-semibold">{submission.name}</h3>
+        {!submission.is_read && (
+          <Button 
+            onClick={handleMarkAsReadClick} 
+            variant="outline" 
+            size="sm"
+            disabled={isMarking}
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Mark as Read
+          </Button>
+        )}
+      </div>
+      <div className="mt-2">
+        <p><strong>Email:</strong> {submission.email}</p>
+        <p><strong>Phone:</strong> {submission.phone}</p>
+        <p><strong>Message:</strong> {submission.message}</p>
+      </div>
+      <div className="mt-4">
+        <h4 className="font-medium mb-2">Reply</h4>
+        <textarea 
+          className="w-full p-2 border rounded"
+          rows={4}
+          placeholder="Type your reply here..."
+        />
         <Button 
-          variant="ghost" 
-          onClick={onBack} 
-          className="flex items-center gap-1"
+          onClick={() => handleReplySubmit('Sample reply text')} 
+          className="mt-2"
+          disabled={isSending}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to list
-        </Button>
-        
-        <Button
-          variant="outline"
-          onClick={markAsRead}
-          disabled={isMarking}
-          className="flex items-center gap-1"
-        >
-          {submission.isRead || submission.is_read ? (
-            <>
-              <EyeOff className="h-4 w-4" />
-              Mark as unread
-            </>
-          ) : (
-            <>
-              <Eye className="h-4 w-4" />
-              Mark as read
-            </>
-          )}
+          Send Reply
         </Button>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Inquiry Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-lg">{submission.name}</h3>
-            <div className="flex flex-col space-y-2 mt-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                <span>{submission.email}</span>
-              </div>
-              {submission.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>{submission.phone}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(submission.createdAt || submission.created_at)}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t pt-4 mt-4">
-            <h4 className="font-medium mb-2">Message</h4>
-            <p className="whitespace-pre-line">{submission.message}</p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <SubmissionReplies 
-        replies={submission.replies || []}
-        submissionId={submission.id}
-      />
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Reply to inquiry</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SubmissionResponse 
-            value={responseText}
-            onChange={setResponseText}
-            isSending={isSending}
-            onSubmit={handleSubmit}
-          />
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -25,6 +25,7 @@ interface PropertyContentTabProps {
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
+    onSubmit: () => void; // Added missing onSubmit property
   };
 }
 
@@ -32,7 +33,10 @@ export function PropertyContentTab({ formData, handlers }: PropertyContentTabPro
   return (
     <ContentTabWrapper 
       formData={formData} 
-      handlers={handlers} 
+      handlers={{
+        ...handlers,
+        onSubmit: handlers.onSubmit // Make sure to pass onSubmit to ContentTabWrapper
+      }} 
     />
   );
 }
