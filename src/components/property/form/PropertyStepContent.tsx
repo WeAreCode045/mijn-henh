@@ -29,6 +29,7 @@ interface PropertyStepContentProps {
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
+  onSubmit?: () => void; // Add this missing prop
 }
 
 export function PropertyStepContent({
@@ -53,6 +54,7 @@ export function PropertyStepContent({
   isLoadingLocationData,
   setPendingChanges,
   isUploading,
+  onSubmit,
 }: PropertyStepContentProps) {
   const renderStep = () => {
     switch (currentStep) {
