@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useFetchSubmissions } from '../communications/hooks/useFetchSubmissions';
-import { useMarkAsRead } from '../communications/hooks/useMarkAsRead';
-import { useSendResponse } from '../communications/hooks/useSendResponse';
+import { useMarkAsRead } from '@/hooks/useMarkAsRead';
+import { useSendResponse } from '@/hooks/useSendResponse';
 import { SubmissionsList } from '../communications/SubmissionsList';
 import { SubmissionDetail } from '../communications/SubmissionDetail';
 import { Submission } from '../communications/types';
