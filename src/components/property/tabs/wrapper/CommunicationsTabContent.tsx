@@ -17,16 +17,16 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const { profile } = useAuth();
   
-  const { markAsRead, isMarking } = useMarkAsRead(
-    selectedSubmission?.id || '',
-    refetch
-  );
+  const { markAsRead, isMarking } = useMarkAsRead({
+    submissionId: selectedSubmission?.id || '',
+    onSuccess: refetch
+  });
   
-  const { sendResponse, isSending } = useSendResponse(
-    selectedSubmission?.id || '',
-    profile?.id || '',
-    refetch
-  );
+  const { sendResponse, isSending } = useSendResponse({
+    submissionId: selectedSubmission?.id || '',
+    agentId: profile?.id || '',
+    onSuccess: refetch
+  });
   
   const handleSelectSubmission = (submission: Submission) => {
     setSelectedSubmission(submission);
@@ -42,8 +42,8 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
         <SubmissionsList 
           submissions={submissions}
           isLoading={isLoading}
-          onSelectSubmission={handleSelectSubmission}
-          selectedSubmissionId={selectedSubmission?.id}
+          onSelect={handleSelectSubmission}
+          selectedId={selectedSubmission?.id}
         />
       </div>
       
@@ -51,7 +51,6 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
         <div className="w-full md:w-2/3">
           <SubmissionDetail
             submission={selectedSubmission}
-            onBack={handleDeselectSubmission}
             onMarkAsRead={markAsRead}
             isMarking={isMarking}
             onSendReply={sendResponse}

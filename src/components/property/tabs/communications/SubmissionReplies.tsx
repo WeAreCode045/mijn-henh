@@ -1,60 +1,50 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { formatDate } from '@/utils/dateUtils';
+import { format } from 'date-fns';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { SubmissionReply } from './types';
 
 interface SubmissionRepliesProps {
   replies: SubmissionReply[];
-  submissionId: string;
 }
 
-export function SubmissionReplies({ replies, submissionId }: SubmissionRepliesProps) {
+export function SubmissionReplies({ replies }: SubmissionRepliesProps) {
   if (!replies || replies.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Responses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">No responses yet.</p>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
-  
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Responses</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {replies.map((reply) => (
-          <div key={reply.id} className="border-b last:border-b-0 pb-4 last:pb-0">
-            <div className="flex items-start gap-3">
-              <Avatar className="h-8 w-8">
-                {reply.user_avatar || (reply.agent?.avatar_url) ? (
-                  <AvatarImage src={reply.user_avatar || reply.agent?.avatar_url || ''} alt={(reply.user_name || reply.agent?.full_name || 'User')} />
-                ) : (
+    <div className="space-y-4">
+      <h4 className="font-medium">Previous Replies</h4>
+      <div className="space-y-4">
+        {replies.map((reply) => {
+          const replyDate = new Date(reply.created_at);
+          const agentName = reply.agent?.full_name || 'Agent';
+          const agentAvatar = reply.agent?.avatar_url;
+          
+          return (
+            <div key={reply.id} className="border rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Avatar className="h-8 w-8">
+                  {agentAvatar && <AvatarImage src={agentAvatar} alt={agentName} />}
                   <AvatarFallback>
-                    {((reply.user_name || reply.agent?.full_name || 'U')).charAt(0).toUpperCase()}
+                    {agentName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
-                )}
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-medium">{reply.user_name || reply.agent?.full_name || 'Staff Member'}</h4>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(reply.created_at)}
-                  </span>
+                </Avatar>
+                <div>
+                  <div className="font-medium">{agentName}</div>
+                  <div className="text-xs text-gray-500">
+                    {format(replyDate, 'PPP p')}
+                  </div>
                 </div>
-                <p className="mt-1 whitespace-pre-line">{reply.reply_text || reply.message}</p>
               </div>
+              <Separator className="my-2" />
+              <div className="whitespace-pre-wrap">{reply.message}</div>
             </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 }

@@ -1,29 +1,38 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from 'lucide-react';
-import { useMarkAsRead } from './hooks';
-import { useSendResponse } from './hooks';
 import { Submission } from './types';
+import { SubmissionReplies } from './SubmissionReplies';
+import { SubmissionReplyForm } from './SubmissionReplyForm';
 
 interface SubmissionDetailProps {
   submission: Submission;
   onSendReply: (text: string) => Promise<void>;
   isSending: boolean;
-  onMarkAsRead: () => void;
+  onMarkAsRead: () => Promise<void>;
   isMarking: boolean;
 }
 
-export function SubmissionDetail({ submission, onSendReply, isSending, onMarkAsRead, isMarking }: SubmissionDetailProps) {
+export function SubmissionDetail({ 
+  submission,
+  onSendReply,
+  isSending,
+  onMarkAsRead,
+  isMarking
+}: SubmissionDetailProps) {
+  const [replyText, setReplyText] = useState('');
+
   const handleMarkAsReadClick = () => {
     if (onMarkAsRead) {
       onMarkAsRead();
     }
   };
 
-  const handleReplySubmit = (text: string) => {
-    if (onSendReply) {
-      onSendReply(text);
+  const handleReplySubmit = () => {
+    if (onSendReply && replyText.trim()) {
+      onSendReply(replyText.trim())
+        .then(() => setReplyText(''));
     }
   };
 
@@ -48,20 +57,21 @@ export function SubmissionDetail({ submission, onSendReply, isSending, onMarkAsR
         <p><strong>Phone:</strong> {submission.phone}</p>
         <p><strong>Message:</strong> {submission.message}</p>
       </div>
+      
+      {submission.replies && submission.replies.length > 0 && (
+        <div className="mt-4">
+          <SubmissionReplies replies={submission.replies} />
+        </div>
+      )}
+      
       <div className="mt-4">
         <h4 className="font-medium mb-2">Reply</h4>
-        <textarea 
-          className="w-full p-2 border rounded"
-          rows={4}
-          placeholder="Type your reply here..."
+        <SubmissionReplyForm
+          value={replyText}
+          onChange={setReplyText}
+          onSubmit={handleReplySubmit}
+          isSubmitting={isSending}
         />
-        <Button 
-          onClick={() => handleReplySubmit('Sample reply text')} 
-          className="mt-2"
-          disabled={isSending}
-        >
-          Send Reply
-        </Button>
       </div>
     </div>
   );

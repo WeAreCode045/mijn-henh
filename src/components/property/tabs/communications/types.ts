@@ -27,9 +27,6 @@ export interface SubmissionReply {
   agent_id: string;
   message: string;
   created_at: string;
-  user_name?: string;       // Adding this to match component usage
-  user_avatar?: string;     // Adding this to match component usage
-  reply_text?: string;      // Adding this to match component usage
   agent?: {
     id: string;
     full_name: string;
