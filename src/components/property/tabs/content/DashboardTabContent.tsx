@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { RecentSubmissions } from "@/components/dashboard/RecentSubmissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { NotesCard } from "../../dashboard/NotesCard";
+import { AgendaCard } from "../../dashboard/AgendaCard";
 
 interface DashboardTabContentProps {
   property: PropertyData;
@@ -112,6 +115,26 @@ export function DashboardTabContent({
                     <p className="font-semibold">Type</p>
                     <p>{"Not specified"}</p>
                   </div>
+                  <div className="col-span-2">
+                    <p className="font-semibold mb-1">Assigned Agent</p>
+                    <Select 
+                      value={property.agent_id || 'no-agent'} 
+                      onValueChange={handleAgentChange}
+                      disabled={isLoadingAgents}
+                    >
+                      <SelectTrigger className="w-full mb-2">
+                        <SelectValue placeholder="Select an agent" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-agent">No agent assigned</SelectItem>
+                        {agents.map(agent => (
+                          <SelectItem key={agent.id} value={agent.id}>
+                            {agent.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               <div className="w-full md:w-40 h-40 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
@@ -133,7 +156,7 @@ export function DashboardTabContent({
 
         <Card className="md:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-medium">Dates & Actions</CardTitle>
+            <CardTitle className="text-lg font-medium">Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -188,8 +211,8 @@ export function DashboardTabContent({
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="md:col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="h-full">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Recent Submissions</CardTitle>
           </CardHeader>
@@ -198,48 +221,9 @@ export function DashboardTabContent({
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-1">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-medium">Assigned Agent</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select 
-              value={property.agent_id || 'no-agent'} 
-              onValueChange={handleAgentChange}
-              disabled={isLoadingAgents}
-            >
-              <SelectTrigger className="w-full mb-2">
-                <SelectValue placeholder="Select an agent" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="no-agent">No agent assigned</SelectItem>
-                {agents.map(agent => (
-                  <SelectItem key={agent.id} value={agent.id}>
-                    {agent.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <NotesCard propertyId={property.id} />
 
-            {property.agent && (
-              <div className="flex items-center gap-3 mt-4">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  {property.agent.photoUrl ? (
-                    <img src={property.agent.photoUrl} alt={property.agent.name} className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-lg font-medium text-gray-500">
-                      {property.agent.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium">{property.agent.name}</p>
-                  {property.agent.email && <p className="text-sm text-muted-foreground">{property.agent.email}</p>}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <AgendaCard propertyId={property.id} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
