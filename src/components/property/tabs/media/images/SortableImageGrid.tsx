@@ -1,10 +1,10 @@
-
 import React, { useEffect } from "react";
 import { PropertyImage } from "@/types/property";
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { SortableImageItem } from "./SortableImageItem";
 import { useSortableImages } from "@/hooks/images/useSortableImages";
+import { toast } from "sonner";
 
 interface SortableImageGridProps {
   images: PropertyImage[];
@@ -34,20 +34,41 @@ export function SortableImageGrid({
     setSortedImages
   } = useSortableImages(images, propertyId);
   
-  // Update sortedImages when the images prop changes
   useEffect(() => {
     setSortedImages(images);
   }, [images, setSortedImages]);
 
-  // Modified handlers that don't try to access nativeEvent
   const handleDragStartSafe = (event: DragStartEvent) => {
-    // Call the drag start handler directly without trying to access nativeEvent
     handleDragStart(event);
   };
 
   const handleDragEndSafe = (event: DragEndEvent) => {
-    // Call the drag end handler directly without trying to access nativeEvent
     handleDragEnd(event);
+  };
+  
+  const handleSetMain = (imageUrl: string) => {
+    if (onSetFeaturedImage) {
+      if (featuredImage === imageUrl) return;
+      
+      onSetFeaturedImage(imageUrl);
+    }
+  };
+  
+  const handleToggleFeatured = (imageUrl: string) => {
+    if (!onToggleFeaturedImage) return;
+    
+    const isFeatured = featuredImages.includes(imageUrl);
+    if (isFeatured) {
+      onToggleFeaturedImage(imageUrl);
+      return;
+    }
+    
+    if (featuredImages.length >= 4) {
+      toast.warning("Maximum of 4 featured images allowed. Please remove one first.");
+      return;
+    }
+    
+    onToggleFeaturedImage(imageUrl);
   };
   
   return (
@@ -76,8 +97,8 @@ export function SortableImageGrid({
                 onRemove={() => onRemoveImage(index)}
                 isMain={isMain}
                 isFeatured={isFeatured}
-                onSetMain={onSetFeaturedImage ? () => onSetFeaturedImage(isMain ? null : imageUrl) : undefined}
-                onToggleFeatured={onToggleFeaturedImage ? () => onToggleFeaturedImage(imageUrl) : undefined}
+                onSetMain={onSetFeaturedImage ? () => handleSetMain(imageUrl) : undefined}
+                onToggleFeatured={onToggleFeaturedImage ? () => handleToggleFeatured(imageUrl) : undefined}
                 isUpdating={isSaving}
               />
             );

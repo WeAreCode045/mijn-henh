@@ -33,6 +33,7 @@ export function usePropertyMediaHandlers(
       if (resetError) throw resetError;
       
       if (url) {
+        console.log("Setting main image:", url);
         // Mark the selected image as main
         const { error: updateError } = await supabase
           .from('property_images')
@@ -40,7 +41,10 @@ export function usePropertyMediaHandlers(
           .eq('property_id', property.id)
           .eq('url', url);
           
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Error setting main image:", updateError);
+          throw updateError;
+        }
           
         // Update local state
         setProperty(prev => ({
@@ -80,6 +84,13 @@ export function usePropertyMediaHandlers(
     try {
       const featuredImages = property.featuredImages || [];
       const isAlreadyFeatured = featuredImages.includes(url);
+      
+      // Check max featured images limit
+      if (!isAlreadyFeatured && featuredImages.length >= 4) {
+        toast.warning("Maximum of 4 featured images allowed. Please remove one first.");
+        setIsSaving(false);
+        return;
+      }
       
       // Update database
       const { error } = await supabase
