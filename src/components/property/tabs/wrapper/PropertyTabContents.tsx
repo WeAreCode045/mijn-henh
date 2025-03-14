@@ -22,6 +22,7 @@ interface PropertyTabContentsProps {
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
   isUpdating: boolean;
+  isSaving?: boolean;
   onSave: () => void;
   onDelete: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => void;
@@ -47,8 +48,6 @@ interface PropertyTabContentsProps {
   handleRemoveFloorplan: (index: number) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
   onSubmit: () => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
@@ -73,6 +72,7 @@ export function PropertyTabContents({
   agentInfo,
   templateInfo,
   isUpdating,
+  isSaving,
   onSave,
   onDelete,
   handleSaveObjectId,
@@ -98,8 +98,6 @@ export function PropertyTabContents({
   handleRemoveFloorplan,
   currentStep,
   handleStepClick,
-  handleNext,
-  handlePrevious,
   onSubmit,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
@@ -141,8 +139,6 @@ export function PropertyTabContents({
     handleRemoveFloorplan,
     currentStep,
     handleStepClick,
-    handleNext,
-    handlePrevious,
     onSubmit,
     formState,
     isUploadingFloorplan,
@@ -160,7 +156,8 @@ export function PropertyTabContents({
     handleYoutubeUrlUpdate,
     handleFloorplanEmbedScriptUpdate,
     onFeatureImageToggle,
-    onSetMainImage
+    onSetMainImage,
+    isSaving
   };
 
   const tabProps = {

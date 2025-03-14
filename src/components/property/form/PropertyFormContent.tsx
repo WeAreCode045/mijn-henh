@@ -1,3 +1,4 @@
+
 // Import for FeaturesStep component
 import React from 'react';
 import { 
@@ -7,7 +8,7 @@ import { PropertyData, PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, MinusCircle } from "lucide-react";
+import { PlusCircle, MinusCircle, Save } from "lucide-react";
 
 interface FeaturesStepProps {
   features: any;
@@ -184,26 +185,9 @@ function Areas({
   );
 }
 
-interface FeaturesStepProps {
-  features: any;
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
-}
-
-interface AreasStepProps {
-  areas: any;
-  onAddArea: () => void;
-  onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: string, value: any) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-}
-
 export function PropertyFormContent({
   currentStep,
   handleStepClick,
-  handleNext,
-  handlePrevious,
   formState,
   handleFieldChange,
   addFeature,
@@ -212,7 +196,10 @@ export function PropertyFormContent({
   addArea,
   removeArea,
   updateArea,
-  handleAreaImageUpload
+  handleAreaImageUpload,
+  onSubmit,
+  isSaving,
+  setPendingChanges
 }: PropertyFormManagerChildrenProps) {
 
   const renderStepContent = () => {
@@ -282,21 +269,27 @@ export function PropertyFormContent({
   return (
     <div className="space-y-6">
       <div>{renderStepContent()}</div>
-      <div className="flex justify-between">
+      <div className="flex justify-end">
         <Button
           type="button"
-          variant="secondary"
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
+          onClick={() => {
+            // Set pending changes to true when user saves
+            setPendingChanges(true);
+            onSubmit();
+          }}
+          disabled={isSaving}
         >
-          Previous
-        </Button>
-        <Button
-          type="button"
-          onClick={handleNext}
-          disabled={currentStep === 3}
-        >
-          {currentStep === 3 ? 'Submit' : 'Next'}
+          {isSaving ? (
+            <>
+              <span className="animate-spin mr-2">⏳</span>
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </>
+          )}
         </Button>
       </div>
     </div>

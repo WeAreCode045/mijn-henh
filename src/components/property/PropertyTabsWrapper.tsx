@@ -64,8 +64,6 @@ export function PropertyTabsWrapper({
               onSubmit,
               currentStep,
               handleStepClick,
-              handleNext,
-              handlePrevious,
               propertyWithRequiredProps,
               lastSaved,
               isSaving,
@@ -112,11 +110,10 @@ export function PropertyTabsWrapper({
                       handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
                       currentStep={currentStep}
                       handleStepClick={handleStepClick}
-                      handleNext={handleNext}
-                      handlePrevious={handlePrevious}
                       onSubmit={onSubmit}
                       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
                       setPendingChanges={setPendingChanges}
+                      isSaving={isSaving}
                     />
                   </PropertyTabs>
                 </Tabs>

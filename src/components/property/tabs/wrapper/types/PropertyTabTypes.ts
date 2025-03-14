@@ -73,5 +73,7 @@ export interface PropertyTabProps {
     // For media components
     onFeatureImageToggle?: (url: string) => void;
     onSetMainImage?: (url: string) => void;
+    // Add isSaving for loading state
+    isSaving?: boolean;
   };
 }
