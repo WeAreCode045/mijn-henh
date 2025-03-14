@@ -38,7 +38,7 @@ export function SortableFloorplanItem({
     zIndex: isActive ? 10 : 1
   };
 
-  const imageUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+  const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
 
   return (
     <div
@@ -50,9 +50,9 @@ export function SortableFloorplanItem({
       )}
     >
       <img 
-        src={imageUrl} 
+        src={floorplanUrl} 
         alt={`Floorplan ${index + 1}`} 
-        className="w-full h-40 object-contain bg-gray-100"
+        className="w-full h-40 object-cover"
       />
       
       {/* Drag handle */}
@@ -69,15 +69,21 @@ export function SortableFloorplanItem({
       {/* Action buttons overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 
                     transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onRemove}
-          disabled={isUpdating}
-        >
-          <Trash2Icon className="h-4 w-4 mr-1" />
-          Delete
-        </Button>
+        <div className="flex flex-col space-y-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent form submission
+              e.stopPropagation(); // Prevent event bubbling
+              onRemove();
+            }}
+            disabled={isUpdating}
+          >
+            <Trash2Icon className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
+        </div>
       </div>
     </div>
   );

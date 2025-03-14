@@ -6,9 +6,19 @@ interface ImageUploaderProps {
   onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isUploading?: boolean;
   label?: string;
+  multiple?: boolean;
 }
 
-export function ImageUploader({ onUpload, isUploading, label = "Upload Image" }: ImageUploaderProps) {
+export function ImageUploader({ 
+  onUpload, 
+  isUploading, 
+  label = "Upload Image",
+  multiple = false
+}: ImageUploaderProps) {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+  };
+
   return (
     <div className="flex flex-col items-start gap-2">
       <label className="relative cursor-pointer">
@@ -17,6 +27,7 @@ export function ImageUploader({ onUpload, isUploading, label = "Upload Image" }:
           variant="outline"
           className="flex items-center gap-2"
           disabled={isUploading}
+          onClick={handleButtonClick}
         >
           <UploadIcon className="h-4 w-4" />
           {isUploading ? "Uploading..." : label}
@@ -27,7 +38,8 @@ export function ImageUploader({ onUpload, isUploading, label = "Upload Image" }:
           onChange={onUpload}
           disabled={isUploading}
           className="hidden"
-          multiple
+          multiple={multiple}
+          onClick={(e) => e.stopPropagation()}
         />
       </label>
     </div>

@@ -1,7 +1,7 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { PropertyImage } from "@/types/property";
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { SortableImageItem } from "./SortableImageItem";
 import { useSortableImages } from "@/hooks/images/useSortableImages";
@@ -30,14 +30,35 @@ export function SortableImageGrid({
     sortedImages, 
     isSaving, 
     handleDragStart, 
-    handleDragEnd 
+    handleDragEnd,
+    setSortedImages
   } = useSortableImages(images, propertyId);
+  
+  // Update sortedImages when the images prop changes
+  useEffect(() => {
+    setSortedImages(images);
+  }, [images, setSortedImages]);
+
+  // Prevent default on all events to avoid form submission
+  const handleDragStartSafe = (event: DragStartEvent) => {
+    if (event.synthetic?.nativeEvent) {
+      event.synthetic.nativeEvent.preventDefault();
+    }
+    handleDragStart(event);
+  };
+
+  const handleDragEndSafe = (event: DragEndEvent) => {
+    if (event.synthetic?.nativeEvent) {
+      event.synthetic.nativeEvent.preventDefault();
+    }
+    handleDragEnd(event);
+  };
   
   return (
     <DndContext 
       id="image-grid-dnd-context"
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStartSafe}
+      onDragEnd={handleDragEndSafe}
     >
       <SortableContext 
         items={sortedImages.map(image => image.id)} 

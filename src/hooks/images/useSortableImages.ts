@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { PropertyImage } from "@/types/property";
-import { DndContext, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
+import { DragEndEvent, DragStartEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,25 +12,32 @@ export function useSortableImages(images: PropertyImage[], propertyId: string) {
   const [isSaving, setIsSaving] = useState(false);
 
   // Update sorted images when images prop changes
-  useState(() => {
+  useEffect(() => {
     setSortedImages(images);
-  });
+  }, [images]);
 
-  const handleDragStart = (event: { active: { id: UniqueIdentifier } }) => {
+  const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (!over) return;
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
 
     if (active.id !== over.id) {
       const oldIndex = sortedImages.findIndex(item => item.id === active.id);
       const newIndex = sortedImages.findIndex(item => item.id === over.id);
 
-      if (oldIndex === -1 || newIndex === -1) return;
+      if (oldIndex === -1 || newIndex === -1) {
+        setActiveId(null);
+        return;
+      }
 
+      // Create a copy of the sorted images with the new order
       const newSortedImages = arrayMove(sortedImages, oldIndex, newIndex);
 
       // Update local state immediately for better UX
@@ -41,10 +48,14 @@ export function useSortableImages(images: PropertyImage[], propertyId: string) {
         setIsSaving(true);
         
         try {
+          console.log("Updating image order in database");
+          
           // Update sort_order for each image in the database
           const updates = newSortedImages.map((image, index) => {
-            // Make sure we're using string IDs consistently
-            const imageId = typeof image.id === 'number' ? String(image.id) : image.id;
+            // Make sure we're using the correct ID
+            const imageId = typeof image.id === 'number' 
+              ? String(image.id) 
+              : image.id;
             
             return supabase
               .from('property_images')
@@ -71,6 +82,7 @@ export function useSortableImages(images: PropertyImage[], propertyId: string) {
   return {
     activeId,
     sortedImages,
+    setSortedImages,
     isSaving,
     handleDragStart,
     handleDragEnd
