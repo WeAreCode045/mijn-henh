@@ -11,7 +11,6 @@ import { toast } from "sonner";
 interface FloorplansTabProps {
   property: PropertyData;
   setProperty: React.Dispatch<React.SetStateAction<PropertyData>>;
-  preventFormSubmission?: (e: React.FormEvent) => false;
   isSaving?: boolean;
   setIsSaving?: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -19,7 +18,6 @@ interface FloorplansTabProps {
 export function FloorplansTab({ 
   property, 
   setProperty,
-  preventFormSubmission,
   isSaving = false,
   setIsSaving = () => {}
 }: FloorplansTabProps) {

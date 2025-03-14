@@ -40,14 +40,8 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleFloorplanEmbedScriptSave
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
-  // Prevent form submission for any forms in this component
-  const preventFormSubmission = (e: React.FormEvent): false => {
-    e.preventDefault();
-    return false;
-  };
-
   return (
-    <div className="space-y-6" onSubmit={preventFormSubmission}>
+    <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-6">
           <TabsTrigger value="images">Images</TabsTrigger>
@@ -73,7 +67,6 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
           <FloorplansTab 
             property={localProperty} 
             setProperty={setLocalProperty} 
-            preventFormSubmission={preventFormSubmission}
             isSaving={isSaving}
             setIsSaving={setIsSaving}
           />
@@ -86,7 +79,6 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             onVirtualTourSave={handleVirtualTourSave}
             onYoutubeUrlSave={handleYoutubeUrlSave}
             onFloorplanEmbedScriptSave={handleFloorplanEmbedScriptSave}
-            preventFormSubmission={preventFormSubmission}
             isSaving={isSaving}
           />
         </TabsContent>

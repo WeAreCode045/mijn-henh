@@ -1,8 +1,6 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlusIcon, UploadIcon } from "lucide-react";
 import { PropertyImage } from "@/types/property";
 import { SortableImageGrid } from "./images/SortableImageGrid";
 import { ImageUploader } from "@/components/ui/ImageUploader";
@@ -30,11 +28,6 @@ export function PropertyImagesCard({
   featuredImages = [],
   propertyId = ""
 }: PropertyImagesCardProps) {
-  // Use our custom image uploader that includes the preventDefault
-  const handleUploadClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent any form submission
-  };
-
   return (
     <Card>
       <CardHeader>
