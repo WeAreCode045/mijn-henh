@@ -16,6 +16,8 @@ interface ContentTabContentProps {
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
@@ -39,6 +41,8 @@ export function ContentTabContent({
   handleAreaImageUpload,
   currentStep,
   handleStepClick,
+  handleNext,
+  handlePrevious,
   onFetchLocationData,
   onRemoveNearbyPlace,
   isLoadingLocationData,
@@ -62,6 +66,8 @@ export function ContentTabContent({
       onAreaImageUpload={handleAreaImageUpload}
       currentStep={currentStep}
       handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
       onFetchLocationData={onFetchLocationData}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
       isLoadingLocationData={isLoadingLocationData}
