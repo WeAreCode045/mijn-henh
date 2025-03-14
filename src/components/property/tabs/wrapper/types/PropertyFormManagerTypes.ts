@@ -34,8 +34,6 @@ export interface PropertyFormManagerChildrenProps {
   onSubmit: () => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
   propertyWithRequiredProps: PropertyData;
   lastSaved: Date | null;
   isSaving: boolean;

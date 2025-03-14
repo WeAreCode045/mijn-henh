@@ -38,13 +38,13 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           handleAreaImageUpload={handlers.handleAreaImageUpload}
           currentStep={handlers.currentStep}
           handleStepClick={handlers.handleStepClick}
-          handleNext={handlers.handleNext}
-          handlePrevious={handlers.handlePrevious}
           onFetchLocationData={handlers.onFetchLocationData}
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
           setPendingChanges={handlers.setPendingChanges || (() => {})}
           isUploading={handlers.isUploading}
+          onSubmit={handlers.onSubmit}
+          isSaving={handlers.isSaving}
         />
       );
     case "media":
