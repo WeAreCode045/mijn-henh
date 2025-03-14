@@ -21,15 +21,16 @@ interface PropertyStepContentProps {
   onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
+  handleNext?: () => void;
+  handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
   onGenerateLocationDescription?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: () => void; // Add this missing prop
+  onSubmit?: () => void; 
+  isSaving?: boolean;
 }
 
 export function PropertyStepContent({
@@ -55,6 +56,7 @@ export function PropertyStepContent({
   setPendingChanges,
   isUploading,
   onSubmit,
+  isSaving,
 }: PropertyStepContentProps) {
   const renderStep = () => {
     switch (currentStep) {
@@ -113,8 +115,8 @@ export function PropertyStepContent({
       <FormStepNavigation
         currentStep={currentStep}
         onStepClick={handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
+        onSave={onSubmit}
+        isSaving={isSaving}
       />
       <div className="mt-6">
         {renderStep()}

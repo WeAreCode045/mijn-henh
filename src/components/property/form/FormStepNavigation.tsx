@@ -2,20 +2,20 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { steps, FormStep } from "./formSteps";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface FormStepNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
+  onSave?: () => void;
+  isSaving?: boolean;
 }
 
 export function FormStepNavigation({
   currentStep,
   onStepClick,
-  handleNext,
-  handlePrevious
+  onSave,
+  isSaving = false
 }: FormStepNavigationProps) {
   return (
     <div className="space-y-4">
@@ -36,29 +36,20 @@ export function FormStepNavigation({
         ))}
       </div>
       
-      <div className="flex justify-between mt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handlePrevious}
-          disabled={currentStep === 1}
-          className="flex items-center"
-        >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Previous
-        </Button>
-        
-        <Button
-          type="button"
-          variant="default"
-          onClick={handleNext}
-          disabled={currentStep === steps.length}
-          className="flex items-center"
-        >
-          Next
-          <ChevronRight className="h-4 w-4 ml-2" />
-        </Button>
-      </div>
+      {onSave && (
+        <div className="flex justify-center mt-4">
+          <Button
+            type="button"
+            variant="default"
+            onClick={onSave}
+            disabled={isSaving}
+            className="w-full sm:w-auto flex items-center justify-center"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

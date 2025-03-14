@@ -14,9 +14,10 @@ export function usePropertyContent(
 ) {
   const [currentStep, setCurrentStep] = useState(0);
   const [pendingChanges, setPendingChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { handleSubmit } = usePropertyFormSubmit();
-  const { autosaveData, isSaving, lastSaved } = usePropertyAutoSave();
+  const { autosaveData, isSaving: isAutoSaving, lastSaved } = usePropertyAutoSave();
   
   const { 
     fetchLocationData, 
@@ -30,6 +31,7 @@ export function usePropertyContent(
     if (!formData || !pendingChanges) return;
     
     try {
+      setIsSaving(true);
       console.log("Saving changes to property");
       const event = {} as React.FormEvent;
       const result = await handleSubmit(event, formData, false);
@@ -50,6 +52,8 @@ export function usePropertyContent(
         variant: "destructive",
       });
       return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -67,44 +71,7 @@ export function usePropertyContent(
     }
   };
 
-  // Improved step navigation handling
-  const handleNext = async () => {
-    console.log(`usePropertyContent - Current step: ${currentStep}, max steps: ${steps.length}`);
-    
-    if (currentStep < steps.length - 1) {
-      // Save changes before moving to next step
-      if (pendingChanges) {
-        const saveResult = await handleSave();
-        if (saveResult) {
-          console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-          setCurrentStep(currentStep + 1);
-        }
-      } else {
-        console.log(`usePropertyContent - Moving to next step: ${currentStep + 1}`);
-        setCurrentStep(currentStep + 1);
-      }
-    } else {
-      console.log('usePropertyContent - Already at the last step');
-    }
-  };
-
-  const handlePrevious = async () => {
-    if (currentStep > 0) {
-      // Save changes before moving to previous step
-      if (pendingChanges) {
-        const saveResult = await handleSave();
-        if (saveResult) {
-          console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-          setCurrentStep(currentStep - 1);
-        }
-      } else {
-        console.log(`usePropertyContent - Moving to previous step: ${currentStep - 1}`);
-        setCurrentStep(currentStep - 1);
-      }
-    } else {
-      console.log('usePropertyContent - Already at the first step');
-    }
-  };
+  // Removed handleNext and handlePrevious since they are no longer needed
 
   const onSubmit = async () => {
     await handleSave();
@@ -173,8 +140,6 @@ export function usePropertyContent(
   return {
     currentStep,
     handleStepClick,
-    handleNext,
-    handlePrevious,
     onSubmit,
     handleFieldChange: handleFieldChangeWithTracking,
     // Feature management
