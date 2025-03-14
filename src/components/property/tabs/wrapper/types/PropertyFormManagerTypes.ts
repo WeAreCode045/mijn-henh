@@ -45,4 +45,11 @@ export interface PropertyFormManagerChildrenProps {
   // For media components
   onFeatureImageToggle?: (url: string) => void;
   onSetMainImage?: (url: string) => void;
+  // Add location-related properties
+  onFetchLocationData: () => Promise<any>;
+  onGenerateLocationDescription: () => Promise<any>;
+  onGenerateMap: () => Promise<any>;
+  onRemoveNearbyPlace: (index: number) => void;
+  isLoadingLocationData: boolean;
+  isGeneratingMap: boolean;
 }

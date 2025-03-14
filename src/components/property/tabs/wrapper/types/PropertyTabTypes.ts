@@ -75,5 +75,9 @@ export interface PropertyTabProps {
     onSetMainImage?: (url: string) => void;
     // Add isSaving for loading state
     isSaving?: boolean;
+    // Add the new location generation handlers
+    onGenerateLocationDescription?: () => Promise<any>;
+    onGenerateMap?: () => Promise<any>;
+    isGeneratingMap?: boolean;
   };
 }

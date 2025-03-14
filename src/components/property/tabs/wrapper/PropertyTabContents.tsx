@@ -63,6 +63,10 @@ interface PropertyTabContentsProps {
   // Media components
   onFeatureImageToggle?: (url: string) => void;
   onSetMainImage?: (url: string) => void;
+  // Add new location-related properties
+  onGenerateLocationDescription?: () => Promise<any>;
+  onGenerateMap?: () => Promise<any>;
+  isGeneratingMap?: boolean;
 }
 
 export function PropertyTabContents({
@@ -111,7 +115,10 @@ export function PropertyTabContents({
   handleYoutubeUrlUpdate = () => {},
   handleFloorplanEmbedScriptUpdate = () => {},
   onFeatureImageToggle,
-  onSetMainImage
+  onSetMainImage,
+  onGenerateLocationDescription,
+  onGenerateMap,
+  isGeneratingMap
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -157,7 +164,10 @@ export function PropertyTabContents({
     handleFloorplanEmbedScriptUpdate,
     onFeatureImageToggle,
     onSetMainImage,
-    isSaving
+    isSaving,
+    onGenerateLocationDescription,
+    onGenerateMap,
+    isGeneratingMap
   };
 
   const tabProps = {

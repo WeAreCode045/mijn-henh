@@ -160,6 +160,7 @@ export function usePropertyFormManager(property: PropertyData) {
     onGenerateLocationDescription: contentManager.generateLocationDescription,
     onGenerateMap: contentManager.generateMapImage,
     onRemoveNearbyPlace: contentManager.removeNearbyPlace,
-    isLoadingLocationData: contentManager.isLoadingLocationData
+    isLoadingLocationData: contentManager.isLoadingLocationData,
+    isGeneratingMap: contentManager.isGeneratingMap
   };
 }

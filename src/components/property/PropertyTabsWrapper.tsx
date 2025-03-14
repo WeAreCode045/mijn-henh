@@ -72,7 +72,8 @@ export function PropertyTabsWrapper({
               onGenerateLocationDescription,
               onGenerateMap,
               onRemoveNearbyPlace,
-              isLoadingLocationData
+              isLoadingLocationData,
+              isGeneratingMap
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -121,9 +122,10 @@ export function PropertyTabsWrapper({
                       isSaving={isSaving}
                       onFetchLocationData={onFetchLocationData}
                       onGenerateLocationDescription={onGenerateLocationDescription}
+                      onGenerateMap={onGenerateMap}
                       onRemoveNearbyPlace={onRemoveNearbyPlace}
                       isLoadingLocationData={isLoadingLocationData}
-                      onGenerateMap={onGenerateMap}
+                      isGeneratingMap={isGeneratingMap}
                     />
                   </PropertyTabs>
                 </Tabs>
