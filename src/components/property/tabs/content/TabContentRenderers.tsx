@@ -23,6 +23,19 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
         />
       );
     case "content":
+      // Define handleNext and handlePrevious for ContentTabContent
+      const handleNext = () => {
+        if (handlers.currentStep < 3) { // 3 is the max step (0-indexed)
+          handlers.handleStepClick(handlers.currentStep + 1);
+        }
+      };
+
+      const handlePrevious = () => {
+        if (handlers.currentStep > 0) {
+          handlers.handleStepClick(handlers.currentStep - 1);
+        }
+      };
+
       return (
         <ContentTabContent
           formData={formState}
@@ -38,6 +51,8 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           handleAreaImageUpload={handlers.handleAreaImageUpload}
           currentStep={handlers.currentStep}
           handleStepClick={handlers.handleStepClick}
+          handleNext={handleNext}
+          handlePrevious={handlePrevious}
           onFetchLocationData={handlers.onFetchLocationData}
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
