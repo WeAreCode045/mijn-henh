@@ -2,15 +2,18 @@
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { CategorySection } from "./components/CategorySection";
 import { Button } from "@/components/ui/button";
-import { Loader2, Navigation } from "lucide-react";
+import { AlertCircle, MapPin } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
+import { SelectPlacesModal, PlaceOption } from "./components/SelectPlacesModal";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
   onRemovePlace?: (index: number) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
-  onFetchNearbyPlaces?: () => Promise<void>;
+  onFetchNearbyPlaces?: (category?: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
 }
 
@@ -23,6 +26,20 @@ export function NearbyPlacesSection({
 }: NearbyPlacesSectionProps) {
   const nearbyPlaces = formData.nearby_places || [];
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState("");
+  const [placesForModal, setPlacesForModal] = useState<PlaceOption[]>([]);
+  const [isFetchingCategory, setIsFetchingCategory] = useState(false);
+  
+  // Define our categories
+  const categories = [
+    { id: "restaurant", label: "Restaurants" },
+    { id: "education", label: "Education" },
+    { id: "supermarket", label: "Supermarkets" },
+    { id: "shopping", label: "Shopping" },
+    { id: "sport", label: "Sport Facilities" },
+    { id: "leisure", label: "Leisure" }
+  ];
   
   // Group places by category
   const placesByCategory: Record<string, PropertyNearbyPlace[]> = {
@@ -35,12 +52,63 @@ export function NearbyPlacesSection({
     if (!placesByCategory[category]) {
       placesByCategory[category] = [];
     }
-    // We don't modify the original place object with index property
     placesByCategory[category].push(place);
   });
   
-  // Get available categories for tab list
-  const categories = Object.keys(placesByCategory).filter(cat => cat !== 'all');
+  // Handle fetch for specific category
+  const handleFetchCategory = async (category: string) => {
+    if (!onFetchNearbyPlaces) return;
+    
+    setIsFetchingCategory(true);
+    setCurrentCategory(category);
+    
+    try {
+      const results = await onFetchNearbyPlaces(category);
+      if (results && results[category]) {
+        // Convert to our format
+        const options: PlaceOption[] = results[category].map((place: any) => ({
+          id: place.place_id,
+          name: place.name,
+          vicinity: place.vicinity,
+          rating: place.rating,
+          distance: place.distance,
+          type: category
+        }));
+        
+        setPlacesForModal(options);
+        setModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching places:", error);
+    } finally {
+      setIsFetchingCategory(false);
+    }
+  };
+  
+  // Handle saving selected places
+  const handleSavePlaces = (selectedPlaces: PlaceOption[]) => {
+    if (!onFieldChange || !formData.nearby_places) return;
+    
+    // Convert to PropertyNearbyPlace
+    const newPlaces: PropertyNearbyPlace[] = selectedPlaces.map(place => ({
+      id: place.id,
+      name: place.name,
+      vicinity: place.vicinity,
+      rating: place.rating,
+      distance: place.distance || 0,
+      type: place.type,
+      visible_in_webview: true
+    }));
+    
+    // Filter out existing places with the same IDs
+    const existingPlaces = formData.nearby_places.filter(
+      place => !newPlaces.some(newPlace => newPlace.id === place.id)
+    );
+    
+    // Merge existing places with new ones
+    const updatedPlaces = [...existingPlaces, ...newPlaces];
+    onFieldChange('nearby_places', updatedPlaces);
+  };
   
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
     if (!onFieldChange || !formData.nearby_places) return;
@@ -71,13 +139,13 @@ export function NearbyPlacesSection({
           >
             {isLoadingNearbyPlaces ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 Fetching...
               </>
             ) : (
               <>
-                <Navigation className="h-4 w-4" />
-                Get Nearby Places
+                <MapPin className="h-4 w-4" />
+                Get All Nearby Places
               </>
             )}
           </Button>
@@ -90,11 +158,34 @@ export function NearbyPlacesSection({
             <TabsList className="w-full">
               <TabsTrigger value="all">All ({nearbyPlaces.length})</TabsTrigger>
               {categories.map(category => (
-                <TabsTrigger key={category} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)} ({placesByCategory[category].length})
+                <TabsTrigger key={category.id} value={category.id}>
+                  {category.label} ({placesByCategory[category.id]?.length || 0})
                 </TabsTrigger>
               ))}
             </TabsList>
+            
+            <div className="flex justify-end mt-2">
+              {activeTab !== 'all' && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleFetchCategory(activeTab)}
+                  disabled={isFetchingCategory}
+                >
+                  {isFetchingCategory ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent mr-2" />
+                      Fetching...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Fetch {categories.find(c => c.id === activeTab)?.label}
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
             
             <TabsContent value="all" className="space-y-4 mt-4">
               {nearbyPlaces.length > 0 ? (
@@ -112,15 +203,28 @@ export function NearbyPlacesSection({
             </TabsContent>
             
             {categories.map(category => (
-              <TabsContent key={category} value={category} className="space-y-4 mt-4">
-                <CategorySection
-                  key={category}
-                  category={category.charAt(0).toUpperCase() + category.slice(1)}
-                  places={placesByCategory[category]}
-                  onRemovePlace={onRemovePlace}
-                  toggleVisibility={togglePlaceVisibility}
-                  isVisible={(place) => !!place.visible_in_webview}
-                />
+              <TabsContent key={category.id} value={category.id} className="space-y-4 mt-4">
+                {placesByCategory[category.id]?.length > 0 ? (
+                  <CategorySection
+                    key={category.id}
+                    category={category.label}
+                    places={placesByCategory[category.id] || []}
+                    onRemovePlace={onRemovePlace}
+                    toggleVisibility={togglePlaceVisibility}
+                    isVisible={(place) => !!place.visible_in_webview}
+                  />
+                ) : (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <Alert variant="default" className="bg-amber-50">
+                        <AlertCircle className="h-4 w-4 text-amber-600" />
+                        <AlertDescription>
+                          No {category.label.toLowerCase()} found near this property. Use the "Fetch" button above to search for places in this category.
+                        </AlertDescription>
+                      </Alert>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
             ))}
           </Tabs>
@@ -132,6 +236,16 @@ export function NearbyPlacesSection({
           </p>
         </div>
       )}
+      
+      {/* Modal for selecting places */}
+      <SelectPlacesModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        places={placesForModal}
+        onSave={handleSavePlaces}
+        category={currentCategory}
+        isLoading={isFetchingCategory}
+      />
     </div>
   );
 }

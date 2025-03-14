@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -13,14 +14,11 @@ serve(async (req) => {
   }
 
   try {
-    const { address, propertyId } = await req.json();
+    const requestData = await req.json();
+    const { address, propertyId, category } = requestData;
     
     if (!address) {
       throw new Error("Address is required");
-    }
-
-    if (!propertyId) {
-      throw new Error("Property ID is required");
     }
 
     // Get settings from database to retrieve API keys
@@ -60,25 +58,122 @@ serve(async (req) => {
     const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${lat},${lng}&key=${googleMapsApiKey}`;
     console.log(`Generated map image URL`);
 
-    // Fetch nearby places
-    const nearbyPlacesTypes = [
-      "restaurant", "school", "supermarket", "shopping_mall", 
-      "gym", "park", "hospital", "transit_station"
-    ];
-    
-    const placePromises = nearbyPlacesTypes.map(async (type) => {
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1500&type=${type}&key=${googleMapsApiKey}`;
+    // If category is specified, just fetch places for that category
+    if (category) {
+      let placeType = category;
+      
+      // Map our category names to Google Place types
+      const categoryMap: Record<string, string> = {
+        "restaurant": "restaurant",
+        "education": "school",
+        "supermarket": "supermarket",
+        "shopping": "shopping_mall",
+        "sport": "gym",
+        "leisure": "park"
+      };
+      
+      if (categoryMap[category]) {
+        placeType = categoryMap[category];
+      }
+      
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&type=${placeType}&key=${googleMapsApiKey}`;
       const response = await fetch(url);
       const data = await response.json();
-      return data.results?.map((place: any) => ({
-        id: place.place_id,
-        name: place.name,
-        type: type,
-        vicinity: place.vicinity,
-        rating: place.rating,
-        user_ratings_total: place.user_ratings_total,
-        visible_in_webview: true
-      })) || [];
+      
+      const places = data.results?.map((place: any) => {
+        // Calculate distance from property to place (in km)
+        const distance = calculateDistance(lat, lng, 
+          place.geometry.location.lat, 
+          place.geometry.location.lng);
+          
+        return {
+          place_id: place.place_id,
+          name: place.name,
+          type: category,
+          vicinity: place.vicinity,
+          rating: place.rating,
+          user_ratings_total: place.user_ratings_total,
+          distance: parseFloat(distance.toFixed(1)),
+          visible_in_webview: true
+        };
+      }) || [];
+      
+      const result = { [category]: places };
+      
+      return new Response(
+        JSON.stringify(result),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    // For cities only request
+    if (requestData.citiesOnly) {
+      // Fetch nearby cities with population data 
+      const citiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=200000&type=locality&key=${googleMapsApiKey}&rankby=prominence`;
+      const citiesResponse = await fetch(citiesUrl);
+      const citiesData = await citiesResponse.json();
+      
+      let cities = [];
+      if (citiesData.results && citiesData.results.length > 0) {
+        cities = citiesData.results.slice(0, 5).map((city: any) => {
+          // Calculate distance from property to city (in km)
+          const cityLat = city.geometry.location.lat;
+          const cityLng = city.geometry.location.lng;
+          const distance = calculateDistance(lat, lng, cityLat, cityLng);
+          
+          return {
+            id: city.place_id,
+            name: city.name,
+            distance: parseFloat(distance.toFixed(1)),
+            vicinity: city.vicinity,
+            visible_in_webview: true
+          };
+        });
+      }
+      
+      return new Response(
+        JSON.stringify({ cities }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Fetch nearby places for all categories
+    const nearbyPlacesTypes = {
+      "restaurant": "restaurant",
+      "education": "school",
+      "supermarket": "supermarket", 
+      "shopping": "shopping_mall",
+      "sport": "gym",
+      "leisure": "park",
+      "transportation": "transit_station"
+    };
+    
+    const placePromises = Object.entries(nearbyPlacesTypes).map(async ([category, type]) => {
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&type=${type}&key=${googleMapsApiKey}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      return data.results?.map((place: any) => {
+        // Calculate distance from property to place (in km)
+        const distance = calculateDistance(lat, lng, 
+          place.geometry.location.lat, 
+          place.geometry.location.lng);
+          
+        return {
+          id: place.place_id,
+          name: place.name,
+          type: category,
+          vicinity: place.vicinity,
+          rating: place.rating,
+          user_ratings_total: place.user_ratings_total,
+          distance: parseFloat(distance.toFixed(1)),
+          visible_in_webview: true
+        };
+      }) || [];
     });
 
     const placesResults = await Promise.all(placePromises);
@@ -89,13 +184,12 @@ serve(async (req) => {
     let nearbyCities = [];
     try {
       // Fetch nearby cities with population data 
-      // Modify the URL to include population, limit results to 5, and max distance 200km
       const citiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=200000&type=locality&key=${googleMapsApiKey}&rankby=prominence`;
       const citiesResponse = await fetch(citiesUrl);
       const citiesData = await citiesResponse.json();
       
       if (citiesData.results && citiesData.results.length > 0) {
-        const cities = citiesData.results.slice(0, 5).map(city => {
+        const cities = citiesData.results.slice(0, 5).map((city: any) => {
           // Calculate distance from property to city (in km)
           const cityLat = city.geometry.location.lat;
           const cityLng = city.geometry.location.lng;
@@ -116,20 +210,22 @@ serve(async (req) => {
       console.error("Error fetching nearby cities:", error);
     }
 
-    // Update the property with the new data
-    const { error: updateError } = await supabaseAdmin
-      .from("properties")
-      .update({
-        latitude: lat,
-        longitude: lng,
-        map_image: mapImageUrl,
-        nearby_places: nearbyPlaces,
-        nearby_cities: nearbyCities
-      })
-      .eq("id", propertyId);
+    // Update the property with the new data if propertyId is provided
+    if (propertyId) {
+      const { error: updateError } = await supabaseAdmin
+        .from("properties")
+        .update({
+          latitude: lat,
+          longitude: lng,
+          map_image: mapImageUrl,
+          nearby_places: nearbyPlaces,
+          nearby_cities: nearbyCities
+        })
+        .eq("id", propertyId);
 
-    if (updateError) {
-      throw new Error(`Failed to update property: ${updateError.message}`);
+      if (updateError) {
+        throw new Error(`Failed to update property: ${updateError.message}`);
+      }
     }
 
     return new Response(
@@ -157,7 +253,7 @@ serve(async (req) => {
   }
 });
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // Radius of the earth in km
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
@@ -170,6 +266,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return distance;
 }
 
-function deg2rad(deg) {
+function deg2rad(deg: number): number {
   return deg * (Math.PI/180);
 }

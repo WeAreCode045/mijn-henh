@@ -1,166 +1,105 @@
+import { useState } from 'react';
+import { PropertyFormData } from '@/types/property';
+import { usePropertyFormState } from '@/components/property/form/usePropertyFormState';
+import { usePropertyFeatures } from './usePropertyFeatures';
+import { usePropertyAreas } from './usePropertyAreas';
+import { usePropertyContent } from './usePropertyContent';
+import { usePropertyImages } from './usePropertyImages';
 
-import { useState, useCallback } from "react";
-import { PropertyData, PropertyFormData } from "@/types/property";
-import { v4 as uuidv4 } from "uuid";
-import { usePropertyContent } from "@/hooks/usePropertyContent";
-import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyAreas } from "@/hooks/usePropertyAreas";
-import { useFeatures } from "@/hooks/useFeatures";
-import { supabase } from "@/integrations/supabase/client";
-
-export function usePropertyFormManager(property: PropertyData) {
-  const [formState, setFormState] = useState<PropertyFormData>(property as PropertyFormData);
+export function usePropertyFormManager(property: PropertyFormData) {
+  const [formState, setFormState] = useState<PropertyFormData>(property);
   
-  // Create a callback function to update form state
-  const handleFieldChange = useCallback(<K extends keyof PropertyFormData>(
-    field: K,
-    value: PropertyFormData[K]
-  ) => {
-    setFormState(prev => ({ ...prev, [field]: value }));
-  }, []);
-
-  // Use the property content hook for location and content-related functionality
-  const contentManager = usePropertyContent(formState, handleFieldChange);
+  // Hook for handling form state
+  const { 
+    onFieldChange 
+  } = usePropertyFormState(formState, setFormState);
   
-  // Use the features hook for managing features
-  const featuresManager = useFeatures(formState, setFormState);
+  // Hook for managing features
+  const { 
+    addFeature, 
+    removeFeature, 
+    updateFeature 
+  } = usePropertyFeatures(formState, onFieldChange);
   
-  // Use the property images hook
-  const imageManager = usePropertyImages(formState, setFormState);
+  // Hook for managing areas
+  const { 
+    addArea, 
+    removeArea, 
+    updateArea, 
+    handleAreaImageRemove, 
+    handleAreaImagesSelect,
+    handleAreaImageUpload
+  } = usePropertyAreas(formState, onFieldChange);
   
-  // Use the property areas hook
+  // Hook for managing content and steps
+  const { 
+    fetchLocationData,
+    fetchCategoryPlaces,
+    fetchNearbyCities,
+    generateLocationDescription,
+    generateMapImage,
+    removeNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    lastSaved,
+    isSaving,
+    setPendingChanges,
+    onSubmit
+  } = usePropertyContent(formState, onFieldChange);
+  
+  // Hook for managing images
   const {
-    addArea,
-    removeArea,
-    updateArea,
-    handleAreaImageUpload: baseHandleAreaImageUpload,
-    handleAreaImageRemove,
-    handleAreaImagesSelect
-  } = usePropertyAreas(formState, setFormState);
-
-  // Wrap the handleAreaImageUpload to return a Promise
-  const handleAreaImageUpload = async (areaId: string, files: FileList): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
-      try {
-        baseHandleAreaImageUpload(areaId, files);
-        resolve();
-      } catch (error) {
-        console.error("Error uploading area images:", error);
-        reject(error);
-      }
-    });
-  };
-
-  // Add handle functions for object_id, agent, and template
-  const handleSaveObjectId = useCallback((objectId: string) => {
-    handleFieldChange('object_id', objectId);
-  }, [handleFieldChange]);
-
-  const handleSaveAgent = useCallback((agentId: string) => {
-    handleFieldChange('agent_id', agentId);
-  }, [handleFieldChange]);
-
-  const handleSaveTemplate = useCallback((templateId: string) => {
-    handleFieldChange('template_id', templateId);
-  }, [handleFieldChange]);
-
-  // Handle setting and toggling the featured image
-  const handleSetFeaturedImage = useCallback((url: string | null) => {
-    if (url) {
-      setFormState(prev => ({
-        ...prev,
-        featuredImage: url
-      }));
-    } else {
-      setFormState(prev => ({
-        ...prev,
-        featuredImage: null
-      }));
-    }
-  }, []);
-
-  const handleToggleFeaturedImage = useCallback((url: string) => {
-    const currentFeaturedImages = formState.featuredImages || [];
-    const newFeaturedImages = currentFeaturedImages.includes(url) 
-      ? currentFeaturedImages.filter(img => img !== url)
-      : [...currentFeaturedImages, url];
-    
-    handleFieldChange('featuredImages', newFeaturedImages);
-  }, [formState.featuredImages, handleFieldChange]);
-
-  // Handle area photos
-  const handleAreaPhotosUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      // Implementation here
-      console.log("Uploading area photos:", e.target.files);
-    }
-  }, []);
-
-  const handleRemoveAreaPhoto = useCallback((areaId: string, imageId: string) => {
-    handleAreaImageRemove(areaId, imageId);
-  }, [handleAreaImageRemove]);
-
-  // Add handlers for virtual tours and YouTube 
-  const handleVirtualTourUpdate = useCallback((url: string) => {
-    handleFieldChange('virtualTourUrl', url);
-  }, [handleFieldChange]);
-
-  const handleYoutubeUrlUpdate = useCallback((url: string) => {
-    handleFieldChange('youtubeUrl', url);
-  }, [handleFieldChange]);
-
-  const handleFloorplanEmbedScriptUpdate = useCallback((script: string) => {
-    handleFieldChange('floorplanEmbedScript', script);
-  }, [handleFieldChange]);
-
-  // Ensure propertyWithRequiredProps has all the required properties
-  const propertyWithRequiredProps: PropertyData = {
-    ...formState,
-    id: formState.id || uuidv4(),
-    title: formState.title || '',
-  };
-
+    handleImageUpload,
+    handleRemoveImage,
+    images
+  } = usePropertyImages(formState, onFieldChange);
+  
   return {
     formState,
-    handleFieldChange,
-    handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate,
-    addFeature: featuresManager.addFeature,
-    removeFeature: featuresManager.removeFeature,
-    updateFeature: featuresManager.updateFeature,
+    onFieldChange,
+    
+    // Feature methods
+    addFeature,
+    removeFeature,
+    updateFeature,
+    
+    // Area methods
     addArea,
     removeArea,
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
     handleAreaImageUpload,
-    handleImageUpload: imageManager.handleImageUpload,
-    handleRemoveImage: imageManager.handleRemoveImage,
-    isUploading: imageManager.isUploading,
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
-    handleFloorplanUpload: imageManager.handleFloorplanUpload,
-    handleRemoveFloorplan: imageManager.handleRemoveFloorplan,
-    isUploadingFloorplan: imageManager.isUploadingFloorplan,
-    handleSetFeaturedImage,
-    handleToggleFeaturedImage,
-    handleVirtualTourUpdate,
-    handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate,
-    onSubmit: contentManager.onSubmit,
-    currentStep: contentManager.currentStep,
-    handleStepClick: contentManager.handleStepClick,
-    propertyWithRequiredProps,
-    lastSaved: contentManager.lastSaved,
-    isSaving: contentManager.isSaving,
-    setPendingChanges: contentManager.setPendingChanges,
-    // Include location-related functionality
-    onFetchLocationData: contentManager.fetchLocationData,
-    onGenerateLocationDescription: contentManager.generateLocationDescription,
-    onGenerateMap: contentManager.generateMapImage,
-    onRemoveNearbyPlace: contentManager.removeNearbyPlace,
-    isLoadingLocationData: contentManager.isLoadingLocationData,
-    isGeneratingMap: contentManager.isGeneratingMap
+    
+    // Location methods
+    onFetchLocationData: fetchLocationData,
+    onFetchCategoryPlaces: fetchCategoryPlaces,
+    onFetchNearbyCities: fetchNearbyCities,
+    onGenerateLocationDescription: generateLocationDescription,
+    onGenerateMap: generateMapImage,
+    onRemoveNearbyPlace: removeNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    
+    // Step navigation
+    onSubmit,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    
+    // Status
+    lastSaved,
+    isSaving,
+    setPendingChanges,
+    
+    // Image methods
+    handleImageUpload,
+    handleRemoveImage,
+    images
   };
 }

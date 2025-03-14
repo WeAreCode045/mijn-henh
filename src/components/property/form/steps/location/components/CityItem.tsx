@@ -1,17 +1,19 @@
 
 import { PropertyCity } from "@/types/property";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { MapPin } from "lucide-react";
 
 interface CityItemProps {
   city: PropertyCity;
   index: number;
-  onVisibilityChange: (cityIndex: number, visible: boolean) => void;
+  onVisibilityChange: (index: number, visible: boolean) => void;
   isVisible: boolean;
 }
 
 export function CityItem({ 
   city, 
-  index, 
+  index,
   onVisibilityChange,
   isVisible
 }: CityItemProps) {
@@ -27,13 +29,17 @@ export function CityItem({
         />
         <div>
           <div className="font-medium">{city.name}</div>
-          {city.distance && (
-            <div className="text-sm text-gray-500">
-              {typeof city.distance === 'number' 
-                ? `${city.distance.toFixed(1)} km` 
-                : city.distance}
-            </div>
-          )}
+          
+          <div className="flex flex-wrap gap-1 mt-1">
+            {city.distance !== undefined && (
+              <Badge variant="outline" className="text-xs flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {typeof city.distance === 'number' 
+                  ? `${city.distance.toFixed(1)} km` 
+                  : city.distance}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
     </div>

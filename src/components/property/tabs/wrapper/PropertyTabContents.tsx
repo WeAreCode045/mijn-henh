@@ -1,73 +1,7 @@
 
-import { PropertyFormData } from "@/types/property";
-import { renderTabContent } from "../content/TabContentRenderers";
-
-interface PropertyTabContentsProps {
-  activeTab: string;
-  property: {
-    id: string;
-    object_id?: string;
-    title: string;
-    agent_id?: string;
-    created_at?: string;
-    updated_at?: string;
-    images: any[];
-    floorplans?: any[];
-    virtualTourUrl?: string;
-    youtubeUrl?: string;
-    notes?: string;
-    floorplanEmbedScript?: string;
-  };
-  formState: PropertyFormData;
-  agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
-  isUpdating: boolean;
-  isSaving?: boolean;
-  onSave: () => void;
-  onDelete: () => Promise<void>;
-  handleSaveObjectId: (objectId: string) => void;
-  handleSaveAgent: (agentId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
-  handleGeneratePDF: () => void;
-  handleWebView: () => void;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
-  onAddArea: () => void;
-  onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage: (index: number) => void;
-  isUploading?: boolean;
-  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan: (index: number) => void;
-  currentStep: number;
-  handleStepClick: (step: number) => void;
-  onSubmit: () => void;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
-  isUploadingFloorplan?: boolean;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  onFetchLocationData?: () => Promise<void>;
-  onRemoveNearbyPlace?: (index: number) => void;
-  isLoadingLocationData?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
-  handleVirtualTourUpdate?: (url: string) => void;
-  handleYoutubeUrlUpdate?: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
-  // Media components
-  onFeatureImageToggle?: (url: string) => void;
-  onSetMainImage?: (url: string) => void;
-  // Add new location-related properties
-  onGenerateLocationDescription?: () => Promise<any>;
-  onGenerateMap?: () => Promise<any>;
-  isGeneratingMap?: boolean;
-}
+import React from 'react';
+import { PropertyTabContentsProps } from './types/PropertyTabTypes';
+import { TabContentRenderers } from '../content/TabContentRenderers';
 
 export function PropertyTabContents({
   activeTab,
@@ -75,16 +9,6 @@ export function PropertyTabContents({
   formState,
   agentInfo,
   templateInfo,
-  isUpdating,
-  isSaving,
-  onSave,
-  onDelete,
-  handleSaveObjectId,
-  handleSaveAgent,
-  handleSaveTemplate,
-  handleGeneratePDF,
-  handleWebView,
-  onFieldChange,
   onAddFeature,
   onRemoveFeature,
   onUpdateFeature,
@@ -93,94 +17,60 @@ export function PropertyTabContents({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  handleAreaImageUpload,
-  handleImageUpload,
-  handleRemoveImage,
-  isUploading,
-  handleAreaPhotosUpload,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  currentStep,
-  handleStepClick,
-  onSubmit,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage,
-  isUploadingFloorplan,
-  handleRemoveAreaPhoto,
+  onAreaImageUpload,
+  onFieldChange,
   onFetchLocationData,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  setPendingChanges = () => {},
-  handleVirtualTourUpdate = () => {},
-  handleYoutubeUrlUpdate = () => {},
-  handleFloorplanEmbedScriptUpdate = () => {},
-  onFeatureImageToggle,
-  onSetMainImage,
+  onFetchCategoryPlaces,
+  onFetchNearbyCities,
   onGenerateLocationDescription,
   onGenerateMap,
-  isGeneratingMap
+  onRemoveNearbyPlace,
+  isLoadingLocationData,
+  isGeneratingMap,
+  onSave,
+  onDelete,
+  handleSaveObjectId,
+  handleSaveAgent,
+  handleSaveTemplate,
+  currentStep,
+  handleStepClick,
+  setPendingChanges,
+  isSaving
 }: PropertyTabContentsProps) {
-  const handlers = {
-    onSave,
-    onDelete,
-    handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate,
-    handleGeneratePDF,
-    handleWebView,
-    onFieldChange,
-    onAddFeature,
-    onRemoveFeature,
-    onUpdateFeature,
-    onAddArea,
-    onRemoveArea,
-    onUpdateArea,
-    onAreaImageRemove,
-    onAreaImagesSelect,
-    handleAreaImageUpload,
-    handleImageUpload,
-    handleRemoveImage,
-    isUploading,
-    handleAreaPhotosUpload,
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    currentStep,
-    handleStepClick,
-    onSubmit,
-    formState,
-    isUploadingFloorplan,
-    handleSetFeaturedImage: handleSetFeaturedImage || (() => console.warn("Main image functionality not available")),
-    handleToggleFeaturedImage: handleToggleFeaturedImage || (() => console.warn("Featured image functionality not available")),
-    handleRemoveAreaPhoto: handleRemoveAreaPhoto || ((areaId: string, imageId: string) => {
-      console.warn("Area photo removal functionality not available");
-    }),
-    onFetchLocationData,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    setPendingChanges,
-    featuredImage: formState.featuredImage,
-    handleVirtualTourUpdate,
-    handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate,
-    onFeatureImageToggle,
-    onSetMainImage,
-    isSaving,
-    onGenerateLocationDescription,
-    onGenerateMap,
-    isGeneratingMap
-  };
-
-  const tabProps = {
-    activeTab,
-    property,
-    formState,
-    agentInfo,
-    templateInfo,
-    isUpdating,
-    handlers
-  };
-
-  console.log("PropertyTabContents - Active tab:", activeTab);
-
-  return renderTabContent(tabProps);
+  return (
+    <TabContentRenderers
+      activeTab={activeTab}
+      property={property}
+      formState={formState}
+      agentInfo={agentInfo}
+      templateInfo={templateInfo}
+      onAddFeature={onAddFeature}
+      onRemoveFeature={onRemoveFeature}
+      onUpdateFeature={onUpdateFeature}
+      onAddArea={onAddArea}
+      onRemoveArea={onRemoveArea}
+      onUpdateArea={onUpdateArea}
+      onAreaImageRemove={onAreaImageRemove}
+      onAreaImagesSelect={onAreaImagesSelect}
+      onAreaImageUpload={onAreaImageUpload}
+      onFieldChange={onFieldChange}
+      onFetchLocationData={onFetchLocationData}
+      onFetchCategoryPlaces={onFetchCategoryPlaces}
+      onFetchNearbyCities={onFetchNearbyCities}
+      onGenerateLocationDescription={onGenerateLocationDescription}
+      onGenerateMap={onGenerateMap}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
+      isGeneratingMap={isGeneratingMap}
+      onSave={onSave}
+      onDelete={onDelete}
+      handleSaveObjectId={handleSaveObjectId}
+      handleSaveAgent={handleSaveAgent}
+      handleSaveTemplate={handleSaveTemplate}
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      setPendingChanges={setPendingChanges}
+      isSaving={isSaving}
+    />
+  );
 }

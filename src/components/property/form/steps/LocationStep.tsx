@@ -5,11 +5,14 @@ import { MapPreviewSection } from "./location/MapPreviewSection";
 import { NearbyPlacesSection } from "./location/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
 import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
+import { useState } from "react";
 
 interface LocationStepProps {
   formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onFetchLocationData?: () => Promise<void>;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchNearbyCities?: () => Promise<any>;
   onGenerateLocationDescription?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
@@ -23,6 +26,8 @@ export function LocationStep({
   formData,
   onFieldChange,
   onFetchLocationData,
+  onFetchCategoryPlaces,
+  onFetchNearbyCities,
   onGenerateLocationDescription,
   onRemoveNearbyPlace,
   isLoadingLocationData,
@@ -57,13 +62,14 @@ export function LocationStep({
               formData={formData}
               onRemovePlace={onRemoveNearbyPlace}
               onFieldChange={onFieldChange}
-              onFetchNearbyPlaces={onFetchLocationData}
+              onFetchNearbyPlaces={onFetchCategoryPlaces || onFetchLocationData}
               isLoadingNearbyPlaces={isLoadingLocationData}
             />
             
             <NearbyCitiesSection 
               formData={formData}
               onFetchLocationData={onFetchLocationData}
+              onFetchNearbyCities={onFetchNearbyCities}
               isLoadingLocationData={isLoadingLocationData}
               onFieldChange={onFieldChange}
             />
