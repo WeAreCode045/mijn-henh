@@ -34,7 +34,12 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
-
+    --padding-s: 2px;
+    --padding-m: 5px;
+    --padding-l: 10px;
+    --padding-xl:20px;
+  
+  
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
