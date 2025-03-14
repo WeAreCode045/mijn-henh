@@ -1,29 +1,41 @@
 
 import { Button } from "@/components/ui/button";
-import { Building2, Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 
 interface FetchCitiesButtonProps {
-  onFetch: () => Promise<void>;
-  isLoading: boolean;
+  onFetch?: () => Promise<void>;
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
-export function FetchCitiesButton({ onFetch, isLoading }: FetchCitiesButtonProps) {
+export function FetchCitiesButton({ 
+  onFetch, 
+  isLoading = false,
+  disabled = false
+}: FetchCitiesButtonProps) {
   return (
-    <Button 
-      type="button" 
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
       onClick={(e) => {
         e.preventDefault();
-        onFetch();
+        if (onFetch) onFetch();
       }}
-      className="flex items-center gap-2"
-      disabled={isLoading}
+      disabled={isLoading || disabled}
+      className="flex gap-2 items-center"
     >
       {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Fetching...
+        </>
       ) : (
-        <Building2 className="h-4 w-4" />
+        <>
+          <MapPin className="h-4 w-4" />
+          Fetch Cities
+        </>
       )}
-      {isLoading ? "Fetching Cities..." : "Get Nearby Cities"}
     </Button>
   );
 }

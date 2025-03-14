@@ -60,24 +60,23 @@ export interface PropertyTabProps {
     handleStepClick: (step: number) => void;
     onSubmit: () => void;
     formState: PropertyFormData;
-    // Optional handlers
+    // Location-related handlers
     onFetchLocationData?: () => Promise<void>;
+    onGenerateLocationDescription?: () => Promise<void>;
+    onGenerateMap?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
+    isGeneratingMap?: boolean;
+    // Optional handlers
+    setPendingChanges: (pending: boolean) => void;
     // Add new handlers for media tab
     handleVirtualTourUpdate: (url: string) => void;
     handleYoutubeUrlUpdate: (url: string) => void;
     handleFloorplanEmbedScriptUpdate: (script: string) => void;
-    // Required for setPendingChanges
-    setPendingChanges: (pending: boolean) => void;
     // For media components
     onFeatureImageToggle?: (url: string) => void;
     onSetMainImage?: (url: string) => void;
     // Add isSaving for loading state
     isSaving?: boolean;
-    // Add the new location generation handlers
-    onGenerateLocationDescription?: () => Promise<any>;
-    onGenerateMap?: () => Promise<any>;
-    isGeneratingMap?: boolean;
   };
 }

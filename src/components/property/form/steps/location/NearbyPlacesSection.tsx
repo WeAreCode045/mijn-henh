@@ -1,10 +1,10 @@
 
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
-import { useLocationCategories } from "../../../form/steps/location/useLocationCategories";
-import { CategoryFilters } from "./components/CategoryFilters";
 import { CategorySection } from "./components/CategorySection";
 import { Button } from "@/components/ui/button";
 import { Loader2, Navigation } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -22,18 +22,15 @@ export function NearbyPlacesSection({
   isLoadingNearbyPlaces = false
 }: NearbyPlacesSectionProps) {
   const nearbyPlaces = formData.nearby_places || [];
-  const { categories, activeFilters, handleFilterChange } = useLocationCategories(nearbyPlaces);
-
-  // Group places by category
-  const placesByCategory: Record<string, PropertyNearbyPlace[]> = {};
+  const [activeTab, setActiveTab] = useState<string>("all");
   
-  // Initialize categories that exist in the filter list
-  activeFilters.forEach(category => {
-    placesByCategory[category] = [];
-  });
+  // Group places by category
+  const placesByCategory: Record<string, PropertyNearbyPlace[]> = {
+    all: [...nearbyPlaces]
+  };
   
   // Add places to their respective categories
-  nearbyPlaces.forEach((place, index) => {
+  nearbyPlaces.forEach((place) => {
     const category = place.type || 'other';
     if (!placesByCategory[category]) {
       placesByCategory[category] = [];
@@ -41,6 +38,9 @@ export function NearbyPlacesSection({
     // We don't modify the original place object with index property
     placesByCategory[category].push(place);
   });
+  
+  // Get available categories for tab list
+  const categories = Object.keys(placesByCategory).filter(cat => cat !== 'all');
   
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
     if (!onFieldChange || !formData.nearby_places) return;
@@ -84,31 +84,48 @@ export function NearbyPlacesSection({
         )}
       </div>
       
-      <CategoryFilters 
-        categories={categories} 
-        activeFilters={activeFilters} 
-        onFilterChange={handleFilterChange} 
-      />
-      
-      <div className="space-y-4 mt-4">
-        {Object.entries(placesByCategory).map(([category, places]) => {
-          // Only show categories that are in the active filters and have places
-          if (!activeFilters.includes(category) || places.length === 0) return null;
-          
-          return (
-            <CategorySection
-              key={category}
-              category={category}
-              places={places}
-              onRemovePlace={onRemovePlace}
-              toggleVisibility={togglePlaceVisibility}
-              isVisible={(place) => !!place.visible_in_webview}
-            />
-          );
-        })}
-      </div>
-      
-      {nearbyPlaces.length === 0 && (
+      {nearbyPlaces.length > 0 ? (
+        <div className="space-y-4">
+          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full">
+              <TabsTrigger value="all">All ({nearbyPlaces.length})</TabsTrigger>
+              {categories.map(category => (
+                <TabsTrigger key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)} ({placesByCategory[category].length})
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            
+            <TabsContent value="all" className="space-y-4 mt-4">
+              {nearbyPlaces.length > 0 ? (
+                <CategorySection
+                  key="all-places"
+                  category="All Places"
+                  places={nearbyPlaces}
+                  onRemovePlace={onRemovePlace}
+                  toggleVisibility={togglePlaceVisibility}
+                  isVisible={(place) => !!place.visible_in_webview}
+                />
+              ) : (
+                <p className="text-center py-4 text-muted-foreground">No places found</p>
+              )}
+            </TabsContent>
+            
+            {categories.map(category => (
+              <TabsContent key={category} value={category} className="space-y-4 mt-4">
+                <CategorySection
+                  key={category}
+                  category={category.charAt(0).toUpperCase() + category.slice(1)}
+                  places={placesByCategory[category]}
+                  onRemovePlace={onRemovePlace}
+                  toggleVisibility={togglePlaceVisibility}
+                  isVisible={(place) => !!place.visible_in_webview}
+                />
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
+      ) : (
         <div className="text-center py-6 border border-dashed rounded-md">
           <p className="text-muted-foreground">
             No nearby places found. Try fetching location data to discover places near this property.

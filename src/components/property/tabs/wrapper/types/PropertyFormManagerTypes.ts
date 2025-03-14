@@ -38,18 +38,18 @@ export interface PropertyFormManagerChildrenProps {
   lastSaved: Date | null;
   isSaving: boolean;
   setPendingChanges: (pending: boolean) => void;
-  // Add these new handlers
-  handleVirtualTourUpdate: (url: string) => void;
-  handleYoutubeUrlUpdate: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate: (script: string) => void;
-  // For media components
-  onFeatureImageToggle?: (url: string) => void;
-  onSetMainImage?: (url: string) => void;
-  // Add location-related properties
+  // Location-related handlers
   onFetchLocationData: () => Promise<any>;
   onGenerateLocationDescription: () => Promise<any>;
   onGenerateMap: () => Promise<any>;
   onRemoveNearbyPlace: (index: number) => void;
   isLoadingLocationData: boolean;
   isGeneratingMap: boolean;
+  // For media components
+  handleVirtualTourUpdate: (url: string) => void;
+  handleYoutubeUrlUpdate: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate: (script: string) => void;
+  // For media components
+  onFeatureImageToggle?: (url: string) => void;
+  onSetMainImage?: (url: string) => void;
 }

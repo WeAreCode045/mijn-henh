@@ -13,7 +13,7 @@ interface PlaceItemProps {
   index: number;
   originalIndex: number;
   category: string;
-  visible: boolean; // Changed from isVisible to visible
+  visible: boolean;
 }
 
 export function PlaceItem({ 
@@ -38,11 +38,28 @@ export function PlaceItem({
         <div>
           <div className="font-medium">{place.name}</div>
           <div className="text-sm text-gray-500">{place.vicinity}</div>
-          {category === 'transportation' && (
-            <Badge variant="outline" className="mt-1 text-xs">
-              {getTransportationType(place)}
-            </Badge>
-          )}
+          
+          <div className="flex flex-wrap gap-1 mt-1">
+            {category === 'transportation' && (
+              <Badge variant="outline" className="text-xs">
+                {getTransportationType(place)}
+              </Badge>
+            )}
+            
+            {place.distance && (
+              <Badge variant="secondary" className="text-xs">
+                {typeof place.distance === 'number' 
+                  ? `${place.distance.toFixed(1)} km` 
+                  : place.distance}
+              </Badge>
+            )}
+            
+            {place.rating && (
+              <Badge variant="outline" className="text-xs text-yellow-600">
+                ★ {place.rating}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
       {onRemove && (

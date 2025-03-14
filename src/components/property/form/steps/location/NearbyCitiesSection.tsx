@@ -3,6 +3,8 @@ import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CitiesListSection } from "./components/CitiesListSection";
 import { FetchCitiesButton } from "./components/FetchCitiesButton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface NearbyCitiesSectionProps {
   formData: PropertyFormData;
@@ -31,7 +33,15 @@ export function NearbyCitiesSection({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Nearby Cities</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Nearby Cities</h3>
+        
+        <FetchCitiesButton 
+          onFetch={onFetchLocationData}
+          isLoading={isLoadingLocationData}
+          disabled={!formData.address}
+        />
+      </div>
       
       {nearbyCities.length > 0 ? (
         <CitiesListSection 
@@ -41,18 +51,13 @@ export function NearbyCitiesSection({
         />
       ) : (
         <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-md">No Cities Found</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              No nearby cities data available. Fetch location data to discover cities near this property.
-            </p>
-            
-            <FetchCitiesButton 
-              onFetch={onFetchLocationData}
-              isLoading={isLoadingLocationData}
-            />
+          <CardContent className="pt-6">
+            <Alert variant="default" className="bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription>
+                No nearby cities data available. Use the "Fetch Cities" button to discover cities near this property.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
       )}

@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { address, nearbyPlaces } = await req.json();
+    const { address, nearbyPlaces, language = 'nl' } = await req.json();
 
     if (!address) {
       return new Response(
@@ -52,25 +52,26 @@ serve(async (req) => {
         placesByType[place.type].push(place);
       });
       
-      // Add nearby places by type
+      // Add nearby places by type with distances
       Object.entries(placesByType).forEach(([type, places]) => {
-        placesInfo += `- ${type.replace('_', ' ')}: ${places.map(p => p.name).join(', ')}\n`;
+        placesInfo += `- ${type.replace('_', ' ')}: ${places.map(p => `${p.name} (${p.distance || 'unknown'} km)`).join(', ')}\n`;
       });
     }
 
     const systemPrompt = `You are a professional real estate copywriter specializing in location descriptions.
-Your task is to write compelling location descriptions for property listings.
+Your task is to write compelling location descriptions for property listings in Dutch.
 Focus on the property's neighborhood advantages, accessibility, and lifestyle benefits.
 Highlight proximity to amenities, transportation, and attractive features of the area.
 Write in a professional but warm tone that appeals to potential buyers/renters.
 Keep descriptions factual, positive, and focused on what makes the location desirable.`;
 
-    const userPrompt = `Write a concise but comprehensive location description for a property at "${address}".
+    const userPrompt = `Write a concise but comprehensive location description in Dutch for a property at "${address}".
 ${placesInfo}
 The description should be appealing to potential property buyers/renters.
 Limit the response to 3-4 paragraphs maximum.
 Highlight neighborhood quality, accessibility, and nearby amenities.
-Include information about transportation options if available.`;
+Include information about transportation options if available.
+Always write in Dutch, as this is for the Dutch real estate market.`;
 
     console.log("Sending request to OpenAI");
 
