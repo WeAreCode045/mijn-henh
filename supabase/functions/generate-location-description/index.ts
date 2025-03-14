@@ -2,8 +2,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
-const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -28,6 +26,8 @@ serve(async (req) => {
       );
     }
 
+    // Get OpenAI API key from environment variables
+    const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openAIApiKey) {
       return new Response(
         JSON.stringify({ error: "OpenAI API key is not configured" }),
@@ -42,18 +42,37 @@ serve(async (req) => {
     let placesInfo = "";
     if (nearbyPlaces && nearbyPlaces.length > 0) {
       placesInfo = "Nearby places include:\n";
+      
+      // Group places by type for better context
+      const placesByType: Record<string, any[]> = {};
       nearbyPlaces.forEach((place: any) => {
-        placesInfo += `- ${place.name} (${place.type}, ${place.distance} away)\n`;
+        if (!placesByType[place.type]) {
+          placesByType[place.type] = [];
+        }
+        placesByType[place.type].push(place);
+      });
+      
+      // Add nearby places by type
+      Object.entries(placesByType).forEach(([type, places]) => {
+        placesInfo += `- ${type.replace('_', ' ')}: ${places.map(p => p.name).join(', ')}\n`;
       });
     }
 
-    const prompt = `Write a concise but comprehensive location description for a property at "${address}". 
-    ${placesInfo}
-    Focus on the neighborhood, accessibility, lifestyle, and nearby amenities. 
-    The description should be appealing to potential property buyers/renters.
-    Limit the response to 3-4 paragraphs maximum. Write in a professional real estate style.`;
+    const systemPrompt = `You are a professional real estate copywriter specializing in location descriptions.
+Your task is to write compelling location descriptions for property listings.
+Focus on the property's neighborhood advantages, accessibility, and lifestyle benefits.
+Highlight proximity to amenities, transportation, and attractive features of the area.
+Write in a professional but warm tone that appeals to potential buyers/renters.
+Keep descriptions factual, positive, and focused on what makes the location desirable.`;
 
-    console.log("Sending request to OpenAI with prompt:", prompt);
+    const userPrompt = `Write a concise but comprehensive location description for a property at "${address}".
+${placesInfo}
+The description should be appealing to potential property buyers/renters.
+Limit the response to 3-4 paragraphs maximum.
+Highlight neighborhood quality, accessibility, and nearby amenities.
+Include information about transportation options if available.`;
+
+    console.log("Sending request to OpenAI");
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -66,11 +85,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a professional real estate copywriter specializing in location descriptions."
+            content: systemPrompt
           },
           {
             role: "user",
-            content: prompt
+            content: userPrompt
           }
         ],
         temperature: 0.7,
@@ -78,7 +97,7 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log("OpenAI response:", data);
+    console.log("Received response from OpenAI");
 
     if (!data.choices || data.choices.length === 0) {
       throw new Error("No response from OpenAI");

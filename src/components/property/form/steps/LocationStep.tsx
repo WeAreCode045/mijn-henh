@@ -1,10 +1,10 @@
 
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AddressSection } from "./location/AddressSection";
 import { MapPreviewSection } from "./location/MapPreviewSection";
 import { NearbyPlacesSection } from "./location/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
+import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
 
 interface LocationStepProps {
   formData: PropertyFormData;
@@ -15,6 +15,8 @@ interface LocationStepProps {
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   handleMapImageDelete?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
+  isGeneratingMap?: boolean;
 }
 
 export function LocationStep({
@@ -25,18 +27,10 @@ export function LocationStep({
   onRemoveNearbyPlace,
   isLoadingLocationData,
   setPendingChanges,
-  handleMapImageDelete
+  handleMapImageDelete,
+  onGenerateMap,
+  isGeneratingMap = false
 }: LocationStepProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (onFieldChange) {
-      onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
-      
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
-    }
-  };
-
   return (
     <div className="space-y-4">
       <Card className="bg-white shadow-sm">
@@ -45,24 +39,26 @@ export function LocationStep({
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            <AddressSection 
+            <LocationDescriptionSection 
               formData={formData}
               onFieldChange={onFieldChange}
-              onFetchLocationDescription={onGenerateLocationDescription}
-              onFetchLocationData={onFetchLocationData}
-              isLoadingLocationDescription={isLoadingLocationData}
-              isLoadingLocationData={isLoadingLocationData}
+              onGenerateDescription={onGenerateLocationDescription}
+              isGeneratingDescription={isLoadingLocationData}
             />
             
             <MapPreviewSection 
               formData={formData}
               onDeleteMapImage={handleMapImageDelete}
+              onGenerateMap={onGenerateMap}
+              isGeneratingMap={isGeneratingMap}
             />
             
             <NearbyPlacesSection 
               formData={formData}
               onRemovePlace={onRemoveNearbyPlace}
               onFieldChange={onFieldChange}
+              onFetchNearbyPlaces={onFetchLocationData}
+              isLoadingNearbyPlaces={isLoadingLocationData}
             />
             
             <NearbyCitiesSection 

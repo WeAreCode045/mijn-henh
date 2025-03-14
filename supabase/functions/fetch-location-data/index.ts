@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const GOOGLE_MAPS_API_KEY = Deno.env.get("GOOGLE_MAPS_API_KEY");
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,144 +14,113 @@ serve(async (req) => {
   }
 
   try {
-    const { address } = await req.json();
-
+    const { address, propertyId } = await req.json();
+    
     if (!address) {
-      return new Response(
-        JSON.stringify({ error: "Address is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      throw new Error("Address is required");
     }
 
-    if (!GOOGLE_MAPS_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Google Maps API key is not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!propertyId) {
+      throw new Error("Property ID is required");
     }
 
-    // First, get coordinates for the address
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`;
+    // Get settings from database to retrieve API keys
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { data: settings, error: settingsError } = await supabaseAdmin
+      .from("agency_settings")
+      .select("google_maps_api_key")
+      .single();
+
+    if (settingsError) {
+      throw new Error(`Failed to retrieve settings: ${settingsError.message}`);
+    }
+
+    if (!settings.google_maps_api_key) {
+      throw new Error("Google Maps API key is not configured");
+    }
+
+    const googleMapsApiKey = settings.google_maps_api_key;
+    
+    // First, get coordinates from the address
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${googleMapsApiKey}`;
     const geocodeResponse = await fetch(geocodeUrl);
     const geocodeData = await geocodeResponse.json();
 
-    if (geocodeData.status !== "OK" || !geocodeData.results || geocodeData.results.length === 0) {
-      throw new Error(`Geocoding failed: ${geocodeData.status}`);
+    if (!geocodeData.results?.[0]?.geometry?.location) {
+      throw new Error("Could not geocode address");
     }
 
-    const location = geocodeData.results[0].geometry.location;
-    const latitude = location.lat;
-    const longitude = location.lng;
-    const formattedAddress = geocodeData.results[0].formatted_address;
+    const { lat, lng } = geocodeData.results[0].geometry.location;
+    console.log(`Geocoded coordinates: ${lat}, ${lng}`);
 
-    // Get static map image
-    const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=14&size=600x300&markers=color:red%7C${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+    // Generate static map image URL
+    const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${lat},${lng}&key=${googleMapsApiKey}`;
+    console.log(`Generated map image URL`);
 
     // Fetch nearby places
-    const nearbyPlacesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=1500&key=${GOOGLE_MAPS_API_KEY}`;
-    const placesResponse = await fetch(nearbyPlacesUrl);
-    const placesData = await placesResponse.json();
-
-    let nearbyPlaces = [];
-    if (placesData.status === "OK" && placesData.results) {
-      nearbyPlaces = placesData.results.slice(0, 20).map((place: any) => ({
+    const nearbyPlacesTypes = [
+      "restaurant", "school", "supermarket", "shopping_mall", 
+      "gym", "park", "hospital", "transit_station"
+    ];
+    
+    const placePromises = nearbyPlacesTypes.map(async (type) => {
+      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1500&type=${type}&key=${googleMapsApiKey}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      return data.results?.map((place: any) => ({
         id: place.place_id,
         name: place.name,
-        type: place.types?.[0]?.replace('_', ' ') || "place",
+        type: type,
         vicinity: place.vicinity,
-        distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
-        lat: place.geometry.location.lat,
-        lng: place.geometry.location.lng,
-        icon: place.icon,
-      }));
-    }
+        rating: place.rating,
+        user_ratings_total: place.user_ratings_total,
+        visible_in_webview: true
+      })) || [];
+    });
 
-    // Find nearby cities/localities
-    const nearbyCitiesUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=locality|political&key=${GOOGLE_MAPS_API_KEY}`;
-    const citiesResponse = await fetch(nearbyCitiesUrl);
-    const citiesData = await citiesResponse.json();
+    const placesResults = await Promise.all(placePromises);
+    const nearbyPlaces = placesResults.flat();
+    console.log(`Fetched ${nearbyPlaces.length} nearby places`);
 
-    let nearbyCities = [];
-    if (citiesData.status === "OK" && citiesData.results) {
-      const mainCity = citiesData.results[0];
-      nearbyCities.push({
-        id: mainCity.place_id,
-        name: mainCity.address_components.find((c: any) => c.types.includes("locality"))?.long_name || mainCity.formatted_address,
-        distance: "0 km",
-        lat: mainCity.geometry.location.lat,
-        lng: mainCity.geometry.location.lng,
-      });
+    // Update the property with the new data
+    const { error: updateError } = await supabaseAdmin
+      .from("properties")
+      .update({
+        latitude: lat,
+        longitude: lng,
+        map_image: mapImageUrl,
+        nearby_places: nearbyPlaces,
+      })
+      .eq("id", propertyId);
 
-      // Try to find a few more nearby cities
-      const otherCitiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=20000&type=locality&key=${GOOGLE_MAPS_API_KEY}`;
-      const otherCitiesResponse = await fetch(otherCitiesUrl);
-      const otherCitiesData = await otherCitiesResponse.json();
-
-      if (otherCitiesData.status === "OK" && otherCitiesData.results) {
-        const otherCities = otherCitiesData.results
-          .filter((place: any) => place.place_id !== mainCity.place_id)
-          .slice(0, 5)
-          .map((place: any) => ({
-            id: place.place_id,
-            name: place.name,
-            distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
-            lat: place.geometry.location.lat,
-            lng: place.geometry.location.lng,
-          }));
-
-        nearbyCities = [...nearbyCities, ...otherCities];
-      }
+    if (updateError) {
+      throw new Error(`Failed to update property: ${updateError.message}`);
     }
 
     return new Response(
       JSON.stringify({
-        latitude,
-        longitude,
-        formatted_address: formattedAddress,
+        success: true,
+        latitude: lat,
+        longitude: lng,
         map_image: mapImageUrl,
         nearby_places: nearbyPlaces,
-        nearby_cities: nearbyCities,
       }),
       {
-        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error("Error in fetch-location-data function:", error);
+    console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message || "An error occurred" }),
+      JSON.stringify({ success: false, error: error.message }),
       {
-        status: 500,
+        status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }
 });
-
-// Calculate distance in km between two coordinates
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): string {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c; // Distance in km
-
-  if (distance < 1) {
-    return `${Math.round(distance * 1000)} m`;
-  }
-  return `${distance.toFixed(1)} km`;
-}
-
-function deg2rad(deg: number): number {
-  return deg * (Math.PI / 180);
-}

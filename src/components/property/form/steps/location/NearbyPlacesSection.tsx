@@ -3,17 +3,23 @@ import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { useLocationCategories } from "../../../form/steps/location/useLocationCategories";
 import { CategoryFilters } from "./components/CategoryFilters";
 import { CategorySection } from "./components/CategorySection";
+import { Button } from "@/components/ui/button";
+import { Loader2, Navigation } from "lucide-react";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
   onRemovePlace?: (index: number) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+  onFetchNearbyPlaces?: () => Promise<void>;
+  isLoadingNearbyPlaces?: boolean;
 }
 
 export function NearbyPlacesSection({ 
   formData,
   onRemovePlace,
-  onFieldChange
+  onFieldChange,
+  onFetchNearbyPlaces,
+  isLoadingNearbyPlaces = false
 }: NearbyPlacesSectionProps) {
   const nearbyPlaces = formData.nearby_places || [];
   const { categories, activeFilters, handleFilterChange } = useLocationCategories(nearbyPlaces);
@@ -48,7 +54,35 @@ export function NearbyPlacesSection({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Nearby Places</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Nearby Places</h3>
+        
+        {onFetchNearbyPlaces && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              onFetchNearbyPlaces();
+            }}
+            disabled={isLoadingNearbyPlaces || !formData.address}
+            className="flex gap-2 items-center"
+          >
+            {isLoadingNearbyPlaces ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Fetching...
+              </>
+            ) : (
+              <>
+                <Navigation className="h-4 w-4" />
+                Get Nearby Places
+              </>
+            )}
+          </Button>
+        )}
+      </div>
       
       <CategoryFilters 
         categories={categories} 
