@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
 import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
-import { usePropertyFormState } from "@/hooks/usePropertyFormState";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
@@ -42,7 +40,15 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
   const [templates, setTemplates] = useState([]);
   
   // Form state management
-  const { formState, setFormState, handleFieldChange } = usePropertyFormState(property || {});
+  const [formState, setFormState] = useState(property || {});
+  const { handleFieldChange } = usePropertyStateTracking(
+    formState,
+    (field, value) => {
+      setFormState(prev => ({ ...prev, [field]: value }));
+    },
+    setFormState,
+    () => {} // placeholder for setPendingChanges
+  );
   
   // Auto-save functionality
   const { 
@@ -54,25 +60,16 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     setLastSaved 
   } = usePropertyAutoSave();
   
-  // State tracking utilities
-  const { handleFieldChangeWithTracking, setFormStateWithTracking } = 
-    usePropertyStateTracking(
-      formState, 
-      handleFieldChange, 
-      setFormState,
-      setPendingChanges
-    );
-  
   // Property content management
   const contentManager = usePropertyContent(
     formState,
-    handleFieldChangeWithTracking
+    handleFieldChange
   );
   
   // Feature management
   const { addFeature, removeFeature, updateFeature } = useFeatures(
     formState,
-    setFormStateWithTracking
+    setFormState
   );
   
   // Property areas management
@@ -85,7 +82,7 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     handleAreaImagesSelect,
   } = usePropertyAreas(
     formState, 
-    setFormStateWithTracking
+    setFormState
   );
   
   // Property images management
@@ -100,7 +97,7 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     images
   } = usePropertyImages(
     formState, 
-    setFormStateWithTracking
+    setFormState
   );
 
   // Property floorplans management
@@ -110,7 +107,7 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     isUploadingFloorplan
   } = usePropertyFloorplans(
     formState,
-    setFormStateWithTracking
+    setFormState
   );
   
   // Step navigation with auto-save

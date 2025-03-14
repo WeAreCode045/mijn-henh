@@ -35,7 +35,30 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleStepClick: formManagerProps.handleStepClick,
     lastSaved: formManagerProps.lastSaved,
     isSaving: formManagerProps.isSaving,
-    setPendingChanges: formManagerProps.setPendingChanges
+    setPendingChanges: formManagerProps.setPendingChanges,
+    // Add missing properties for compatibility
+    propertyWithRequiredProps: property,
+    handleImageUpload: formManagerProps.handleImageUpload,
+    handleRemoveImage: formManagerProps.handleRemoveImage,
+    isUploading: formManagerProps.isUploading,
+    handleAreaPhotosUpload: formManagerProps.handleAreaPhotosUpload,
+    handleRemoveAreaPhoto: formManagerProps.handleRemoveAreaPhoto,
+    handleFloorplanUpload: formManagerProps.handleFloorplanUpload,
+    handleRemoveFloorplan: formManagerProps.handleRemoveFloorplan,
+    isUploadingFloorplan: formManagerProps.isUploadingFloorplan,
+    handleSetFeaturedImage: formManagerProps.handleSetFeaturedImage,
+    handleToggleFeaturedImage: formManagerProps.handleToggleFeaturedImage,
+    handleVirtualTourUpdate: formManagerProps.handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate: formManagerProps.handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate: formManagerProps.handleFloorplanEmbedScriptUpdate,
+    // Add aliases for compatibility
+    addFeature: formManagerProps.onAddFeature,
+    removeFeature: formManagerProps.onRemoveFeature,
+    updateFeature: formManagerProps.onUpdateFeature,
+    addArea: formManagerProps.onAddArea,
+    removeArea: formManagerProps.onRemoveArea,
+    updateArea: formManagerProps.onUpdateArea,
+    images: formManagerProps.images
   };
   
   // Pass all the props to the children render function

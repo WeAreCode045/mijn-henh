@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { PropertyFormData, PropertyArea } from '@/types/property';
+import { PropertyFormData, PropertyArea, PropertyImage } from '@/types/property';
 
 export function usePropertyAreas(
   formData: PropertyFormData,
@@ -58,7 +58,13 @@ export function usePropertyAreas(
     const updatedAreas = formData.areas.map(area => {
       if (area.id === areaId) {
         const updatedImageIds = area.imageIds.filter(id => id !== imageId);
-        const updatedImages = area.images.filter(image => image.id !== imageId && image !== imageId);
+        const updatedImages = area.images.filter(image => {
+          // Handle both PropertyImage objects and string IDs
+          if (typeof image === 'string') {
+            return image !== imageId;
+          }
+          return image.id !== imageId;
+        });
         
         return { 
           ...area, 

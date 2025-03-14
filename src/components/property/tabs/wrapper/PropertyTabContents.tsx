@@ -36,7 +36,22 @@ export function PropertyTabContents({
   currentStep,
   handleStepClick,
   setPendingChanges,
-  isSaving
+  isSaving,
+  handleGeneratePDF,
+  handleWebView,
+  handleImageUpload,
+  handleRemoveImage,
+  isUploading,
+  handleAreaPhotosUpload,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  isUploadingFloorplan,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage,
+  handleVirtualTourUpdate,
+  handleYoutubeUrlUpdate,
+  handleFloorplanEmbedScriptUpdate,
+  handleRemoveAreaPhoto
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
@@ -53,7 +68,7 @@ export function PropertyTabContents({
     onUpdateArea,
     onAreaImageRemove,
     onAreaImagesSelect,
-    handleAreaImageUpload: onAreaImageUpload,
+    handleAreaImageUpload,
     onFetchLocationData,
     onFetchCategoryPlaces,
     onFetchNearbyCities,

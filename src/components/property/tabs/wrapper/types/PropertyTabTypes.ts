@@ -35,6 +35,22 @@ export interface PropertyTabContentsProps {
   handleStepClick: (step: number) => void;
   setPendingChanges: (pending: boolean) => void;
   isSaving?: boolean;
+  // Add the missing properties
+  handleGeneratePDF?: () => void;
+  handleWebView?: () => void;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  isUploading?: boolean;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
+  isUploadingFloorplan?: boolean;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
+  handleVirtualTourUpdate?: (url: string) => void;
+  handleYoutubeUrlUpdate?: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
 }
 
 export interface PropertyFormManagerChildrenProps {
@@ -66,6 +82,28 @@ export interface PropertyFormManagerChildrenProps {
   lastSaved: Date | null;
   isSaving: boolean;
   setPendingChanges: (pending: boolean) => void;
+  // Define additional properties to satisfy the component requirements
+  propertyWithRequiredProps?: PropertyData;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  isUploading?: boolean;
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan?: (index: number) => void;
+  isUploadingFloorplan?: boolean;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
+  handleVirtualTourUpdate?: (url: string) => void;
+  handleYoutubeUrlUpdate?: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+  addFeature?: () => void;
+  removeFeature?: (id: string) => void;
+  updateFeature?: (id: string, description: string) => void;
+  addArea?: () => void;
+  removeArea?: (id: string) => void;
+  updateArea?: (id: string, field: any, value: any) => void;
+  images?: any[];
 }
 
 export interface PropertyTabProps {
