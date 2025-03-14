@@ -56,12 +56,15 @@ export function AddressSection({
     };
 
     const initializeAutocomplete = () => {
-      if (!window.google || !window.google.maps || !window.google.maps.places) {
+      // Use window with type assertion to access the google object
+      if (!(window as GoogleMapsWindow).google || 
+          !(window as GoogleMapsWindow).google?.maps || 
+          !(window as GoogleMapsWindow).google?.maps?.places) {
         console.error('Google Maps Places API not loaded');
         return;
       }
 
-      const autocomplete = new window.google.maps.places.Autocomplete(
+      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
         autocompleteInputRef.current as HTMLInputElement,
         { types: ['address'] }
       );
