@@ -248,10 +248,10 @@ export function usePropertyMediaHandlers(
     
     setIsSaving(true);
     try {
-      // Update database
+      // Update database - use virtualTourUrl to match the database column name
       const { error } = await supabase
         .from('properties')
-        .update({ virtual_tour_url: url })
+        .update({ virtualTourUrl: url })
         .eq('id', property.id);
         
       if (error) throw error;
@@ -281,10 +281,10 @@ export function usePropertyMediaHandlers(
     
     setIsSaving(true);
     try {
-      // Update database
+      // Update database - use youtubeUrl to match the database column name
       const { error } = await supabase
         .from('properties')
-        .update({ youtube_url: url })
+        .update({ youtubeUrl: url })
         .eq('id', property.id);
         
       if (error) throw error;
@@ -314,10 +314,10 @@ export function usePropertyMediaHandlers(
     
     setIsSaving(true);
     try {
-      // Update database
+      // Update database - use floorplanEmbedScript to match the database column name
       const { error } = await supabase
         .from('properties')
-        .update({ floorplan_embed_script: script })
+        .update({ floorplanEmbedScript: script })
         .eq('id', property.id);
         
       if (error) throw error;

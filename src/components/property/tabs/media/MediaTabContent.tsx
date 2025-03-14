@@ -41,7 +41,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
   // Prevent form submission for any forms in this component
-  const preventFormSubmission = (e: React.FormEvent) => {
+  const preventFormSubmission = (e: React.FormEvent): false => {
     e.preventDefault();
     return false;
   };

@@ -41,15 +41,15 @@ export function SortableImageGrid({
 
   // Prevent default on all events to avoid form submission
   const handleDragStartSafe = (event: DragStartEvent) => {
-    if (event.synthetic?.nativeEvent) {
-      event.synthetic.nativeEvent.preventDefault();
+    if (event.nativeEvent) {
+      event.nativeEvent.preventDefault();
     }
     handleDragStart(event);
   };
 
   const handleDragEndSafe = (event: DragEndEvent) => {
-    if (event.synthetic?.nativeEvent) {
-      event.synthetic.nativeEvent.preventDefault();
+    if (event.nativeEvent) {
+      event.nativeEvent.preventDefault();
     }
     handleDragEnd(event);
   };
