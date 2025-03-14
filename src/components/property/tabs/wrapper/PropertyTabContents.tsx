@@ -9,6 +9,7 @@ export function PropertyTabContents({
   formState,
   agentInfo,
   templateInfo,
+  isUpdating = false,
   onAddFeature,
   onRemoveFeature,
   onUpdateFeature,
@@ -37,40 +38,43 @@ export function PropertyTabContents({
   setPendingChanges,
   isSaving
 }: PropertyTabContentsProps) {
-  return (
-    <TabContentRenderers
-      activeTab={activeTab}
-      property={property}
-      formState={formState}
-      agentInfo={agentInfo}
-      templateInfo={templateInfo}
-      onAddFeature={onAddFeature}
-      onRemoveFeature={onRemoveFeature}
-      onUpdateFeature={onUpdateFeature}
-      onAddArea={onAddArea}
-      onRemoveArea={onRemoveArea}
-      onUpdateArea={onUpdateArea}
-      onAreaImageRemove={onAreaImageRemove}
-      onAreaImagesSelect={onAreaImagesSelect}
-      onAreaImageUpload={onAreaImageUpload}
-      onFieldChange={onFieldChange}
-      onFetchLocationData={onFetchLocationData}
-      onFetchCategoryPlaces={onFetchCategoryPlaces}
-      onFetchNearbyCities={onFetchNearbyCities}
-      onGenerateLocationDescription={onGenerateLocationDescription}
-      onGenerateMap={onGenerateMap}
-      onRemoveNearbyPlace={onRemoveNearbyPlace}
-      isLoadingLocationData={isLoadingLocationData}
-      isGeneratingMap={isGeneratingMap}
-      onSave={onSave}
-      onDelete={onDelete}
-      handleSaveObjectId={handleSaveObjectId}
-      handleSaveAgent={handleSaveAgent}
-      handleSaveTemplate={handleSaveTemplate}
-      currentStep={currentStep}
-      handleStepClick={handleStepClick}
-      setPendingChanges={setPendingChanges}
-      isSaving={isSaving}
-    />
-  );
+  const handlers = {
+    onSave,
+    onDelete,
+    handleSaveObjectId,
+    handleSaveAgent,
+    handleSaveTemplate,
+    onFieldChange,
+    onAddFeature,
+    onRemoveFeature,
+    onUpdateFeature,
+    onAddArea,
+    onRemoveArea,
+    onUpdateArea,
+    onAreaImageRemove,
+    onAreaImagesSelect,
+    handleAreaImageUpload: onAreaImageUpload,
+    onFetchLocationData,
+    onFetchCategoryPlaces,
+    onFetchNearbyCities,
+    onGenerateLocationDescription,
+    onGenerateMap,
+    onRemoveNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    currentStep,
+    handleStepClick,
+    setPendingChanges,
+    isSaving: isSaving || false
+  };
+
+  return TabContentRenderers.renderTabContent({
+    activeTab,
+    property,
+    formState,
+    agentInfo,
+    templateInfo,
+    isUpdating,
+    handlers
+  });
 }

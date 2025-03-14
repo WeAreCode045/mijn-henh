@@ -19,7 +19,6 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           property={propertyData} 
           onDelete={handlers.onDelete}
           onSave={handlers.onSave}
-          onWebView={handlers.handleWebView}
         />
       );
     case "content":
@@ -54,14 +53,15 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           handleNext={handleNext}
           handlePrevious={handlePrevious}
           onFetchLocationData={handlers.onFetchLocationData}
+          onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
+          onFetchNearbyCities={handlers.onFetchNearbyCities}
           onGenerateLocationDescription={handlers.onGenerateLocationDescription}
           onGenerateMap={handlers.onGenerateMap}
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
           isGeneratingMap={handlers.isGeneratingMap}
-          setPendingChanges={handlers.setPendingChanges || (() => {})}
-          isUploading={handlers.isUploading}
-          onSubmit={handlers.onSubmit}
+          setPendingChanges={handlers.setPendingChanges}
+          onSubmit={handlers.onSave}
           isSaving={handlers.isSaving}
         />
       );
@@ -83,3 +83,5 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
       return null;
   }
 }
+
+export const TabContentRenderers = { renderTabContent };

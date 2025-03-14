@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
 import { PropertyFormData } from '@/types/property';
-import { usePropertyFormState } from '@/components/property/form/usePropertyFormState';
-import { usePropertyContent } from './property-form/usePropertyContent';
+import { usePropertyFormState } from '@/hooks/usePropertyFormState';
 import { usePropertyFeatures } from './property-form/usePropertyFeatures';
 import { usePropertyAreas } from './property-form/usePropertyAreas';
+import { usePropertyContent } from './property-form/usePropertyContent';
+import { usePropertyImages } from './property-form/usePropertyImages';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
@@ -28,7 +29,8 @@ export function usePropertyFormManager(property: PropertyFormData) {
     updateArea, 
     handleAreaImageRemove, 
     handleAreaImagesSelect,
-    handleAreaImageUpload
+    handleAreaImageUpload,
+    isUploading
   } = usePropertyAreas(formState, onFieldChange);
   
   // Hook for managing content and steps
@@ -51,21 +53,28 @@ export function usePropertyFormManager(property: PropertyFormData) {
     onSubmit
   } = usePropertyContent(formState, onFieldChange);
   
+  // Hook for managing images
+  const {
+    handleImageUpload,
+    handleRemoveImage,
+    images
+  } = usePropertyImages(formState, onFieldChange);
+  
   return {
     formState,
-    onFieldChange,
+    handleFieldChange: onFieldChange,
     
     // Feature methods
-    addFeature,
-    removeFeature,
-    updateFeature,
+    onAddFeature: addFeature,
+    onRemoveFeature: removeFeature,
+    onUpdateFeature: updateFeature,
     
     // Area methods
-    addArea,
-    removeArea,
-    updateArea,
-    handleAreaImageRemove,
-    handleAreaImagesSelect,
+    onAddArea: addArea,
+    onRemoveArea: removeArea,
+    onUpdateArea: updateArea,
+    onAreaImageRemove: handleAreaImageRemove,
+    onAreaImagesSelect: handleAreaImagesSelect,
     handleAreaImageUpload,
     
     // Location methods
@@ -88,6 +97,23 @@ export function usePropertyFormManager(property: PropertyFormData) {
     // Status
     lastSaved,
     isSaving,
-    setPendingChanges
+    setPendingChanges,
+    
+    // Image methods
+    handleImageUpload,
+    handleRemoveImage,
+    images,
+    isUploading,
+    
+    // Placeholder methods for required properties in PropertyFormManagerChildrenProps
+    handleSaveObjectId: (objectId: string) => {
+      onFieldChange('object_id', objectId);
+    },
+    handleSaveAgent: (agentId: string) => {
+      onFieldChange('agent_id', agentId);
+    },
+    handleSaveTemplate: (templateId: string) => {
+      onFieldChange('template_id', templateId);
+    }
   };
 }

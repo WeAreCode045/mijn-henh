@@ -2,17 +2,9 @@
 import { useState, useCallback } from "react";
 import { PropertyFormData } from "@/types/property";
 
-export function usePropertyFormState(initialData: PropertyFormData) {
-  const [formState, setFormState] = useState<PropertyFormData>(initialData);
-  
-  // Create a memoized wrapper function for setFormState
-  const setFormData = useCallback((data: PropertyFormData) => {
-    console.log("Setting form data:", data);
-    setFormState(data);
-  }, []);
-
+export function usePropertyFormState(formState: PropertyFormData, setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>) {
   // Type-safe field change handler memoized to prevent unnecessary re-renders
-  const handleFieldChange = useCallback(<K extends keyof PropertyFormData>(
+  const onFieldChange = useCallback(<K extends keyof PropertyFormData>(
     field: K, 
     value: PropertyFormData[K]
   ) => {
@@ -21,11 +13,9 @@ export function usePropertyFormState(initialData: PropertyFormData) {
       ...prevState,
       [field]: value
     }));
-  }, []);
+  }, [setFormState]);
   
   return {
-    formState,
-    setFormState: setFormData,
-    handleFieldChange
+    onFieldChange
   };
 }

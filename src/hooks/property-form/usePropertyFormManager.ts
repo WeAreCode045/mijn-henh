@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { PropertyFormData } from '@/types/property';
-import { usePropertyFormState } from '@/components/property/form/usePropertyFormState';
+import { usePropertyFormState } from '@/hooks/usePropertyFormState';
 import { usePropertyFeatures } from './usePropertyFeatures';
 import { usePropertyAreas } from './usePropertyAreas';
 import { usePropertyContent } from './usePropertyContent';
@@ -28,7 +29,8 @@ export function usePropertyFormManager(property: PropertyFormData) {
     updateArea, 
     handleAreaImageRemove, 
     handleAreaImagesSelect,
-    handleAreaImageUpload
+    handleAreaImageUpload,
+    isUploading
   } = usePropertyAreas(formState, onFieldChange);
   
   // Hook for managing content and steps
@@ -60,19 +62,19 @@ export function usePropertyFormManager(property: PropertyFormData) {
   
   return {
     formState,
-    onFieldChange,
+    handleFieldChange: onFieldChange,
     
     // Feature methods
-    addFeature,
-    removeFeature,
-    updateFeature,
+    onAddFeature: addFeature,
+    onRemoveFeature: removeFeature,
+    onUpdateFeature: updateFeature,
     
     // Area methods
-    addArea,
-    removeArea,
-    updateArea,
-    handleAreaImageRemove,
-    handleAreaImagesSelect,
+    onAddArea: addArea,
+    onRemoveArea: removeArea,
+    onUpdateArea: updateArea,
+    onAreaImageRemove: handleAreaImageRemove,
+    onAreaImagesSelect: handleAreaImagesSelect,
     handleAreaImageUpload,
     
     // Location methods
@@ -100,6 +102,18 @@ export function usePropertyFormManager(property: PropertyFormData) {
     // Image methods
     handleImageUpload,
     handleRemoveImage,
-    images
+    images,
+    isUploading,
+    
+    // Placeholder methods for required properties in PropertyFormManagerChildrenProps
+    handleSaveObjectId: (objectId: string) => {
+      onFieldChange('object_id', objectId);
+    },
+    handleSaveAgent: (agentId: string) => {
+      onFieldChange('agent_id', agentId);
+    },
+    handleSaveTemplate: (templateId: string) => {
+      onFieldChange('template_id', templateId);
+    }
   };
 }
