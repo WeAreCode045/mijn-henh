@@ -37,7 +37,7 @@ export function AddressSection({
 
   // Set up Google Places Autocomplete
   useEffect(() => {
-    const googleApiKey = settings?.google_maps_api_key;
+    const googleApiKey = settings?.googleMapsApiKey;
     if (!googleApiKey || !autocompleteInputRef.current) return;
 
     // Load the Google Maps JavaScript API
