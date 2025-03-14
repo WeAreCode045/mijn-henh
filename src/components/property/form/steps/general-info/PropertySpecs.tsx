@@ -16,7 +16,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 padding-m">
       <div>
         <Label htmlFor="bedrooms">Bedrooms</Label>
         <Input
