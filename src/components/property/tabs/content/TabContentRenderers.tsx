@@ -54,8 +54,11 @@ export function renderTabContent({ activeTab, property, formState, agentInfo, te
           handleNext={handleNext}
           handlePrevious={handlePrevious}
           onFetchLocationData={handlers.onFetchLocationData}
+          onGenerateLocationDescription={handlers.onGenerateLocationDescription}
+          onGenerateMap={handlers.onGenerateMap}
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
+          isGeneratingMap={handlers.isGeneratingMap}
           setPendingChanges={handlers.setPendingChanges || (() => {})}
           isUploading={handlers.isUploading}
           onSubmit={handlers.onSubmit}

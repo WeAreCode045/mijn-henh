@@ -27,8 +27,10 @@ interface PropertyStepContentProps {
   handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
   onGenerateLocationDescription?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
+  isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
   onSubmit?: () => void; 
@@ -53,8 +55,10 @@ export function PropertyStepContent({
   handlePrevious,
   onFetchLocationData,
   onGenerateLocationDescription,
+  onGenerateMap,
   onRemoveNearbyPlace,
   isLoadingLocationData,
+  isGeneratingMap,
   setPendingChanges,
   isUploading,
   onSubmit,
@@ -77,8 +81,10 @@ export function PropertyStepContent({
             onFieldChange={onFieldChange}
             onFetchLocationData={onFetchLocationData}
             onGenerateLocationDescription={onGenerateLocationDescription}
+            onGenerateMap={onGenerateMap}
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
+            isGeneratingMap={isGeneratingMap}
             setPendingChanges={setPendingChanges}
           />
         );

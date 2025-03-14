@@ -26,6 +26,7 @@ import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
+import { useFeatures } from "@/hooks/useFeatures";
 import { safeToString } from "@/utils/stringUtils";
 
 // This component is currently unused and should be refactored or removed
@@ -63,13 +64,15 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     );
   
   // Property content management
-  const {
-    addFeature,
-    removeFeature,
-    updateFeature,
-  } = usePropertyContent(
+  const contentManager = usePropertyContent(
     formState,
     handleFieldChangeWithTracking
+  );
+  
+  // Feature management
+  const { addFeature, removeFeature, updateFeature } = useFeatures(
+    formState,
+    setFormStateWithTracking
   );
   
   // Property areas management

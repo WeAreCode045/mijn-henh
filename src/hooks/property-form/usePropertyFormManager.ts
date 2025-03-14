@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
+import { useFeatures } from "@/hooks/useFeatures";
 import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyFormManager(property: PropertyData) {
@@ -18,8 +19,11 @@ export function usePropertyFormManager(property: PropertyData) {
     setFormState(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  // Use the property content hook
+  // Use the property content hook for location and content-related functionality
   const contentManager = usePropertyContent(formState, handleFieldChange);
+  
+  // Use the features hook for managing features
+  const featuresManager = useFeatures(formState, setFormState);
   
   // Use the property images hook
   const imageManager = usePropertyImages(formState, setFormState);
@@ -122,9 +126,9 @@ export function usePropertyFormManager(property: PropertyData) {
     handleSaveObjectId,
     handleSaveAgent,
     handleSaveTemplate,
-    addFeature: contentManager.addFeature,
-    removeFeature: contentManager.removeFeature,
-    updateFeature: contentManager.updateFeature,
+    addFeature: featuresManager.addFeature,
+    removeFeature: featuresManager.removeFeature,
+    updateFeature: featuresManager.updateFeature,
     addArea,
     removeArea,
     updateArea,
@@ -150,6 +154,12 @@ export function usePropertyFormManager(property: PropertyData) {
     propertyWithRequiredProps,
     lastSaved: contentManager.lastSaved,
     isSaving: contentManager.isSaving,
-    setPendingChanges: contentManager.setPendingChanges
+    setPendingChanges: contentManager.setPendingChanges,
+    // Include location-related functionality
+    onFetchLocationData: contentManager.fetchLocationData,
+    onGenerateLocationDescription: contentManager.generateLocationDescription,
+    onGenerateMap: contentManager.generateMapImage,
+    onRemoveNearbyPlace: contentManager.removeNearbyPlace,
+    isLoadingLocationData: contentManager.isLoadingLocationData
   };
 }

@@ -67,7 +67,12 @@ export function PropertyTabsWrapper({
               propertyWithRequiredProps,
               lastSaved,
               isSaving,
-              setPendingChanges
+              setPendingChanges,
+              onFetchLocationData,
+              onGenerateLocationDescription,
+              onGenerateMap,
+              onRemoveNearbyPlace,
+              isLoadingLocationData
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -114,6 +119,11 @@ export function PropertyTabsWrapper({
                       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
                       setPendingChanges={setPendingChanges}
                       isSaving={isSaving}
+                      onFetchLocationData={onFetchLocationData}
+                      onGenerateLocationDescription={onGenerateLocationDescription}
+                      onRemoveNearbyPlace={onRemoveNearbyPlace}
+                      isLoadingLocationData={isLoadingLocationData}
+                      onGenerateMap={onGenerateMap}
                     />
                   </PropertyTabs>
                 </Tabs>
