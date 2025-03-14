@@ -31,18 +31,14 @@ export function SortableFloorplanGrid({
     setSortedFloorplans(floorplans);
   }, [floorplans, setSortedFloorplans]);
 
-  // Prevent default on all events to avoid form submission
+  // Modified handlers that don't try to access nativeEvent
   const handleDragStartSafe = (event: DragStartEvent) => {
-    if (event.nativeEvent) {
-      event.nativeEvent.preventDefault();
-    }
+    // Call the drag start handler directly without trying to access nativeEvent
     handleDragStart(event);
   };
 
   const handleDragEndSafe = (event: DragEndEvent) => {
-    if (event.nativeEvent) {
-      event.nativeEvent.preventDefault();
-    }
+    // Call the drag end handler directly without trying to access nativeEvent
     handleDragEnd(event);
   };
   
