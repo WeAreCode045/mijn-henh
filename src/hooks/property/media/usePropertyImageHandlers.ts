@@ -92,14 +92,33 @@ export function usePropertyImageHandlers(
         return;
       }
       
-      // Update database
+      // Find the image record to update
+      const { data: imageRecord, error: findError } = await supabase
+        .from('property_images')
+        .select('id')
+        .eq('property_id', property.id)
+        .eq('url', url)
+        .single();
+        
+      if (findError) {
+        console.error("Error finding image record:", findError);
+        throw findError;
+      }
+      
+      if (!imageRecord) {
+        throw new Error("Image record not found");
+      }
+      
+      // Update database with the toggle state
       const { error } = await supabase
         .from('property_images')
         .update({ is_featured_image: !isAlreadyFeatured })
-        .eq('property_id', property.id)
-        .eq('url', url);
+        .eq('id', imageRecord.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error toggling featured image:", error);
+        throw error;
+      }
       
       // Update local state
       const newFeaturedImages = isAlreadyFeatured

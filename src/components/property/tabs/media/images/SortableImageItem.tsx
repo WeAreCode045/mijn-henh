@@ -47,6 +47,14 @@ export function SortableImageItem({
   };
 
   const imageUrl = typeof image === 'string' ? image : image.url;
+  
+  const handleToggleFeatured = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onToggleFeatured) {
+      onToggleFeatured(e);
+    }
+  };
 
   return (
     <div
@@ -98,11 +106,11 @@ export function SortableImageItem({
               type="button"
               variant={isFeatured ? "default" : "outline"}
               size="sm"
-              onClick={onToggleFeatured}
+              onClick={handleToggleFeatured}
               className="bg-white text-black hover:bg-gray-100"
               disabled={isUpdating}
             >
-              {isFeatured ? 'Featured' : 'Set Featured'}
+              {isFeatured ? 'Unset Featured' : 'Set Featured'}
             </Button>
           )}
           
