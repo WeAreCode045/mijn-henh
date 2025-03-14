@@ -6,6 +6,8 @@ import { GeneralInfoStep } from "@/components/property/form/steps/general-info/G
 import { FeaturesStep } from "@/components/property/form/steps/FeaturesStep";
 import { AreasStep } from "@/components/property/form/steps/AreasStep";
 import { LocationStep } from "@/components/property/form/steps/LocationStep";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
@@ -120,6 +122,30 @@ export function PropertyStepContent({
       />
       <div className="mt-6">
         {renderStep()}
+      </div>
+      
+      {/* Navigation Buttons */}
+      <div className="flex justify-between mt-6">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={currentStep === 0}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Previous
+        </Button>
+        
+        <Button
+          onClick={handleNext}
+          disabled={currentStep === 3}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          Next
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

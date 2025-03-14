@@ -3,9 +3,9 @@ import { useState } from "react";
 import { PropertyImage } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check, Image as ImageIcon, PencilIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface ImageSelectionsProps {
   images: PropertyImage[];
@@ -30,13 +30,7 @@ export function ImageSelections({
   const [selectionType, setSelectionType] = useState<'main' | 'featured'>('main');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const navigate = useNavigate();
-  
-  const handleOpenSelectMain = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    setSelectionType('main');
-    setSelectedImage(featuredImage);
-    setImageSelectOpen(true);
-  };
+  const { id } = useParams();
   
   const handleOpenSelectFeatured = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
@@ -54,22 +48,16 @@ export function ImageSelections({
     }
   };
   
-  const handleConfirmSelection = () => {
-    if (selectionType === 'main' && selectedImage !== undefined) {
-      console.log("Confirming main image selection:", selectedImage);
-      onFeaturedImageSelect(selectedImage);
-    }
-    setImageSelectOpen(false);
-  };
-  
   const handleCloseDialog = () => {
     setSelectedImage(null);
     setImageSelectOpen(false);
   };
 
   const navigateToMediaTab = () => {
-    if (propertyId) {
-      navigate(`/property/${propertyId}/media`);
+    // Use the id from params if propertyId is not provided
+    const idToUse = propertyId || id;
+    if (idToUse) {
+      navigate(`/property/${idToUse}/media`);
     }
   };
   
@@ -94,9 +82,9 @@ export function ImageSelections({
           {/* Main Image - Left Side */}
           <div className="md:w-1/2 space-y-3">
             <h3 className="text-md font-medium">Main Image</h3>
-            <div className="flex flex-col gap-3 items-center">
+            <div className="h-64 flex-col gap-3 items-center">
               {featuredImage ? (
-                <div className="relative w-full h-64 border rounded-lg overflow-hidden">
+                <div className="relative w-full h-full border rounded-lg overflow-hidden">
                   <img 
                     src={featuredImage} 
                     alt="Main" 
@@ -104,17 +92,10 @@ export function ImageSelections({
                   />
                 </div>
               ) : (
-                <div className="w-full h-64 border rounded-lg flex items-center justify-center bg-gray-100">
+                <div className="w-full h-full border rounded-lg flex items-center justify-center bg-gray-100">
                   <ImageIcon className="h-12 w-12 text-gray-400" />
                 </div>
               )}
-              <Button 
-                onClick={handleOpenSelectMain} 
-                type="button"
-                className="bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-800 w-full"
-              >
-                {featuredImage ? "Change" : "Select"} Main Image
-              </Button>
             </div>
           </div>
           
@@ -156,22 +137,17 @@ export function ImageSelections({
           </div>
         </div>
         
-        {/* Image Selection Dialog */}
+        {/* Image Selection Dialog - Only for Featured Images */}
         <Dialog open={imageSelectOpen} onOpenChange={setImageSelectOpen}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle>
-                {selectionType === 'main' ? 'Select Main Image' : 'Select Featured Images'}
-              </DialogTitle>
+              <DialogTitle>Select Featured Images</DialogTitle>
             </DialogHeader>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
               {images.map((image, index) => {
-                // For main images, check against the temporary selectedImage state
-                // For featured images, check if it's already in the featuredImages array
-                const isSelected = selectionType === 'main' 
-                  ? image.url === selectedImage
-                  : featuredImages.includes(image.url);
+                // Check if image is already in the featuredImages array
+                const isSelected = featuredImages.includes(image.url);
                 
                 return (
                   <div 
@@ -199,17 +175,6 @@ export function ImageSelections({
                 </div>
               )}
             </div>
-            
-            {selectionType === 'main' && (
-              <DialogFooter className="mt-4">
-                <Button variant="outline" onClick={handleCloseDialog}>
-                  Cancel
-                </Button>
-                <Button onClick={handleConfirmSelection}>
-                  Confirm Selection
-                </Button>
-              </DialogFooter>
-            )}
           </DialogContent>
         </Dialog>
       </CardContent>

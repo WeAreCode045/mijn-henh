@@ -1,9 +1,10 @@
 
-import React from 'react';
 import { PropertyFormData } from "@/types/property";
-import { PropertyContentTab } from '../PropertyContentTab';
+import { useState } from "react";
+import { ContentTabContent } from "./ContentTabContent";
+import { usePropertyContent } from "@/hooks/usePropertyContent";
 
-export interface ContentTabWrapperProps {
+interface ContentTabWrapperProps {
   formData: PropertyFormData;
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
@@ -29,9 +30,65 @@ export interface ContentTabWrapperProps {
 }
 
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
+  // Extract handlers
+  const {
+    onFieldChange,
+    onAddFeature,
+    onRemoveFeature,
+    onUpdateFeature,
+    onAddArea,
+    onRemoveArea,
+    onUpdateArea,
+    onAreaImageRemove,
+    onAreaImagesSelect,
+    handleAreaImageUpload,
+    currentStep,
+    handleStepClick,
+    onFetchLocationData,
+    onRemoveNearbyPlace,
+    isLoadingLocationData,
+    setPendingChanges,
+    isUploading,
+    onSubmit,
+    isSaving
+  } = handlers;
+
+  const handleNext = () => {
+    if (currentStep < 3) { // 3 is the max step (0-indexed)
+      handleStepClick(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      handleStepClick(currentStep - 1);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <PropertyContentTab formData={formData} handlers={handlers} />
-    </div>
+    <ContentTabContent
+      formData={formData}
+      onFieldChange={onFieldChange}
+      onAddFeature={onAddFeature}
+      onRemoveFeature={onRemoveFeature}
+      onUpdateFeature={onUpdateFeature}
+      onAddArea={onAddArea}
+      onRemoveArea={onRemoveArea}
+      onUpdateArea={onUpdateArea}
+      onAreaImageRemove={onAreaImageRemove}
+      onAreaImagesSelect={onAreaImagesSelect}
+      handleAreaImageUpload={handleAreaImageUpload}
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      onFetchLocationData={onFetchLocationData}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
+      setPendingChanges={setPendingChanges}
+      isUploading={isUploading}
+      onSubmit={onSubmit}
+      isSaving={isSaving}
+    />
   );
 }

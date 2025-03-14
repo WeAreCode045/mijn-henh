@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface BasicDetailsProps {
   formData: PropertyFormData;
@@ -11,10 +12,58 @@ interface BasicDetailsProps {
 }
 
 export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
+  const { settings } = useAgencySettings();
+  const addressInputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (field: keyof PropertyFormData, value: string) => {
     console.log(`BasicDetails - ${field} changed to:`, value);
     onFieldChange(field, value);
   };
+
+  // Set up Google Places Autocomplete for address field
+  useEffect(() => {
+    const googleApiKey = settings?.googleMapsApiKey;
+    if (!googleApiKey || !addressInputRef.current) return;
+
+    // Load the Google Maps JavaScript API
+    const loadGoogleMapsScript = () => {
+      const scriptId = 'google-maps-script';
+      if (document.getElementById(scriptId)) return;
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = initializeAutocomplete;
+      document.head.appendChild(script);
+    };
+
+    const initializeAutocomplete = () => {
+      // Use window with type assertion to access the google object
+      if (!(window as GoogleMapsWindow).google || 
+          !(window as GoogleMapsWindow).google?.maps || 
+          !(window as GoogleMapsWindow).google?.maps?.places) {
+        console.error('Google Maps Places API not loaded');
+        return;
+      }
+
+      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
+        addressInputRef.current as HTMLInputElement,
+        { types: ['address'] }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.formatted_address) {
+          handleChange('address', place.formatted_address);
+        }
+      });
+    };
+
+    loadGoogleMapsScript();
+  }, [settings, onFieldChange]);
 
   return (
     <Card>
@@ -54,6 +103,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
               onChange={(e) => handleChange('address', e.target.value)}
               placeholder="Address"
               className="mt-1 p-2"
+              ref={addressInputRef}
             />
           </div>
           <div className="space-y-2">
