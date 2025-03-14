@@ -16,7 +16,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 padding-m">
       <div>
         <Label htmlFor="title">Title</Label>
         <Input
