@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { v4 as uuidv4 } from "uuid";
@@ -146,8 +147,6 @@ export function usePropertyFormManager(property: PropertyData) {
     onSubmit: contentManager.onSubmit,
     currentStep: contentManager.currentStep,
     handleStepClick: contentManager.handleStepClick,
-    handleNext: contentManager.handleNext,
-    handlePrevious: contentManager.handlePrevious,
     propertyWithRequiredProps,
     lastSaved: contentManager.lastSaved,
     isSaving: contentManager.isSaving,

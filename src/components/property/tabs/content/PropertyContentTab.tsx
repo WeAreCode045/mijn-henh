@@ -15,14 +15,14 @@ export interface PropertyContentTabProps {
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
   onFetchLocationData?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUpdateMode?: boolean;
   isUploading?: boolean;
+  onSubmit: () => void;
+  isSaving?: boolean;
 }
 
 export function PropertyContentTab(props: PropertyContentTabProps) {

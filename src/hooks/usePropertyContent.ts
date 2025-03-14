@@ -71,8 +71,6 @@ export function usePropertyContent(
     }
   };
 
-  // Removed handleNext and handlePrevious since they are no longer needed
-
   const onSubmit = async () => {
     await handleSave();
     console.log('usePropertyContent - Form submitted and saved');

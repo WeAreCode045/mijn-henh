@@ -147,8 +147,6 @@ export function usePropertyFormManager(property: PropertyData) {
     onSubmit: contentManager.onSubmit,
     currentStep: contentManager.currentStep,
     handleStepClick: contentManager.handleStepClick,
-    handleNext: contentManager.handleNext,
-    handlePrevious: contentManager.handlePrevious,
     propertyWithRequiredProps,
     lastSaved: contentManager.lastSaved,
     isSaving: contentManager.isSaving,

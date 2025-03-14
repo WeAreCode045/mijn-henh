@@ -58,8 +58,6 @@ export interface PropertyTabProps {
     handleToggleFeaturedImage: (url: string) => void;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    handleNext: () => void;
-    handlePrevious: () => void;
     onSubmit: () => void;
     formState: PropertyFormData;
     // Optional handlers

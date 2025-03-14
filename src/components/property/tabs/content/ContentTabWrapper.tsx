@@ -18,14 +18,13 @@ export interface ContentTabWrapperProps {
     handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    handleNext: () => void;
-    handlePrevious: () => void;
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
-    onSubmit: () => void; // Added missing onSubmit property
+    onSubmit: () => void;
+    isSaving?: boolean;
   };
 }
 
