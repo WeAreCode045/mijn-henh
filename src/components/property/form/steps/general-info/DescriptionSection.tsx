@@ -19,7 +19,7 @@ export function DescriptionSection({ formData, onFieldChange }: DescriptionSecti
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">Property Description</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-4">
         <div className="space-y-2">
           <Label htmlFor="description">Property Description</Label>
           <Textarea
@@ -28,6 +28,7 @@ export function DescriptionSection({ formData, onFieldChange }: DescriptionSecti
             rows={6}
             value={formData.description || ''}
             onChange={handleDescriptionChange}
+            className="mt-1"
           />
         </div>
       </CardContent>

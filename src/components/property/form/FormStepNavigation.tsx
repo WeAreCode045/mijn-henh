@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { steps, FormStep } from "./formSteps";
-import { Save } from "lucide-react";
+import { steps } from "./formSteps";
+import { Check, Loader2 } from "lucide-react";
 
 interface FormStepNavigationProps {
   currentStep: number;
@@ -15,41 +15,47 @@ export function FormStepNavigation({
   currentStep,
   onStepClick,
   onSave,
-  isSaving = false
+  isSaving = false,
 }: FormStepNavigationProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {steps.map((step) => (
           <Button
             key={step.id}
-            type="button"
             variant={currentStep === step.id ? "default" : "outline"}
-            className="flex-1"
+            size="sm"
             onClick={() => onStepClick(step.id)}
+            className="flex items-center gap-1"
           >
-            <span className="flex items-center">
-              {step.icon}
-              <span className="ml-2 hidden sm:inline">{step.title}</span>
-            </span>
+            {step.icon}
+            <span>{step.title}</span>
           </Button>
         ))}
+        
+        {onSave && (
+          <div className="ml-auto">
+            <Button
+              type="button"
+              onClick={onSave}
+              disabled={isSaving}
+              className="flex items-center gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Save</span>
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
-      
-      {onSave && (
-        <div className="flex justify-center mt-4">
-          <Button
-            type="button"
-            variant="default"
-            onClick={onSave}
-            disabled={isSaving}
-            className="w-full sm:w-auto flex items-center justify-center"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 
 import { PropertyFormData } from "@/types/property";
-import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { BasicDetails } from "./BasicDetails";
@@ -61,29 +60,28 @@ export function GeneralInfoStep({
 
   return (
     <div className="space-y-6">
-      <Card>
-        <BasicDetails 
-          formData={formData} 
-          onFieldChange={handleFieldChange} 
-        />
-      </Card>
+      {/* 1. Basic Details (Title, Price, Address, Object ID) */}
+      <BasicDetails 
+        formData={formData} 
+        onFieldChange={handleFieldChange} 
+      />
 
-      <Card>
-        <PropertySpecs 
-          formData={formData} 
-          onFieldChange={handleFieldChange} 
-        />
-      </Card>
-
+      {/* 2. Property Description */}
       <DescriptionSection 
         formData={formData}
         onFieldChange={handleFieldChange} 
       />
+      
+      {/* 3. Key Information */}
+      <PropertySpecs 
+        formData={formData} 
+        onFieldChange={handleFieldChange} 
+      />
 
-      {/* Only render image selections if there are images */}
+      {/* 4. Image Selections */}
       {formData.images && formData.images.length > 0 && (
         <ImageSelections
-          images={formData.images}
+          images={propertyImages}
           featuredImage={formData.featuredImage || null}
           featuredImages={formData.featuredImages || []}
           onFeaturedImageSelect={handleFeaturedImageSelect}

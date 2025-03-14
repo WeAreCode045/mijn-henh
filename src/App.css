@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -35,13 +36,32 @@
 
 .card {
   padding: 2em;
+}
 
+/* Add CSS variables for padding */
+:root {
+  --padding-s: 0.5rem;
+  --padding-m: 1rem;
+  --padding-l: 1.5rem;
+  --padding-xl: 2rem;
+}
 
-  --padding-s: 2px;
-    --padding-m: 5px;
-    --padding-l: 10px;
-    --padding-xl:20px;
-}  
+.padding-s {
+  padding: var(--padding-s);
+}
+
+.padding-m {
+  padding: var(--padding-m);
+}
+
+.padding-l {
+  padding: var(--padding-l);
+}
+
+.padding-xl {
+  padding: var(--padding-xl);
+}
+
 .read-the-docs {
   color: #888;
 }
