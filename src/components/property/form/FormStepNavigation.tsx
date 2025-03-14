@@ -19,22 +19,24 @@ export function FormStepNavigation({
 }: FormStepNavigationProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {steps.map((step) => (
-          <Button
-            key={step.id}
-            variant={currentStep === step.id ? "default" : "outline"}
-            size="sm"
-            onClick={() => onStepClick(step.id)}
-            className="flex items-center gap-1"
-          >
-            {step.icon}
-            <span>{step.title}</span>
-          </Button>
-        ))}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
+        <div className="flex items-center gap-2">
+          {steps.map((step) => (
+            <Button
+              key={step.id}
+              variant={currentStep === step.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => onStepClick(step.id)}
+              className="flex items-center gap-1"
+            >
+              {step.icon}
+              <span>{step.title}</span>
+            </Button>
+          ))}
+        </div>
         
         {onSave && (
-          <div className="ml-auto">
+          <div>
             <Button
               type="button"
               onClick={onSave}

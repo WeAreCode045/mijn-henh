@@ -4,7 +4,8 @@ import { PropertyImage } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Check, Image as ImageIcon } from "lucide-react";
+import { Check, Image as ImageIcon, PencilIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ImageSelectionsProps {
   images: PropertyImage[];
@@ -12,6 +13,7 @@ interface ImageSelectionsProps {
   featuredImages: string[];
   onFeaturedImageSelect: (url: string | null) => void;
   onFeaturedImageToggle: (url: string) => void;
+  propertyId?: string;
   maxFeaturedImages?: number;
 }
 
@@ -21,11 +23,13 @@ export function ImageSelections({
   featuredImages = [],
   onFeaturedImageSelect,
   onFeaturedImageToggle,
+  propertyId = "",
   maxFeaturedImages = 4
 }: ImageSelectionsProps) {
   const [imageSelectOpen, setImageSelectOpen] = useState(false);
   const [selectionType, setSelectionType] = useState<'main' | 'featured'>('main');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   const handleOpenSelectMain = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
@@ -62,13 +66,28 @@ export function ImageSelections({
     setSelectedImage(null);
     setImageSelectOpen(false);
   };
+
+  const navigateToMediaTab = () => {
+    if (propertyId) {
+      navigate(`/property/${propertyId}/media`);
+    }
+  };
   
   const canAddMoreFeaturedImages = featuredImages.length < maxFeaturedImages;
   
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-medium">Image Selections</CardTitle>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={navigateToMediaTab}
+          type="button"
+        >
+          <PencilIcon className="h-4 w-4 mr-2" />
+          Edit in Media Tab
+        </Button>
       </CardHeader>
       <CardContent className="p-4">
         <div className="flex flex-col md:flex-row gap-6">
@@ -83,16 +102,6 @@ export function ImageSelections({
                     alt="Main" 
                     className="w-full h-full object-cover"
                   />
-                  <button 
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
-                    onClick={(e) => {
-                      e.preventDefault(); // Prevent form submission
-                      onFeaturedImageSelect(null);
-                    }}
-                    type="button"
-                  >
-                    ✕
-                  </button>
                 </div>
               ) : (
                 <div className="w-full h-64 border rounded-lg flex items-center justify-center bg-gray-100">
@@ -112,30 +121,20 @@ export function ImageSelections({
           {/* Featured Images - Right Side */}
           <div className="md:w-1/2 space-y-3">
             <h3 className="text-md font-medium">Featured Images (max {maxFeaturedImages})</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 h-64">
               {featuredImages.slice(0, 4).map((url, index) => (
-                <div key={index} className="relative aspect-square border rounded-lg overflow-hidden">
+                <div key={index} className="relative h-full border rounded-lg overflow-hidden">
                   <img 
                     src={url} 
                     alt={`Featured ${index + 1}`} 
                     className="w-full h-full object-cover"
                   />
-                  <button 
-                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full text-xs"
-                    onClick={(e) => {
-                      e.preventDefault(); // Prevent form submission
-                      onFeaturedImageToggle(url);
-                    }}
-                    type="button"
-                  >
-                    ✕
-                  </button>
                 </div>
               ))}
               
               {/* Empty slots or add button */}
               {Array.from({ length: Math.min(4 - featuredImages.length, 4) }).map((_, index) => (
-                <div key={`empty-${index}`} className="aspect-square">
+                <div key={`empty-${index}`} className="h-full">
                   {index === 0 && canAddMoreFeaturedImages ? (
                     <Button 
                       onClick={handleOpenSelectFeatured}

@@ -22,8 +22,8 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
         <CardTitle className="text-lg font-medium">Property Details</CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
@@ -31,10 +31,10 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
               value={formData.title || ''}
               onChange={(e) => handleChange('title', e.target.value)}
               placeholder="Title"
-              className="mt-1"
+              className="mt-1 p-2"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="price">Price</Label>
             <Input
               id="price"
@@ -42,10 +42,10 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
               value={formData.price || ''}
               onChange={(e) => handleChange('price', e.target.value)}
               placeholder="Price"
-              className="mt-1"
+              className="mt-1 p-2"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="address">Address</Label>
             <Input
               id="address"
@@ -53,10 +53,10 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
               value={formData.address || ''}
               onChange={(e) => handleChange('address', e.target.value)}
               placeholder="Address"
-              className="mt-1"
+              className="mt-1 p-2"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="object_id">Object ID</Label>
             <Input
               id="object_id"
@@ -64,7 +64,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
               value={formData.object_id || ''}
               onChange={(e) => handleChange('object_id', e.target.value)}
               placeholder="Object ID"
-              className="mt-1"
+              className="mt-1 p-2"
             />
           </div>
         </div>

@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Search } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface AddressSectionProps {
   formData: PropertyFormData;
@@ -24,11 +26,56 @@ export function AddressSection({
   isLoadingLocationDescription = false,
   isLoadingLocationData = false
 }: AddressSectionProps) {
+  const { settings } = useAgencySettings();
+  const autocompleteInputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (onFieldChange) {
       onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
     }
   };
+
+  // Set up Google Places Autocomplete
+  useEffect(() => {
+    const googleApiKey = settings?.google_maps_api_key;
+    if (!googleApiKey || !autocompleteInputRef.current) return;
+
+    // Load the Google Maps JavaScript API
+    const loadGoogleMapsScript = () => {
+      const scriptId = 'google-maps-script';
+      if (document.getElementById(scriptId)) return;
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = initializeAutocomplete;
+      document.head.appendChild(script);
+    };
+
+    const initializeAutocomplete = () => {
+      if (!window.google || !window.google.maps || !window.google.maps.places) {
+        console.error('Google Maps Places API not loaded');
+        return;
+      }
+
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        autocompleteInputRef.current as HTMLInputElement,
+        { types: ['address'] }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.formatted_address && onFieldChange) {
+          onFieldChange('address', place.formatted_address);
+        }
+      });
+    };
+
+    loadGoogleMapsScript();
+  }, [settings, onFieldChange]);
 
   return (
     <Card>
@@ -44,6 +91,7 @@ export function AddressSection({
                 onChange={handleChange}
                 placeholder="Enter full property address"
                 className="flex-1"
+                ref={autocompleteInputRef}
               />
               {onFetchLocationData && (
                 <Button
