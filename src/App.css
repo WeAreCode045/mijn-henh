@@ -35,8 +35,13 @@
 
 .card {
   padding: 2em;
-}
 
+
+  --padding-s: 2px;
+    --padding-m: 5px;
+    --padding-l: 10px;
+    --padding-xl:20px;
+}  
 .read-the-docs {
   color: #888;
 }
