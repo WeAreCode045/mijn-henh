@@ -19,7 +19,8 @@ export function useUploadImage(
 
   // Upload image
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault(); // Prevent form submission
+    // Prevent default behavior
+    e.preventDefault();
     
     if (!e.target.files || e.target.files.length === 0 || !property.id) {
       return;
@@ -40,8 +41,11 @@ export function useUploadImage(
       
       // Process each file
       for (const file of files) {
+        console.log(`Uploading file: ${file.name}, size: ${file.size}`);
+        
         // Upload file
         const publicUrl = await uploadFile(file, property.id, 'photos');
+        console.log(`File uploaded, public URL: ${publicUrl}`);
         
         // Increment sort order
         highestSortOrder += 1;
@@ -58,7 +62,12 @@ export function useUploadImage(
           .select()
           .single();
           
-        if (error) throw error;
+        if (error) {
+          console.error("Database error:", error);
+          throw error;
+        }
+        
+        console.log(`Database record created, ID: ${data.id}`);
         
         // Add to new images array
         newImages.push({
@@ -86,8 +95,10 @@ export function useUploadImage(
       toast.error("Failed to upload images");
     } finally {
       setIsSaving(false);
-      // Reset the file input
-      e.target.value = '';
+      // Reset the file input if it's a standard input element
+      if (e.target.value !== undefined) {
+        e.target.value = '';
+      }
     }
   };
 

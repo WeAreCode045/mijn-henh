@@ -6,8 +6,6 @@ import { PropertyImagesCard } from "./PropertyImagesCard";
 import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface MediaTabContentProps {
   property: PropertyData;

@@ -1,12 +1,11 @@
-
 import React, { useState } from "react";
 import { PropertyData, PropertyImage } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ImageUploader } from "@/components/ui/ImageUploader";
 import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { toast } from "sonner";
+import { AdvancedImageUploader } from "@/components/ui/AdvancedImageUploader";
 
 interface FloorplansTabProps {
   property: PropertyData;
@@ -142,26 +141,19 @@ export function FloorplansTab({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Floorplans</span>
-          <ImageUploader 
-            onUpload={handleFloorplanUpload} 
-            isUploading={isSaving} 
-            label="Upload Floorplans"
-            multiple={true}
-          />
-        </CardTitle>
+        <CardTitle>Floorplans</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <AdvancedImageUploader 
+          onUpload={handleFloorplanUpload} 
+          isUploading={isSaving} 
+          label="Upload Floorplans"
+          multiple={true}
+        />
+        
         {(!floorplans || floorplans.length === 0) ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground mb-4">No floorplans uploaded yet</p>
-            <ImageUploader 
-              onUpload={handleFloorplanUpload} 
-              isUploading={isSaving} 
-              label="Upload Floorplans"
-              multiple={true}
-            />
+          <div className="text-center py-6 mt-4">
+            <p className="text-muted-foreground">No floorplans uploaded yet</p>
           </div>
         ) : (
           <SortableFloorplanGrid 

@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyImage } from "@/types/property";
 import { SortableImageGrid } from "./images/SortableImageGrid";
-import { ImageUploader } from "@/components/ui/ImageUploader";
+import { AdvancedImageUploader } from "@/components/ui/AdvancedImageUploader";
 
 interface PropertyImagesCardProps {
   images: PropertyImage[];
@@ -31,26 +31,19 @@ export function PropertyImagesCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Property Images</span>
-          <ImageUploader 
-            onUpload={onImageUpload} 
-            isUploading={isUploading} 
-            label="Upload Images"
-            multiple={true}
-          />
-        </CardTitle>
+        <CardTitle>Property Images</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <AdvancedImageUploader 
+          onUpload={onImageUpload} 
+          isUploading={isUploading} 
+          label="Upload Images"
+          multiple={true}
+        />
+        
         {(!images || images.length === 0) ? (
-          <div className="text-center py-12 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground mb-4">No images uploaded yet</p>
-            <ImageUploader 
-              onUpload={onImageUpload} 
-              isUploading={isUploading} 
-              label="Upload Images"
-              multiple={true}
-            />
+          <div className="text-center py-6 mt-4">
+            <p className="text-muted-foreground">No images uploaded yet</p>
           </div>
         ) : (
           <SortableImageGrid 
