@@ -53,13 +53,16 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     isSaving
   } = handlers;
 
-  const handleNext = () => {
+  // Define local step handling functions that prevent default form submission
+  const handleNext = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (currentStep < 3) { // 3 is the max step (0-indexed)
       handleStepClick(currentStep + 1);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (currentStep > 0) {
       handleStepClick(currentStep - 1);
     }
@@ -79,7 +82,10 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
       onAreaImagesSelect={onAreaImagesSelect}
       handleAreaImageUpload={handleAreaImageUpload}
       currentStep={currentStep}
-      handleStepClick={handleStepClick}
+      handleStepClick={(step) => {
+        // Prevent default event and call the step click handler
+        handleStepClick(step);
+      }}
       handleNext={handleNext}
       handlePrevious={handlePrevious}
       onFetchLocationData={onFetchLocationData}

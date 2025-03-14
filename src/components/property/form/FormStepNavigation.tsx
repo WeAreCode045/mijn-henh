@@ -26,7 +26,11 @@ export function FormStepNavigation({
               key={step.id}
               variant={currentStep === step.id ? "default" : "outline"}
               size="sm"
-              onClick={() => onStepClick(step.id)}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent default form submission behavior
+                onStepClick(step.id);
+              }}
+              type="button" // Explicitly set as button type to prevent form submission
               className="flex items-center gap-1"
             >
               {step.icon}
@@ -39,7 +43,10 @@ export function FormStepNavigation({
           <div>
             <Button
               type="button"
-              onClick={onSave}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent default form submission behavior
+                onSave();
+              }}
               disabled={isSaving}
               className="flex items-center gap-2"
             >
