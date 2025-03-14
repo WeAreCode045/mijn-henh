@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { PropertyImage } from "@/types/property";
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
@@ -46,7 +47,10 @@ export function SortableImageGrid({
     handleDragEnd(event);
   };
   
-  const handleSetMain = (imageUrl: string) => {
+  const handleSetMain = (e: React.MouseEvent, imageUrl: string) => {
+    e.preventDefault(); // Prevent default browser behavior
+    e.stopPropagation(); // Stop event propagation
+    
     if (onSetFeaturedImage) {
       if (featuredImage === imageUrl) return;
       
@@ -54,7 +58,10 @@ export function SortableImageGrid({
     }
   };
   
-  const handleToggleFeatured = (imageUrl: string) => {
+  const handleToggleFeatured = (e: React.MouseEvent, imageUrl: string) => {
+    e.preventDefault(); // Prevent default browser behavior
+    e.stopPropagation(); // Stop event propagation
+    
     if (!onToggleFeaturedImage) return;
     
     const isFeatured = featuredImages.includes(imageUrl);
@@ -97,8 +104,8 @@ export function SortableImageGrid({
                 onRemove={() => onRemoveImage(index)}
                 isMain={isMain}
                 isFeatured={isFeatured}
-                onSetMain={onSetFeaturedImage ? () => handleSetMain(imageUrl) : undefined}
-                onToggleFeatured={onToggleFeaturedImage ? () => handleToggleFeatured(imageUrl) : undefined}
+                onSetMain={onSetFeaturedImage ? (e) => handleSetMain(e, imageUrl) : undefined}
+                onToggleFeatured={onToggleFeaturedImage ? (e) => handleToggleFeatured(e, imageUrl) : undefined}
                 isUpdating={isSaving}
               />
             );

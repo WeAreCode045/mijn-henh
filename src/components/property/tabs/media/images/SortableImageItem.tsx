@@ -15,8 +15,8 @@ interface SortableImageItemProps {
   isActive: boolean;
   isMain?: boolean;
   isFeatured?: boolean;
-  onSetMain?: () => void;
-  onToggleFeatured?: () => void;
+  onSetMain?: (e: React.MouseEvent) => void;
+  onToggleFeatured?: (e: React.MouseEvent) => void;
   isUpdating?: boolean;
 }
 
@@ -81,6 +81,7 @@ export function SortableImageItem({
         <div className="flex flex-col space-y-2">
           {onSetMain && (
             <Button
+              type="button"
               variant={isMain ? "default" : "outline"}
               size="sm"
               onClick={onSetMain}
@@ -94,6 +95,7 @@ export function SortableImageItem({
           
           {onToggleFeatured && (
             <Button
+              type="button"
               variant={isFeatured ? "default" : "outline"}
               size="sm"
               onClick={onToggleFeatured}
@@ -105,6 +107,7 @@ export function SortableImageItem({
           )}
           
           <Button
+            type="button"
             variant="destructive"
             size="sm"
             onClick={onRemove}
