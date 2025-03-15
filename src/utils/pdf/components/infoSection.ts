@@ -84,14 +84,14 @@ export const generateInfoSection = async (
     });
     
     // Position QR code centered in the description column
-    const qrCodeSize = 30;
+    const qrCodeSize = 15;
     const qrCodeX = contentX + (descColumnWidth / 2) - (qrCodeSize / 2);
     
     pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
     
     // Add "Scan for web view" text
     pdf.setFontSize(8);
-    const scanText = "Scan for web view";
+    const scanText = "Bekijk de online Brochure";
     const textWidth = pdf.getTextWidth(scanText);
     const textX = contentX + (descColumnWidth / 2) - (textWidth / 2);
     pdf.text(scanText, textX, qrCodeY + qrCodeSize + 5);
@@ -107,7 +107,7 @@ export const generateInfoSection = async (
   
   pdf.setFontSize(10);
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Features', featuresX + 5, contentY + 10);
+  pdf.text('Bijzonderheden', featuresX + 5, contentY + 10);
   
   // Make sure features are displayed
   pdf.setFontSize(8);
