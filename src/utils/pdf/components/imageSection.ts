@@ -32,8 +32,8 @@ export const generateImageSection = async (
   }
   
   // Calculate heights - main image takes 50% of total height, grid takes 50%
-  const mainImageHeight = height * 0.6; // 50% for main image
-  const featuredImagesHeight = height * 0.4; // 50% for featured images grid
+  const mainImageHeight = height * 0.4; // 50% for main image
+  const featuredImagesHeight = height * 0.5; // 50% for featured images grid
   
   // Draw main image (top) with 1.5 aspect ratio (landscape orientation)
   if (mainImage) {
@@ -67,7 +67,7 @@ export const generateImageSection = async (
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;
-    const gapSize = 1; // Reduced gap between images in the grid
+    const gapSize = 2; // Reduced gap between images in the grid
     
     // Calculate cell dimensions with gaps
     const cellWidth = (width - gapSize) / gridCols;
