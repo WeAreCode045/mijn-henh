@@ -26,12 +26,12 @@ export const generateKeyInfoCards = async (
   
   // Property specs in a 1x6 grid
   const specs = [
-    { label: 'Build Year', value: property.buildYear || 'N/A', icon: buildYearIcon },
-    { label: 'Living Area', value: `${property.livingArea || 'N/A'} m²`, icon: livingAreaIcon },
-    { label: 'Plot Size', value: `${property.sqft || 'N/A'} m²`, icon: sqftIcon },
-    { label: 'Bedrooms', value: property.bedrooms || 'N/A', icon: bedroomsIcon },
-    { label: 'Bathrooms', value: property.bathrooms || 'N/A', icon: bathroomsIcon },
-    { label: 'Energy Class', value: property.energyLabel || 'N/A', icon: energyClassIcon }
+    { label: 'Bouwjaar', value: property.buildYear || 'N/A', icon: buildYearIcon },
+    { label: 'Woonoppervlak', value: `${property.livingArea || 'N/A'} m²`, icon: livingAreaIcon },
+    { label: 'Perceeloppervlak', value: `${property.sqft || 'N/A'} m²`, icon: sqftIcon },
+    { label: 'Slaapkamers', value: property.bedrooms || 'N/A', icon: bedroomsIcon },
+    { label: 'Badkamers', value: property.bathrooms || 'N/A', icon: bathroomsIcon },
+    { label: 'Energie klasse', value: property.energyLabel || 'N/A', icon: energyClassIcon }
   ];
   
   // Calculate spec card dimensions (1x6 grid)
