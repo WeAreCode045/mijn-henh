@@ -41,15 +41,15 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
   
   // Form state management
   const [formState, setFormState] = useState(property || {});
-  const { handleFieldChange } = usePropertyStateTracking(
-    formState,
-    (field, value) => {
-      setFormState(prev => ({ ...prev, [field]: value }));
-    },
-    setFormState,
-    () => {} // placeholder for setPendingChanges
-  );
   
+  // Replace with direct field change handler
+  const handleFieldChange = (field, value) => {
+    setFormState(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // Auto-save functionality
   const { 
     autosaveData, 

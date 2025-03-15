@@ -40,6 +40,8 @@ export interface PropertyFormManagerChildrenProps {
   setPendingChanges: (pending: boolean) => void;
   // Location-related handlers
   onFetchLocationData: () => Promise<any>;
+  onFetchCategoryPlaces: (category: string) => Promise<any>;
+  onFetchNearbyCities: () => Promise<any>;
   onGenerateLocationDescription: () => Promise<any>;
   onGenerateMap: () => Promise<any>;
   onRemoveNearbyPlace: (index: number) => void;
@@ -52,4 +54,14 @@ export interface PropertyFormManagerChildrenProps {
   // For media components
   onFeatureImageToggle?: (url: string) => void;
   onSetMainImage?: (url: string) => void;
+  // Aliases for backward compatibility
+  onAddFeature: () => void;
+  onRemoveFeature: (id: string) => void;
+  onUpdateFeature: (id: string, description: string) => void;
+  onAddArea: () => void;
+  onRemoveArea: (id: string) => void;
+  onUpdateArea: (id: string, field: any, value: any) => void;
+  onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  images: any[];
 }

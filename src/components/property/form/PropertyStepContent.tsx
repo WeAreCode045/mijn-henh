@@ -26,6 +26,8 @@ interface PropertyStepContentProps {
   handleNext?: () => void;
   handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>; // Added missing property
+  onFetchNearbyCities?: () => Promise<any>; // Added missing property
   onGenerateLocationDescription?: () => Promise<void>;
   onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;

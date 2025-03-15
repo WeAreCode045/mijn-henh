@@ -17,7 +17,7 @@ export function usePropertyAreas(
       description: '',
       name: '',
       size: '',
-      imageIds: [],
+      imageIds: [], // Keep imageIds for compatibility
       images: [],
       columns: 2
     };
@@ -62,8 +62,10 @@ export function usePropertyAreas(
           // Handle both PropertyImage objects and string IDs
           if (typeof image === 'string') {
             return image !== imageId;
+          } else if (typeof image === 'object' && 'id' in image) {
+            return image.id !== imageId;
           }
-          return image.id !== imageId;
+          return true;
         });
         
         return { 

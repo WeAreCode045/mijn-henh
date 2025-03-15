@@ -18,7 +18,7 @@ export function PropertyTabContents({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  onAreaImageUpload,
+  onAreaImageUpload, // Make sure this prop exists
   onFieldChange,
   onFetchLocationData,
   onFetchCategoryPlaces,
@@ -37,7 +37,7 @@ export function PropertyTabContents({
   handleStepClick,
   setPendingChanges,
   isSaving,
-  handleGeneratePDF,
+  handleGeneratePDF, // Add missing props
   handleWebView,
   handleImageUpload,
   handleRemoveImage,
@@ -68,7 +68,7 @@ export function PropertyTabContents({
     onUpdateArea,
     onAreaImageRemove,
     onAreaImagesSelect,
-    handleAreaImageUpload,
+    handleAreaImageUpload: onAreaImageUpload, // Ensure this is correctly passed
     onFetchLocationData,
     onFetchCategoryPlaces,
     onFetchNearbyCities,
