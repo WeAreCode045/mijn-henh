@@ -68,11 +68,11 @@ export const generateKeyInfoCards = async (
     // Label to the right of the icon
     pdf.setFontSize(8);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(spec.label, specX + 16, specY + 5);
+    pdf.text(spec.label, specX + 16, specY + 10);
     
     // Value below label
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(spec.value), specX + 16, specY + 22);
+    pdf.text(String(spec.value), specX + 16, specY + 13);
   });
 };
