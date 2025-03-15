@@ -1,4 +1,3 @@
-
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -126,8 +125,8 @@ export function PropertyTabsWrapper({
                       onRemoveNearbyPlace={onRemoveNearbyPlace}
                       isLoadingLocationData={isLoadingLocationData}
                       isGeneratingMap={isGeneratingMap}
-                      onFetchCategoryPlaces={() => Promise.resolve([])}
-                      onFetchNearbyCities={() => Promise.resolve([])}
+                      onFetchCategoryPlaces={onFetchCategoryPlaces}
+                      onFetchNearbyCities={onFetchNearbyCities}
                     />
                   </PropertyTabs>
                 </Tabs>
