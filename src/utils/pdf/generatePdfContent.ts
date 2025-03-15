@@ -4,46 +4,59 @@ import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
 import { generateImageSection } from './components/imageSection';
 import { generateInfoSection } from './components/infoSection';
-import { generateContactBarSection } from './components/contactBarSection';
-import { BROCHURE_STYLES } from './constants/styles';
+import { generateContactSection } from './components/contactSection';
 
 export const generatePdfContent = async (
-  pdf: jsPDF,
-  property: PropertyData,
-  settings: AgencySettings,
-  pageWidth: number,
+  pdf: jsPDF, 
+  property: PropertyData, 
+  settings: AgencySettings, 
+  pageWidth: number, 
   pageHeight: number
 ) => {
-  // Define layout dimensions with margins
-  const margin = BROCHURE_STYLES.spacing.margin;
+  // Define common dimensions
+  const margin = 15;
   const contentWidth = pageWidth - (margin * 2);
   
-  // Define section heights
-  const imageHeight = 120;
-  const infoHeight = 100;
-  const contactBarHeight = 30;
+  // Calculate the available content height (excluding margins)
+  const availableHeight = pageHeight - margin * 2;
   
-  // Set coordinates for each section
-  const imageX = margin;
-  const imageY = margin;
+  // Calculate heights for main content and contact section
+  const mainContentHeight = availableHeight * 0.85; // 85% for main content
+  const contactSectionHeight = availableHeight * 0.15; // 15% for contact section
   
-  const infoX = margin;
-  const infoY = imageY + imageHeight + 5;
+  // Calculate widths for left and right columns
+  const leftColumnWidth = contentWidth * 0.4; // 40% for images
+  const rightColumnWidth = contentWidth * 0.6; // 60% for title/description/features
   
-  const contactBarX = margin;
-  const contactBarY = pageHeight - contactBarHeight - margin;
+  // Generate the main image and featured images section (left column)
+  await generateImageSection(
+    pdf, 
+    property, 
+    margin, 
+    leftColumnWidth, 
+    margin, 
+    mainContentHeight
+  );
   
-  // Generate each section
-  try {
-    // Images section (top half)
-    await generateImageSection(pdf, property, imageX, contentWidth, imageY, imageHeight);
-    
-    // Info section (middle)
-    await generateInfoSection(pdf, property, settings, infoX, contentWidth, infoY, infoHeight);
-    
-    // Contact bar (bottom)
-    await generateContactBarSection(pdf, property, settings, contactBarX, contentWidth, contactBarY, contactBarHeight);
-  } catch (error) {
-    console.error('Error generating PDF content:', error);
-  }
+  // Generate the info section (title, description, features, key info cards) on the right column
+  await generateInfoSection(
+    pdf, 
+    property, 
+    settings, 
+    margin + leftColumnWidth, 
+    rightColumnWidth, 
+    margin, 
+    mainContentHeight
+  );
+  
+  // Generate the contact section at the bottom (full width)
+  await generateContactSection(
+    pdf,
+    property,
+    settings,
+    margin,
+    contentWidth,
+    margin + mainContentHeight + 10,
+    contactSectionHeight
+  );
 };

@@ -2,7 +2,6 @@
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
-import { addFontAwesomeIconToPdf, getIconNameFromSettings } from '../utils/iconUtils';
 
 export const generateKeyInfoCards = async (
   pdf: jsPDF,
@@ -17,14 +16,22 @@ export const generateKeyInfoCards = async (
   const primaryColor = settings?.primaryColor || '#9b87f5';
   const secondaryColor = settings?.secondaryColor || '#7E69AB';
   
+  // Get icons from settings or use defaults
+  const buildYearIcon = settings?.iconBuildYear || 'calendar';
+  const livingAreaIcon = settings?.iconLivingSpace || 'home';
+  const sqftIcon = settings?.iconSqft || 'ruler';
+  const bedroomsIcon = settings?.iconBedrooms || 'bed';
+  const bathroomsIcon = settings?.iconBathrooms || 'bath';
+  const energyClassIcon = settings?.iconEnergyClass || 'zap';
+  
   // Property specs in a 3x2 grid
   const specs = [
-    { label: 'Bouwjaar', value: property.buildYear || 'N/A', iconType: 'buildYear' },
-    { label: 'Woonoppervlak', value: `${property.livingArea || 'N/A'} m²`, iconType: 'livingArea' },
-    { label: 'Perceeloppervlak', value: `${property.sqft || 'N/A'} m²`, iconType: 'sqft' },
-    { label: 'Slaapkamers', value: property.bedrooms || 'N/A', iconType: 'bedrooms' },
-    { label: 'Badkamers', value: property.bathrooms || 'N/A', iconType: 'bathrooms' },
-    { label: 'Energie klasse', value: property.energyLabel || 'N/A', iconType: 'energyClass' }
+    { label: 'Bouwjaar', value: property.buildYear || 'N/A', icon: buildYearIcon },
+    { label: 'Woonoppervlak', value: `${property.livingArea || 'N/A'} m²`, icon: livingAreaIcon },
+    { label: 'Perceeloppervlak', value: `${property.sqft || 'N/A'} m²`, icon: sqftIcon },
+    { label: 'Slaapkamers', value: property.bedrooms || 'N/A', icon: bedroomsIcon },
+    { label: 'Badkamers', value: property.bathrooms || 'N/A', icon: bathroomsIcon },
+    { label: 'Energie klasse', value: property.energyLabel || 'N/A', icon: energyClassIcon }
   ];
   
   // Calculate spec card dimensions (3x2 grid)
@@ -34,11 +41,9 @@ export const generateKeyInfoCards = async (
   const specHeight = height / rows - 4; // Add spacing between rows
   const specMargin = 4; // Margin between cards
   
-  // Create and render each spec card
-  for (let i = 0; i < specs.length; i++) {
-    const spec = specs[i];
-    const col = i % cols;
-    const row = Math.floor(i / cols);
+  specs.forEach((spec, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
     
     const specX = x + (col * (specWidth + specMargin));
     const specY = y + (row * (specHeight + specMargin));
@@ -47,24 +52,27 @@ export const generateKeyInfoCards = async (
     pdf.setFillColor(primaryColor);
     pdf.roundedRect(specX, specY, specWidth, specHeight, 2, 2, 'F');
     
-    // Get icon name from settings
-    const iconName = getIconNameFromSettings(spec.iconType, settings);
-    
     // Position icon at left side of the card
-    const iconX = specX + 10;
+    pdf.setFillColor(secondaryColor);
+    const iconX = specX + 8;
     const iconY = specY + 13;
+    pdf.circle(iconX, iconY, 4, 'F');
     
-    // Add icon using FontAwesome
-    await addFontAwesomeIconToPdf(pdf, iconName, iconX, iconY, 8, '#ffffff');
+    // Draw icon text (simplified representation of icon)
+    pdf.setFontSize(6);
+    pdf.setTextColor(255, 255, 255);
+    const iconText = spec.icon.charAt(0).toUpperCase();
+    const textWidth = pdf.getTextWidth(iconText);
+    pdf.text(iconText, iconX - textWidth/2, iconY + 2);
     
     // Label to the right of the icon
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(spec.label, specX + 20, specY + 10);
+    pdf.text(spec.label, specX + 16, specY + 10);
     
     // Value below label
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(spec.value), specX + 20, specY + 18);
-  }
+    pdf.text(String(spec.value), specX + 16, specY + 15);
+  });
 };
