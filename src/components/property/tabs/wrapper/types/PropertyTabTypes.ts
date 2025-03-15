@@ -1,3 +1,4 @@
+
 import { PropertyData, PropertyFormData, PropertyCity, PropertyNearbyPlace } from "@/types/property";
 
 export interface PropertyTabContentsProps {
@@ -16,6 +17,7 @@ export interface PropertyTabContentsProps {
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>; // Add this property
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchLocationData: () => Promise<void>;
   onFetchCategoryPlaces: (category: string) => Promise<any>;
@@ -50,6 +52,7 @@ export interface PropertyTabContentsProps {
   handleYoutubeUrlUpdate?: (url: string) => void;
   handleFloorplanEmbedScriptUpdate?: (script: string) => void;
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  onSubmit?: () => void;
 }
 
 export interface PropertyFormManagerChildrenProps {
@@ -58,14 +61,14 @@ export interface PropertyFormManagerChildrenProps {
   handleSaveObjectId: (objectId: string) => void;
   handleSaveAgent: (agentId: string) => void;
   handleSaveTemplate: (templateId: string) => void;
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
-  onAddArea: () => void;
-  onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  addFeature: () => void;
+  removeFeature: (id: string) => void;
+  updateFeature: (id: string, description: string) => void;
+  addArea: () => void;
+  removeArea: (id: string) => void;
+  updateArea: (id: string, field: any, value: any) => void;
+  handleAreaImageRemove: (areaId: string, imageId: string) => void;
+  handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   onFetchLocationData: () => Promise<void>;
   onFetchCategoryPlaces: (category: string) => Promise<any>;
@@ -96,14 +99,15 @@ export interface PropertyFormManagerChildrenProps {
   handleVirtualTourUpdate?: (url: string) => void;
   handleYoutubeUrlUpdate?: (url: string) => void;
   handleFloorplanEmbedScriptUpdate?: (script: string) => void;
-  addFeature?: () => void;
-  removeFeature?: (id: string) => void;
-  updateFeature?: (id: string, description: string) => void;
-  addArea?: () => void;
-  removeArea?: (id: string) => void;
-  updateArea?: (id: string, field: any, value: any) => void;
-  onAreaImageRemove?: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  // These were duplicated, removing them:
+  // onAreaImageRemove?: (areaId: string, imageId: string) => void;
+  // onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  onAddFeature?: () => void;
+  onRemoveFeature?: (id: string) => void;
+  onUpdateFeature?: (id: string, description: string) => void;
+  onAddArea?: () => void;
+  onRemoveArea?: (id: string) => void;
+  onUpdateArea?: (id: string, field: any, value: any) => void;
   images?: any[];
 }
 

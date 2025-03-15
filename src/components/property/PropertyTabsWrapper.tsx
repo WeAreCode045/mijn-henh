@@ -101,7 +101,7 @@ export function PropertyTabsWrapper({
                       onUpdateArea={updateArea}
                       onAreaImageRemove={handleAreaImageRemove}
                       onAreaImagesSelect={handleAreaImagesSelect}
-                      handleAreaImageUpload={handleAreaImageUpload}
+                      onAreaImageUpload={handleAreaImageUpload}
                       handleImageUpload={handleImageUpload}
                       handleRemoveImage={handleRemoveImage}
                       isUploading={isUploading}
@@ -126,6 +126,8 @@ export function PropertyTabsWrapper({
                       onRemoveNearbyPlace={onRemoveNearbyPlace}
                       isLoadingLocationData={isLoadingLocationData}
                       isGeneratingMap={isGeneratingMap}
+                      onFetchCategoryPlaces={() => Promise.resolve([])}
+                      onFetchNearbyCities={() => Promise.resolve([])}
                     />
                   </PropertyTabs>
                 </Tabs>
