@@ -33,7 +33,7 @@ export const generateImageSection = async (
   
   // Calculate heights - main image takes 50% of total height, grid takes 50%
   const mainImageHeight = height * 0.5; // 50% for main image
-  const featuredImagesHeight = height * 0.5; // 50% for featured images grid
+  const featuredImagesHeight = height * 0.4; // 50% for featured images grid
   
   // Draw main image (top) with 1.5 aspect ratio (landscape orientation)
   if (mainImage) {
