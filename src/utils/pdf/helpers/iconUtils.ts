@@ -9,6 +9,7 @@ import {
   faBolt 
 } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
+// Import svg2pdf correctly - it's a default export
 import svg2pdf from 'svg2pdf.js';
 
 // Map of icon names to FontAwesome icons
@@ -60,7 +61,7 @@ export const renderIconToPDF = async (
     const offsetX = x - size/2;
     const offsetY = y - size/2;
     
-    // Render SVG to PDF - using the correct import method
+    // Render SVG to PDF
     await svg2pdf(svg, pdf, {
       x: offsetX,
       y: offsetY,
