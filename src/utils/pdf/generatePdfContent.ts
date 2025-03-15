@@ -16,7 +16,7 @@ export const generatePdfContent = async (
   const margin = 15;
   const contentWidth = pageWidth - (margin * 2);
   const bottomBarHeight = 15;
-  const bottomMargin = 10;
+  const bottomMargin = 10; // Add some margin between content and bottom bar
   
   // Generate the left side with images
   await generateLeftSide(pdf, property, margin, contentWidth, pageHeight, bottomBarHeight, bottomMargin);
