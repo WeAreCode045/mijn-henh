@@ -2,6 +2,7 @@
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
+import { renderIconToPDF } from '../helpers/iconUtils';
 
 export const generateKeyInfoCards = async (
   pdf: jsPDF,
@@ -41,9 +42,11 @@ export const generateKeyInfoCards = async (
   const specHeight = height / rows - 4; // Add spacing between rows
   const specMargin = 4; // Margin between cards
   
-  specs.forEach((spec, index) => {
-    const col = index % cols;
-    const row = Math.floor(index / cols);
+  // Process each spec card
+  for (let i = 0; i < specs.length; i++) {
+    const spec = specs[i];
+    const col = i % cols;
+    const row = Math.floor(i / cols);
     
     const specX = x + (col * (specWidth + specMargin));
     const specY = y + (row * (specHeight + specMargin));
@@ -52,18 +55,16 @@ export const generateKeyInfoCards = async (
     pdf.setFillColor(primaryColor);
     pdf.roundedRect(specX, specY, specWidth, specHeight, 2, 2, 'F');
     
-    // Position icon at left side of the card
-    pdf.setFillColor(secondaryColor);
+    // Position for icon at left side of the card
     const iconX = specX + 8;
     const iconY = specY + 13;
+    
+    // Circle background for icon
+    pdf.setFillColor(secondaryColor);
     pdf.circle(iconX, iconY, 4, 'F');
     
-    // Draw icon text (simplified representation of icon)
-    pdf.setFontSize(6);
-    pdf.setTextColor(255, 255, 255);
-    const iconText = spec.icon.charAt(0).toUpperCase();
-    const textWidth = pdf.getTextWidth(iconText);
-    pdf.text(iconText, iconX - textWidth/2, iconY + 2);
+    // Render FontAwesome icon
+    await renderIconToPDF(pdf, spec.icon, iconX, iconY, 6);
     
     // Label to the right of the icon
     pdf.setFontSize(9);
@@ -74,5 +75,5 @@ export const generateKeyInfoCards = async (
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
     pdf.text(String(spec.value), specX + 16, specY + 15);
-  });
+  }
 };
