@@ -54,11 +54,11 @@ export function DashboardTabContent({
       isUpdating={isUpdating}
       onSave={onSave}
       onDelete={onDelete}
-      handleSaveObjectId={handleSaveObjectId}
-      handleSaveAgent={handleSaveAgent}
-      handleSaveTemplate={handleSaveTemplate}
-      handleGeneratePDF={handleGeneratePDF}
-      handleWebView={handleWebView}
+      onSaveObjectId={handleSaveObjectId}
+      onSaveAgent={handleSaveAgent}
+      onSaveTemplate={handleSaveTemplate}
+      onGeneratePDF={handleGeneratePDF}
+      onWebView={handleWebView}
     />
   );
 }

@@ -6,13 +6,14 @@ import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
 import { Button } from "@/components/ui/button";
 import { FileDown, Globe } from "lucide-react";
+import { PropertyData } from "@/types/property";
 
 interface PropertyDashboardTabProps {
   id: string;
-  objectId?: string;
   title: string;
+  propertyData?: PropertyData; // Add propertyData prop
+  objectId?: string;
   agentId?: string;
-  agentName?: string;
   templateId?: string;
   templateName?: string;
   createdAt?: string;
@@ -25,14 +26,16 @@ interface PropertyDashboardTabProps {
   onSaveObjectId?: (objectId: string) => void;
   onSaveTemplate?: (templateId: string) => void;
   isUpdating?: boolean;
+  agentInfo?: { id: string; name: string } | null;
+  templateInfo?: { id: string; name: string } | null;
 }
 
 export function PropertyDashboardTab({
   id,
-  objectId,
   title,
+  propertyData, // Add propertyData prop here
+  objectId,
   agentId,
-  agentName,
   templateId,
   templateName,
   createdAt,
@@ -44,7 +47,9 @@ export function PropertyDashboardTab({
   onSaveAgent,
   onSaveObjectId,
   onSaveTemplate,
-  isUpdating = false
+  isUpdating = false,
+  agentInfo,
+  templateInfo
 }: PropertyDashboardTabProps) {
   // Construct the API endpoint with the proper ID
   const apiEndpoint = `/api/properties/${id}`;
@@ -88,14 +93,14 @@ export function PropertyDashboardTab({
         <div className="space-y-6">
           <AgentCard
             agentId={agentId}
-            agentName={agentName}
+            agentName={agentInfo?.name}
             onSaveAgent={onSaveAgent || (() => {})}
             isUpdating={isUpdating}
           />
           
           <TemplateCard
             templateId={templateId}
-            templateName={templateName}
+            templateName={templateName || templateInfo?.name}
             onSaveTemplate={onSaveTemplate || (() => {})}
             isUpdating={isUpdating}
           />

@@ -1,4 +1,3 @@
-
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
@@ -49,7 +48,7 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
     // Get featured images
     const normalizedImages = normalizeImageCollection(property.images);
     let featuredImages = normalizedImages
-      .filter(img => img.featured)
+      .filter(img => img.is_featured_image)
       .map(img => img.url || '');
     
     if (featuredImages.length === 0 && property.featuredImages) {
