@@ -2,7 +2,6 @@
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
-import QRCode from 'qrcode';
 
 export const generateBottomBar = async (
   pdf: jsPDF, 
@@ -16,7 +15,7 @@ export const generateBottomBar = async (
   // Define colors
   const primaryColor = settings?.primaryColor || '#9b87f5';
   
-  // Bottom bar with contact info and QR code - full width at bottom
+  // Bottom bar with contact info - full width at bottom
   const bottomBarY = pageHeight - bottomBarHeight;
   pdf.setFillColor(primaryColor);
   pdf.rect(0, bottomBarY, pageWidth, bottomBarHeight, 'F');
@@ -42,35 +41,5 @@ export const generateBottomBar = async (
     const phoneText = `Phone: ${settings.phone}`;
     const phoneX = margin + 200; // Position after email
     pdf.text(phoneText, phoneX, bottomBarY + 10);
-  }
-  
-  // QR Code for web view
-  try {
-    const webViewUrl = `${window.location.origin}/property/${property.id}/view`;
-    const qrCodeDataUrl = await QRCode.toDataURL(webViewUrl, { 
-      width: 12, // Smaller QR code
-      margin: 0,
-      color: {
-        dark: '#FFFFFF',
-        light: primaryColor
-      }
-    });
-    
-    // Position QR code on the right side of the bottom bar
-    const qrCodeX = pageWidth - margin - 12; // 12mm from right edge
-    const qrCodeY = bottomBarY + 1.5; // 1.5mm from bottom bar top
-    const qrCodeSize = 12; // QR code size
-    
-    pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
-    
-    // Add "Scan for web view" text
-    pdf.setFontSize(7); // Smaller text size
-    const scanText = "Scan for web view";
-    const textWidth = pdf.getTextWidth(scanText);
-    const textX = qrCodeX + (qrCodeSize - textWidth) / 2;
-    pdf.text(scanText, textX, qrCodeY - 1);
-    
-  } catch (error) {
-    console.error('Error generating QR code:', error);
   }
 };

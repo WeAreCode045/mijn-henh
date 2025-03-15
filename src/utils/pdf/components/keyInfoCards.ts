@@ -16,14 +16,22 @@ export const generateKeyInfoCards = async (
   const primaryColor = settings?.primaryColor || '#9b87f5';
   const secondaryColor = settings?.secondaryColor || '#7E69AB';
   
+  // Get icons from settings or use defaults
+  const buildYearIcon = settings?.iconBuildYear || 'calendar';
+  const livingAreaIcon = settings?.iconLivingSpace || 'home';
+  const sqftIcon = settings?.iconSqft || 'ruler';
+  const bedroomsIcon = settings?.iconBedrooms || 'bed';
+  const bathroomsIcon = settings?.iconBathrooms || 'bath';
+  const energyClassIcon = settings?.iconEnergyClass || 'zap';
+  
   // Property specs in a 1x6 grid
   const specs = [
-    { label: 'Build Year', value: property.buildYear || 'N/A', icon: 'calendar' },
-    { label: 'Living Area', value: `${property.livingArea || 'N/A'} m²`, icon: 'home' },
-    { label: 'Plot Size', value: `${property.sqft || 'N/A'} m²`, icon: 'ruler' },
-    { label: 'Bedrooms', value: property.bedrooms || 'N/A', icon: 'bed' },
-    { label: 'Bathrooms', value: property.bathrooms || 'N/A', icon: 'bath' },
-    { label: 'Energy Class', value: property.energyLabel || 'N/A', icon: 'zap' }
+    { label: 'Build Year', value: property.buildYear || 'N/A', icon: buildYearIcon },
+    { label: 'Living Area', value: `${property.livingArea || 'N/A'} m²`, icon: livingAreaIcon },
+    { label: 'Plot Size', value: `${property.sqft || 'N/A'} m²`, icon: sqftIcon },
+    { label: 'Bedrooms', value: property.bedrooms || 'N/A', icon: bedroomsIcon },
+    { label: 'Bathrooms', value: property.bathrooms || 'N/A', icon: bathroomsIcon },
+    { label: 'Energy Class', value: property.energyLabel || 'N/A', icon: energyClassIcon }
   ];
   
   // Calculate spec card dimensions (1x6 grid)
@@ -40,17 +48,25 @@ export const generateKeyInfoCards = async (
     pdf.setFillColor(primaryColor);
     pdf.roundedRect(specX, specY, specWidth, specHeight, 2, 2, 'F');
     
-    // Circle for icon - smaller size
+    // Circle for icon
     pdf.setFillColor(secondaryColor);
-    pdf.circle(specX + 8, specY + specHeight/2, 3, 'F'); // Smaller icon
+    pdf.circle(specX + 8, specY + specHeight/2, 4, 'F');
     
-    // Label and value with minimal spacing
-    pdf.setFontSize(6); // Smaller font for label
+    // Draw icon text (simplified representation of icon)
+    pdf.setFontSize(6);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(spec.label, specX + 14, specY + 6); // Compact spacing
+    const iconText = spec.icon.charAt(0).toUpperCase();
+    const textWidth = pdf.getTextWidth(iconText);
+    pdf.text(iconText, specX + 8 - textWidth/2, specY + specHeight/2 + 2);
     
-    pdf.setFontSize(8); // Smaller font for value
+    // Label with increased font size and reduced spacing
+    pdf.setFontSize(7); // Increased from 6
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(spec.value), specX + 14, specY + 14); // Compact spacing
+    pdf.text(spec.label, specX + 14, specY + 6);
+    
+    // Value with reduced spacing from label
+    pdf.setFontSize(8);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(String(spec.value), specX + 14, specY + 12); // Reduced space between label and value
   });
 };

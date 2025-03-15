@@ -2,6 +2,7 @@
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
+import QRCode from 'qrcode';
 
 export const generateInfoSection = async (
   pdf: jsPDF,
@@ -43,11 +44,14 @@ export const generateInfoSection = async (
   // Content area (description and features side by side)
   const contentY = y + 20;
   const contentHeight = height - 20;
-  const columnWidth = contentWidth / 2 - 2; // Each takes half of available width, with small gap
   
-  // Description (left half)
+  // Update column width proportion: 60% for description, 40% for features
+  const descColumnWidth = contentWidth * 0.6;
+  const featuresColumnWidth = contentWidth * 0.4;
+  
+  // Description (left 60%)
   pdf.setFillColor(245, 245, 245);
-  pdf.roundedRect(contentX, contentY, columnWidth, contentHeight, 2, 2, 'F');
+  pdf.roundedRect(contentX, contentY, descColumnWidth - 2, contentHeight, 2, 2, 'F');
   
   pdf.setFontSize(10);
   pdf.setTextColor(80, 80, 80);
@@ -58,13 +62,48 @@ export const generateInfoSection = async (
   
   // Ensure description is always shown
   const description = property.description || 'No description available.';
-  const splitDescription = pdf.splitTextToSize(description, columnWidth - 10);
+  const splitDescription = pdf.splitTextToSize(description, descColumnWidth - 10);
+  
+  // Display the description
   pdf.text(splitDescription, contentX + 5, contentY + 18);
   
-  // Features (right half)
-  const featuresX = contentX + columnWidth + 4; // Small gap between columns
+  // Calculate the height of the description
+  const descHeight = splitDescription.length * 4; // Approximate height
+  const qrCodeY = contentY + 22 + descHeight;
+  
+  // Add QR code below the description
+  try {
+    const webViewUrl = `${window.location.origin}/property/${property.id}/view`;
+    const qrCodeDataUrl = await QRCode.toDataURL(webViewUrl, { 
+      width: 12,
+      margin: 0,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+    
+    // Position QR code centered in the description column
+    const qrCodeSize = 30;
+    const qrCodeX = contentX + (descColumnWidth / 2) - (qrCodeSize / 2);
+    
+    pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
+    
+    // Add "Scan for web view" text
+    pdf.setFontSize(8);
+    const scanText = "Scan for web view";
+    const textWidth = pdf.getTextWidth(scanText);
+    const textX = contentX + (descColumnWidth / 2) - (textWidth / 2);
+    pdf.text(scanText, textX, qrCodeY + qrCodeSize + 5);
+    
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+  }
+  
+  // Features (right 40%)
+  const featuresX = contentX + descColumnWidth;
   pdf.setFillColor(secondaryColor);
-  pdf.roundedRect(featuresX, contentY, columnWidth, contentHeight, 2, 2, 'F');
+  pdf.roundedRect(featuresX, contentY, featuresColumnWidth, contentHeight, 2, 2, 'F');
   
   pdf.setFontSize(10);
   pdf.setTextColor(255, 255, 255);
@@ -73,8 +112,9 @@ export const generateInfoSection = async (
   // Make sure features are displayed
   pdf.setFontSize(8);
   if (property.features && property.features.length > 0) {
-    property.features.slice(0, 15).forEach((feature, index) => {
-      const featureY = contentY + 18 + (index * 10); // Reduced line spacing
+    property.features.slice(0, 18).forEach((feature, index) => {
+      // Reduce line spacing to 6 (from 10)
+      const featureY = contentY + 18 + (index * 6);
       
       if (featureY < contentY + contentHeight - 5) {
         const featureText = feature.description || (typeof feature === 'string' ? feature : 'Feature');

@@ -31,15 +31,24 @@ export const generateImageSection = async (
     featuredImages = normalizedImages.slice(0, 4).map(img => img.url || '');
   }
   
-  // Calculate heights
+  // Calculate heights - enforce 3:4 ratio for main image
   const mainImageHeight = height * 0.6; // 60% for main image
+  
+  // Fix 3:4 ratio for main image width (height is fixed, adjust width to maintain ratio)
+  const mainImageRatio = 3/4; // width:height ratio of 3:4
+  const mainImageWidth = mainImageHeight * mainImageRatio;
+  
+  // Center the main image if it's narrower than the available width
+  const mainImageX = mainImageWidth < width ? x + ((width - mainImageWidth) / 2) : x;
+  
+  // Featured images section takes remaining height
   const featuredImagesHeight = height * 0.4; // 40% for featured images
   
   // Draw main image (top)
   if (mainImage) {
     try {
-      // Use correct image dimensions to maintain aspect ratio
-      pdf.addImage(mainImage, 'JPEG', x, y, width, mainImageHeight);
+      // Use correct image dimensions to maintain 3:4 aspect ratio
+      pdf.addImage(mainImage, 'JPEG', mainImageX, y, mainImageWidth, mainImageHeight);
     } catch (error) {
       console.error('Error adding main image:', error);
     }
@@ -47,22 +56,26 @@ export const generateImageSection = async (
   
   // Draw featured images (bottom) in a 2x2 grid
   if (featuredImages.length > 0) {
-    const featuredImagesY = y + mainImageHeight + 2; // Reduced gap
+    const featuredImagesY = y + mainImageHeight + 2; // Small gap after main image
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;
-    const cellWidth = (width) / gridCols;
-    const cellHeight = (featuredImagesHeight) / gridRows;
+    const gapSize = 2; // Gap between images in the grid
+    
+    // Calculate cell dimensions with gaps
+    const cellWidth = (width - gapSize) / gridCols;
+    const cellHeight = (featuredImagesHeight - gapSize) / gridRows;
     
     featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
       const row = Math.floor(index / gridCols);
       const col = index % gridCols;
-      const imgX = x + (col * cellWidth);
-      const imgY = featuredImagesY + (row * cellHeight);
+      
+      // Calculate position with gaps
+      const imgX = x + (col * (cellWidth + gapSize));
+      const imgY = featuredImagesY + (row * (cellHeight + gapSize));
       
       try {
-        // Remove the 1px gap between images for cleaner look
         pdf.addImage(img, 'JPEG', imgX, imgY, cellWidth, cellHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);

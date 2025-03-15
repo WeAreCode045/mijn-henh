@@ -17,22 +17,22 @@ export const generatePdfContent = async (
   const margin = 15;
   const contentWidth = pageWidth - (margin * 2);
   const bottomBarHeight = 15;
-  const bottomMargin = 10; // Margin between content and bottom bar
+  const bottomMargin = 5; // Reduced from 10 to minimize space below key info cards
   
   // Calculate the available content height (excluding margins and bottom bar)
   const availableHeight = pageHeight - margin * 2 - bottomBarHeight - bottomMargin;
   
   // Key info cards should be more compact
-  const cardsHeight = 18; // Reduced height
-  const cardsMargin = 5; // Space before and after cards
+  const cardsHeight = 15; // Slightly reduced height
+  const cardsMargin = 3; // Reduced space before and after cards
   
   // Allocate heights for each section
-  const imagesHeight = availableHeight * 0.95; // 68% of available height for images
-  const infoSectionHeight = availableHeight - imagesHeight - cardsHeight - (cardsMargin * 2); // Remaining height for info
+  const imagesHeight = availableHeight * 0.95; // 95% of available height for images and info sections
+  const infoSectionHeight = availableHeight - imagesHeight - cardsHeight - cardsMargin; // Remaining height for info
   
   // Calculate widths for left and right columns
-  const leftColumnWidth = contentWidth * 0.4; // 50% for images
-  const rightColumnWidth = contentWidth * 0.6; // 50% for title/description/features
+  const leftColumnWidth = contentWidth * 0.4; // 40% for images
+  const rightColumnWidth = contentWidth * 0.6; // 60% for title/description/features
   
   // Generate the main image and featured images section (left column)
   await generateImageSection(
@@ -55,7 +55,7 @@ export const generatePdfContent = async (
     imagesHeight // Match height with images section
   );
   
-  // Generate the key info cards (full width, at bottom)
+  // Generate the key info cards (full width, at bottom) - position exactly below the main content
   const cardsStartY = margin + imagesHeight + cardsMargin;
   await generateKeyInfoCards(
     pdf, 
