@@ -45,7 +45,7 @@ export const generateInfoSection = async (
   // Define section heights and positions
   const titleBarHeight = 15;
   const descriptionY = y + titleBarHeight + 5;
-  const descriptionHeight = 90; // Reduced description section height
+  const descriptionHeight = 70; // Reduced description section height
   
   // Description section (left 60%)
   const descriptionWidth = contentWidth * 0.6;
@@ -139,7 +139,7 @@ export const generateInfoSection = async (
     contentX,
     keyInfoWidth,
     bottomSectionY,
-    70 // Height for key info cards section
+    60 // Height for key info cards section
   );
   
   // Contact section (right 40%) - No background color, dark text
