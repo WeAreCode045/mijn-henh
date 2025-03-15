@@ -17,7 +17,7 @@ export function usePropertyAreas(
       description: '',
       name: '',
       size: '',
-      imageIds: [], // This property exists now in the interface
+      imageIds: [], // Using the properly defined imageIds property
       images: [],
       columns: 2
     };
@@ -121,7 +121,7 @@ export function usePropertyAreas(
           return { 
             ...area, 
             images: updatedImages,
-            imageIds: updatedImageIds // This property now exists in the interface
+            imageIds: updatedImageIds
           };
         }
         return area;
