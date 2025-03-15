@@ -12,29 +12,35 @@ export const generateBottomBar = async (
   pageHeight: number
 ) => {
   const bottomBarHeight = 15;
-  const margin = 15;
   
   // Define colors
   const primaryColor = settings?.primaryColor || '#9b87f5';
   
-  // Bottom bar with contact info and QR code - with margin
+  // Bottom bar with contact info and QR code - full width at bottom
   const bottomBarY = pageHeight - bottomBarHeight;
   pdf.setFillColor(primaryColor);
   pdf.rect(0, bottomBarY, pageWidth, bottomBarHeight, 'F');
   
   // Contact information
+  const margin = 15;
   pdf.setFontSize(9); // Slightly smaller font for bottom bar
   pdf.setTextColor(255, 255, 255);
   
+  // Agency name (if available)
+  if (settings?.name) {
+    pdf.text(settings.name, margin, bottomBarY + 10);
+  }
+  
   // Email address (if available)
   if (settings?.email) {
-    pdf.text(`Email: ${settings.email}`, margin, bottomBarY + 10);
+    const emailX = margin + 80; // Position after name
+    pdf.text(`Email: ${settings.email}`, emailX, bottomBarY + 10);
   }
   
   // Phone number (if available)
   if (settings?.phone) {
     const phoneText = `Phone: ${settings.phone}`;
-    const phoneX = margin + 100; // Position after email
+    const phoneX = margin + 200; // Position after email
     pdf.text(phoneText, phoneX, bottomBarY + 10);
   }
   
@@ -51,9 +57,9 @@ export const generateBottomBar = async (
     });
     
     // Position QR code on the right side of the bottom bar
-    const qrCodeX = pageWidth - margin - 12; // 12mm from right edge (smaller QR code)
+    const qrCodeX = pageWidth - margin - 12; // 12mm from right edge
     const qrCodeY = bottomBarY + 1.5; // 1.5mm from bottom bar top
-    const qrCodeSize = 12; // Smaller QR code size
+    const qrCodeSize = 12; // QR code size
     
     pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
     

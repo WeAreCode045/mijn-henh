@@ -3,18 +3,14 @@ import { PropertyData } from '@/types/property';
 import jsPDF from 'jspdf';
 import { safelyGetImageUrl, normalizeImageCollection } from '../../imageHandlers';
 
-export const generateLeftSide = async (
+export const generateImageSection = async (
   pdf: jsPDF,
   property: PropertyData,
-  margin: number,
-  contentWidth: number,
-  pageHeight: number,
-  bottomBarHeight: number,
-  bottomMargin: number
+  x: number,
+  width: number,
+  y: number,
+  height: number
 ) => {
-  // Left side width (half of content area)
-  const leftSideWidth = contentWidth / 2 - 5;
-  
   // Get the main image and featured images
   const mainImage = safelyGetImageUrl(property.featuredImage) || 
                   (property.images && property.images.length > 0 ? 
@@ -35,12 +31,12 @@ export const generateLeftSide = async (
     featuredImages = normalizedImages.slice(0, 4).map(img => img.url || '');
   }
   
-  // Draw main image (top half of left side)
+  // Draw main image (larger, on the left)
   if (mainImage) {
-    const mainImgX = margin;
-    const mainImgY = margin;
-    const mainImgWidth = leftSideWidth;
-    const mainImgHeight = (pageHeight - (margin * 2) - bottomBarHeight - bottomMargin) / 2;
+    const mainImgX = x;
+    const mainImgY = y;
+    const mainImgWidth = width * 0.5;
+    const mainImgHeight = height;
     
     try {
       pdf.addImage(mainImage, 'JPEG', mainImgX, mainImgY, mainImgWidth, mainImgHeight);
@@ -49,18 +45,19 @@ export const generateLeftSide = async (
     }
   }
   
-  // Draw 2x2 grid of featured images (bottom half of left side)
+  // Draw 2x2 grid of featured images (right side)
   if (featuredImages.length > 0) {
-    const gridStartY = margin + (pageHeight - (margin * 2) - bottomBarHeight - bottomMargin) / 2 + 5;
-    const cellWidth = leftSideWidth / 2 - 2.5;
-    const cellHeight = (pageHeight - gridStartY - margin - bottomBarHeight - bottomMargin) / 2 - 2.5;
+    const gridStartX = x + width * 0.5 + 5;
+    const gridWidth = width * 0.5 - 5;
+    const cellWidth = gridWidth / 2 - 2.5;
+    const cellHeight = height / 2 - 2.5;
     
     featuredImages.slice(0, 4).forEach((img, index) => {
       if (!img) return;
       const row = Math.floor(index / 2);
       const col = index % 2;
-      const imgX = margin + (col * (cellWidth + 5));
-      const imgY = gridStartY + (row * (cellHeight + 5));
+      const imgX = gridStartX + (col * (cellWidth + 5));
+      const imgY = y + (row * (cellHeight + 5));
       
       try {
         pdf.addImage(img, 'JPEG', imgX, imgY, cellWidth, cellHeight);
