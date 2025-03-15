@@ -39,7 +39,7 @@ export const generateImageSection = async (
   if (mainImage) {
     try {
       // Ensure 1.5 aspect ratio (width:height ratio of 1.5 (landscape)
-      const aspectRatio = 1.5;
+      const aspectRatio = 1.6;
       
       // Calculate dimensions to maintain aspect ratio
       let imageWidth = width;
@@ -75,7 +75,7 @@ export const generateImageSection = async (
     const cellHeight = (featuredImagesHeight - gapSize) / gridRows;
     
     // Apply the same 1.5 aspect ratio to each grid cell
-    const aspectRatio = 1.5;
+    const aspectRatio = 1.6;
     
     featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
