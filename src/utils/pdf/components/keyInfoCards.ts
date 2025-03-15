@@ -59,7 +59,7 @@ export const generateKeyInfoCards = async (
     pdf.circle(iconX, iconY, 4, 'F');
     
     // Draw icon text (simplified representation of icon)
-    pdf.setFontSize(6);
+    pdf.setFontSize(10);
     pdf.setTextColor(255, 255, 255);
     const iconText = spec.icon.charAt(0).toUpperCase();
     const textWidth = pdf.getTextWidth(iconText);
@@ -68,11 +68,11 @@ export const generateKeyInfoCards = async (
     // Label to the right of the icon
     pdf.setFontSize(8);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(spec.label, specX + 16, specY + 10);
+    pdf.text(spec.label, specX + 16, specY + 15);
     
     // Value below label
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(spec.value), specX + 16, specY + 13);
+    pdf.text(String(spec.value), specX + 16, specY + 20);
   });
 };
