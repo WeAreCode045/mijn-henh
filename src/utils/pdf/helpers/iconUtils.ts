@@ -9,7 +9,7 @@ import {
   faBolt 
 } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
-import svg2pdf from 'svg2pdf.js';
+import * as svg2pdfLib from 'svg2pdf.js';
 
 // Map of icon names to FontAwesome icons
 const iconMap = {
@@ -55,11 +55,12 @@ export const renderIconToPDF = async (
     // Save current state of PDF
     pdf.saveGraphicsState();
     
-    // Position the icon
-    pdf.setCurrentTransformationMatrix([1, 0, 0, 1, x - size/2, y - size/2]);
+    // Position the icon - using proper transform syntax
+    // Create transformation matrix with proper position offsets
+    pdf.setTransform(1, 0, 0, 1, x - size/2, y - size/2);
     
-    // Render SVG to PDF
-    await svg2pdf(svg, pdf, {
+    // Render SVG to PDF - make sure to call the default function correctly
+    await svg2pdfLib.default(svg, pdf, {
       x: 0,
       y: 0,
       width: size,
