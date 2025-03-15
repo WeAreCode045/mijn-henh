@@ -17,7 +17,7 @@ export function usePropertyAreas(
       description: '',
       name: '',
       size: '',
-      imageIds: [], // Keep imageIds for compatibility
+      imageIds: [], // This property exists now in the interface
       images: [],
       columns: 2
     };
@@ -63,7 +63,7 @@ export function usePropertyAreas(
           if (typeof image === 'string') {
             return image !== imageId;
           } else if (typeof image === 'object' && 'id' in image) {
-            return image.id !== imageId;
+            return (image as PropertyImage).id !== imageId;
           }
           return true;
         });
@@ -89,7 +89,7 @@ export function usePropertyAreas(
         // Add the selected images to the area
         return { 
           ...area, 
-          imageIds 
+          imageIds // This property now exists in the interface
         };
       }
       return area;
@@ -121,7 +121,7 @@ export function usePropertyAreas(
           return { 
             ...area, 
             images: updatedImages,
-            imageIds: updatedImageIds
+            imageIds: updatedImageIds // This property now exists in the interface
           };
         }
         return area;

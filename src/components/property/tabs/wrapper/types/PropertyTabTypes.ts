@@ -1,4 +1,3 @@
-
 import { PropertyData, PropertyFormData, PropertyCity, PropertyNearbyPlace } from "@/types/property";
 
 export interface PropertyTabContentsProps {
@@ -103,6 +102,8 @@ export interface PropertyFormManagerChildrenProps {
   addArea?: () => void;
   removeArea?: (id: string) => void;
   updateArea?: (id: string, field: any, value: any) => void;
+  onAreaImageRemove?: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   images?: any[];
 }
 

@@ -10,7 +10,7 @@ export interface PropertyArea {
   size: string;
   title: string;
   description: string;
-  imageIds: string[]; // Add this property
+  imageIds: string[]; // Property used for compatibility with existing code
   columns: number;
   images: PropertyImage[] | string[];
 }

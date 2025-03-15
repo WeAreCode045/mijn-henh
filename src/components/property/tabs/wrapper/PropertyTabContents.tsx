@@ -18,7 +18,7 @@ export function PropertyTabContents({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  onAreaImageUpload, // Make sure this prop exists
+  onAreaImageUpload, // This prop is used directly
   onFieldChange,
   onFetchLocationData,
   onFetchCategoryPlaces,
@@ -68,7 +68,7 @@ export function PropertyTabContents({
     onUpdateArea,
     onAreaImageRemove,
     onAreaImagesSelect,
-    handleAreaImageUpload: onAreaImageUpload, // Ensure this is correctly passed
+    handleAreaImageUpload: onAreaImageUpload, // Pass the correct prop here
     onFetchLocationData,
     onFetchCategoryPlaces,
     onFetchNearbyCities,
