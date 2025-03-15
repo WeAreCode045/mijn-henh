@@ -44,19 +44,24 @@ export const generateImageSection = async (
     }
   }
   
-  // Draw featured images (bottom) in a single row
+  // Draw featured images (bottom) in a 2x2 grid
   if (featuredImages.length > 0) {
     const featuredImagesY = y + mainImageHeight + 5;
-    const maxFeaturedImages = 3; // Show up to 3 featured images in a row
-    const cellWidth = width / maxFeaturedImages - 3;
-    const cellHeight = featuredImagesHeight - 5;
+    const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
+    const gridCols = 2;
+    const gridRows = 2;
+    const cellWidth = (width - 3) / gridCols;
+    const cellHeight = (featuredImagesHeight - 5) / gridRows;
     
     featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
-      const imgX = x + (index * (cellWidth + 4));
+      const row = Math.floor(index / gridCols);
+      const col = index % gridCols;
+      const imgX = x + (col * (cellWidth + 3));
+      const imgY = featuredImagesY + (row * (cellHeight + 3));
       
       try {
-        pdf.addImage(img, 'JPEG', imgX, featuredImagesY, cellWidth, cellHeight);
+        pdf.addImage(img, 'JPEG', imgX, imgY, cellWidth, cellHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
       }

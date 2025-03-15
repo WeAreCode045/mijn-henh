@@ -28,9 +28,9 @@ export const generateKeyInfoCards = async (
   
   // Calculate spec card dimensions (1x6 grid)
   const cols = 6; // 6 columns in 1 row
-  const specWidth = width / cols - 4;
-  const specHeight = height; // Lower height for cards
-  const specMargin = 4;
+  const specWidth = width / cols - 2; // Reduced margin
+  const specHeight = height; // Reduced height
+  const specMargin = 2; // Reduced margin
   
   specs.forEach((spec, index) => {
     const specX = x + (index * (specWidth + specMargin));
@@ -42,15 +42,15 @@ export const generateKeyInfoCards = async (
     
     // Circle for icon - smaller size
     pdf.setFillColor(secondaryColor);
-    pdf.circle(specX + 10, specY + specHeight/2, 4, 'F'); // Small icon
+    pdf.circle(specX + 8, specY + specHeight/2, 3, 'F'); // Smaller icon
     
     // Label and value with minimal spacing
-    pdf.setFontSize(8); // Smaller font for label
+    pdf.setFontSize(6); // Smaller font for label
     pdf.setTextColor(255, 255, 255);
-    pdf.text(spec.label, specX + 18, specY + 8); // Compact spacing
+    pdf.text(spec.label, specX + 14, specY + 6); // Compact spacing
     
-    pdf.setFontSize(10); // Smaller font for value
+    pdf.setFontSize(8); // Smaller font for value
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(spec.value), specX + 18, specY + 17); // Compact spacing
+    pdf.text(String(spec.value), specX + 14, specY + 14); // Compact spacing
   });
 };

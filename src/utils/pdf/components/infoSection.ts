@@ -18,66 +18,65 @@ export const generateInfoSection = async (
   
   // Top bar with title and price
   pdf.setFillColor(primaryColor);
-  pdf.rect(x, y, width, 20, 'F');
+  pdf.rect(x, y, width, 15, 'F'); // Reduced height
   
   // Title and price text
-  pdf.setFontSize(16);
+  pdf.setFontSize(14); // Reduced font size
   pdf.setTextColor(255, 255, 255);
   
   // Add title (left aligned)
   const title = property.title || 'Property Details';
-  pdf.text(title, x + 10, y + 13);
+  pdf.text(title, x + 5, y + 10); // Reduced padding
   
   // Add price if available (right aligned)
   if (property.price) {
     pdf.setFontSize(14);
-    const priceX = x + width - 10 - pdf.getTextWidth(property.price);
-    pdf.text(property.price, priceX, y + 13);
+    const priceX = x + width - 5 - pdf.getTextWidth(property.price);
+    pdf.text(property.price, priceX, y + 10);
   }
   
-  // Content area (description on top, features on bottom)
-  const contentY = y + 25;
-  const contentHeight = height - 25;
-  const descriptionHeight = contentHeight * 0.5;
-  const featuresHeight = contentHeight * 0.5;
+  // Content area (description on left, features on right)
+  const contentY = y + 20; // Reduced spacing
+  const contentHeight = height - 20;
+  const columnWidth = width / 2 - 2; // Each takes half of available width, with small gap
   
-  // Description (top half)
+  // Description (left half)
   pdf.setFillColor(245, 245, 245);
-  pdf.roundedRect(x, contentY, width, descriptionHeight, 3, 3, 'F');
+  pdf.roundedRect(x, contentY, columnWidth, contentHeight, 2, 2, 'F');
   
-  pdf.setFontSize(12);
+  pdf.setFontSize(10); // Reduced font size
   pdf.setTextColor(80, 80, 80);
-  pdf.text('Description', x + 8, contentY + 12); // Reduced padding
+  pdf.text('Description', x + 5, contentY + 10); // Reduced padding
   
-  pdf.setFontSize(10);
+  pdf.setFontSize(8); // Reduced font size
   pdf.setTextColor(100, 100, 100);
   
   // Ensure description is always shown
   const description = property.description || 'No description available.';
-  const splitDescription = pdf.splitTextToSize(description, width - 16); // Reduced padding
-  pdf.text(splitDescription, x + 8, contentY + 20); // Reduced padding
+  const splitDescription = pdf.splitTextToSize(description, columnWidth - 10); // Reduced padding
+  pdf.text(splitDescription, x + 5, contentY + 18); // Reduced padding
   
-  // Features (bottom half)
-  const featuresY = contentY + descriptionHeight + 5;
+  // Features (right half)
+  const featuresX = x + columnWidth + 4; // Small gap between columns
   pdf.setFillColor(secondaryColor);
-  pdf.roundedRect(x, featuresY, width, featuresHeight - 5, 3, 3, 'F');
+  pdf.roundedRect(featuresX, contentY, columnWidth, contentHeight, 2, 2, 'F');
   
-  pdf.setFontSize(12);
+  pdf.setFontSize(10); // Reduced font size
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Features', x + 8, featuresY + 12); // Reduced padding
+  pdf.text('Features', featuresX + 5, contentY + 10); // Reduced padding
   
   // Make sure features are displayed
-  pdf.setFontSize(10);
+  pdf.setFontSize(8); // Reduced font size
   if (property.features && property.features.length > 0) {
     property.features.slice(0, 15).forEach((feature, index) => {
-      const featureY = featuresY + 20 + (index * 13); // Reduced line spacing
+      const featureY = contentY + 18 + (index * 10); // Reduced line spacing
       
-      if (featureY < featuresY + featuresHeight - 8) {
+      if (featureY < contentY + contentHeight - 5) {
         const featureText = feature.description || (typeof feature === 'string' ? feature : 'Feature');
-        pdf.text(`• ${featureText}`, x + 8, featureY); // Reduced padding
+        pdf.text(`• ${featureText}`, featuresX + 5, featureY); // Reduced padding
       }
     });
   } else {
-    pdf.text('No features available.', x + 8, featuresY + 20);
+    pdf.text('No features available.', featuresX + 5, contentY + 18); // Reduced padding
   }
 };
