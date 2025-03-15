@@ -1,3 +1,4 @@
+
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -72,7 +73,9 @@ export function PropertyTabsWrapper({
               onGenerateMap,
               onRemoveNearbyPlace,
               isLoadingLocationData,
-              isGeneratingMap
+              isGeneratingMap,
+              onFetchCategoryPlaces,  // Access this from the PropertyFormManager
+              onFetchNearbyCities     // Access this from the PropertyFormManager
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>

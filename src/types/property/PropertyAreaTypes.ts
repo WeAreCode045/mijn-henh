@@ -10,7 +10,7 @@ export interface PropertyArea {
   size: string;
   title: string;
   description: string;
-  imageIds: string[]; // This property is needed for area image management
+  imageIds: string[]; // Adding this property to fix TypeScript errors
   columns: number;
   images: PropertyImage[] | string[];
 }
