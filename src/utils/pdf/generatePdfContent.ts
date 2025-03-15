@@ -27,7 +27,7 @@ export const generatePdfContent = async (
   const cardsMargin = 5; // Space before and after cards
   
   // Allocate heights for each section
-  const imagesHeight = availableHeight * 1; // 68% of available height for images
+  const imagesHeight = availableHeight * 0.95; // 68% of available height for images
   const infoSectionHeight = availableHeight - imagesHeight - cardsHeight - (cardsMargin * 2); // Remaining height for info
   
   // Calculate widths for left and right columns
