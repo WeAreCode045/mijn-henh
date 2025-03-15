@@ -21,6 +21,7 @@ export function usePropertyAgenda(propertyId: string) {
   const fetchAgendaItems = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching agenda items for property:', propertyId);
       const { data, error } = await supabase
         .from('property_agenda_items')
         .select('*')
@@ -29,6 +30,7 @@ export function usePropertyAgenda(propertyId: string) {
         .order('event_time', { ascending: true });
 
       if (error) throw error;
+      console.log('Agenda items fetched:', data);
       setAgendaItems(data || []);
     } catch (error: any) {
       console.error('Error fetching agenda items:', error);
@@ -44,7 +46,15 @@ export function usePropertyAgenda(propertyId: string) {
 
   const addAgendaItem = async (title: string, description: string | null, eventDate: string, eventTime: string) => {
     try {
-      const { error } = await supabase
+      console.log('Adding agenda item:', {
+        property_id: propertyId,
+        title,
+        description,
+        event_date: eventDate,
+        event_time: eventTime
+      });
+      
+      const { data, error } = await supabase
         .from('property_agenda_items')
         .insert({
           property_id: propertyId,
@@ -52,10 +62,12 @@ export function usePropertyAgenda(propertyId: string) {
           description,
           event_date: eventDate,
           event_time: eventTime
-        });
+        })
+        .select();
 
       if (error) throw error;
       
+      console.log('Agenda item added:', data);
       toast({
         title: "Success",
         description: "Agenda item added successfully",
@@ -74,6 +86,7 @@ export function usePropertyAgenda(propertyId: string) {
 
   const deleteAgendaItem = async (itemId: string) => {
     try {
+      console.log('Deleting agenda item:', itemId);
       const { error } = await supabase
         .from('property_agenda_items')
         .delete()
@@ -81,6 +94,7 @@ export function usePropertyAgenda(propertyId: string) {
 
       if (error) throw error;
       
+      console.log('Agenda item deleted successfully');
       toast({
         title: "Success",
         description: "Agenda item deleted successfully",

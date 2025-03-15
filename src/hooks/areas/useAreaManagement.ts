@@ -19,7 +19,8 @@ export function useAreaManagement(
       columns: 2, // Default to 2 columns
       name: '',
       size: '',
-      images: []
+      images: [],
+      imageIds: [] // Added this missing property
     };
     
     console.log("Adding new area with default columns:", newArea);
