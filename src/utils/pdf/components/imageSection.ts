@@ -35,7 +35,7 @@ export const generateImageSection = async (
   const mainImageHeight = height * 0.6; // 60% for main image
   
   // Fix 3:4 ratio for main image width (height is fixed, adjust width to maintain ratio)
-  const mainImageRatio = 3/4; // width:height ratio of 3:4
+  const mainImageRatio = 4/3; // width:height ratio of 3:4
   const mainImageWidth = mainImageHeight * mainImageRatio;
   
   // Center the main image if it's narrower than the available width
