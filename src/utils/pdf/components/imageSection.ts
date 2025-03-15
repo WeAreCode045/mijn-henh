@@ -32,7 +32,7 @@ export const generateImageSection = async (
   }
   
   // Calculate heights - main image takes 50% of total height, grid takes 50%
-  const mainImageHeight = height * 0.5; // 50% for main image
+  const mainImageHeight = height * 0.4; // 50% for main image
   const featuredImagesHeight = height * 0.5; // 50% for featured images grid
   
   // Draw main image (top) with 1.5 aspect ratio (landscape orientation)
@@ -55,6 +55,8 @@ export const generateImageSection = async (
       const imageX = imageWidth < width ? x + ((width - imageWidth) / 2) : x;
       
       // Add rounded corners to main image
+      pdf.setDrawColor(255, 255, 255);
+      pdf.roundedRect(imageX, y, imageWidth, imageHeight, 5, 5, 'F');
       pdf.addImage(mainImage, 'JPEG', imageX, y, imageWidth, imageHeight);
     } catch (error) {
       console.error('Error adding main image:', error);
@@ -68,7 +70,7 @@ export const generateImageSection = async (
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;
-    const gapSize = 2; // Reduced gap between images in the grid
+    const gapSize = 1; // Reduced gap between images in the grid
     
     // Calculate cell dimensions with gaps
     const cellWidth = (width - gapSize) / gridCols;
@@ -99,7 +101,9 @@ export const generateImageSection = async (
       const centeredImgX = imgX + ((cellWidth - imgDisplayWidth) / 2);
       
       try {
-     
+        // Add rounded corners to featured images
+        pdf.setDrawColor(255, 255, 255);
+        pdf.roundedRect(centeredImgX, imgY, imgDisplayWidth, imgDisplayHeight, 5, 5, 'F');
         pdf.addImage(img, 'JPEG', centeredImgX, imgY, imgDisplayWidth, imgDisplayHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
