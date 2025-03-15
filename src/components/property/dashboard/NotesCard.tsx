@@ -32,15 +32,21 @@ export function NotesCard({ propertyId }: NotesCardProps) {
     setIsViewDialogOpen(true);
   };
 
+  const handleAddButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsAddDialogOpen(true);
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-medium">Notes</CardTitle>
         <Button 
-          onClick={() => setIsAddDialogOpen(true)} 
+          onClick={handleAddButtonClick} 
           variant="ghost" 
           size="sm"
           className="h-8 w-8 p-0 rounded-full"
+          type="button"
         >
           <Plus className="h-4 w-4" />
           <span className="sr-only">Add note</span>
@@ -58,7 +64,8 @@ export function NotesCard({ propertyId }: NotesCardProps) {
               variant="outline" 
               size="sm" 
               className="mt-2"
-              onClick={() => setIsAddDialogOpen(true)}
+              type="button"
+              onClick={handleAddButtonClick}
             >
               Add your first note
             </Button>

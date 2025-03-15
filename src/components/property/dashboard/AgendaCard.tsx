@@ -60,16 +60,22 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
       setIsViewDialogOpen(false);
     }
   };
+  
+  const handleAddButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsAddDialogOpen(true);
+  };
 
   return (
     <Card className="h-full">
       <CardHeader className="pb-3 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-medium">Agenda</CardTitle>
         <Button 
-          onClick={() => setIsAddDialogOpen(true)} 
+          onClick={handleAddButtonClick} 
           variant="ghost" 
           size="sm"
           className="h-8 w-8 p-0 rounded-full"
+          type="button"
         >
           <Plus className="h-4 w-4" />
           <span className="sr-only">Add agenda item</span>
@@ -180,10 +186,10 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} type="button">
               Cancel
             </Button>
-            <Button type="submit" onClick={handleAddAgendaItem}>
+            <Button type="button" onClick={handleAddAgendaItem}>
               Add
             </Button>
           </DialogFooter>
@@ -214,10 +220,10 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
               )}
             </div>
             <DialogFooter className="flex justify-between items-center">
-              <Button variant="destructive" size="sm" onClick={handleDeleteAgendaItem}>
+              <Button variant="destructive" size="sm" onClick={handleDeleteAgendaItem} type="button">
                 Delete
               </Button>
-              <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setIsViewDialogOpen(false)} type="button">
                 Close
               </Button>
             </DialogFooter>

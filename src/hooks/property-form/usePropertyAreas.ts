@@ -17,8 +17,8 @@ export function usePropertyAreas(
       description: '',
       name: '',
       size: '',
-      imageIds: [], // Now properly defined in the interface
       images: [],
+      imageIds: [], // Now properly defined in the interface
       columns: 2
     };
     
@@ -57,7 +57,6 @@ export function usePropertyAreas(
     
     const updatedAreas = formData.areas.map(area => {
       if (area.id === areaId) {
-        const updatedImageIds = area.imageIds.filter(id => id !== imageId);
         const updatedImages = area.images.filter(image => {
           // Handle both PropertyImage objects and string IDs
           if (typeof image === 'string') {
@@ -68,10 +67,12 @@ export function usePropertyAreas(
           return true;
         });
         
+        const updatedImageIds = area.imageIds.filter(id => id !== imageId);
+        
         return { 
           ...area, 
-          imageIds: updatedImageIds,
-          images: updatedImages 
+          images: updatedImages,
+          imageIds: updatedImageIds
         };
       }
       return area;
