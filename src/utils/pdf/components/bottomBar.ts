@@ -11,7 +11,7 @@ export const generateBottomBar = async (
   pageWidth: number,
   pageHeight: number
 ) => {
-  const bottomBarHeight = 15;
+  const bottomBarHeight = 20;
   
   // Define colors
   const primaryColor = settings?.primaryColor || '#9b87f5';
@@ -23,7 +23,7 @@ export const generateBottomBar = async (
   
   // Contact information
   const margin = 15;
-  pdf.setFontSize(9); // Slightly smaller font for bottom bar
+  pdf.setFontSize(12); // Slightly smaller font for bottom bar
   pdf.setTextColor(255, 255, 255);
   
   // Agency name (if available)
