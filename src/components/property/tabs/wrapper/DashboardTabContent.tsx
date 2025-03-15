@@ -1,5 +1,5 @@
 
-import { PropertyDashboardTab } from "../PropertyDashboardTab";
+import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
 
 interface DashboardTabContentProps {
   id: string;
@@ -44,6 +44,7 @@ export function DashboardTabContent({
     <PropertyDashboardTab
       id={id}
       title={title}
+      propertyData={propertyData}
       objectId={objectId}
       agentId={agentId}
       createdAt={createdAt}

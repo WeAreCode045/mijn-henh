@@ -11,7 +11,7 @@ import { PropertyData } from "@/types/property";
 interface PropertyDashboardTabProps {
   id: string;
   title: string;
-  propertyData?: PropertyData; // Add propertyData prop
+  propertyData?: PropertyData;
   objectId?: string;
   agentId?: string;
   templateId?: string;
@@ -33,7 +33,7 @@ interface PropertyDashboardTabProps {
 export function PropertyDashboardTab({
   id,
   title,
-  propertyData, // Add propertyData prop here
+  propertyData,
   objectId,
   agentId,
   templateId,
@@ -82,7 +82,7 @@ export function PropertyDashboardTab({
           createdAt={createdAt}
           updatedAt={updatedAt}
           apiEndpoint={apiEndpoint}
-          onSaveObjectId={onSaveObjectId || (() => {})}
+          onSaveObjectId={onSaveObjectId}
           isUpdating={isUpdating}
           onGeneratePDF={onGeneratePDF}
           onWebView={onWebView}
@@ -94,14 +94,14 @@ export function PropertyDashboardTab({
           <AgentCard
             agentId={agentId}
             agentName={agentInfo?.name}
-            onSaveAgent={onSaveAgent || (() => {})}
+            onSaveAgent={onSaveAgent}
             isUpdating={isUpdating}
           />
           
           <TemplateCard
             templateId={templateId}
             templateName={templateName || templateInfo?.name}
-            onSaveTemplate={onSaveTemplate || (() => {})}
+            onSaveTemplate={onSaveTemplate}
             isUpdating={isUpdating}
           />
         </div>
