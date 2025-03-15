@@ -1,7 +1,9 @@
+
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
+import { generateKeyInfoCards } from './keyInfoCards';
 
 export const generateInfoSection = async (
   pdf: jsPDF,
@@ -40,37 +42,35 @@ export const generateInfoSection = async (
     pdf.text(property.price, priceX, y + 10);
   }
   
-  // Content area (description and features side by side)
-  const contentY = y + 20;
-  const contentHeight = height - 20;
+  // Define section heights and positions
+  const titleBarHeight = 15;
+  const descriptionHeight = 100; // Description section height
   
-  // Update column width proportion: 60% for description, 40% for features
-  const descColumnWidth = contentWidth * 0.6;
-  const featuresColumnWidth = contentWidth * 0.4;
+  // Description section (left 60%)
+  const descriptionY = y + titleBarHeight + 5;
+  const descriptionWidth = contentWidth * 0.6;
   
-  // Description (left 60%)
   pdf.setFillColor(245, 245, 245);
-  pdf.roundedRect(contentX, contentY, descColumnWidth - 2, contentHeight, 2, 2, 'F');
+  pdf.roundedRect(contentX, descriptionY, descriptionWidth - 5, descriptionHeight, 2, 2, 'F');
   
   pdf.setFontSize(10);
   pdf.setTextColor(80, 80, 80);
-  pdf.text('Description', contentX + 5, contentY + 10);
+  pdf.text('Description', contentX + 5, descriptionY + 10);
   
   pdf.setFontSize(8);
   pdf.setTextColor(100, 100, 100);
   
   // Ensure description is always shown
   const description = property.description || 'No description available.';
-  const splitDescription = pdf.splitTextToSize(description, descColumnWidth - 10);
+  const splitDescription = pdf.splitTextToSize(description, descriptionWidth - 15);
   
   // Display the description
-  pdf.text(splitDescription, contentX + 5, contentY + 18);
+  pdf.text(splitDescription, contentX + 5, descriptionY + 18);
   
-  // Calculate the height of the description
-  const descHeight = splitDescription.length * 4; // Approximate height
-  const qrCodeY = contentY + 22 + descHeight;
+  // Calculate the height of the description text
+  const descTextHeight = splitDescription.length * 4; // Approximate height
   
-  // Add QR code below the description
+  // Add QR code below the description text
   try {
     const webViewUrl = `${window.location.origin}/property/${property.id}/view`;
     const qrCodeDataUrl = await QRCode.toDataURL(webViewUrl, { 
@@ -82,45 +82,88 @@ export const generateInfoSection = async (
       }
     });
     
-    // Position QR code centered in the description column
+    // Position QR code below the description text
     const qrCodeSize = 15;
-    const qrCodeX = contentX + (descColumnWidth / 2) - (qrCodeSize / 2);
+    const qrCodeX = contentX + 5;
+    const qrCodeY = descriptionY + 18 + descTextHeight + 5; // 5px spacing after text
     
-    pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
-    
-    // Add "Scan for web view" text
-    pdf.setFontSize(8);
-    const scanText = "Bekijk de online Brochure";
-    const textWidth = pdf.getTextWidth(scanText);
-    const textX = contentX + (descColumnWidth / 2) - (textWidth / 2);
-    pdf.text(scanText, textX, qrCodeY + qrCodeSize + 5);
+    if (qrCodeY + qrCodeSize < descriptionY + descriptionHeight - 5) {
+      pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
+      
+      // Add "Scan for web view" text
+      pdf.setFontSize(8);
+      const scanText = "Bekijk de online Brochure";
+      pdf.text(scanText, qrCodeX + qrCodeSize + 5, qrCodeY + qrCodeSize/2);
+    }
     
   } catch (error) {
     console.error('Error generating QR code:', error);
   }
   
-  // Features (right 40%)
-  const featuresX = contentX + descColumnWidth;
+  // Features section (right 40%)
+  const featuresX = contentX + descriptionWidth;
+  const featuresWidth = contentWidth * 0.4;
+  
   pdf.setFillColor(secondaryColor);
-  pdf.roundedRect(featuresX, contentY, featuresColumnWidth, contentHeight, 2, 2, 'F');
+  pdf.roundedRect(featuresX, descriptionY, featuresWidth, descriptionHeight, 2, 2, 'F');
   
   pdf.setFontSize(10);
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Bijzonderheden', featuresX + 5, contentY + 10);
+  pdf.text('Bijzonderheden', featuresX + 5, descriptionY + 10);
   
   // Make sure features are displayed
   pdf.setFontSize(8);
   if (property.features && property.features.length > 0) {
     property.features.slice(0, 18).forEach((feature, index) => {
-      // Reduce line spacing to 6 (from 10)
-      const featureY = contentY + 18 + (index * 6);
+      // Reduce line spacing to 5 (from 6)
+      const featureY = descriptionY + 18 + (index * 5);
       
-      if (featureY < contentY + contentHeight - 5) {
+      if (featureY < descriptionY + descriptionHeight - 5) {
         const featureText = feature.description || (typeof feature === 'string' ? feature : 'Eigenschap');
         pdf.text(`• ${featureText}`, featuresX + 5, featureY);
       }
     });
   } else {
-    pdf.text('No features available.', featuresX + 5, contentY + 18);
+    pdf.text('No features available.', featuresX + 5, descriptionY + 18);
+  }
+  
+  // Key info cards in a 3x2 grid below the description section
+  const keyInfoY = descriptionY + descriptionHeight + 10;
+  await generateKeyInfoCards(
+    pdf,
+    property,
+    settings,
+    contentX,
+    contentWidth,
+    keyInfoY,
+    70 // Increased height for 2 rows
+  );
+  
+  // Contact section below the features
+  const contactY = keyInfoY + 80; // After key info cards
+  
+  // Contact box with agency details
+  pdf.setFillColor(primaryColor);
+  pdf.roundedRect(contentX, contactY, contentWidth, 40, 2, 2, 'F');
+  
+  pdf.setFontSize(10);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('Contact', contentX + 5, contactY + 10);
+  
+  // Agency name
+  if (settings?.name) {
+    pdf.setFontSize(9);
+    pdf.text(settings.name, contentX + 5, contactY + 20);
+  }
+  
+  // Email and phone on the same line
+  let contactLine = '';
+  if (settings?.email) contactLine += `Email: ${settings.email}`;
+  if (settings?.email && settings?.phone) contactLine += ' | ';
+  if (settings?.phone) contactLine += `Tel: ${settings.phone}`;
+  
+  if (contactLine) {
+    pdf.setFontSize(8);
+    pdf.text(contactLine, contentX + 5, contactY + 30);
   }
 };

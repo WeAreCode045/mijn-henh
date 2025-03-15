@@ -31,32 +31,44 @@ export const generateImageSection = async (
     featuredImages = normalizedImages.slice(0, 4).map(img => img.url || '');
   }
   
-  // Calculate heights - enforce 3:4 ratio for main image
-  const mainImageHeight = height * 0.5; // 60% for main image
+  // Calculate heights - enforce 3:4 ratio for main image (width:height)
+  const mainImageHeight = height * 0.6; // 60% for main image
   
-  // Fix 3:4 ratio for main image width (height is fixed, adjust width to maintain ratio)
-  const mainImageRatio = 4/3; // width:height ratio of 3:4
-  const mainImageWidth = mainImageHeight * mainImageRatio;
-  
-  // Center the main image if it's narrower than the available width
-  const mainImageX = mainImageWidth < width ? x + ((width - mainImageWidth) / 2) : x;
+  // Use the full column width for the main image
+  const mainImageWidth = width;
   
   // Featured images section takes remaining height
-  const featuredImagesHeight = height * 0.5; // 40% for featured images
+  const featuredImagesHeight = height - mainImageHeight - 2; // 2px gap
   
-  // Draw main image (top)
+  // Draw main image (top) with 3:4 ratio
   if (mainImage) {
     try {
-      // Use correct image dimensions to maintain 3:4 aspect ratio
-      pdf.addImage(mainImage, 'JPEG', mainImageX, y, mainImageWidth, mainImageHeight);
+      // Maintain 3:4 ratio (width:height) within the available width
+      // This means height should be 4/3 of width
+      const aspectRatio = 3/4; // width:height ratio of 3:4
+      const calculatedHeight = mainImageWidth / aspectRatio;
+      
+      // If calculated height is too large, adjust width to maintain ratio
+      let imageWidth = mainImageWidth;
+      let imageHeight = calculatedHeight;
+      
+      if (calculatedHeight > mainImageHeight) {
+        imageHeight = mainImageHeight;
+        imageWidth = mainImageHeight * aspectRatio;
+      }
+      
+      // Center the image horizontally if it's narrower than the container
+      const imageX = imageWidth < width ? x + ((width - imageWidth) / 2) : x;
+      
+      pdf.addImage(mainImage, 'JPEG', imageX, y, imageWidth, imageHeight);
     } catch (error) {
       console.error('Error adding main image:', error);
     }
   }
   
-  // Draw featured images (bottom) in a 2x2 grid
+  // Draw featured images (bottom) in a 2x2 grid with gaps
   if (featuredImages.length > 0) {
-    const featuredImagesY = y + mainImageHeight + 2; // Small gap after main image
+    const featuredImagesY = y + mainImageHeight + 2; // 2px gap after main image
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;

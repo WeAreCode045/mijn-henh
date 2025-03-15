@@ -3,7 +3,6 @@ import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
 import { generatePdfContent } from './pdf/generatePdfContent';
-import { generateBottomBar } from './pdf/components/bottomBar';
 
 export const generatePropertyPDF = async (property: PropertyData, settings: AgencySettings, templateId?: string) => {
   try {
@@ -20,9 +19,6 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
     
     // Generate the main content of the PDF
     await generatePdfContent(pdf, property, settings, pageWidth, pageHeight);
-    
-    // Add the bottom bar with contact information and QR code
-    await generateBottomBar(pdf, property, settings, pageWidth, pageHeight);
     
     // Open PDF in a new window
     window.open(pdf.output('bloburl'), '_blank');
