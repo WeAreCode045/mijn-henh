@@ -19,17 +19,48 @@ export const generatePdfContent = async (
   const bottomBarHeight = 15;
   const bottomMargin = 10; // Margin between content and bottom bar
   
-  // Generate the image section (left half, top)
-  const imageHeight = (pageHeight - margin * 2 - bottomBarHeight - bottomMargin) * 0.55;
-  await generateImageSection(pdf, property, margin, contentWidth, margin, imageHeight);
+  // Calculate the available content height (excluding margins and bottom bar)
+  const availableHeight = pageHeight - margin * 2 - bottomBarHeight - bottomMargin;
   
-  // Generate the key info cards (full width, below images)
-  const cardsStartY = margin + imageHeight + 10;
-  const cardsHeight = 25; // Reduced height for cards
-  await generateKeyInfoCards(pdf, property, settings, margin, contentWidth, cardsStartY, cardsHeight);
+  // Allocate heights for each section
+  const imagesHeight = availableHeight * 0.6; // 60% of available height for images
+  const infoSectionHeight = availableHeight * 0.4; // 40% of available height for info
+  const cardsHeight = 25; // Fixed height for key info cards
   
-  // Generate the info section (title, description, features)
-  const infoSectionY = cardsStartY + cardsHeight + 10;
-  const infoSectionHeight = pageHeight - infoSectionY - bottomBarHeight - bottomMargin;
-  await generateInfoSection(pdf, property, settings, margin, contentWidth, infoSectionY, infoSectionHeight);
+  // Calculate widths for left and right columns
+  const leftColumnWidth = contentWidth * 0.5; // 50% for images
+  const rightColumnWidth = contentWidth * 0.5; // 50% for title/description/features
+  
+  // Generate the main image and featured images section (left column)
+  await generateImageSection(
+    pdf, 
+    property, 
+    margin, 
+    leftColumnWidth, 
+    margin, 
+    imagesHeight
+  );
+  
+  // Generate the info section (title, description, features) on the right column
+  await generateInfoSection(
+    pdf, 
+    property, 
+    settings, 
+    margin + leftColumnWidth, 
+    rightColumnWidth, 
+    margin, 
+    imagesHeight
+  );
+  
+  // Generate the key info cards (full width, at bottom)
+  const cardsStartY = margin + imagesHeight + 10;
+  await generateKeyInfoCards(
+    pdf, 
+    property, 
+    settings, 
+    margin, 
+    contentWidth, 
+    cardsStartY, 
+    cardsHeight
+  );
 };

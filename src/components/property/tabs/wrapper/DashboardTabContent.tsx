@@ -44,7 +44,7 @@ export function DashboardTabContent({
     <PropertyDashboardTab
       id={id}
       title={title}
-      property={propertyData} // Pass propertyData as property prop
+      propertyData={propertyData} // Use propertyData prop name to match PropertyDashboardTab
       objectId={objectId}
       agentId={agentId}
       createdAt={createdAt}

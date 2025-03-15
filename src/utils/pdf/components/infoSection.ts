@@ -35,14 +35,15 @@ export const generateInfoSection = async (
     pdf.text(property.price, priceX, y + 13);
   }
   
-  // Content area (description on left, features on right)
+  // Content area (description on top, features on bottom)
   const contentY = y + 25;
   const contentHeight = height - 25;
-  const columnWidth = width / 2 - 5;
+  const descriptionHeight = contentHeight * 0.5;
+  const featuresHeight = contentHeight * 0.5;
   
-  // Description (left half)
+  // Description (top half)
   pdf.setFillColor(245, 245, 245);
-  pdf.roundedRect(x, contentY, columnWidth, contentHeight, 3, 3, 'F');
+  pdf.roundedRect(x, contentY, width, descriptionHeight, 3, 3, 'F');
   
   pdf.setFontSize(12);
   pdf.setTextColor(80, 80, 80);
@@ -53,29 +54,30 @@ export const generateInfoSection = async (
   
   // Ensure description is always shown
   const description = property.description || 'No description available.';
-  const splitDescription = pdf.splitTextToSize(description, columnWidth - 16); // Reduced padding
+  const splitDescription = pdf.splitTextToSize(description, width - 16); // Reduced padding
   pdf.text(splitDescription, x + 8, contentY + 20); // Reduced padding
   
-  // Features (right half)
+  // Features (bottom half)
+  const featuresY = contentY + descriptionHeight + 5;
   pdf.setFillColor(secondaryColor);
-  pdf.roundedRect(x + columnWidth + 10, contentY, columnWidth, contentHeight, 3, 3, 'F');
+  pdf.roundedRect(x, featuresY, width, featuresHeight - 5, 3, 3, 'F');
   
   pdf.setFontSize(12);
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Features', x + columnWidth + 18, contentY + 12); // Reduced padding
+  pdf.text('Features', x + 8, featuresY + 12); // Reduced padding
   
   // Make sure features are displayed
   pdf.setFontSize(10);
   if (property.features && property.features.length > 0) {
     property.features.slice(0, 15).forEach((feature, index) => {
-      const featureY = contentY + 20 + (index * 13); // Reduced line spacing
+      const featureY = featuresY + 20 + (index * 13); // Reduced line spacing
       
-      if (featureY < contentY + contentHeight - 8) {
+      if (featureY < featuresY + featuresHeight - 8) {
         const featureText = feature.description || (typeof feature === 'string' ? feature : 'Feature');
-        pdf.text(`• ${featureText}`, x + columnWidth + 18, featureY); // Reduced padding
+        pdf.text(`• ${featureText}`, x + 8, featureY); // Reduced padding
       }
     });
   } else {
-    pdf.text('No features available.', x + columnWidth + 18, contentY + 20);
+    pdf.text('No features available.', x + 8, featuresY + 20);
   }
 };

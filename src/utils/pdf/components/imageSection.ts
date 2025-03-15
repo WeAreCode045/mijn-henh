@@ -31,36 +31,32 @@ export const generateImageSection = async (
     featuredImages = normalizedImages.slice(0, 4).map(img => img.url || '');
   }
   
-  // Draw main image (larger, on the left)
+  // Calculate heights
+  const mainImageHeight = height * 0.6; // 60% for main image
+  const featuredImagesHeight = height * 0.4; // 40% for featured images
+  
+  // Draw main image (top)
   if (mainImage) {
-    const mainImgX = x;
-    const mainImgY = y;
-    const mainImgWidth = width * 0.5;
-    const mainImgHeight = height;
-    
     try {
-      pdf.addImage(mainImage, 'JPEG', mainImgX, mainImgY, mainImgWidth, mainImgHeight);
+      pdf.addImage(mainImage, 'JPEG', x, y, width, mainImageHeight);
     } catch (error) {
       console.error('Error adding main image:', error);
     }
   }
   
-  // Draw 2x2 grid of featured images (right side)
+  // Draw featured images (bottom) in a single row
   if (featuredImages.length > 0) {
-    const gridStartX = x + width * 0.5 + 5;
-    const gridWidth = width * 0.5 - 5;
-    const cellWidth = gridWidth / 2 - 2.5;
-    const cellHeight = height / 2 - 2.5;
+    const featuredImagesY = y + mainImageHeight + 5;
+    const maxFeaturedImages = 3; // Show up to 3 featured images in a row
+    const cellWidth = width / maxFeaturedImages - 3;
+    const cellHeight = featuredImagesHeight - 5;
     
-    featuredImages.slice(0, 4).forEach((img, index) => {
+    featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
-      const row = Math.floor(index / 2);
-      const col = index % 2;
-      const imgX = gridStartX + (col * (cellWidth + 5));
-      const imgY = y + (row * (cellHeight + 5));
+      const imgX = x + (index * (cellWidth + 4));
       
       try {
-        pdf.addImage(img, 'JPEG', imgX, imgY, cellWidth, cellHeight);
+        pdf.addImage(img, 'JPEG', imgX, featuredImagesY, cellWidth, cellHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
       }
