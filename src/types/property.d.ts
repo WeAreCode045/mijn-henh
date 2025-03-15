@@ -32,6 +32,7 @@ export interface PropertyArea {
   title: string;
   description: string;
   images: PropertyImage[]; 
+  imageIds: string[]; // Adding this property to match PropertyAreaTypes.ts
   columns: number;
 }
 

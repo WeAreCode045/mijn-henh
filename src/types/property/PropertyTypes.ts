@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -11,7 +10,7 @@ export interface PropertyArea {
   id: string;
   title: string;
   description: string;
-  imageIds: string[];
+  imageIds: string[]; // Explicitly defined property
   columns: number;
   name: string;
   size: string;
