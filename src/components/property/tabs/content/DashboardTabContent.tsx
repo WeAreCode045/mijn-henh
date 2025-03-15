@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +32,6 @@ export function DashboardTabContent({
   const [agents, setAgents] = useState<{id: string, name: string}[]>([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
 
-  // Fetch agents for the dropdown, include admin users who can also be agents
   useEffect(() => {
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
@@ -41,7 +39,7 @@ export function DashboardTabContent({
         const { data, error } = await supabase
           .from('profiles')
           .select('id, full_name, role')
-          .or('role.eq.agent,role.eq.admin'); // Include both agent and admin roles
+          .or('role.eq.agent,role.eq.admin');
         
         if (error) throw error;
         
@@ -62,7 +60,6 @@ export function DashboardTabContent({
   }, []);
 
   const handleShare = () => {
-    // Copy the public URL to clipboard
     const url = `${window.location.origin}/property/view/${property.id}`;
     navigator.clipboard.writeText(url);
     toast({
@@ -73,7 +70,6 @@ export function DashboardTabContent({
 
   const handleAgentChange = (agentId: string) => {
     if (handleSaveAgent) {
-      // Handle the special case for "no-agent"
       const finalAgentId = agentId === "no-agent" ? "" : agentId;
       handleSaveAgent(finalAgentId);
       
@@ -211,7 +207,12 @@ export function DashboardTabContent({
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <NotesCard propertyId={property.id} />
+        <AgendaCard propertyId={property.id} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
         <Card className="h-full">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-medium">Recent Submissions</CardTitle>
@@ -220,10 +221,6 @@ export function DashboardTabContent({
             <RecentSubmissions propertyId={property.id} />
           </CardContent>
         </Card>
-
-        <NotesCard propertyId={property.id} />
-
-        <AgendaCard propertyId={property.id} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
