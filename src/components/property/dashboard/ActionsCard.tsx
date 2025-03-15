@@ -1,12 +1,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Save, Trash2, Share2, Globe } from "lucide-react";
+import { ExternalLink, Save, Trash2, Share2, Globe, FileText } from "lucide-react";
 import { formatDate } from "@/utils/dateUtils";
 import { useToast } from "@/components/ui/use-toast";
+import { PropertyData } from "@/types/property";
+import { useGeneratePDF } from "@/hooks/useGeneratePDF";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface ActionsCardProps {
   propertyId: string;
+  propertyData?: PropertyData;
   createdAt?: string;
   updatedAt?: string;
   onSave?: () => void;
@@ -16,6 +20,7 @@ interface ActionsCardProps {
 
 export function ActionsCard({ 
   propertyId, 
+  propertyData,
   createdAt, 
   updatedAt, 
   onSave, 
@@ -23,6 +28,8 @@ export function ActionsCard({
   onWebView
 }: ActionsCardProps) {
   const { toast } = useToast();
+  const { generatePDF, isGenerating } = useGeneratePDF();
+  const { settings } = useAgencySettings();
 
   const handleShare = () => {
     const url = `${window.location.origin}/property/view/${propertyId}`;
@@ -31,6 +38,23 @@ export function ActionsCard({
       title: "Link copied to clipboard",
       description: "You can now share this link with others",
     });
+  };
+
+  const handleGeneratePDF = async () => {
+    if (!propertyData) {
+      toast({
+        title: "Error",
+        description: "Property data is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await generatePDF(propertyData);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
   };
 
   return (
@@ -76,6 +100,16 @@ export function ActionsCard({
           >
             <Globe className="h-4 w-4" />
             Web View
+          </Button>
+          <Button
+            onClick={handleGeneratePDF}
+            variant="outline"
+            className="w-full flex items-center gap-2"
+            size="sm"
+            disabled={isGenerating}
+          >
+            <FileText className="h-4 w-4" />
+            {isGenerating ? "Generating..." : "Generate PDF"}
           </Button>
           <Button
             onClick={handleShare}

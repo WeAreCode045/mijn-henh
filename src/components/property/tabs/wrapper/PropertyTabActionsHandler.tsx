@@ -1,9 +1,14 @@
 
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { useState } from "react";
+import { PropertyData } from "@/types/property";
+import { AgencySettings } from "@/types/agency";
+import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 
 interface PropertyTabActionsHandlerProps {
   propertyId: string;
+  propertyData?: PropertyData;
+  settings?: AgencySettings;
   children: (props: {
     webViewOpen: boolean;
     setWebViewOpen: (open: boolean) => void;
@@ -12,15 +17,27 @@ interface PropertyTabActionsHandlerProps {
   }) => React.ReactNode;
 }
 
-export function PropertyTabActionsHandler({ propertyId, children }: PropertyTabActionsHandlerProps) {
+export function PropertyTabActionsHandler({ 
+  propertyId, 
+  propertyData,
+  settings,
+  children 
+}: PropertyTabActionsHandlerProps) {
   const [webViewOpen, setWebViewOpen] = useState(false);
-  const { handleGeneratePDF, handleWebView } = usePropertyActions(propertyId);
+  const { handleWebView } = usePropertyActions(propertyId);
+  const { generatePDF } = useGeneratePDF();
 
-  // Web view functions - now opens in new tab instead of dialog
+  // Web view functions - opens in new tab
   const handleOpenWebView = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    // Use the direct navigation function instead of opening the dialog
     handleWebView(e);
+  };
+
+  // PDF generation function
+  const handleGeneratePDF = async () => {
+    if (propertyData && settings) {
+      await generatePDF(propertyData);
+    }
   };
 
   return children({

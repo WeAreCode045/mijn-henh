@@ -4,6 +4,7 @@ import { PropertyDashboardTab } from "../PropertyDashboardTab";
 interface DashboardTabContentProps {
   id: string;
   title: string;
+  propertyData?: any; // Add propertyData prop
   objectId?: string;
   agentId?: string;
   createdAt?: string;
@@ -23,6 +24,7 @@ interface DashboardTabContentProps {
 export function DashboardTabContent({
   id,
   title,
+  propertyData,
   objectId,
   agentId,
   createdAt,
@@ -42,6 +44,7 @@ export function DashboardTabContent({
     <PropertyDashboardTab
       id={id}
       title={title}
+      propertyData={propertyData}
       objectId={objectId}
       agentId={agentId}
       createdAt={createdAt}
