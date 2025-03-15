@@ -32,7 +32,7 @@ export const generateImageSection = async (
   }
   
   // Calculate heights - enforce 3:4 ratio for main image
-  const mainImageHeight = height * 0.6; // 60% for main image
+  const mainImageHeight = height * 0.5; // 60% for main image
   
   // Fix 3:4 ratio for main image width (height is fixed, adjust width to maintain ratio)
   const mainImageRatio = 4/3; // width:height ratio of 3:4
@@ -42,7 +42,7 @@ export const generateImageSection = async (
   const mainImageX = mainImageWidth < width ? x + ((width - mainImageWidth) / 2) : x;
   
   // Featured images section takes remaining height
-  const featuredImagesHeight = height * 0.4; // 40% for featured images
+  const featuredImagesHeight = height * 0.5; // 40% for featured images
   
   // Draw main image (top)
   if (mainImage) {
