@@ -22,10 +22,13 @@ export const generatePdfContent = async (
   // Calculate the available content height (excluding margins and bottom bar)
   const availableHeight = pageHeight - margin * 2 - bottomBarHeight - bottomMargin;
   
+  // Key info cards should be more compact
+  const cardsHeight = 18; // Reduced height
+  const cardsMargin = 5; // Space before and after cards
+  
   // Allocate heights for each section
-  const imagesHeight = availableHeight * 0.65; // 65% of available height for images
-  const cardsHeight = 20; // Fixed height for key info cards (reduced)
-  const infoSectionHeight = availableHeight - imagesHeight - cardsHeight - 10; // Remaining height for info
+  const imagesHeight = availableHeight * 0.68; // 68% of available height for images
+  const infoSectionHeight = availableHeight - imagesHeight - cardsHeight - (cardsMargin * 2); // Remaining height for info
   
   // Calculate widths for left and right columns
   const leftColumnWidth = contentWidth * 0.5; // 50% for images
@@ -49,11 +52,11 @@ export const generatePdfContent = async (
     margin + leftColumnWidth, 
     rightColumnWidth, 
     margin, 
-    infoSectionHeight
+    imagesHeight // Match height with images section
   );
   
   // Generate the key info cards (full width, at bottom)
-  const cardsStartY = margin + imagesHeight + 10;
+  const cardsStartY = margin + imagesHeight + cardsMargin;
   await generateKeyInfoCards(
     pdf, 
     property, 

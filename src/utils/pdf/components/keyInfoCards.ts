@@ -29,7 +29,7 @@ export const generateKeyInfoCards = async (
   // Calculate spec card dimensions (1x6 grid)
   const cols = 6; // 6 columns in 1 row
   const specWidth = width / cols - 2; // Reduced margin
-  const specHeight = height; // Reduced height
+  const specHeight = height; // Keep height as provided (should be smaller)
   const specMargin = 2; // Reduced margin
   
   specs.forEach((spec, index) => {

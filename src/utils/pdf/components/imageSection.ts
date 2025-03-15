@@ -38,6 +38,7 @@ export const generateImageSection = async (
   // Draw main image (top)
   if (mainImage) {
     try {
+      // Use correct image dimensions to maintain aspect ratio
       pdf.addImage(mainImage, 'JPEG', x, y, width, mainImageHeight);
     } catch (error) {
       console.error('Error adding main image:', error);
@@ -46,21 +47,22 @@ export const generateImageSection = async (
   
   // Draw featured images (bottom) in a 2x2 grid
   if (featuredImages.length > 0) {
-    const featuredImagesY = y + mainImageHeight + 5;
+    const featuredImagesY = y + mainImageHeight + 2; // Reduced gap
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;
-    const cellWidth = (width - 3) / gridCols;
-    const cellHeight = (featuredImagesHeight - 5) / gridRows;
+    const cellWidth = (width) / gridCols;
+    const cellHeight = (featuredImagesHeight) / gridRows;
     
     featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
       const row = Math.floor(index / gridCols);
       const col = index % gridCols;
-      const imgX = x + (col * (cellWidth + 3));
-      const imgY = featuredImagesY + (row * (cellHeight + 3));
+      const imgX = x + (col * cellWidth);
+      const imgY = featuredImagesY + (row * cellHeight);
       
       try {
+        // Remove the 1px gap between images for cleaner look
         pdf.addImage(img, 'JPEG', imgX, imgY, cellWidth, cellHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
