@@ -39,7 +39,7 @@ export const generateImageSection = async (
   if (mainImage) {
     try {
       // Ensure 1.5 aspect ratio (width:height ratio of 1.5 (landscape)
-      const aspectRatio = 1.5;
+      const aspectRatio = 1.6;
       
       // Calculate dimensions to maintain aspect ratio
       let imageWidth = width;
@@ -64,7 +64,7 @@ export const generateImageSection = async (
   // Draw featured images (bottom) in a 2x2 grid with the same aspect ratio as main image
   if (featuredImages.length > 0) {
     // Use a smaller gap (1px instead of 2px)
-    const featuredImagesY = y + mainImageHeight + 2; // Reduced gap after main image
+    const featuredImagesY = y + mainImageHeight + 1; // Reduced gap after main image
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;
@@ -75,7 +75,7 @@ export const generateImageSection = async (
     const cellHeight = (featuredImagesHeight - gapSize) / gridRows;
     
     // Apply the same 1.5 aspect ratio to each grid cell
-    const aspectRatio = 1.5;
+    const aspectRatio = 1.6;
     
     featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
@@ -99,7 +99,7 @@ export const generateImageSection = async (
       const centeredImgX = imgX + ((cellWidth - imgDisplayWidth) / 2);
       
       try {
-        // Add rounded corners to featured images
+     
         pdf.addImage(img, 'JPEG', centeredImgX, imgY, imgDisplayWidth, imgDisplayHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
