@@ -17,7 +17,7 @@ export function usePropertyAreas(
       description: '',
       name: '',
       size: '',
-      imageIds: [], // Using the properly defined imageIds property
+      imageIds: [], // Now properly defined in the interface
       images: [],
       columns: 2
     };
