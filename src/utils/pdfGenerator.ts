@@ -23,6 +23,8 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 15;
     const contentWidth = pageWidth - (margin * 2);
+    const bottomBarHeight = 15; // Reduced bottom bar height
+    const bottomMargin = 10; // Added margin between content and bottom bar
     
     // ===== LEFT SIDE - IMAGES =====
     
@@ -54,7 +56,7 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
       const mainImgX = margin;
       const mainImgY = margin;
       const mainImgWidth = leftSideWidth;
-      const mainImgHeight = (pageHeight - (margin * 2)) / 2;
+      const mainImgHeight = (pageHeight - (margin * 2) - bottomBarHeight - bottomMargin) / 2;
       
       try {
         pdf.addImage(mainImage, 'JPEG', mainImgX, mainImgY, mainImgWidth, mainImgHeight);
@@ -65,9 +67,9 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
     
     // Draw 2x2 grid of featured images (bottom half of left side)
     if (featuredImages.length > 0) {
-      const gridStartY = margin + (pageHeight - (margin * 2)) / 2 + 5;
+      const gridStartY = margin + (pageHeight - (margin * 2) - bottomBarHeight - bottomMargin) / 2 + 5;
       const cellWidth = leftSideWidth / 2 - 2.5;
-      const cellHeight = (pageHeight - gridStartY - margin) / 2 - 2.5;
+      const cellHeight = (pageHeight - gridStartY - margin - bottomBarHeight - bottomMargin) / 2 - 2.5;
       
       featuredImages.slice(0, 4).forEach((img, index) => {
         if (!img) return;
@@ -124,7 +126,7 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
     const cols = 2;
     const rows = 3;
     const specWidth = rightSideWidth / cols - 5;
-    const specHeight = 40;
+    const specHeight = 35; // Slightly reduced height
     const specMargin = 5;
     
     specs.forEach((spec, index) => {
@@ -138,23 +140,23 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
       pdf.setFillColor(primaryColor);
       pdf.roundedRect(specX, specY, specWidth, specHeight, 3, 3, 'F');
       
-      // Circle for icon
+      // Circle for icon - smaller size (8 instead of 10)
       pdf.setFillColor(secondaryColor);
-      pdf.circle(specX + 15, specY + 15, 10, 'F');
+      pdf.circle(specX + 12, specY + 15, 6, 'F');
       
       // Label and value
       pdf.setFontSize(10);
       pdf.setTextColor(255, 255, 255);
-      pdf.text(spec.label, specX + 35, specY + 15);
+      pdf.text(spec.label, specX + 25, specY + 15);
       
-      pdf.setFontSize(14);
+      pdf.setFontSize(12);
       pdf.setTextColor(255, 255, 255);
-      pdf.text(String(spec.value), specX + 35, specY + 30);
+      pdf.text(String(spec.value), specX + 25, specY + 28);
     });
     
     // Description and features section (starts after specs)
     const textSectionY = specsStartY + (rows * (specHeight + specMargin)) + 10;
-    const textSectionHeight = pageHeight - textSectionY - 30; // Leave 30mm for bottom bar
+    const textSectionHeight = pageHeight - textSectionY - bottomBarHeight - bottomMargin;
     
     // Description (left half of bottom right)
     pdf.setFillColor(245, 245, 245);
@@ -191,32 +193,32 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
       pdf.text('No features available.', rightSideX + rightSideWidth / 2 + 15, textSectionY + 30);
     }
     
-    // Bottom bar with contact info and QR code
-    const bottomBarY = pageHeight - 20;
+    // Bottom bar with contact info and QR code - now with added margin
+    const bottomBarY = pageHeight - bottomBarHeight;
     pdf.setFillColor(primaryColor);
-    pdf.rect(0, bottomBarY, pageWidth, 20, 'F');
+    pdf.rect(0, bottomBarY, pageWidth, bottomBarHeight, 'F');
     
     // Contact information
-    pdf.setFontSize(10);
+    pdf.setFontSize(9); // Slightly smaller font for bottom bar
     pdf.setTextColor(255, 255, 255);
     
     // Email address (if available)
     if (settings?.email) {
-      pdf.text(`Email: ${settings.email}`, margin, bottomBarY + 13);
+      pdf.text(`Email: ${settings.email}`, margin, bottomBarY + 10);
     }
     
     // Phone number (if available)
     if (settings?.phone) {
       const phoneText = `Phone: ${settings.phone}`;
       const phoneX = margin + 100; // Position after email
-      pdf.text(phoneText, phoneX, bottomBarY + 13);
+      pdf.text(phoneText, phoneX, bottomBarY + 10);
     }
     
     // QR Code for web view
     try {
       const webViewUrl = `${window.location.origin}/property/${property.id}/view`;
       const qrCodeDataUrl = await QRCode.toDataURL(webViewUrl, { 
-        width: 15,
+        width: 12, // Smaller QR code
         margin: 0,
         color: {
           dark: '#FFFFFF',
@@ -225,18 +227,18 @@ export const generatePropertyPDF = async (property: PropertyData, settings: Agen
       });
       
       // Position QR code on the right side of the bottom bar
-      const qrCodeX = pageWidth - margin - 15; // 15mm from right edge
-      const qrCodeY = bottomBarY + 2.5; // 2.5mm from bottom bar top
-      const qrCodeSize = 15;
+      const qrCodeX = pageWidth - margin - 12; // 12mm from right edge (smaller QR code)
+      const qrCodeY = bottomBarY + 1.5; // 1.5mm from bottom bar top
+      const qrCodeSize = 12; // Smaller QR code size
       
       pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
       
       // Add "Scan for web view" text
-      pdf.setFontSize(8);
+      pdf.setFontSize(7); // Smaller text size
       const scanText = "Scan for web view";
       const textWidth = pdf.getTextWidth(scanText);
       const textX = qrCodeX + (qrCodeSize - textWidth) / 2;
-      pdf.text(scanText, textX, qrCodeY - 2);
+      pdf.text(scanText, textX, qrCodeY - 1);
       
     } catch (error) {
       console.error('Error generating QR code:', error);
