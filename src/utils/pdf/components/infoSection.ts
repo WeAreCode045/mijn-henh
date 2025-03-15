@@ -1,4 +1,3 @@
-
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
@@ -117,7 +116,7 @@ export const generateInfoSection = async (
       const featureY = contentY + 18 + (index * 6);
       
       if (featureY < contentY + contentHeight - 5) {
-        const featureText = feature.description || (typeof feature === 'string' ? feature : 'Feature');
+        const featureText = feature.description || (typeof feature === 'string' ? feature : 'Eigenschap');
         pdf.text(`• ${featureText}`, featuresX + 5, featureY);
       }
     });
