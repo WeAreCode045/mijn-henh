@@ -54,8 +54,24 @@ export const generateImageSection = async (
       // Center the image horizontally if it's narrower than the container
       const imageX = imageWidth < width ? x + ((width - imageWidth) / 2) : x;
       
-      // Add rounded corners to main image
+      // Add main image with rounded corners
+      // First clip a rounded rectangle path
+      const cornerRadius = 4;
+      pdf.setDrawColor(255, 255, 255);
+      pdf.setFillColor(255, 255, 255);
+      
+      // Save the current graphics state
+      pdf.saveGraphicsState();
+      
+      // Create a clipping path with rounded corners
+      pdf.roundedRect(imageX, y, imageWidth, imageHeight, cornerRadius, cornerRadius, 'S');
+      pdf.clip();
+      
+      // Add the image (it will be clipped by the rounded rectangle)
       pdf.addImage(mainImage, 'JPEG', imageX, y, imageWidth, imageHeight);
+      
+      // Restore the graphics state to remove the clipping path
+      pdf.restoreGraphicsState();
     } catch (error) {
       console.error('Error adding main image:', error);
     }
@@ -99,8 +115,21 @@ export const generateImageSection = async (
       const centeredImgX = imgX + ((cellWidth - imgDisplayWidth) / 2);
       
       try {
-        // Add rounded corners to featured images
+        // Add featured image with rounded corners
+        const cornerRadius = 2; // Smaller corner radius for featured images
+        
+        // Save the current graphics state
+        pdf.saveGraphicsState();
+        
+        // Create a clipping path with rounded corners
+        pdf.roundedRect(centeredImgX, imgY, imgDisplayWidth, imgDisplayHeight, cornerRadius, cornerRadius, 'S');
+        pdf.clip();
+        
+        // Add the image (it will be clipped by the rounded rectangle)
         pdf.addImage(img, 'JPEG', centeredImgX, imgY, imgDisplayWidth, imgDisplayHeight);
+        
+        // Restore the graphics state to remove the clipping path
+        pdf.restoreGraphicsState();
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
       }
