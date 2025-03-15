@@ -52,25 +52,29 @@ export const generateKeyInfoCards = async (
     pdf.setFillColor(primaryColor);
     pdf.roundedRect(specX, specY, specWidth, specHeight, 2, 2, 'F');
     
-    // Circle for icon
+    // Position icon at the top center of the card
     pdf.setFillColor(secondaryColor);
-    pdf.circle(specX + 8, specY + 10, 4, 'F');
+    const iconX = specX + (specWidth / 2);
+    const iconY = specY + 8;
+    pdf.circle(iconX, iconY, 4, 'F');
     
     // Draw icon text (simplified representation of icon)
     pdf.setFontSize(6);
     pdf.setTextColor(255, 255, 255);
     const iconText = spec.icon.charAt(0).toUpperCase();
     const textWidth = pdf.getTextWidth(iconText);
-    pdf.text(iconText, specX + 8 - textWidth/2, specY + 10 + 2);
+    pdf.text(iconText, iconX - textWidth/2, iconY + 2);
     
-    // Label with increased font size
-    pdf.setFontSize(8); // Increased from 7
+    // Label centered below icon
+    pdf.setFontSize(8);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(spec.label, specX + 14, specY + 10);
+    const labelWidth = pdf.getTextWidth(spec.label);
+    pdf.text(spec.label, specX + (specWidth / 2) - (labelWidth / 2), specY + 18);
     
-    // Value closer to label
-    pdf.setFontSize(9); // Slightly increased
+    // Value centered below label
+    pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(String(spec.value), specX + 14, specY + 18); // Reduced space between label and value
+    const valueWidth = pdf.getTextWidth(String(spec.value));
+    pdf.text(String(spec.value), specX + (specWidth / 2) - (valueWidth / 2), specY + 26);
   });
 };

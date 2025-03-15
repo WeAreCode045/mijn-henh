@@ -38,8 +38,8 @@ export const generateImageSection = async (
   // Draw main image (top) with 1.5 aspect ratio (landscape orientation)
   if (mainImage) {
     try {
-      // Ensure 1.5 aspect ratio (width:height) within the available width
-      const aspectRatio = 1.5; // width:height ratio of 1.5 (landscape)
+      // Ensure 1.5 aspect ratio (width:height ratio of 1.5 (landscape)
+      const aspectRatio = 1.5;
       
       // Calculate dimensions to maintain aspect ratio
       let imageWidth = width;
@@ -60,29 +60,45 @@ export const generateImageSection = async (
     }
   }
   
-  // Draw featured images (bottom) in a 2x2 grid
+  // Draw featured images (bottom) in a 2x2 grid with the same aspect ratio as main image
   if (featuredImages.length > 0) {
-    const featuredImagesY = y + mainImageHeight + 2; // 2px gap after main image
+    // Use a smaller gap (1px instead of 2px)
+    const featuredImagesY = y + mainImageHeight + 1; // Reduced gap after main image
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid
     const gridCols = 2;
     const gridRows = 2;
-    const gapSize = 2; // Gap between images in the grid
+    const gapSize = 1; // Reduced gap between images in the grid
     
     // Calculate cell dimensions with gaps
     const cellWidth = (width - gapSize) / gridCols;
     const cellHeight = (featuredImagesHeight - gapSize) / gridRows;
+    
+    // Apply the same 1.5 aspect ratio to each grid cell
+    const aspectRatio = 1.5;
     
     featuredImages.slice(0, maxFeaturedImages).forEach((img, index) => {
       if (!img) return;
       const row = Math.floor(index / gridCols);
       const col = index % gridCols;
       
-      // Calculate position with gaps
+      // Calculate position with reduced gaps
       const imgX = x + (col * (cellWidth + gapSize));
       const imgY = featuredImagesY + (row * (cellHeight + gapSize));
       
+      // Maintain aspect ratio within each cell
+      let imgDisplayWidth = cellWidth;
+      let imgDisplayHeight = imgDisplayWidth / aspectRatio;
+      
+      if (imgDisplayHeight > cellHeight) {
+        imgDisplayHeight = cellHeight;
+        imgDisplayWidth = imgDisplayHeight * aspectRatio;
+      }
+      
+      // Center the image in its cell
+      const centeredImgX = imgX + ((cellWidth - imgDisplayWidth) / 2);
+      
       try {
-        pdf.addImage(img, 'JPEG', imgX, imgY, cellWidth, cellHeight);
+        pdf.addImage(img, 'JPEG', centeredImgX, imgY, imgDisplayWidth, imgDisplayHeight);
       } catch (error) {
         console.error(`Error adding featured image ${index}:`, error);
       }

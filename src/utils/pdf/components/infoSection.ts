@@ -45,7 +45,7 @@ export const generateInfoSection = async (
   // Define section heights and positions
   const titleBarHeight = 15;
   const descriptionY = y + titleBarHeight + 5;
-  const descriptionHeight = 100; // Description section height
+  const descriptionHeight = 80; // Reduced description section height
   
   // Description section (left 60%)
   const descriptionWidth = contentWidth * 0.6;
@@ -142,16 +142,13 @@ export const generateInfoSection = async (
     70 // Height for key info cards section
   );
   
-  // Contact section (right 40%)
+  // Contact section (right 40%) - No background color, dark text
   const contactX = contentX + keyInfoWidth + 5;
   const contactWidth = contentWidth * 0.4 - 5;
   
-  // Contact box with agency details
-  pdf.setFillColor(primaryColor);
-  pdf.roundedRect(contactX, bottomSectionY, contactWidth, 70, 2, 2, 'F');
-  
+  // Contact section with no background color
   pdf.setFontSize(10);
-  pdf.setTextColor(255, 255, 255);
+  pdf.setTextColor(80, 80, 80); // Dark text
   pdf.text('Contact', contactX + 5, bottomSectionY + 10);
   
   // Agency name
@@ -192,7 +189,7 @@ export const generateInfoSection = async (
     
     // Add text under QR code
     pdf.setFontSize(7);
-    pdf.setTextColor(255, 255, 255);
+    pdf.setTextColor(80, 80, 80); // Dark text
     const scanText = "Scan voor online brochure";
     const textWidth = pdf.getTextWidth(scanText);
     pdf.text(scanText, contactX + (contactWidth / 2) - (textWidth / 2), qrCodeY + qrCodeSize + 5);
