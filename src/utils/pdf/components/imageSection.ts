@@ -31,30 +31,24 @@ export const generateImageSection = async (
     featuredImages = normalizedImages.slice(0, 4).map(img => img.url || '');
   }
   
-  // Calculate heights - enforce 3:4 ratio for main image (width:height)
-  const mainImageHeight = height * 0.6; // 60% for main image
+  // Calculate heights - main image takes 50% of total height, grid takes 50%
+  const mainImageHeight = height * 0.5; // 50% for main image
+  const featuredImagesHeight = height * 0.5; // 50% for featured images grid
   
-  // Use the full column width for the main image
-  const mainImageWidth = width;
-  
-  // Featured images section takes remaining height
-  const featuredImagesHeight = height - mainImageHeight - 2; // 2px gap
-  
-  // Draw main image (top) with 3:4 ratio
+  // Draw main image (top) with 1.5 aspect ratio (landscape orientation)
   if (mainImage) {
     try {
-      // Maintain 3:4 ratio (width:height) within the available width
-      // This means height should be 4/3 of width
-      const aspectRatio = 3/4; // width:height ratio of 3:4
-      const calculatedHeight = mainImageWidth / aspectRatio;
+      // Ensure 1.5 aspect ratio (width:height) within the available width
+      const aspectRatio = 1.5; // width:height ratio of 1.5 (landscape)
       
-      // If calculated height is too large, adjust width to maintain ratio
-      let imageWidth = mainImageWidth;
-      let imageHeight = calculatedHeight;
+      // Calculate dimensions to maintain aspect ratio
+      let imageWidth = width;
+      let imageHeight = imageWidth / aspectRatio;
       
-      if (calculatedHeight > mainImageHeight) {
+      // If calculated height exceeds allocated height, adjust width
+      if (imageHeight > mainImageHeight) {
         imageHeight = mainImageHeight;
-        imageWidth = mainImageHeight * aspectRatio;
+        imageWidth = imageHeight * aspectRatio;
       }
       
       // Center the image horizontally if it's narrower than the container
@@ -66,7 +60,7 @@ export const generateImageSection = async (
     }
   }
   
-  // Draw featured images (bottom) in a 2x2 grid with gaps
+  // Draw featured images (bottom) in a 2x2 grid
   if (featuredImages.length > 0) {
     const featuredImagesY = y + mainImageHeight + 2; // 2px gap after main image
     const maxFeaturedImages = 4; // Show up to 4 featured images in a 2x2 grid

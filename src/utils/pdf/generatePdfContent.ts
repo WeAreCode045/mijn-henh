@@ -20,9 +20,6 @@ export const generatePdfContent = async (
   // Calculate the available content height (excluding margins)
   const availableHeight = pageHeight - margin * 2;
   
-  // Allocate heights for each section
-  const imagesHeight = availableHeight * 0.6; // 60% of available height for images
-  
   // Calculate widths for left and right columns
   const leftColumnWidth = contentWidth * 0.4; // 40% for images
   const rightColumnWidth = contentWidth * 0.6; // 60% for title/description/features
@@ -34,7 +31,7 @@ export const generatePdfContent = async (
     margin, 
     leftColumnWidth, 
     margin, 
-    imagesHeight
+    availableHeight
   );
   
   // Generate the info section (title, description, features, key info cards, contact info) on the right column
@@ -45,6 +42,6 @@ export const generatePdfContent = async (
     margin + leftColumnWidth, 
     rightColumnWidth, 
     margin, 
-    imagesHeight // Match height with images section
+    availableHeight
   );
 };

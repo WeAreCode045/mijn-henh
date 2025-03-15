@@ -44,10 +44,10 @@ export const generateInfoSection = async (
   
   // Define section heights and positions
   const titleBarHeight = 15;
+  const descriptionY = y + titleBarHeight + 5;
   const descriptionHeight = 100; // Description section height
   
   // Description section (left 60%)
-  const descriptionY = y + titleBarHeight + 5;
   const descriptionWidth = contentWidth * 0.6;
   
   pdf.setFillColor(245, 245, 245);
@@ -70,7 +70,7 @@ export const generateInfoSection = async (
   // Calculate the height of the description text
   const descTextHeight = splitDescription.length * 4; // Approximate height
   
-  // Add QR code below the description text
+  // Add QR code within the description area
   try {
     const webViewUrl = `${window.location.origin}/property/${property.id}/view`;
     const qrCodeDataUrl = await QRCode.toDataURL(webViewUrl, { 
@@ -111,12 +111,12 @@ export const generateInfoSection = async (
   pdf.setTextColor(255, 255, 255);
   pdf.text('Bijzonderheden', featuresX + 5, descriptionY + 10);
   
-  // Make sure features are displayed
+  // Make sure features are displayed with less spacing between rows
   pdf.setFontSize(8);
   if (property.features && property.features.length > 0) {
     property.features.slice(0, 18).forEach((feature, index) => {
-      // Reduce line spacing to 5 (from 6)
-      const featureY = descriptionY + 18 + (index * 5);
+      // Reduce line spacing to 4 (from 5)
+      const featureY = descriptionY + 18 + (index * 4);
       
       if (featureY < descriptionY + descriptionHeight - 5) {
         const featureText = feature.description || (typeof feature === 'string' ? feature : 'Eigenschap');
@@ -127,43 +127,77 @@ export const generateInfoSection = async (
     pdf.text('No features available.', featuresX + 5, descriptionY + 18);
   }
   
-  // Key info cards in a 3x2 grid below the description section
-  const keyInfoY = descriptionY + descriptionHeight + 10;
+  // Bottom section layout (after description & features)
+  const bottomSectionY = descriptionY + descriptionHeight + 10;
+  
+  // Key info cards in a 3x2 grid (left 60%)
+  const keyInfoWidth = contentWidth * 0.6;
   await generateKeyInfoCards(
     pdf,
     property,
     settings,
     contentX,
-    contentWidth,
-    keyInfoY,
-    70 // Increased height for 2 rows
+    keyInfoWidth,
+    bottomSectionY,
+    70 // Height for key info cards section
   );
   
-  // Contact section below the features
-  const contactY = keyInfoY + 80; // After key info cards
+  // Contact section (right 40%)
+  const contactX = contentX + keyInfoWidth + 5;
+  const contactWidth = contentWidth * 0.4 - 5;
   
   // Contact box with agency details
   pdf.setFillColor(primaryColor);
-  pdf.roundedRect(contentX, contactY, contentWidth, 40, 2, 2, 'F');
+  pdf.roundedRect(contactX, bottomSectionY, contactWidth, 70, 2, 2, 'F');
   
   pdf.setFontSize(10);
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Contact', contentX + 5, contactY + 10);
+  pdf.text('Contact', contactX + 5, bottomSectionY + 10);
   
   // Agency name
   if (settings?.name) {
     pdf.setFontSize(9);
-    pdf.text(settings.name, contentX + 5, contactY + 20);
+    pdf.text(settings.name, contactX + 5, bottomSectionY + 20);
   }
   
-  // Email and phone on the same line
-  let contactLine = '';
-  if (settings?.email) contactLine += `Email: ${settings.email}`;
-  if (settings?.email && settings?.phone) contactLine += ' | ';
-  if (settings?.phone) contactLine += `Tel: ${settings.phone}`;
-  
-  if (contactLine) {
+  // Email and phone
+  if (settings?.email) {
     pdf.setFontSize(8);
-    pdf.text(contactLine, contentX + 5, contactY + 30);
+    pdf.text(`Email: ${settings.email}`, contactX + 5, bottomSectionY + 30);
+  }
+  
+  if (settings?.phone) {
+    pdf.setFontSize(8);
+    pdf.text(`Tel: ${settings.phone}`, contactX + 5, bottomSectionY + 40);
+  }
+  
+  // Logo or QR code in contact section
+  try {
+    const webViewUrl = `${window.location.origin}/property/${property.id}/view`;
+    const qrCodeDataUrl = await QRCode.toDataURL(webViewUrl, { 
+      width: 12,
+      margin: 0,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+    
+    // Position QR code in contact section
+    const qrCodeSize = 20;
+    const qrCodeX = contactX + (contactWidth / 2) - (qrCodeSize / 2);
+    const qrCodeY = bottomSectionY + 45;
+    
+    pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
+    
+    // Add text under QR code
+    pdf.setFontSize(7);
+    pdf.setTextColor(255, 255, 255);
+    const scanText = "Scan voor online brochure";
+    const textWidth = pdf.getTextWidth(scanText);
+    pdf.text(scanText, contactX + (contactWidth / 2) - (textWidth / 2), qrCodeY + qrCodeSize + 5);
+    
+  } catch (error) {
+    console.error('Error generating QR code for contact:', error);
   }
 };
