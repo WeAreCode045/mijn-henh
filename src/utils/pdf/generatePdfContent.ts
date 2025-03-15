@@ -4,7 +4,7 @@ import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
 import { generateImageSection } from './components/imageSection';
 import { generateInfoSection } from './components/infoSection';
-import { generateKeyInfoCards } from './components/keyInfoCards';
+import { generateContactSection } from './components/contactSection';
 
 export const generatePdfContent = async (
   pdf: jsPDF, 
@@ -20,6 +20,10 @@ export const generatePdfContent = async (
   // Calculate the available content height (excluding margins)
   const availableHeight = pageHeight - margin * 2;
   
+  // Calculate heights for main content and contact section
+  const mainContentHeight = availableHeight * 0.85; // 85% for main content
+  const contactSectionHeight = availableHeight * 0.15; // 15% for contact section
+  
   // Calculate widths for left and right columns
   const leftColumnWidth = contentWidth * 0.4; // 40% for images
   const rightColumnWidth = contentWidth * 0.6; // 60% for title/description/features
@@ -31,10 +35,10 @@ export const generatePdfContent = async (
     margin, 
     leftColumnWidth, 
     margin, 
-    availableHeight
+    mainContentHeight
   );
   
-  // Generate the info section (title, description, features, key info cards, contact info) on the right column
+  // Generate the info section (title, description, features, key info cards) on the right column
   await generateInfoSection(
     pdf, 
     property, 
@@ -42,6 +46,17 @@ export const generatePdfContent = async (
     margin + leftColumnWidth, 
     rightColumnWidth, 
     margin, 
-    availableHeight
+    mainContentHeight
+  );
+  
+  // Generate the contact section at the bottom (full width)
+  await generateContactSection(
+    pdf,
+    property,
+    settings,
+    margin,
+    contentWidth,
+    margin + mainContentHeight + 10,
+    contactSectionHeight
   );
 };

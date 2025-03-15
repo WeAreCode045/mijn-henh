@@ -52,10 +52,10 @@ export const generateKeyInfoCards = async (
     pdf.setFillColor(primaryColor);
     pdf.roundedRect(specX, specY, specWidth, specHeight, 2, 2, 'F');
     
-    // Position icon at the top center of the card
+    // Position icon at left side of the card
     pdf.setFillColor(secondaryColor);
-    const iconX = specX + (specWidth / 2);
-    const iconY = specY + 8;
+    const iconX = specX + 8;
+    const iconY = specY + 13;
     pdf.circle(iconX, iconY, 4, 'F');
     
     // Draw icon text (simplified representation of icon)
@@ -65,16 +65,14 @@ export const generateKeyInfoCards = async (
     const textWidth = pdf.getTextWidth(iconText);
     pdf.text(iconText, iconX - textWidth/2, iconY + 2);
     
-    // Label centered below icon
+    // Label to the right of the icon
     pdf.setFontSize(8);
     pdf.setTextColor(255, 255, 255);
-    const labelWidth = pdf.getTextWidth(spec.label);
-    pdf.text(spec.label, specX + (specWidth / 2) - (labelWidth / 2), specY + 18);
+    pdf.text(spec.label, specX + 16, specY + 13);
     
-    // Value centered below label
+    // Value below label
     pdf.setFontSize(9);
     pdf.setTextColor(255, 255, 255);
-    const valueWidth = pdf.getTextWidth(String(spec.value));
-    pdf.text(String(spec.value), specX + (specWidth / 2) - (valueWidth / 2), specY + 26);
+    pdf.text(String(spec.value), specX + 16, specY + 22);
   });
 };
