@@ -67,7 +67,7 @@ export const addFontAwesomeIconToPdf = async (
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElement.setAttribute('width', String(size));
     svgElement.setAttribute('height', String(size));
-    svgElement.setAttribute('viewBox', `0 0 ${faIcon.width} ${faIcon.height}`);
+    svgElement.setAttribute('viewBox', `0 0 ${iconDefinition.icon[0]} ${iconDefinition.icon[1]}`);
     
     // Set icon html as inner HTML
     svgElement.innerHTML = faIcon.html[0];
