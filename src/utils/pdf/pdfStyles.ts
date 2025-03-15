@@ -33,7 +33,7 @@ export const addHeaderFooter = (pdf: jsPDF, pageNum: number, totalPages: number,
   pdf.setFontSize(8);
   pdf.setTextColor(255, 255, 255);
   const contactX = margin + 50;
-  let contactDetails = [];
+  const contactDetails = [];
   
   if (settings?.name) contactDetails.push(settings.name);
   if (settings?.phone) contactDetails.push(settings.phone);
