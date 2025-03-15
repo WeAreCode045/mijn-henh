@@ -45,7 +45,7 @@ export const generateInfoSection = async (
   // Define section heights and positions
   const titleBarHeight = 15;
   const descriptionY = y + titleBarHeight + 5;
-  const descriptionHeight = 80; // Reduced description section height
+  const descriptionHeight = 90; // Reduced description section height
   
   // Description section (left 60%)
   const descriptionWidth = contentWidth * 0.6;
@@ -131,7 +131,7 @@ export const generateInfoSection = async (
   const bottomSectionY = descriptionY + descriptionHeight + 10;
   
   // Key info cards in a 3x2 grid (left 60%)
-  const keyInfoWidth = contentWidth * 0.6;
+  const keyInfoWidth = contentWidth * 1;
   await generateKeyInfoCards(
     pdf,
     property,
