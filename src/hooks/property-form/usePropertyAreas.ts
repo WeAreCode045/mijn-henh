@@ -89,7 +89,7 @@ export function usePropertyAreas(
         // Add the selected images to the area
         return { 
           ...area, 
-          imageIds // This property now exists in the interface
+          imageIds 
         };
       }
       return area;
