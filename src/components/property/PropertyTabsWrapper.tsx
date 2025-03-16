@@ -1,4 +1,3 @@
-
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -32,7 +31,7 @@ export function PropertyTabsWrapper({
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
         {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={property}>
+          <PropertyFormManager property={property as PropertyFormData}>
             {({ 
               formState, 
               handleFieldChange,
@@ -74,8 +73,8 @@ export function PropertyTabsWrapper({
               onRemoveNearbyPlace,
               isLoadingLocationData,
               isGeneratingMap,
-              onFetchCategoryPlaces,  // Access this from the PropertyFormManager
-              onFetchNearbyCities     // Access this from the PropertyFormManager
+              onFetchCategoryPlaces,
+              onFetchNearbyCities
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>

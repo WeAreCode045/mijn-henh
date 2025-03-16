@@ -12,13 +12,13 @@ export interface PropertyImage {
   property_id?: string;
   is_main?: boolean;
   is_featured_image?: boolean;
-  type?: string;
+  type?: 'image' | 'floorplan' | string;
   area?: string | null;
   sort_order?: number;
   filePath?: string;
   title?: string;
   description?: string;
-  columns?: number; // Added for FloorplanProcessor compatibility
+  columns?: number;
 }
 
 // Define PropertyFloorplan as an alias to PropertyImage for compatibility
@@ -27,21 +27,22 @@ export type PropertyFloorplan = PropertyImage;
 // Property area with all required fields
 export interface PropertyArea {
   id: string;
-  name: string;
-  size: string;
+  name?: string;
+  size?: string;
   title: string;
   description: string;
-  images: PropertyImage[]; 
-  imageIds: string[]; // Adding this property to match PropertyAreaTypes.ts
-  columns: number;
+  images: (PropertyImage | string)[]; 
+  imageIds?: string[];
+  columns?: number;
 }
 
 // Property nearby place
 export interface PropertyNearbyPlace {
   id: string;
   name: string;
-  distance: string | number;
-  type: string;
+  distance?: string | number;
+  type?: string;
+  types?: string[];
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
@@ -69,26 +70,48 @@ export interface PropertyAgent {
   address?: string;
 }
 
+// New type for structured General Info
+export interface GeneralInfoData {
+  propertyDetails: {
+    title: string;
+    price: string;
+    address: string;
+    objectId: string;
+  };
+  description: {
+    shortDescription: string;
+    fullDescription: string;
+  };
+  keyInformation: {
+    buildYear: string;
+    lotSize: string;
+    livingArea: string;
+    bedrooms: string;
+    bathrooms: string;
+    energyClass: string;
+  };
+}
+
 // Property data interface
 export interface PropertyData {
   id: string;
-  title: string;
-  price: string;
-  address: string;
-  bedrooms: string;
-  bathrooms: string;
-  sqft: string;
-  livingArea: string;
-  buildYear: string;
-  garages: string;
-  energyLabel: string;
-  hasGarden: boolean;
-  description: string;
-  shortDescription?: string; // Added shortDescription field
+  title?: string;
+  price?: string;
+  address?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  sqft?: string;
+  livingArea?: string;
+  buildYear?: string;
+  garages?: string;
+  energyLabel?: string;
+  hasGarden?: boolean;
+  description?: string;
+  shortDescription?: string;
   location_description?: string;
-  features: PropertyFeature[];
-  images: PropertyImage[];
-  areas: PropertyArea[];
+  features?: PropertyFeature[];
+  images?: (PropertyImage | string)[];
+  areas?: PropertyArea[];
   map_image?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -101,25 +124,30 @@ export interface PropertyData {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   notes?: string;
-  floorplans?: PropertyImage[];
+  floorplans?: (PropertyImage | string)[];
   floorplanEmbedScript?: string;
   featuredImage?: string | null;
   featuredImages?: string[];
   created_at?: string;
   updated_at?: string;
-  // For backward compatibility - can be PropertyImage[] or string[]
-  coverImages?: PropertyImage[] | string[];
-  gridImages?: PropertyImage[] | string[];
+  coverImages?: (PropertyImage | string)[];
+  gridImages?: (PropertyImage | string)[];
+  generalInfo?: GeneralInfoData;
+  areaPhotos?: (PropertyImage | string)[];
 }
 
 // Property form data extends PropertyData
-export interface PropertyFormData extends PropertyData {
-  // For backward compatibility in the form
-  areaPhotos?: PropertyImage[];
+export interface PropertyFormData extends Partial<PropertyData> {
+  id?: string;
+  areaPhotos?: (PropertyImage | string)[];
+  coverImages?: (PropertyImage | string)[];
+  gridImages?: (PropertyImage | string)[];
+  generalInfo?: GeneralInfoData;
 }
 
 // Property submit data
 export interface PropertySubmitData {
+  id?: string;
   title: string;
   price: string;
   address: string;
@@ -132,11 +160,11 @@ export interface PropertySubmitData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
-  shortDescription?: string; // Added shortDescription field
+  shortDescription?: string;
   location_description?: string;
   features: string;
   images: string[];
-  areas: PropertyArea[];
+  areas: any;
   map_image?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -152,4 +180,5 @@ export interface PropertySubmitData {
   featuredImage?: string | null;
   featuredImages?: string[];
   floorplanEmbedScript?: string;
+  generalInfo?: string;
 }

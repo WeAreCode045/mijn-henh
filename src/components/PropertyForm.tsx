@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
@@ -112,11 +111,14 @@ export function PropertyForm() {
     </div>;
   }
 
-  // Ensure formData has an id property by casting it to PropertyData
-  // This is safe because we've already checked that formData is not null
+  // Ensure formData has all required properties for PropertyData type
   const propertyData: PropertyData = {
     ...formData,
     id: formData.id || '', // Provide empty string as fallback if id is missing
+    created_at: formData.created_at || new Date().toISOString(),
+    updated_at: formData.updated_at || new Date().toISOString(),
+    coverImages: formData.coverImages || [],
+    gridImages: formData.gridImages || []
   };
 
   return (

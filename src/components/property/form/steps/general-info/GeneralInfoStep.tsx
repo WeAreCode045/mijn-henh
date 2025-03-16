@@ -1,5 +1,5 @@
 
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, GeneralInfoData } from "@/types/property";
 import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { BasicDetails } from "./BasicDetails";
@@ -15,6 +15,7 @@ interface GeneralInfoStepProps {
   setPendingChanges?: (pending: boolean) => void;
 }
 
+// Define the allowed sections for the generalInfo object
 type GeneralInfoSections = 'propertyDetails' | 'description' | 'keyInformation';
 
 export function GeneralInfoStep({
