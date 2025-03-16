@@ -9,8 +9,8 @@ import {
   faBolt 
 } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
-// Import svg2pdf.js library correctly
-import { default as svg2pdf } from 'svg2pdf.js';
+// Import the svg2pdf library correctly
+import * as svg2pdfLib from 'svg2pdf.js';
 import { supabase } from '@/integrations/supabase/client';
 
 // Map of icon names to FontAwesome icons (fallback if SVG fetching fails)
@@ -107,8 +107,8 @@ export const renderIconToPDF = async (
     const offsetX = x - size/2;
     const offsetY = y - size/2;
     
-    // Use svg2pdf correctly
-    await svg2pdf(svg, pdf, {
+    // Use svg2pdf correctly - it's now available as svg2pdfLib
+    await svg2pdfLib.default(svg, pdf, {
       x: offsetX,
       y: offsetY,
       width: size,

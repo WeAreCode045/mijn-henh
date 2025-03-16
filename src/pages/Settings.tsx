@@ -6,6 +6,7 @@ import { SettingsTab } from "@/types/settings";
 import { AgencyTab } from "@/components/settings/AgencyTab";
 import { DesignTab } from "@/components/settings/DesignTab";
 import { AdvancedTab } from "@/components/settings/AdvancedTab";
+import { IconSettings } from "@/components/settings/IconSettings";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>("agency");
@@ -44,6 +45,12 @@ const Settings = () => {
         >
           Advanced
         </Button>
+        <Button 
+          onClick={() => setActiveTab("icons")} 
+          variant={activeTab === "icons" ? "default" : "outline"}
+        >
+          Icons
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
@@ -71,6 +78,13 @@ const Settings = () => {
             settings={settings}
             onChange={handleChange}
             onSwitchChange={handleSwitchChange}
+          />
+        )}
+
+        {activeTab === "icons" && (
+          <IconSettings
+            settings={settings}
+            onSelectChange={handleSelectChange}
           />
         )}
 

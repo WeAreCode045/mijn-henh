@@ -1,70 +1,54 @@
+
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AgencySettings } from "@/types/agency";
-import { icons } from "lucide-react";
-import { 
-  faHome,
-  faBed,
-  faBath,
-  faCar,
-  faCalendar,
-  faRuler,
-  faBolt,
-  faMapMarker,
-  faLandmark,
-  faBuilding,
-  faHouse,
-  faWarehouse,
-  faCity,
-  faTree,
-  faSwimmingPool,
-  faKey,
-  faDoorOpen,
-  faSun,
-  faLeaf
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { availableIcons, getSvgIconUrl } from "@/utils/iconUtils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface IconSettingsProps {
   settings: AgencySettings;
   onSelectChange: (name: string, value: string) => void;
 }
 
-const faIcons = {
-  home: faHome,
-  bed: faBed,
-  bath: faBath,
-  car: faCar,
-  calendar: faCalendar,
-  ruler: faRuler,
-  zap: faBolt,
-  'map-pin': faMapMarker,
-  landmark: faLandmark,
-  building: faBuilding,
-  house: faHouse,
-  warehouse: faWarehouse,
-  city: faCity,
-  tree: faTree,
-  pool: faSwimmingPool,
-  key: faKey,
-  door: faDoorOpen,
-  sun: faSun,
-  leaf: faLeaf,
+interface IconPreviewProps {
+  iconName: string;
+  className?: string;
+}
+
+// Component to display the SVG icon preview
+const IconPreview = ({ iconName, className = "" }: IconPreviewProps) => {
+  const [iconUrl, setIconUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadIcon = async () => {
+      setIsLoading(true);
+      try {
+        const url = await getSvgIconUrl(iconName);
+        setIconUrl(url);
+      } catch (error) {
+        console.error(`Error loading icon ${iconName}:`, error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (iconName) {
+      loadIcon();
+    }
+  }, [iconName]);
+
+  if (isLoading) {
+    return <Skeleton className="h-5 w-5 rounded-full" />;
+  }
+
+  if (!iconUrl) {
+    return <div className={`h-5 w-5 flex items-center justify-center text-xs ${className}`}>{iconName.charAt(0).toUpperCase()}</div>;
+  }
+
+  return <img src={iconUrl} alt={iconName} className={`h-5 w-5 ${className}`} />;
 };
-
-const lucideIconOptions = Object.keys(icons).sort().map(icon => ({
-  id: `lucide-${icon}`,
-  name: icon,
-  source: 'lucide'
-}));
-
-const faIconOptions = Object.keys(faIcons).sort().map(icon => ({
-  id: `fa-${icon}`,
-  name: icon,
-  source: 'fa'
-}));
-
-const iconOptions = [...lucideIconOptions, ...faIconOptions].sort((a, b) => a.name.localeCompare(b.name));
 
 export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) => {
   return (
@@ -80,19 +64,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconBuildYear && faIcons[settings.iconBuildYear as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconBuildYear as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconBuildYear}
+                {settings.iconBuildYear && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconBuildYear} className="mr-2" />
+                    <span>{settings.iconBuildYear}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -107,19 +93,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconBedrooms && faIcons[settings.iconBedrooms as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconBedrooms as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconBedrooms}
+                {settings.iconBedrooms && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconBedrooms} className="mr-2" />
+                    <span>{settings.iconBedrooms}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -134,19 +122,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconBathrooms && faIcons[settings.iconBathrooms as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconBathrooms as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconBathrooms}
+                {settings.iconBathrooms && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconBathrooms} className="mr-2" />
+                    <span>{settings.iconBathrooms}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -161,19 +151,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconGarages && faIcons[settings.iconGarages as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconGarages as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconGarages}
+                {settings.iconGarages && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconGarages} className="mr-2" />
+                    <span>{settings.iconGarages}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -188,19 +180,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconEnergyClass && faIcons[settings.iconEnergyClass as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconEnergyClass as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconEnergyClass}
+                {settings.iconEnergyClass && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconEnergyClass} className="mr-2" />
+                    <span>{settings.iconEnergyClass}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -215,19 +209,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconSqft && faIcons[settings.iconSqft as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconSqft as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconSqft}
+                {settings.iconSqft && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconSqft} className="mr-2" />
+                    <span>{settings.iconSqft}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -242,19 +238,21 @@ export const IconSettings = ({ settings, onSelectChange }: IconSettingsProps) =>
           >
             <SelectTrigger>
               <SelectValue placeholder="Select icon">
-                {settings.iconLivingSpace && faIcons[settings.iconLivingSpace as keyof typeof faIcons] ? (
-                  <FontAwesomeIcon icon={faIcons[settings.iconLivingSpace as keyof typeof faIcons]} className="mr-2" />
-                ) : null}
-                {settings.iconLivingSpace}
+                {settings.iconLivingSpace && (
+                  <div className="flex items-center">
+                    <IconPreview iconName={settings.iconLivingSpace} className="mr-2" />
+                    <span>{settings.iconLivingSpace}</span>
+                  </div>
+                )}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {iconOptions.map((icon) => (
-                <SelectItem key={icon.id} value={icon.name} className="flex items-center">
-                  {icon.source === 'fa' && faIcons[icon.name as keyof typeof faIcons] ? (
-                    <FontAwesomeIcon icon={faIcons[icon.name as keyof typeof faIcons]} className="mr-2" />
-                  ) : null}
-                  {icon.name}
+              {availableIcons.map((iconName) => (
+                <SelectItem key={iconName} value={iconName} className="flex items-center">
+                  <div className="flex items-center">
+                    <IconPreview iconName={iconName} className="mr-2" />
+                    <span>{iconName}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

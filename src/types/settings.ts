@@ -1,5 +1,5 @@
 
-export type SettingsTab = "agency" | "design" | "advanced";
+export type SettingsTab = "agency" | "design" | "advanced" | "icons";
 
 export interface Settings {
   name: string;
