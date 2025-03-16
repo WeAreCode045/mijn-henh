@@ -9,10 +9,11 @@ import {
   faBolt 
 } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
-// Import svg2pdf as a default import and rename to make it clear
-import svg2pdfLib from 'svg2pdf.js';
+// Import svg2pdf.js library correctly
+import { default as svg2pdf } from 'svg2pdf.js';
+import { supabase } from '@/integrations/supabase/client';
 
-// Map of icon names to FontAwesome icons
+// Map of icon names to FontAwesome icons (fallback if SVG fetching fails)
 const iconMap = {
   'calendar': faCalendar,
   'home': faHome,
@@ -22,36 +23,82 @@ const iconMap = {
   'zap': faBolt,
 };
 
+// Cache for SVG icons to avoid repeated fetches
+const svgCache: Record<string, string> = {};
+
+// Fetch SVG from Supabase storage
+const fetchSvgIcon = async (iconName: string, theme: 'light' | 'dark' = 'light'): Promise<string | null> => {
+  // Check cache first
+  const cacheKey = `${theme}-${iconName}`;
+  if (svgCache[cacheKey]) {
+    return svgCache[cacheKey];
+  }
+  
+  try {
+    const { data, error } = await supabase.storage
+      .from('global')
+      .download(`icons/${theme}/${iconName}.svg`);
+      
+    if (error || !data) {
+      console.error(`Error fetching icon ${iconName}:`, error);
+      return null;
+    }
+    
+    const svgText = await data.text();
+    // Cache the result
+    svgCache[cacheKey] = svgText;
+    return svgText;
+  } catch (error) {
+    console.error(`Error processing icon ${iconName}:`, error);
+    return null;
+  }
+};
+
 export const renderIconToPDF = async (
   pdf: jsPDF,
   iconName: string,
   x: number,
   y: number,
-  size: number = 8
+  size: number = 8,
+  theme: 'light' | 'dark' = 'light'
 ): Promise<void> => {
   try {
-    // Get the icon from our map, or use calendar as fallback
-    const iconDef = iconMap[iconName] || faCalendar;
+    // Try to fetch the SVG icon from storage
+    const svgContent = await fetchSvgIcon(iconName, theme);
     
-    // Create FontAwesome icon
-    const renderedIcon = icon(iconDef, { 
-      styles: { 'color': 'white' } 
-    });
+    let svg: SVGSVGElement;
     
-    // Create SVG from icon
-    const svgElement = document.createElement('div');
-    svgElement.innerHTML = renderedIcon.html[0];
-    const svg = svgElement.firstChild as SVGSVGElement;
-    
-    if (!svg) {
-      console.error('Failed to create SVG element from icon:', iconName);
-      return;
+    if (svgContent) {
+      // Create SVG element from the fetched content
+      const svgElement = document.createElement('div');
+      svgElement.innerHTML = svgContent;
+      svg = svgElement.firstChild as SVGSVGElement;
+      
+      if (!svg) {
+        throw new Error('Invalid SVG content');
+      }
+    } else {
+      // Fallback to FontAwesome if SVG fetching fails
+      const iconDef = iconMap[iconName] || faCalendar;
+      const renderedIcon = icon(iconDef, { 
+        styles: { 'color': 'white' } 
+      });
+      
+      const svgElement = document.createElement('div');
+      svgElement.innerHTML = renderedIcon.html[0];
+      svg = svgElement.firstChild as SVGSVGElement;
+      
+      if (!svg) {
+        throw new Error('Failed to create SVG element from icon');
+      }
+      
+      // Set viewBox for FontAwesome icons
+      svg.setAttribute('viewBox', `0 0 ${iconDef.icon[0]} ${iconDef.icon[1]}`);
     }
     
-    // Set size and position
+    // Set size for the SVG
     svg.setAttribute('width', `${size}px`);
     svg.setAttribute('height', `${size}px`);
-    svg.setAttribute('viewBox', `0 0 ${iconDef.icon[0]} ${iconDef.icon[1]}`);
     
     // Save current state of PDF
     pdf.saveGraphicsState();
@@ -60,8 +107,8 @@ export const renderIconToPDF = async (
     const offsetX = x - size/2;
     const offsetY = y - size/2;
     
-    // Use svg2pdfLib directly without calling .default
-    await svg2pdfLib(svg, pdf, {
+    // Use svg2pdf correctly
+    await svg2pdf(svg, pdf, {
       x: offsetX,
       y: offsetY,
       width: size,

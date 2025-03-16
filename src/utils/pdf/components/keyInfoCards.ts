@@ -63,8 +63,8 @@ export const generateKeyInfoCards = async (
     pdf.setFillColor(secondaryColor);
     pdf.circle(iconX, iconY, 4, 'F');
     
-    // Render FontAwesome icon
-    await renderIconToPDF(pdf, spec.icon, iconX, iconY, 6);
+    // Render icon - use 'light' theme for white icons
+    await renderIconToPDF(pdf, spec.icon, iconX, iconY, 6, 'light');
     
     // Label to the right of the icon
     pdf.setFontSize(9);

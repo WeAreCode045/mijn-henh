@@ -2,17 +2,8 @@
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { defaultAgencySettings } from "@/utils/defaultAgencySettings";
-import { 
-  CalendarDays, 
-  BedDouble, 
-  Bath, 
-  Car, 
-  Ruler, 
-  Home,
-  MapPin,
-  Landmark,
-  Building
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyDetailsProps {
   property: PropertyData;
@@ -20,40 +11,44 @@ interface PropertyDetailsProps {
 }
 
 export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
-  const iconSize = 18;
+  const [iconUrls, setIconUrls] = useState<Record<string, string>>({});
   
-  // Map icon names to actual components
-  const getIcon = (iconName: string | undefined) => {
-    // Default to calendar if iconName is undefined
-    const iconToRender = iconName?.toLowerCase() || 'calendar';
+  // Fetch and generate URLs for the icons
+  useEffect(() => {
+    const fetchIcons = async () => {
+      const iconsToFetch = [
+        settings?.iconBuildYear || 'calendar',
+        settings?.iconBedrooms || 'bed',
+        settings?.iconBathrooms || 'bath',
+        settings?.iconGarages || 'car',
+        settings?.iconSqft || 'ruler',
+        settings?.iconLivingSpace || 'home',
+        settings?.iconEnergyClass || 'zap'
+      ];
+      
+      const iconUrlMap: Record<string, string> = {};
+      
+      for (const iconName of iconsToFetch) {
+        try {
+          // Get public URL for the icon
+          const { data } = await supabase.storage
+            .from('global')
+            .getPublicUrl(`icons/dark/${iconName}.svg`);
+          
+          if (data?.publicUrl) {
+            iconUrlMap[iconName] = data.publicUrl;
+          }
+        } catch (error) {
+          console.error(`Error fetching icon ${iconName}:`, error);
+        }
+      }
+      
+      setIconUrls(iconUrlMap);
+    };
     
-    switch (iconToRender) {
-      case 'calendar':
-      case 'calendars':
-      case 'calendardays':
-        return <CalendarDays size={iconSize} />;
-      case 'bed':
-      case 'beddouble':
-        return <BedDouble size={iconSize} />;
-      case 'bath':
-        return <Bath size={iconSize} />;
-      case 'car':
-        return <Car size={iconSize} />;
-      case 'ruler':
-        return <Ruler size={iconSize} />;
-      case 'home':
-        return <Home size={iconSize} />;
-      case 'mappin':
-        return <MapPin size={iconSize} />;
-      case 'landmark':
-        return <Landmark size={iconSize} />;
-      case 'building':
-        return <Building size={iconSize} />;
-      default:
-        return <CalendarDays size={iconSize} />;
-    }
-  };
-
+    fetchIcons();
+  }, [settings]);
+  
   // Format the number with commas for thousands
   const formatNumber = (num?: number | string) => {
     if (num === undefined || num === null) return '';
@@ -101,7 +96,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           {property.buildYear && (
             <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
-                {getIcon(safeSettings.iconBuildYear)}
+                {iconUrls[safeSettings.iconBuildYear] ? (
+                  <img 
+                    src={iconUrls[safeSettings.iconBuildYear]} 
+                    alt="Year Built" 
+                    className="w-6 h-6" 
+                  />
+                ) : (
+                  <span className="w-6 h-6 flex items-center justify-center">C</span>
+                )}
               </div>
               <div>
                 <p className="text-xs text-white/80">Year Built</p>
@@ -113,7 +116,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           {parseValueToNumber(property.bedrooms) > 0 && (
             <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
-                {getIcon(safeSettings.iconBedrooms)}
+                {iconUrls[safeSettings.iconBedrooms] ? (
+                  <img 
+                    src={iconUrls[safeSettings.iconBedrooms]} 
+                    alt="Bedrooms" 
+                    className="w-6 h-6" 
+                  />
+                ) : (
+                  <span className="w-6 h-6 flex items-center justify-center">B</span>
+                )}
               </div>
               <div>
                 <p className="text-xs text-white/80">Bedrooms</p>
@@ -125,7 +136,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           {parseValueToNumber(property.bathrooms) > 0 && (
             <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
-                {getIcon(safeSettings.iconBathrooms)}
+                {iconUrls[safeSettings.iconBathrooms] ? (
+                  <img 
+                    src={iconUrls[safeSettings.iconBathrooms]} 
+                    alt="Bathrooms" 
+                    className="w-6 h-6" 
+                  />
+                ) : (
+                  <span className="w-6 h-6 flex items-center justify-center">B</span>
+                )}
               </div>
               <div>
                 <p className="text-xs text-white/80">Bathrooms</p>
@@ -137,7 +156,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           {parseValueToNumber(property.garages) > 0 && (
             <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
-                {getIcon(safeSettings.iconGarages)}
+                {iconUrls[safeSettings.iconGarages] ? (
+                  <img 
+                    src={iconUrls[safeSettings.iconGarages]} 
+                    alt="Garages" 
+                    className="w-6 h-6" 
+                  />
+                ) : (
+                  <span className="w-6 h-6 flex items-center justify-center">G</span>
+                )}
               </div>
               <div>
                 <p className="text-xs text-white/80">Garages</p>
@@ -149,7 +176,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           {parseValueToNumber(property.sqft) > 0 && (
             <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
-                {getIcon(safeSettings.iconSqft)}
+                {iconUrls[safeSettings.iconSqft] ? (
+                  <img 
+                    src={iconUrls[safeSettings.iconSqft]} 
+                    alt="Plot Size" 
+                    className="w-6 h-6" 
+                  />
+                ) : (
+                  <span className="w-6 h-6 flex items-center justify-center">P</span>
+                )}
               </div>
               <div>
                 <p className="text-xs text-white/80">Plot Size</p>
@@ -161,7 +196,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
           {parseValueToNumber(property.livingArea) > 0 && (
             <div className="flex items-center gap-3 rounded-lg p-3 bg-primary-color">
               <div className="webview-detail-icon" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white' }}>
-                {getIcon(safeSettings.iconLivingSpace)}
+                {iconUrls[safeSettings.iconLivingSpace] ? (
+                  <img 
+                    src={iconUrls[safeSettings.iconLivingSpace]} 
+                    alt="Living Space" 
+                    className="w-6 h-6" 
+                  />
+                ) : (
+                  <span className="w-6 h-6 flex items-center justify-center">L</span>
+                )}
               </div>
               <div>
                 <p className="text-xs text-white/80">Living Space</p>
