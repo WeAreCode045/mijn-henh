@@ -5,17 +5,23 @@ import { PropertyFeature } from "../property";
 import { PropertyArea } from "../property";
 import { PropertyNearbyPlace } from "../property";
 import { PropertyAgent } from "../property";
+import { GeneralInfoData } from "../property";
 
 // Property form data extends PropertyData
-export interface PropertyFormData extends PropertyData {
+export interface PropertyFormData extends Partial<PropertyData> {
+  id: string;
+  title?: string; // Make optional for form
   areaPhotos?: string[];
   coverImages?: string[];
   gridImages?: string[];
   nearby_cities?: PropertyCity[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Property submit data
 export interface PropertySubmitData {
+  id?: string;
   title: string;
   price: string;
   address: string;
@@ -28,6 +34,7 @@ export interface PropertySubmitData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription?: string;
   location_description?: string;
   features: string;
   images: string[];
@@ -47,4 +54,5 @@ export interface PropertySubmitData {
   featuredImage?: string | null;
   featuredImages?: string[];
   floorplanEmbedScript?: string;
+  generalInfo?: string;
 }

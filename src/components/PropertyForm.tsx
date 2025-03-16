@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
@@ -5,7 +6,7 @@ import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -111,10 +112,11 @@ export function PropertyForm() {
     </div>;
   }
 
-  // Ensure formData has all required properties for PropertyData type
+  // Convert formData to PropertyData with default values for required fields
   const propertyData: PropertyData = {
     ...formData,
-    id: formData.id || '', // Provide empty string as fallback if id is missing
+    id: formData.id || '',
+    title: formData.title || '', // Ensure title is not undefined
     created_at: formData.created_at || new Date().toISOString(),
     updated_at: formData.updated_at || new Date().toISOString(),
     coverImages: formData.coverImages || [],

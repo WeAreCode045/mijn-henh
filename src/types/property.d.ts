@@ -1,4 +1,6 @@
 
+import { Area } from './area';
+
 // Type for property features
 export interface PropertyFeature {
   id: string;
@@ -22,7 +24,12 @@ export interface PropertyImage {
 }
 
 // Define PropertyFloorplan as an alias to PropertyImage for compatibility
-export type PropertyFloorplan = PropertyImage;
+export type PropertyFloorplan = PropertyImage & {
+  title?: string;
+  description?: string;
+  is_featured?: boolean;
+  timestamp?: string;
+};
 
 // Property area with all required fields
 export interface PropertyArea {
@@ -49,7 +56,7 @@ export interface PropertyNearbyPlace {
   visible_in_webview?: boolean;
 }
 
-// Define PropertyPlaceType as PropertyNearbyPlace (not a union type)
+// Define PropertyPlaceType as PropertyNearbyPlace 
 export type PropertyPlaceType = PropertyNearbyPlace;
 
 // City type
@@ -58,6 +65,8 @@ export interface PropertyCity {
   name: string;
   distance?: string | number;
   visible_in_webview?: boolean;
+  description?: string;
+  image?: string;
 }
 
 // Property agent
@@ -95,7 +104,7 @@ export interface GeneralInfoData {
 // Property data interface
 export interface PropertyData {
   id: string;
-  title?: string;
+  title: string; // Required field
   price?: string;
   address?: string;
   bedrooms?: string;
@@ -132,17 +141,20 @@ export interface PropertyData {
   updated_at?: string;
   coverImages?: (PropertyImage | string)[];
   gridImages?: (PropertyImage | string)[];
-  generalInfo?: GeneralInfoData;
   areaPhotos?: (PropertyImage | string)[];
+  generalInfo?: GeneralInfoData;
 }
 
-// Property form data extends PropertyData
+// Property form data
 export interface PropertyFormData extends Partial<PropertyData> {
-  id?: string;
+  id: string;
+  title?: string; // Make this optional for form data
   areaPhotos?: (PropertyImage | string)[];
   coverImages?: (PropertyImage | string)[];
   gridImages?: (PropertyImage | string)[];
   generalInfo?: GeneralInfoData;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Property submit data

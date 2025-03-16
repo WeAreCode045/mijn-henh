@@ -15,7 +15,7 @@ export const initialFormData: PropertyFormData = {
   energyLabel: "",
   hasGarden: false,
   description: "",
-  shortDescription: "", // Now the field is properly typed
+  shortDescription: "", 
   location_description: "",
   features: [],
   images: [],
@@ -32,7 +32,10 @@ export const initialFormData: PropertyFormData = {
   floorplanEmbedScript: "", // Empty floorplanEmbedScript with empty string default
   virtualTourUrl: "",
   youtubeUrl: "",
-  // For backward compatibility
+  // Standard fields
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  // Backward compatibility fields
   areaPhotos: [], 
   coverImages: [],
   gridImages: []

@@ -1,13 +1,13 @@
 
 import { usePropertyFormManager } from "@/hooks/usePropertyFormManager";
-import { PropertyFormManagerProps } from "./types/PropertyFormManagerTypes";
+import { PropertyFormManagerProps, PropertyFormManagerChildrenProps } from "./types/PropertyFormManagerTypes";
 
 export function PropertyFormManager({ property, children }: PropertyFormManagerProps) {
   // Use the custom hook that combines all form-related functionality
   const formManagerProps = usePropertyFormManager(property);
   
   // Create props object that matches PropertyFormManagerChildrenProps structure
-  const childrenProps = {
+  const childrenProps: PropertyFormManagerChildrenProps = {
     formState: formManagerProps.formState,
     handleFieldChange: formManagerProps.handleFieldChange,
     handleSaveObjectId: formManagerProps.handleSaveObjectId,
@@ -36,23 +36,23 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     lastSaved: formManagerProps.lastSaved,
     isSaving: formManagerProps.isSaving,
     setPendingChanges: formManagerProps.setPendingChanges,
-    // Add missing properties for compatibility
+    // Add properties for compatibility
     propertyWithRequiredProps: property,
     handleImageUpload: formManagerProps.handleImageUpload,
     handleRemoveImage: formManagerProps.handleRemoveImage,
     isUploading: formManagerProps.isUploading,
-    // Placeholder implementations for missing properties
-    handleAreaPhotosUpload: () => {}, // Add stub implementation
-    handleRemoveAreaPhoto: () => {}, // Add stub implementation
-    handleFloorplanUpload: () => {}, // Add stub implementation
-    handleRemoveFloorplan: () => {}, // Add stub implementation
-    isUploadingFloorplan: false, // Add default value
-    handleSetFeaturedImage: () => {}, // Add stub implementation
-    handleToggleFeaturedImage: () => {}, // Add stub implementation
-    handleVirtualTourUpdate: () => {}, // Add stub implementation
-    handleYoutubeUrlUpdate: () => {}, // Add stub implementation
-    handleFloorplanEmbedScriptUpdate: () => {}, // Add stub implementation
-    // Add aliases for compatibility
+    // Implementation for missing properties
+    handleAreaPhotosUpload: formManagerProps.handleAreaPhotosUpload || (() => Promise.resolve()),
+    handleRemoveAreaPhoto: formManagerProps.handleRemoveAreaPhoto || (() => {}),
+    handleFloorplanUpload: formManagerProps.handleFloorplanUpload || (() => {}),
+    handleRemoveFloorplan: formManagerProps.handleRemoveFloorplan || (() => {}),
+    isUploadingFloorplan: formManagerProps.isUploadingFloorplan || false,
+    handleSetFeaturedImage: formManagerProps.handleSetFeaturedImage || (() => {}),
+    handleToggleFeaturedImage: formManagerProps.handleToggleFeaturedImage || (() => {}),
+    handleVirtualTourUpdate: formManagerProps.handleVirtualTourUpdate || (() => {}),
+    handleYoutubeUrlUpdate: formManagerProps.handleYoutubeUrlUpdate || (() => {}),
+    handleFloorplanEmbedScriptUpdate: formManagerProps.handleFloorplanEmbedScriptUpdate || (() => {}),
+    // Aliases for compatibility
     onAddFeature: formManagerProps.onAddFeature,
     onRemoveFeature: formManagerProps.onRemoveFeature,
     onUpdateFeature: formManagerProps.onUpdateFeature,

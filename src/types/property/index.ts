@@ -17,3 +17,9 @@ export type {
 
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export { type PropertyData as PropertyDataType } from './PropertyDataTypes';
+
+// Re-export types from PropertyTypes.ts
+export type { 
+  PropertyFloorplan as PropertyFloorplanType,
+  PropertyNearbyPlace as PropertyNearbyPlaceType
+} from './PropertyTypes';

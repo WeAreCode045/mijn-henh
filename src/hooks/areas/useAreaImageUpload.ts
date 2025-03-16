@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyImage } from "@/types/property";
 
 export function useAreaImageUpload(property_id: string, areaId: string, imageIds: string[], setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>) {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +14,7 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
     setError(null);
     
     const uploadedImageIds: string[] = [];
-    const uploadedImages: any[] = [];
+    const uploadedImages: PropertyImage[] = [];
     
     try {
       for (let i = 0; i < files.length; i++) {
@@ -51,7 +52,7 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
             property_id,
             area: areaId,
             url: publicUrl,
-            type: 'image' as 'image' | 'floorplan', // Explicitly cast as a valid type
+            type: 'image', // Use a string that matches the allowed type values
             sort_order: imageIds.length + i
           })
           .select('*')
@@ -65,7 +66,7 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
           
         // Add the image ID to the list
         uploadedImageIds.push(imageData.id);
-        uploadedImages.push(imageData);
+        uploadedImages.push(imageData as PropertyImage);
       }
       
       // Update the form state with the new image IDs

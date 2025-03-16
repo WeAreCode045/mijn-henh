@@ -1,17 +1,10 @@
 
-import { PropertyFormData } from "@/types/property";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { PropertyFormData, GeneralInfoData } from "@/types/property";
+import { useState, useCallback } from "react";
+import { PropertySpecs } from "./general-info/PropertySpecs";
 import { BasicDetails } from "./general-info/BasicDetails";
 import { DescriptionSection } from "./general-info/DescriptionSection";
-import { PropertySpecs } from "./general-info/PropertySpecs";
 import { ImageSelections } from "./general-info/ImageSelections";
-import { useState } from "react";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
@@ -19,146 +12,146 @@ interface GeneralInfoStepProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
+
+// Define specific type for the sections in generalInfo
+type GeneralInfoSections = 'propertyDetails' | 'description' | 'keyInformation';
 
 export function GeneralInfoStep({
   formData,
   onFieldChange,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading
+  isUploading,
+  setPendingChanges
 }: GeneralInfoStepProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onFieldChange(name as keyof PropertyFormData, value);
-  };
-  
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    onFieldChange(name as keyof PropertyFormData, checked);
-  };
+  // Initialize generalInfo if it doesn't exist
+  if (!formData.generalInfo) {
+    formData.generalInfo = {
+      propertyDetails: {
+        title: formData.title || '',
+        price: formData.price || '',
+        address: formData.address || '',
+        objectId: formData.object_id || '',
+      },
+      description: {
+        shortDescription: formData.shortDescription || '',
+        fullDescription: formData.description || '',
+      },
+      keyInformation: {
+        buildYear: formData.buildYear || '',
+        lotSize: formData.sqft || '',
+        livingArea: formData.livingArea || '',
+        bedrooms: formData.bedrooms || '',
+        bathrooms: formData.bathrooms || '',
+        energyClass: formData.energyLabel || '',
+      }
+    };
+  }
 
   const handleFeaturedImageSelect = (url: string | null) => {
+    console.log("Featured image selected in GeneralInfoStep:", url);
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
     }
   };
 
   const handleFeaturedImageToggle = (url: string) => {
+    console.log("Featured image toggled in GeneralInfoStep:", url);
     if (handleToggleFeaturedImage) {
       handleToggleFeaturedImage(url);
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
     }
   };
 
+  // Convert images to PropertyImage[] format
+  const propertyImages = formData.images?.map(img => {
+    if (typeof img === 'string') {
+      return { url: img, id: img }; // Use URL as ID if string
+    }
+    return img;
+  }) || [];
+
+  // Handle changes to generalInfo
+  const handleGeneralInfoChange = useCallback((
+    section: GeneralInfoSections, // Use the defined type
+    field: string,
+    value: any
+  ) => {
+    if (!formData.generalInfo) return;
+    
+    const updatedGeneralInfo = {
+      ...formData.generalInfo,
+      [section]: {
+        ...formData.generalInfo[section],
+        [field]: value
+      }
+    };
+    
+    // Update the generalInfo field
+    onFieldChange('generalInfo', updatedGeneralInfo);
+    
+    // Also update the individual fields for backward compatibility
+    if (section === 'propertyDetails') {
+      if (field === 'title') onFieldChange('title', value);
+      if (field === 'price') onFieldChange('price', value);
+      if (field === 'address') onFieldChange('address', value);
+      if (field === 'objectId') onFieldChange('object_id', value);
+    } else if (section === 'description') {
+      if (field === 'shortDescription') onFieldChange('shortDescription', value);
+      if (field === 'fullDescription') onFieldChange('description', value);
+    } else if (section === 'keyInformation') {
+      if (field === 'buildYear') onFieldChange('buildYear', value);
+      if (field === 'lotSize') onFieldChange('sqft', value);
+      if (field === 'livingArea') onFieldChange('livingArea', value);
+      if (field === 'bedrooms') onFieldChange('bedrooms', value);
+      if (field === 'bathrooms') onFieldChange('bathrooms', value);
+      if (field === 'energyClass') onFieldChange('energyLabel', value);
+    }
+    
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+  }, [formData.generalInfo, onFieldChange, setPendingChanges]);
+
   return (
     <div className="space-y-6">
-      {/* Basic Details */}
+      {/* 1. Basic Details (Title, Price, Address, Object ID) */}
       <BasicDetails 
-        formData={formData}
-        onFieldChange={onFieldChange}
-      />
-      
-      {/* Property Specifications */}
-      <PropertySpecs 
         formData={formData} 
         onFieldChange={onFieldChange}
+        onGeneralInfoChange={handleGeneralInfoChange}
       />
-      
-      {/* Description Section */}
+
+      {/* 2. Property Description */}
       <DescriptionSection 
         formData={formData}
         onFieldChange={onFieldChange}
+        onGeneralInfoChange={handleGeneralInfoChange}
+        setPendingChanges={setPendingChanges}
       />
       
-      {/* Advanced Fields Toggle */}
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => setShowAdvanced(!showAdvanced)}
-        className="w-full"
-      >
-        {showAdvanced ? "Hide" : "Show"} Advanced Fields
-      </Button>
-      
-      {/* Advanced Fields */}
-      {showAdvanced && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-medium">Advanced Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="livingArea">Living Area (m²)</Label>
-                <Input
-                  id="livingArea"
-                  name="livingArea"
-                  placeholder="Living Area"
-                  value={formData.livingArea || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="buildYear">Build Year</Label>
-                <Input
-                  id="buildYear"
-                  name="buildYear"
-                  placeholder="Build Year"
-                  value={formData.buildYear || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="garages">Garages</Label>
-                <Input
-                  id="garages"
-                  name="garages"
-                  placeholder="Garages"
-                  value={formData.garages || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="energyLabel">Energy Label</Label>
-                <Input
-                  id="energyLabel"
-                  name="energyLabel"
-                  placeholder="Energy Label"
-                  value={formData.energyLabel || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="hasGarden"
-                  checked={formData.hasGarden || false}
-                  onCheckedChange={(checked) => handleSwitchChange('hasGarden', checked)}
-                />
-                <Label htmlFor="hasGarden">Has Garden</Label>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Image Selections - Only display if there are images available */}
+      {/* 3. Key Information */}
+      <PropertySpecs 
+        formData={formData} 
+        onFieldChange={onFieldChange}
+        onGeneralInfoChange={handleGeneralInfoChange}
+      />
+
+      {/* 4. Image Selections */}
       {formData.images && formData.images.length > 0 && (
         <ImageSelections
-          images={formData.images}
+          images={propertyImages}
           featuredImage={formData.featuredImage || null}
           featuredImages={formData.featuredImages || []}
           onFeaturedImageSelect={handleFeaturedImageSelect}
           onFeaturedImageToggle={handleFeaturedImageToggle}
-          maxFeaturedImages={4}
         />
       )}
     </div>

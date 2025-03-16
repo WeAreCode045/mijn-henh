@@ -1,6 +1,7 @@
+
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { usePropertyTabs } from "@/hooks/usePropertyTabs";
 import { PropertyFormManager } from "./tabs/wrapper/PropertyFormManager";
 import { PropertyTabActionsHandler } from "./tabs/wrapper/PropertyTabActionsHandler";
@@ -83,8 +84,8 @@ export function PropertyTabsWrapper({
                       activeTab={activeTab}
                       property={propertyWithRequiredProps}
                       formState={formState}
-                      agentInfo={agentInfo}
-                      templateInfo={templateInfo}
+                      agentInfo={agentInfo || { id: '', name: '' }}
+                      templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
                       isUpdating={false}
                       onSave={onSave}
                       onDelete={onDelete}
