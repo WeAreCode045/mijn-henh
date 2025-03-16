@@ -48,10 +48,12 @@ export function usePropertyContentSubmit(
         ? formData.nearby_cities
         : JSON.stringify(formData.nearby_cities || []);
       
-      // Stringify generalInfo for database storage
+      // Stringify generalInfo for database storage - this is the key part!
+      console.log("generalInfo before stringify:", formData.generalInfo);
       const generalInfoJson = typeof formData.generalInfo === 'string'
         ? formData.generalInfo
         : JSON.stringify(formData.generalInfo || {});
+      console.log("generalInfo after stringify:", generalInfoJson);
       
       // Get values from generalInfo structure if available, otherwise use legacy fields
       const { 
@@ -89,11 +91,12 @@ export function usePropertyContentSubmit(
         virtualTourUrl: formData.virtualTourUrl,
         youtubeUrl: formData.youtubeUrl,
         floorplanEmbedScript: formData.floorplanEmbedScript || "",
-        // Add the new generalInfo field
+        // Explicitly add the generalInfo field to the update data
         generalInfo: generalInfoJson
       };
       
       console.log("Data being sent to database:", JSON.stringify(updateData).substring(0, 200) + "...");
+      console.log("generalInfo included in update:", updateData.generalInfo ? "Yes" : "No");
       
       // Update the property in the database
       const { error, data } = await supabase

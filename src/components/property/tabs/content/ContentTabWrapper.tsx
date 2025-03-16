@@ -25,7 +25,7 @@ interface ContentTabWrapperProps {
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
-    isSaving?: boolean; // Add this property to fix the TypeScript error
+    isSaving?: boolean; // Property to track saving state
   };
 }
 
@@ -60,6 +60,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
 
   const handleSave = async () => {
     console.log("handleSave called in ContentTabWrapper with formData ID:", formData.id);
+    console.log("formData.generalInfo:", formData.generalInfo);
     
     if (!formData.id) {
       console.error("Cannot save: formData.id is missing", formData);
