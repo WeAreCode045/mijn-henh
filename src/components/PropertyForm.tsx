@@ -66,12 +66,9 @@ export function PropertyForm() {
 
   // Modified to avoid conflicts with content tab save
   const handleSave = () => {
-    console.log("PropertyForm.handleSave called - this is just a refresh notification");
-    
     // Only show a toast, don't trigger any actual save
-    toast({
-      description: "Property data refreshed",
-    });
+    // This function is not used for actual saving anymore
+    console.log("PropertyForm.handleSave called - this is just a refresh notification");
   };
 
   const handleDelete = async (): Promise<void> => {
