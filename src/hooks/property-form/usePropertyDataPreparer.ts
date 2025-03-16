@@ -17,21 +17,29 @@ export function usePropertyDataPreparer() {
     const imageUrls = Array.isArray(formData.images)
       ? formData.images.map(img => typeof img === 'string' ? img : img.url)
       : [];
+      
+    // Prepare generalInfo - use it directly if it exists
+    let generalInfoValue = formData.generalInfo;
+    if (generalInfoValue && typeof generalInfoValue !== 'string') {
+      generalInfoValue = JSON.stringify(generalInfoValue);
+    }
     
     return {
-      title: formData.title,
-      price: formData.price,
-      address: formData.address,
-      bedrooms: formData.bedrooms,
-      bathrooms: formData.bathrooms,
-      sqft: formData.sqft,
-      livingArea: formData.livingArea,
-      buildYear: formData.buildYear,
-      garages: formData.garages,
-      energyLabel: formData.energyLabel,
-      hasGarden: formData.hasGarden,
-      description: formData.description,
-      location_description: formData.location_description,
+      id: formData.id,
+      title: formData.title || '',
+      price: formData.price || '',
+      address: formData.address || '',
+      bedrooms: formData.bedrooms || '',
+      bathrooms: formData.bathrooms || '',
+      sqft: formData.sqft || '',
+      livingArea: formData.livingArea || '',
+      buildYear: formData.buildYear || '',
+      garages: formData.garages || '',
+      energyLabel: formData.energyLabel || '',
+      hasGarden: formData.hasGarden || false,
+      description: formData.description || '',
+      shortDescription: formData.shortDescription || '',
+      location_description: formData.location_description || '',
       features: featuresJson as string,
       areas: areasForSubmission as any,
       nearby_places: nearby_placesJson as string,
@@ -46,7 +54,9 @@ export function usePropertyDataPreparer() {
       youtubeUrl: formData.youtubeUrl,
       floorplanEmbedScript: formData.floorplanEmbedScript || "",
       // Use the extracted URL strings
-      images: imageUrls
+      images: imageUrls,
+      // Include generalInfo
+      generalInfo: generalInfoValue
     };
   };
 

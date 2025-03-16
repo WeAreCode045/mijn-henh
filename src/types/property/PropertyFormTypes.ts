@@ -1,19 +1,13 @@
 
-import { PropertyData } from "../property";
-import { PropertyCity } from "../property";
-import { PropertyFeature } from "../property";
-import { PropertyArea } from "../property";
-import { PropertyNearbyPlace } from "../property";
-import { PropertyAgent } from "../property";
-import { GeneralInfoData } from "../property";
+import { PropertyData, PropertyCity, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyAgent, GeneralInfoData } from "../property";
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends Partial<PropertyData> {
   id: string;
   title?: string; // Make optional for form
   areaPhotos?: string[];
-  coverImages?: string[];
-  gridImages?: string[];
+  coverImages?: PropertyData['coverImages'];
+  gridImages?: PropertyData['gridImages'];
   nearby_cities?: PropertyCity[];
   created_at?: string;
   updated_at?: string;
@@ -38,7 +32,7 @@ export interface PropertySubmitData {
   location_description?: string;
   features: string;
   images: string[];
-  areas: PropertyArea[];
+  areas: string;
   map_image?: string | null;
   latitude?: number | null;
   longitude?: number | null;

@@ -6,6 +6,9 @@ import { usePropertyFeatures } from './property-form/usePropertyFeatures';
 import { usePropertyAreas } from './property-form/usePropertyAreas';
 import { usePropertyContent } from './property-form/usePropertyContent';
 import { usePropertyImages } from './property-form/usePropertyImages';
+import { usePropertyFloorplans } from './images/usePropertyFloorplans';
+import { usePropertyAreaPhotos } from './images/usePropertyAreaPhotos';
+import { usePropertyCoverImages } from './usePropertyCoverImages';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
@@ -31,7 +34,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleAreaImagesSelect,
     handleAreaImageUpload,
     isUploading
-  } = usePropertyAreas(formState, onFieldChange);
+  } = usePropertyAreas(formState, setFormState);
   
   // Hook for managing content and steps
   const { 
@@ -59,6 +62,35 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveImage,
     images
   } = usePropertyImages(formState, onFieldChange);
+  
+  // Hook for managing floorplans
+  const {
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
+    handleFloorplanEmbedScriptUpdate
+  } = usePropertyFloorplans(formState, onFieldChange);
+  
+  // Hook for managing area photos
+  const {
+    handleAreaPhotosUpload,
+    handleRemoveAreaPhoto
+  } = usePropertyAreaPhotos(formState, onFieldChange);
+  
+  // Hook for managing cover images
+  const {
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage
+  } = usePropertyCoverImages(formState, onFieldChange);
+  
+  // Media update handlers
+  const handleVirtualTourUpdate = (url: string) => {
+    onFieldChange('virtualTourUrl', url);
+  };
+  
+  const handleYoutubeUrlUpdate = (url: string) => {
+    onFieldChange('youtubeUrl', url);
+  };
   
   return {
     formState,
@@ -105,7 +137,25 @@ export function usePropertyFormManager(property: PropertyFormData) {
     images,
     isUploading,
     
-    // Placeholder methods for required properties in PropertyFormManagerChildrenProps
+    // Floorplan methods
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
+    handleFloorplanEmbedScriptUpdate,
+    
+    // Area photos methods
+    handleAreaPhotosUpload,
+    handleRemoveAreaPhoto,
+    
+    // Featured image methods
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    
+    // Media update methods
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    
+    // Save handlers
     handleSaveObjectId: (objectId: string) => {
       onFieldChange('object_id', objectId);
     },

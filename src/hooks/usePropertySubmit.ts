@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData, PropertySubmitData } from "@/types/property";
 import { usePropertyDataPreparer } from "./property-form/usePropertyDataPreparer";
+import { Json } from "@/integrations/supabase/types";
 
 export function usePropertySubmit() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,19 +19,25 @@ export function usePropertySubmit() {
       const submitData = prepareSubmitData(formData);
       
       // Add JSON serialization for complex fields
-      const dataForDb = {
+      const dataForDb: Record<string, any> = {
         ...submitData,
         features: JSON.stringify(submitData.features),
         areas: JSON.stringify(submitData.areas),
         nearby_places: JSON.stringify(submitData.nearby_places),
         nearby_cities: JSON.stringify(submitData.nearby_cities),
-        // Serialize generalInfo field if it exists
-        generalInfo: submitData.generalInfo ? 
-          (typeof submitData.generalInfo === 'string' ? 
-            submitData.generalInfo : 
-            JSON.stringify(submitData.generalInfo)
-          ) : null
       };
+      
+      // Serialize generalInfo field if it exists
+      if (submitData.generalInfo) {
+        dataForDb.generalInfo = typeof submitData.generalInfo === 'string' 
+          ? submitData.generalInfo 
+          : JSON.stringify(submitData.generalInfo);
+      }
+      
+      // Process floorplans if they exist
+      if (submitData.floorplans) {
+        dataForDb.floorplans = JSON.stringify(submitData.floorplans);
+      }
       
       const { data, error } = await supabase
         .from('properties')

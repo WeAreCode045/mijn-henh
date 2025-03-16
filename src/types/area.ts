@@ -1,14 +1,13 @@
 
-/**
- * Legacy area type definition maintained for backward compatibility
- */
+import { PropertyImage } from './property';
+
 export interface Area {
   id: string;
   name?: string;
-  title: string;
-  description: string;
   size?: string;
-  images?: string[] | { url: string; id: string }[];
+  title?: string;
+  description?: string;
+  images?: string[] | { url: string; id: string; }[];
   imageIds?: string[];
   columns?: number;
 }
