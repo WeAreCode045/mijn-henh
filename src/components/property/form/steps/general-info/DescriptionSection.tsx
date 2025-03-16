@@ -8,13 +8,25 @@ import { Input } from "@/components/ui/input";
 interface DescriptionSectionProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onGeneralInfoChange: (section: string, field: string, value: any) => void;
   setPendingChanges?: (pending: boolean) => void;
 }
 
-export function DescriptionSection({ formData, onFieldChange, setPendingChanges }: DescriptionSectionProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onFieldChange(name as keyof PropertyFormData, value);
+export function DescriptionSection({ 
+  formData, 
+  onFieldChange, 
+  onGeneralInfoChange,
+  setPendingChanges 
+}: DescriptionSectionProps) {
+  
+  // Get values from generalInfo or fallback to direct properties for backwards compatibility
+  const descriptionData = formData.generalInfo?.description || {
+    shortDescription: formData.shortDescription || '',
+    fullDescription: formData.description || ''
+  };
+
+  const handleChange = (field: string, value: string) => {
+    onGeneralInfoChange('description', field, value);
     if (setPendingChanges) {
       setPendingChanges(true);
     }
@@ -32,19 +44,19 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
             id="shortDescription"
             name="shortDescription"
             placeholder="Enter a brief summary of the property (displayed in listings)"
-            value={formData.shortDescription || ''}
-            onChange={handleChange}
+            value={descriptionData.shortDescription}
+            onChange={(e) => handleChange('shortDescription', e.target.value)}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Full Description</Label>
+          <Label htmlFor="fullDescription">Full Description</Label>
           <Textarea
-            id="description"
-            name="description"
+            id="fullDescription"
+            name="fullDescription"
             placeholder="Enter a detailed description of the property"
-            value={formData.description || ''}
-            onChange={handleChange}
+            value={descriptionData.fullDescription}
+            onChange={(e) => handleChange('fullDescription', e.target.value)}
             className="min-h-32"
           />
         </div>

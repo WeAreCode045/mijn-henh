@@ -48,21 +48,33 @@ export function usePropertyContentSubmit(
         ? formData.nearby_cities
         : JSON.stringify(formData.nearby_cities || []);
       
+      // Stringify generalInfo for database storage
+      const generalInfoJson = typeof formData.generalInfo === 'string'
+        ? formData.generalInfo
+        : JSON.stringify(formData.generalInfo || {});
+      
+      // Get values from generalInfo structure if available, otherwise use legacy fields
+      const { 
+        title, price, address, object_id,
+        description, shortDescription,
+        bedrooms, bathrooms, sqft, livingArea, buildYear, energyLabel
+      } = extractPropertyValues(formData);
+      
       // Prepare data for update
       const updateData = {
-        title: formData.title,
-        price: formData.price,
-        address: formData.address,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        sqft: formData.sqft,
-        livingArea: formData.livingArea,
-        buildYear: formData.buildYear,
+        title,
+        price,
+        address,
+        bedrooms,
+        bathrooms,
+        sqft,
+        livingArea,
+        buildYear,
         garages: formData.garages,
-        energyLabel: formData.energyLabel,
+        energyLabel,
         hasGarden: formData.hasGarden,
-        shortDescription: formData.shortDescription || "",
-        description: formData.description,
+        shortDescription: shortDescription || "",
+        description,
         location_description: formData.location_description,
         features: featuresJson,
         areas: areasForDb as Json[],
@@ -71,12 +83,14 @@ export function usePropertyContentSubmit(
         latitude: formData.latitude,
         longitude: formData.longitude,
         map_image: formData.map_image,
-        object_id: formData.object_id,
+        object_id,
         agent_id: formData.agent_id,
         template_id: formData.template_id,
         virtualTourUrl: formData.virtualTourUrl,
         youtubeUrl: formData.youtubeUrl,
-        floorplanEmbedScript: formData.floorplanEmbedScript || ""
+        floorplanEmbedScript: formData.floorplanEmbedScript || "",
+        // Add the new generalInfo field
+        generalInfo: generalInfoJson
       };
       
       console.log("Data being sent to database:", JSON.stringify(updateData).substring(0, 200) + "...");
@@ -114,4 +128,41 @@ export function usePropertyContentSubmit(
   };
 
   return { onSubmit };
+}
+
+// Helper function to extract values from either generalInfo structure or legacy fields
+function extractPropertyValues(formData: PropertyFormData) {
+  // If generalInfo exists, use its values, otherwise fall back to direct properties
+  if (formData.generalInfo) {
+    return {
+      title: formData.generalInfo.propertyDetails.title,
+      price: formData.generalInfo.propertyDetails.price,
+      address: formData.generalInfo.propertyDetails.address,
+      object_id: formData.generalInfo.propertyDetails.objectId,
+      description: formData.generalInfo.description.fullDescription,
+      shortDescription: formData.generalInfo.description.shortDescription,
+      bedrooms: formData.generalInfo.keyInformation.bedrooms,
+      bathrooms: formData.generalInfo.keyInformation.bathrooms,
+      sqft: formData.generalInfo.keyInformation.lotSize,
+      livingArea: formData.generalInfo.keyInformation.livingArea,
+      buildYear: formData.generalInfo.keyInformation.buildYear,
+      energyLabel: formData.generalInfo.keyInformation.energyClass
+    };
+  }
+  
+  // Fall back to legacy fields
+  return {
+    title: formData.title || '',
+    price: formData.price || '',
+    address: formData.address || '',
+    object_id: formData.object_id || '',
+    description: formData.description || '',
+    shortDescription: formData.shortDescription || '',
+    bedrooms: formData.bedrooms || '',
+    bathrooms: formData.bathrooms || '',
+    sqft: formData.sqft || '',
+    livingArea: formData.livingArea || '',
+    buildYear: formData.buildYear || '',
+    energyLabel: formData.energyLabel || ''
+  };
 }

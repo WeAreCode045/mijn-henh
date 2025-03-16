@@ -23,6 +23,30 @@ export function GeneralInfoStep({
   isUploading,
   setPendingChanges
 }: GeneralInfoStepProps) {
+  // Initialize generalInfo if it doesn't exist
+  if (!formData.generalInfo) {
+    formData.generalInfo = {
+      propertyDetails: {
+        title: formData.title || '',
+        price: formData.price || '',
+        address: formData.address || '',
+        objectId: formData.object_id || '',
+      },
+      description: {
+        shortDescription: formData.shortDescription || '',
+        fullDescription: formData.description || '',
+      },
+      keyInformation: {
+        buildYear: formData.buildYear || '',
+        lotSize: formData.sqft || '',
+        livingArea: formData.livingArea || '',
+        bedrooms: formData.bedrooms || '',
+        bathrooms: formData.bathrooms || '',
+        energyClass: formData.energyLabel || '',
+      }
+    };
+  }
+
   const handleFeaturedImageSelect = (url: string | null) => {
     console.log("Featured image selected in GeneralInfoStep:", url);
     if (handleSetFeaturedImage) {
@@ -51,8 +75,43 @@ export function GeneralInfoStep({
     return img;
   }) || [];
 
-  const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
-    onFieldChange(field, value);
+  // Handle changes to generalInfo
+  const handleGeneralInfoChange = (
+    section: keyof typeof formData.generalInfo!,
+    field: string,
+    value: any
+  ) => {
+    if (!formData.generalInfo) return;
+    
+    const updatedGeneralInfo = {
+      ...formData.generalInfo,
+      [section]: {
+        ...formData.generalInfo[section],
+        [field]: value
+      }
+    };
+    
+    // Update the generalInfo field
+    onFieldChange('generalInfo', updatedGeneralInfo);
+    
+    // Also update the individual fields for backward compatibility
+    if (section === 'propertyDetails') {
+      if (field === 'title') onFieldChange('title', value);
+      if (field === 'price') onFieldChange('price', value);
+      if (field === 'address') onFieldChange('address', value);
+      if (field === 'objectId') onFieldChange('object_id', value);
+    } else if (section === 'description') {
+      if (field === 'shortDescription') onFieldChange('shortDescription', value);
+      if (field === 'fullDescription') onFieldChange('description', value);
+    } else if (section === 'keyInformation') {
+      if (field === 'buildYear') onFieldChange('buildYear', value);
+      if (field === 'lotSize') onFieldChange('sqft', value);
+      if (field === 'livingArea') onFieldChange('livingArea', value);
+      if (field === 'bedrooms') onFieldChange('bedrooms', value);
+      if (field === 'bathrooms') onFieldChange('bathrooms', value);
+      if (field === 'energyClass') onFieldChange('energyLabel', value);
+    }
+    
     if (setPendingChanges) {
       setPendingChanges(true);
     }
@@ -63,19 +122,23 @@ export function GeneralInfoStep({
       {/* 1. Basic Details (Title, Price, Address, Object ID) */}
       <BasicDetails 
         formData={formData} 
-        onFieldChange={handleFieldChange} 
+        onFieldChange={onFieldChange}
+        onGeneralInfoChange={handleGeneralInfoChange}
       />
 
       {/* 2. Property Description */}
       <DescriptionSection 
         formData={formData}
-        onFieldChange={handleFieldChange} 
+        onFieldChange={onFieldChange}
+        onGeneralInfoChange={handleGeneralInfoChange}
+        setPendingChanges={setPendingChanges}
       />
       
       {/* 3. Key Information */}
       <PropertySpecs 
         formData={formData} 
-        onFieldChange={handleFieldChange} 
+        onFieldChange={onFieldChange}
+        onGeneralInfoChange={handleGeneralInfoChange}
       />
 
       {/* 4. Image Selections */}

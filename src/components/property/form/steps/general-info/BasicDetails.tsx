@@ -9,15 +9,24 @@ import { useAgencySettings } from "@/hooks/useAgencySettings";
 interface BasicDetailsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onGeneralInfoChange: (section: string, field: string, value: any) => void;
 }
 
-export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
+export function BasicDetails({ formData, onFieldChange, onGeneralInfoChange }: BasicDetailsProps) {
   const { settings } = useAgencySettings();
   const addressInputRef = useRef<HTMLInputElement>(null);
+  
+  // Get values from generalInfo or fallback to direct properties for backwards compatibility
+  const propertyDetails = formData.generalInfo?.propertyDetails || {
+    title: formData.title || '',
+    price: formData.price || '',
+    address: formData.address || '',
+    objectId: formData.object_id || ''
+  };
 
-  const handleChange = (field: keyof PropertyFormData, value: string) => {
+  const handleChange = (field: string, value: string) => {
     console.log(`BasicDetails - ${field} changed to:`, value);
-    onFieldChange(field, value);
+    onGeneralInfoChange('propertyDetails', field, value);
   };
 
   // Set up Google Places Autocomplete for address field
@@ -42,14 +51,14 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
 
     const initializeAutocomplete = () => {
       // Use window with type assertion to access the google object
-      if (!(window as GoogleMapsWindow).google || 
-          !(window as GoogleMapsWindow).google?.maps || 
-          !(window as GoogleMapsWindow).google?.maps?.places) {
+      if (!(window as any).google || 
+          !(window as any).google?.maps || 
+          !(window as any).google?.maps?.places) {
         console.error('Google Maps Places API not loaded');
         return;
       }
 
-      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
+      const autocomplete = new (window as any).google!.maps!.places!.Autocomplete(
         addressInputRef.current as HTMLInputElement,
         { types: ['address'] }
       );
@@ -77,7 +86,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
             <Input
               id="title"
               type="text"
-              value={formData.title || ''}
+              value={propertyDetails.title}
               onChange={(e) => handleChange('title', e.target.value)}
               placeholder="Title"
               className="mt-1 p-2"
@@ -88,7 +97,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
             <Input
               id="price"
               type="text"
-              value={formData.price || ''}
+              value={propertyDetails.price}
               onChange={(e) => handleChange('price', e.target.value)}
               placeholder="Price"
               className="mt-1 p-2"
@@ -99,7 +108,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
             <Input
               id="address"
               type="text"
-              value={formData.address || ''}
+              value={propertyDetails.address}
               onChange={(e) => handleChange('address', e.target.value)}
               placeholder="Address"
               className="mt-1 p-2"
@@ -107,12 +116,12 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="object_id">Object ID</Label>
+            <Label htmlFor="objectId">Object ID</Label>
             <Input
-              id="object_id"
+              id="objectId"
               type="text"
-              value={formData.object_id || ''}
-              onChange={(e) => handleChange('object_id', e.target.value)}
+              value={propertyDetails.objectId}
+              onChange={(e) => handleChange('objectId', e.target.value)}
               placeholder="Object ID"
               className="mt-1 p-2"
             />

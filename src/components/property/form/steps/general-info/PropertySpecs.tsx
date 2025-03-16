@@ -8,11 +8,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface PropertySpecsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onGeneralInfoChange: (section: string, field: string, value: any) => void;
 }
 
-export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
-  const handleChange = (field: keyof PropertyFormData, value: string) => {
-    onFieldChange(field, value);
+export function PropertySpecs({ formData, onFieldChange, onGeneralInfoChange }: PropertySpecsProps) {
+  // Get values from generalInfo or fallback to direct properties for backwards compatibility
+  const keyInfo = formData.generalInfo?.keyInformation || {
+    buildYear: formData.buildYear || '',
+    lotSize: formData.sqft || '',
+    livingArea: formData.livingArea || '',
+    bedrooms: formData.bedrooms || '',
+    bathrooms: formData.bathrooms || '',
+    energyClass: formData.energyLabel || ''
+  };
+
+  const handleChange = (field: string, value: string) => {
+    onGeneralInfoChange('keyInformation', field, value);
   };
 
   return (
@@ -27,19 +38,19 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Input
               id="buildYear"
               type="text"
-              value={formData.buildYear || ''}
+              value={keyInfo.buildYear}
               onChange={(e) => handleChange('buildYear', e.target.value)}
               placeholder="Build Year"
               className="mt-1 p-2"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sqft">Lot Size (m²)</Label>
+            <Label htmlFor="lotSize">Lot Size (m²)</Label>
             <Input
-              id="sqft"
+              id="lotSize"
               type="text"
-              value={formData.sqft || ''}
-              onChange={(e) => handleChange('sqft', e.target.value)}
+              value={keyInfo.lotSize}
+              onChange={(e) => handleChange('lotSize', e.target.value)}
               placeholder="Lot Size"
               className="mt-1 p-2"
             />
@@ -49,7 +60,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Input
               id="livingArea"
               type="text"
-              value={formData.livingArea || ''}
+              value={keyInfo.livingArea}
               onChange={(e) => handleChange('livingArea', e.target.value)}
               placeholder="Living Area"
               className="mt-1 p-2"
@@ -63,7 +74,7 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Input
               id="bedrooms"
               type="text"
-              value={formData.bedrooms || ''}
+              value={keyInfo.bedrooms}
               onChange={(e) => handleChange('bedrooms', e.target.value)}
               placeholder="Bedrooms"
               className="mt-1 p-2"
@@ -74,19 +85,19 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Input
               id="bathrooms"
               type="text"
-              value={formData.bathrooms || ''}
+              value={keyInfo.bathrooms}
               onChange={(e) => handleChange('bathrooms', e.target.value)}
               placeholder="Bathrooms"
               className="mt-1 p-2"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="energyLabel">Energy Class</Label>
+            <Label htmlFor="energyClass">Energy Class</Label>
             <Input
-              id="energyLabel"
+              id="energyClass"
               type="text"
-              value={formData.energyLabel || ''}
-              onChange={(e) => handleChange('energyLabel', e.target.value)}
+              value={keyInfo.energyClass}
+              onChange={(e) => handleChange('energyClass', e.target.value)}
               placeholder="Energy Class"
               className="mt-1 p-2"
             />
