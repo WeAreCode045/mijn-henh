@@ -8,7 +8,7 @@ interface ContentTabNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
   lastSaved: Date | null;
-  onSave: () => void;
+  onSave: () => Promise<boolean>;
   isSaving: boolean;
 }
 
@@ -19,6 +19,12 @@ export function ContentTabNavigation({
   onSave,
   isSaving
 }: ContentTabNavigationProps) {
+  const handleSaveClick = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any form submission
+    console.log("Save button clicked in ContentTabNavigation");
+    await onSave();
+  };
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <FormStepNavigation
@@ -34,9 +40,10 @@ export function ContentTabNavigation({
         )}
         
         <Button 
-          onClick={onSave} 
+          onClick={handleSaveClick} 
           disabled={isSaving}
           className="min-w-[100px]"
+          type="button"
         >
           {isSaving ? (
             <>

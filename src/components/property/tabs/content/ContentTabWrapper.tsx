@@ -43,15 +43,21 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   );
 
   const handleNext = () => {
-    if (handlers.currentStep < 3) {
-      handlers.handleStepClick(handlers.currentStep + 1);
-    }
+    // First save the data before moving to the next step
+    handleSave().then(success => {
+      if (success && handlers.currentStep < 3) {
+        handlers.handleStepClick(handlers.currentStep + 1);
+      }
+    });
   };
 
   const handlePrevious = () => {
-    if (handlers.currentStep > 0) {
-      handlers.handleStepClick(handlers.currentStep - 1);
-    }
+    // First save the data before moving to the previous step
+    handleSave().then(success => {
+      if (success && handlers.currentStep > 0) {
+        handlers.handleStepClick(handlers.currentStep - 1);
+      }
+    });
   };
 
   const handleSave = async () => {
@@ -60,8 +66,10 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     try {
       const result = await onSubmit();
       console.log("Save result:", result);
+      return result;
     } catch (error) {
       console.error("Error during save:", error);
+      return false;
     } finally {
       setLocalIsSaving(false);
     }

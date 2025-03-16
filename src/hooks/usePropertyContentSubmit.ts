@@ -3,7 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
-import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
+import { prepareAreasForFormSubmission } from "@/hooks/property-form/preparePropertyData";
 
 export function usePropertyContentSubmit(
   formData: PropertyFormData,
@@ -31,6 +31,7 @@ export function usePropertyContentSubmit(
         
         // Transform areas to the correct format for the database
         const areasForDb = prepareAreasForFormSubmission(formData.areas || []);
+        console.log("Areas prepared for database:", areasForDb);
         
         // Transform features, nearby_places, and nearby_cities to JSON strings
         const featuresJson = typeof formData.features === 'string' 
@@ -62,7 +63,7 @@ export function usePropertyContentSubmit(
           description: formData.description,
           location_description: formData.location_description,
           features: featuresJson,
-          areas: areasForDb as Json[],
+          areas: areasForDb,
           nearby_places: nearby_placesJson,
           nearby_cities: nearby_citiesJson,
           latitude: formData.latitude,
