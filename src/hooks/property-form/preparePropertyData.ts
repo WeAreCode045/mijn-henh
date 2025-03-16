@@ -1,3 +1,4 @@
+
 import type { PropertyArea } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 

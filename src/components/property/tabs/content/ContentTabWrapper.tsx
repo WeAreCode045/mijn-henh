@@ -70,7 +70,6 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     setLocalIsSaving(true);
     try {
       // Use our direct onSubmit function that saves to DB
-      // Ignore any external onSubmit to avoid conflicts
       const result = await onSubmit();
       console.log("Save result from usePropertyContentSubmit:", result);
       return result;

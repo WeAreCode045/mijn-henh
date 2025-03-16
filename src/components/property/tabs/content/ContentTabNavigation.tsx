@@ -20,11 +20,13 @@ export function ContentTabNavigation({
   isSaving
 }: ContentTabNavigationProps) {
   const handleSaveClick = async (e: React.MouseEvent) => {
+    // Prevent default behavior and stop propagation
     e.preventDefault(); 
     e.stopPropagation(); 
     
-    console.log("Save button clicked in ContentTabNavigation");
+    console.log("Save button clicked in ContentTabNavigation - triggering save");
     try {
+      // Directly call onSave function passed from parent
       const result = await onSave();
       console.log("Save result in ContentTabNavigation:", result);
       return result;
