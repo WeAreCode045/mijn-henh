@@ -15,6 +15,8 @@ interface GeneralInfoStepProps {
   setPendingChanges?: (pending: boolean) => void;
 }
 
+type GeneralInfoSections = 'propertyDetails' | 'description' | 'keyInformation';
+
 export function GeneralInfoStep({
   formData,
   onFieldChange,
@@ -77,7 +79,7 @@ export function GeneralInfoStep({
 
   // Handle changes to generalInfo
   const handleGeneralInfoChange = (
-    section: keyof typeof formData.generalInfo!,
+    section: GeneralInfoSections,
     field: string,
     value: any
   ) => {
