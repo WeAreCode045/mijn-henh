@@ -32,13 +32,14 @@ interface ContentTabWrapperProps {
 
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [localIsSaving, setLocalIsSaving] = useState(false);
   
   // Use the contentSubmit hook for handling the submit action
   const { onSubmit } = usePropertyContentSubmit(
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
-    handlers.onSubmit
+    undefined // Don't use external submit here to ensure we use our saving logic
   );
 
   const handleNext = () => {
@@ -53,14 +54,25 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     }
   };
 
+  const handleSave = async () => {
+    setLocalIsSaving(true);
+    try {
+      await onSubmit();
+    } finally {
+      setLocalIsSaving(false);
+    }
+  };
+
+  const isSaving = handlers.isSaving || localIsSaving;
+
   return (
     <div className="space-y-6">
       <ContentTabNavigation 
         currentStep={handlers.currentStep}
         onStepClick={handlers.handleStepClick}
         lastSaved={lastSaved}
-        onSave={onSubmit}
-        isSaving={handlers.isSaving || false}
+        onSave={handleSave}
+        isSaving={isSaving}
       />
       
       <ContentTabContent
@@ -84,8 +96,8 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         isLoadingLocationData={handlers.isLoadingLocationData}
         setPendingChanges={handlers.setPendingChanges}
         isUploading={handlers.isUploading}
-        onSubmit={onSubmit}
-        isSaving={handlers.isSaving}
+        onSubmit={handleSave}
+        isSaving={isSaving}
       />
     </div>
   );
