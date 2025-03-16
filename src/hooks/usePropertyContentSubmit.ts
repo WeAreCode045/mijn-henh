@@ -1,7 +1,8 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
+import { supabase } from "@/integrations/supabase/client";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 export function usePropertyContentSubmit(
   formData: PropertyFormData,
@@ -10,7 +11,6 @@ export function usePropertyContentSubmit(
   externalOnSubmit?: () => void
 ) {
   const { toast } = useToast();
-  const { handleSubmit } = usePropertyFormSubmit();
 
   const onSubmit = async () => {
     console.log("Submit clicked in PropertyContentTab with formData:", formData);
@@ -21,30 +21,82 @@ export function usePropertyContentSubmit(
       return;
     }
     
-    console.log("Form submitted in PropertyContentTab");
+    console.log("Form submitted in PropertyContentTab, saving to database");
     
     // Final save when clicking submit
     if (formData.id) {
       try {
         console.log("Attempting to save property with ID:", formData.id);
-        const formEvent = {} as React.FormEvent;
-        const success = await handleSubmit(formEvent, formData, false);
         
-        if (success) {
-          console.log("Save successful");
-          setLastSaved(new Date());
-          setPendingChanges(false);
-          toast({
-            title: "Success",
-            description: "All changes have been saved",
-          });
-        } else {
-          console.log("Save returned false");
-          toast({
-            title: "Warning",
-            description: "Changes may not have been saved properly",
-          });
+        // Transform areas to the correct format for the database
+        const areasForDb = prepareAreasForFormSubmission(formData.areas || []);
+        
+        // Transform features, nearby_places, and nearby_cities to JSON strings
+        const featuresJson = typeof formData.features === 'string' 
+          ? formData.features 
+          : JSON.stringify(formData.features || []);
+        
+        const nearby_placesJson = typeof formData.nearby_places === 'string'
+          ? formData.nearby_places
+          : JSON.stringify(formData.nearby_places || []);
+        
+        const nearby_citiesJson = typeof formData.nearby_cities === 'string'
+          ? formData.nearby_cities
+          : JSON.stringify(formData.nearby_cities || []);
+        
+        // Prepare data for update
+        const updateData = {
+          title: formData.title,
+          price: formData.price,
+          address: formData.address,
+          bedrooms: formData.bedrooms,
+          bathrooms: formData.bathrooms,
+          sqft: formData.sqft,
+          livingArea: formData.livingArea,
+          buildYear: formData.buildYear,
+          garages: formData.garages,
+          energyLabel: formData.energyLabel,
+          hasGarden: formData.hasGarden,
+          shortDescription: formData.shortDescription,
+          description: formData.description,
+          location_description: formData.location_description,
+          features: featuresJson,
+          areas: areasForDb,
+          nearby_places: nearby_placesJson,
+          nearby_cities: nearby_citiesJson,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          map_image: formData.map_image,
+          object_id: formData.object_id,
+          agent_id: formData.agent_id,
+          template_id: formData.template_id,
+          virtualTourUrl: formData.virtualTourUrl,
+          youtubeUrl: formData.youtubeUrl,
+          floorplanEmbedScript: formData.floorplanEmbedScript || ""
+        };
+        
+        console.log("Data being sent to database:", updateData);
+        
+        // Update the property in the database
+        const { error } = await supabase
+          .from('properties')
+          .update(updateData)
+          .eq('id', formData.id);
+        
+        if (error) {
+          console.error("Error saving to database:", error);
+          throw error;
         }
+        
+        console.log("Save successful");
+        setLastSaved(new Date());
+        setPendingChanges(false);
+        toast({
+          title: "Success",
+          description: "All changes have been saved",
+        });
+        
+        return true;
       } catch (error) {
         console.error("Final save failed:", error);
         toast({
@@ -52,6 +104,7 @@ export function usePropertyContentSubmit(
           description: "Failed to save all changes",
           variant: "destructive",
         });
+        return false;
       }
     } else {
       console.error("Cannot save: formData.id is missing", formData);
@@ -60,6 +113,7 @@ export function usePropertyContentSubmit(
         description: "Cannot save property: missing ID",
         variant: "destructive",
       });
+      return false;
     }
   };
 

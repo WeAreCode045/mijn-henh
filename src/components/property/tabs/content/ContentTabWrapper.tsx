@@ -25,7 +25,7 @@ interface ContentTabWrapperProps {
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
-    onSubmit: () => void;
+    onSubmit?: () => void;
     isSaving?: boolean;
   };
 }
@@ -39,7 +39,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
-    undefined // Don't use external submit here to ensure we use our saving logic
+    handlers.onSubmit // Pass the external onSubmit if provided
   );
 
   const handleNext = () => {
@@ -55,9 +55,13 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   };
 
   const handleSave = async () => {
+    console.log("Save button clicked in ContentTabWrapper");
     setLocalIsSaving(true);
     try {
-      await onSubmit();
+      const result = await onSubmit();
+      console.log("Save result:", result);
+    } catch (error) {
+      console.error("Error during save:", error);
     } finally {
       setLocalIsSaving(false);
     }

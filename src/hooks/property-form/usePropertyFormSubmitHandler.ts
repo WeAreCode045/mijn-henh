@@ -5,15 +5,14 @@ import { usePropertyValidation } from "./usePropertyValidation";
 import { useNavigate } from "react-router-dom";
 import { usePropertyImageSaver } from "./usePropertyImageSaver";
 import { usePropertyDataPreparer } from "./usePropertyDataPreparer";
-import { usePropertyDatabase } from "./usePropertyDatabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyFormSubmitHandler() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { validatePropertyData } = usePropertyValidation();
-  const { savePropertyImages, savePropertyFloorplans } = usePropertyImageSaver();
+  const { savePropertyImages } = usePropertyImageSaver();
   const { prepareSubmitData } = usePropertyDataPreparer();
-  const { updateProperty, createProperty } = usePropertyDatabase();
 
   const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData, shouldRedirect = false) => {
     if (e && e.preventDefault) {
@@ -22,6 +21,7 @@ export function usePropertyFormSubmitHandler() {
     
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
     
+    // If this is a new property, validate the data first
     if (!formData.id) {
       if (!validatePropertyData(formData)) {
         return false;
@@ -34,25 +34,50 @@ export function usePropertyFormSubmitHandler() {
       console.log("usePropertyFormSubmit - Final submit data:", submitData);
       
       let success = false;
+      
       if (formData.id) {
         // Update existing property
         console.log("Updating existing property with ID:", formData.id);
-        success = await updateProperty(formData.id, submitData);
+        
+        // Make a direct database update to ensure data is saved
+        const { error } = await supabase
+          .from('properties')
+          .update(submitData)
+          .eq('id', formData.id);
+          
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
+        
+        console.log("Property updated successfully in database");
+        success = true;
         
         if (success) {
-          console.log("Property updated successfully, now saving images");
+          console.log("Now saving images");
           // Save or update featured images
           await savePropertyImages(formData);
-        } else {
-          console.log("Property update failed");
+          console.log("Images saved successfully");
         }
       } else {
         // Create new property
         console.log("Creating new property");
-        success = await createProperty(submitData);
+        
+        // Make a direct database insert
+        const { error } = await supabase
+          .from('properties')
+          .insert(submitData);
+          
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
+        
+        console.log("Property created successfully in database");
+        success = true;
         
         if (success) {
-          console.log("Property created successfully, now getting new ID");
+          console.log("Getting new property ID");
           const newPropertyId = await getNewPropertyId(formData.title);
           
           if (newPropertyId) {
@@ -62,8 +87,6 @@ export function usePropertyFormSubmitHandler() {
           } else {
             console.log("Could not obtain new property ID");
           }
-        } else {
-          console.log("Property creation failed");
         }
         
         if (success && shouldRedirect) {
@@ -97,8 +120,6 @@ export function usePropertyFormSubmitHandler() {
 }
 
 // Helper function to get the ID of a newly created property
-import { supabase } from "@/integrations/supabase/client";
-
 async function getNewPropertyId(title: string): Promise<string | null> {
   try {
     const { data: newProperty, error } = await supabase
@@ -124,7 +145,7 @@ async function getNewPropertyId(title: string): Promise<string | null> {
 async function saveAllImagesForNewProperty(propertyId: string, formData: PropertyFormData) {
   try {
     // Add regular images to property_images table
-    for (const image of formData.images) {
+    for (const image of formData.images || []) {
       const imageUrl = typeof image === 'string' ? image : image.url;
       await supabase
         .from('property_images')
