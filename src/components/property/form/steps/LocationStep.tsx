@@ -1,25 +1,24 @@
 
+import React, { useState } from "react";
 import { PropertyFormData } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPreviewSection } from "./location/MapPreviewSection";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GeneralLocationInfo } from "./location/GeneralLocationInfo";
+import { MapLocationSection } from "./location/MapLocationSection";
 import { NearbyPlacesSection } from "./location/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
 import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
-import { useState } from "react";
 
 interface LocationStepProps {
   formData: PropertyFormData;
-  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
-  onFetchLocationData?: () => Promise<void>;
-  onFetchCategoryPlaces?: (category: string) => Promise<any>;
-  onFetchNearbyCities?: () => Promise<any>;
-  onGenerateLocationDescription?: () => Promise<void>;
-  onRemoveNearbyPlace?: (index: number) => void;
-  isLoadingLocationData?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
-  handleMapImageDelete?: () => Promise<void>;
-  onGenerateMap?: () => Promise<void>;
-  isGeneratingMap?: boolean;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFetchLocationData: () => Promise<any>;
+  onFetchCategoryPlaces: (category: string) => Promise<any>;
+  onFetchNearbyCities: () => Promise<any>;
+  onGenerateLocationDescription: () => Promise<any>;
+  onGenerateMap: () => Promise<any>;
+  onRemoveNearbyPlace: (index: number) => void;
+  isLoadingLocationData: boolean;
+  isGeneratingMap: boolean;
 }
 
 export function LocationStep({
@@ -29,53 +28,62 @@ export function LocationStep({
   onFetchCategoryPlaces,
   onFetchNearbyCities,
   onGenerateLocationDescription,
+  onGenerateMap,
   onRemoveNearbyPlace,
   isLoadingLocationData,
-  setPendingChanges,
-  handleMapImageDelete,
-  onGenerateMap,
-  isGeneratingMap = false
+  isGeneratingMap,
 }: LocationStepProps) {
+  const [isLoadingNearbyPlaces, setIsLoadingNearbyPlaces] = useState(false);
+
+  // Handle nearby places fetch with loading state
+  const handleFetchNearbyPlaces = async (category: string) => {
+    setIsLoadingNearbyPlaces(true);
+    try {
+      await onFetchCategoryPlaces(category);
+    } finally {
+      setIsLoadingNearbyPlaces(false);
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <Card className="bg-white shadow-sm">
-        <CardHeader>
-          <CardTitle>Location Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <LocationDescriptionSection 
-              formData={formData}
-              onFieldChange={onFieldChange}
-              onGenerateDescription={onGenerateLocationDescription}
-              isGeneratingDescription={isLoadingLocationData}
-            />
-            
-            <MapPreviewSection 
-              formData={formData}
-              onDeleteMapImage={handleMapImageDelete}
-              onGenerateMap={onGenerateMap}
-              isGeneratingMap={isGeneratingMap}
-            />
-            
-            <NearbyPlacesSection 
-              formData={formData}
-              onRemovePlace={onRemoveNearbyPlace}
-              onFieldChange={onFieldChange}
-              onFetchNearbyPlaces={onFetchCategoryPlaces || onFetchLocationData}
-              isLoadingNearbyPlaces={isLoadingLocationData}
-            />
-            
-            <NearbyCitiesSection 
-              formData={formData}
-              onFetchLocationData={onFetchLocationData}
-              onFetchNearbyCities={onFetchNearbyCities}
-              isLoadingLocationData={isLoadingLocationData}
-              onFieldChange={onFieldChange}
-            />
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold">Location Information</h2>
+      
+      <GeneralLocationInfo
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onFetchLocationData={onFetchLocationData}
+        isLoadingLocationData={isLoadingLocationData}
+      />
+      
+      <MapLocationSection
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onGenerateMap={onGenerateMap}
+        isGeneratingMap={isGeneratingMap}
+      />
+      
+      <NearbyPlacesSection
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onFetchNearbyPlaces={handleFetchNearbyPlaces}
+        onRemovePlace={onRemoveNearbyPlace}
+        isLoadingNearbyPlaces={isLoadingNearbyPlaces}
+      />
+      
+      <NearbyCitiesSection
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onFetchNearbyCities={onFetchNearbyCities}
+        isLoadingLocationData={isLoadingLocationData}
+      />
+      
+      <LocationDescriptionSection
+        formData={formData}
+        onFieldChange={onFieldChange}
+        onGenerateLocationDescription={onGenerateLocationDescription}
+        isGenerating={isLoadingLocationData}
+      />
     </div>
   );
 }

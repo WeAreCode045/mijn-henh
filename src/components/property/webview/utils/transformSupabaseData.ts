@@ -76,6 +76,7 @@ export function transformSupabaseData(
           id: img.id,
           url: img.url,
           area: img.area,
+          type: img.type as "image" | "floorplan" // Cast to expected type
         });
 
         // Check if this is the main image (previously featured)
@@ -102,7 +103,8 @@ export function transformSupabaseData(
       .map((img) => ({
         id: img.id,
         url: img.url,
-        area: img.area
+        area: img.area,
+        type: img.type as "image" | "floorplan" // Cast to expected type
       }))
   }));
 
@@ -110,14 +112,18 @@ export function transformSupabaseData(
   const dataFeatures = Array.isArray(data.features) ? data.features : 
                       (data.features ? [data.features] : []);
 
-  // Ensure nearby_places is always an array
-  const nearbyPlaces = Array.isArray(data.nearby_places) ? data.nearby_places : 
-                      (data.nearby_places ? [data.nearby_places] : []);
+  // Ensure nearby_places is always an array and has types property
+  const nearbyPlaces = Array.isArray(data.nearby_places) 
+    ? data.nearby_places.map((place: any) => ({
+        ...place,
+        types: place.types || [place.type || "other"] // Ensure types exists
+      }))
+    : [];
 
   // Create the transformed property data
   const transformedData: PropertyData = {
     id: data.id,
-    object_id: data.object_id || undefined,
+    object_id: data.object_id || "",
     title: data.title || "",
     price: data.price || "",
     address: data.address || "",
@@ -137,10 +143,11 @@ export function transformSupabaseData(
     featuredImages: featuredImages,
     areas: transformedAreas,
     nearby_places: nearbyPlaces,
+    nearby_cities: [], // Add default empty array
     latitude: data.latitude,
     longitude: data.longitude,
     map_image: data.map_image,
-    agent_id: data.agent_id,
+    agent_id: data.agent_id || "",
     agent: data.agent
       ? {
           id: data.agent.id,
@@ -152,9 +159,13 @@ export function transformSupabaseData(
       : undefined,
     created_at: data.created_at,
     updated_at: data.updated_at,
-    template_id: data.template_id,
+    template_id: data.template_id || "default",
     floorplanEmbedScript: data.floorplanEmbedScript || "",
     floorplans: [],
+    virtualTourUrl: "", // Add required field
+    youtubeUrl: "", // Add required field
+    coverImages: [], // Add required field 
+    gridImages: [], // Add required field
   };
 
   console.log('transformSupabaseData - Returning transformed data:', {

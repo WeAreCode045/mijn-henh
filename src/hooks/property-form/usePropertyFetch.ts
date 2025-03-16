@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity } from "@/types/property";
+import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity, GeneralInfoData } from "@/types/property";
 import { initialFormData } from "./initialFormData";
 import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
@@ -43,6 +43,35 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
     };
   }
   
+  return undefined;
+};
+
+// Helper function to safely convert generalInfo
+const formatGeneralInfo = (data: any): GeneralInfoData | undefined => {
+  if (!data) return undefined;
+  
+  // If it's already an object with the right shape, return it
+  if (typeof data === 'object' && !Array.isArray(data)) {
+    // Check if it has at least one expected property
+    if ('propertyDetails' in data || 'description' in data || 'keyInformation' in data) {
+      return data as GeneralInfoData;
+    }
+  }
+  
+  // If it's a string, try to parse it to an object
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as GeneralInfoData;
+      }
+    } catch (e) {
+      // Failed to parse, return undefined
+      return undefined;
+    }
+  }
+  
+  // Return undefined if we couldn't convert to GeneralInfoData
   return undefined;
 };
 
@@ -88,7 +117,7 @@ export function usePropertyFetch(id: string | undefined) {
           is_main: img.is_main,
           is_featured_image: img.is_featured_image,
           sort_order: img.sort_order,
-          type: img.type || "image" as "image" | "floorplan"
+          type: (img.type || "image") as "image" | "floorplan"
         })) : [];
         
         // Filter images by type and flags
@@ -154,8 +183,12 @@ export function usePropertyFetch(id: string | undefined) {
           // Convert featuredImages to PropertyImages for coverImages
           const coverImages = featuredImages.map(url => ({
             id: `cover-${Date.now()}-${Math.random()}`,
-            url
+            url,
+            type: "image" as "image" | "floorplan"
           })) as PropertyImage[];
+          
+          // Process generalInfo
+          const generalInfo = formatGeneralInfo(propertyData.generalInfo);
           
           // Set the form data with safe defaults for new fields
           const updatedFormData: PropertyFormData = {
@@ -173,6 +206,7 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImage: featuredImage,
             featuredImages: featuredImages,
             agent: agentData,
+            generalInfo, // Use the processed generalInfo
             // Add backward compatibility fields
             coverImages, // Now as PropertyImage[]
             gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]

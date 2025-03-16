@@ -4,7 +4,7 @@ import { PropertyImage } from './property/PropertyImageTypes';
 export interface AreaImage {
   id: string;
   url: string;
-  type?: string;
+  type: "image" | "floorplan" | string; // Match PropertyImage's type definition
 }
 
 export interface Area {

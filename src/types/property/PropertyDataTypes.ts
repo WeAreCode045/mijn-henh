@@ -2,12 +2,12 @@
 import type {
   PropertyArea,
   PropertyFeature,
-  PropertyImage,
   PropertyNearbyPlace,
   PropertyCity,
   PropertyFloorplan,
   GeneralInfoData
 } from './PropertyTypes';
+import { PropertyImage } from './PropertyImageTypes';
 
 export interface PropertyData {
   id: string;

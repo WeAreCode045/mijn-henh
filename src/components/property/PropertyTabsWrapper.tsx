@@ -27,14 +27,34 @@ export function PropertyTabsWrapper({
   const { activeTab, setActiveTab } = usePropertyTabs();
   console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
-  // Cast property to PropertyFormData with as assertion to ensure TypeScript compatibility
-  const propertyAsFormData = property as unknown as PropertyFormData;
+  // Create a new object with required PropertyData properties to satisfy TypeScript
+  const propertyAsData: PropertyData = {
+    ...property,
+    title: property.title || '', // Ensure title is set
+    price: property.price || '',
+    address: property.address || '',
+    bedrooms: property.bedrooms || '',
+    bathrooms: property.bathrooms || '',
+    sqft: property.sqft || '',
+    livingArea: property.livingArea || '',
+    buildYear: property.buildYear || '',
+    garages: property.garages || '',
+    energyLabel: property.energyLabel || '',
+    hasGarden: property.hasGarden || false,
+    description: property.description || '',
+    location_description: property.location_description || '',
+    nearby_cities: property.nearby_cities || [],
+    virtualTourUrl: property.virtualTourUrl || '',
+    youtubeUrl: property.youtubeUrl || '',
+    coverImages: property.coverImages || [],
+    gridImages: property.gridImages || [],
+  };
   
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
         {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={propertyAsFormData}>
+          <PropertyFormManager property={propertyAsData as PropertyFormData}>
             {({ 
               formState, 
               handleFieldChange,

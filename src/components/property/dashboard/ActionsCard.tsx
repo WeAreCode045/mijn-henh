@@ -1,126 +1,111 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Save, Trash2, Share2, Globe, FileText } from "lucide-react";
-import { formatDate } from "@/utils/dateUtils";
+import { AlertCircle, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { PropertyData } from "@/types/property";
-import { useGeneratePDF } from "@/hooks/useGeneratePDF";
-import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface ActionsCardProps {
-  propertyId: string;
-  propertyData?: PropertyData;
-  createdAt?: string;
-  updatedAt?: string;
-  onSave?: () => void;
   onDelete?: () => Promise<void>;
-  onWebView?: () => void;
+  onEdit?: () => void;
+  onCreate?: () => void;
+  title?: string;
+  description?: string;
+  id?: string;
+  isDeleting?: boolean;
+  showDelete?: boolean;
+  showEdit?: boolean;
+  showCreate?: boolean;
 }
 
-export function ActionsCard({ 
-  propertyId, 
-  propertyData,
-  createdAt, 
-  updatedAt, 
-  onSave, 
-  onDelete, 
-  onWebView
+export function ActionsCard({
+  onDelete,
+  onEdit,
+  onCreate,
+  title = "Actions",
+  description = "Manage this property",
+  id,
+  isDeleting = false,
+  showDelete = true,
+  showEdit = true,
+  showCreate = false,
 }: ActionsCardProps) {
   const { toast } = useToast();
-  const { generatePDF, isGenerating } = useGeneratePDF();
-  const { settings } = useAgencySettings();
 
-  const handleShare = () => {
-    const url = `${window.location.origin}/property/view/${propertyId}`;
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "Link copied to clipboard",
-      description: "You can now share this link with others",
-    });
-  };
-
-  const handleGeneratePDF = async () => {
-    if (!propertyData) {
+  const handleDelete = async () => {
+    try {
+      if (onDelete) {
+        await onDelete();
+      }
+    } catch (error) {
+      console.error("Error in handleDelete:", error);
       toast({
         title: "Error",
-        description: "Property data is missing",
+        description: "Failed to delete property",
         variant: "destructive",
       });
-      return;
-    }
-    
-    try {
-      await generatePDF(propertyData);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
     }
   };
 
   return (
-    <Card className="md:col-span-1">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Actions</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div>
-            <p className="text-sm font-medium">Created</p>
-            <p className="text-sm">{createdAt ? formatDate(createdAt) : "N/A"}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium">Last Updated</p>
-            <p className="text-sm">{updatedAt ? formatDate(updatedAt) : "N/A"}</p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col gap-2">
-          <Button 
-            onClick={onSave}
-            className="w-full flex items-center gap-2"
-            size="sm"
-          >
-            <Save className="h-4 w-4" />
-            Save
-          </Button>
-          <Button 
-            onClick={onDelete}
-            variant="destructive"
-            className="w-full flex items-center gap-2"
-            size="sm"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+      <CardContent className="flex flex-col space-y-2">
+        {showEdit && (
           <Button
-            onClick={onWebView}
             variant="outline"
-            className="w-full flex items-center gap-2"
-            size="sm"
+            className="w-full justify-start"
+            onClick={onEdit}
           >
-            <Globe className="h-4 w-4" />
-            Web View
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
           </Button>
+        )}
+
+        {showCreate && (
           <Button
-            onClick={handleGeneratePDF}
             variant="outline"
-            className="w-full flex items-center gap-2"
-            size="sm"
-            disabled={isGenerating}
+            className="w-full justify-start"
+            onClick={onCreate}
           >
-            <FileText className="h-4 w-4" />
-            {isGenerating ? "Generating..." : "Generate PDF"}
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create New
           </Button>
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            className="w-full flex items-center gap-2"
-            size="sm"
-          >
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-        </div>
+        )}
+
+        {showDelete && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-destructive hover:text-destructive"
+                disabled={isDeleting}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  property {id && `with ID ${id}`} and all associated data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </CardContent>
     </Card>
   );

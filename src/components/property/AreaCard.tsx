@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
@@ -24,12 +23,12 @@ interface AreaCardProps {
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
-interface AreaImageType extends PropertyImage {
+type AreaImageType = Omit<PropertyImage, 'type'> & {
   area?: string | null;
   property_id?: string;
   created_at?: string;
-  type?: string;
-}
+  type: "image" | "floorplan" | string;
+};
 
 export function AreaCard({
   area,
@@ -45,7 +44,6 @@ export function AreaCard({
   const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
   
-  // Get area images based on area ID from property_images table
   useEffect(() => {
     const fetchAreaImages = async () => {
       if (!area) {
@@ -53,7 +51,6 @@ export function AreaCard({
         return;
       }
       
-      // If we have a propertyId, fetch images from property_images table
       if (propertyId) {
         try {
           const { data, error } = await supabase
@@ -66,12 +63,11 @@ export function AreaCard({
             console.error(`Error fetching images for area ${area.id} from property_images:`, error);
           } else if (data && data.length > 0) {
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
-            // Convert the database images to PropertyImage type
             const convertedImages: PropertyImage[] = data.map(img => ({
               id: img.id,
               url: img.url,
               area: img.area,
-              type: img.type || "image",
+              type: img.type || "image" as "image" | "floorplan",
               is_main: img.is_main,
               is_featured_image: img.is_featured_image,
               sort_order: img.sort_order,
@@ -87,9 +83,7 @@ export function AreaCard({
           console.error(`Error in fetching area images from property_images:`, err);
         }
       } else {
-        // Use area.images directly if available
         if (area.images && area.images.length > 0) {
-          // Convert all images to PropertyImage type
           const normalizedImages = area.images.map(img => normalizeImage(img));
           setAreaImages(normalizedImages);
         } else {
@@ -116,7 +110,6 @@ export function AreaCard({
   const handleUpdateImageIds = (imageIds: string[]) => {
     console.log(`Updating area ${area.id} image IDs:`, imageIds);
     
-    // Additional callback for external handling if needed
     if (onImagesSelect) {
       onImagesSelect(area.id, imageIds);
     }

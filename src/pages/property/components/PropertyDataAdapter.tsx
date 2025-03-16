@@ -54,7 +54,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           is_main: img.is_main,
           is_featured_image: img.is_featured_image,
           sort_order: img.sort_order,
-          type: img.type as "image" | "floorplan" | string
+          type: (img.type || "image") as "image" | "floorplan" // Ensure proper typing
         }));
         
         // Parse complex data
@@ -83,7 +83,8 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         // Create coverImages for backward compatibility
         const coverImages = featuredImages.map(url => ({
           id: `cover-${Date.now()}-${Math.random()}`,
-          url
+          url,
+          type: "image" as "image" | "floorplan"
         }));
         
         // Ensure areas is an array
@@ -110,7 +111,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             }))
           : [];
 
-        // Create the transformed property data - using type assertion to ensure all required fields
+        // Create the transformed property data with all required fields
         const transformedData: PropertyData = {
           id: propertyData.id || "",
           object_id: propertyData.object_id || "",

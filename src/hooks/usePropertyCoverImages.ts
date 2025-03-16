@@ -1,79 +1,68 @@
 
-import { useState } from "react";
-import { PropertyFormData, PropertyImage } from "@/types/property";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { getImageUrl, normalizeImage } from "@/utils/imageHelpers";
+import { useState } from 'react';
+import { PropertyFormData, PropertyImage } from '@/types/property';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 export function usePropertyCoverImages(
   formData: PropertyFormData,
-  setFormData: (data: PropertyFormData) => void
+  setFormState: (data: PropertyFormData) => void
 ) {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  // Set featured image (main image)
-  const handleSetFeaturedImage = async (imageUrl: string | null) => {
+  // Normalize an image which might be a string or PropertyImage object
+  const normalizeImage = (img: string | PropertyImage): PropertyImage => {
+    if (typeof img === 'string') {
+      return {
+        id: `img-${Date.now()}-${Math.random()}`,
+        url: img,
+        type: 'image',
+      };
+    }
+    return img;
+  };
+  
+  // Set the featured (main) image
+  const handleSetFeaturedImage = async (url: string | null) => {
     if (!formData.id) return;
     
+    setIsUpdating(true);
+    
     try {
-      setIsUpdating(true);
-      
-      // Find the image in the images array
-      const image = Array.isArray(formData.images) 
-        ? formData.images.find(img => {
-            const url = typeof img === 'string' ? img : img.url;
-            return url === imageUrl;
-          })
-        : null;
-      
-      if (!image && imageUrl !== null) {
-        console.error('Image not found in images array');
-        return;
+      // If there's an existing featuredImage, reset its is_main flag
+      if (formData.featuredImage) {
+        const { error: resetError } = await supabase
+          .from('property_images')
+          .update({ is_main: false })
+          .eq('property_id', formData.id)
+          .eq('is_main', true);
+          
+        if (resetError) throw resetError;
       }
       
-      // Update the database: reset all images to is_main=false
-      const { error: resetError } = await supabase
-        .from('property_images')
-        .update({ is_main: false })
-        .eq('property_id', formData.id);
-        
-      if (resetError) {
-        throw resetError;
-      }
-      
-      // If we're setting a new featured image (not clearing)
-      if (imageUrl && image) {
-        const imageId = typeof image === 'string' ? null : image.id;
-        
-        if (imageId) {
-          // Set the selected image to is_main=true
-          const { error } = await supabase
-            .from('property_images')
-            .update({ is_main: true })
-            .eq('id', imageId)
-            .eq('property_id', formData.id);
-            
-          if (error) {
-            throw error;
-          }
-        }
+      // If a new featured image is specified, set it
+      if (url) {
+        const { error } = await supabase
+          .from('property_images')
+          .update({ is_main: true })
+          .eq('property_id', formData.id)
+          .eq('url', url);
+          
+        if (error) throw error;
       }
       
       // Update local state
-      setFormData({
+      setFormState({
         ...formData,
-        featuredImage: imageUrl,
-        // Ensure coverImages is an array of PropertyImage objects
-        coverImages: formData.featuredImages?.map(url => normalizeImage(url)) || []
+        featuredImage: url
       });
       
       toast({
-        title: "Success",
-        description: "Featured image updated",
+        title: url ? "Featured image updated" : "Featured image removed",
       });
     } catch (error) {
-      console.error('Error setting featured image:', error);
+      console.error('Error updating featured image:', error);
       toast({
         title: "Error",
         description: "Failed to update featured image",
@@ -83,69 +72,75 @@ export function usePropertyCoverImages(
       setIsUpdating(false);
     }
   };
-
-  // Toggle featured image (grid image)
-  const handleToggleFeaturedImage = async (imageUrl: string) => {
+  
+  // Toggle an image in the featuredImages list (grid images)
+  const handleToggleFeaturedImage = async (url: string) => {
     if (!formData.id) return;
     
+    setIsUpdating(true);
+    
     try {
-      setIsUpdating(true);
+      const featuredImages = formData.featuredImages || [];
+      const isAlreadyFeatured = featuredImages.includes(url);
       
-      // Find the image in the images array
-      const image = Array.isArray(formData.images) 
-        ? formData.images.find(img => {
-            const url = typeof img === 'string' ? img : img.url;
-            return url === imageUrl;
-          })
-        : null;
+      // Find image ID from URL
+      let imageId: string | null = null;
       
-      if (!image) {
-        console.error('Image not found in images array');
-        return;
+      if (formData.images) {
+        const matchingImage = formData.images.find(img => {
+          const imgObj = normalizeImage(img);
+          return imgObj.url === url;
+        });
+        
+        if (matchingImage) {
+          imageId = normalizeImage(matchingImage).id;
+        }
       }
-      
-      const imageId = typeof image === 'string' ? null : image.id;
       
       if (!imageId) {
-        console.error('Image ID not found');
-        return;
+        console.error('Could not find image ID for URL:', url);
+        throw new Error('Image not found');
       }
       
-      // Check if this image is already a featured image
-      const isFeatured = formData.featuredImages?.includes(imageUrl) || false;
-      
-      // Update the database
+      // Update in database
       const { error } = await supabase
         .from('property_images')
-        .update({ is_featured_image: !isFeatured })
-        .eq('id', imageId)
-        .eq('property_id', formData.id);
+        .update({ is_featured_image: !isAlreadyFeatured })
+        .eq('property_id', formData.id)
+        .eq('id', imageId);
         
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       // Update local state
-      const updatedFeaturedImages = isFeatured
-        ? (formData.featuredImages || []).filter(url => url !== imageUrl)
-        : [...(formData.featuredImages || []), imageUrl];
+      let newFeaturedImages: string[];
       
-      setFormData({
+      if (isAlreadyFeatured) {
+        newFeaturedImages = featuredImages.filter(image => image !== url);
+      } else {
+        newFeaturedImages = [...featuredImages, url];
+      }
+      
+      // Ensure coverImages is updated to match
+      const coverImages: PropertyImage[] = newFeaturedImages.map(imgUrl => ({
+        id: `cover-${Date.now()}-${Math.random()}`,
+        url: imgUrl,
+        type: 'image'
+      }));
+      
+      setFormState({
         ...formData,
-        featuredImages: updatedFeaturedImages,
-        // Ensure coverImages is an array of PropertyImage objects
-        coverImages: updatedFeaturedImages.map(url => normalizeImage(url))
+        featuredImages: newFeaturedImages,
+        coverImages
       });
       
       toast({
-        title: "Success",
-        description: isFeatured ? "Image removed from featured list" : "Image added to featured list",
+        title: isAlreadyFeatured ? "Image removed from grid" : "Image added to grid",
       });
     } catch (error) {
       console.error('Error toggling featured image:', error);
       toast({
         title: "Error",
-        description: "Failed to update featured images",
+        description: "Failed to update grid images",
         variant: "destructive",
       });
     } finally {

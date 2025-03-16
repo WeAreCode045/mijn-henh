@@ -1,49 +1,57 @@
 
-import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { useState } from "react";
-import { PropertyData } from "@/types/property";
-import { AgencySettings } from "@/types/agency";
-import { useGeneratePDF } from "@/hooks/useGeneratePDF";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { usePDFGenerator } from "@/hooks/usePDFGenerator";
 
 interface PropertyTabActionsHandlerProps {
   propertyId: string;
-  propertyData?: PropertyData;
-  settings?: AgencySettings;
+  baseRoute?: string;
   children: (props: {
     webViewOpen: boolean;
     setWebViewOpen: (open: boolean) => void;
     handleGeneratePDF: () => void;
-    handleOpenWebView: (e?: React.MouseEvent) => void;
+    handleOpenWebView: () => void;
   }) => React.ReactNode;
 }
 
-export function PropertyTabActionsHandler({ 
-  propertyId, 
-  propertyData,
-  settings,
-  children 
+export function PropertyTabActionsHandler({
+  propertyId,
+  baseRoute = "/properties",
+  children,
 }: PropertyTabActionsHandlerProps) {
   const [webViewOpen, setWebViewOpen] = useState(false);
-  const { handleWebView } = usePropertyActions(propertyId);
-  const { generatePDF } = useGeneratePDF();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { generatePDF, isGenerating } = usePDFGenerator();
 
-  // Web view functions - opens in new tab
-  const handleOpenWebView = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    handleWebView(e);
+  const handlePDFGenerate = async () => {
+    try {
+      // Use default options if no specific options provided
+      await generatePDF(propertyId);
+      
+      toast({
+        title: "PDF Generated",
+        description: "PDF has been generated successfully"
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
   };
 
-  // PDF generation function
-  const handleGeneratePDF = async () => {
-    if (propertyData && settings) {
-      await generatePDF(propertyData);
-    }
+  const handleWebViewOpen = () => {
+    setWebViewOpen(true);
   };
 
   return children({
     webViewOpen,
     setWebViewOpen,
-    handleGeneratePDF,
-    handleOpenWebView
+    handleGeneratePDF: handlePDFGenerate,
+    handleOpenWebView: handleWebViewOpen,
   });
 }

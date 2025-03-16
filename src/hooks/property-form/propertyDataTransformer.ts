@@ -1,5 +1,5 @@
 
-import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType } from "@/types/property";
+import type { PropertyFeature, PropertyArea, PropertyImage, PropertyPlaceType, GeneralInfoData } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
 
@@ -67,7 +67,7 @@ export function transformAreas(areas: any[]): PropertyArea[] {
     : [];
 }
 
-export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
+export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {
   return Array.isArray(places)
     ? places.map((place: any) => ({
         id: place.id || "",
@@ -87,4 +87,35 @@ export function transformImages(images: any[]): PropertyImage[] {
   return Array.isArray(images)
     ? images.map((img: any) => normalizeImage(img))
     : [];
+}
+
+// Helper to transform GeneralInfoData
+export function transformGeneralInfo(data: any): GeneralInfoData | undefined {
+  if (!data) return undefined;
+  
+  if (typeof data === 'object' && !Array.isArray(data)) {
+    // It's already an object, check if it looks like GeneralInfoData
+    if ('propertyDetails' in data || 'description' in data || 'keyInformation' in data) {
+      return data as GeneralInfoData;
+    }
+  }
+  
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as GeneralInfoData;
+      }
+    } catch (e) {
+      // Return undefined if parsing fails
+      return undefined;
+    }
+  }
+  
+  // Default empty object with the expected structure
+  return {
+    propertyDetails: {},
+    description: {},
+    keyInformation: {}
+  };
 }

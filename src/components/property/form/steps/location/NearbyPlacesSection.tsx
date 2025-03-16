@@ -1,161 +1,149 @@
 
-import { useState } from "react";
-import { PropertyFormData, PropertyNearbyPlace, PropertyPlaceType } from "@/types/property";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, MapPin, Plus, Search, X } from "lucide-react";
+import React, { useState } from "react";
+import { PropertyPlaceType } from "@/types/property";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategorySection } from "./components/CategorySection";
+import { PlaceItem } from "./components/PlaceItem";
+import { RestaurantIcon, ShoppingCartIcon, SchoolIcon, HomeIcon, HeartIcon, ParkIcon } from "lucide-react";
 
 interface NearbyPlacesSectionProps {
-  formData: PropertyFormData;
-  onFetchCategoryPlaces: (category: string) => Promise<any>;
-  onRemoveNearbyPlace: (index: number) => void;
-  isLoadingLocationData: boolean;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  formData: any;
+  onRemovePlace: (index: number) => void;
+  onFieldChange: (field: string, value: any) => void;
+  onFetchNearbyPlaces: (category: string) => Promise<any>;
+  isLoadingNearbyPlaces: boolean;
 }
 
 export function NearbyPlacesSection({
   formData,
-  onFetchCategoryPlaces,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  onFieldChange
+  onRemovePlace,
+  onFieldChange,
+  onFetchNearbyPlaces,
+  isLoadingNearbyPlaces
 }: NearbyPlacesSectionProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const nearbyPlaces = formData.nearby_places || [];
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  // Function to fetch places based on category
-  const handleFetchCategory = async (category: string) => {
-    await onFetchCategoryPlaces(category);
+  const handleFetchRestaurants = async () => {
+    setActiveCategory("restaurant");
+    await onFetchNearbyPlaces("restaurant");
   };
 
-  // Function to add a custom place
-  const handleAddCustomPlace = () => {
-    if (!searchQuery.trim()) return;
+  const handleFetchStores = async () => {
+    setActiveCategory("store");
+    await onFetchNearbyPlaces("store");
+  };
 
-    const newPlace: PropertyPlaceType = {
-      id: crypto.randomUUID(),
-      name: searchQuery,
-      type: "other",
-      types: ["other"],
-      distance: 0,
-      visible_in_webview: true
-    };
+  const handleFetchSchools = async () => {
+    setActiveCategory("school");
+    await onFetchNearbyPlaces("school");
+  };
 
-    const updatedPlaces = [
-      ...(formData.nearby_places || []),
-      newPlace
-    ];
+  const handleFetchHealthcare = async () => {
+    setActiveCategory("hospital");
+    await onFetchNearbyPlaces("hospital");
+  };
 
+  const handleFetchParks = async () => {
+    setActiveCategory("park");
+    await onFetchNearbyPlaces("park");
+  };
+
+  const handleFetchTransit = async () => {
+    setActiveCategory("transit_station");
+    await onFetchNearbyPlaces("transit_station");
+  };
+
+  // Helper to ensure all places have the required 'types' array
+  const ensureTypesArray = (places: PropertyPlaceType[]): PropertyPlaceType[] => {
+    return places.map(place => ({
+      ...place,
+      types: place.types || [place.type || "other"]
+    }));
+  };
+
+  // Update the nearby places with visibility flag
+  const updatePlaceVisibility = (placeId: string, visible: boolean) => {
+    const updatedPlaces = nearbyPlaces.map((place: PropertyPlaceType) => {
+      if (place.id === placeId) {
+        return { ...place, visible_in_webview: visible };
+      }
+      return place;
+    });
     onFieldChange("nearby_places", updatedPlaces);
-    setSearchQuery("");
-  };
-
-  // Function to remove a place
-  const handleRemovePlace = (index: number) => {
-    onRemoveNearbyPlace(index);
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Nearby Places</h3>
-      
-      {/* Search and Add Custom Place */}
-      <div className="flex space-x-2">
-        <div className="relative flex-1">
-          <Input
-            placeholder="Add custom place..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10"
+    <Card>
+      <CardHeader>
+        <CardTitle>Nearby Places</CardTitle>
+        <CardDescription>
+          Find and add nearby places of interest that will be displayed on the property page.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CategorySection
+            title="Restaurants"
+            icon={<RestaurantIcon className="h-4 w-4" />}
+            onClick={handleFetchRestaurants}
+            isLoading={isLoadingNearbyPlaces && activeCategory === "restaurant"}
           />
-          {searchQuery && (
-            <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-        <Button type="button" onClick={handleAddCustomPlace}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add
-        </Button>
-      </div>
-      
-      {/* Categories for fetching places */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
-        <CategorySection
-          title="Restaurants"
-          icon="restaurant"
-          onClick={() => handleFetchCategory("restaurant")}
-          isLoading={isLoadingLocationData}
-        />
-        <CategorySection
-          title="Schools"
-          icon="school"
-          onClick={() => handleFetchCategory("school")}
-          isLoading={isLoadingLocationData}
-        />
-        <CategorySection
-          title="Parks"
-          icon="park"
-          onClick={() => handleFetchCategory("park")}
-          isLoading={isLoadingLocationData}
-        />
-        <CategorySection
-          title="Shops"
-          icon="shop"
-          onClick={() => handleFetchCategory("store")}
-          isLoading={isLoadingLocationData}
-        />
-        <CategorySection
-          title="Transit"
-          icon="transit"
-          onClick={() => handleFetchCategory("transit_station")}
-          isLoading={isLoadingLocationData}
-        />
-        <CategorySection
-          title="Health"
-          icon="health"
-          onClick={() => handleFetchCategory("hospital")}
-          isLoading={isLoadingLocationData}
-        />
-      </div>
-      
-      {/* Places List */}
-      <div className="mt-4">
-        <Label>Selected Places</Label>
-        <div className="mt-2 space-y-2">
-          {(!formData.nearby_places || formData.nearby_places.length === 0) && (
-            <p className="text-sm text-muted-foreground italic">No places selected yet</p>
-          )}
           
-          {formData.nearby_places?.map((place, index) => (
-            <Card key={place.id} className="relative">
-              <CardContent className="p-4 pl-8">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{place.name}</p>
-                    <p className="text-xs text-muted-foreground">{place.vicinity}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemovePlace(index)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <CategorySection
+            title="Shopping"
+            icon={<ShoppingCartIcon className="h-4 w-4" />}
+            onClick={handleFetchStores}
+            isLoading={isLoadingNearbyPlaces && activeCategory === "store"}
+          />
+          
+          <CategorySection
+            title="Schools"
+            icon={<SchoolIcon className="h-4 w-4" />}
+            onClick={handleFetchSchools}
+            isLoading={isLoadingNearbyPlaces && activeCategory === "school"}
+          />
+          
+          <CategorySection
+            title="Healthcare"
+            icon={<HeartIcon className="h-4 w-4" />}
+            onClick={handleFetchHealthcare}
+            isLoading={isLoadingNearbyPlaces && activeCategory === "hospital"}
+          />
+          
+          <CategorySection
+            title="Parks"
+            icon={<ParkIcon className="h-4 w-4" />}
+            onClick={handleFetchParks}
+            isLoading={isLoadingNearbyPlaces && activeCategory === "park"}
+          />
+          
+          <CategorySection
+            title="Public Transit"
+            icon={<HomeIcon className="h-4 w-4" />}
+            onClick={handleFetchTransit}
+            isLoading={isLoadingNearbyPlaces && activeCategory === "transit_station"}
+          />
         </div>
-      </div>
-    </div>
+
+        {nearbyPlaces.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-medium mb-4">Selected Places</h3>
+            <div className="space-y-3">
+              {ensureTypesArray(nearbyPlaces).map((place: PropertyPlaceType, idx: number) => (
+                <PlaceItem
+                  key={place.id || idx}
+                  place={place}
+                  onRemove={() => onRemovePlace(idx)}
+                  onToggleVisibility={(visible) =>
+                    updatePlaceVisibility(place.id, visible)
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

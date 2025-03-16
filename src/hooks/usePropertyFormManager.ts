@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { usePropertyFormState } from '@/hooks/usePropertyFormState';
 import { usePropertyFeatures } from './property-form/usePropertyFeatures';
@@ -9,6 +9,16 @@ import { usePropertyImages } from './property-form/usePropertyImages';
 import { usePropertyFloorplans } from './images/usePropertyFloorplans';
 import { usePropertyAreaPhotos } from './images/usePropertyAreaPhotos';
 import { usePropertyCoverImages } from './usePropertyCoverImages';
+
+// Define a wrapper for handleFieldChange
+const createFieldChangeWrapper = (handleFieldChange: <K extends keyof PropertyFormData>(field: K, value: PropertyFormData[K]) => void) => {
+  return (data: PropertyFormData) => {
+    // For each property in data, call handleFieldChange
+    Object.entries(data).forEach(([key, value]) => {
+      handleFieldChange(key as keyof PropertyFormData, value as any);
+    });
+  };
+};
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
@@ -35,6 +45,9 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleAreaImageUpload,
     isUploading
   } = usePropertyAreas(formState, handleFieldChange);
+  
+  // Create a wrapper function for hooks that expect a function with (data: PropertyFormData) signature
+  const fieldChangeWrapper = createFieldChangeWrapper(handleFieldChange);
   
   // Hook for managing content and steps
   const { 
@@ -63,13 +76,13 @@ export function usePropertyFormManager(property: PropertyFormData) {
     images
   } = usePropertyImages(formState, setFormState);
   
-  // Hook for managing floorplans
+  // Hook for managing floorplans - pass the wrapper function
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan,
     handleFloorplanEmbedScriptUpdate
-  } = usePropertyFloorplans(formState, setFormState);
+  } = usePropertyFloorplans(formState, fieldChangeWrapper);
   
   // Hook for managing area photos
   const {
@@ -77,11 +90,11 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveAreaPhoto
   } = usePropertyAreaPhotos(formState, setFormState);
   
-  // Hook for managing cover images
+  // Hook for managing cover images - pass the wrapper function
   const {
     handleSetFeaturedImage,
     handleToggleFeaturedImage
-  } = usePropertyCoverImages(formState, setFormState);
+  } = usePropertyCoverImages(formState, fieldChangeWrapper);
   
   // Media update handlers
   const handleVirtualTourUpdate = (url: string) => {
