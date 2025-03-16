@@ -1,4 +1,3 @@
-
 import { icon } from '@fortawesome/fontawesome-svg-core';
 import { 
   faCalendar, 
@@ -9,8 +8,7 @@ import {
   faBolt 
 } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
-import svg2pdf from 'svg2pdf.js';
-import { supabase } from '@/integrations/supabase/client';
+import svg2pdf from 'svg2pdf.js/dist/svg2pdf';
 import { fetchSvgIcon } from '@/utils/iconService';
 
 // Map of icon names to FontAwesome icons (fallback if SVG fetching fails)
