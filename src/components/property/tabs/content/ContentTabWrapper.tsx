@@ -25,6 +25,7 @@ interface ContentTabWrapperProps {
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
+    isSaving?: boolean; // Add this property to fix the TypeScript error
   };
 }
 
@@ -78,6 +79,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     }
   };
 
+  // Use the handlers.isSaving if provided, otherwise use localIsSaving
   const isSaving = handlers.isSaving || localIsSaving;
 
   return (
