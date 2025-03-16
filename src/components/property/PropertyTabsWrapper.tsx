@@ -1,4 +1,3 @@
-
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData, PropertyFormData } from "@/types/property";
@@ -28,11 +27,14 @@ export function PropertyTabsWrapper({
   const { activeTab, setActiveTab } = usePropertyTabs();
   console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
+  // Cast property to PropertyFormData with as assertion to ensure TypeScript compatibility
+  const propertyAsFormData = property as unknown as PropertyFormData;
+  
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
         {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={property as PropertyFormData}>
+          <PropertyFormManager property={propertyAsFormData}>
             {({ 
               formState, 
               handleFieldChange,

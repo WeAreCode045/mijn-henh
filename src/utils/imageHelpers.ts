@@ -8,14 +8,19 @@ import { PropertyImage } from "@/types/property";
 export function normalizeImage(image: string | PropertyImage | { url: string }): PropertyImage {
   // If image is already a PropertyImage type object, return it directly
   if (typeof image === 'object' && 'id' in image && 'url' in image) {
-    return image as PropertyImage;
+    // Ensure type is valid or set default
+    return {
+      ...image,
+      type: image.type || "image"
+    } as PropertyImage;
   }
   
   // If image is a string (URL only), create a PropertyImage object
   if (typeof image === 'string') {
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: image
+      url: image,
+      type: "image"
     };
   }
   
@@ -23,7 +28,8 @@ export function normalizeImage(image: string | PropertyImage | { url: string }):
   if (typeof image === 'object' && 'url' in image) {
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: image.url
+      url: image.url,
+      type: "image"
     };
   }
   
@@ -31,7 +37,8 @@ export function normalizeImage(image: string | PropertyImage | { url: string }):
   console.error('Invalid image format:', image);
   return {
     id: `img-${Date.now()}`,
-    url: ''
+    url: '',
+    type: "image"
   };
 }
 

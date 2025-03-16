@@ -1,8 +1,9 @@
 
 import { useState } from "react";
-import { PropertyFormData, PropertyImage } from "@/types/property";
+import { PropertyFormData, PropertyImage, PropertyFloorplan } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { getImageUrl } from "@/utils/imageHelpers";
 
 export function usePropertyFloorplans(
   formData: PropertyFormData,
@@ -153,7 +154,7 @@ export function usePropertyFloorplans(
     });
     
     // If the floorplan has a file path, attempt to delete it from storage
-    if (floorplanToRemove.filePath) {
+    if (typeof floorplanToRemove !== 'string' && floorplanToRemove.filePath) {
       try {
         const { error } = await supabase.storage
           .from('properties')
@@ -168,16 +169,22 @@ export function usePropertyFloorplans(
     }
     
     // If property exists in database, delete the floorplan from property_images table
-    if (formData.id && floorplanToRemove.url) {
+    if (formData.id) {
       try {
-        const { error } = await supabase
-          .from('property_images')
-          .delete()
-          .eq('url', floorplanToRemove.url)
-          .eq('property_id', formData.id);
+        const url = typeof floorplanToRemove === 'string' 
+          ? floorplanToRemove 
+          : floorplanToRemove.url;
           
-        if (error) {
-          console.error('Error removing floorplan from database:', error);
+        if (url) {
+          const { error } = await supabase
+            .from('property_images')
+            .delete()
+            .eq('url', url)
+            .eq('property_id', formData.id);
+            
+          if (error) {
+            console.error('Error removing floorplan from database:', error);
+          }
         }
       } catch (error) {
         console.error('Error removing floorplan from database:', error);
@@ -190,9 +197,18 @@ export function usePropertyFloorplans(
     });
   };
 
+  // Add a handler for updating floorplan embed script
+  const handleFloorplanEmbedScriptUpdate = (script: string) => {
+    setFormData({
+      ...formData,
+      floorplanEmbedScript: script
+    });
+  };
+
   return {
     handleFloorplanUpload,
     handleRemoveFloorplan,
-    isUploadingFloorplan: isUploading
+    isUploadingFloorplan: isUploading,
+    handleFloorplanEmbedScriptUpdate
   };
 }

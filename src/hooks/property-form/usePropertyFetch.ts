@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity } from "@/types/property";
 import { initialFormData } from "./initialFormData";
 import { Json } from "@/integrations/supabase/types";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 // Helper function to safely convert JSON or array to array
 const safeParseArray = (value: any, defaultValue: any[] = []): any[] => {
@@ -78,11 +79,21 @@ export function usePropertyFetch(id: string | undefined) {
           console.error('Error fetching property images:', imageError);
         }
         
-        const images: PropertyImage[] = imageData || [];
+        // Process images with proper type conversion
+        const processedImages = imageData ? imageData.map((img: any) => ({
+          id: img.id,
+          url: img.url,
+          area: img.area,
+          property_id: img.property_id,
+          is_main: img.is_main,
+          is_featured_image: img.is_featured_image,
+          sort_order: img.sort_order,
+          type: img.type || "image" as "image" | "floorplan"
+        })) : [];
         
         // Filter images by type and flags
-        const regularImages = images.filter(img => img.type === 'image' || !img.type);
-        const floorplanImages = images.filter(img => img.type === 'floorplan');
+        const regularImages = processedImages.filter(img => img.type === 'image' || !img.type);
+        const floorplanImages = processedImages.filter(img => img.type === 'floorplan');
         const featuredImage = regularImages.find(img => img.is_main)?.url || null;
         const featuredImages = regularImages
           .filter(img => img.is_featured_image)
@@ -144,12 +155,14 @@ export function usePropertyFetch(id: string | undefined) {
           const coverImages = featuredImages.map(url => ({
             id: `cover-${Date.now()}-${Math.random()}`,
             url
-          }));
+          })) as PropertyImage[];
           
           // Set the form data with safe defaults for new fields
-          setFormData({
+          const updatedFormData: PropertyFormData = {
             ...initialFormData,
             ...propertyData,
+            id: propertyData.id || "",
+            title: propertyData.title || "",
             features,
             areas,
             nearby_places,
@@ -164,7 +177,9 @@ export function usePropertyFetch(id: string | undefined) {
             coverImages, // Now as PropertyImage[]
             gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
             areaPhotos: []
-          });
+          };
+          
+          setFormData(updatedFormData);
         }
       } catch (error) {
         console.error('Error fetching property:', error);

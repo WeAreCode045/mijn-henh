@@ -13,10 +13,19 @@ export type {
   PropertyData,
   PropertyFormData,
   PropertySubmitData,
-} from '../property';
+} from './PropertyTypes';
 
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export { type PropertyData as PropertyDataType } from './PropertyDataTypes';
+
+// Re-export types from PropertyImageTypes.ts
+export type { PropertyImage as PropertyImageType } from './PropertyImageTypes';
+
+// Re-export types from PropertyPlaceTypes.ts
+export type { 
+  PropertyPlaceType as PropertyPlaceTypeBase,
+  PropertyNearbyPlace as PropertyNearbyPlaceBase 
+} from './PropertyPlaceTypes';
 
 // Re-export types from PropertyTypes.ts
 export type { 

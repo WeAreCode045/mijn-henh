@@ -1,7 +1,7 @@
 
-import { PropertyPlaceType } from "@/types/property";
+import { PropertyPlaceType, PropertyNearbyPlace } from "@/types/property";
 
-export function transformPropertyNearbyPlaces(placesData: any[]): PropertyPlaceType[] {
+export function transformPropertyNearbyPlaces(placesData: any[]): PropertyNearbyPlace[] {
   return placesData.map(place => ({
     id: place.id || "",
     name: place.name || "",

@@ -1,6 +1,7 @@
 
 import { PropertyAreas } from "@/components/property/PropertyAreas";
 import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 interface AreasStepProps {
   formData: PropertyFormData;
@@ -25,6 +26,11 @@ export function AreasStep({
   setPendingChanges,
   isUploading
 }: AreasStepProps) {
+  // Normalize images to ensure they are all PropertyImage objects
+  const normalizedImages = Array.isArray(formData.images) 
+    ? formData.images.map(img => normalizeImage(img))
+    : [];
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Property Areas</h2>
@@ -34,7 +40,7 @@ export function AreasStep({
       
       <PropertyAreas 
         areas={formData.areas || []}
-        images={formData.images || []}
+        images={normalizedImages}
         propertyId={formData.id || ''}
         onAdd={onAddArea}
         onRemove={onRemoveArea}

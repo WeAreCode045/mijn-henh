@@ -1,5 +1,6 @@
 
 import { PropertyData } from "./PropertyDataTypes";
+import { PropertyImage } from "./PropertyImageTypes";
 
 // Basic data types
 export interface PropertyFeature {
@@ -15,20 +16,7 @@ export interface PropertyArea {
   columns: number;
   name: string;
   size: string;
-  images: string[] | { url: string; id: string }[];
-}
-
-export interface PropertyImage {
-  id: string;
-  url: string;
-  sort_order?: number;
-  is_main?: boolean;
-  is_featured_image?: boolean;
-  area?: string;
-  type?: 'image' | 'floorplan' | string;
-  title?: string;
-  description?: string;
-  filePath?: string;
+  images: PropertyImage[];
 }
 
 export interface PropertyFloorplan {
@@ -39,6 +27,7 @@ export interface PropertyFloorplan {
   filePath?: string; // Used during upload process
   columns?: number; // Used for layout
   description?: string;
+  type?: "floorplan";
 }
 
 export interface PropertyNearbyPlace {
@@ -47,10 +36,10 @@ export interface PropertyNearbyPlace {
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
-  type?: string;
-  types?: string[];
+  type: string;
+  types: string[];
   visible_in_webview?: boolean;
-  distance?: number | string;
+  distance: number | string;
 }
 
 export interface PropertyCity {
@@ -60,10 +49,15 @@ export interface PropertyCity {
   visible_in_webview?: boolean;
 }
 
+// GeneralInfoData type
+export interface GeneralInfoData {
+  [key: string]: any;
+}
+
 // Composite types for forms
 export interface PropertyFormData {
-  id?: string;
-  title?: string;
+  id: string;
+  title: string;  // Make title required to match PropertyData
   price?: string;
   address?: string;
   bedrooms?: string;
@@ -78,7 +72,7 @@ export interface PropertyFormData {
   shortDescription?: string;
   location_description?: string;
   features?: PropertyFeature[];
-  images?: (PropertyImage | string)[] | { url: string }[];
+  images?: PropertyImage[];
   featuredImage?: string | null;
   featuredImages?: string[];
   areas?: PropertyArea[];
@@ -95,12 +89,13 @@ export interface PropertyFormData {
   floorplanEmbedScript?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  areaPhotos?: string[];
-  coverImages?: (PropertyImage | string)[];
-  gridImages?: (PropertyImage | string)[];
   created_at?: string;
   updated_at?: string;
-  generalInfo?: any;
+  generalInfo?: GeneralInfoData;
+  // For backward compatibility
+  coverImages?: PropertyImage[];
+  gridImages?: PropertyImage[];
+  areaPhotos?: string[];
 }
 
 export interface PropertySubmitData {
@@ -118,7 +113,7 @@ export interface PropertySubmitData {
   hasGarden: boolean;
   description: string;
   shortDescription?: string;
-  location_description: string;
+  location_description?: string;
   features: string;
   areas: any;
   nearby_places?: string;
@@ -134,8 +129,8 @@ export interface PropertySubmitData {
   images?: string[];
   floorplans?: string[];
   floorplanEmbedScript?: string;
-  generalInfo?: string;
+  generalInfo?: string | GeneralInfoData;
 }
 
 // Export PropertyPlaceType as the interface itself
-export type PropertyPlaceType = PropertyNearbyPlace;
+export type { PropertyPlaceType } from './PropertyPlaceTypes';

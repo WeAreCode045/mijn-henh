@@ -15,7 +15,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
   
   // Hook for handling form state
   const { 
-    onFieldChange 
+    handleFieldChange 
   } = usePropertyFormState(formState, setFormState);
   
   // Hook for managing features
@@ -23,7 +23,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     addFeature, 
     removeFeature, 
     updateFeature 
-  } = usePropertyFeatures(formState, onFieldChange);
+  } = usePropertyFeatures(formState, handleFieldChange);
   
   // Hook for managing areas
   const { 
@@ -34,7 +34,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleAreaImagesSelect, 
     handleAreaImageUpload,
     isUploading
-  } = usePropertyAreas(formState, onFieldChange);
+  } = usePropertyAreas(formState, handleFieldChange);
   
   // Hook for managing content and steps
   const { 
@@ -54,14 +54,14 @@ export function usePropertyFormManager(property: PropertyFormData) {
     isSaving,
     setPendingChanges,
     onSubmit
-  } = usePropertyContent(formState, onFieldChange);
+  } = usePropertyContent(formState, handleFieldChange);
   
   // Hook for managing images
   const {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyImages(formState, onFieldChange);
+  } = usePropertyImages(formState, setFormState);
   
   // Hook for managing floorplans
   const {
@@ -69,32 +69,32 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveFloorplan,
     isUploadingFloorplan,
     handleFloorplanEmbedScriptUpdate
-  } = usePropertyFloorplans(formState, onFieldChange);
+  } = usePropertyFloorplans(formState, setFormState);
   
   // Hook for managing area photos
   const {
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto
-  } = usePropertyAreaPhotos(formState, onFieldChange);
+  } = usePropertyAreaPhotos(formState, setFormState);
   
   // Hook for managing cover images
   const {
     handleSetFeaturedImage,
     handleToggleFeaturedImage
-  } = usePropertyCoverImages(formState, onFieldChange);
+  } = usePropertyCoverImages(formState, setFormState);
   
   // Media update handlers
   const handleVirtualTourUpdate = (url: string) => {
-    onFieldChange('virtualTourUrl', url);
+    handleFieldChange('virtualTourUrl', url);
   };
   
   const handleYoutubeUrlUpdate = (url: string) => {
-    onFieldChange('youtubeUrl', url);
+    handleFieldChange('youtubeUrl', url);
   };
   
   return {
     formState,
-    handleFieldChange: onFieldChange,
+    handleFieldChange,
     
     // Feature methods
     onAddFeature: addFeature,
@@ -157,13 +157,13 @@ export function usePropertyFormManager(property: PropertyFormData) {
     
     // Save handlers
     handleSaveObjectId: (objectId: string) => {
-      onFieldChange('object_id', objectId);
+      handleFieldChange('object_id', objectId);
     },
     handleSaveAgent: (agentId: string) => {
-      onFieldChange('agent_id', agentId);
+      handleFieldChange('agent_id', agentId);
     },
     handleSaveTemplate: (templateId: string) => {
-      onFieldChange('template_id', templateId);
+      handleFieldChange('template_id', templateId);
     }
   };
 }

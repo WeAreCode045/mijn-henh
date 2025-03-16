@@ -7,6 +7,8 @@ export interface PropertyImage {
   is_main?: boolean;
   is_featured_image?: boolean;
   sort_order?: number;
-  type?: string;
+  type?: "image" | "floorplan" | string;
   filePath?: string;
+  title?: string;
+  description?: string;
 }

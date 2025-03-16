@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { PropertyData, PropertyImage, PropertyCity } from "@/types/property";
+import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 
 // Safely parse JSON to the expected type
@@ -29,7 +29,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
       
       try {
         // Fetch images from property_images table
-        let images: PropertyImage[] = [];
+        let rawImages: any[] = [];
         
         if (propertyData.id) {
           const { data: imageData, error: imageError } = await supabase
@@ -41,9 +41,21 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           if (imageError) {
             console.error('Error fetching property images:', imageError);
           } else {
-            images = imageData || [];
+            rawImages = imageData || [];
           }
         }
+        
+        // Process images to PropertyImage objects
+        const images: PropertyImage[] = rawImages.map(img => ({
+          id: img.id,
+          url: img.url,
+          area: img.area,
+          property_id: img.property_id,
+          is_main: img.is_main,
+          is_featured_image: img.is_featured_image,
+          sort_order: img.sort_order,
+          type: img.type as "image" | "floorplan" | string
+        }));
         
         // Parse complex data
         const features = safeParseJSON(propertyData.features, []);
@@ -51,7 +63,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         const nearby_places = safeParseJSON(propertyData.nearby_places, []);
         
         // Handle nearby_cities with proper checks
-        let nearby_cities: PropertyCity[] = [];
+        let nearby_cities = [];
         if (propertyData.nearby_cities !== undefined) {
           nearby_cities = safeParseJSON(propertyData.nearby_cities, []);
         }
@@ -74,9 +86,34 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           url
         }));
         
-        // Create the structured property data
-        const structuredProperty: PropertyData = {
+        // Ensure areas is an array
+        const dataAreas = Array.isArray(areas) ? areas : [];
+        
+        // Transform areas to include images from property_images table
+        const transformedAreas = dataAreas.map((area: any) => ({
+          ...area,
+          images: images
+            .filter((img) => img.area === area.id)
+            .map((img) => ({
+              id: img.id,
+              url: img.url,
+              area: img.area,
+              type: img.type
+            }))
+        }));
+
+        // Ensure nearby_places has 'types' property
+        const transformedNearbyPlaces = Array.isArray(nearby_places)
+          ? nearby_places.map((place: any) => ({
+              ...place,
+              types: place.types || [place.type || "other"]
+            }))
+          : [];
+
+        // Create the transformed property data - using type assertion to ensure all required fields
+        const transformedData: PropertyData = {
           id: propertyData.id || "",
+          object_id: propertyData.object_id || "",
           title: propertyData.title || "",
           price: propertyData.price || "",
           address: propertyData.address || "",
@@ -90,32 +127,36 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           hasGarden: propertyData.hasGarden || false,
           description: propertyData.description || "",
           location_description: propertyData.location_description || "",
-          features,
-          areas,
-          nearby_places,
-          nearby_cities,
-          images: regularImages,
-          map_image: propertyData.map_image || null,
+          features: features,
+          images: images,
+          featuredImage: featuredImage,
+          featuredImages: featuredImages,
+          areas: transformedAreas,
+          nearby_places: transformedNearbyPlaces,
+          nearby_cities: nearby_cities,
           latitude: propertyData.latitude || null,
           longitude: propertyData.longitude || null,
-          floorplans: floorplanImages,
-          object_id: propertyData.object_id || "",
+          map_image: propertyData.map_image || null,
           agent_id: propertyData.agent_id || "",
           template_id: propertyData.template_id || "default",
           virtualTourUrl: propertyData.virtualTourUrl || "",
           youtubeUrl: propertyData.youtubeUrl || "",
-          notes: propertyData.notes || "",
-          featuredImage,
-          featuredImages,
+          created_at: propertyData.created_at || new Date().toISOString(),
+          updated_at: propertyData.updated_at || new Date().toISOString(),
+          floorplans: floorplanImages,
           floorplanEmbedScript: propertyData.floorplanEmbedScript || "",
-          created_at: propertyData.created_at,
-          updated_at: propertyData.updated_at,
-          // Add backward compatibility fields
-          coverImages, // Now as PropertyImage[]
-          gridImages: regularImages.slice(0, 4) // Now as PropertyImage[]
+          coverImages: coverImages as PropertyImage[],
+          gridImages: regularImages.slice(0, 4) as PropertyImage[],
+          agent: propertyData.agent ? {
+            id: propertyData.agent.id,
+            name: propertyData.agent.full_name,
+            email: propertyData.agent.email,
+            phone: propertyData.agent.phone,
+            photoUrl: propertyData.agent.avatar_url
+          } : undefined
         };
         
-        setProperty(structuredProperty);
+        setProperty(transformedData);
       } catch (error) {
         console.error("Error processing property data:", error);
         setProperty(null);

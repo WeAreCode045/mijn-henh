@@ -11,6 +11,7 @@ import { AreaImageSelectDialog } from "./area/AreaImageSelectDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 interface AreaCardProps {
   area: PropertyArea;
@@ -23,14 +24,12 @@ interface AreaCardProps {
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
-type AreaImage = {
-  id: string;
-  url: string;
+interface AreaImageType extends PropertyImage {
   area?: string | null;
   property_id?: string;
   created_at?: string;
   type?: string;
-};
+}
 
 export function AreaCard({
   area,
@@ -43,7 +42,7 @@ export function AreaCard({
   onImagesSelect,
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
-  const [areaImages, setAreaImages] = useState<AreaImage[]>([]);
+  const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
   
   // Get area images based on area ID from property_images table
@@ -67,7 +66,18 @@ export function AreaCard({
             console.error(`Error fetching images for area ${area.id} from property_images:`, error);
           } else if (data && data.length > 0) {
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
-            setAreaImages(data as AreaImage[]);
+            // Convert the database images to PropertyImage type
+            const convertedImages: PropertyImage[] = data.map(img => ({
+              id: img.id,
+              url: img.url,
+              area: img.area,
+              type: img.type || "image",
+              is_main: img.is_main,
+              is_featured_image: img.is_featured_image,
+              sort_order: img.sort_order,
+              property_id: img.property_id
+            }));
+            setAreaImages(convertedImages);
             return;
           } else {
             console.log(`AreaCard ${area.id} - No images found in property_images table`);
@@ -79,7 +89,9 @@ export function AreaCard({
       } else {
         // Use area.images directly if available
         if (area.images && area.images.length > 0) {
-          setAreaImages(area.images as AreaImage[]);
+          // Convert all images to PropertyImage type
+          const normalizedImages = area.images.map(img => normalizeImage(img));
+          setAreaImages(normalizedImages);
         } else {
           setAreaImages([]);
         }

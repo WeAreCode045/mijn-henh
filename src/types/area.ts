@@ -1,4 +1,6 @@
 
+import { PropertyImage } from './property/PropertyImageTypes';
+
 export interface AreaImage {
   id: string;
   url: string;
@@ -11,7 +13,7 @@ export interface Area {
   size?: string;
   title?: string;
   description?: string;
-  images?: string[] | { url: string; id: string; }[];
+  images?: PropertyImage[] | string[] | { url: string; id: string; }[];
   imageIds?: string[];
   columns?: number;
 }
