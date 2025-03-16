@@ -38,8 +38,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   const { onSubmit } = usePropertyContentSubmit(
     formData,
     handlers.setPendingChanges || (() => {}),
-    setLastSaved,
-    handlers.onSubmit // Pass the external onSubmit if provided
+    setLastSaved
   );
 
   const handleNext = () => {
@@ -61,11 +60,13 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   };
 
   const handleSave = async () => {
-    console.log("Save button clicked in ContentTabWrapper");
+    console.log("Save button clicked in ContentTabWrapper - saving formData:", formData.id);
+    
     setLocalIsSaving(true);
     try {
+      // Always use our direct onSubmit function that saves to DB
       const result = await onSubmit();
-      console.log("Save result:", result);
+      console.log("Save result from usePropertyContentSubmit:", result);
       return result;
     } catch (error) {
       console.error("Error during save:", error);

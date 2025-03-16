@@ -14,20 +14,21 @@ export function usePropertyContentSubmit(
   const { toast } = useToast();
 
   const onSubmit = async () => {
-    console.log("Submit clicked in PropertyContentTab with formData:", formData);
+    console.log("Submit clicked in PropertyContentTab with formData ID:", formData.id);
     
-    if (externalOnSubmit) {
-      console.log("Using external onSubmit function");
+    // If we have an external submit function AND we don't have an ID, use the external function
+    if (externalOnSubmit && !formData.id) {
+      console.log("Using external onSubmit function because we don't have an ID");
       externalOnSubmit();
-      return;
+      return true;
     }
     
-    console.log("Form submitted in PropertyContentTab, saving to database");
+    console.log("Saving directly to database");
     
     // Final save when clicking submit
     if (formData.id) {
       try {
-        console.log("Attempting to save property with ID:", formData.id);
+        console.log("Saving property with ID:", formData.id);
         
         // Transform areas to the correct format for the database
         const areasForDb = prepareAreasForFormSubmission(formData.areas || []);
@@ -63,7 +64,7 @@ export function usePropertyContentSubmit(
           description: formData.description,
           location_description: formData.location_description,
           features: featuresJson,
-          areas: areasForDb,
+          areas: areasForDb as Json[],
           nearby_places: nearby_placesJson,
           nearby_cities: nearby_citiesJson,
           latitude: formData.latitude,
@@ -77,20 +78,21 @@ export function usePropertyContentSubmit(
           floorplanEmbedScript: formData.floorplanEmbedScript || ""
         };
         
-        console.log("Data being sent to database:", updateData);
+        console.log("Data being sent to database:", JSON.stringify(updateData).substring(0, 200) + "...");
         
         // Update the property in the database
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('properties')
           .update(updateData)
-          .eq('id', formData.id);
+          .eq('id', formData.id)
+          .select();
         
         if (error) {
           console.error("Error saving to database:", error);
           throw error;
         }
         
-        console.log("Save successful");
+        console.log("Save successful, response data:", data);
         setLastSaved(new Date());
         setPendingChanges(false);
         toast({

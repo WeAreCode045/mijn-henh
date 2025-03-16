@@ -21,8 +21,9 @@ export function ContentTabNavigation({
 }: ContentTabNavigationProps) {
   const handleSaveClick = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent any form submission
-    console.log("Save button clicked in ContentTabNavigation");
-    await onSave();
+    e.stopPropagation(); // Stop event propagation
+    console.log("Save button clicked in ContentTabNavigation, triggering onSave");
+    return await onSave();
   };
 
   return (

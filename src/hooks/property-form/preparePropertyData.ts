@@ -9,6 +9,8 @@ import { Json } from "@/integrations/supabase/types";
 export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): Json[] {
   if (!areas || !Array.isArray(areas)) return [];
   
+  console.log("prepareAreasForFormSubmission input:", areas);
+  
   return areas.map(area => {
     // Check if the area is already a primitive Json type
     if (typeof area === 'string' || typeof area === 'number' || typeof area === 'boolean' || area === null) {
