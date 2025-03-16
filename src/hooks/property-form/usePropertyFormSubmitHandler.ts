@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { usePropertyImageSaver } from "./usePropertyImageSaver";
 import { usePropertyDataPreparer } from "./usePropertyDataPreparer";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "./preparePropertyData";
 
 export function usePropertyFormSubmitHandler() {
   const { toast } = useToast();
@@ -39,10 +41,59 @@ export function usePropertyFormSubmitHandler() {
         // Update existing property
         console.log("Updating existing property with ID:", formData.id);
         
+        // Convert the areas to the correct format for database
+        const areasForDb = prepareAreasForFormSubmission(submitData.areas || []);
+        
+        // Transform features, nearby_places, and nearby_cities to JSON strings
+        const featuresJson = typeof submitData.features === 'string' 
+          ? submitData.features 
+          : JSON.stringify(submitData.features || []);
+        
+        const nearby_placesJson = typeof submitData.nearby_places === 'string'
+          ? submitData.nearby_places
+          : JSON.stringify(submitData.nearby_places || []);
+        
+        const nearby_citiesJson = typeof submitData.nearby_cities === 'string'
+          ? submitData.nearby_cities
+          : JSON.stringify(submitData.nearby_cities || []);
+        
+        // Create a database-ready object
+        const dbData = {
+          title: submitData.title,
+          price: submitData.price,
+          address: submitData.address,
+          bedrooms: submitData.bedrooms,
+          bathrooms: submitData.bathrooms,
+          sqft: submitData.sqft,
+          livingArea: submitData.livingArea,
+          buildYear: submitData.buildYear,
+          garages: submitData.garages,
+          energyLabel: submitData.energyLabel,
+          hasGarden: submitData.hasGarden,
+          shortDescription: submitData.shortDescription || "",
+          description: submitData.description,
+          location_description: submitData.location_description,
+          features: featuresJson,
+          areas: areasForDb as Json[],
+          nearby_places: nearby_placesJson,
+          nearby_cities: nearby_citiesJson,
+          latitude: submitData.latitude,
+          longitude: submitData.longitude,
+          map_image: submitData.map_image,
+          object_id: submitData.object_id,
+          agent_id: submitData.agent_id,
+          template_id: submitData.template_id,
+          virtualTourUrl: submitData.virtualTourUrl,
+          youtubeUrl: submitData.youtubeUrl,
+          floorplanEmbedScript: submitData.floorplanEmbedScript || ""
+        };
+        
+        console.log("Database update data:", dbData);
+        
         // Make a direct database update to ensure data is saved
         const { error } = await supabase
           .from('properties')
-          .update(submitData)
+          .update(dbData)
           .eq('id', formData.id);
           
         if (error) {
@@ -63,10 +114,59 @@ export function usePropertyFormSubmitHandler() {
         // Create new property
         console.log("Creating new property");
         
+        // Convert the areas to the correct format for database
+        const areasForDb = prepareAreasForFormSubmission(submitData.areas || []);
+        
+        // Transform features, nearby_places, and nearby_cities to JSON strings
+        const featuresJson = typeof submitData.features === 'string' 
+          ? submitData.features 
+          : JSON.stringify(submitData.features || []);
+        
+        const nearby_placesJson = typeof submitData.nearby_places === 'string'
+          ? submitData.nearby_places
+          : JSON.stringify(submitData.nearby_places || []);
+        
+        const nearby_citiesJson = typeof submitData.nearby_cities === 'string'
+          ? submitData.nearby_cities
+          : JSON.stringify(submitData.nearby_cities || []);
+        
+        // Create a database-ready object
+        const dbData = {
+          title: submitData.title,
+          price: submitData.price,
+          address: submitData.address,
+          bedrooms: submitData.bedrooms,
+          bathrooms: submitData.bathrooms,
+          sqft: submitData.sqft,
+          livingArea: submitData.livingArea,
+          buildYear: submitData.buildYear,
+          garages: submitData.garages,
+          energyLabel: submitData.energyLabel,
+          hasGarden: submitData.hasGarden,
+          shortDescription: submitData.shortDescription || "",
+          description: submitData.description,
+          location_description: submitData.location_description,
+          features: featuresJson,
+          areas: areasForDb as Json[],
+          nearby_places: nearby_placesJson,
+          nearby_cities: nearby_citiesJson,
+          latitude: submitData.latitude,
+          longitude: submitData.longitude,
+          map_image: submitData.map_image,
+          object_id: submitData.object_id,
+          agent_id: submitData.agent_id,
+          template_id: submitData.template_id,
+          virtualTourUrl: submitData.virtualTourUrl,
+          youtubeUrl: submitData.youtubeUrl,
+          floorplanEmbedScript: submitData.floorplanEmbedScript || ""
+        };
+        
+        console.log("Database insert data:", dbData);
+        
         // Make a direct database insert
         const { error } = await supabase
           .from('properties')
-          .insert(submitData);
+          .insert(dbData);
           
         if (error) {
           console.error("Supabase insert error:", error);

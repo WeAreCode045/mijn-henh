@@ -24,7 +24,8 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     const size = (area as any).size || '';
     const images = (area as any).images || [];
     
-    return {
+    // Convert to a simple object that matches Json type
+    const jsonObject: Record<string, Json> = {
       id,
       title,
       description,
@@ -33,6 +34,13 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
       size,
       images
     };
+    
+    // Handle imageIds separately because it may not be a Json type directly
+    if ((area as any).imageIds) {
+      jsonObject.imageIds = (area as any).imageIds;
+    }
+    
+    return jsonObject as Json;
   });
 }
 

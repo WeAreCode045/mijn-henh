@@ -2,6 +2,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 export function usePropertyContentSubmit(
@@ -57,11 +58,11 @@ export function usePropertyContentSubmit(
           garages: formData.garages,
           energyLabel: formData.energyLabel,
           hasGarden: formData.hasGarden,
-          shortDescription: formData.shortDescription,
+          shortDescription: formData.shortDescription || "",
           description: formData.description,
           location_description: formData.location_description,
           features: featuresJson,
-          areas: areasForDb,
+          areas: areasForDb as Json[],
           nearby_places: nearby_placesJson,
           nearby_cities: nearby_citiesJson,
           latitude: formData.latitude,
