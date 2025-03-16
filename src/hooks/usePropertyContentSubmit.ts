@@ -16,6 +16,7 @@ export function usePropertyContentSubmit(
     console.log("Submit clicked in PropertyContentTab");
     
     if (externalOnSubmit) {
+      console.log("Using external onSubmit function");
       externalOnSubmit();
       return;
     }
@@ -44,6 +45,13 @@ export function usePropertyContentSubmit(
           variant: "destructive",
         });
       }
+    } else {
+      console.error("Cannot save: formData.id is missing", formData);
+      toast({
+        title: "Error",
+        description: "Cannot save property: missing ID",
+        variant: "destructive",
+      });
     }
   };
 

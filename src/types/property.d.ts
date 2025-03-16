@@ -84,6 +84,7 @@ export interface PropertyData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription?: string; // Added shortDescription field
   location_description?: string;
   features: PropertyFeature[];
   images: PropertyImage[];
@@ -131,6 +132,7 @@ export interface PropertySubmitData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription?: string; // Added shortDescription field
   location_description?: string;
   features: string;
   images: string[];
