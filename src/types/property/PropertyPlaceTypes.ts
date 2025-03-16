@@ -6,8 +6,8 @@ export interface PropertyPlaceType {
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
-  type: string;
-  types?: string[];
+  type?: string; // Keep for backward compatibility
+  types: string[]; // Make sure this is required
   visible_in_webview?: boolean;
 }
 

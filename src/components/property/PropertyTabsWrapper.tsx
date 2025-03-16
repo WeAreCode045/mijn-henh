@@ -1,3 +1,4 @@
+
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData, PropertyFormData } from "@/types/property";
@@ -27,8 +28,8 @@ export function PropertyTabsWrapper({
   const { activeTab, setActiveTab } = usePropertyTabs();
   console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
-  // Create a new object with required PropertyData properties to satisfy TypeScript
-  const propertyAsData: PropertyData = {
+  // Create a new object with required PropertyData properties
+  const propertyWithRequiredFields: PropertyData = {
     ...property,
     title: property.title || '', // Ensure title is set
     price: property.price || '',
@@ -43,18 +44,37 @@ export function PropertyTabsWrapper({
     hasGarden: property.hasGarden || false,
     description: property.description || '',
     location_description: property.location_description || '',
+    features: property.features || [],
+    areas: property.areas || [],
+    nearby_places: property.nearby_places || [],
     nearby_cities: property.nearby_cities || [],
-    virtualTourUrl: property.virtualTourUrl || '',
-    youtubeUrl: property.youtubeUrl || '',
+    images: property.images || [],
+    floorplans: property.floorplans || [],
+    created_at: property.created_at || new Date().toISOString(),
+    updated_at: property.updated_at || new Date().toISOString(),
     coverImages: property.coverImages || [],
     gridImages: property.gridImages || [],
+    map_image: property.map_image || null,
+    latitude: property.latitude || null,
+    longitude: property.longitude || null,
+    object_id: property.object_id || '',
+    agent_id: property.agent_id || '',
+    template_id: property.template_id || '',
+    virtualTourUrl: property.virtualTourUrl || '',
+    youtubeUrl: property.youtubeUrl || '',
+  };
+  
+  // Create a compatible PropertyFormData object from PropertyData
+  const propertyFormData: PropertyFormData = {
+    ...propertyWithRequiredFields,
+    title: propertyWithRequiredFields.title,
   };
   
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
         {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={propertyAsData as PropertyFormData}>
+          <PropertyFormManager property={propertyFormData}>
             {({ 
               formState, 
               handleFieldChange,
@@ -104,7 +124,7 @@ export function PropertyTabsWrapper({
                   <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
                     <PropertyTabContents
                       activeTab={activeTab}
-                      property={propertyWithRequiredProps}
+                      property={propertyWithRequiredFields}
                       formState={formState}
                       agentInfo={agentInfo || { id: '', name: '' }}
                       templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
@@ -158,7 +178,7 @@ export function PropertyTabsWrapper({
 
                 {/* WebView Dialog */}
                 <PropertyWebViewDialog
-                  propertyData={propertyWithRequiredProps}
+                  propertyData={propertyWithRequiredFields}
                   isOpen={webViewOpen}
                   onOpenChange={setWebViewOpen}
                 />

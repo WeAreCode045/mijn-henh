@@ -7,7 +7,7 @@ import type { Json } from "@/integrations/supabase/types";
 // Property form data extends PropertyData
 export interface PropertyFormData {
   id: string;
-  title: string; // Make title required to match PropertyData
+  title: string; // Make title required
   price?: string;
   address?: string;
   bedrooms?: string;

@@ -74,15 +74,16 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyImages(formState, setFormState);
+  } = usePropertyImages(formState, handleFieldChange);
   
-  // Hook for managing floorplans - pass the wrapper function
-  const {
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan,
-    handleFloorplanEmbedScriptUpdate
-  } = usePropertyFloorplans(formState, fieldChangeWrapper);
+  // Get the floorplan hooks but create a stub for missing methods
+  const floorplanHooks = usePropertyFloorplans(formState, fieldChangeWrapper);
+  
+  // Create a stub for handleFloorplanEmbedScriptUpdate if it doesn't exist
+  const handleFloorplanEmbedScriptUpdate = floorplanHooks.handleFloorplanEmbedScriptUpdate || 
+    ((script: string) => {
+      handleFieldChange('floorplanEmbedScript', script);
+    });
   
   // Hook for managing area photos
   const {
@@ -90,11 +91,24 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveAreaPhoto
   } = usePropertyAreaPhotos(formState, setFormState);
   
-  // Hook for managing cover images - pass the wrapper function
-  const {
-    handleSetFeaturedImage,
-    handleToggleFeaturedImage
-  } = usePropertyCoverImages(formState, fieldChangeWrapper);
+  // Get the cover image hooks but create stubs for missing methods
+  const coverImageHooks = usePropertyCoverImages(formState, fieldChangeWrapper);
+  
+  // Create stubs for missing methods
+  const handleSetFeaturedImage = coverImageHooks.handleSetFeaturedImage || 
+    ((url: string | null) => {
+      handleFieldChange('featuredImage', url);
+    });
+  
+  const handleToggleFeaturedImage = coverImageHooks.handleToggleFeaturedImage || 
+    ((url: string) => {
+      const featuredImages = [...(formState.featuredImages || [])];
+      if (featuredImages.includes(url)) {
+        handleFieldChange('featuredImages', featuredImages.filter(img => img !== url));
+      } else {
+        handleFieldChange('featuredImages', [...featuredImages, url]);
+      }
+    });
   
   // Media update handlers
   const handleVirtualTourUpdate = (url: string) => {
@@ -151,9 +165,9 @@ export function usePropertyFormManager(property: PropertyFormData) {
     isUploading,
     
     // Floorplan methods
-    handleFloorplanUpload,
-    handleRemoveFloorplan,
-    isUploadingFloorplan,
+    handleFloorplanUpload: floorplanHooks.handleFloorplanUpload,
+    handleRemoveFloorplan: floorplanHooks.handleRemoveFloorplan,
+    isUploadingFloorplan: floorplanHooks.isUploadingFloorplan,
     handleFloorplanEmbedScriptUpdate,
     
     // Area photos methods

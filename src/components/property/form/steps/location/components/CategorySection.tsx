@@ -1,8 +1,6 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { PropertyPlaceType } from "@/types/property";
-import { LucideIcon } from "lucide-react";
 
 export interface CategorySectionProps {
   title: string;

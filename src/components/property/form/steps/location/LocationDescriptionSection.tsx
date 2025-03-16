@@ -1,73 +1,47 @@
 
-import { PropertyFormData } from "@/types/property";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin } from "lucide-react";
+import { PropertyFormData } from "@/types/property";
+import { Textarea } from "@/components/ui/textarea";
 
 interface LocationDescriptionSectionProps {
   formData: PropertyFormData;
-  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
-  onGenerateDescription?: () => Promise<void>;
-  isGeneratingDescription?: boolean;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onGenerateDescription: () => Promise<any>;
+  isGenerating: boolean;
 }
 
 export function LocationDescriptionSection({
   formData,
   onFieldChange,
   onGenerateDescription,
-  isGeneratingDescription = false
+  isGenerating
 }: LocationDescriptionSectionProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onFieldChange) {
-      onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
-    }
-  };
-
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <Label htmlFor="location_description">Location Description</Label>
-              {onGenerateDescription && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onGenerateDescription();
-                  }}
-                  disabled={isGeneratingDescription || !formData.address}
-                  className="flex gap-2 items-center"
-                >
-                  {isGeneratingDescription ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <MapPin className="h-4 w-4" />
-                      Generate Description
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-            <Textarea
-              id="location_description"
-              name="location_description"
-              value={formData.location_description || ""}
-              onChange={handleChange}
-              placeholder="Describe the property location and surroundings"
-              rows={6}
-            />
-          </div>
-        </div>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Location Description</CardTitle>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.preventDefault();
+            onGenerateDescription();
+          }}
+          disabled={isGenerating}
+          type="button"
+        >
+          {isGenerating ? "Generating..." : "Generate Description"}
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <Textarea
+          value={formData.location_description || ""}
+          onChange={(e) => onFieldChange("location_description", e.target.value)}
+          placeholder="Describe the location of the property..."
+          className="min-h-[200px]"
+        />
       </CardContent>
     </Card>
   );

@@ -1,77 +1,72 @@
 
+import React from "react";
 import { PropertyPlaceType } from "@/types/property";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { X } from "lucide-react";
-import { getTransportationType } from "../utils/categoryUtils";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Star, X } from "lucide-react";
 
-interface PlaceItemProps {
+export interface PlaceItemProps {
   place: PropertyPlaceType;
-  onRemove?: (index: number) => void;
-  onVisibilityChange: (index: number, visible: boolean) => void;
-  index: number;
-  originalIndex: number;
-  category: string;
-  visible: boolean;
+  onRemove: () => void;
+  onToggleVisibility: (visible: boolean) => void;
 }
 
-export function PlaceItem({ 
-  place, 
-  index, 
-  originalIndex, 
-  onRemove, 
-  onVisibilityChange,
-  category,
-  visible
-}: PlaceItemProps) {
+export function PlaceItem({ place, onRemove, onToggleVisibility }: PlaceItemProps) {
+  const isVisible = place.visible_in_webview !== false;
+  
+  const handleToggleVisibility = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleVisibility(!isVisible);
+  };
+  
+  // Format distance based on unit
+  const formatDistance = (distance: string | number) => {
+    if (typeof distance === "number") {
+      return distance < 1 ? 
+        `${Math.round(distance * 1000)} m` : 
+        `${distance.toFixed(1)} km`;
+    }
+    return distance;
+  };
+  
   return (
-    <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md">
-      <div className="flex items-start gap-2">
-        <Checkbox 
-          id={`place-${originalIndex}`}
-          checked={visible}
-          onCheckedChange={(checked) => {
-            onVisibilityChange(originalIndex, checked === true);
-          }}
-        />
-        <div>
-          <div className="font-medium">{place.name}</div>
-          <div className="text-sm text-gray-500">{place.vicinity}</div>
-          
-          <div className="flex flex-wrap gap-1 mt-1">
-            {category === 'transportation' && (
-              <Badge variant="outline" className="text-xs">
-                {getTransportationType(place)}
-              </Badge>
-            )}
-            
-            {place.distance && (
-              <Badge variant="secondary" className="text-xs">
-                {typeof place.distance === 'number' 
-                  ? `${place.distance.toFixed(1)} km` 
-                  : place.distance}
-              </Badge>
-            )}
-            
-            {place.rating && (
-              <Badge variant="outline" className="text-xs text-yellow-600">
-                ★ {place.rating}
-              </Badge>
-            )}
-          </div>
+    <div className="flex items-center justify-between gap-2 p-2 border rounded-md">
+      <div className="flex flex-col">
+        <span className="font-medium text-sm">{place.name}</span>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          {place.rating && (
+            <span className="flex items-center">
+              <Star className="h-3 w-3 mr-0.5 text-yellow-500" />
+              {place.rating.toFixed(1)}
+            </span>
+          )}
+          {place.distance && (
+            <span className="ml-1">
+              • {formatDistance(place.distance)}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-1 mt-1">
+          {place.types && place.types.slice(0, 2).map((type, i) => (
+            <Badge key={i} variant="outline" className="text-xs">
+              {type.replace(/_/g, ' ')}
+            </Badge>
+          ))}
         </div>
       </div>
-      {onRemove && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-6 w-6 rounded-full text-gray-500 hover:text-red-500"
-          onClick={() => onRemove(originalIndex)}
-        >
+      
+      <div className="flex items-center gap-2">
+        <Switch 
+          checked={isVisible} 
+          onCheckedChange={(checked) => onToggleVisibility(checked)}
+          size="sm"
+        />
+        
+        <Button variant="ghost" size="sm" onClick={onRemove}>
           <X className="h-4 w-4" />
         </Button>
-      )}
+      </div>
     </div>
   );
 }

@@ -45,7 +45,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           }
         }
         
-        // Process images to PropertyImage objects
+        // Process images to PropertyImage objects with proper type
         const images: PropertyImage[] = rawImages.map(img => ({
           id: img.id,
           url: img.url,
@@ -54,7 +54,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           is_main: img.is_main,
           is_featured_image: img.is_featured_image,
           sort_order: img.sort_order,
-          type: (img.type || "image") as "image" | "floorplan" // Ensure proper typing
+          type: (img.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan" // Type casting
         }));
         
         // Parse complex data
@@ -99,7 +99,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
               id: img.id,
               url: img.url,
               area: img.area,
-              type: img.type
+              type: img.type as "image" | "floorplan"
             }))
         }));
 

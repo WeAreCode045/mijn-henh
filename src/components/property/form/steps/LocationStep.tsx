@@ -19,6 +19,7 @@ interface LocationStepProps {
   onRemoveNearbyPlace: (index: number) => void;
   isLoadingLocationData: boolean;
   isGeneratingMap: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function LocationStep({
@@ -32,6 +33,7 @@ export function LocationStep({
   onRemoveNearbyPlace,
   isLoadingLocationData,
   isGeneratingMap,
+  setPendingChanges,
 }: LocationStepProps) {
   const [isLoadingNearbyPlaces, setIsLoadingNearbyPlaces] = useState(false);
 
@@ -40,6 +42,7 @@ export function LocationStep({
     setIsLoadingNearbyPlaces(true);
     try {
       await onFetchCategoryPlaces(category);
+      if (setPendingChanges) setPendingChanges(true);
     } finally {
       setIsLoadingNearbyPlaces(false);
     }
@@ -67,7 +70,7 @@ export function LocationStep({
         formData={formData}
         onFieldChange={onFieldChange}
         onFetchNearbyPlaces={handleFetchNearbyPlaces}
-        onRemovePlace={onRemoveNearbyPlace}
+        onRemoveNearbyPlace={onRemoveNearbyPlace}
         isLoadingNearbyPlaces={isLoadingNearbyPlaces}
       />
       
@@ -81,7 +84,7 @@ export function LocationStep({
       <LocationDescriptionSection
         formData={formData}
         onFieldChange={onFieldChange}
-        onGenerateLocationDescription={onGenerateLocationDescription}
+        onGenerateDescription={onGenerateLocationDescription}
         isGenerating={isLoadingLocationData}
       />
     </div>

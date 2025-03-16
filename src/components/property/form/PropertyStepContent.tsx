@@ -26,8 +26,8 @@ interface PropertyStepContentProps {
   handleNext?: () => void;
   handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
-  onFetchCategoryPlaces?: (category: string) => Promise<any>; // Added missing property
-  onFetchNearbyCities?: () => Promise<any>; // Added missing property
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchNearbyCities?: () => Promise<any>;
   onGenerateLocationDescription?: () => Promise<void>;
   onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -56,6 +56,8 @@ export function PropertyStepContent({
   handleNext,
   handlePrevious,
   onFetchLocationData,
+  onFetchCategoryPlaces,
+  onFetchNearbyCities,
   onGenerateLocationDescription,
   onGenerateMap,
   onRemoveNearbyPlace,
@@ -82,6 +84,8 @@ export function PropertyStepContent({
             formData={formData}
             onFieldChange={onFieldChange}
             onFetchLocationData={onFetchLocationData}
+            onFetchCategoryPlaces={onFetchCategoryPlaces}
+            onFetchNearbyCities={onFetchNearbyCities}
             onGenerateLocationDescription={onGenerateLocationDescription}
             onGenerateMap={onGenerateMap}
             onRemoveNearbyPlace={onRemoveNearbyPlace}

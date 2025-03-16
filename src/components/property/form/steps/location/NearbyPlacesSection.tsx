@@ -1,75 +1,54 @@
 
-import React, { useState } from "react";
-import { PropertyPlaceType } from "@/types/property";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { PropertyFormData, PropertyPlaceType } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Grid } from "@/components/ui/grid";
+import { Button } from "@/components/ui/button";
+import { 
+  Utensils, MapPin, Store, School, 
+  Building, Hospital, Dumbbell, Bank, 
+  ShoppingBag, GlassWater, ShoppingCart, Train 
+} from "lucide-react";
 import { CategorySection } from "./components/CategorySection";
 import { PlaceItem } from "./components/PlaceItem";
-import { RestaurantIcon, ShoppingCartIcon, SchoolIcon, HomeIcon, HeartIcon, ParkIcon } from "lucide-react";
 
 interface NearbyPlacesSectionProps {
-  formData: any;
-  onRemovePlace: (index: number) => void;
-  onFieldChange: (field: string, value: any) => void;
-  onFetchNearbyPlaces: (category: string) => Promise<any>;
+  formData: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFetchNearbyPlaces: (category: string) => Promise<void>;
+  onRemoveNearbyPlace: (index: number) => void;
   isLoadingNearbyPlaces: boolean;
 }
 
 export function NearbyPlacesSection({
   formData,
-  onRemovePlace,
   onFieldChange,
   onFetchNearbyPlaces,
+  onRemoveNearbyPlace,
   isLoadingNearbyPlaces
 }: NearbyPlacesSectionProps) {
-  const nearbyPlaces = formData.nearby_places || [];
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-
-  const handleFetchRestaurants = async () => {
-    setActiveCategory("restaurant");
-    await onFetchNearbyPlaces("restaurant");
+  const handleFetchCategory = async (category: string) => {
+    try {
+      await onFetchNearbyPlaces(category);
+    } catch (error) {
+      console.error(`Error fetching ${category} places:`, error);
+    }
   };
 
-  const handleFetchStores = async () => {
-    setActiveCategory("store");
-    await onFetchNearbyPlaces("store");
+  const handleRemovePlace = (index: number) => {
+    onRemoveNearbyPlace(index);
   };
 
-  const handleFetchSchools = async () => {
-    setActiveCategory("school");
-    await onFetchNearbyPlaces("school");
-  };
-
-  const handleFetchHealthcare = async () => {
-    setActiveCategory("hospital");
-    await onFetchNearbyPlaces("hospital");
-  };
-
-  const handleFetchParks = async () => {
-    setActiveCategory("park");
-    await onFetchNearbyPlaces("park");
-  };
-
-  const handleFetchTransit = async () => {
-    setActiveCategory("transit_station");
-    await onFetchNearbyPlaces("transit_station");
-  };
-
-  // Helper to ensure all places have the required 'types' array
-  const ensureTypesArray = (places: PropertyPlaceType[]): PropertyPlaceType[] => {
-    return places.map(place => ({
-      ...place,
-      types: place.types || [place.type || "other"]
-    }));
-  };
-
-  // Update the nearby places with visibility flag
-  const updatePlaceVisibility = (placeId: string, visible: boolean) => {
-    const updatedPlaces = nearbyPlaces.map((place: PropertyPlaceType) => {
-      if (place.id === placeId) {
-        return { ...place, visible_in_webview: visible };
-      }
-      return place;
-    });
+  // Simple toggle visibility function - you might want to enhance this
+  const handleToggleVisibility = (index: number, visible: boolean) => {
+    if (!formData.nearby_places) return;
+    
+    const updatedPlaces = [...formData.nearby_places];
+    updatedPlaces[index] = {
+      ...updatedPlaces[index],
+      visible_in_webview: visible
+    };
+    
     onFieldChange("nearby_places", updatedPlaces);
   };
 
@@ -77,70 +56,69 @@ export function NearbyPlacesSection({
     <Card>
       <CardHeader>
         <CardTitle>Nearby Places</CardTitle>
-        <CardDescription>
-          Find and add nearby places of interest that will be displayed on the property page.
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <CategorySection
             title="Restaurants"
-            icon={<RestaurantIcon className="h-4 w-4" />}
-            onClick={handleFetchRestaurants}
-            isLoading={isLoadingNearbyPlaces && activeCategory === "restaurant"}
-          />
-          
-          <CategorySection
-            title="Shopping"
-            icon={<ShoppingCartIcon className="h-4 w-4" />}
-            onClick={handleFetchStores}
-            isLoading={isLoadingNearbyPlaces && activeCategory === "store"}
-          />
-          
-          <CategorySection
-            title="Schools"
-            icon={<SchoolIcon className="h-4 w-4" />}
-            onClick={handleFetchSchools}
-            isLoading={isLoadingNearbyPlaces && activeCategory === "school"}
-          />
-          
-          <CategorySection
-            title="Healthcare"
-            icon={<HeartIcon className="h-4 w-4" />}
-            onClick={handleFetchHealthcare}
-            isLoading={isLoadingNearbyPlaces && activeCategory === "hospital"}
+            icon={<Utensils className="h-4 w-4" />}
+            onClick={() => handleFetchCategory("restaurant")}
+            isLoading={isLoadingNearbyPlaces}
           />
           
           <CategorySection
             title="Parks"
-            icon={<ParkIcon className="h-4 w-4" />}
-            onClick={handleFetchParks}
-            isLoading={isLoadingNearbyPlaces && activeCategory === "park"}
+            icon={<MapPin className="h-4 w-4" />}
+            onClick={() => handleFetchCategory("park")}
+            isLoading={isLoadingNearbyPlaces}
           />
           
           <CategorySection
-            title="Public Transit"
-            icon={<HomeIcon className="h-4 w-4" />}
-            onClick={handleFetchTransit}
-            isLoading={isLoadingNearbyPlaces && activeCategory === "transit_station"}
+            title="Stores"
+            icon={<Store className="h-4 w-4" />}
+            onClick={() => handleFetchCategory("store")}
+            isLoading={isLoadingNearbyPlaces}
+          />
+          
+          <CategorySection
+            title="Schools"
+            icon={<School className="h-4 w-4" />}
+            onClick={() => handleFetchCategory("school")}
+            isLoading={isLoadingNearbyPlaces}
+          />
+          
+          <CategorySection
+            title="Supermarkets"
+            icon={<ShoppingCart className="h-4 w-4" />}
+            onClick={() => handleFetchCategory("supermarket")}
+            isLoading={isLoadingNearbyPlaces}
+          />
+          
+          <CategorySection
+            title="Transportation"
+            icon={<Train className="h-4 w-4" />}
+            onClick={() => handleFetchCategory("transit_station")}
+            isLoading={isLoadingNearbyPlaces}
           />
         </div>
-
-        {nearbyPlaces.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-lg font-medium mb-4">Selected Places</h3>
-            <div className="space-y-3">
-              {ensureTypesArray(nearbyPlaces).map((place: PropertyPlaceType, idx: number) => (
+        
+        {formData.nearby_places && formData.nearby_places.length > 0 ? (
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Selected Places ({formData.nearby_places.length})</h3>
+            <div className="space-y-2">
+              {formData.nearby_places.map((place, index) => (
                 <PlaceItem
-                  key={place.id || idx}
+                  key={place.id || index}
                   place={place}
-                  onRemove={() => onRemovePlace(idx)}
-                  onToggleVisibility={(visible) =>
-                    updatePlaceVisibility(place.id, visible)
-                  }
+                  onRemove={() => handleRemovePlace(index)}
+                  onToggleVisibility={(visible) => handleToggleVisibility(index, visible)}
                 />
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="flex justify-center items-center p-4 border border-dashed rounded-md">
+            <p className="text-muted-foreground">No nearby places added yet</p>
           </div>
         )}
       </CardContent>

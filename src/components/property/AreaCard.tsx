@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
@@ -23,12 +24,18 @@ interface AreaCardProps {
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
-type AreaImageType = Omit<PropertyImage, 'type'> & {
+// Create an interface that conforms to PropertyImage
+interface AreaImageData {
+  id: string;
+  url: string;
   area?: string | null;
   property_id?: string;
+  is_main?: boolean;
+  is_featured_image?: boolean;
+  sort_order?: number;
+  type: string;
   created_at?: string;
-  type: "image" | "floorplan" | string;
-};
+}
 
 export function AreaCard({
   area,
@@ -63,11 +70,12 @@ export function AreaCard({
             console.error(`Error fetching images for area ${area.id} from property_images:`, error);
           } else if (data && data.length > 0) {
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
-            const convertedImages: PropertyImage[] = data.map(img => ({
+            // Convert the raw data to PropertyImage[] with correctly typed 'type' property
+            const convertedImages: PropertyImage[] = data.map((img: AreaImageData) => ({
               id: img.id,
               url: img.url,
               area: img.area,
-              type: img.type || "image" as "image" | "floorplan",
+              type: (img.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan",
               is_main: img.is_main,
               is_featured_image: img.is_featured_image,
               sort_order: img.sort_order,
@@ -84,7 +92,14 @@ export function AreaCard({
         }
       } else {
         if (area.images && area.images.length > 0) {
-          const normalizedImages = area.images.map(img => normalizeImage(img));
+          const normalizedImages = area.images.map(img => {
+            const normalized = normalizeImage(img);
+            // Ensure type is always "image" or "floorplan"
+            return {
+              ...normalized,
+              type: (normalized.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan"
+            };
+          });
           setAreaImages(normalizedImages);
         } else {
           setAreaImages([]);
