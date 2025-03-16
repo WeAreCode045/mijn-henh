@@ -8,8 +8,7 @@ import { prepareAreasForFormSubmission } from "@/hooks/property-form/prepareProp
 export function usePropertyContentSubmit(
   formData: PropertyFormData,
   setPendingChanges: (pending: boolean) => void,
-  setLastSaved: (date: Date | null) => void,
-  externalOnSubmit?: () => void
+  setLastSaved: (date: Date | null) => void
 ) {
   const { toast } = useToast();
 

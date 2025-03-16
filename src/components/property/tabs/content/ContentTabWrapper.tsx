@@ -25,8 +25,6 @@ interface ContentTabWrapperProps {
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
-    onSubmit?: () => void;
-    isSaving?: boolean;
   };
 }
 
@@ -69,7 +67,6 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     
     setLocalIsSaving(true);
     try {
-      // Use our direct onSubmit function that saves to DB
       const result = await onSubmit();
       console.log("Save result from usePropertyContentSubmit:", result);
       return result;

@@ -64,11 +64,10 @@ export function PropertyForm() {
     }
   }, [formData?.agent_id, formData?.template_id]);
 
-  // Modified to avoid conflicts with content tab save
+  // This is now a dummy function that doesn't trigger actual saves
   const handleSave = () => {
-    // Only show a toast, don't trigger any actual save
-    // This function is not used for actual saving anymore
-    console.log("PropertyForm.handleSave called - this is just a refresh notification");
+    // No longer used for actual saving - that's handled in ContentTabWrapper
+    console.log("PropertyForm.handleSave called - this is just a notification");
   };
 
   const handleDelete = async (): Promise<void> => {
