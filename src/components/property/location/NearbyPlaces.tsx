@@ -11,8 +11,10 @@ interface NearbyPlacesProps {
 
 export function NearbyPlaces({ places, onPlaceDelete }: NearbyPlacesProps) {
   const placesByType = places.reduce((acc: Record<string, PropertyPlaceType[]>, place) => {
-    let type = place.type;
-    if (['bus_station', 'train_station', 'transit_station'].includes(place.type)) {
+    // Use place.type if available, otherwise use the first type from place.types array
+    let type = place.type || (place.types && place.types.length > 0 ? place.types[0] : 'other');
+    
+    if (['bus_station', 'train_station', 'transit_station'].includes(type)) {
       type = 'public_transport';
     }
     if (!acc[type]) {

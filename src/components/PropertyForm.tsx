@@ -112,15 +112,47 @@ export function PropertyForm() {
     </div>;
   }
 
-  // Convert formData to PropertyData with default values for required fields
+  // Convert formData to PropertyData with required values for missing properties
   const propertyData: PropertyData = {
-    ...formData,
-    id: formData.id || '',
-    title: formData.title || '', // Ensure title is not undefined
+    id: formData.id,
+    title: formData.title || '',
+    price: formData.price || '',
+    address: formData.address || '',
+    bedrooms: formData.bedrooms || '',
+    bathrooms: formData.bathrooms || '',
+    sqft: formData.sqft || '',
+    livingArea: formData.livingArea || '',
+    buildYear: formData.buildYear || '',
+    garages: formData.garages || '',
+    energyLabel: formData.energyLabel || '',
+    hasGarden: formData.hasGarden || false,
+    description: formData.description || '',
+    location_description: formData.location_description || '',
+    features: formData.features || [],
+    areas: formData.areas || [],
+    nearby_places: formData.nearby_places || [],
+    nearby_cities: formData.nearby_cities || [],
+    images: formData.images?.map(img => typeof img === 'string' ? { id: img, url: img } : img) || [],
+    floorplans: formData.floorplans?.map(fp => typeof fp === 'string' ? { id: fp, url: fp } : fp) || [],
+    map_image: formData.map_image || null,
+    latitude: formData.latitude || null,
+    longitude: formData.longitude || null,
+    object_id: formData.object_id || '',
+    agent_id: formData.agent_id || '',
+    agent: formData.agent,
+    template_id: formData.template_id || 'default',
+    virtualTourUrl: formData.virtualTourUrl || '',
+    youtubeUrl: formData.youtubeUrl || '',
+    notes: formData.notes || '',
+    featuredImage: formData.featuredImage || null,
+    featuredImages: formData.featuredImages || [],
+    floorplanEmbedScript: formData.floorplanEmbedScript || '',
     created_at: formData.created_at || new Date().toISOString(),
     updated_at: formData.updated_at || new Date().toISOString(),
     coverImages: formData.coverImages || [],
-    gridImages: formData.gridImages || []
+    gridImages: formData.gridImages || [],
+    generalInfo: formData.generalInfo,
+    shortDescription: formData.shortDescription
   };
 
   return (

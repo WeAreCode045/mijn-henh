@@ -23,19 +23,17 @@ export function usePropertySubmit() {
         ...submitData,
         features: JSON.stringify(submitData.features),
         areas: JSON.stringify(submitData.areas),
-        nearby_places: JSON.stringify(submitData.nearby_places),
-        nearby_cities: JSON.stringify(submitData.nearby_cities),
+        nearby_places: submitData.nearby_places ? JSON.stringify(submitData.nearby_places) : null,
+        nearby_cities: submitData.nearby_cities ? JSON.stringify(submitData.nearby_cities) : null,
       };
       
-      // Serialize generalInfo field if it exists
+      // Process generalInfo field if it exists
       if (submitData.generalInfo) {
-        dataForDb.generalInfo = typeof submitData.generalInfo === 'string' 
-          ? submitData.generalInfo 
-          : JSON.stringify(submitData.generalInfo);
+        dataForDb.generalInfo = submitData.generalInfo;
       }
       
       // Process floorplans if they exist
-      if (submitData.floorplans) {
+      if (submitData.floorplans && submitData.floorplans.length > 0) {
         dataForDb.floorplans = JSON.stringify(submitData.floorplans);
       }
       

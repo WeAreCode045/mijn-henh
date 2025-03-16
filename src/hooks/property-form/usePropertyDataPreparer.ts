@@ -18,10 +18,12 @@ export function usePropertyDataPreparer() {
       ? formData.images.map(img => typeof img === 'string' ? img : img.url)
       : [];
       
-    // Prepare generalInfo - use it directly if it exists
-    let generalInfoValue = formData.generalInfo;
-    if (generalInfoValue && typeof generalInfoValue !== 'string') {
-      generalInfoValue = JSON.stringify(generalInfoValue);
+    // Prepare generalInfo - handle properly based on type
+    let generalInfoValue = undefined;
+    if (formData.generalInfo) {
+      generalInfoValue = typeof formData.generalInfo === 'string' 
+        ? formData.generalInfo 
+        : JSON.stringify(formData.generalInfo);
     }
     
     return {
@@ -52,11 +54,15 @@ export function usePropertyDataPreparer() {
       template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
-      floorplanEmbedScript: formData.floorplanEmbedScript || "",
+      floorplanEmbedScript: formData.floorplanEmbedScript || '',
       // Use the extracted URL strings
       images: imageUrls,
       // Include generalInfo
-      generalInfo: generalInfoValue
+      generalInfo: generalInfoValue,
+      // Include floorplans if they exist
+      floorplans: Array.isArray(formData.floorplans) 
+        ? formData.floorplans.map(fp => typeof fp === 'string' ? fp : fp.url) 
+        : []
     };
   };
 

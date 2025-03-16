@@ -1,5 +1,5 @@
 
-// Re-export all property types from the main property.d.ts file
+// Re-export all property types from the main property.ts file
 export type {
   PropertyFeature,
   PropertyArea,
@@ -13,8 +13,6 @@ export type {
   PropertyData,
   PropertyFormData,
   PropertySubmitData,
-  Area,
-  AreaImage
 } from '../property';
 
 // Re-export types from PropertyDataTypes.ts that don't conflict
@@ -25,3 +23,6 @@ export type {
   PropertyFloorplan as PropertyFloorplanType,
   PropertyNearbyPlace as PropertyNearbyPlaceType
 } from './PropertyTypes';
+
+// Re-export Area types
+export type { Area, AreaImage } from '../area';

@@ -31,10 +31,10 @@ export function usePropertyFormManager(property: PropertyFormData) {
     removeArea, 
     updateArea, 
     handleAreaImageRemove, 
-    handleAreaImagesSelect,
+    handleAreaImagesSelect, 
     handleAreaImageUpload,
     isUploading
-  } = usePropertyAreas(formState, setFormState);
+  } = usePropertyAreas(formState, onFieldChange);
   
   // Hook for managing content and steps
   const { 

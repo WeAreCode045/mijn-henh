@@ -1,5 +1,6 @@
 
-import { PropertyData, PropertyCity, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyAgent, GeneralInfoData } from "../property";
+import type { PropertyData, PropertyCity, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyAgent, GeneralInfoData } from "../property";
+import type { Json } from "@/integrations/supabase/types";
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends Partial<PropertyData> {

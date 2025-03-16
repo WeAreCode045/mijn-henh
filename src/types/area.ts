@@ -1,5 +1,9 @@
 
-import { PropertyImage } from './property';
+export interface AreaImage {
+  id: string;
+  url: string;
+  type?: string;
+}
 
 export interface Area {
   id: string;
