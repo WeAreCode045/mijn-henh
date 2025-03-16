@@ -12,35 +12,37 @@ export function usePropertyContentSubmit(
   const { toast } = useToast();
   const { handleSubmit } = usePropertyFormSubmit();
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     console.log("Submit clicked in PropertyContentTab");
+    
     if (externalOnSubmit) {
       externalOnSubmit();
-    } else {
-      console.log("Form submitted in PropertyContentTab");
-      
-      // Final save when clicking submit
-      if (formData.id) {
+      return;
+    }
+    
+    console.log("Form submitted in PropertyContentTab");
+    
+    // Final save when clicking submit
+    if (formData.id) {
+      try {
         const formEvent = {} as React.FormEvent;
-        handleSubmit(formEvent, formData, false)
-          .then((success) => {
-            if (success) {
-              setLastSaved(new Date());
-              setPendingChanges(false);
-              toast({
-                title: "Success",
-                description: "All changes have been saved",
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Final save failed:", error);
-            toast({
-              title: "Error",
-              description: "Failed to save all changes",
-              variant: "destructive",
-            });
+        const success = await handleSubmit(formEvent, formData, false);
+        
+        if (success) {
+          setLastSaved(new Date());
+          setPendingChanges(false);
+          toast({
+            title: "Success",
+            description: "All changes have been saved",
           });
+        }
+      } catch (error) {
+        console.error("Final save failed:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save all changes",
+          variant: "destructive",
+        });
       }
     }
   };

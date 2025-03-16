@@ -1,8 +1,9 @@
 
+import { useState } from 'react';
 import { PropertyFormData } from "@/types/property";
-import { useState } from "react";
-import { ContentTabContent } from "./ContentTabContent";
-import { usePropertyContent } from "@/hooks/usePropertyContent";
+import { ContentTabNavigation } from './ContentTabNavigation';
+import { ContentTabContent } from './ContentTabContent';
+import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -30,71 +31,62 @@ interface ContentTabWrapperProps {
 }
 
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
-  // Extract handlers
-  const {
-    onFieldChange,
-    onAddFeature,
-    onRemoveFeature,
-    onUpdateFeature,
-    onAddArea,
-    onRemoveArea,
-    onUpdateArea,
-    onAreaImageRemove,
-    onAreaImagesSelect,
-    handleAreaImageUpload,
-    currentStep,
-    handleStepClick,
-    onFetchLocationData,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    setPendingChanges,
-    isUploading,
-    onSubmit,
-    isSaving
-  } = handlers;
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  
+  // Use the contentSubmit hook for handling the submit action
+  const { onSubmit } = usePropertyContentSubmit(
+    formData,
+    handlers.setPendingChanges || (() => {}),
+    setLastSaved,
+    handlers.onSubmit
+  );
 
-  // Define local step handling functions that prevent default form submission
-  const handleNext = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (currentStep < 3) { // 3 is the max step (0-indexed)
-      handleStepClick(currentStep + 1);
+  const handleNext = () => {
+    if (handlers.currentStep < 3) {
+      handlers.handleStepClick(handlers.currentStep + 1);
     }
   };
 
-  const handlePrevious = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (currentStep > 0) {
-      handleStepClick(currentStep - 1);
+  const handlePrevious = () => {
+    if (handlers.currentStep > 0) {
+      handlers.handleStepClick(handlers.currentStep - 1);
     }
   };
 
   return (
-    <ContentTabContent
-      formData={formData}
-      onFieldChange={onFieldChange}
-      onAddFeature={onAddFeature}
-      onRemoveFeature={onRemoveFeature}
-      onUpdateFeature={onUpdateFeature}
-      onAddArea={onAddArea}
-      onRemoveArea={onRemoveArea}
-      onUpdateArea={onUpdateArea}
-      onAreaImageRemove={onAreaImageRemove}
-      onAreaImagesSelect={onAreaImagesSelect}
-      handleAreaImageUpload={handleAreaImageUpload}
-      currentStep={currentStep}
-      handleStepClick={(step) => {
-        // Prevent default event and call the step click handler
-        handleStepClick(step);
-      }}
-      handleNext={handleNext}
-      handlePrevious={handlePrevious}
-      onFetchLocationData={onFetchLocationData}
-      onRemoveNearbyPlace={onRemoveNearbyPlace}
-      isLoadingLocationData={isLoadingLocationData}
-      setPendingChanges={setPendingChanges}
-      isUploading={isUploading}
-      onSubmit={onSubmit}
-      isSaving={isSaving}
-    />
+    <div className="space-y-6">
+      <ContentTabNavigation 
+        currentStep={handlers.currentStep}
+        onStepClick={handlers.handleStepClick}
+        lastSaved={lastSaved}
+        onSave={onSubmit}
+        isSaving={handlers.isSaving || false}
+      />
+      
+      <ContentTabContent
+        formData={formData}
+        onFieldChange={handlers.onFieldChange}
+        onAddFeature={handlers.onAddFeature}
+        onRemoveFeature={handlers.onRemoveFeature}
+        onUpdateFeature={handlers.onUpdateFeature}
+        onAddArea={handlers.onAddArea}
+        onRemoveArea={handlers.onRemoveArea}
+        onUpdateArea={handlers.onUpdateArea}
+        onAreaImageRemove={handlers.onAreaImageRemove}
+        onAreaImagesSelect={handlers.onAreaImagesSelect}
+        handleAreaImageUpload={handlers.handleAreaImageUpload}
+        currentStep={handlers.currentStep}
+        handleStepClick={handlers.handleStepClick}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
+        onFetchLocationData={handlers.onFetchLocationData}
+        onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
+        isLoadingLocationData={handlers.isLoadingLocationData}
+        setPendingChanges={handlers.setPendingChanges}
+        isUploading={handlers.isUploading}
+        onSubmit={onSubmit}
+        isSaving={handlers.isSaving}
+      />
+    </div>
   );
 }
