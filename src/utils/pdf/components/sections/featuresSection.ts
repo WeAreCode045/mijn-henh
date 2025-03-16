@@ -14,16 +14,16 @@ export const generateFeaturesSection = (
   pdf.setFillColor(secondaryColor);
   pdf.roundedRect(featuresX, descriptionY, featuresWidth, descriptionHeight, 2, 2, 'F');
   
-  pdf.setFontSize(10);
+  pdf.setFontSize(12); // Increased font size from 10
   pdf.setTextColor(255, 255, 255);
   pdf.text('Bijzonderheden', featuresX + 5, descriptionY + 10);
   
-  // Make sure features are displayed with less spacing between rows
-  pdf.setFontSize(8);
+  // Display features with more spacing between rows
+  pdf.setFontSize(10); // Increased font size from 8
   if (property.features && property.features.length > 0) {
-    property.features.slice(0, 18).forEach((feature, index) => {
-      // Reduce line spacing to 4 (from 5)
-      const featureY = descriptionY + 18 + (index * 4);
+    property.features.slice(0, 15).forEach((feature, index) => { // Reduced max features to 15 to account for bigger font
+      // Increase line spacing from 4 to 6
+      const featureY = descriptionY + 18 + (index * 6);
       
       if (featureY < descriptionY + descriptionHeight - 5) {
         const featureText = feature.description || (typeof feature === 'string' ? feature : 'Eigenschap');

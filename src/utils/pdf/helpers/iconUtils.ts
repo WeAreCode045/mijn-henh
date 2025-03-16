@@ -64,23 +64,24 @@ export const renderIconToPDF = async (
       svg.setAttribute('viewBox', `0 0 ${iconDef.icon[0]} ${iconDef.icon[1]}`);
     }
     
-    // Set size for the SVG
-    svg.setAttribute('width', `${size}px`);
-    svg.setAttribute('height', `${size}px`);
+    // Set size for the SVG with padding
+    const padding = 2; // Adding padding around the icon
+    svg.setAttribute('width', `${size - padding}px`);
+    svg.setAttribute('height', `${size - padding}px`);
     
     // Save current state of PDF
     pdf.saveGraphicsState();
     
-    // Position the icon
-    const offsetX = x - size/2;
-    const offsetY = y - size/2;
+    // Position the icon with adjustment for better vertical alignment
+    const offsetX = x - size/2 + padding/2;
+    const offsetY = y - size/2 - 0.5; // Slight upward adjustment for better alignment
     
     // Use svg2pdf correctly
     await svg2pdf(svg, pdf, {
       x: offsetX,
       y: offsetY,
-      width: size,
-      height: size
+      width: size - padding,
+      height: size - padding
     });
     
     // Restore PDF state

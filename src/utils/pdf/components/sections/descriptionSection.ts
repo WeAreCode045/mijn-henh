@@ -22,7 +22,13 @@ export const generateDescriptionSection = (
   
   // Ensure description is always shown
   const description = property.description || 'No description available.';
-  const splitDescription = pdf.splitTextToSize(description, descriptionWidth - 15);
+  
+  // Process line breaks and ensure proper text wrapping
+  // Replace HTML <br> tags with newline character
+  const processedDescription = description.replace(/<br\s*\/?>/gi, '\n');
+  
+  // Split text with proper line breaks
+  const splitDescription = pdf.splitTextToSize(processedDescription, descriptionWidth - 15);
   
   // Display the description
   pdf.text(splitDescription, contentX + 5, descriptionY + 18);

@@ -19,11 +19,26 @@ export const generateKeyInfoCards = async (
   
   // Get icons from settings or use defaults
   const buildYearIcon = settings?.iconBuildYear || 'calendar';
-  const livingAreaIcon = settings?.iconLivingSpace || 'home';
+  const livingAreaIcon = settings?.iconLivingSpace || 'home'; // Fixed to use 'home'
   const sqftIcon = settings?.iconSqft || 'ruler';
   const bedroomsIcon = settings?.iconBedrooms || 'bed';
   const bathroomsIcon = settings?.iconBathrooms || 'bath';
   const energyClassIcon = settings?.iconEnergyClass || 'zap';
+  
+  // Format price with Euro symbol and thousand separators
+  const formatPrice = (price?: string | number) => {
+    if (!price) return 'N/A';
+    
+    // Convert to string and remove any non-numeric characters except decimal
+    const numericPrice = String(price).replace(/[^\d.]/g, '');
+    
+    // Parse as number
+    const priceNum = parseFloat(numericPrice);
+    if (isNaN(priceNum)) return 'N/A';
+    
+    // Format with thousand separators
+    return '€ ' + priceNum.toLocaleString('nl-NL');
+  };
   
   // Property specs in a 3x2 grid
   const specs = [

@@ -3,6 +3,7 @@ import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
+import { renderIconToPDF } from '../helpers/iconUtils';
 
 export const generateContactSection = async (
   pdf: jsPDF,
@@ -31,7 +32,7 @@ export const generateContactSection = async (
     }
   }
   
-  // Add agency name, email and phone
+  // Add agency name, email and phone with icons
   pdf.setFontSize(10);
   pdf.setTextColor(60, 60, 60);
   
@@ -41,12 +42,16 @@ export const generateContactSection = async (
     pdf.setFont('helvetica', 'normal');
   }
   
+  // Email with icon
   if (settings?.email) {
-    pdf.text(`Email: ${settings.email}`, currentX, centerY);
+    await renderIconToPDF(pdf, 'mail', currentX, centerY, 6, 'dark');
+    pdf.text(`${settings.email}`, currentX + 8, centerY);
   }
   
+  // Phone with icon
   if (settings?.phone) {
-    pdf.text(`Tel: ${settings.phone}`, currentX, centerY + 12);
+    await renderIconToPDF(pdf, 'phone', currentX, centerY + 12, 6, 'dark');
+    pdf.text(`${settings.phone}`, currentX + 8, centerY + 12);
   }
   
   // Add QR code on the right side
@@ -67,9 +72,9 @@ export const generateContactSection = async (
     
     pdf.addImage(qrCodeDataUrl, 'PNG', qrCodeX, qrCodeY, qrCodeSize, qrCodeSize);
     
-    // Add "Scan for web view" text
+    // Add "Scan voor web view" text
     pdf.setFontSize(8);
-    const scanText = "Bekijk de online Brochure";
+    const scanText = "Scan QR voor de online brochure";
     const textWidth = pdf.getTextWidth(scanText);
     pdf.text(scanText, qrCodeX + (qrCodeSize - textWidth) / 2, qrCodeY + qrCodeSize + 10);
     
