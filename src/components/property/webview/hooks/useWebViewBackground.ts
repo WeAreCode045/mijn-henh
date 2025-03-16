@@ -1,8 +1,12 @@
 
 import { useEffect } from "react";
 import { AgencySettings } from "@/types/agency";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
 export function useWebViewBackground(settings: AgencySettings) {
+  // Use the generic theme colors hook for color properties
+  useThemeColors(settings);
+  
   useEffect(() => {
     // Set background image if available
     if (settings?.webviewBackgroundUrl) {
@@ -19,27 +23,10 @@ export function useWebViewBackground(settings: AgencySettings) {
       document.documentElement.style.removeProperty('--webview-bg-position');
     }
     
-    // Set agency colors as CSS custom properties
-    if (settings?.primaryColor) {
-      document.documentElement.style.setProperty(
-        '--primary-color', 
-        settings.primaryColor
-      );
-    }
-    
-    if (settings?.secondaryColor) {
-      document.documentElement.style.setProperty(
-        '--secondary-color', 
-        settings.secondaryColor
-      );
-    }
-    
     // Cleanup function to remove the properties when component unmounts
     return () => {
       document.documentElement.style.removeProperty('--webview-bg-image');
       document.documentElement.style.removeProperty('--webview-bg-position');
-      document.documentElement.style.removeProperty('--primary-color');
-      document.documentElement.style.removeProperty('--secondary-color');
     };
-  }, [settings?.webviewBackgroundUrl, settings?.primaryColor, settings?.secondaryColor]);
+  }, [settings?.webviewBackgroundUrl]);
 }
