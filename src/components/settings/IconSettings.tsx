@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AgencySettings } from "@/types/agency";
-import { availableIcons, getSvgIconUrl } from "@/utils/iconUtils";
+import { availableIcons, getSvgIconUrl } from "@/utils/iconService";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface IconSettingsProps {

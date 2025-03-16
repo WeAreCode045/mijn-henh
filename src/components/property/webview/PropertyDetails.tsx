@@ -1,9 +1,8 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { defaultAgencySettings } from "@/utils/defaultAgencySettings";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getSvgIconUrl } from "@/utils/iconService";
 
 interface PropertyDetailsProps {
   property: PropertyData;
@@ -13,7 +12,7 @@ interface PropertyDetailsProps {
 export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   const [iconUrls, setIconUrls] = useState<Record<string, string>>({});
   
-  // Fetch and generate URLs for the icons
+  // Fetch and generate URLs for the icons using our centralized service
   useEffect(() => {
     const fetchIcons = async () => {
       const iconsToFetch = [
@@ -30,13 +29,9 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
       
       for (const iconName of iconsToFetch) {
         try {
-          // Get public URL for the icon
-          const { data } = await supabase.storage
-            .from('global')
-            .getPublicUrl(`icons/dark/${iconName}.svg`);
-          
-          if (data?.publicUrl) {
-            iconUrlMap[iconName] = data.publicUrl;
+          const url = await getSvgIconUrl(iconName, 'dark');
+          if (url) {
+            iconUrlMap[iconName] = url;
           }
         } catch (error) {
           console.error(`Error fetching icon ${iconName}:`, error);
