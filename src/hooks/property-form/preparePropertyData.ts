@@ -11,7 +11,7 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
   
   console.log("prepareAreasForFormSubmission input:", areas);
   
-  return areas.map(area => {
+  const result = areas.map(area => {
     // Check if the area is already a primitive Json type
     if (typeof area === 'string' || typeof area === 'number' || typeof area === 'boolean' || area === null) {
       return area;
@@ -45,6 +45,9 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     
     return jsonObject as Json;
   });
+  
+  console.log("prepareAreasForFormSubmission output:", result);
+  return result;
 }
 
 /**

@@ -60,11 +60,17 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   };
 
   const handleSave = async () => {
-    console.log("Save button clicked in ContentTabWrapper - saving formData:", formData.id);
+    console.log("handleSave called in ContentTabWrapper with formData ID:", formData.id);
+    
+    if (!formData.id) {
+      console.error("Cannot save: formData.id is missing", formData);
+      return false;
+    }
     
     setLocalIsSaving(true);
     try {
-      // Always use our direct onSubmit function that saves to DB
+      // Use our direct onSubmit function that saves to DB
+      // Ignore any external onSubmit to avoid conflicts
       const result = await onSubmit();
       console.log("Save result from usePropertyContentSubmit:", result);
       return result;

@@ -64,16 +64,14 @@ export function PropertyForm() {
     }
   }, [formData?.agent_id, formData?.template_id]);
 
+  // Modified to avoid conflicts with content tab save
   const handleSave = () => {
-    // Refresh the form data
-    if (id) {
-      toast({
-        description: "Property data refreshed",
-      });
-      
-      // This would trigger a refresh of the data
-      // For now, we'll just show a toast
-    }
+    console.log("PropertyForm.handleSave called - this is just a refresh notification");
+    
+    // Only show a toast, don't trigger any actual save
+    toast({
+      description: "Property data refreshed",
+    });
   };
 
   const handleDelete = async (): Promise<void> => {
