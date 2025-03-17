@@ -130,7 +130,7 @@ export function PropertyTabsWrapper({
                       agentInfo={agentInfo || { id: '', name: '' }}
                       templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
                       isUpdating={false}
-                      onSave={onSave}
+                      onSave={onSave || onSubmit}
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}

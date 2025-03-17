@@ -137,20 +137,28 @@ export function usePropertyContentSubmit(
 function extractPropertyValues(formData: PropertyFormData) {
   // If generalInfo exists, use its values, otherwise fall back to direct properties
   if (formData.generalInfo) {
-    return {
-      title: formData.generalInfo.propertyDetails.title,
-      price: formData.generalInfo.propertyDetails.price,
-      address: formData.generalInfo.propertyDetails.address,
-      object_id: formData.generalInfo.propertyDetails.objectId,
-      description: formData.generalInfo.description.fullDescription,
-      shortDescription: formData.generalInfo.description.shortDescription,
-      bedrooms: formData.generalInfo.keyInformation.bedrooms,
-      bathrooms: formData.generalInfo.keyInformation.bathrooms,
-      sqft: formData.generalInfo.keyInformation.lotSize,
-      livingArea: formData.generalInfo.keyInformation.livingArea,
-      buildYear: formData.generalInfo.keyInformation.buildYear,
-      energyLabel: formData.generalInfo.keyInformation.energyClass
-    };
+    try {
+      const generalInfo = typeof formData.generalInfo === 'string'
+        ? JSON.parse(formData.generalInfo)
+        : formData.generalInfo;
+        
+      return {
+        title: generalInfo.propertyDetails?.title || formData.title || '',
+        price: generalInfo.propertyDetails?.price || formData.price || '',
+        address: generalInfo.propertyDetails?.address || formData.address || '',
+        object_id: generalInfo.propertyDetails?.objectId || formData.object_id || '',
+        description: generalInfo.description?.fullDescription || formData.description || '',
+        shortDescription: generalInfo.description?.shortDescription || formData.shortDescription || '',
+        bedrooms: generalInfo.keyInformation?.bedrooms || formData.bedrooms || '',
+        bathrooms: generalInfo.keyInformation?.bathrooms || formData.bathrooms || '',
+        sqft: generalInfo.keyInformation?.lotSize || formData.sqft || '',
+        livingArea: generalInfo.keyInformation?.livingArea || formData.livingArea || '',
+        buildYear: generalInfo.keyInformation?.buildYear || formData.buildYear || '',
+        energyLabel: generalInfo.keyInformation?.energyClass || formData.energyLabel || ''
+      };
+    } catch (error) {
+      console.error("Error parsing generalInfo:", error);
+    }
   }
   
   // Fall back to legacy fields
