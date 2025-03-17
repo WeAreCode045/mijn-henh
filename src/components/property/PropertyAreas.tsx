@@ -3,6 +3,7 @@ import { PropertyArea } from "./PropertyArea";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { PropertyImage, PropertyArea as PropertyAreaType } from "@/types/property";
+import { ChangeEvent } from "react";
 
 interface PropertyAreasProps {
   areas: PropertyAreaType[];
@@ -13,7 +14,7 @@ interface PropertyAreasProps {
   onUpdate: (id: string, field: string, value: any) => void;
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesSelect: (areaId: string, imageIds: string[]) => void;
-  onImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  onImageUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   isUploading?: boolean;
 }
 
@@ -68,7 +69,7 @@ export function PropertyAreas({
             allImages={images}
             onRemove={() => onRemove(area.id)}
             onUpdate={(field, value) => onUpdate(area.id, field, value)}
-            onImageUpload={(files) => onImageUpload(area.id, files)}
+            onImageUpload={onImageUpload}
             onImageRemove={(imageId) => onImageRemove(area.id, imageId)}
             onImagesSelect={(imageIds) => onImagesSelect(area.id, imageIds)}
             isUploading={isUploading}

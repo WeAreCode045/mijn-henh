@@ -37,7 +37,11 @@ export function PropertyTabContentSetup({
   const { webViewOpen, setWebViewOpen } = handleWebViewProps;
   
   // Create adapted area photo handlers to resolve type compatibility issues
-  const { adaptedHandleAreaPhotosUpload, adaptedHandleRemoveAreaPhoto } = useAdaptedAreaPhotoHandlers(
+  const { 
+    adaptedHandleAreaPhotosUpload, 
+    adaptedHandleRemoveAreaPhoto,
+    adaptedHandleAreaImageUpload 
+  } = useAdaptedAreaPhotoHandlers(
     formHandlers.handleAreaPhotosUpload,
     formHandlers.handleAreaImageUpload, 
     formHandlers.handleRemoveAreaPhoto,
@@ -70,11 +74,11 @@ export function PropertyTabContentSetup({
             onUpdateArea={formHandlers.updateArea}
             onAreaImageRemove={formHandlers.handleAreaImageRemove}
             onAreaImagesSelect={formHandlers.handleAreaImagesSelect}
-            onAreaImageUpload={formHandlers.handleAreaImageUpload}
+            onAreaImageUpload={adaptedHandleAreaImageUpload} // Pass the files-based adapter for components expecting that signature
             handleImageUpload={formHandlers.handleImageUpload}
             handleRemoveImage={formHandlers.handleRemoveImage}
             isUploading={formHandlers.isUploading}
-            handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload} 
+            handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload} // Pass the event-based adapter for components expecting that signature
             handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
             handleFloorplanUpload={formHandlers.handleFloorplanUpload}
             handleRemoveFloorplan={formHandlers.handleRemoveFloorplan}

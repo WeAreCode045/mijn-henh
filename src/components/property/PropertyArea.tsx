@@ -9,6 +9,7 @@ import { Trash2 } from "lucide-react";
 import { PropertyAreaImageUpload } from "./PropertyAreaImageUpload";
 import { AreaImageGallery } from "./area/AreaImageGallery";
 import { PropertyImage } from "@/types/property";
+import { ChangeEvent } from "react";
 
 interface PropertyAreaProps {
   id: string;
@@ -18,7 +19,7 @@ interface PropertyAreaProps {
   allImages: PropertyImage[];
   onRemove: () => void;
   onUpdate: (field: string, value: any) => void;
-  onImageUpload: (files: FileList) => Promise<void>;
+  onImageUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   onImageRemove: (imageId: string) => void;
   onImagesSelect: (imageIds: string[]) => void;
   isUploading?: boolean;

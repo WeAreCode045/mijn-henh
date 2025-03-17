@@ -2,6 +2,7 @@
 import { PropertyAreas } from "@/components/property/PropertyAreas";
 import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
 import { normalizeImage } from "@/utils/imageHelpers";
+import { ChangeEvent } from "react";
 
 interface AreasStepProps {
   formData: PropertyFormData;
@@ -10,7 +11,7 @@ interface AreasStepProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  onAreaImageUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
 }

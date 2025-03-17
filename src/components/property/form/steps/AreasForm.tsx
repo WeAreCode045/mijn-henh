@@ -5,6 +5,7 @@ import { PropertyFormData, PropertyImage } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyAreas } from "@/components/property/PropertyAreas";
 import { normalizeImage } from "@/utils/imageHelpers";
+import { ChangeEvent } from "react";
 
 interface AreasFormProps {
   formData: PropertyFormData;
@@ -16,7 +17,7 @@ interface AreasFormProps {
   onUpdateArea: (id: string, field: string, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  handleAreaImageUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   isUploading?: boolean;
   onSubmit?: () => void;
   isSubmitting?: boolean;

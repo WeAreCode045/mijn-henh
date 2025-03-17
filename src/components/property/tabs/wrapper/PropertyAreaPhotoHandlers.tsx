@@ -1,10 +1,11 @@
 import { useAreaPhotoRemoveAdapter } from "@/hooks/images/adapters/useAreaPhotoRemoveAdapter";
-import { useAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
+import { useAreaPhotoUploadAdapter, useReverseAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
 import { ChangeEvent } from "react";
 
 interface AdaptedAreaPhotoHandlers {
   adaptedHandleAreaPhotosUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   adaptedHandleRemoveAreaPhoto: (areaId: string, photoIndex: number) => void;
+  adaptedHandleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
 }
 
 /**
@@ -40,10 +41,18 @@ export function useAdaptedAreaPhotoHandlers(
   // If handleAreaPhotosUpload is already provided with the event-based signature, use it directly
   // Otherwise, adapt the originalUploadHandler to have the event-based signature
   const adaptedHandleAreaPhotosUpload = handleAreaPhotosUpload || useAreaPhotoUploadAdapter(originalUploadHandler);
+  
+  // Also provide a files-based handler for components that need it
+  // If handleAreaImageUpload is already provided, use it directly
+  // Otherwise, adapt the event-based handler to have the files-based signature
+  const adaptedHandleAreaImageUpload = handleAreaImageUpload || 
+    (handleAreaPhotosUpload ? useReverseAreaPhotoUploadAdapter(handleAreaPhotosUpload) : originalUploadHandler);
+  
   const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(originalRemoveHandler);
   
   return {
     adaptedHandleAreaPhotosUpload,
-    adaptedHandleRemoveAreaPhoto
+    adaptedHandleRemoveAreaPhoto,
+    adaptedHandleAreaImageUpload
   };
 }

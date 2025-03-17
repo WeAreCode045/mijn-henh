@@ -21,3 +21,29 @@ export function useAreaPhotoUploadAdapter(
 
   return adaptedHandler;
 }
+
+/**
+ * Reverse adapter hook to convert from event-based signature to (areaId, files) signature
+ * This allows components that expect (areaId, files) to work with event-based handlers
+ */
+export function useReverseAreaPhotoUploadAdapter(
+  eventHandler: (e: ChangeEvent<HTMLInputElement>) => Promise<void>
+): (areaId: string, files: FileList) => Promise<void> {
+  // Convert from (e) signature to (areaId, files) signature
+  const reverseAdaptedHandler = async (areaId: string, files: FileList): Promise<void> => {
+    // Create a synthetic event object
+    const syntheticEvent = {
+      target: {
+        files: files,
+        dataset: {
+          areaId: areaId
+        }
+      }
+    } as unknown as ChangeEvent<HTMLInputElement>;
+    
+    // Call the event handler with the synthetic event
+    return eventHandler(syntheticEvent);
+  };
+  
+  return reverseAdaptedHandler;
+}
