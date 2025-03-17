@@ -12,17 +12,13 @@ interface AdaptedAreaPhotoHandlers {
  * Creates adapted handlers for area photo operations to manage type compatibility
  */
 export function useAdaptedAreaPhotoHandlers(
-  handleAreaPhotosUpload?: (areaId: string, files: FileList) => Promise<void>,
+  handleAreaPhotosUpload?: (e: ChangeEvent<HTMLInputElement>) => Promise<void>,
   handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>,
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void,
   handleAreaImageRemove?: (areaId: string, imageId: string) => void
 ): AdaptedAreaPhotoHandlers {
   // Create a proper fallback handler for uploads with the correct signature
   const originalUploadHandler = (areaId: string, files: FileList): Promise<void> => {
-    if (handleAreaPhotosUpload) {
-      return handleAreaPhotosUpload(areaId, files);
-    }
-    
     if (handleAreaImageUpload) {
       return handleAreaImageUpload(areaId, files);
     }

@@ -1,8 +1,8 @@
 
 import { PropertyFormData } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 interface DescriptionSectionProps {
@@ -12,21 +12,21 @@ interface DescriptionSectionProps {
   setPendingChanges?: (pending: boolean) => void;
 }
 
-export function DescriptionSection({ 
-  formData, 
-  onFieldChange, 
+export function DescriptionSection({
+  formData,
+  onFieldChange,
   onGeneralInfoChange,
-  setPendingChanges 
+  setPendingChanges
 }: DescriptionSectionProps) {
-  
-  // Get values from generalInfo or fallback to direct properties for backwards compatibility
-  const descriptionData = formData.generalInfo?.description || {
+  // Access description fields from generalInfo
+  const descriptionInfo = formData.generalInfo?.description || {
     shortDescription: formData.shortDescription || '',
     fullDescription: formData.description || ''
   };
 
   const handleChange = (field: string, value: string) => {
     onGeneralInfoChange('description', field, value);
+    
     if (setPendingChanges) {
       setPendingChanges(true);
     }
@@ -34,30 +34,28 @@ export function DescriptionSection({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Description</CardTitle>
+      <CardHeader>
+        <CardTitle>Description</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="shortDescription">Short Description</Label>
           <Input
             id="shortDescription"
-            name="shortDescription"
-            placeholder="Enter a brief summary of the property (displayed in listings)"
-            value={descriptionData.shortDescription}
+            value={descriptionInfo.shortDescription}
             onChange={(e) => handleChange('shortDescription', e.target.value)}
+            placeholder="Brief overview of the property"
           />
         </div>
-
+        
         <div className="space-y-2">
           <Label htmlFor="fullDescription">Full Description</Label>
           <Textarea
             id="fullDescription"
-            name="fullDescription"
-            placeholder="Enter a detailed description of the property"
-            value={descriptionData.fullDescription}
+            value={descriptionInfo.fullDescription}
             onChange={(e) => handleChange('fullDescription', e.target.value)}
-            className="min-h-32"
+            placeholder="Detailed description of the property"
+            rows={6}
           />
         </div>
       </CardContent>

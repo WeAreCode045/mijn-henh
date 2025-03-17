@@ -46,6 +46,8 @@ export function GeneralInfoStep({
         bedrooms: formData.bedrooms || '',
         bathrooms: formData.bathrooms || '',
         energyClass: formData.energyLabel || '',
+        garages: formData.garages || '',
+        hasGarden: formData.hasGarden || false,
       }
     };
   }
@@ -113,6 +115,8 @@ export function GeneralInfoStep({
       if (field === 'bedrooms') onFieldChange('bedrooms', value);
       if (field === 'bathrooms') onFieldChange('bathrooms', value);
       if (field === 'energyClass') onFieldChange('energyLabel', value);
+      if (field === 'garages') onFieldChange('garages', value);
+      if (field === 'hasGarden') onFieldChange('hasGarden', value);
     }
     
     if (setPendingChanges) {

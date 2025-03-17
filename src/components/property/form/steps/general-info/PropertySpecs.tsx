@@ -1,9 +1,9 @@
 
-import React from "react";
 import { PropertyFormData } from "@/types/property";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 interface PropertySpecsProps {
   formData: PropertyFormData;
@@ -11,96 +11,123 @@ interface PropertySpecsProps {
   onGeneralInfoChange: (section: string, field: string, value: any) => void;
 }
 
-export function PropertySpecs({ formData, onFieldChange, onGeneralInfoChange }: PropertySpecsProps) {
-  // Get values from generalInfo or fallback to direct properties for backwards compatibility
+export function PropertySpecs({
+  formData,
+  onFieldChange,
+  onGeneralInfoChange
+}: PropertySpecsProps) {
+  // Access keyInformation from generalInfo
   const keyInfo = formData.generalInfo?.keyInformation || {
     buildYear: formData.buildYear || '',
     lotSize: formData.sqft || '',
     livingArea: formData.livingArea || '',
     bedrooms: formData.bedrooms || '',
     bathrooms: formData.bathrooms || '',
-    energyClass: formData.energyLabel || ''
+    energyClass: formData.energyLabel || '',
+    garages: formData.garages || '',
+    hasGarden: formData.hasGarden || false
   };
 
-  const handleChange = (field: string, value: string) => {
+  // Handler for regular inputs
+  const handleInputChange = (field: string, value: string) => {
     onGeneralInfoChange('keyInformation', field, value);
+  };
+
+  // Handler for garden switch
+  const handleGardenChange = (checked: boolean) => {
+    onGeneralInfoChange('keyInformation', 'hasGarden', checked);
   };
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Key Information</CardTitle>
+      <CardHeader>
+        <CardTitle>Key Information</CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="buildYear">Build Year</Label>
-            <Input
+            <Input 
               id="buildYear"
-              type="text"
               value={keyInfo.buildYear}
-              onChange={(e) => handleChange('buildYear', e.target.value)}
-              placeholder="Build Year"
-              className="mt-1 p-2"
+              onChange={(e) => handleInputChange('buildYear', e.target.value)}
             />
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="lotSize">Lot Size (m²)</Label>
-            <Input
+            <Input 
               id="lotSize"
-              type="text"
               value={keyInfo.lotSize}
-              onChange={(e) => handleChange('lotSize', e.target.value)}
-              placeholder="Lot Size"
-              className="mt-1 p-2"
+              onChange={(e) => handleInputChange('lotSize', e.target.value)}
             />
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="livingArea">Living Area (m²)</Label>
-            <Input
+            <Input 
               id="livingArea"
-              type="text"
               value={keyInfo.livingArea}
-              onChange={(e) => handleChange('livingArea', e.target.value)}
-              placeholder="Living Area"
-              className="mt-1 p-2"
+              onChange={(e) => handleInputChange('livingArea', e.target.value)}
             />
           </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
           <div className="space-y-2">
             <Label htmlFor="bedrooms">Bedrooms</Label>
-            <Input
+            <Input 
               id="bedrooms"
-              type="text"
               value={keyInfo.bedrooms}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
-              placeholder="Bedrooms"
-              className="mt-1 p-2"
+              onChange={(e) => handleInputChange('bedrooms', e.target.value)}
             />
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="bathrooms">Bathrooms</Label>
-            <Input
+            <Input 
               id="bathrooms"
-              type="text"
               value={keyInfo.bathrooms}
-              onChange={(e) => handleChange('bathrooms', e.target.value)}
-              placeholder="Bathrooms"
-              className="mt-1 p-2"
+              onChange={(e) => handleInputChange('bathrooms', e.target.value)}
             />
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="garages">Garages</Label>
+            <Input 
+              id="garages"
+              value={keyInfo.garages}
+              onChange={(e) => handleInputChange('garages', e.target.value)}
+            />
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="energyClass">Energy Class</Label>
-            <Input
+            <select
               id="energyClass"
-              type="text"
+              className="w-full rounded-md border border-input bg-background px-3 py-2"
               value={keyInfo.energyClass}
-              onChange={(e) => handleChange('energyClass', e.target.value)}
-              placeholder="Energy Class"
-              className="mt-1 p-2"
+              onChange={(e) => handleInputChange('energyClass', e.target.value)}
+            >
+              <option value="">Select Energy Class</option>
+              <option value="A+++">A+++</option>
+              <option value="A++">A++</option>
+              <option value="A+">A+</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+              <option value="F">F</option>
+              <option value="G">G</option>
+            </select>
+          </div>
+          
+          <div className="flex items-center space-x-2 pt-8">
+            <Switch
+              id="hasGarden"
+              checked={!!keyInfo.hasGarden}
+              onCheckedChange={handleGardenChange}
             />
+            <Label htmlFor="hasGarden">Has Garden</Label>
           </div>
         </div>
       </CardContent>
