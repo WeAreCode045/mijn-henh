@@ -3,7 +3,7 @@ import React from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EnvelopeOpenIcon, MessageSquareText, PhoneCall } from "lucide-react";
+import { Mail, MessageSquareText, PhoneCall } from "lucide-react";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -21,7 +21,7 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
             <span>Messages</span>
           </TabsTrigger>
           <TabsTrigger value="emails" className="flex items-center gap-2">
-            <EnvelopeOpenIcon className="h-4 w-4" />
+            <Mail className="h-4 w-4" />
             <span>Emails</span>
           </TabsTrigger>
           <TabsTrigger value="calls" className="flex items-center gap-2">

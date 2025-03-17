@@ -7,6 +7,8 @@ import { PropertyFormManager } from "./tabs/wrapper/PropertyFormManager";
 import { PropertyTabActionsHandler } from "./tabs/wrapper/PropertyTabActionsHandler";
 import { PropertyWebViewDialog } from "./tabs/wrapper/PropertyWebViewDialog";
 import { Tabs } from "@/components/ui/tabs";
+import { useAreaPhotoRemoveAdapter } from "@/hooks/images/adapters/useAreaPhotoRemoveAdapter";
+import { useAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -119,69 +121,75 @@ export function PropertyTabsWrapper({
               isGeneratingMap,
               onFetchCategoryPlaces,
               onFetchNearbyCities
-            }) => (
-              <>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
-                    <PropertyTabContents
-                      activeTab={activeTab}
-                      property={propertyWithRequiredFields}
-                      formState={formState}
-                      agentInfo={agentInfo || { id: '', name: '' }}
-                      templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
-                      isUpdating={false}
-                      onDelete={onDelete || (() => Promise.resolve())}
-                      handleSaveObjectId={handleSaveObjectId}
-                      handleSaveAgent={handleSaveAgent}
-                      handleSaveTemplate={handleSaveTemplate}
-                      handleGeneratePDF={handleGeneratePDF}
-                      handleWebView={handleOpenWebView}
-                      onFieldChange={handleFieldChange}
-                      onAddFeature={addFeature}
-                      onRemoveFeature={removeFeature}
-                      onUpdateFeature={updateFeature}
-                      onAddArea={addArea}
-                      onRemoveArea={removeArea}
-                      onUpdateArea={updateArea}
-                      onAreaImageRemove={handleAreaImageRemove}
-                      onAreaImagesSelect={handleAreaImagesSelect}
-                      onAreaImageUpload={handleAreaImageUpload}
-                      handleImageUpload={handleImageUpload}
-                      handleRemoveImage={handleRemoveImage}
-                      isUploading={isUploading}
-                      handleAreaPhotosUpload={handleAreaPhotosUpload}
-                      handleFloorplanUpload={handleFloorplanUpload}
-                      handleRemoveFloorplan={handleRemoveFloorplan}
-                      isUploadingFloorplan={isUploadingFloorplan}
-                      handleSetFeaturedImage={handleSetFeaturedImage}
-                      handleToggleFeaturedImage={handleToggleFeaturedImage}
-                      handleVirtualTourUpdate={handleVirtualTourUpdate}
-                      handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
-                      handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
-                      currentStep={currentStep}
-                      handleStepClick={handleStepClick}
-                      handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-                      setPendingChanges={setPendingChanges}
-                      onFetchLocationData={onFetchLocationData}
-                      onGenerateLocationDescription={onGenerateLocationDescription}
-                      onGenerateMap={onGenerateMap}
-                      onRemoveNearbyPlace={onRemoveNearbyPlace}
-                      isLoadingLocationData={isLoadingLocationData}
-                      isGeneratingMap={isGeneratingMap}
-                      onFetchCategoryPlaces={onFetchCategoryPlaces}
-                      onFetchNearbyCities={onFetchNearbyCities}
-                    />
-                  </PropertyTabs>
-                </Tabs>
+            }) => {
+              // Create adapters for handlers with mismatched signatures
+              const adaptedHandleAreaPhotosUpload = useAreaPhotoUploadAdapter(handleAreaPhotosUpload || handleAreaImageUpload);
+              const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(handleRemoveAreaPhoto || handleAreaImageRemove);
+              
+              return (
+                <>
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
+                    <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
+                      <PropertyTabContents
+                        activeTab={activeTab}
+                        property={propertyWithRequiredFields}
+                        formState={formState}
+                        agentInfo={agentInfo || { id: '', name: '' }}
+                        templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
+                        isUpdating={false}
+                        onDelete={onDelete || (() => Promise.resolve())}
+                        handleSaveObjectId={handleSaveObjectId}
+                        handleSaveAgent={handleSaveAgent}
+                        handleSaveTemplate={handleSaveTemplate}
+                        handleGeneratePDF={handleGeneratePDF}
+                        handleWebView={handleOpenWebView}
+                        onFieldChange={handleFieldChange}
+                        onAddFeature={addFeature}
+                        onRemoveFeature={removeFeature}
+                        onUpdateFeature={updateFeature}
+                        onAddArea={addArea}
+                        onRemoveArea={removeArea}
+                        onUpdateArea={updateArea}
+                        onAreaImageRemove={handleAreaImageRemove}
+                        onAreaImagesSelect={handleAreaImagesSelect}
+                        onAreaImageUpload={handleAreaImageUpload}
+                        handleImageUpload={handleImageUpload}
+                        handleRemoveImage={handleRemoveImage}
+                        isUploading={isUploading}
+                        handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload}
+                        handleFloorplanUpload={handleFloorplanUpload}
+                        handleRemoveFloorplan={handleRemoveFloorplan}
+                        isUploadingFloorplan={isUploadingFloorplan}
+                        handleSetFeaturedImage={handleSetFeaturedImage}
+                        handleToggleFeaturedImage={handleToggleFeaturedImage}
+                        handleVirtualTourUpdate={handleVirtualTourUpdate}
+                        handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
+                        handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
+                        currentStep={currentStep}
+                        handleStepClick={handleStepClick}
+                        handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
+                        setPendingChanges={setPendingChanges}
+                        onFetchLocationData={onFetchLocationData}
+                        onGenerateLocationDescription={onGenerateLocationDescription}
+                        onGenerateMap={onGenerateMap}
+                        onRemoveNearbyPlace={onRemoveNearbyPlace}
+                        isLoadingLocationData={isLoadingLocationData}
+                        isGeneratingMap={isGeneratingMap}
+                        onFetchCategoryPlaces={onFetchCategoryPlaces}
+                        onFetchNearbyCities={onFetchNearbyCities}
+                      />
+                    </PropertyTabs>
+                  </Tabs>
 
-                {/* WebView Dialog */}
-                <PropertyWebViewDialog
-                  propertyData={propertyWithRequiredFields}
-                  isOpen={webViewOpen}
-                  onOpenChange={setWebViewOpen}
-                />
-              </>
-            )}
+                  {/* WebView Dialog */}
+                  <PropertyWebViewDialog
+                    propertyData={propertyWithRequiredFields}
+                    isOpen={webViewOpen}
+                    onOpenChange={setWebViewOpen}
+                  />
+                </>
+              );
+            }}
           </PropertyFormManager>
         )}
       </PropertyTabActionsHandler>

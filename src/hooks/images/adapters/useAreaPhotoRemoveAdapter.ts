@@ -6,15 +6,13 @@
 export function useAreaPhotoRemoveAdapter(
   originalHandler: (areaId: string, imageId: string) => void
 ) {
-  // Convert the (areaId, imageId) signature to (index) signature
-  const adaptedHandlerForIndexOnly = (index: number) => {
-    // Use a default areaId for general area photos
-    const areaId = "general";
+  // Convert the (areaId, imageId) signature to (areaId, photoIndex) signature
+  const adaptedHandler = (areaId: string, photoIndex: number) => {
     // Create an imageId from the index
-    const imageId = `area-photo-${index}`;
+    const imageId = `area-photo-${photoIndex}`;
     // Call the original handler with the converted parameters
     originalHandler(areaId, imageId);
   };
 
-  return adaptedHandlerForIndexOnly;
+  return adaptedHandler;
 }
