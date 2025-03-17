@@ -1,10 +1,11 @@
+
 import { useAreaPhotoRemoveAdapter } from "@/hooks/images/adapters/useAreaPhotoRemoveAdapter";
 import { useAreaPhotoUploadAdapter, useReverseAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
 import { ChangeEvent } from "react";
 
 interface AdaptedAreaPhotoHandlers {
   adaptedHandleAreaPhotosUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
-  adaptedHandleRemoveAreaPhoto: (areaId: string, photoIndex: number) => void;
+  adaptedHandleRemoveAreaPhoto: (areaId: string, photoIdOrIndex: string | number) => void;
   adaptedHandleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
 }
 

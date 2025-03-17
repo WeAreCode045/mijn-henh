@@ -7,10 +7,13 @@ export function useAreaPhotoRemoveAdapter(
   originalHandler: (areaId: string, imageId: string) => void
 ) {
   // Convert the (areaId, imageId) signature to (areaId, photoIndex) signature
-  const adaptedHandler = (areaId: string, photoIndex: number) => {
-    // Create an imageId from the index - this is a simplification
+  // and vice versa, ensuring string type for imageId
+  const adaptedHandler = (areaId: string, photoIdOrIndex: string | number) => {
+    // If we received a number, convert it to a string ID
     // In a real implementation, you might need to lookup the actual imageId from the index
-    const imageId = `area-photo-${photoIndex}`;
+    const imageId = typeof photoIdOrIndex === 'number' 
+      ? `area-photo-${photoIdOrIndex}` 
+      : photoIdOrIndex;
     
     // Call the original handler with the converted parameters
     originalHandler(areaId, imageId);
