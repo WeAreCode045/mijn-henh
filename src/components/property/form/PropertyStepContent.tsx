@@ -8,6 +8,8 @@ import { AreasStep } from "@/components/property/form/steps/AreasStep";
 import { LocationStep } from "@/components/property/form/steps/LocationStep";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
+import { ChangeEvent } from "react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
@@ -64,6 +66,11 @@ export function PropertyStepContent({
   setPendingChanges,
   isUploading,
 }: PropertyStepContentProps) {
+  // Convert the areaId+files handler to an event-based handler for AreasStep
+  const areaImageUploadEventHandler = onAreaImageUpload 
+    ? useAreaPhotoUploadAdapter(onAreaImageUpload)
+    : async (e: ChangeEvent<HTMLInputElement>) => Promise.resolve();
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -110,7 +117,7 @@ export function PropertyStepContent({
             onUpdateArea={onUpdateArea}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
-            onAreaImageUpload={onAreaImageUpload}
+            onAreaImageUpload={areaImageUploadEventHandler}
             setPendingChanges={setPendingChanges}
             isUploading={isUploading}
           />

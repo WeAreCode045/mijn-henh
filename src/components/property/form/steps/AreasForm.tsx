@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PropertyAreas } from "@/components/property/PropertyAreas";
 import { normalizeImage } from "@/utils/imageHelpers";
 import { ChangeEvent } from "react";
+import { useReverseAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
 
 interface AreasFormProps {
   formData: PropertyFormData;
@@ -43,6 +44,9 @@ export function AreasForm({
     ? formData.images.map(img => normalizeImage(img))
     : [];
 
+  // Create an adapter to convert event-based handlers to areaId+files parameters
+  const handleAreaImageUploadAdapted = useReverseAreaPhotoUploadAdapter(handleAreaImageUpload);
+
   return (
     <PropertyStepForm
       formData={formData}
@@ -64,6 +68,7 @@ export function AreasForm({
             onImageRemove={onAreaImageRemove}
             onImagesSelect={onAreaImagesSelect}
             onImageUpload={handleAreaImageUpload}
+            handleAreaImageUpload={handleAreaImageUploadAdapted}
             isUploading={isUploading}
           />
         </CardContent>

@@ -3,6 +3,7 @@ import { PropertyAreas } from "@/components/property/PropertyAreas";
 import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
 import { normalizeImage } from "@/utils/imageHelpers";
 import { ChangeEvent } from "react";
+import { useReverseAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
 
 interface AreasStepProps {
   formData: PropertyFormData;
@@ -32,6 +33,9 @@ export function AreasStep({
     ? formData.images.map(img => normalizeImage(img))
     : [];
 
+  // Create an adapter to convert event-based handlers to areaId+files parameters
+  const handleAreaImageUploadAdapted = useReverseAreaPhotoUploadAdapter(onAreaImageUpload);
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Property Areas</h2>
@@ -49,6 +53,7 @@ export function AreasStep({
         onImageRemove={onAreaImageRemove}
         onImagesSelect={onAreaImagesSelect}
         onImageUpload={onAreaImageUpload}
+        handleAreaImageUpload={handleAreaImageUploadAdapted}
         isUploading={isUploading}
       />
     </div>

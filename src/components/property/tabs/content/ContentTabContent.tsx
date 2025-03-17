@@ -5,6 +5,7 @@ import { GeneralInfoForm } from '@/components/property/form/steps/GeneralInfoFor
 import { LocationForm } from '@/components/property/form/steps/LocationForm';
 import { FeaturesForm } from '@/components/property/form/steps/FeaturesForm';
 import { AreasForm } from '@/components/property/form/steps/AreasForm';
+import { useAreaPhotoUploadAdapter } from '@/hooks/images/adapters/useAreaPhotoUploadAdapter';
 
 interface ContentTabContentProps {
   formData: PropertyFormData;
@@ -67,6 +68,9 @@ export function ContentTabContent({
   onSubmit,
   isSaving
 }: ContentTabContentProps) {
+  // Convert the areaId+files handler to an event-based handler
+  const areaImageUploadEventHandler = useAreaPhotoUploadAdapter(handleAreaImageUpload);
+
   const renderStepForm = () => {
     switch (currentStep) {
       case 0:
@@ -125,7 +129,7 @@ export function ContentTabContent({
             onUpdateArea={onUpdateArea}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
-            handleAreaImageUpload={handleAreaImageUpload}
+            handleAreaImageUpload={areaImageUploadEventHandler}
             isUploading={isUploading}
             onSubmit={onSubmit}
             isSubmitting={isSaving}
