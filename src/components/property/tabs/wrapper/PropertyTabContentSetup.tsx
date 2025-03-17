@@ -39,7 +39,7 @@ export function PropertyTabContentSetup({
   // Create adapted area photo handlers to resolve type compatibility issues
   const { adaptedHandleAreaPhotosUpload, adaptedHandleRemoveAreaPhoto } = useAdaptedAreaPhotoHandlers(
     formHandlers.handleAreaPhotosUpload,
-    formHandlers.handleAreaImageUpload,
+    formHandlers.handleAreaImageUpload, 
     formHandlers.handleRemoveAreaPhoto,
     formHandlers.handleAreaImageRemove
   );

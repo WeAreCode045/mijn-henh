@@ -39,7 +39,7 @@ export function useAdaptedAreaPhotoHandlers(
   };
   
   // Create the adapted handlers using our adapter hooks
-  const adaptedHandleAreaPhotosUpload = useAreaPhotoUploadAdapter(originalUploadHandler);
+  const adaptedHandleAreaPhotosUpload = handleAreaPhotosUpload || useAreaPhotoUploadAdapter(originalUploadHandler);
   const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(originalRemoveHandler);
   
   return {
