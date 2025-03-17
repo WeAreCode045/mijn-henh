@@ -1,7 +1,15 @@
 
-import type { PropertyData, PropertyCity, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyFloorplan, PropertyAgent, GeneralInfoData } from "./PropertyTypes";
+import type { 
+  PropertyFeature, 
+  PropertyPlaceType, 
+  PropertyCity, 
+  PropertyFloorplan, 
+  PropertyAgent, 
+  GeneralInfoData 
+} from "./PropertyTypes";
 import { PropertyImage } from "./PropertyImageTypes";
-import type { Json } from "@/integrations/supabase/types";
+import { PropertyArea } from "./PropertyAreaTypes";
+import type { PropertyData } from "./PropertyDataTypes";
 
 // Property form data extends PropertyData
 export interface PropertyFormData {
@@ -26,7 +34,7 @@ export interface PropertyFormData {
   featuredImages?: string[];
   areas?: PropertyArea[];
   map_image?: string | null;
-  nearby_places?: PropertyNearbyPlace[];
+  nearby_places?: PropertyPlaceType[];
   nearby_cities?: PropertyCity[];
   latitude?: number | null;
   longitude?: number | null;

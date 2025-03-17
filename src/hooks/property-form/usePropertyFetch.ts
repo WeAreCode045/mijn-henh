@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity, GeneralInfoData } from "@/types/property";
 import { initialFormData } from "./initialFormData";
-import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
 
 // Helper function to safely convert JSON or array to array
@@ -29,6 +28,8 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
     return {
       id: agentData,
       name: 'Unknown Agent',
+      email: '',
+      phone: '',
     };
   }
   
@@ -36,8 +37,8 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
     return {
       id: agentData.id || '',
       name: agentData.name || agentData.full_name || 'Unknown Agent',
-      email: agentData.email,
-      phone: agentData.phone,
+      email: agentData.email || '',
+      phone: agentData.phone || '',
       photoUrl: agentData.avatar_url, // Using avatar_url instead of agent_photo
       address: agentData.address,
     };
@@ -168,24 +169,19 @@ export function usePropertyFetch(id: string | undefined) {
               agentData = {
                 id: agentProfile.id,
                 name: agentProfile.full_name || 'Unknown Agent',
-                email: agentProfile.email,
-                phone: agentProfile.phone,
+                email: agentProfile.email || '',
+                phone: agentProfile.phone || '',
                 photoUrl: agentProfile.avatar_url
               };
             } else {
               agentData = {
                 id: agentId,
-                name: 'Unknown Agent'
+                name: 'Unknown Agent',
+                email: '',
+                phone: '',
               };
             }
           }
-          
-          // Convert featuredImages to PropertyImages for coverImages
-          const coverImages = featuredImages.map(url => ({
-            id: `cover-${Date.now()}-${Math.random()}`,
-            url,
-            type: "image" as "image" | "floorplan"
-          })) as PropertyImage[];
           
           // Process generalInfo
           const generalInfo = formatGeneralInfo(propertyData.generalInfo);
@@ -206,10 +202,9 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImage: featuredImage,
             featuredImages: featuredImages,
             agent: agentData,
-            generalInfo, // Use the processed generalInfo
-            // Add backward compatibility fields
-            coverImages, // Now as PropertyImage[]
-            gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
+            generalInfo, 
+            coverImages: regularImages.filter(img => img.is_featured_image),
+            gridImages: regularImages.slice(0, 4),
             areaPhotos: []
           };
           

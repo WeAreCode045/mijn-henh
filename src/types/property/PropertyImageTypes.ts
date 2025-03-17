@@ -11,4 +11,5 @@ export interface PropertyImage {
   filePath?: string;
   title?: string;
   description?: string;
+  alt?: string;
 }

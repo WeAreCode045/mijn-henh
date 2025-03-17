@@ -1,70 +1,64 @@
 
-import { PropertyFormData, PropertySubmitData } from "@/types/property";
-import { 
-  prepareAreasForFormSubmission, 
-  preparePropertiesForJsonField,
-  prepareImagesForSubmission
-} from "./preparePropertyData";
+import { PropertyFormData, PropertyFeature, PropertyPlaceType, PropertyCity, GeneralInfoData } from "@/types/property";
+import { transformFeatures, transformNearbyPlaces, transformGeneralInfo } from "./propertyDataTransformer";
+
+// Function to safely parse JSON
+const safeJsonParse = <T,>(jsonString: string | undefined | null, defaultValue: T): T => {
+  if (!jsonString) return defaultValue;
+  try {
+    return JSON.parse(jsonString) as T;
+  } catch (e) {
+    console.error("Error parsing JSON:", e);
+    return defaultValue;
+  }
+};
 
 export function usePropertyDataPreparer() {
-  const prepareSubmitData = (formData: PropertyFormData): PropertySubmitData => {
-    const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
-    const featuresJson = preparePropertiesForJsonField(formData.features);
-    const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
-    const nearby_citiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
-    
-    // Extract just the URLs for type compatibility
-    const imageUrls = Array.isArray(formData.images)
-      ? formData.images.map(img => typeof img === 'string' ? img : img.url)
-      : [];
-      
-    // Prepare generalInfo - handle properly based on type
-    let generalInfoValue = undefined;
-    if (formData.generalInfo) {
-      generalInfoValue = typeof formData.generalInfo === 'string' 
-        ? formData.generalInfo 
-        : JSON.stringify(formData.generalInfo);
-    }
-    
-    return {
-      id: formData.id,
-      title: formData.title || '',
-      price: formData.price || '',
-      address: formData.address || '',
-      bedrooms: formData.bedrooms || '',
-      bathrooms: formData.bathrooms || '',
-      sqft: formData.sqft || '',
-      livingArea: formData.livingArea || '',
-      buildYear: formData.buildYear || '',
-      garages: formData.garages || '',
-      energyLabel: formData.energyLabel || '',
-      hasGarden: formData.hasGarden || false,
-      description: formData.description || '',
-      shortDescription: formData.shortDescription || '',
-      location_description: formData.location_description || '',
-      features: featuresJson as string,
-      areas: areasForSubmission as any,
-      nearby_places: nearby_placesJson as string,
-      nearby_cities: nearby_citiesJson as string,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-      map_image: formData.map_image,
-      object_id: formData.object_id,
-      agent_id: formData.agent_id,
-      template_id: formData.template_id,
-      virtualTourUrl: formData.virtualTourUrl,
-      youtubeUrl: formData.youtubeUrl,
-      floorplanEmbedScript: formData.floorplanEmbedScript || '',
-      // Use the extracted URL strings
-      images: imageUrls,
-      // Include generalInfo
-      generalInfo: generalInfoValue,
-      // Include floorplans if they exist
-      floorplans: Array.isArray(formData.floorplans) 
-        ? formData.floorplans.map(fp => typeof fp === 'string' ? fp : fp.url) 
-        : []
+  // Prepare data for form submission
+  const preparePropertyData = (formData: PropertyFormData) => {
+    // Convert complex objects to JSON strings
+    const data = {
+      ...formData,
+      features: Array.isArray(formData.features) ? JSON.stringify(formData.features) : JSON.stringify([]),
+      areas: Array.isArray(formData.areas) ? JSON.stringify(formData.areas) : JSON.stringify([]),
+      nearby_places: Array.isArray(formData.nearby_places) ? JSON.stringify(formData.nearby_places) : JSON.stringify([]),
+      nearby_cities: Array.isArray(formData.nearby_cities) ? JSON.stringify(formData.nearby_cities) : JSON.stringify([]),
+      generalInfo: formData.generalInfo ? JSON.stringify(formData.generalInfo) : null
     };
+    
+    return data;
   };
-
-  return { prepareSubmitData };
+  
+  // Process data from API to use in forms
+  const processPropertyData = (data: any) => {
+    if (!data) return null;
+    
+    // Parse JSON strings
+    const features: PropertyFeature[] = safeJsonParse(data.features, []);
+    const areas = safeJsonParse(data.areas, []);
+    const nearby_places: PropertyPlaceType[] = safeJsonParse(data.nearby_places, []);
+    const nearby_cities: PropertyCity[] = safeJsonParse(data.nearby_cities, []);
+    const generalInfo: GeneralInfoData | undefined = transformGeneralInfo(data.generalInfo);
+    
+    // Prepare processed data
+    const processedData: PropertyFormData = {
+      ...data,
+      features,
+      areas,
+      nearby_places,
+      nearby_cities,
+      generalInfo,
+      // Ensure primitive types
+      hasGarden: !!data.hasGarden,
+      latitude: data.latitude !== undefined ? data.latitude : null,
+      longitude: data.longitude !== undefined ? data.longitude : null
+    };
+    
+    return processedData;
+  };
+  
+  return {
+    preparePropertyData,
+    processPropertyData
+  };
 }

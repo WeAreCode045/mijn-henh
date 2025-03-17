@@ -1,6 +1,7 @@
 
-import type { PropertyFeature, PropertyArea, PropertyImage, PropertyPlaceType, GeneralInfoData } from "@/types/property";
-import { Json } from "@/integrations/supabase/types";
+import type { PropertyFeature, PropertyPlaceType, PropertyCity, GeneralInfoData } from "@/types/property";
+import { PropertyImage } from "@/types/property";
+import { PropertyArea } from "@/types/property";
 import { normalizeImage } from "@/utils/imageHelpers";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {

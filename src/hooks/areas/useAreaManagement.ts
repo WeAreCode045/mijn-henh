@@ -14,7 +14,7 @@ export function useAreaManagement(
   const addArea = () => {
     const newArea: PropertyArea = {
       id: crypto.randomUUID(),
-      title: '', // Now included in PropertyArea
+      title: '', 
       name: '',
       size: '',
       unit: '',

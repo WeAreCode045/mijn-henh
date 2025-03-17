@@ -87,6 +87,3 @@ export interface PropertySubmitData {
   propertyType?: string;
   generalInfo?: GeneralInfoData;
 }
-
-// Export the type using the 'export type' syntax to work with isolatedModules
-export type { PropertyFeature, PropertyFloorplan, PropertyNearbyPlace, PropertyPlaceType, PropertyCity, PropertyAgent, GeneralInfoData, PropertySubmitData };

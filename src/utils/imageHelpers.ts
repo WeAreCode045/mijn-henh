@@ -19,7 +19,7 @@ export const normalizeImage = (img: any): PropertyImage => {
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       url: img,
-      type: "image"
+      type: "image" as "image" | "floorplan"
     };
   } 
   
@@ -32,7 +32,7 @@ export const normalizeImage = (img: any): PropertyImage => {
       is_main: img.is_main || false,
       is_featured_image: img.is_featured_image || false,
       sort_order: img.sort_order || 0,
-      type: img.type || "image",
+      type: img.type || "image" as "image" | "floorplan",
       title: img.title || '',
       description: img.description || ''
     };

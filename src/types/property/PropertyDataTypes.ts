@@ -1,14 +1,15 @@
 
 import type {
-  PropertyArea,
   PropertyFeature,
-  PropertyNearbyPlace,
+  PropertyPlaceType,
   PropertyCity,
   PropertyFloorplan,
   GeneralInfoData,
-  PropertyAgent
+  PropertyAgent,
+  PropertyNearbyPlace
 } from './PropertyTypes';
-import { PropertyImage } from './PropertyImageTypes';
+import type { PropertyImage } from './PropertyImageTypes';
+import type { PropertyArea } from './PropertyAreaTypes';
 
 export interface PropertyData {
   id: string;
