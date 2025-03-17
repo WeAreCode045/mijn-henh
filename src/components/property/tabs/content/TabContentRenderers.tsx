@@ -3,7 +3,7 @@ import React from 'react';
 import { PropertyFormData } from "@/types/property";
 import { ContentTabContent } from './ContentTabContent';
 
-export function renderContentTab({
+export const renderContentTab = ({
   formData,
   onFieldChange,
   onAddFeature,
@@ -30,7 +30,7 @@ export function renderContentTab({
   setPendingChanges,
   isUploading,
   isSaving
-}) {
+}) => {
   // Create a dummy onSubmit function if it's missing
   const onSubmit = () => {
     console.log("Form submitted");
@@ -67,4 +67,15 @@ export function renderContentTab({
       onSubmit={onSubmit}
     />
   );
-}
+};
+
+// Create a TabContentRenderers object with the renderContentTab function
+export const TabContentRenderers = {
+  renderTabContent: ({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }) => {
+    // Add logic to render the appropriate tab content based on activeTab
+    return renderContentTab({
+      formData: formState,
+      ...handlers
+    });
+  }
+};

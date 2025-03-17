@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
+import { usePropertyFloorplans } from "@/hooks/usePropertyFloorplans";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
@@ -65,13 +66,13 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     images
-  } = usePropertyImages();
+  } = usePropertyImages(formState, handleFieldChange);
 
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan
-  } = usePropertyFloorplans();
+  } = usePropertyFloorplans(formState, handleFieldChange);
   
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
     usePropertyStepNavigation();
