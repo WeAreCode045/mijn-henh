@@ -1,9 +1,10 @@
 
 import React from "react";
 import { PropertyStepForm } from "../PropertyStepForm";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyImage } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyAreas } from "@/components/property/PropertyAreas";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 interface AreasFormProps {
   formData: PropertyFormData;
@@ -36,6 +37,11 @@ export function AreasForm({
   onSubmit,
   isSubmitting = false
 }: AreasFormProps) {
+  // Normalize images to ensure they are all PropertyImage objects
+  const normalizedImages = Array.isArray(formData.images) 
+    ? formData.images.map(img => normalizeImage(img))
+    : [];
+
   return (
     <PropertyStepForm
       formData={formData}
@@ -49,6 +55,8 @@ export function AreasForm({
         <CardContent className="pt-6">
           <PropertyAreas 
             areas={formData.areas || []}
+            images={normalizedImages}
+            propertyId={formData.id || ''}
             onAdd={onAddArea}
             onRemove={onRemoveArea}
             onUpdate={onUpdateArea}

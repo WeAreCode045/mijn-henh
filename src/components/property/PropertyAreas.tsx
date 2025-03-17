@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PropertyArea } from "@/types/property";
+import { PropertyArea, PropertyImage } from "@/types/property";
 import { PlusCircle, MinusCircle, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PropertyAreasProps {
   areas: PropertyArea[];
+  images?: PropertyImage[]; // Add the images prop as optional
+  propertyId?: string;      // Make propertyId optional
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: string, value: any) => void;
@@ -21,6 +23,8 @@ interface PropertyAreasProps {
 
 export function PropertyAreas({
   areas = [],
+  images = [],         // Add default empty array for images
+  propertyId,          // Add propertyId parameter
   onAdd,
   onRemove,
   onUpdate,
