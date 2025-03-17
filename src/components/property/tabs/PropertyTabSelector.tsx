@@ -10,10 +10,11 @@ interface PropertyTabSelectorProps {
 export function PropertyTabSelector({ activeTab, onTabChange }: PropertyTabSelectorProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
         <TabsTrigger value="content">Content</TabsTrigger>
         <TabsTrigger value="media">Media</TabsTrigger>
+        <TabsTrigger value="communications">Communications</TabsTrigger>
       </TabsList>
     </Tabs>
   );
