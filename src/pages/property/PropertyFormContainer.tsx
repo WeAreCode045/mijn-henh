@@ -21,14 +21,12 @@ export function PropertyFormContainer() {
     selectedAgent,
     setSelectedAgent,
     templateInfo,
-    isSubmitting,
     setIsSubmitting,
     toast
   } = usePropertyFormContainerData();
 
   const {
     deleteProperty,
-    saveProperty,
     handleAgentChange,
     handleImageUpload,
     handleRemoveImage,
@@ -57,13 +55,11 @@ export function PropertyFormContainer() {
       selectedAgent={selectedAgent}
       onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
-      onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
       images={images}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
-      isSubmitting={isSubmitting}
     >
       <PropertyForm />
     </PropertyFormLayout>

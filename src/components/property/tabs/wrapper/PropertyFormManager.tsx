@@ -30,11 +30,8 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     onRemoveNearbyPlace: formManagerProps.onRemoveNearbyPlace,
     isLoadingLocationData: formManagerProps.isLoadingLocationData,
     isGeneratingMap: formManagerProps.isGeneratingMap,
-    onSubmit: formManagerProps.onSubmit,
     currentStep: formManagerProps.currentStep,
     handleStepClick: formManagerProps.handleStepClick,
-    lastSaved: formManagerProps.lastSaved,
-    isSaving: formManagerProps.isSaving,
     setPendingChanges: formManagerProps.setPendingChanges,
     // Add properties for compatibility
     propertyWithRequiredProps: property,
@@ -61,7 +58,10 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     onUpdateArea: formManagerProps.onUpdateArea,
     onAreaImageRemove: formManagerProps.onAreaImageRemove,
     onAreaImagesSelect: formManagerProps.onAreaImagesSelect,
-    images: formManagerProps.images || []
+    images: formManagerProps.images || [],
+    onSubmit: () => {}, // Empty function as a placeholder
+    lastSaved: null,
+    isSaving: false,
   };
   
   // Pass all the props to the children render function

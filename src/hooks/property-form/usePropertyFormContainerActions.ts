@@ -1,6 +1,5 @@
 
 import { useNavigate } from "react-router-dom";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
@@ -15,7 +14,6 @@ export function usePropertyFormContainerActions(
   agents: any[]
 ) {
   const navigate = useNavigate();
-  const { handleSubmit } = usePropertyFormSubmit();
   
   const { handleImageUpload, handleRemoveImage, images } = usePropertyImages(
     formData, 
@@ -45,32 +43,6 @@ export function usePropertyFormContainerActions(
         description: "Failed to delete property",
         variant: "destructive",
       });
-    }
-  };
-
-  const saveProperty = async () => {
-    if (!formData) return;
-    
-    setIsSubmitting(true);
-    try {
-      const event = {} as React.FormEvent;
-      const result = await handleSubmit(event, formData, false);
-      
-      if (result) {
-        toast({
-          title: "Success",
-          description: "Property saved successfully",
-        });
-      }
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -127,7 +99,6 @@ export function usePropertyFormContainerActions(
 
   return {
     deleteProperty,
-    saveProperty,
     handleAgentChange,
     handleImageUpload,
     handleRemoveImage,

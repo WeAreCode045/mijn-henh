@@ -28,8 +28,6 @@ interface ContentTabContentProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: () => void;
-  isSaving?: boolean;
 }
 
 export function ContentTabContent({
@@ -57,9 +55,7 @@ export function ContentTabContent({
   isLoadingLocationData,
   isGeneratingMap,
   setPendingChanges,
-  isUploading,
-  onSubmit,
-  isSaving
+  isUploading
 }: ContentTabContentProps) {
   return (
     <PropertyStepContent
@@ -87,8 +83,6 @@ export function ContentTabContent({
       isGeneratingMap={isGeneratingMap}
       setPendingChanges={setPendingChanges}
       isUploading={isUploading}
-      onSubmit={onSubmit}
-      isSaving={isSaving}
     />
   );
 }

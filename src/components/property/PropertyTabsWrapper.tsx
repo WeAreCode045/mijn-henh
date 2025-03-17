@@ -11,7 +11,6 @@ import { Tabs } from "@/components/ui/tabs";
 interface PropertyTabsWrapperProps {
   property: PropertyData;
   settings: any;
-  onSave?: () => void;
   onDelete?: () => Promise<void>;
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
@@ -20,7 +19,6 @@ interface PropertyTabsWrapperProps {
 export function PropertyTabsWrapper({
   property,
   settings,
-  onSave,
   onDelete,
   agentInfo,
   templateInfo
@@ -104,12 +102,9 @@ export function PropertyTabsWrapper({
               handleVirtualTourUpdate,
               handleYoutubeUrlUpdate,
               handleFloorplanEmbedScriptUpdate,
-              onSubmit,
               currentStep,
               handleStepClick,
               propertyWithRequiredProps,
-              lastSaved,
-              isSaving,
               setPendingChanges,
               onFetchLocationData,
               onGenerateLocationDescription,
@@ -130,7 +125,6 @@ export function PropertyTabsWrapper({
                       agentInfo={agentInfo || { id: '', name: '' }}
                       templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
                       isUpdating={false}
-                      onSave={onSave || onSubmit}
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
@@ -161,10 +155,8 @@ export function PropertyTabsWrapper({
                       handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
                       currentStep={currentStep}
                       handleStepClick={handleStepClick}
-                      onSubmit={onSubmit}
                       handleRemoveAreaPhoto={handleRemoveAreaPhoto}
                       setPendingChanges={setPendingChanges}
-                      isSaving={isSaving}
                       onFetchLocationData={onFetchLocationData}
                       onGenerateLocationDescription={onGenerateLocationDescription}
                       onGenerateMap={onGenerateMap}

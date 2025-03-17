@@ -2,20 +2,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { steps } from "./formSteps";
-import { Check, Loader2 } from "lucide-react";
 
 interface FormStepNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
-  onSave?: () => void;
-  isSaving?: boolean;
 }
 
 export function FormStepNavigation({
   currentStep,
   onStepClick,
-  onSave,
-  isSaving = false,
 }: FormStepNavigationProps) {
   return (
     <div className="space-y-4">
@@ -38,32 +33,6 @@ export function FormStepNavigation({
             </Button>
           ))}
         </div>
-        
-        {onSave && (
-          <div>
-            <Button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent default form submission behavior
-                onSave();
-              }}
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Save</span>
-                </>
-              )}
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

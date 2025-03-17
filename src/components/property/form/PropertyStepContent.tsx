@@ -35,8 +35,6 @@ interface PropertyStepContentProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: () => void; 
-  isSaving?: boolean;
 }
 
 export function PropertyStepContent({
@@ -65,8 +63,6 @@ export function PropertyStepContent({
   isGeneratingMap,
   setPendingChanges,
   isUploading,
-  onSubmit,
-  isSaving,
 }: PropertyStepContentProps) {
   const renderStep = () => {
     switch (currentStep) {
@@ -129,8 +125,6 @@ export function PropertyStepContent({
       <FormStepNavigation
         currentStep={currentStep}
         onStepClick={handleStepClick}
-        onSave={onSubmit}
-        isSaving={isSaving}
       />
       <div className="mt-6">
         {renderStep()}
