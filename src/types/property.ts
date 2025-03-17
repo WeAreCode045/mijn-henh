@@ -220,5 +220,7 @@ export interface GeneralInfoData {
     bedrooms?: string;
     bathrooms?: string;
     energyClass?: string;
+    garages?: string;
+    hasGarden?: boolean;
   };
 }
