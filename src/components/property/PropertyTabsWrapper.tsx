@@ -69,6 +69,11 @@ export function PropertyTabsWrapper({
     title: propertyWithRequiredFields.title,
   };
   
+  // Dummy onSave function to satisfy type requirements
+  const dummyOnSave = () => {
+    console.log("Save functionality has been disabled");
+  };
+  
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
@@ -125,7 +130,7 @@ export function PropertyTabsWrapper({
                       agentInfo={agentInfo || { id: '', name: '' }}
                       templateInfo={templateInfo || { id: 'default', name: 'Default Template' }}
                       isUpdating={false}
-                      onDelete={onDelete}
+                      onDelete={onDelete || (() => Promise.resolve())}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
                       handleSaveTemplate={handleSaveTemplate}

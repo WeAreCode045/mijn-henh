@@ -45,6 +45,11 @@ export function PropertyFormContainer() {
     return <PropertyFormLoader />;
   }
 
+  // Dummy function for onSaveProperty to satisfy the type requirement
+  const dummySaveProperty = () => {
+    console.log("Save property functionality has been disabled");
+  };
+
   return (
     <PropertyFormLayout
       title={id ? "Edit Property" : "Add New Property"}
@@ -60,6 +65,7 @@ export function PropertyFormContainer() {
       images={images}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
+      onSaveProperty={dummySaveProperty}
     >
       <PropertyForm />
     </PropertyFormLayout>

@@ -28,7 +28,6 @@ export function PropertyTabContents({
   onRemoveNearbyPlace,
   isLoadingLocationData,
   isGeneratingMap,
-  onSave,
   onDelete,
   handleSaveObjectId,
   handleSaveAgent,
@@ -54,7 +53,6 @@ export function PropertyTabContents({
   handleRemoveAreaPhoto
 }: PropertyTabContentsProps) {
   const handlers = {
-    onSave,
     onDelete,
     handleSaveObjectId,
     handleSaveAgent,

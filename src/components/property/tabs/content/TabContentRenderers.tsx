@@ -19,7 +19,6 @@ export const TabContentRenderers = {
           <DashboardTabContent 
             property={propertyData} 
             onDelete={handlers.onDelete}
-            onSave={handlers.onSave}
           />
         );
       case "content":
@@ -34,6 +33,11 @@ export const TabContentRenderers = {
           if (handlers.currentStep > 0) {
             handlers.handleStepClick(handlers.currentStep - 1);
           }
+        };
+
+        // Create a dummy onSubmit function to satisfy type requirements
+        const dummyOnSubmit = () => {
+          console.log("Submit functionality has been disabled");
         };
 
         return (
@@ -62,7 +66,7 @@ export const TabContentRenderers = {
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
             setPendingChanges={handlers.setPendingChanges}
-            onSubmit={handlers.onSave}
+            onSubmit={dummyOnSubmit}
             isSaving={handlers.isSaving}
           />
         );

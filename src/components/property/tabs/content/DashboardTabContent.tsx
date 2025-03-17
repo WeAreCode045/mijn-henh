@@ -12,7 +12,6 @@ import { AgendaCard } from "../../dashboard/AgendaCard";
 interface DashboardTabContentProps {
   property: PropertyData;
   onDelete?: () => Promise<void>;
-  onSave?: () => void;
   onWebView?: () => void;
   handleSaveAgent?: (agentId: string) => void;
 }
@@ -20,7 +19,6 @@ interface DashboardTabContentProps {
 export function DashboardTabContent({ 
   property, 
   onDelete, 
-  onSave, 
   onWebView,
   handleSaveAgent
 }: DashboardTabContentProps) {
@@ -37,7 +35,6 @@ export function DashboardTabContent({
           description="Manage this property"
           id={property.id}
           onDelete={onDelete}
-          onSave={onSave}
           onWebView={onWebView}
           showDelete={true}
           showEdit={false}
