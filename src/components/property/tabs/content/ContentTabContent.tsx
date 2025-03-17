@@ -89,7 +89,12 @@ export function ContentTabContent({
             onFieldChange={onFieldChange}
             onFetchLocationData={onFetchLocationData}
             onGenerateLocationDescription={onGenerateLocationDescription}
+            onFetchCategoryPlaces={onFetchCategoryPlaces}
+            onFetchNearbyCities={onFetchNearbyCities}
+            onGenerateMap={onGenerateMap}
+            onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
+            isGeneratingMap={isGeneratingMap}
             onSubmit={onSubmit}
             isSubmitting={isSaving}
           />

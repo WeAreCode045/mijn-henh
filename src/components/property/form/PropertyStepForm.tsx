@@ -4,7 +4,7 @@ import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { FormStepNavigation } from "./FormStepNavigation";
 import { steps } from "./formSteps";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 
 export interface PropertyStepFormProps {
   formData: PropertyFormData;
@@ -29,8 +29,6 @@ export function PropertyStepForm({
   const handleNext = () => {
     if (step < steps.length - 1) {
       onStepChange(step + 1);
-    } else if (onSubmit) {
-      onSubmit();
     }
   };
   
@@ -39,12 +37,16 @@ export function PropertyStepForm({
       onStepChange(step - 1);
     }
   };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSubmit) {
+      onSubmit();
+    }
+  };
   
   return (
-    <form className="space-y-6" onSubmit={(e) => {
-      e.preventDefault();
-      if (onSubmit) onSubmit();
-    }}>
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <FormStepNavigation
         currentStep={step}
         onStepClick={onStepChange}
@@ -67,13 +69,22 @@ export function PropertyStepForm({
         </Button>
         
         <Button
-          type={step === steps.length - 1 && onSubmit ? "submit" : "button"}
-          onClick={step < steps.length - 1 ? handleNext : undefined}
+          type="submit"
           disabled={isSubmitting}
           className="flex items-center gap-2"
         >
-          {step === steps.length - 1 ? "Save" : "Next"}
-          {step < steps.length - 1 && <ArrowRight className="h-4 w-4" />}
+          <Save className="h-4 w-4" />
+          Save Changes
+        </Button>
+        
+        <Button
+          type="button"
+          onClick={handleNext}
+          disabled={step === steps.length - 1 || isSubmitting}
+          className="flex items-center gap-2"
+        >
+          Next
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </form>
