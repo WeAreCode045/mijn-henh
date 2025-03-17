@@ -5,7 +5,7 @@ import { AreaImageActions } from "./area/AreaImageActions";
 
 interface PropertyAreaImageUploadProps {
   areaId: string;
-  onUpload: (files: FileList) => Promise<void>;
+  onUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   isUploading?: boolean;
 }
 
@@ -20,17 +20,6 @@ export function PropertyAreaImageUpload({
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      await onUpload(e.target.files);
-      
-      // Reset the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
   return (
     <div>
       <input
@@ -39,7 +28,7 @@ export function PropertyAreaImageUpload({
         className="hidden"
         accept="image/*"
         multiple
-        onChange={handleFileSelect}
+        onChange={onUpload}
         disabled={isUploading}
         data-area-id={areaId}
       />

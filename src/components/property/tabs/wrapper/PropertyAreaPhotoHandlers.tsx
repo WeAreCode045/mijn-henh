@@ -37,9 +37,8 @@ export function useAdaptedAreaPhotoHandlers(
     }
   };
   
-  // Create the adapted handlers using our adapter hooks
-  // If handleAreaPhotosUpload is already provided, use it directly
-  // Otherwise, adapt the originalUploadHandler
+  // If handleAreaPhotosUpload is already provided with the event-based signature, use it directly
+  // Otherwise, adapt the originalUploadHandler to have the event-based signature
   const adaptedHandleAreaPhotosUpload = handleAreaPhotosUpload || useAreaPhotoUploadAdapter(originalUploadHandler);
   const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(originalRemoveHandler);
   

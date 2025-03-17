@@ -74,7 +74,7 @@ export function PropertyTabContentSetup({
             handleImageUpload={formHandlers.handleImageUpload}
             handleRemoveImage={formHandlers.handleRemoveImage}
             isUploading={formHandlers.isUploading}
-            handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload}
+            handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload} 
             handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
             handleFloorplanUpload={formHandlers.handleFloorplanUpload}
             handleRemoveFloorplan={formHandlers.handleRemoveFloorplan}
