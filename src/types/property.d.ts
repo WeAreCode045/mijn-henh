@@ -1,4 +1,3 @@
-
 // Area type definition (previously missing)
 export interface Area {
   id: string;
@@ -169,30 +168,35 @@ export interface PropertyFormData {
   description?: string;
   shortDescription?: string;
   location_description?: string;
-  features?: PropertyFeature[];
-  images?: (PropertyImage | string)[];
-  featuredImage?: string | null;
-  featuredImages?: string[];
-  areas?: PropertyArea[];
-  map_image?: string | null;
-  nearby_places?: PropertyNearbyPlace[];
-  nearby_cities?: PropertyCity[];
-  latitude?: number | null;
-  longitude?: number | null;
+  template_id?: string;
   object_id?: string;
   agent_id?: string;
   agent?: PropertyAgent;
-  template_id?: string;
-  floorplans?: (PropertyFloorplan | PropertyImage | string)[];
-  floorplanEmbedScript?: string;
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  notes?: string;
+  features: PropertyFeature[];
+  areas: PropertyArea[];
+  images?: PropertyImage[] | string[];
+  map_image?: string | null;
+  nearby_places?: PropertyPlaceType[];
+  nearby_cities?: PropertyCity[];
+  latitude?: number | null;
+  longitude?: number | null;
   created_at?: string;
   updated_at?: string;
-  coverImages?: PropertyImage[];
-  gridImages?: PropertyImage[];
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  floorplans?: PropertyImage[] | string[];
+  floorplanEmbedScript?: string;
+  notes?: string;
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  propertyType?: string;
+  
+  // Legacy fields for backward compatibility
+  coverImages?: string[];
+  gridImages?: string[];
   areaPhotos?: string[];
+  
+  // Structure for unified general info
   generalInfo?: GeneralInfoData;
 }
 

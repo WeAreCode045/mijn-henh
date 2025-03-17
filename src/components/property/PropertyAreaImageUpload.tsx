@@ -1,7 +1,8 @@
 
-import { ChangeEvent, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { AreaImageActions } from "./area/AreaImageActions";
+import { Label } from "@/components/ui/label";
+import { Upload, Loader2 } from "lucide-react";
+import { ChangeEvent, useRef } from "react";
 
 interface PropertyAreaImageUploadProps {
   areaId: string;
@@ -16,30 +17,50 @@ export function PropertyAreaImageUpload({
 }: PropertyAreaImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSelectClick = () => {
+  const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // Store the areaId in the event data-* attribute for the handler
+    if (e.currentTarget) {
+      e.currentTarget.setAttribute('data-area-id', areaId);
+      onUpload(e);
+    }
+  };
+
   return (
-    <div>
+    <div className="mt-2">
       <input
         type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
         multiple
-        onChange={onUpload}
-        disabled={isUploading}
-        data-area-id={areaId}
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        accept="image/*"
       />
-      
-      <AreaImageActions onSelectClick={handleSelectClick} />
-      
-      {isUploading && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          Uploading images...
-        </div>
-      )}
+      <Button
+        variant="outline"
+        onClick={handleUploadClick}
+        disabled={isUploading}
+        className="w-full"
+        type="button"
+      >
+        {isUploading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="mr-2 h-4 w-4" />
+            Select Images From Library
+          </>
+        )}
+      </Button>
+      <p className="text-xs text-muted-foreground mt-1">
+        Use the Media tab to upload new images. Here you can select from existing images.
+      </p>
     </div>
   );
 }
