@@ -1,5 +1,5 @@
 
-import type { PropertyData, PropertyCity, PropertyFeature, PropertyArea, PropertyAgent, GeneralInfoData } from "../property";
+import type { PropertyData, PropertyCity, PropertyFeature, PropertyArea, GeneralInfoData } from "../property";
 import { PropertyImage } from "./PropertyImageTypes";
 import { PropertyPlaceType } from "./PropertyPlaceTypes";
 import type { Json } from "@/integrations/supabase/types";
@@ -33,7 +33,7 @@ export interface PropertyFormData {
   longitude?: number | null;
   object_id?: string;
   agent_id?: string;
-  agent?: PropertyAgent;
+  agent?: any; // Using PropertyAgent causes an error - fix it in the next step
   template_id?: string;
   floorplans?: PropertyImage[];
   floorplanEmbedScript?: string;

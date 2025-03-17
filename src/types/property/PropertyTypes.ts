@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 import { PropertyImage } from "./PropertyImageTypes";
 
@@ -49,10 +48,23 @@ export interface PropertyCity {
   visible_in_webview?: boolean;
 }
 
+// Agent type
+export interface PropertyAgent {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  address?: string;
+}
+
 // GeneralInfoData type
 export interface GeneralInfoData {
   [key: string]: any;
 }
+
+// Export PropertyPlaceType as the interface itself
+export type { PropertyPlaceType } from './PropertyPlaceTypes';
 
 // Composite types for forms
 export interface PropertyFormData {
@@ -131,6 +143,3 @@ export interface PropertySubmitData {
   floorplanEmbedScript?: string;
   generalInfo?: string | GeneralInfoData;
 }
-
-// Export PropertyPlaceType as the interface itself
-export type { PropertyPlaceType } from './PropertyPlaceTypes';

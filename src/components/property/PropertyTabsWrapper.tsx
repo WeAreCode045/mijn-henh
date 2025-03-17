@@ -62,9 +62,10 @@ export function PropertyTabsWrapper({
     template_id: property.template_id || '',
     virtualTourUrl: property.virtualTourUrl || '',
     youtubeUrl: property.youtubeUrl || '',
+    floorplanEmbedScript: property.floorplanEmbedScript || '',
   };
   
-  // Create a compatible PropertyFormData object from PropertyData
+  // Create a compatible PropertyFormData object with required title
   const propertyFormData: PropertyFormData = {
     ...propertyWithRequiredFields,
     title: propertyWithRequiredFields.title,
@@ -74,7 +75,7 @@ export function PropertyTabsWrapper({
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id}>
         {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={propertyFormData}>
+          <PropertyFormManager property={propertyFormData as PropertyData}>
             {({ 
               formState, 
               handleFieldChange,

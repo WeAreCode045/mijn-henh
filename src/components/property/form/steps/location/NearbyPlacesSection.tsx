@@ -2,11 +2,10 @@
 import React from "react";
 import { PropertyFormData, PropertyPlaceType } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Grid } from "@/components/ui/grid";
 import { Button } from "@/components/ui/button";
 import { 
   Utensils, MapPin, Store, School, 
-  Building, Hospital, Dumbbell, Bank, 
+  Building, Hospital, Dumbbell, Ban, 
   ShoppingBag, GlassWater, ShoppingCart, Train 
 } from "lucide-react";
 import { CategorySection } from "./components/CategorySection";

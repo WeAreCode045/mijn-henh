@@ -60,7 +60,7 @@ export function PlaceItem({ place, onRemove, onToggleVisibility }: PlaceItemProp
         <Switch 
           checked={isVisible} 
           onCheckedChange={(checked) => onToggleVisibility(checked)}
-          size="sm"
+          className="scale-75"
         />
         
         <Button variant="ghost" size="sm" onClick={onRemove}>

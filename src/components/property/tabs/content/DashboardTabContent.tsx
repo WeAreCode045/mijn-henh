@@ -33,8 +33,7 @@ export function DashboardTabContent({
         />
         
         <ActionsCard 
-          propertyId={property.id}
-          propertyData={property}
+          property={property}
           createdAt={property.created_at}
           updatedAt={property.updated_at}
           onSave={onSave}
