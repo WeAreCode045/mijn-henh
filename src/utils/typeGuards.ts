@@ -36,8 +36,7 @@ export function isPropertyArea(value: any): value is PropertyArea {
     typeof value === 'object' && 
     'id' in value &&
     'name' in value &&
-    'size' in value &&
-    'images' in value
+    'size' in value
   );
 }
 
@@ -51,4 +50,13 @@ export function isUrlString(value: any): value is string {
     value.startsWith('/') ||
     value.startsWith('data:')
   );
+}
+
+/**
+ * Helper to safely get the URL from any image type
+ */
+export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  return image.url || '';
 }

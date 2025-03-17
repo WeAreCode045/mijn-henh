@@ -1,5 +1,6 @@
 
-import { PropertyFloorplan, PropertyImage } from "@/types/property";
+import { PropertyImage, PropertyFloorplan } from "@/types/property";
+import { toPropertyImage } from "./imageUtils";
 
 /**
  * Converts a floorplan to the required PropertyFloorplan format
@@ -13,6 +14,7 @@ export function normalizeFloorplan(floorplan: any): PropertyFloorplan {
       description: '',
       sort_order: 0,
       filePath: '',
+      type: "floorplan",
       columns: 1
     };
   }
@@ -24,7 +26,8 @@ export function normalizeFloorplan(floorplan: any): PropertyFloorplan {
     description: floorplan.description || '',
     sort_order: floorplan.sort_order !== undefined ? floorplan.sort_order : 0,
     filePath: floorplan.filePath || '',
-    columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1
+    columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1,
+    type: "floorplan"
   };
 }
 
@@ -51,6 +54,7 @@ export function processFloorplans(
         description: floorplan.description || '',
         sort_order: floorplan.sort_order !== undefined ? floorplan.sort_order : 0,
         filePath: floorplan.filePath || '',
+        type: "floorplan",
         columns: 1
       };
     }

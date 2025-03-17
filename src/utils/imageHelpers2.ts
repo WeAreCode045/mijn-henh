@@ -1,11 +1,12 @@
 
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
+import { getImageUrl, normalizeImage } from "./imageHelpers";
 
 /**
  * Safely handle accessing URL from any image type (string or object)
  */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
-  if (!image) return "";
+export function safelyGetImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string | null {
+  if (!image) return null;
   
   if (typeof image === "string") {
     return image;
@@ -15,7 +16,7 @@ export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | 
 }
 
 /**
- * Convert array of mixed image types to PropertyImage[] 
+ * Function to ensure image collections are of a consistent type
  */
 export function convertToPropertyImages(images: (string | PropertyImage | PropertyFloorplan)[]): PropertyImage[] {
   if (!images || !Array.isArray(images)) return [];
@@ -23,7 +24,7 @@ export function convertToPropertyImages(images: (string | PropertyImage | Proper
   return images.map(img => {
     if (typeof img === 'string') {
       return {
-        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         url: img,
         type: "image"
       };
@@ -54,7 +55,8 @@ export function getMainImage(images: (string | PropertyImage)[]): PropertyImage 
   if (!images || !Array.isArray(images) || images.length === 0) return null;
   
   const propertyImages = images.map(img => typeof img === 'string' ? { id: '', url: img } : img);
-  return propertyImages.find(img => img.is_main) || propertyImages[0];
+  const mainImage = propertyImages.find(img => (img as PropertyImage).is_main);
+  return mainImage || propertyImages[0];
 }
 
 /**
@@ -64,7 +66,7 @@ export function getFeaturedImages(images: (string | PropertyImage)[]): PropertyI
   if (!images || !Array.isArray(images)) return [];
   
   const propertyImages = images.map(img => typeof img === 'string' ? { id: '', url: img } : img);
-  return propertyImages.filter(img => img.is_featured_image === true);
+  return propertyImages.filter(img => (img as PropertyImage).is_featured_image === true);
 }
 
 /**

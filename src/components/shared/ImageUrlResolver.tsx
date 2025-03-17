@@ -28,7 +28,7 @@ export function ImageUrlResolver({
   
   const getAlt = (): string => {
     if (!image || typeof image === 'string') return alt;
-    return image.alt || image.title || alt;
+    return (image as any).alt || (image as any).title || alt;
   };
   
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {

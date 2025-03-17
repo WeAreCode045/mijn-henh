@@ -4,6 +4,7 @@ export type { PropertyImage } from './PropertyImageTypes';
 export type { PropertyArea } from './PropertyAreaTypes';
 export type { PropertyData } from './PropertyDataTypes';
 export type { PropertyFormData } from './PropertyFormTypes';
+export type { GeneralInfoData } from './PropertyTypes';
 
 // Re-export types from PropertyTypes.ts 
 export type {
@@ -13,7 +14,6 @@ export type {
   PropertyPlaceType,
   PropertyCity,
   PropertyAgent,
-  GeneralInfoData,
   PropertySubmitData,
 } from './PropertyTypes';
 

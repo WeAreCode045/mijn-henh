@@ -15,7 +15,7 @@ export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | 
  */
 export function getImageAlt(image: string | PropertyImage | PropertyFloorplan | null | undefined, defaultAlt: string = ''): string {
   if (!image || typeof image === 'string') return defaultAlt;
-  return image.alt || image.title || defaultAlt;
+  return (image as any).alt || (image as any).title || defaultAlt;
 }
 
 /**
@@ -23,7 +23,7 @@ export function getImageAlt(image: string | PropertyImage | PropertyFloorplan | 
  */
 export function isMainImage(image: string | PropertyImage | null | undefined): boolean {
   if (!image || typeof image === 'string') return false;
-  return !!image.is_main;
+  return !!(image as PropertyImage).is_main;
 }
 
 /**
@@ -31,7 +31,7 @@ export function isMainImage(image: string | PropertyImage | null | undefined): b
  */
 export function isFeaturedImage(image: string | PropertyImage | null | undefined): boolean {
   if (!image || typeof image === 'string') return false;
-  return !!image.is_featured_image;
+  return !!(image as PropertyImage).is_featured_image;
 }
 
 /**
@@ -64,6 +64,6 @@ export function normalizeImageArray(images: (string | PropertyImage | PropertyFl
  */
 export function getImageId(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
   if (!image) return '';
-  if (typeof img === 'string') return '';
+  if (typeof image === 'string') return '';
   return image.id || '';
 }

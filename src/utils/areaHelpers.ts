@@ -45,8 +45,8 @@ export function processAreaImages(area: PropertyArea): PropertyImage[] {
  */
 export function sortAreaImages(images: PropertyImage[]): PropertyImage[] {
   return [...images].sort((a, b) => {
-    const sortA = a.sort_order !== undefined ? a.sort_order : 0;
-    const sortB = b.sort_order !== undefined ? b.sort_order : 0;
+    const sortA = (a as any).sort_order !== undefined ? (a as any).sort_order : 0;
+    const sortB = (b as any).sort_order !== undefined ? (b as any).sort_order : 0;
     return sortA - sortB;
   });
 }
@@ -59,4 +59,21 @@ export function updateArea(area: PropertyArea, field: keyof PropertyArea, value:
     ...area,
     [field]: value
   };
+}
+
+/**
+ * Maps image IDs to the corresponding area ID
+ */
+export function getImageAreaMapping(areas: PropertyArea[]): Record<string, string> {
+  const mapping: Record<string, string> = {};
+  
+  areas.forEach(area => {
+    if (area.imageIds && Array.isArray(area.imageIds)) {
+      area.imageIds.forEach(imageId => {
+        mapping[imageId] = area.id;
+      });
+    }
+  });
+  
+  return mapping;
 }
