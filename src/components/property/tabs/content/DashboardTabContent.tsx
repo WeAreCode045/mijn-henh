@@ -33,12 +33,17 @@ export function DashboardTabContent({
         />
         
         <ActionsCard 
-          property={property}
+          title="Property Actions"
+          description="Manage this property"
+          id={property.id}
+          onDelete={onDelete}
+          onSave={onSave}
+          onWebView={onWebView}
+          showDelete={true}
+          showEdit={false}
+          showCreate={false}
           createdAt={property.created_at}
           updatedAt={property.updated_at}
-          onSave={onSave}
-          onDelete={onDelete}
-          onWebView={onWebView}
         />
       </div>
 
