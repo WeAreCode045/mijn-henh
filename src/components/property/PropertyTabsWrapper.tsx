@@ -9,6 +9,7 @@ import { PropertyWebViewDialog } from "./tabs/wrapper/PropertyWebViewDialog";
 import { Tabs } from "@/components/ui/tabs";
 import { useAreaPhotoRemoveAdapter } from "@/hooks/images/adapters/useAreaPhotoRemoveAdapter";
 import { useAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
+import { ChangeEvent } from "react";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -122,14 +123,27 @@ export function PropertyTabsWrapper({
               onFetchCategoryPlaces,
               onFetchNearbyCities
             }) => {
-              // Create adapters for handlers with mismatched signatures
-              const adaptedHandleAreaPhotosUpload = useAreaPhotoUploadAdapter(
-                handleAreaPhotosUpload || handleAreaImageUpload
-              );
+              // Create adapter for area photos upload
+              // Make sure we're using the correct handler based on what's available
+              const originalUploadHandler = handleAreaPhotosUpload || 
+                ((areaId: string, files: FileList) => {
+                  if (handleAreaImageUpload) {
+                    return handleAreaImageUpload(areaId, files);
+                  }
+                  return Promise.resolve();
+                });
               
-              const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(
-                handleRemoveAreaPhoto || handleAreaImageRemove
-              );
+              const adaptedHandleAreaPhotosUpload = useAreaPhotoUploadAdapter(originalUploadHandler);
+              
+              // Create adapter for area photo removal
+              const originalRemoveHandler = handleRemoveAreaPhoto || 
+                ((areaId: string, imageId: string) => {
+                  if (handleAreaImageRemove) {
+                    handleAreaImageRemove(areaId, imageId);
+                  }
+                });
+              
+              const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(originalRemoveHandler);
               
               return (
                 <>
@@ -182,6 +196,7 @@ export function PropertyTabsWrapper({
                         isGeneratingMap={isGeneratingMap}
                         onFetchCategoryPlaces={onFetchCategoryPlaces}
                         onFetchNearbyCities={onFetchNearbyCities}
+                        onSubmit={() => console.log("Submit functionality has been disabled")}
                       />
                     </PropertyTabs>
                   </Tabs>
