@@ -64,12 +64,6 @@ export function PropertyForm() {
     }
   }, [formData?.agent_id, formData?.template_id]);
 
-  // This is now a dummy function that doesn't trigger actual saves
-  const handleSave = () => {
-    // No longer used for actual saving - that's handled in ContentTabWrapper
-    console.log("PropertyForm.handleSave called - this is just a notification");
-  };
-
   const handleDelete = async (): Promise<void> => {
     if (!id) {
       toast({
@@ -161,7 +155,6 @@ export function PropertyForm() {
         <PropertyTabsWrapper
           property={propertyData}
           settings={settings}
-          onSave={handleSave}
           onDelete={handleDelete}
           agentInfo={agentInfo}
           templateInfo={templateInfo}

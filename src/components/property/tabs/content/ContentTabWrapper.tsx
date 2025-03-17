@@ -1,9 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
+import { usePropertyContentAutoSave } from "@/hooks/usePropertyContentAutoSave";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -30,20 +31,30 @@ interface ContentTabWrapperProps {
 }
 
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [pendingChanges, setPendingChangesLocal] = useState(false);
   const [localIsSaving, setLocalIsSaving] = useState(false);
   
-  // Use the contentSubmit hook for handling the submit action
+  // Use the setPendingChanges from props if available, otherwise use local state
+  const setPendingChanges = handlers.setPendingChanges || setPendingChangesLocal;
+  
+  // Use the auto-save hook
+  const { lastSaved, setLastSaved, saveChanges } = usePropertyContentAutoSave(
+    formData, 
+    pendingChanges, 
+    setPendingChanges
+  );
+  
+  // Use the content submit hook for handling the submit action (manual save)
   const { onSubmit } = usePropertyContentSubmit(
     formData,
-    handlers.setPendingChanges || (() => {}),
+    setPendingChanges,
     setLastSaved
   );
 
   const handleNext = () => {
     // First save the data before moving to the next step
-    handleSave().then(success => {
-      if (success && handlers.currentStep < 3) {
+    saveChanges().then(() => {
+      if (handlers.currentStep < 3) {
         handlers.handleStepClick(handlers.currentStep + 1);
       }
     });
@@ -51,16 +62,16 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
 
   const handlePrevious = () => {
     // First save the data before moving to the previous step
-    handleSave().then(success => {
-      if (success && handlers.currentStep > 0) {
+    saveChanges().then(() => {
+      if (handlers.currentStep > 0) {
         handlers.handleStepClick(handlers.currentStep - 1);
       }
     });
   };
 
+  // Manual save function (fallback)
   const handleSave = async () => {
     console.log("handleSave called in ContentTabWrapper with formData ID:", formData.id);
-    console.log("formData.generalInfo:", formData.generalInfo);
     
     if (!formData.id) {
       console.error("Cannot save: formData.id is missing", formData);
@@ -69,9 +80,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     
     setLocalIsSaving(true);
     try {
-      const result = await onSubmit();
-      console.log("Save result from usePropertyContentSubmit:", result);
-      return result;
+      return await saveChanges();
     } catch (error) {
       console.error("Error during save:", error);
       return false;
@@ -89,7 +98,6 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         currentStep={handlers.currentStep}
         onStepClick={handlers.handleStepClick}
         lastSaved={lastSaved}
-        onSave={handleSave}
         isSaving={isSaving}
       />
       
@@ -112,7 +120,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         onFetchLocationData={handlers.onFetchLocationData}
         onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
         isLoadingLocationData={handlers.isLoadingLocationData}
-        setPendingChanges={handlers.setPendingChanges}
+        setPendingChanges={setPendingChanges}
         isUploading={handlers.isUploading}
         onSubmit={handleSave}
         isSaving={isSaving}

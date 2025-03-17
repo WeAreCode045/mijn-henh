@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,6 +12,7 @@ export function usePropertyAutoSave() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
+  // Add a debounced autosave effect
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -19,11 +21,50 @@ export function usePropertyAutoSave() {
     };
   }, []);
 
+  const scheduleAutosave = (formData: PropertyFormData) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    if (!formData.id || !pendingChanges) return;
+    
+    console.log("Scheduling autosave for data with ID:", formData.id);
+    
+    // Set a timeout to trigger autosave after 1.5 seconds of inactivity
+    timeoutRef.current = setTimeout(() => {
+      autosaveData(formData);
+    }, 1500);
+  };
+
   const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
     if (!formData.id) return false;
     
     try {
       setIsSaving(true);
+      
+      // Prepare general information if it exists
+      let generalInfoJson;
+      if (formData.generalInfo) {
+        generalInfoJson = typeof formData.generalInfo === 'string'
+          ? formData.generalInfo
+          : JSON.stringify(formData.generalInfo);
+      }
+      
+      // Transform areas to the correct format for the database
+      const areasForDb = prepareAreasForFormSubmission(formData.areas || []);
+      
+      // Transform JSON fields to strings
+      const featuresJson = typeof formData.features === 'string' 
+        ? formData.features 
+        : JSON.stringify(formData.features || []);
+      
+      const nearby_placesJson = typeof formData.nearby_places === 'string'
+        ? formData.nearby_places
+        : JSON.stringify(formData.nearby_places || []);
+      
+      const nearby_citiesJson = typeof formData.nearby_cities === 'string'
+        ? formData.nearby_cities
+        : JSON.stringify(formData.nearby_cities || []);
       
       const submitData = {
         title: formData.title,
@@ -32,25 +73,31 @@ export function usePropertyAutoSave() {
         bedrooms: formData.bedrooms,
         bathrooms: formData.bathrooms,
         sqft: formData.sqft,
-        living_area: formData.livingArea,
-        build_year: formData.buildYear,
+        livingArea: formData.livingArea,
+        buildYear: formData.buildYear,
         garages: formData.garages,
-        energy_label: formData.energyLabel,
-        has_garden: formData.hasGarden,
+        energyLabel: formData.energyLabel,
+        hasGarden: formData.hasGarden,
         description: formData.description,
+        shortDescription: formData.shortDescription || "",
         location_description: formData.location_description,
-        features: JSON.stringify(formData.features),
+        features: featuresJson,
+        areas: areasForDb,
+        nearby_places: nearby_placesJson,
+        nearby_cities: nearby_citiesJson,
         latitude: formData.latitude,
         longitude: formData.longitude,
+        map_image: formData.map_image,
         object_id: formData.object_id,
         agent_id: formData.agent_id,
         template_id: formData.template_id,
-        virtual_tour_url: formData.virtualTourUrl,
-        youtube_url: formData.youtubeUrl,
-        floorplan_embed_script: formData.floorplanEmbedScript,
+        virtualTourUrl: formData.virtualTourUrl,
+        youtubeUrl: formData.youtubeUrl,
+        floorplanEmbedScript: formData.floorplanEmbedScript || "",
+        generalInfo: generalInfoJson
       };
       
-      console.log('Auto-saving property data...', formData);
+      console.log('Auto-saving property data...', formData.id);
 
       const { error } = await supabase
         .from('properties')
@@ -62,6 +109,7 @@ export function usePropertyAutoSave() {
         throw error;
       }
 
+      // Check for floorplans that need to be saved
       if (formData.floorplans && formData.floorplans.length > 0) {
         try {
           const { data: existingFloorplans } = await supabase
@@ -91,7 +139,7 @@ export function usePropertyAutoSave() {
 
       setLastSaved(new Date());
       setPendingChanges(false);
-      console.log('Auto-save successful');
+      console.log('Auto-save successful for property ID:', formData.id);
       return true;
     } catch (error: any) {
       console.error('Auto-save failed:', error);
@@ -108,6 +156,7 @@ export function usePropertyAutoSave() {
 
   return {
     autosaveData,
+    scheduleAutosave,
     isSaving,
     lastSaved,
     pendingChanges,

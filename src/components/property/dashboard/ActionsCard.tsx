@@ -10,7 +10,6 @@ interface ActionsCardProps {
   onDelete?: () => Promise<void>;
   onEdit?: () => void;
   onCreate?: () => void;
-  onSave?: () => void;
   onWebView?: () => void;
   title?: string;
   description?: string;
@@ -27,7 +26,6 @@ export function ActionsCard({
   onDelete,
   onEdit,
   onCreate,
-  onSave,
   onWebView,
   title = "Actions",
   description = "Manage this property",
@@ -61,6 +59,16 @@ export function ActionsCard({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
+        {createdAt && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Created: {new Date(createdAt).toLocaleDateString()}
+          </p>
+        )}
+        {updatedAt && (
+          <p className="text-xs text-muted-foreground">
+            Updated: {new Date(updatedAt).toLocaleDateString()}
+          </p>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col space-y-2">
         {showEdit && (
@@ -71,17 +79,6 @@ export function ActionsCard({
           >
             <Pencil className="mr-2 h-4 w-4" />
             Edit
-          </Button>
-        )}
-
-        {onSave && (
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={onSave}
-          >
-            <Pencil className="mr-2 h-4 w-4" />
-            Save
           </Button>
         )}
 

@@ -1,10 +1,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, FileDown, Globe, Trash2, Save } from "lucide-react";
+import { Share2, FileDown, Globe, Trash2 } from "lucide-react";
 
 interface PropertyActionButtonsProps {
-  onSave: () => void;
   onDelete: () => void;
   onGeneratePDF: () => void;
   onWebView: () => void;
@@ -12,7 +11,6 @@ interface PropertyActionButtonsProps {
 }
 
 export function PropertyActionButtons({
-  onSave,
   onDelete,
   onGeneratePDF,
   onWebView,
@@ -25,16 +23,6 @@ export function PropertyActionButtons({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start" 
-            onClick={onSave}
-            type="button"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
-          </Button>
-
           <Button
             variant="outline"
             className="w-full justify-start"

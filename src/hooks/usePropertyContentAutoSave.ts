@@ -10,8 +10,16 @@ export function usePropertyContentAutoSave(
   pendingChanges: boolean, 
   setPendingChanges: (pending: boolean) => void
 ) {
-  const { autosaveData, lastSaved, setLastSaved } = usePropertyAutoSave();
+  const { autosaveData, scheduleAutosave, lastSaved, setLastSaved } = usePropertyAutoSave();
   const { toast } = useToast();
+  
+  // Watch for changes to automatically save
+  useEffect(() => {
+    if (pendingChanges && formData.id) {
+      console.log("Changes detected, scheduling autosave");
+      scheduleAutosave(formData);
+    }
+  }, [formData, pendingChanges, scheduleAutosave]);
   
   // Manual save function
   const saveChanges = async () => {
