@@ -1,4 +1,3 @@
-
 import { useAreaPhotoRemoveAdapter } from "@/hooks/images/adapters/useAreaPhotoRemoveAdapter";
 import { useAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
 import { ChangeEvent } from "react";
@@ -39,6 +38,8 @@ export function useAdaptedAreaPhotoHandlers(
   };
   
   // Create the adapted handlers using our adapter hooks
+  // If handleAreaPhotosUpload is already provided, use it directly
+  // Otherwise, adapt the originalUploadHandler
   const adaptedHandleAreaPhotosUpload = handleAreaPhotosUpload || useAreaPhotoUploadAdapter(originalUploadHandler);
   const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(originalRemoveHandler);
   

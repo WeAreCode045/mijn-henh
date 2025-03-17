@@ -93,8 +93,6 @@ export function PropertyTabContentSetup({
             onRemoveNearbyPlace={formHandlers.onRemoveNearbyPlace}
             isLoadingLocationData={formHandlers.isLoadingLocationData}
             isGeneratingMap={formHandlers.isGeneratingMap}
-            onFetchCategoryPlaces={formHandlers.onFetchCategoryPlaces}
-            onFetchNearbyCities={formHandlers.onFetchNearbyCities}
             onSubmit={() => console.log("Submit functionality has been disabled")}
           />
         </PropertyTabs>

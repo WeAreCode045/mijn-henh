@@ -7,7 +7,7 @@ import { ChangeEvent } from 'react';
  */
 export function useAreaPhotoUploadAdapter(
   originalHandler: (areaId: string, files: FileList) => Promise<void>
-) {
+): (e: ChangeEvent<HTMLInputElement>) => Promise<void> {
   // Convert the (areaId, files) signature to (e) signature
   const adaptedHandler = (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     if (!e.target.files) return Promise.resolve();
