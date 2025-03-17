@@ -10,6 +10,8 @@ interface ActionsCardProps {
   onDelete?: () => Promise<void>;
   onEdit?: () => void;
   onCreate?: () => void;
+  onSave?: () => void;
+  onWebView?: () => void;
   title?: string;
   description?: string;
   id?: string;
@@ -17,12 +19,16 @@ interface ActionsCardProps {
   showDelete?: boolean;
   showEdit?: boolean;
   showCreate?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function ActionsCard({
   onDelete,
   onEdit,
   onCreate,
+  onSave,
+  onWebView,
   title = "Actions",
   description = "Manage this property",
   id,
@@ -30,6 +36,8 @@ export function ActionsCard({
   showDelete = true,
   showEdit = true,
   showCreate = false,
+  createdAt,
+  updatedAt,
 }: ActionsCardProps) {
   const { toast } = useToast();
 
@@ -63,6 +71,28 @@ export function ActionsCard({
           >
             <Pencil className="mr-2 h-4 w-4" />
             Edit
+          </Button>
+        )}
+
+        {onSave && (
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onSave}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Save
+          </Button>
+        )}
+
+        {onWebView && (
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onWebView}
+          >
+            <AlertCircle className="mr-2 h-4 w-4" />
+            Web View
           </Button>
         )}
 
