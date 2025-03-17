@@ -84,8 +84,10 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     isUploadingFloorplan
   } = usePropertyFloorplans(formState, fieldChangeWrapper);
   
+  // Pass empty handler functions for now
+  const dummyHandler = () => {}; 
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
-    usePropertyStepNavigation(formState, false, () => {}, () => {});
+    usePropertyStepNavigation(formState, false, dummyHandler, dummyHandler);
 
   useEffect(() => {
     const fetchAgents = async () => {

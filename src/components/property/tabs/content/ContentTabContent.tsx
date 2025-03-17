@@ -1,7 +1,10 @@
 
 import React from 'react';
 import { PropertyFormData } from "@/types/property";
-import { PropertyContentTab } from '../PropertyContentTab';
+import { GeneralInfoForm } from '@/components/property/form/steps/GeneralInfoForm';
+import { LocationForm } from '@/components/property/form/steps/LocationForm';
+import { FeaturesForm } from '@/components/property/form/steps/FeaturesForm';
+import { AreasForm } from '@/components/property/form/steps/AreasForm';
 
 interface ContentTabContentProps {
   formData: PropertyFormData;
@@ -64,37 +67,73 @@ export function ContentTabContent({
   onSubmit,
   isSaving
 }: ContentTabContentProps) {
-  // Pass the handlers to the PropertyContentTab component
-  const handlers = {
-    onFieldChange,
-    onAddFeature,
-    onRemoveFeature,
-    onUpdateFeature,
-    onAddArea,
-    onRemoveArea,
-    onUpdateArea,
-    onAreaImageRemove,
-    onAreaImagesSelect,
-    handleAreaImageUpload,
-    currentStep,
-    handleStepClick,
-    handleNext,
-    handlePrevious,
-    onFetchLocationData,
-    onFetchCategoryPlaces,
-    onFetchNearbyCities,
-    onGenerateLocationDescription,
-    onGenerateMap,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    isGeneratingMap,
-    setPendingChanges,
-    isUploading,
-    onSubmit,
-    isSaving
+  const renderStepForm = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <GeneralInfoForm 
+            formData={formData}
+            step={currentStep}
+            onStepChange={handleStepClick}
+            onFieldChange={onFieldChange}
+            onSubmit={onSubmit}
+            isSubmitting={isSaving}
+          />
+        );
+      case 1:
+        return (
+          <LocationForm 
+            formData={formData}
+            step={currentStep}
+            onStepChange={handleStepClick}
+            onFieldChange={onFieldChange}
+            onFetchLocationData={onFetchLocationData}
+            onGenerateLocationDescription={onGenerateLocationDescription}
+            isLoadingLocationData={isLoadingLocationData}
+            onSubmit={onSubmit}
+            isSubmitting={isSaving}
+          />
+        );
+      case 2:
+        return (
+          <FeaturesForm 
+            formData={formData}
+            step={currentStep}
+            onStepChange={handleStepClick}
+            onFieldChange={onFieldChange}
+            onAddFeature={onAddFeature}
+            onRemoveFeature={onRemoveFeature}
+            onUpdateFeature={onUpdateFeature}
+            onSubmit={onSubmit}
+            isSubmitting={isSaving}
+          />
+        );
+      case 3:
+        return (
+          <AreasForm 
+            formData={formData}
+            step={currentStep}
+            onStepChange={handleStepClick}
+            onFieldChange={onFieldChange}
+            onAddArea={onAddArea}
+            onRemoveArea={onRemoveArea}
+            onUpdateArea={onUpdateArea}
+            onAreaImageRemove={onAreaImageRemove}
+            onAreaImagesSelect={onAreaImagesSelect}
+            handleAreaImageUpload={handleAreaImageUpload}
+            isUploading={isUploading}
+            onSubmit={onSubmit}
+            isSubmitting={isSaving}
+          />
+        );
+      default:
+        return <div>Unknown step</div>;
+    }
   };
 
   return (
-    <PropertyContentTab formData={formData} handlers={handlers} />
+    <div className="space-y-6">
+      {renderStepForm()}
+    </div>
   );
 }

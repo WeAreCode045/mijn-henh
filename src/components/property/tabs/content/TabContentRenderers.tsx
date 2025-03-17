@@ -3,7 +3,8 @@ import React from 'react';
 import { PropertyFormData } from "@/types/property";
 import { ContentTabContent } from './ContentTabContent';
 
-export const renderContentTab = ({
+// Create a single tab content renderer function
+const renderContentTab = ({
   formData,
   onFieldChange,
   onAddFeature,
@@ -69,13 +70,19 @@ export const renderContentTab = ({
   );
 };
 
-// Create a TabContentRenderers object with the renderContentTab function
+// Export the TabContentRenderers object
 export const TabContentRenderers = {
+  renderContentTab,
   renderTabContent: ({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }) => {
     // Add logic to render the appropriate tab content based on activeTab
-    return renderContentTab({
-      formData: formState,
-      ...handlers
-    });
+    if (activeTab === 'content') {
+      return renderContentTab({
+        formData: formState,
+        ...handlers
+      });
+    }
+    
+    // For other tabs, return null or other content
+    return null;
   }
 };
