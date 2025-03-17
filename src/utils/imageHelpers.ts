@@ -34,7 +34,8 @@ export const normalizeImage = (img: any): PropertyImage => {
       sort_order: img.sort_order || 0,
       type: img.type || "image" as "image" | "floorplan",
       title: img.title || '',
-      description: img.description || ''
+      description: img.description || '',
+      filePath: img.filePath || undefined
     };
   }
   

@@ -15,6 +15,8 @@ export interface PropertyFloorplan {
   filePath?: string;
   columns?: number;
   sort_order?: number;
+  property_id?: string;
+  type?: "floorplan";
 }
 
 export interface PropertyPlaceType {

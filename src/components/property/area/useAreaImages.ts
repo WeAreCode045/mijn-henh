@@ -12,7 +12,7 @@ interface AreaImageData {
   is_main?: boolean;
   is_featured_image?: boolean;
   sort_order?: number;
-  type: string;
+  type: "image" | "floorplan";
   created_at?: string;
 }
 

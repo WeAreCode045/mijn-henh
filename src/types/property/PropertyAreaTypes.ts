@@ -9,7 +9,7 @@ export interface PropertyArea {
   name: string;
   size: string;
   unit?: string;
-  title: string; // Added title property
+  title: string;
   description: string;
   imageIds: string[]; // Array of image IDs
   columns: number;
