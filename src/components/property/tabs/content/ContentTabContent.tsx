@@ -30,6 +30,7 @@ interface ContentTabContentProps {
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
   isUpdateMode?: boolean;
+  onSubmit: () => void;
   isSaving?: boolean;
 }
 
@@ -60,6 +61,7 @@ export function ContentTabContent({
   setPendingChanges,
   isUploading,
   isUpdateMode = false,
+  onSubmit,
   isSaving
 }: ContentTabContentProps) {
   // Pass the handlers to the PropertyContentTab component
@@ -88,6 +90,7 @@ export function ContentTabContent({
     isGeneratingMap,
     setPendingChanges,
     isUploading,
+    onSubmit,
     isSaving
   };
 

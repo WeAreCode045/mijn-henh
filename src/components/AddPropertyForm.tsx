@@ -1,32 +1,20 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFeature } from "@/types/property";
-import { PropertyArea } from "@/types/property";
-import { PropertyNearbyPlace } from "@/types/property";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
-import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
 import { safeToString } from "@/utils/stringUtils";
-import { useFeatures } from "@/hooks/useFeatures";
+import { usePropertyFeatures } from "@/hooks/property/usePropertyFeatures";
 
-// This component is currently unused and should be refactored or removed
-// in the future. It contains imports to components that might not exist.
 export function AddPropertyForm({ property, onSave, onDelete }) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,10 +25,8 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
   const [agents, setAgents] = useState([]);
   const [templates, setTemplates] = useState([]);
   
-  // Form state management
   const [formState, setFormState] = useState(property || {});
   
-  // Replace with direct field change handler
   const handleFieldChange = (field, value) => {
     setFormState(prev => ({
       ...prev,
@@ -48,19 +34,16 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     }));
   };
 
-  // Property content management
   const contentManager = usePropertyContent(
     formState,
     handleFieldChange
   );
   
-  // Feature management
-  const { addFeature, removeFeature, updateFeature } = useFeatures(
+  const { addFeature, removeFeature, updateFeature } = usePropertyFeatures(
     formState,
     setFormState
   );
   
-  // Property areas management
   const {
     addArea,
     removeArea,
@@ -73,7 +56,6 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     setFormState
   );
   
-  // Property images management
   const {
     handleImageUpload,
     handleRemoveImage,
@@ -85,18 +67,15 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     images
   } = usePropertyImages();
 
-  // Property floorplans management
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan
   } = usePropertyFloorplans();
   
-  // Step navigation with auto-save
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
     usePropertyStepNavigation();
 
-  // Fetch agents and templates on component mount
   useEffect(() => {
     const fetchAgents = async () => {
       const { data, error } = await supabase
@@ -122,7 +101,6 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
         return;
       }
       
-      // Add default template
       const templatesWithDefault = [
         { id: 'default', name: 'Default Template' },
         ...(data || [])
@@ -135,8 +113,6 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     fetchTemplates();
   }, []);
   
-  // NOTE: This component has many missing imports and should be refactored or removed.
-  // It's not currently being used in the application.
   return (
     <div className="space-y-6">
       <Card>

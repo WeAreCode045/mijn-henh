@@ -46,6 +46,11 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     }
   };
 
+  // Dummy onSubmit function
+  const onSubmit = () => {
+    console.log("Form submitted");
+  };
+
   return (
     <div className="space-y-6">
       <ContentTabNavigation 
@@ -80,6 +85,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         setPendingChanges={handlers.setPendingChanges}
         isUploading={handlers.isUploading}
         isSaving={handlers.isSaving}
+        onSubmit={onSubmit}
       />
     </div>
   );
