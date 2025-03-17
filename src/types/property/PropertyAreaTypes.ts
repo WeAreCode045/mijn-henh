@@ -11,7 +11,7 @@ export interface PropertyArea {
   unit?: string;
   title: string;
   description: string;
-  imageIds: string[]; // Explicitly defined property
+  imageIds: string[]; // Array of image IDs
   columns: number;
   images: PropertyImage[] | string[];
 }

@@ -1,9 +1,7 @@
 
-import { PropertyData } from "./PropertyDataTypes";
-import { PropertyImage } from "./PropertyImageTypes";
-import { PropertyArea } from "./PropertyAreaTypes";
+import { PropertyImage } from './PropertyImageTypes';
+import { PropertyArea } from './PropertyAreaTypes';
 
-// Basic data types
 export interface PropertyFeature {
   id: string;
   description: string;
@@ -13,106 +11,82 @@ export interface PropertyFloorplan {
   id: string;
   url: string;
   title?: string;
-  sort_order?: number;
-  filePath?: string; // Used during upload process
-  columns?: number; // Used for layout
   description?: string;
-  type?: "floorplan";
+  filePath?: string;
+  columns?: number;
+  sort_order?: number;
 }
 
-export interface PropertyNearbyPlace {
+export interface PropertyPlaceType {
   id: string;
+  place_id: string; // Required field
   name: string;
-  place_id: string;
+  type?: string;
+  types?: string[]; 
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
-  type: string;
-  types: string[];
   visible_in_webview?: boolean;
-  distance: number | string;
+  distance?: number;
 }
+
+// Alias for backward compatibility
+export type PropertyNearbyPlace = PropertyPlaceType;
 
 export interface PropertyCity {
   id: string;
   name: string;
-  distance?: string | number;
+  distance?: number;
   visible_in_webview?: boolean;
 }
 
-// Agent type
 export interface PropertyAgent {
   id: string;
   name: string;
-  email?: string;
-  phone?: string;
+  email: string;
+  phone: string;
   photoUrl?: string;
   address?: string;
 }
 
-// GeneralInfoData type
 export interface GeneralInfoData {
-  propertyDetails?: {
-    title: string;
-    price: string;
-    address: string;
-    objectId: string;
-  };
-  description?: {
-    shortDescription: string;
-    fullDescription: string;
-  };
-  keyInformation?: {
-    buildYear: string;
-    lotSize: string;
-    livingArea: string;
-    bedrooms: string;
-    bathrooms: string;
-    energyClass: string;
-    garages?: string;
-    hasGarden?: boolean;
-  };
+  propertyDetails: Record<string, any>;
+  description: Record<string, any>;
+  keyInformation: Record<string, any>;
   [key: string]: any;
 }
 
-// Export PropertyPlaceType as the interface itself
-export type PropertyPlaceType = PropertyNearbyPlace;
-
-// Export for backward compatibility
-export { PropertyArea };
-
-// Composite types for forms
 export interface PropertySubmitData {
-  id?: string;
+  id: string;
   title: string;
-  price: string;
-  address: string;
-  bedrooms: string;
-  bathrooms: string;
-  sqft: string;
-  livingArea: string;
-  buildYear: string;
-  garages: string;
-  energyLabel: string;
-  hasGarden: boolean;
-  description: string;
+  price?: string;
+  address?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  sqft?: string;
+  livingArea?: string;
+  buildYear?: string;
+  garages?: string;
+  energyLabel?: string;
+  hasGarden?: boolean;
+  description?: string;
   shortDescription?: string;
   location_description?: string;
-  features: string;
-  areas: any;
-  nearby_places?: string;
-  nearby_cities?: string;
+  features?: PropertyFeature[];
+  nearby_places?: PropertyPlaceType[];
+  nearby_cities?: PropertyCity[];
   latitude?: number | null;
   longitude?: number | null;
-  map_image?: string | null;
   object_id?: string;
   agent_id?: string;
   template_id?: string;
+  floorplanEmbedScript?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
+  notes?: string;
   propertyType?: string;
-  images?: string[];
-  floorplans?: string[];
-  floorplanEmbedScript?: string;
-  generalInfo?: string | GeneralInfoData;
+  generalInfo?: GeneralInfoData;
 }
+
+// Export the type using the 'export type' syntax to work with isolatedModules
+export type { PropertyFeature, PropertyFloorplan, PropertyNearbyPlace, PropertyPlaceType, PropertyCity, PropertyAgent, GeneralInfoData, PropertySubmitData };
