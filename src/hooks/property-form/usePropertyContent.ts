@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from "react";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyPlaceType, PropertyCity, PropertySubmitData } from "@/types/property";
 import { usePropertyDatabase } from "./usePropertyDatabase";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -84,11 +84,13 @@ export function usePropertyContent(
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Add a mock place
-      const mockPlace = {
+      const mockPlace: PropertyPlaceType = {
+        id: `mock-${category}-${Date.now()}`,
         place_id: `mock-${category}-${Date.now()}`,
         name: `Mock ${category.replace('_', ' ')}`,
         vicinity: "Mock Address",
         type: category,
+        types: [category],
         distance: 0.5 + Math.random() * 2
       };
       
@@ -127,9 +129,9 @@ export function usePropertyContent(
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Add mock cities
-      const mockCities = [
-        { name: "Nearby City 1", distance: 5 + Math.random() * 5 },
-        { name: "Nearby City 2", distance: 10 + Math.random() * 10 }
+      const mockCities: PropertyCity[] = [
+        { id: "city1", name: "Nearby City 1", distance: 5 + Math.random() * 5 },
+        { id: "city2", name: "Nearby City 2", distance: 10 + Math.random() * 10 }
       ];
       
       handleFieldChange('nearby_cities', mockCities);
@@ -239,19 +241,48 @@ export function usePropertyContent(
     setIsSaving(true);
     
     try {
+      // Ensure required fields are present
+      const requiredSubmitData: Partial<PropertySubmitData> = {
+        ...formData,
+        title: formData.title || "",
+        price: formData.price || "",
+        address: formData.address || "",
+        bedrooms: formData.bedrooms || "",
+        bathrooms: formData.bathrooms || "",
+        sqft: formData.sqft || "",
+        livingArea: formData.livingArea || "",
+        buildYear: formData.buildYear || "",
+        garages: formData.garages || "",
+        energyLabel: formData.energyLabel || "",
+        hasGarden: formData.hasGarden || false,
+        description: formData.description || "",
+        // Convert complex objects to strings
+        features: JSON.stringify(formData.features || []),
+        areas: JSON.stringify(formData.areas || []),
+        nearby_places: JSON.stringify(formData.nearby_places || []),
+        nearby_cities: JSON.stringify(formData.nearby_cities || []),
+        images: (formData.images || []).map(img => typeof img === 'string' ? img : img.url),
+        generalInfo: JSON.stringify(formData.generalInfo || {})
+      };
+      
       let success;
       
       if (formData.id) {
         // Update existing property
-        success = await updateProperty(formData.id, formData);
+        success = await updateProperty(formData.id, requiredSubmitData as PropertySubmitData);
       } else {
         // Create new property
-        success = await createProperty(formData);
+        success = await createProperty(requiredSubmitData as PropertySubmitData);
       }
       
       if (success) {
         setLastSaved(new Date());
         setPendingChanges(false);
+        
+        toast({
+          title: "Success",
+          description: "Property saved successfully",
+        });
       }
     } catch (error) {
       console.error("Error saving property:", error);

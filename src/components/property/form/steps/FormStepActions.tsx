@@ -13,11 +13,16 @@ export function FormStepActions({
   isSubmitting = false,
   submitText = "Save Property"
 }: FormStepActionsProps) {
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    onSubmit();
+  };
+
   return (
     <div className="flex justify-end mt-6">
       <Button 
         type="button"
-        onClick={onSubmit}
+        onClick={handleSubmit}
         disabled={isSubmitting}
         className="flex items-center gap-2"
       >

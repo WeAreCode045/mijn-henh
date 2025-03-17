@@ -17,6 +17,18 @@ interface PropertyActionsProps {
 export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: PropertyActionsProps) {
   const navigate = useNavigate();
   
+  const handleWebViewClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default action
+    e.stopPropagation(); // Stop event propagation
+    onShowWebView(e);
+  };
+  
+  const handlePdfClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default action
+    e.stopPropagation(); // Stop event propagation
+    onGeneratePDF();
+  };
+  
   return (
     <div className="flex flex-wrap gap-2">
       <Button 
@@ -32,7 +44,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
       <Button 
         variant="outline"
         size="sm"
-        onClick={(e) => onShowWebView(e)}
+        onClick={handleWebViewClick}
         className="flex items-center gap-1"
       >
         <ArrowUpRight className="h-4 w-4" />
@@ -42,7 +54,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
       <Button 
         variant="outline"
         size="sm"
-        onClick={onGeneratePDF}
+        onClick={handlePdfClick}
         className="flex items-center gap-1"
       >
         <FileText className="h-4 w-4" />

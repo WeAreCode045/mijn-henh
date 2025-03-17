@@ -41,6 +41,7 @@ export interface PropertyFormData {
   youtubeUrl?: string;
   notes?: string;
   generalInfo?: GeneralInfoData;
+  propertyType?: string; // Added this field
   // Backward compatibility fields
   created_at?: string;
   updated_at?: string;
@@ -85,4 +86,5 @@ export interface PropertySubmitData {
   featuredImages?: string[];
   floorplanEmbedScript?: string;
   generalInfo?: string;
+  propertyType?: string; // Added this field
 }
