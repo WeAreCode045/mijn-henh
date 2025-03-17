@@ -11,6 +11,7 @@ interface ActionsCardProps {
   onEdit?: () => void;
   onCreate?: () => void;
   onWebView?: () => void;
+  onSave?: () => void;
   title?: string;
   description?: string;
   id?: string;
@@ -27,6 +28,7 @@ export function ActionsCard({
   onEdit,
   onCreate,
   onWebView,
+  onSave,
   title = "Actions",
   description = "Manage this property",
   id,
@@ -79,6 +81,17 @@ export function ActionsCard({
           >
             <Pencil className="mr-2 h-4 w-4" />
             Edit
+          </Button>
+        )}
+
+        {onSave && (
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onSave}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Save
           </Button>
         )}
 
