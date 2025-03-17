@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { usePropertyFloorplans } from "@/hooks/usePropertyFloorplans";
+import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
@@ -57,6 +57,16 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     setFormState
   );
   
+  // Wrap handleFieldChange to match the expected function signature
+  const fieldChangeWrapper = (data) => {
+    // Iterate through the data object and update each field individually
+    if (data && typeof data === 'object') {
+      Object.entries(data).forEach(([key, value]) => {
+        handleFieldChange(key, value);
+      });
+    }
+  };
+  
   const {
     handleImageUpload,
     handleRemoveImage,
@@ -66,16 +76,16 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     images
-  } = usePropertyImages(formState, handleFieldChange);
+  } = usePropertyImages(formState, fieldChangeWrapper);
 
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan
-  } = usePropertyFloorplans(formState, handleFieldChange);
+  } = usePropertyFloorplans(formState, fieldChangeWrapper);
   
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
-    usePropertyStepNavigation();
+    usePropertyStepNavigation(formState, false, () => {}, () => {});
 
   useEffect(() => {
     const fetchAgents = async () => {
