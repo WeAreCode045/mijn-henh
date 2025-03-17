@@ -1,11 +1,11 @@
 
 import React, { useState } from "react";
-import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
+import { PropertyForm } from "@/components/PropertyForm";
 
 export function PropertyFormContainer() {
   const { isAdmin } = useAuth();
@@ -45,11 +45,6 @@ export function PropertyFormContainer() {
     return <PropertyFormLoader />;
   }
 
-  // Dummy function for onSaveProperty to satisfy the type requirement
-  const dummySaveProperty = () => {
-    console.log("Save property functionality has been disabled");
-  };
-
   return (
     <PropertyFormLayout
       title={id ? "Edit Property" : "Add New Property"}
@@ -65,7 +60,7 @@ export function PropertyFormContainer() {
       images={images}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
-      onSaveProperty={dummySaveProperty}
+      onSaveProperty={() => console.log("Save property functionality has been disabled")}
     >
       <PropertyForm />
     </PropertyFormLayout>

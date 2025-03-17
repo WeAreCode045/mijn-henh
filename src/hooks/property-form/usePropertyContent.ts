@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from "react";
-import { PropertyFormData, PropertyPlaceType, PropertyCity, PropertySubmitData } from "@/types/property";
+import { PropertyFormData, PropertyPlaceType, PropertyCity, PropertySubmitData, PropertyImage } from "@/types/property";
 import { usePropertyDatabase } from "./usePropertyDatabase";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -86,7 +86,7 @@ export function usePropertyContent(
       // Add a mock place
       const mockPlace: PropertyPlaceType = {
         id: `mock-${category}-${Date.now()}`,
-        place_id: `mock-${category}-${Date.now()}`,
+        place_id: `mock-${category}-${Date.now()}`, // This is now valid
         name: `Mock ${category.replace('_', ' ')}`,
         vicinity: "Mock Address",
         type: category,
@@ -261,7 +261,14 @@ export function usePropertyContent(
         areas: JSON.stringify(formData.areas || []),
         nearby_places: JSON.stringify(formData.nearby_places || []),
         nearby_cities: JSON.stringify(formData.nearby_cities || []),
-        images: (formData.images || []).map(img => typeof img === 'string' ? img : img.url),
+        // Fix the floorplans type issue by extracting just the URLs
+        floorplans: formData.floorplans ? formData.floorplans.map(fp => 
+          typeof fp === 'string' ? fp : fp.url
+        ) : [],
+        // Use the extracted URL strings for images
+        images: (formData.images || []).map(img => 
+          typeof img === 'string' ? img : img.url
+        ),
         generalInfo: JSON.stringify(formData.generalInfo || {})
       };
       

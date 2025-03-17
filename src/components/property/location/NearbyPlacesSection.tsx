@@ -83,7 +83,7 @@ export function NearbyPlacesSection({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {formData.nearby_places.map((place, index) => (
                 <div 
-                  key={place.place_id || place.id || index} 
+                  key={place.id || index} 
                   className="flex items-center justify-between p-2 rounded-md border"
                 >
                   <div className="flex items-center gap-2">

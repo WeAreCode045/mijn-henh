@@ -1,14 +1,23 @@
 
+// Property place type
 export interface PropertyPlaceType {
   id: string;
+  place_id?: string; // Adding this to fix the type error
   name: string;
-  distance: string | number;
   vicinity?: string;
-  rating?: number;
-  user_ratings_total?: number;
-  type?: string; // Keep for backward compatibility
-  types: string[]; // Make sure this is required
+  type: string;
+  types?: string[];
+  distance?: number;
   visible_in_webview?: boolean;
 }
 
-export interface PropertyNearbyPlace extends PropertyPlaceType {}
+// Nearby place type (alternative interface for backward compatibility)
+export interface PropertyNearbyPlace {
+  id: string;
+  name: string;
+  type: string;
+  address?: string;
+  distance?: number;
+  latitude?: number;
+  longitude?: number;
+}

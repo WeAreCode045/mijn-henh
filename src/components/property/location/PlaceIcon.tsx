@@ -9,7 +9,7 @@ import {
   Coffee, 
   Building, 
   User,
-  Park
+  TreePine
 } from 'lucide-react';
 
 interface PlaceIconProps {
@@ -42,7 +42,7 @@ export function PlaceIcon({ type, className = "h-4 w-4" }: PlaceIconProps) {
       return <Coffee className={className} />;
     case 'park':
     case 'nature':
-      return <Park className={className} />;
+      return <TreePine className={className} />; // Changed from Park to TreePine which exists in lucide
     case 'business':
     case 'office':
       return <Building className={className} />;
