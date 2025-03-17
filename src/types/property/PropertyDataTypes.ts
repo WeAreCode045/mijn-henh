@@ -5,7 +5,8 @@ import type {
   PropertyNearbyPlace,
   PropertyCity,
   PropertyFloorplan,
-  GeneralInfoData
+  GeneralInfoData,
+  PropertyAgent
 } from './PropertyTypes';
 import { PropertyImage } from './PropertyImageTypes';
 
@@ -23,6 +24,7 @@ export interface PropertyData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription?: string;
   location_description: string;
   features: PropertyFeature[];
   images: PropertyImage[];
@@ -36,23 +38,19 @@ export interface PropertyData {
   longitude: number | null;
   object_id: string;
   agent_id: string;
+  agent?: PropertyAgent;
   template_id: string;
-  floorplans: PropertyFloorplan[];
+  floorplans: (PropertyFloorplan | PropertyImage | string)[];
   floorplanEmbedScript: string;
   virtualTourUrl: string;
   youtubeUrl: string;
+  notes?: string;
+  propertyType?: string;
   created_at: string;
   updated_at: string;
-  agent?: {
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-    photoUrl?: string;
-    address?: string;
-  };
   // For backward compatibility
   coverImages: PropertyImage[];
   gridImages: PropertyImage[];
+  areaPhotos?: string[];
   generalInfo?: GeneralInfoData;
 }

@@ -20,7 +20,7 @@ export function normalizeImage(image: string | PropertyImage | { url: string }):
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       url: image,
-      type: "image"
+      type: "image" as "image" | "floorplan"
     };
   }
   
@@ -29,7 +29,7 @@ export function normalizeImage(image: string | PropertyImage | { url: string }):
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       url: image.url,
-      type: "image"
+      type: "image" as "image" | "floorplan"
     };
   }
   
@@ -38,7 +38,7 @@ export function normalizeImage(image: string | PropertyImage | { url: string }):
   return {
     id: `img-${Date.now()}`,
     url: '',
-    type: "image"
+    type: "image" as "image" | "floorplan"
   };
 }
 

@@ -7,7 +7,7 @@ export interface PropertyImage {
   is_main?: boolean;
   is_featured_image?: boolean;
   sort_order?: number;
-  type: "image" | "floorplan"; // Strict union type, not allowing other string values
+  type: "image" | "floorplan"; // Strict union type
   filePath?: string;
   title?: string;
   description?: string;

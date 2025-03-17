@@ -8,6 +8,7 @@ export interface PropertyArea {
   id: string;
   name: string;
   size: string;
+  unit?: string;
   title: string;
   description: string;
   imageIds: string[]; // Explicitly defined property

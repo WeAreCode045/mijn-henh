@@ -1,21 +1,12 @@
+
 import { PropertyData } from "./PropertyDataTypes";
 import { PropertyImage } from "./PropertyImageTypes";
+import { PropertyArea } from "./PropertyAreaTypes";
 
 // Basic data types
 export interface PropertyFeature {
   id: string;
   description: string;
-}
-
-export interface PropertyArea {
-  id: string;
-  title: string;
-  description: string;
-  imageIds: string[]; // Explicitly defined property
-  columns: number;
-  name: string;
-  size: string;
-  images: PropertyImage[];
 }
 
 export interface PropertyFloorplan {
@@ -32,6 +23,7 @@ export interface PropertyFloorplan {
 export interface PropertyNearbyPlace {
   id: string;
   name: string;
+  place_id: string;
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
@@ -60,56 +52,36 @@ export interface PropertyAgent {
 
 // GeneralInfoData type
 export interface GeneralInfoData {
+  propertyDetails?: {
+    title: string;
+    price: string;
+    address: string;
+    objectId: string;
+  };
+  description?: {
+    shortDescription: string;
+    fullDescription: string;
+  };
+  keyInformation?: {
+    buildYear: string;
+    lotSize: string;
+    livingArea: string;
+    bedrooms: string;
+    bathrooms: string;
+    energyClass: string;
+    garages?: string;
+    hasGarden?: boolean;
+  };
   [key: string]: any;
 }
 
 // Export PropertyPlaceType as the interface itself
-export type { PropertyPlaceType } from './PropertyPlaceTypes';
+export type PropertyPlaceType = PropertyNearbyPlace;
+
+// Export for backward compatibility
+export { PropertyArea };
 
 // Composite types for forms
-export interface PropertyFormData {
-  id: string;
-  title: string;  // Make title required to match PropertyData
-  price?: string;
-  address?: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  sqft?: string;
-  livingArea?: string;
-  buildYear?: string;
-  garages?: string;
-  energyLabel?: string;
-  hasGarden?: boolean;
-  description?: string;
-  shortDescription?: string;
-  location_description?: string;
-  features?: PropertyFeature[];
-  images?: PropertyImage[];
-  featuredImage?: string | null;
-  featuredImages?: string[];
-  areas?: PropertyArea[];
-  map_image?: string | null;
-  nearby_places?: PropertyNearbyPlace[];
-  nearby_cities?: PropertyCity[];
-  latitude?: number | null;
-  longitude?: number | null;
-  object_id?: string;
-  agent_id?: string;
-  agent?: any;
-  template_id?: string;
-  floorplans?: PropertyFloorplan[];
-  floorplanEmbedScript?: string;
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  created_at?: string;
-  updated_at?: string;
-  generalInfo?: GeneralInfoData;
-  // For backward compatibility
-  coverImages?: PropertyImage[];
-  gridImages?: PropertyImage[];
-  areaPhotos?: string[];
-}
-
 export interface PropertySubmitData {
   id?: string;
   title: string;
@@ -138,6 +110,7 @@ export interface PropertySubmitData {
   template_id?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
+  propertyType?: string;
   images?: string[];
   floorplans?: string[];
   floorplanEmbedScript?: string;

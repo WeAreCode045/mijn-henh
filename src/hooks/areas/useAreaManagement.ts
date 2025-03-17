@@ -14,13 +14,14 @@ export function useAreaManagement(
   const addArea = () => {
     const newArea: PropertyArea = {
       id: crypto.randomUUID(),
-      title: '',
-      description: '',
-      columns: 2, // Default to 2 columns
+      title: '', // Now included in PropertyArea
       name: '',
       size: '',
+      unit: '',
+      description: '',
+      columns: 2, // Default to 2 columns
       images: [],
-      imageIds: [] // Added this missing property
+      imageIds: []
     };
     
     console.log("Adding new area with default columns:", newArea);

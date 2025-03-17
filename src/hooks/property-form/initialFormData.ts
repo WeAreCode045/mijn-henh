@@ -36,8 +36,12 @@ export const initialFormData: PropertyFormData = {
   virtualTourUrl: "",
   youtubeUrl: "",
   notes: "",
-  generalInfo: undefined,
-  propertyType: "", // Add property type with empty default
+  generalInfo: {
+    propertyDetails: {},
+    description: {},
+    keyInformation: {}
+  },
+  propertyType: "",
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   coverImages: [],

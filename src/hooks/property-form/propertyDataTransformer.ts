@@ -57,10 +57,11 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           id: area.id || crypto.randomUUID(),
           title: area.title || "",
           description: area.description || "",
-          imageIds: imageIds,
-          columns: typeof area.columns === 'number' ? area.columns : 2,
           name: area.name || "",
           size: area.size || "",
+          unit: area.unit || "",
+          imageIds: imageIds,
+          columns: typeof area.columns === 'number' ? area.columns : 2,
           images: processedImages
         };
       })
@@ -71,6 +72,7 @@ export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {
   return Array.isArray(places)
     ? places.map((place: any) => ({
         id: place.id || "",
+        place_id: place.place_id || place.id || "", // Ensure place_id exists
         name: place.name || "",
         type: place.type || "other",
         types: place.types || [place.type || "other"], // Ensure types exists

@@ -1,11 +1,11 @@
 
 // Re-export types from separate files
-export type { PropertyImage } from './PropertyImageTypes';
+export { PropertyImage } from './PropertyImageTypes';
+export { PropertyArea } from './PropertyAreaTypes';
 
 // Re-export types from PropertyTypes.ts
-export type {
+export {
   PropertyFeature,
-  PropertyArea,
   PropertyFloorplan,
   PropertyNearbyPlace,
   PropertyPlaceType,
@@ -16,16 +16,10 @@ export type {
 } from './PropertyTypes';
 
 // Re-export types from PropertyDataTypes.ts
-export { type PropertyData } from './PropertyDataTypes';
+export { PropertyData } from './PropertyDataTypes';
 
 // Re-export types from PropertyFormTypes.ts
-export { type PropertyFormData } from './PropertyFormTypes';
+export { PropertyFormData } from './PropertyFormTypes';
 
-// Re-export types from PropertyPlaceTypes.ts
-export type { 
-  PropertyPlaceType as PropertyPlaceTypeBase,
-  PropertyNearbyPlace as PropertyNearbyPlaceBase 
-} from './PropertyPlaceTypes';
-
-// Re-export Area types
+// Re-export types from Area types if needed
 export type { Area, AreaImage } from '../area';
