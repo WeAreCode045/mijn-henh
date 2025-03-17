@@ -15,11 +15,22 @@ export function PropertyForm() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('content');
   
-  // Create an empty property data structure
+  // Create an empty property data structure with required fields for PropertyData
   const emptyProperty: PropertyData = {
     ...initialFormData,
     id: id || '',
     title: '',
+    price: '',
+    address: '',
+    bedrooms: '',
+    bathrooms: '',
+    sqft: '',
+    livingArea: '',
+    buildYear: '',
+    garages: '',
+    energyLabel: '',
+    hasGarden: false,
+    description: ''
   };
 
   const handleTabChange = (tab: string) => {

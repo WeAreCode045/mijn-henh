@@ -83,10 +83,10 @@ export function usePropertyContent(
       // Mock implementation - would normally call an API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Add a mock place
+      // Add a mock place with required place_id
       const mockPlace: PropertyPlaceType = {
         id: `mock-${category}-${Date.now()}`,
-        place_id: `mock-${category}-${Date.now()}`, // This is now valid
+        place_id: `place-${category}-${Date.now()}`,
         name: `Mock ${category.replace('_', ' ')}`,
         vicinity: "Mock Address",
         type: category,
@@ -256,12 +256,13 @@ export function usePropertyContent(
         energyLabel: formData.energyLabel || "",
         hasGarden: formData.hasGarden || false,
         description: formData.description || "",
+        propertyType: formData.propertyType || "",
         // Convert complex objects to strings
         features: JSON.stringify(formData.features || []),
         areas: JSON.stringify(formData.areas || []),
         nearby_places: JSON.stringify(formData.nearby_places || []),
         nearby_cities: JSON.stringify(formData.nearby_cities || []),
-        // Fix the floorplans type issue by extracting just the URLs
+        // Fix the floorplans type issue by extracting just the URLs as strings
         floorplans: formData.floorplans ? formData.floorplans.map(fp => 
           typeof fp === 'string' ? fp : fp.url
         ) : [],

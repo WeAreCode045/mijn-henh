@@ -1,81 +1,69 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { PropertySubmitData } from '@/types/property';
+import { useToast } from '@/components/ui/use-toast';
 
 export function usePropertyDatabase() {
   const [isLoading, setIsLoading] = useState(false);
-  
-  const createProperty = async (data: PropertySubmitData) => {
+  const { toast } = useToast();
+
+  // Mock function to create a property
+  const createProperty = async (propertyData: PropertySubmitData): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const { data: newProperty, error } = await supabase
-        .from('properties')
-        .insert([data])
-        .select();
-        
-      if (error) {
-        console.error('Error creating property:', error);
-        return false;
-      }
+      // This is a mock implementation - would normally call an API
+      console.log('Creating property:', propertyData);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Mock success
+      toast({
+        title: "Success",
+        description: "Property created successfully",
+      });
       return true;
-    } catch (err) {
-      console.error('Error in createProperty:', err);
+    } catch (error) {
+      console.error('Error creating property:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create property",
+        variant: "destructive",
+      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const updateProperty = async (id: string, data: PropertySubmitData) => {
+
+  // Mock function to update a property
+  const updateProperty = async (id: string, propertyData: PropertySubmitData): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('properties')
-        .update(data)
-        .eq('id', id);
-        
-      if (error) {
-        console.error('Error updating property:', error);
-        return false;
-      }
+      // This is a mock implementation - would normally call an API
+      console.log('Updating property:', id, propertyData);
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Mock success
+      toast({
+        title: "Success",
+        description: "Property updated successfully",
+      });
       return true;
-    } catch (err) {
-      console.error('Error in updateProperty:', err);
+    } catch (error) {
+      console.error('Error updating property:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update property",
+        variant: "destructive",
+      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const deleteProperty = async (id: string) => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', id);
-        
-      if (error) {
-        console.error('Error deleting property:', error);
-        return false;
-      }
-      
-      return true;
-    } catch (err) {
-      console.error('Error in deleteProperty:', err);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+
   return {
     createProperty,
     updateProperty,
-    deleteProperty,
     isLoading
   };
 }

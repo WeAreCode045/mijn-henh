@@ -37,7 +37,7 @@ export const initialFormData: PropertyFormData = {
   youtubeUrl: "",
   notes: "",
   generalInfo: undefined,
-  propertyType: "",
+  propertyType: "", // Add property type with empty default
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   coverImages: [],

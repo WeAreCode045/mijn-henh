@@ -2,7 +2,7 @@
 // Property place type
 export interface PropertyPlaceType {
   id: string;
-  place_id?: string; // Adding this to fix the type error
+  place_id: string; // Making this required since it's used in several places
   name: string;
   vicinity?: string;
   type: string;
