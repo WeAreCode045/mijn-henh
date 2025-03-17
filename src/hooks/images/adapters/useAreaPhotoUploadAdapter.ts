@@ -12,8 +12,8 @@ export function useAreaPhotoUploadAdapter(
   const adaptedHandler = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return Promise.resolve();
     
-    // Use a default areaId for general area photos
-    const areaId = "general";
+    // Extract areaId from data attribute
+    const areaId = e.target.dataset.areaId || "general";
     
     // Call the original handler with the converted parameters
     return originalHandler(areaId, e.target.files);

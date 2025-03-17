@@ -123,8 +123,13 @@ export function PropertyTabsWrapper({
               onFetchNearbyCities
             }) => {
               // Create adapters for handlers with mismatched signatures
-              const adaptedHandleAreaPhotosUpload = useAreaPhotoUploadAdapter(handleAreaPhotosUpload || handleAreaImageUpload);
-              const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(handleRemoveAreaPhoto || handleAreaImageRemove);
+              const adaptedHandleAreaPhotosUpload = useAreaPhotoUploadAdapter(
+                handleAreaPhotosUpload || handleAreaImageUpload
+              );
+              
+              const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(
+                handleRemoveAreaPhoto || handleAreaImageRemove
+              );
               
               return (
                 <>
@@ -157,6 +162,7 @@ export function PropertyTabsWrapper({
                         handleRemoveImage={handleRemoveImage}
                         isUploading={isUploading}
                         handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload}
+                        handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
                         handleFloorplanUpload={handleFloorplanUpload}
                         handleRemoveFloorplan={handleRemoveFloorplan}
                         isUploadingFloorplan={isUploadingFloorplan}
@@ -167,7 +173,6 @@ export function PropertyTabsWrapper({
                         handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
                         currentStep={currentStep}
                         handleStepClick={handleStepClick}
-                        handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
                         setPendingChanges={setPendingChanges}
                         onFetchLocationData={onFetchLocationData}
                         onGenerateLocationDescription={onGenerateLocationDescription}
