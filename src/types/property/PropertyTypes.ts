@@ -12,9 +12,9 @@ export interface PropertyFloorplan {
   url: string;
   title?: string;
   description?: string;
+  sort_order?: number;
   filePath?: string;
   columns?: number;
-  sort_order?: number;
   property_id?: string;
   type?: "floorplan";
 }
@@ -40,6 +40,9 @@ export interface PropertyCity {
   name: string;
   distance?: number;
   visible_in_webview?: boolean;
+  duration?: number;
+  description?: string;
+  image?: string;
 }
 
 export interface PropertyAgent {
@@ -74,9 +77,9 @@ export interface PropertySubmitData {
   description?: string;
   shortDescription?: string;
   location_description?: string;
-  features?: PropertyFeature[];
-  nearby_places?: PropertyPlaceType[];
-  nearby_cities?: PropertyCity[];
+  features?: PropertyFeature[] | string;
+  nearby_places?: PropertyPlaceType[] | string;
+  nearby_cities?: PropertyCity[] | string;
   latitude?: number | null;
   longitude?: number | null;
   object_id?: string;
@@ -87,5 +90,5 @@ export interface PropertySubmitData {
   youtubeUrl?: string;
   notes?: string;
   propertyType?: string;
-  generalInfo?: GeneralInfoData;
+  generalInfo?: GeneralInfoData | string;
 }

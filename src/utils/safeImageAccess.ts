@@ -2,84 +2,69 @@
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * A collection of utility functions to safely access image properties
- * regardless of whether they are strings or objects
+ * Get URL from any image type safely
  */
-
-/**
- * Safely gets an image URL from either a string or an object
- */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string | null {
-  if (!image) return null;
+export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
   if (typeof image === 'string') return image;
-  return image.url || null;
+  return image.url || '';
 }
 
 /**
- * Safely gets an image ID from an image object or generates one for strings
+ * Get alt text from image safely
  */
-export function getImageId(image: string | PropertyImage | PropertyFloorplan | null | undefined): string | null {
-  if (!image) return null;
-  if (typeof image === 'string') return `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-  return image.id || null;
+export function getImageAlt(image: string | PropertyImage | PropertyFloorplan | null | undefined, defaultAlt: string = ''): string {
+  if (!image) return defaultAlt;
+  if (typeof image === 'string') return defaultAlt;
+  return image.alt || image.title || defaultAlt;
 }
 
 /**
- * Safely checks if an image is a main image
+ * Check if image is main image
  */
 export function isMainImage(image: string | PropertyImage | null | undefined): boolean {
   if (!image || typeof image === 'string') return false;
-  return (image as PropertyImage).is_main === true;
+  return !!image.is_main;
 }
 
 /**
- * Safely checks if an image is a featured image
+ * Check if image is featured
  */
 export function isFeaturedImage(image: string | PropertyImage | null | undefined): boolean {
   if (!image || typeof image === 'string') return false;
-  return (image as PropertyImage).is_featured_image === true;
+  return !!image.is_featured_image;
 }
 
 /**
- * Safely gets image sort order with a fallback
+ * Convert string image to PropertyImage
  */
-export function getImageSortOrder(image: string | PropertyImage | PropertyFloorplan | null | undefined): number {
-  if (!image || typeof image === 'string') return 0;
-  return (image as any).sort_order || 0;
-}
-
-/**
- * Converts any image format to a PropertyImage object
- */
-export function ensurePropertyImageFormat(image: string | PropertyImage | PropertyFloorplan): PropertyImage {
-  if (typeof image === 'string') {
-    return {
-      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: image,
-      type: "image"
-    };
-  }
-  
-  // Ensure it has the required PropertyImage fields
+export function stringToPropertyImage(url: string, type: "image" | "floorplan" = "image"): PropertyImage {
   return {
-    id: image.id,
-    url: image.url,
-    type: (image as any).type === "floorplan" ? "floorplan" : "image",
-    sort_order: (image as any).sort_order,
-    is_main: (image as any).is_main,
-    is_featured_image: (image as any).is_featured_image,
-    description: (image as any).description,
-    title: (image as any).title,
-    area: (image as any).area,
-    property_id: (image as any).property_id,
-    filePath: (image as any).filePath
+    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: url,
+    type: type
   };
 }
 
 /**
- * Converts any image array to a PropertyImage array
+ * Normalize mixed array of image types to PropertyImage[]
  */
-export function ensurePropertyImageArray(images: (string | PropertyImage | PropertyFloorplan)[] | null | undefined): PropertyImage[] {
-  if (!images) return [];
-  return images.map(img => ensurePropertyImageFormat(img));
+export function normalizeImageArray(images: (string | PropertyImage | PropertyFloorplan)[]): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
+  
+  return images.map(img => {
+    if (typeof img === 'string') {
+      return stringToPropertyImage(img);
+    }
+    return img as PropertyImage;
+  });
+}
+
+/**
+ * Get image ID safely
+ */
+export function getImageId(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
+  if (typeof image === 'string') return '';
+  return image.id || '';
 }

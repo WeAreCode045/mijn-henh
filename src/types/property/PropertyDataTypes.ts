@@ -1,16 +1,11 @@
 
-import type {
-  PropertyFeature,
-  PropertyPlaceType,
-  PropertyCity,
-  PropertyFloorplan,
-  GeneralInfoData,
-  PropertyAgent,
-  PropertyNearbyPlace
-} from './PropertyTypes';
-import type { PropertyImage } from './PropertyImageTypes';
-import type { PropertyArea } from './PropertyAreaTypes';
+import { PropertyFeature, PropertyPlaceType, PropertyCity, PropertyAgent, PropertyFloorplan, GeneralInfoData } from './PropertyTypes';
+import { PropertyImage } from './PropertyImageTypes';
+import { PropertyArea } from './PropertyAreaTypes';
 
+/**
+ * Main property data interface
+ */
 export interface PropertyData {
   id: string;
   title: string;
@@ -28,18 +23,18 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features: PropertyFeature[];
-  images: PropertyImage[];
+  images: (string | PropertyImage)[];
   featuredImage: string | null;
   featuredImages: string[];
   areas: PropertyArea[];
   map_image: string | null;
-  nearby_places: PropertyNearbyPlace[];
+  nearby_places: PropertyPlaceType[];
   nearby_cities: PropertyCity[];
   latitude: number | null;
   longitude: number | null;
   object_id: string;
   agent_id: string;
-  agent?: PropertyAgent;
+  agent?: PropertyAgent | null;
   template_id: string;
   floorplans: (PropertyFloorplan | PropertyImage | string)[];
   floorplanEmbedScript: string;

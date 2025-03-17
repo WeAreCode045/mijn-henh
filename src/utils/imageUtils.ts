@@ -2,54 +2,71 @@
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Utility functions to handle mixed type image arrays safely
+ * Safely extract URL from any image type
  */
-
-/**
- * Safely extracts a URL from a string, PropertyImage, or PropertyFloorplan
- */
-export const getImageUrl = (image: string | PropertyImage | PropertyFloorplan): string => {
+export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
   if (typeof image === 'string') return image;
-  return image.url;
-};
+  return image.url || '';
+}
 
 /**
- * Normalizes a mixed image array to PropertyImage[] format
+ * Get image ID safely from any image type
  */
-export const normalizeToPropertyImages = (
-  images: (string | PropertyImage | PropertyFloorplan)[]
-): PropertyImage[] => {
-  return images.map(image => {
-    if (typeof image === 'string') {
-      return {
-        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        url: image,
-        type: "image"
-      };
-    }
-    // Already a PropertyImage or PropertyFloorplan with required fields
+export function getImageId(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
+  if (typeof image === 'string') return '';
+  return image.id || '';
+}
+
+/**
+ * Convert string or object to PropertyImage
+ */
+export function toPropertyImage(img: string | PropertyImage | Record<string, any>): PropertyImage {
+  if (typeof img === 'string') {
     return {
-      id: image.id,
-      url: image.url,
-      type: (image as any).type === "floorplan" ? "floorplan" : "image",
-      sort_order: (image as any).sort_order,
-      title: (image as any).title,
-      description: (image as any).description,
-      filePath: (image as any).filePath,
-      is_main: (image as any).is_main,
-      is_featured_image: (image as any).is_featured_image,
-      area: (image as any).area,
-      property_id: (image as any).property_id
+      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: img,
+      type: "image",
     };
-  });
-};
+  }
+  
+  if (img && typeof img === 'object') {
+    return {
+      id: img.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: img.url || '',
+      area: img.area || null,
+      property_id: img.property_id || undefined,
+      is_main: img.is_main || false,
+      is_featured_image: img.is_featured_image || false,
+      sort_order: img.sort_order || 0,
+      type: img.type || "image",
+      title: img.title || '',
+      description: img.description || '',
+      filePath: img.filePath || undefined,
+      alt: img.alt || ''
+    };
+  }
+  
+  return {
+    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: '',
+    type: "image"
+  };
+}
 
 /**
- * Safely handle mixed string and object type for images in components
- * Returns the URL from any image type
+ * Convert mixed array to PropertyImage array
  */
-export const getSafeImageUrl = (image: string | PropertyImage | PropertyFloorplan | null): string | null => {
-  if (!image) return null;
-  if (typeof image === 'string') return image;
-  return image.url;
-};
+export function toPropertyImages(images: any[]): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
+  return images.map(img => toPropertyImage(img));
+}
+
+/**
+ * Get an image's safe display title
+ */
+export function getImageTitle(image: string | PropertyImage | PropertyFloorplan): string {
+  if (typeof image === 'string') return '';
+  return image.title || '';
+}
