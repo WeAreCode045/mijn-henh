@@ -14,8 +14,7 @@ export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | 
  * Get alt text from image safely
  */
 export function getImageAlt(image: string | PropertyImage | PropertyFloorplan | null | undefined, defaultAlt: string = ''): string {
-  if (!image) return defaultAlt;
-  if (typeof image === 'string') return defaultAlt;
+  if (!image || typeof image === 'string') return defaultAlt;
   return image.alt || image.title || defaultAlt;
 }
 
@@ -65,6 +64,6 @@ export function normalizeImageArray(images: (string | PropertyImage | PropertyFl
  */
 export function getImageId(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
   if (!image) return '';
-  if (typeof image === 'string') return '';
+  if (typeof img === 'string') return '';
   return image.id || '';
 }

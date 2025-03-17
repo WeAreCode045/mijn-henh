@@ -1,53 +1,38 @@
 
-import { PropertyImage, PropertyFloorplan } from "@/types/property";
+import { PropertyImage } from "@/types/property";
 
 /**
- * Safely extract URL from any image type
+ * Convert a string URL or a raw object to a PropertyImage object
  */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
-  if (!image) return '';
-  if (typeof image === 'string') return image;
-  return image.url || '';
-}
-
-/**
- * Get image ID safely from any image type
- */
-export function getImageId(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
-  if (!image) return '';
-  if (typeof image === 'string') return '';
-  return image.id || '';
-}
-
-/**
- * Convert string or object to PropertyImage
- */
-export function toPropertyImage(img: string | PropertyImage | Record<string, any>): PropertyImage {
-  if (typeof img === 'string') {
+export function toPropertyImage(
+  image: string | Record<string, any>
+): PropertyImage {
+  if (typeof image === 'string') {
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: img,
-      type: "image",
+      url: image,
+      type: "image"
     };
   }
   
-  if (img && typeof img === 'object') {
+  if (image && typeof image === 'object') {
     return {
-      id: img.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: img.url || '',
-      area: img.area || null,
-      property_id: img.property_id || undefined,
-      is_main: img.is_main || false,
-      is_featured_image: img.is_featured_image || false,
-      sort_order: img.sort_order || 0,
-      type: img.type || "image",
-      title: img.title || '',
-      description: img.description || '',
-      filePath: img.filePath || undefined,
-      alt: img.alt || ''
+      id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: image.url || '',
+      area: image.area || null,
+      property_id: image.property_id || undefined,
+      is_main: image.is_main || false,
+      is_featured_image: image.is_featured_image || false,
+      sort_order: image.sort_order || 0,
+      type: image.type || "image",
+      title: image.title || '',
+      description: image.description || '',
+      filePath: image.filePath || undefined,
+      alt: image.alt || ''
     };
   }
   
+  // Default fallback
   return {
     id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     url: '',
@@ -56,17 +41,23 @@ export function toPropertyImage(img: string | PropertyImage | Record<string, any
 }
 
 /**
- * Convert mixed array to PropertyImage array
+ * Gets the title or alt text from an image, with fallbacks
  */
-export function toPropertyImages(images: any[]): PropertyImage[] {
-  if (!Array.isArray(images)) return [];
-  return images.map(img => toPropertyImage(img));
+export function getImageTitle(
+  image: PropertyImage | Record<string, any> | null | undefined,
+  defaultTitle: string = 'Image'
+): string {
+  if (!image) return defaultTitle;
+  return image.title || image.alt || defaultTitle;
 }
 
 /**
- * Get an image's safe display title
+ * Gets URL from any object that might be an image
  */
-export function getImageTitle(image: string | PropertyImage | PropertyFloorplan): string {
-  if (typeof image === 'string') return '';
-  return image.title || '';
+export function getImageUrl(
+  input: string | PropertyImage | Record<string, any> | null | undefined
+): string {
+  if (!input) return '';
+  if (typeof input === 'string') return input;
+  return input.url || '';
 }

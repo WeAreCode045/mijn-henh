@@ -13,5 +13,5 @@ export interface PropertyArea {
   description: string;
   imageIds: string[]; // Array of image IDs
   columns: number;
-  images: (PropertyImage | string)[];
+  images: (PropertyImage | string)[]; // Can be either PropertyImage objects or strings (URLs)
 }

@@ -5,7 +5,7 @@ export type { PropertyArea } from './PropertyAreaTypes';
 export type { PropertyData } from './PropertyDataTypes';
 export type { PropertyFormData } from './PropertyFormTypes';
 
-// Re-export types from PropertyTypes.ts using 'export type' syntax
+// Re-export types from PropertyTypes.ts 
 export type {
   PropertyFeature,
   PropertyFloorplan,
