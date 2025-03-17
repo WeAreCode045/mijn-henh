@@ -14,7 +14,6 @@ import { PropertyFeature } from "@/types/property";
 import { PropertyArea } from "@/types/property";
 import { PropertyNearbyPlace } from "@/types/property";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { usePropertyFloorplans } from "@/hooks/images/usePropertyFloorplans";
 import { usePropertyAreaPhotos } from "@/hooks/images/usePropertyAreaPhotos";
@@ -22,10 +21,9 @@ import { usePropertyMainImages } from "@/hooks/images/usePropertyMainImages";
 import { usePropertyContent } from "@/hooks/usePropertyContent";
 import { usePropertyAreas } from "@/hooks/usePropertyAreas";
 import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
-import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
 import { safeToString } from "@/utils/stringUtils";
+import { useFeatures } from "@/hooks/useFeatures";
 
 // This component is currently unused and should be refactored or removed
 // in the future. It contains imports to components that might not exist.
@@ -50,16 +48,6 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     }));
   };
 
-  // Auto-save functionality
-  const { 
-    autosaveData, 
-    isSaving, 
-    lastSaved, 
-    pendingChanges, 
-    setPendingChanges, 
-    setLastSaved 
-  } = usePropertyAutoSave();
-  
   // Property content management
   const contentManager = usePropertyContent(
     formState,
@@ -95,28 +83,18 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
     images
-  } = usePropertyImages(
-    formState, 
-    setFormState
-  );
+  } = usePropertyImages();
 
   // Property floorplans management
   const {
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan
-  } = usePropertyFloorplans(
-    formState,
-    setFormState
-  );
+  } = usePropertyFloorplans();
   
   // Step navigation with auto-save
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
     usePropertyStepNavigation();
-  
-  // Form submission and other actions
-  const { handleSaveObjectId, handleSaveAgent, handleSaveTemplate, onSubmit } = 
-    usePropertyFormActions();
 
   // Fetch agents and templates on component mount
   useEffect(() => {

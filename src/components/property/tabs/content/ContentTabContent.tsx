@@ -20,12 +20,16 @@ interface ContentTabContentProps {
   handleNext?: () => void;
   handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchNearbyCities?: () => Promise<any>;
+  onGenerateLocationDescription?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
+  isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
   isUpdateMode?: boolean;
-  onSubmit?: () => void;
   isSaving?: boolean;
 }
 
@@ -46,8 +50,13 @@ export function ContentTabContent({
   handleNext,
   handlePrevious,
   onFetchLocationData,
+  onFetchCategoryPlaces,
+  onFetchNearbyCities,
+  onGenerateLocationDescription,
+  onGenerateMap,
   onRemoveNearbyPlace,
   isLoadingLocationData,
+  isGeneratingMap,
   setPendingChanges,
   isUploading,
   isUpdateMode = false,
@@ -70,8 +79,13 @@ export function ContentTabContent({
     handleNext,
     handlePrevious,
     onFetchLocationData,
+    onFetchCategoryPlaces,
+    onFetchNearbyCities,
+    onGenerateLocationDescription,
+    onGenerateMap,
     onRemoveNearbyPlace,
     isLoadingLocationData,
+    isGeneratingMap,
     setPendingChanges,
     isUploading,
     isSaving

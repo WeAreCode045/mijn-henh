@@ -61,6 +61,7 @@ export const TabContentRenderers = {
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
             setPendingChanges={handlers.setPendingChanges}
+            isUploading={false}
             isSaving={handlers.isSaving}
           />
         );

@@ -20,9 +20,16 @@ interface ContentTabWrapperProps {
     currentStep: number;
     handleStepClick: (step: number) => void;
     onFetchLocationData?: () => Promise<void>;
+    onFetchCategoryPlaces?: (category: string) => Promise<any>;
+    onFetchNearbyCities?: () => Promise<any>;
+    onGenerateLocationDescription?: () => Promise<void>;
+    onGenerateMap?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
+    isGeneratingMap?: boolean;
+    setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
+    isSaving?: boolean;
   };
 }
 
@@ -63,9 +70,16 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         handleNext={handleNext}
         handlePrevious={handlePrevious}
         onFetchLocationData={handlers.onFetchLocationData}
+        onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
+        onFetchNearbyCities={handlers.onFetchNearbyCities}
+        onGenerateLocationDescription={handlers.onGenerateLocationDescription}
+        onGenerateMap={handlers.onGenerateMap}
         onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
         isLoadingLocationData={handlers.isLoadingLocationData}
+        isGeneratingMap={handlers.isGeneratingMap}
+        setPendingChanges={handlers.setPendingChanges}
         isUploading={handlers.isUploading}
+        isSaving={handlers.isSaving}
       />
     </div>
   );
