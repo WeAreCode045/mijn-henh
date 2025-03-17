@@ -74,11 +74,11 @@ export function PropertyTabContentSetup({
             onUpdateArea={formHandlers.updateArea}
             onAreaImageRemove={formHandlers.handleAreaImageRemove}
             onAreaImagesSelect={formHandlers.handleAreaImagesSelect}
-            onAreaImageUpload={adaptedHandleAreaImageUpload} // Pass the files-based adapter for components expecting that signature
+            onAreaImageUpload={adaptedHandleAreaImageUpload}
             handleImageUpload={formHandlers.handleImageUpload}
             handleRemoveImage={formHandlers.handleRemoveImage}
             isUploading={formHandlers.isUploading}
-            handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload} // Pass the event-based adapter for components expecting that signature
+            handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload}
             handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
             handleFloorplanUpload={formHandlers.handleFloorplanUpload}
             handleRemoveFloorplan={formHandlers.handleRemoveFloorplan}

@@ -22,6 +22,7 @@ interface PropertyAreaProps {
   onImageUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
   onImageRemove: (imageId: string) => void;
   onImagesSelect: (imageIds: string[]) => void;
+  handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   isUploading?: boolean;
 }
 
@@ -36,6 +37,7 @@ export function PropertyArea({
   onImageUpload,
   onImageRemove,
   onImagesSelect,
+  handleAreaImageUpload,
   isUploading = false,
 }: PropertyAreaProps) {
   return (

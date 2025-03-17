@@ -36,8 +36,8 @@ interface PropertyTabContentsProps {
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
-  handleAreaPhotosUpload: (areaId: string, files: FileList) => Promise<void>;
-  handleRemoveAreaPhoto: (areaId: string, photoIndex: number) => void;
+  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
   handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan: (index: number) => void;
   isUploadingFloorplan: boolean;
