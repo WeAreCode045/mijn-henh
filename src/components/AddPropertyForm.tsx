@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,6 @@ import { usePropertyStepNavigation } from "@/hooks/usePropertyStepNavigation";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { usePropertyStateTracking } from "@/hooks/usePropertyStateTracking";
 import { usePropertyFormActions } from "@/hooks/usePropertyFormActions";
-import { useFeatures } from "@/hooks/useFeatures";
 import { safeToString } from "@/utils/stringUtils";
 
 // This component is currently unused and should be refactored or removed
@@ -112,11 +112,11 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
   
   // Step navigation with auto-save
   const { currentStep, handleStepClick, handleNext, handlePrevious } = 
-    usePropertyStepNavigation(formState, pendingChanges, setPendingChanges, setLastSaved);
+    usePropertyStepNavigation();
   
   // Form submission and other actions
   const { handleSaveObjectId, handleSaveAgent, handleSaveTemplate, onSubmit } = 
-    usePropertyFormActions(formState, setPendingChanges, setLastSaved);
+    usePropertyFormActions();
 
   // Fetch agents and templates on component mount
   useEffect(() => {

@@ -35,11 +35,6 @@ export const TabContentRenderers = {
           }
         };
 
-        // Create a dummy onSubmit function to satisfy type requirements
-        const dummyOnSubmit = () => {
-          console.log("Submit functionality has been disabled");
-        };
-
         return (
           <ContentTabContent
             formData={formState}
@@ -66,7 +61,6 @@ export const TabContentRenderers = {
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
             setPendingChanges={handlers.setPendingChanges}
-            onSubmit={dummyOnSubmit}
             isSaving={handlers.isSaving}
           />
         );
