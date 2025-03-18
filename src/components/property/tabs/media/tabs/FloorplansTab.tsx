@@ -74,8 +74,8 @@ export function FloorplansTab({
         newFloorplans.push({
           id: data.id,
           url: publicUrl,
-          type: 'floorplan',
-          sort_order: highestSortOrder
+          sort_order: highestSortOrder,
+          type: 'floorplan'
         });
       }
       

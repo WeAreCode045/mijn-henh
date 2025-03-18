@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
 import { extractPropertyId, isPropertyIdEmpty } from '../utils/dataTransformationUtils';
+import { convertToJsonString } from '@/utils/supabaseHelpers';
 
 /**
  * Prepares property data for saving to Supabase
@@ -22,10 +23,10 @@ export const preparePropertyDataForSave = (formData: PropertyFormData) => {
     description: formData.description,
     shortDescription: formData.shortDescription,
     location_description: formData.location_description,
-    features: JSON.stringify(formData.features),
-    areas: JSON.stringify(formData.areas),
-    nearby_places: JSON.stringify(formData.nearby_places),
-    nearby_cities: JSON.stringify(formData.nearby_cities),
+    features: convertToJsonString(formData.features),
+    areas: convertToJsonString(formData.areas),
+    nearby_places: convertToJsonString(formData.nearby_places),
+    nearby_cities: convertToJsonString(formData.nearby_cities),
     latitude: formData.latitude,
     longitude: formData.longitude,
     object_id: formData.object_id,
@@ -36,7 +37,7 @@ export const preparePropertyDataForSave = (formData: PropertyFormData) => {
     youtubeUrl: formData.youtubeUrl,
     notes: formData.notes,
     propertyType: formData.propertyType,
-    generalInfo: JSON.stringify(formData.generalInfo)
+    generalInfo: convertToJsonString(formData.generalInfo)
   };
 };
 

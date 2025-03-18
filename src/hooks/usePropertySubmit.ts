@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,10 +6,18 @@ import { usePropertyDataPreparer } from "./property-form/usePropertyDataPreparer
 import { Json } from "@/integrations/supabase/types";
 
 export function usePropertySubmit() {
+  const { preparePropertyData, processPropertyData } = usePropertyDataPreparer();
+  
+  const prepareSubmitData = (formData: PropertyFormData): PropertySubmitData => {
+    return {
+      ...formData,
+      propertyType: formData.propertyType || 'residential'
+    };
+  };
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { prepareSubmitData } = usePropertyDataPreparer();
-
+  
   const submitProperty = async (formData: PropertyFormData): Promise<string | null> => {
     setIsSubmitting(true);
     
@@ -68,5 +75,11 @@ export function usePropertySubmit() {
     }
   };
   
-  return { submitProperty, isSubmitting };
+  return {
+    preparePropertyData,
+    processPropertyData,
+    prepareSubmitData,
+    submitProperty,
+    isSubmitting
+  };
 }

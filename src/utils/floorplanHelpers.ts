@@ -13,7 +13,7 @@ export function normalizeFloorplan(floorplan: any): PropertyFloorplan {
       description: '',
       sort_order: 0,
       filePath: '',
-      type: "floorplan",
+      type: "floorplan" as const,
       columns: 1
     };
   }
@@ -26,7 +26,7 @@ export function normalizeFloorplan(floorplan: any): PropertyFloorplan {
     sort_order: floorplan.sort_order !== undefined ? floorplan.sort_order : 0,
     filePath: floorplan.filePath || '',
     columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1,
-    type: floorplan.type || "floorplan"
+    type: "floorplan" as const
   };
 }
 

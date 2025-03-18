@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData, PropertyImage } from "@/types/property";
+import { PropertyFormData, PropertyImage, PropertyArea } from "@/types/property";
+import { normalizeImage } from "@/utils/imageHelpers";
 
 export function useAreaImageUpload(property_id: string, areaId: string, imageIds: string[], setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>) {
   const [isLoading, setIsLoading] = useState(false);
@@ -66,24 +67,30 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
           
         // Add the image ID to the list
         uploadedImageIds.push(imageData.id);
-        uploadedImages.push(imageData as PropertyImage);
+        
+        // Create a normalized image object
+        const normalizedImage = normalizeImage(imageData);
+        uploadedImages.push(normalizedImage);
       }
       
       // Update the form state with the new image IDs
-      setFormState(prevData => {
-        const updatedAreas = prevData.areas?.map(area => {
+      setFormState(prevFormData => {
+        // Create a deep copy of the areas array
+        const updatedAreas = prevFormData.areas.map(area => {
           if (area.id === areaId) {
+            // Create a copy of this specific area with updated imageIds and images
             return {
               ...area,
               imageIds: [...(area.imageIds || []), ...uploadedImageIds],
-              images: [...(area.images || []), ...uploadedImages]
+              images: [...(Array.isArray(area.images) ? area.images : []), ...uploadedImages]
             };
           }
           return area;
-        }) || [];
+        });
         
+        // Return the updated form data
         return {
-          ...prevData,
+          ...prevFormData,
           areas: updatedAreas
         };
       });

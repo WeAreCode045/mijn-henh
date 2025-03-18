@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { OverviewSection } from "../sections/OverviewSection";
@@ -101,3 +100,38 @@ export function getSections({
 
   return sections;
 }
+
+export const getAreaSections = (property: PropertyData, settings: AgencySettings) => {
+  if (!property.areas || property.areas.length === 0) return [];
+
+  return property.areas.map((area, index) => {
+    // Get area images
+    const areaImages = property.images
+      ? property.images
+          .filter(img => {
+            if (typeof img === 'string') return false;
+            return img.area === area.id;
+          })
+          .map(img => {
+            if (typeof img === 'string') {
+              return { id: `img-${index}`, url: img, area: area.id, type: 'image' };
+            }
+            return img;
+          })
+      : [];
+
+    return {
+      id: `area-${area.id}`,
+      title: area.title || area.name,
+      component: () => (
+        <SingleAreaSection 
+          area={area} 
+          areaImages={areaImages}
+          property={property}
+          settings={settings}
+          areaIndex={index}
+        />
+      ),
+    };
+  });
+};

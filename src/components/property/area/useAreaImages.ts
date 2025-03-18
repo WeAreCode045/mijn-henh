@@ -36,7 +36,7 @@ export function useAreaImages(area: PropertyArea, propertyId?: string) {
               id: img.id,
               url: img.url,
               area: img.area,
-              type: (img.type === "floorplan" ? "floorplan" : "image"),
+              type: (img.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan",
               is_main: img.is_main,
               is_featured_image: img.is_featured_image,
               sort_order: img.sort_order,
@@ -60,7 +60,7 @@ export function useAreaImages(area: PropertyArea, propertyId?: string) {
             // Ensure type is always "image" or "floorplan"
             return {
               ...normalized,
-              type: (normalized.type === "floorplan" ? "floorplan" : "image")
+              type: (normalized.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan"
             };
           });
           setAreaImages(normalizedImages);

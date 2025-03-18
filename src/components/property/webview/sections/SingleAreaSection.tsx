@@ -1,17 +1,16 @@
-
 import React from "react";
-import { Area, PropertyImage } from "@/types/property";
-import { getImageUrl } from "@/utils/propertyDataAdapters";
+import { PropertyImage, PropertyArea } from "@/types/property";
+import { getImageUrl } from "@/utils/imageUrlUtils";
 
-interface SingleAreaSectionProps {
-  area: Area;
-  areaImages: PropertyImage[] | string[];
-  property?: any;  // Add property to the props
-  settings?: any;  // Add settings to the props
-  areaIndex?: number; // Add areaIndex to the props
+export interface SingleAreaSectionProps {
+  area: PropertyArea;
+  areaImages: PropertyImage[];
+  property?: any;
+  settings?: any;
+  areaIndex?: number;
 }
 
-export function SingleAreaSection({ area, areaImages, property, settings, areaIndex }: SingleAreaSectionProps) {
+export function SingleAreaSection({ area, areaImages }: SingleAreaSectionProps) {
   // Convert all images to PropertyImage type
   const processedImages = areaImages.map(img => 
     typeof img === 'string' 

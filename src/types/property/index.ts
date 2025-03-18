@@ -17,5 +17,5 @@ export type {
   GeneralInfoData,
 } from './PropertyTypes';
 
-// Re-export types from Area types if needed
-export type { Area, AreaImage } from '../area';
+// Re-export types from Area types
+export type { Area, AreaImage, AreaImageData } from '../area';

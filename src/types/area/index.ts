@@ -1,4 +1,6 @@
 
+import { PropertyImage } from "../property/PropertyImageTypes";
+
 export { type AreaImageData } from './AreaImageData';
 
 export interface Area {

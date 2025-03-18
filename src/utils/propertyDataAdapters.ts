@@ -12,7 +12,7 @@ export function convertToPropertyImageArray(images: (string | PropertyImage)[] |
       return {
         id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         url: img,
-        type: "image"
+        type: "image" as const
       };
     }
     return img;
@@ -32,7 +32,7 @@ export function convertToPropertyFloorplanArray(
       return {
         id: `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         url: plan,
-        type: "floorplan"
+        type: "floorplan" as const
       };
     } else if ((plan as any).type === 'image') {
       // Convert PropertyImage to PropertyFloorplan
@@ -42,7 +42,7 @@ export function convertToPropertyFloorplanArray(
         title: (plan as any).title,
         description: (plan as any).description,
         sort_order: (plan as any).sort_order,
-        type: "floorplan"
+        type: "floorplan" as const
       };
     }
     return plan as PropertyFloorplan;

@@ -8,6 +8,7 @@ import {
   transformNearbyPlaces, 
   transformGeneralInfo 
 } from '../propertyDataTransformer';
+import { parsePropertyCities, parsePropertyFeatures, parsePropertyAreas, parsePropertyPlaceTypes } from '@/utils/supabaseHelpers';
 
 /**
  * Fetches property data from Supabase
@@ -45,19 +46,8 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
   const areas = safelyParse<PropertyArea>(data.areas, transformAreas);
   const nearbyPlaces = safelyParse<PropertyPlaceType>(data.nearby_places, transformNearbyPlaces);
   
-  let nearbyCities: PropertyCity[] = [];
-  try {
-    if (data.nearby_cities) {
-      if (Array.isArray(data.nearby_cities)) {
-        nearbyCities = data.nearby_cities;
-      } else if (typeof data.nearby_cities === 'string') {
-        const parsed = JSON.parse(data.nearby_cities);
-        nearbyCities = Array.isArray(parsed) ? parsed : [];
-      }
-    }
-  } catch (e) {
-    console.error("Error parsing nearby_cities:", e);
-  }
+  // Parse nearby cities with our helper
+  const nearbyCities = parsePropertyCities(data.nearby_cities);
   
   const generalInfo = transformGeneralInfo(data.generalInfo);
   
@@ -92,6 +82,15 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
     propertyType: data.propertyType || '',
-    generalInfo
+    generalInfo,
+    images: [],
+    floorplans: [],
+    featuredImage: null,
+    featuredImages: [],
+    coverImages: [],
+    gridImages: [],
+    map_image: null,
+    created_at: data.created_at || new Date().toISOString(),
+    updated_at: data.updated_at || new Date().toISOString()
   };
 };
