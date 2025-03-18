@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +43,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           }
         }
         
-        // Type images correctly - this will convert them to PropertyImage[] with all required props
         const images = rawImages.map(img => ({
           id: img.id,
           url: img.url,
@@ -95,7 +93,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             }))
           : [];
 
-        // Create the transformed data with proper typing
         const transformedData: PropertyData = {
           id: propertyData.id || "",
           object_id: propertyData.object_id || "",
