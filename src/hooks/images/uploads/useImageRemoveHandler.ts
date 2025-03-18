@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyImage } from "@/types/property";
-import { toPropertyImageArray } from "@/utils/imageHelpers";
+import { normalizeImage } from "@/utils/imageHelpers";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 export function useImageRemoveHandler(
@@ -36,20 +36,17 @@ export function useImageRemoveHandler(
       // Update featured images if they include the removed image
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
-      // Convert featuredImages to PropertyImage[] for coverImages
-      const updatedCoverImages = updatedFeaturedImages.map(url => ({
-        id: `temp-${Date.now()}-${Math.random()}`,
-        url: url,
-        type: "image" as const
-      }));
-      
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages
+        coverImages: updatedFeaturedImages.map(url => ({
+          id: `temp-${Date.now()}-${Math.random()}`,
+          url: url,
+          type: "image" as const
+        }))
       };
       
       // Update the form state
@@ -131,20 +128,17 @@ export function useImageRemoveHandler(
       // Update featured images if they include the removed image
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
-      // Convert featuredImages to PropertyImage[] for coverImages
-      const updatedCoverImages = updatedFeaturedImages.map(url => ({
-        id: `temp-${Date.now()}-${Math.random()}`,
-        url: url,
-        type: "image" as const
-      }));
-      
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages
+        coverImages: updatedFeaturedImages.map(url => ({
+          id: `temp-${Date.now()}-${Math.random()}`,
+          url: url,
+          type: "image" as const
+        }))
       };
       
       // Update the form state
