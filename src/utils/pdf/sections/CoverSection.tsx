@@ -1,61 +1,83 @@
-import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { PropertyData } from '@/types/property';
-import { AgencySettings } from '@/types/agency';
 
-export const CoverSection = ({ property, settings, styles }: { 
-  property: PropertyData; 
-  settings: AgencySettings; 
-  styles: any; 
-}) => {
-  // Get the main image (from property images where is_main=true or first image)
-  const mainImage = property.images.find(img => img.is_main)?.url || 
-                   (property.images.length > 0 ? property.images[0].url : null);
+import React from "react";
+import { PropertyData, PropertyImage } from "@/types/property";
+import { getImageUrl } from "@/utils/imageUrlHelpers";
+
+export const CoverSection = ({ property }: { property: PropertyData }) => {
+  // Find the main image
+  const mainImage = React.useMemo(() => {
+    if (!property.images || property.images.length === 0) return null;
+    
+    // First, look for the explicitly marked main image
+    const mainImg = property.images.find(img => 
+      typeof img !== 'string' && (img as any).is_main
+    );
+    
+    if (mainImg) return getImageUrl(mainImg);
+    
+    // If no main image is found, use the first image
+    return getImageUrl(property.images[0]);
+  }, [property.images]);
   
-  // Get featured images (from images with is_featured_image=true)
-  let displayImages: string[] = property.images
-    .filter(img => img.is_featured_image)
-    .map(img => img.url);
-  
-  // For backward compatibility
-  if (displayImages.length === 0 && property.featuredImages && property.featuredImages.length > 0) {
-    displayImages = property.featuredImages;
-  }
-  
-  // Limit to max 4 images
-  displayImages = displayImages.slice(0, 4);
+  // Get featured images (excluding the main image)
+  const featuredImages = React.useMemo(() => {
+    if (!property.images || property.images.length === 0) return [];
+    
+    return property.images
+      .filter(img => typeof img !== 'string' && (img as any).is_featured_image)
+      .map(img => getImageUrl(img))
+      .filter(url => url !== mainImage)
+      .slice(0, 3); // Limit to 3 featured images
+  }, [property.images, mainImage]);
   
   return (
-    <Page size="A4" style={styles.page}>
-      <View style={styles.coverHeader}>
-        {settings.logoUrl && (
-          <Image src={settings.logoUrl} style={styles.coverLogo} />
+    <div className="pdf-section cover-section">
+      <div className="property-header">
+        <h1>{property.title}</h1>
+        <h2>{property.price}</h2>
+        <p>{property.address}</p>
+      </div>
+      
+      <div className="cover-images">
+        {mainImage && (
+          <div className="main-image">
+            <img src={mainImage} alt={property.title} />
+          </div>
         )}
-        <Text style={styles.handwrittenText}>Wordt dit uw droomhuis?</Text>
-      </View>
-
-      {mainImage && (
-        <Image 
-          src={mainImage} 
-          style={styles.fullWidthImage} 
-        />
-      )}
-
-      {displayImages.length > 0 && (
-        <View style={styles.imageGrid}>
-          {displayImages.map((url, index) => (
-            <Image key={index} src={url} style={styles.gridImage} />
-          ))}
-        </View>
-      )}
-
-      <View style={styles.coverFooter}>
-        <Text style={styles.coverTitle}>
-          {property.title || 'Untitled Property'}
-        </Text>
-        <Text style={styles.coverPrice}>
-          {property.price || ''}
-        </Text>
-      </View>
-    </Page>
+        
+        {featuredImages.length > 0 && (
+          <div className="featured-images">
+            {featuredImages.map((url, i) => (
+              <div className="featured-image" key={i}>
+                <img src={url} alt={`${property.title} - Featured ${i + 1}`} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      <div className="property-summary">
+        <div className="property-details">
+          <div className="detail-item">
+            <span className="label">Bedrooms</span>
+            <span className="value">{property.bedrooms}</span>
+          </div>
+          <div className="detail-item">
+            <span className="label">Bathrooms</span>
+            <span className="value">{property.bathrooms}</span>
+          </div>
+          <div className="detail-item">
+            <span className="label">Size</span>
+            <span className="value">{property.sqft || property.livingArea} m²</span>
+          </div>
+        </div>
+        
+        {property.shortDescription && (
+          <div className="short-description">
+            <p>{property.shortDescription}</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

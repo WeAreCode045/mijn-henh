@@ -6,7 +6,7 @@ import { PropertyImage, PropertyFloorplan } from "@/types/property";
  */
 export function getSafeAltText(image: PropertyImage | PropertyFloorplan | null): string {
   if (!image) return '';
-  return image.alt || image.title || '';
+  return (image as any).alt || (image as any).title || '';
 }
 
 /**
@@ -32,7 +32,7 @@ export function getSafeImageUrl(image: string | PropertyImage | PropertyFloorpla
  */
 export function isMainImage(image: PropertyImage | null): boolean {
   if (!image) return false;
-  return !!image.is_main;
+  return !!((image as any).is_main);
 }
 
 /**
@@ -40,7 +40,7 @@ export function isMainImage(image: PropertyImage | null): boolean {
  */
 export function isFeaturedImage(image: PropertyImage | null): boolean {
   if (!image) return false;
-  return !!image.is_featured_image;
+  return !!((image as any).is_featured_image);
 }
 
 /**

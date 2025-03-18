@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyData } from "@/types/property";
@@ -104,7 +105,7 @@ export function RecentProperties() {
         <div className="space-y-4">
           {(recentProperties || []).map((property: PropertyData) => {
             const displayImage = property.featuredImage || 
-                               (property.images?.[0]?.url || '/placeholder.svg');
+                               (property.images?.[0] ? getImageUrl(property.images[0]) : '/placeholder.svg');
             
             return (
               <div 
@@ -113,7 +114,7 @@ export function RecentProperties() {
                 onClick={() => navigate(`/property/${property.id}/edit`)}
               >
                 <img
-                  src={getImageUrl(displayImage)}
+                  src={displayImage}
                   alt={property.title}
                   className="w-16 h-16 object-cover rounded-lg"
                 />

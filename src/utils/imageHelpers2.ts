@@ -31,7 +31,7 @@ export function convertToPropertyImages(images: (string | PropertyImage | Proper
     }
     
     // Handle PropertyFloorplan conversion to PropertyImage
-    if ((img as PropertyFloorplan).type === 'floorplan') {
+    if ((img as any).type === 'floorplan') {
       return {
         id: img.id,
         url: img.url,
@@ -54,8 +54,8 @@ export function convertToPropertyImages(images: (string | PropertyImage | Proper
 export function getMainImage(images: (string | PropertyImage)[]): PropertyImage | null {
   if (!images || !Array.isArray(images) || images.length === 0) return null;
   
-  const propertyImages = images.map(img => typeof img === 'string' ? { id: '', url: img } : img);
-  const mainImage = propertyImages.find(img => (img as PropertyImage).is_main);
+  const propertyImages = images.map(img => typeof img === 'string' ? { id: '', url: img, type: "image" as const } : img);
+  const mainImage = propertyImages.find(img => (img as any).is_main);
   return mainImage || propertyImages[0];
 }
 
@@ -65,8 +65,8 @@ export function getMainImage(images: (string | PropertyImage)[]): PropertyImage 
 export function getFeaturedImages(images: (string | PropertyImage)[]): PropertyImage[] {
   if (!images || !Array.isArray(images)) return [];
   
-  const propertyImages = images.map(img => typeof img === 'string' ? { id: '', url: img } : img);
-  return propertyImages.filter(img => (img as PropertyImage).is_featured_image === true);
+  const propertyImages = images.map(img => typeof img === 'string' ? { id: '', url: img, type: "image" as const } : img);
+  return propertyImages.filter(img => (img as any).is_featured_image === true);
 }
 
 /**
