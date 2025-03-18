@@ -1,110 +1,104 @@
 
-import { PropertyImage, PropertyFloorplan, PropertyFormData } from "@/types/property";
-import { toFloorplan, toFloorplanArray } from "./floorplanHelpers";
-import { normalizeImage, toPropertyImageArray } from "./imageHelpers";
+import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
+import { toPropertyImage, toPropertyFloorplan } from "./imageTypeConverters";
 
 /**
- * Convert mixed image types to PropertyImage[]
+ * Converts any image array (string[] or mixed) to PropertyImage[]
  */
-export function convertToPropertyImageArray(images: any[]): PropertyImage[] {
-  if (!Array.isArray(images)) {
-    return [];
-  }
+export function convertToPropertyImageArray(images: any[] | undefined): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
   
-  return images.map((img): PropertyImage => {
+  return images.map(img => {
     if (typeof img === 'string') {
-      return {
-        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        url: img,
-        type: "image"
-      };
+      return toPropertyImage(img);
     }
-    
-    // Make sure all required fields are present
-    return {
-      id: img.id || `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: img.url || '',
-      type: img.type === 'floorplan' ? 'floorplan' : 'image',
-      alt: img.alt,
-      title: img.title,
-      description: img.description,
-      is_main: img.is_main,
-      is_featured_image: img.is_featured_image,
-      sort_order: img.sort_order,
-      property_id: img.property_id,
-      area: img.area,
-      filePath: img.filePath
-    };
+    return img as PropertyImage;
   });
 }
 
 /**
- * Convert mixed floorplan types to PropertyFloorplan[]
+ * Converts any floorplan array (string[] or mixed) to PropertyFloorplan[]
  */
-export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloorplan[] {
-  if (!Array.isArray(floorplans)) {
-    return [];
-  }
+export function convertToPropertyFloorplanArray(floorplans: any[] | undefined): PropertyFloorplan[] {
+  if (!Array.isArray(floorplans)) return [];
   
-  return floorplans.map((fp): PropertyFloorplan => {
+  return floorplans.map(fp => {
     if (typeof fp === 'string') {
-      return {
-        id: `fp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        url: fp,
-        type: "floorplan"
-      };
+      return toPropertyFloorplan(fp);
     }
-    
-    // Make sure all required fields are present
-    return {
-      id: fp.id || `fp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      url: fp.url || '',
-      type: "floorplan",
-      title: fp.title,
-      description: fp.description,
-      sort_order: fp.sort_order,
-      property_id: fp.property_id,
-      filePath: fp.filePath,
-      columns: fp.columns,
-      alt: fp.alt
-    };
+    return fp as PropertyFloorplan;
   });
 }
 
 /**
- * Fix image types in PropertyFormData for saving
+ * Extracts image URLs as string array
  */
-export function normalizePropertyImageTypes(formData: PropertyFormData): PropertyFormData {
-  // Create a deeply copied object to avoid modifying the original
-  const normalized: PropertyFormData = {
-    ...formData
-  };
+export function extractImageUrls(images: (string | PropertyImage)[] | undefined): string[] {
+  if (!Array.isArray(images)) return [];
   
-  // Convert image arrays to PropertyImage[] arrays
-  if (formData.images) {
-    normalized.images = convertToPropertyImageArray(formData.images as any[]);
-  }
-  
-  if (formData.floorplans) {
-    normalized.floorplans = convertToPropertyFloorplanArray(formData.floorplans as any[]);
-  }
-  
-  if (formData.coverImages) {
-    normalized.coverImages = convertToPropertyImageArray(formData.coverImages as any[]);
-  }
-  
-  if (formData.gridImages) {
-    normalized.gridImages = convertToPropertyImageArray(formData.gridImages as any[]);
-  }
-  
-  return normalized;
+  return images.map(img => typeof img === 'string' ? img : img.url);
 }
 
 /**
- * Helper to safely get an image URL from any image format
+ * Adapts raw data from API to PropertyData
  */
-export function getImageUrl(image: string | PropertyImage | null | undefined): string {
-  if (!image) return '';
-  if (typeof image === 'string') return image;
-  return image.url;
+export function convertApiDataToPropertyData(apiData: any): PropertyData {
+  // Start with the original data
+  const adaptedData = { ...apiData } as PropertyData;
+  
+  // Convert image arrays
+  if (apiData.images) {
+    adaptedData.images = convertToPropertyImageArray(apiData.images);
+  }
+  
+  if (apiData.featuredImages) {
+    adaptedData.featuredImages = convertToPropertyImageArray(apiData.featuredImages);
+  }
+  
+  if (apiData.coverImages) {
+    adaptedData.coverImages = convertToPropertyImageArray(apiData.coverImages);
+  }
+  
+  if (apiData.gridImages) {
+    adaptedData.gridImages = convertToPropertyImageArray(apiData.gridImages);
+  }
+  
+  // Convert floorplans
+  if (apiData.floorplans) {
+    adaptedData.floorplans = convertToPropertyFloorplanArray(apiData.floorplans);
+  }
+  
+  return adaptedData;
+}
+
+/**
+ * Converts PropertyData to DTO for submission
+ */
+export function convertPropertyDataToDto(propertyData: PropertyData): any {
+  const dto = { ...propertyData };
+  
+  // Convert complex objects to strings where needed
+  if (Array.isArray(dto.features) && dto.features.length > 0) {
+    dto.features = JSON.stringify(dto.features);
+  }
+  
+  if (Array.isArray(dto.nearby_places) && dto.nearby_places.length > 0) {
+    dto.nearby_places = JSON.stringify(dto.nearby_places);
+  }
+  
+  if (Array.isArray(dto.nearby_cities) && dto.nearby_cities.length > 0) {
+    dto.nearby_cities = JSON.stringify(dto.nearby_cities);
+  }
+  
+  if (dto.generalInfo) {
+    dto.generalInfo = JSON.stringify(dto.generalInfo);
+  }
+  
+  // Convert images and floorplans to URL arrays
+  dto.images = extractImageUrls(dto.images);
+  dto.featuredImages = extractImageUrls(dto.featuredImages);
+  dto.coverImages = extractImageUrls(dto.coverImages);
+  dto.gridImages = extractImageUrls(dto.gridImages);
+  
+  return dto;
 }

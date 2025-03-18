@@ -46,7 +46,8 @@ export function toPropertyFloorplan(floorplan: string | any): PropertyFloorplan 
     return {
       id: `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       url: floorplan,
-      type: "floorplan"
+      type: "floorplan",
+      alt: ""
     };
   }
   
@@ -61,7 +62,7 @@ export function toPropertyFloorplan(floorplan: string | any): PropertyFloorplan 
     property_id: floorplan.property_id,
     filePath: floorplan.filePath,
     columns: floorplan.columns,
-    alt: floorplan.alt
+    alt: floorplan.alt || ""
   };
 }
 
