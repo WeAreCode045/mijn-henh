@@ -16,7 +16,8 @@ export interface PropertyPlaceType {
 // Re-exports for backwards compatibility
 export * from './PropertyTypes';
 export * from './PropertyImageTypes';
-export * from './PropertyFloorplanTypes';
+// Export PropertyFloorplan from its own file to avoid ambiguity
+export { PropertyFloorplan } from './PropertyFloorplanTypes';
 export * from './PropertyAreaTypes';
 export * from './PropertyFormTypes';
 export * from './PropertyDataTypes';

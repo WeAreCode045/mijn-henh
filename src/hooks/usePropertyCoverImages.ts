@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { PropertyFormData, PropertyImage } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,7 +123,7 @@ export function usePropertyCoverImages(
       const coverImages: PropertyImage[] = newFeaturedImages.map(imgUrl => ({
         id: `cover-${Date.now()}-${Math.random()}`,
         url: imgUrl,
-        type: 'image'
+        type: "image" as const
       }));
       
       setFormState({

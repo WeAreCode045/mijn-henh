@@ -67,7 +67,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     energyLabel: data.energyLabel || '',
     hasGarden: !!data.hasGarden,
     description: data.description || '',
-    shortDescription: data.description || '', // Use description as fallback since shortDescription might not exist
+    shortDescription: data.shortDescription || data.description || '', // Use description as fallback
     location_description: data.location_description || '',
     features,
     areas,
@@ -82,7 +82,8 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
-    propertyType: data.property_type || '', // Use property_type field name to match database
+    propertyType: data.property_type || '', // Map database field to our property
+    property_type: data.property_type, // Keep for backward compatibility
     generalInfo,
     images: [],
     floorplans: [],

@@ -67,7 +67,7 @@ export function FloorplansTab({
           id: data.id,
           url: publicUrl,
           sort_order: highestSortOrder,
-          type: "floorplan"
+          type: "floorplan" as const
         });
       }
       

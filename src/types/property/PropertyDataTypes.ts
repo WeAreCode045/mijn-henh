@@ -42,6 +42,7 @@ export interface PropertyData {
   youtubeUrl: string;
   notes?: string;
   propertyType?: string;
+  property_type?: string; // Add for database compatibility
   created_at: string;
   updated_at: string;
   // For backward compatibility

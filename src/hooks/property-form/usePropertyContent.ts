@@ -1,56 +1,62 @@
 
-import { useState } from 'react';
-import { fetchPropertyDataFromApi } from './operations/propertyFetchOperations';
-import { savePropertyDataToApi } from './operations/propertySaveOperations';
-import { PropertyFormData } from '@/types/property';
-import { shouldFetchProperty } from './utils/dataTransformationUtils';
+import { useState } from "react";
+import { PropertyFormData } from "@/types/property";
+import { fetchPropertyDataFromApi } from "./operations/propertyFetchOperations";
+import { savePropertyDataToApi } from "./operations/propertySaveOperations";
 
-export function usePropertyContent(propertyId: string | undefined) {
+export function usePropertyContent(propertyId: string) {
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
-  // Function to fetch/refresh data
+  // Function to refresh property data from API
   const refreshData = async () => {
-    if (!shouldFetchProperty(propertyId)) {
-      console.warn('Cannot fetch property - invalid ID:', propertyId);
-      return null;
-    }
-    
     try {
+      setIsLoading(true);
+      setError(null);
       const data = await fetchPropertyDataFromApi(propertyId);
+      setIsLoading(false);
       return data;
-    } catch (error) {
-      console.error('Error fetching property data:', error);
+    } catch (err: any) {
+      setError(err);
+      setIsLoading(false);
       return null;
     }
   };
   
-  // Function to save data
-  const savePropertyData = async (formData: PropertyFormData) => {
-    if (!propertyId) {
-      console.error('Cannot save property - missing ID');
-      return false;
-    }
-    
-    setIsSaving(true);
-    
+  // Function to save property data to API
+  const savePropertyData = async (data: PropertyFormData) => {
     try {
-      await savePropertyDataToApi(propertyId, formData);
+      setIsSaving(true);
+      setError(null);
+      await savePropertyDataToApi(propertyId, data);
+      setLastSaved(new Date());
       setPendingChanges(false);
-      return true;
-    } catch (error) {
-      console.error('Error saving property data:', error);
-      return false;
-    } finally {
       setIsSaving(false);
+      return true;
+    } catch (err: any) {
+      setError(err);
+      setIsSaving(false);
+      return false;
     }
+  };
+  
+  // Function to determine if property data should be fetched
+  const shouldFetchProperty = () => {
+    return !!propertyId && propertyId !== "new" && propertyId !== "undefined";
   };
   
   return {
     refreshData,
     savePropertyData,
+    shouldFetchProperty,
+    isLoading,
     isSaving,
+    error,
     pendingChanges,
-    setPendingChanges
+    setPendingChanges,
+    lastSaved
   };
 }

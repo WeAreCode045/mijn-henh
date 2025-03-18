@@ -1,4 +1,3 @@
-
 import { PropertyImage, PropertyFloorplan, PropertyFormData } from "@/types/property";
 
 /**
@@ -49,7 +48,7 @@ export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloo
       return {
         id: `fp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         url: fp,
-        type: "floorplan"
+        type: "floorplan" as const
       };
     }
     
@@ -57,7 +56,7 @@ export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloo
     return {
       id: fp.id || `fp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       url: fp.url || '',
-      type: "floorplan",
+      type: "floorplan" as const,
       title: fp.title,
       alt: fp.alt,
       description: fp.description,
@@ -75,10 +74,10 @@ export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloo
 export function normalizePropertyImageTypes(formData: PropertyFormData): PropertyFormData {
   const normalized: PropertyFormData = {
     ...formData,
-    images: convertToPropertyImageArray(formData.images || []),
-    floorplans: convertToPropertyFloorplanArray(formData.floorplans || []),
-    coverImages: convertToPropertyImageArray(formData.coverImages || []),
-    gridImages: convertToPropertyImageArray(formData.gridImages || []),
+    images: convertToPropertyImageArray(formData.images || []).map(img => ({ ...img, type: img.type || "image" as const })),
+    floorplans: convertToPropertyFloorplanArray(formData.floorplans || []).map(fp => ({ ...fp, type: "floorplan" as const })),
+    coverImages: convertToPropertyImageArray(formData.coverImages || []).map(img => ({ ...img, type: img.type || "image" as const })),
+    gridImages: convertToPropertyImageArray(formData.gridImages || []).map(img => ({ ...img, type: img.type || "image" as const })),
   };
   
   return normalized;

@@ -24,10 +24,10 @@ export const preparePropertyDataForSave = (formData: PropertyFormData) => {
     description: formData.description,
     shortDescription: formData.shortDescription,
     location_description: formData.location_description,
-    features: JSON.stringify(formData.features || []),
-    areas: JSON.stringify(formData.areas || []),
-    nearby_places: JSON.stringify(formData.nearby_places || []),
-    nearby_cities: JSON.stringify(formData.nearby_cities || []),
+    features: jsonToString(formData.features || []),
+    areas: jsonToString(formData.areas || []),
+    nearby_places: jsonToString(formData.nearby_places || []),
+    nearby_cities: jsonToString(formData.nearby_cities || []),
     latitude: formData.latitude,
     longitude: formData.longitude,
     object_id: formData.object_id,
@@ -38,7 +38,7 @@ export const preparePropertyDataForSave = (formData: PropertyFormData) => {
     youtubeUrl: formData.youtubeUrl,
     notes: formData.notes,
     property_type: formData.propertyType, // Use property_type field name to match database
-    generalInfo: formData.generalInfo ? JSON.stringify(formData.generalInfo) : null
+    generalInfo: formData.generalInfo ? jsonToString(formData.generalInfo) : null
   };
 };
 

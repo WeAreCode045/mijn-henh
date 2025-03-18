@@ -75,7 +75,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         const coverImages = featuredImages.map(url => ({
           id: `cover-${Date.now()}-${Math.random()}`,
           url,
-          type: "image" as "image" | "floorplan"
+          type: "image" as const
         }));
         
         const dataAreas = Array.isArray(areas) ? areas : [];

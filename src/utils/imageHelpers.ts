@@ -1,60 +1,83 @@
 
-import { PropertyImage } from "@/types/property";
+import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Helper function to get the URL from a string or PropertyImage
+ * Normalizes any image representation to PropertyImage
  */
-export const getImageUrl = (image: string | PropertyImage): string => {
+export function normalizeImage(image: string | PropertyImage | any): PropertyImage {
   if (typeof image === 'string') {
-    return image;
-  }
-  return image.url;
-};
-
-/**
- * Helper function to normalize image data to PropertyImage format
- */
-export const normalizeImage = (img: any): PropertyImage => {
-  if (typeof img === 'string') {
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: img,
+      url: image,
       type: "image"
     };
-  } 
+  }
   
-  if (img && typeof img === 'object') {
+  // Ensure we have all the required fields
+  return {
+    id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: image.url || '',
+    type: image.type === 'floorplan' ? 'floorplan' : 'image',
+    is_main: image.is_main,
+    is_featured_image: image.is_featured_image,
+    sort_order: image.sort_order,
+    title: image.title,
+    description: image.description,
+    alt: image.alt,
+    property_id: image.property_id,
+    area: image.area,
+    filePath: image.filePath
+  };
+}
+
+/**
+ * Normalize any floorplan representation to PropertyFloorplan
+ */
+export function normalizeFloorplan(floorplan: string | PropertyFloorplan | any): PropertyFloorplan {
+  if (typeof floorplan === 'string') {
     return {
-      id: img.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: img.url || '',
-      area: img.area || null,
-      property_id: img.property_id || undefined,
-      is_main: img.is_main || false,
-      is_featured_image: img.is_featured_image || false,
-      sort_order: img.sort_order || 0,
-      type: img.type || "image",
-      title: img.title || '',
-      description: img.description || '',
-      filePath: img.filePath || undefined,
-      alt: img.alt || ''
+      id: `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: floorplan,
+      type: "floorplan"
     };
   }
   
-  // Default fallback
+  // Ensure we have all the required fields
   return {
-    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url: '',
-    type: "image"
+    id: floorplan.id || `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: floorplan.url || '',
+    type: "floorplan",
+    title: floorplan.title,
+    description: floorplan.description,
+    alt: floorplan.alt,
+    property_id: floorplan.property_id,
+    sort_order: floorplan.sort_order,
+    filePath: floorplan.filePath,
+    columns: floorplan.columns
   };
-};
+}
 
 /**
- * Helper function to safely process an array of images
+ * Converts mixed array to PropertyImage[] array
  */
-export const normalizeImages = (images: any[]): PropertyImage[] => {
-  if (!Array.isArray(images)) {
-    return [];
-  }
-  
-  return images.map(img => normalizeImage(img));
-};
+export function toPropertyImageArray(items: any[]): PropertyImage[] {
+  if (!Array.isArray(items)) return [];
+  return items.map(item => normalizeImage(item));
+}
+
+/**
+ * Converts mixed array to PropertyFloorplan[] array
+ */
+export function toFloorplanArray(items: any[]): PropertyFloorplan[] {
+  if (!Array.isArray(items)) return [];
+  return items.map(item => normalizeFloorplan(item));
+}
+
+/**
+ * Gets a URL from any image type
+ */
+export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  return image.url || '';
+}

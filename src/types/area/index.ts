@@ -14,5 +14,5 @@ export interface AreaImage {
   type: "image" | "floorplan";
 }
 
-// Re-exports for backwards compatibility
+// Re-exports for backwards compatibility - use export type for type-only exports
 export type { AreaImage as AreaImageData };

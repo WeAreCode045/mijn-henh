@@ -1,4 +1,3 @@
-
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
@@ -46,7 +45,7 @@ export function toPropertyFloorplan(floorplan: string | any): PropertyFloorplan 
     return {
       id: `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       url: floorplan,
-      type: "floorplan"
+      type: "floorplan" as const
     };
   }
   
@@ -54,7 +53,7 @@ export function toPropertyFloorplan(floorplan: string | any): PropertyFloorplan 
   return {
     id: floorplan.id || `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     url: floorplan.url || '',
-    type: "floorplan",
+    type: "floorplan" as const,
     title: floorplan.title,
     description: floorplan.description,
     alt: floorplan.alt,

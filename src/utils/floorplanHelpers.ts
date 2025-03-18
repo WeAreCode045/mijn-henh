@@ -1,47 +1,30 @@
 
 import { PropertyFloorplan } from "@/types/property";
 
-/**
- * Creates a PropertyFloorplan object from a URL
- */
-export function createFloorplanFromUrl(url: string, index: number = 0): PropertyFloorplan {
+// Convert a URL string to a PropertyFloorplan object
+export function urlToFloorplan(url: string): PropertyFloorplan {
   return {
-    id: `floorplan-${Date.now()}-${index}`,
+    id: `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     url,
-    sort_order: index,
-    type: "floorplan"
+    type: "floorplan",
+    sort_order: 0
   };
 }
 
-/**
- * Normalizes floorplan data to ensure required properties
- */
-export function normalizeFloorplan(floorplan: any): PropertyFloorplan {
+// Convert a mixed object to a normalized PropertyFloorplan
+export function toFloorplan(floorplan: string | PropertyFloorplan | any): PropertyFloorplan {
   if (typeof floorplan === 'string') {
-    return createFloorplanFromUrl(floorplan);
+    return urlToFloorplan(floorplan);
   }
   
   return {
-    id: floorplan.id || `floorplan-${Date.now()}`,
+    id: floorplan.id || `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     url: floorplan.url || '',
     title: floorplan.title,
     alt: floorplan.alt,
     description: floorplan.description,
     sort_order: floorplan.sort_order || 0,
+    property_id: floorplan.property_id,
     type: "floorplan"
   };
-}
-
-/**
- * Converts an array of mixed data to PropertyFloorplan[]
- */
-export function ensureFloorplanArray(data: any[]): PropertyFloorplan[] {
-  if (!Array.isArray(data)) return [];
-  
-  return data.map((item, index) => {
-    if (typeof item === 'string') {
-      return createFloorplanFromUrl(item, index);
-    }
-    return normalizeFloorplan(item);
-  });
 }

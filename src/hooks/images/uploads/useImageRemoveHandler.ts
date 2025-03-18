@@ -45,12 +45,12 @@ export function useImageRemoveHandler(
       });
       
       // Create an updated form data object
-      const updatedFormData = {
+      const updatedFormData: PropertyFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages // Properly typed coverImages
+        coverImages: updatedCoverImages.map(img => ({ ...img, type: "image" as const })) // Ensure proper type
       };
       
       // Update the form state
@@ -144,12 +144,12 @@ export function useImageRemoveHandler(
       });
       
       // Create an updated form data object
-      const updatedFormData = {
+      const updatedFormData: PropertyFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages // Properly typed coverImages
+        coverImages: updatedCoverImages.map(img => ({ ...img, type: "image" as const })) // Ensure proper type
       };
       
       // Update the form state
