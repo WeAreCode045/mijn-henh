@@ -25,7 +25,7 @@ export interface PropertyData {
   features: PropertyFeature[];
   images: PropertyImage[];  // Changed from string[] to PropertyImage[]
   featuredImage: string | null;
-  featuredImages: string[];
+  featuredImages: PropertyImage[];  // Changed from string[] to PropertyImage[]
   areas: PropertyArea[];
   map_image: string | null;
   nearby_places: PropertyPlaceType[];

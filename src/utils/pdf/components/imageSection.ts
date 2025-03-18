@@ -19,33 +19,56 @@ function normalizeImages(images: string[] | PropertyImage[] | undefined): Proper
 }
 
 // Creates the image gallery section for the PDF
-export const createImageSection = (images: string[] | PropertyImage[] | undefined) => {
-  if (!images || images.length === 0) return null;
-  
-  // Convert to PropertyImage[]
+export const createImageSection = (
+  pdf: any,
+  property: any,
+  x: number,
+  width: number,
+  y: number,
+  height: number
+) => {
+  // Extract and normalize images
+  const images = property.images || [];
   const propertyImages: PropertyImage[] = normalizeImages(images);
   
-  return {
-    stack: [
-      {
-        text: 'Property Images',
-        style: 'heading2',
-        margin: [0, 16, 0, 8]
-      },
-      {
-        columns: propertyImages.slice(0, 6).map(img => ({
-          stack: [
-            {
-              image: getImageUrl(img),
-              width: 180,
-              height: 120,
-              fit: [180, 120]
-            }
-          ],
-          width: 'auto',
-          margin: [0, 0, 8, 8]
-        }))
-      }
-    ]
-  };
+  if (propertyImages.length === 0) {
+    return;
+  }
+  
+  // Use the main image (featuredImage) if available
+  const mainImageUrl = property.featuredImage || 
+                      (property.featuredImages && property.featuredImages.length > 0 ? 
+                        getImageUrl(property.featuredImages[0]) : null) ||
+                      (propertyImages.length > 0 ? getImageUrl(propertyImages[0]) : null);
+  
+  if (!mainImageUrl) {
+    return;
+  }
+  
+  // Add main image
+  const imageHeight = height * 0.6;
+  pdf.addImage(mainImageUrl, 'JPEG', x, y, width, imageHeight);
+  
+  // Add smaller images in a grid below
+  const smallImagesY = y + imageHeight + 10;
+  const smallImageHeight = (height - imageHeight - 10) / 2;
+  const smallImageWidth = width / 2 - 2;
+  
+  // Draw smaller images (up to 4)
+  const smallImages = propertyImages.slice(1, 5);
+  smallImages.forEach((img, index) => {
+    const row = Math.floor(index / 2);
+    const col = index % 2;
+    const imageX = x + col * (smallImageWidth + 4);
+    const imageY = smallImagesY + row * (smallImageHeight + 4);
+    
+    pdf.addImage(
+      getImageUrl(img),
+      'JPEG',
+      imageX,
+      imageY,
+      smallImageWidth,
+      smallImageHeight
+    );
+  });
 };

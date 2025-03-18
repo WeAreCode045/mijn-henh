@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check, Image as ImageIcon, PencilIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getImageUrl } from "@/utils/imageTypeConverters";
 
 interface ImageSelectionsProps {
   images: PropertyImage[];
   featuredImage: string | null;
-  featuredImages: string[];
+  featuredImages: PropertyImage[];
   onFeaturedImageSelect: (url: string | null) => void;
   onFeaturedImageToggle: (url: string) => void;
   propertyId?: string;
@@ -31,6 +32,9 @@ export function ImageSelections({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Get image URLs from PropertyImage objects
+  const featuredImageUrls = featuredImages.map(img => getImageUrl(img));
   
   const handleOpenSelectFeatured = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
@@ -77,102 +81,140 @@ export function ImageSelections({
           Edit in Media Tab
         </Button>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Main Image - Left Side */}
-          <div className="md:w-1/2 space-y-3">
-            <h3 className="text-md font-medium">Main Image</h3>
-            <div className="h-64 flex-col gap-3 items-center">
-              {featuredImage ? (
-                <div className="relative w-full h-full border rounded-lg overflow-hidden">
-                  <img 
-                    src={featuredImage} 
-                    alt="Main" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full border rounded-lg flex items-center justify-center bg-gray-100">
-                  <ImageIcon className="h-12 w-12 text-gray-400" />
-                </div>
-              )}
+      <CardContent>
+        {images.length > 0 ? (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Main Image</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {images.slice(0, 4).map((image) => (
+                  <div 
+                    key={image.id} 
+                    className={`relative border-2 rounded overflow-hidden cursor-pointer ${
+                      featuredImage === image.url ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                    }`}
+                    onClick={() => onFeaturedImageSelect(image.url)}
+                  >
+                    <img 
+                      src={image.url} 
+                      alt="Property view" 
+                      className="w-full h-24 object-cover"
+                    />
+                    {featuredImage === image.url && (
+                      <div className="absolute top-1 right-1 bg-primary rounded-full p-0.5">
+                        <Check className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          
-          {/* Featured Images - Right Side */}
-          <div className="md:w-1/2 space-y-3">
-            <h3 className="text-md font-medium">Featured Images (max {maxFeaturedImages})</h3>
-            <div className="grid grid-cols-2 gap-3 h-64">
-              {featuredImages.slice(0, 4).map((url, index) => (
-                <div key={index} className="relative h-full border rounded-lg overflow-hidden">
-                  <img 
-                    src={url} 
-                    alt={`Featured ${index + 1}`} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-              
-              {/* Empty slots or add button */}
-              {Array.from({ length: Math.min(4 - featuredImages.length, 4) }).map((_, index) => (
-                <div key={`empty-${index}`} className="h-full">
-                  {index === 0 && canAddMoreFeaturedImages ? (
-                    <Button 
-                      onClick={handleOpenSelectFeatured}
-                      className="h-full w-full flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800"
-                      variant="outline"
-                      type="button"
+            
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-medium">Featured Images</h3>
+                {images.length > 4 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleOpenSelectFeatured}
+                    disabled={!canAddMoreFeaturedImages}
+                    type="button"
+                  >
+                    View All
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {images.slice(0, 4).map((image) => {
+                  const isInFeatured = featuredImageUrls.includes(image.url);
+                  return (
+                    <div 
+                      key={image.id} 
+                      className={`relative border-2 rounded overflow-hidden cursor-pointer ${
+                        isInFeatured ? 'border-blue-500' : 'border-transparent hover:border-gray-300'
+                      }`}
+                      onClick={() => onFeaturedImageToggle(image.url)}
                     >
-                      <ImageIcon className="h-8 w-8 mb-1" />
-                      <span className="text-xs">Add</span>
-                    </Button>
-                  ) : (
-                    <div className="h-full w-full border border-dashed border-gray-200 rounded-lg flex items-center justify-center bg-gray-50">
-                      <ImageIcon className="h-6 w-6 text-gray-300" />
+                      <img 
+                        src={image.url} 
+                        alt="Property view" 
+                        className="w-full h-24 object-cover"
+                      />
+                      {isInFeatured && (
+                        <div className="absolute top-1 right-1 bg-blue-500 rounded-full p-0.5">
+                          <Check className="h-3 w-3 text-white" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-6 text-gray-500">
+            <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>No images uploaded yet</p>
+          </div>
+        )}
         
-        {/* Image Selection Dialog - Only for Featured Images */}
         <Dialog open={imageSelectOpen} onOpenChange={setImageSelectOpen}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle>Select Featured Images</DialogTitle>
+              <DialogTitle>
+                {selectionType === 'main' ? 'Select Main Image' : 'Select Featured Images'}
+              </DialogTitle>
             </DialogHeader>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 max-h-[60vh] overflow-y-auto p-2">
-              {images.map((image, index) => {
-                // Check if image is already in the featuredImages array
-                const isSelected = featuredImages.includes(image.url);
+            <div className="grid grid-cols-4 gap-3 mt-4">
+              {images.map((image) => {
+                const isSelected = selectionType === 'main' 
+                  ? selectedImage === image.url 
+                  : featuredImageUrls.includes(image.url);
                 
                 return (
                   <div 
-                    key={image.id || index} 
-                    className={`relative cursor-pointer h-[150px] border-2 rounded-lg overflow-hidden hover:border-blue-500 ${isSelected ? 'border-blue-500' : 'border-gray-200'}`}
+                    key={image.id} 
+                    className={`relative border-2 rounded overflow-hidden cursor-pointer ${
+                      isSelected 
+                        ? selectionType === 'main' ? 'border-primary' : 'border-blue-500' 
+                        : 'border-transparent hover:border-gray-300'
+                    }`}
                     onClick={() => handleImageClick(image.url)}
                   >
-                    <img
-                      src={image.url}
-                      alt={`Property image ${index + 1}`}
-                      className="w-full h-full object-cover"
+                    <img 
+                      src={image.url} 
+                      alt="Property view" 
+                      className="w-full h-32 object-cover"
                     />
                     {isSelected && (
-                      <div className="absolute top-2 right-2 bg-blue-500 text-white p-1 rounded-full">
-                        <Check className="h-4 w-4" />
+                      <div className={`absolute top-1 right-1 ${
+                        selectionType === 'main' ? 'bg-primary' : 'bg-blue-500'
+                      } rounded-full p-0.5`}>
+                        <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
                   </div>
                 );
               })}
-              
-              {images.length === 0 && (
-                <div className="col-span-full py-8 text-center text-gray-500">
-                  No images available. Please upload images in the Media tab first.
-                </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-4">
+              <Button variant="outline" onClick={handleCloseDialog} type="button">
+                Cancel
+              </Button>
+              {selectionType === 'main' && (
+                <Button 
+                  onClick={() => {
+                    if (selectedImage) {
+                      onFeaturedImageSelect(selectedImage);
+                    }
+                    handleCloseDialog();
+                  }}
+                  disabled={!selectedImage}
+                  type="button"
+                >
+                  Select
+                </Button>
               )}
             </div>
           </DialogContent>

@@ -1,6 +1,9 @@
 
 import { PropertyData, PropertyImage, PropertyFloorplan, PropertyFeature, PropertyPlaceType, PropertyCity, PropertyGeneralInfo } from "@/types/property";
-import { toPropertyImage, toPropertyFloorplan, extractImageUrls } from "./imageTypeConverters";
+import { toPropertyImage, toPropertyFloorplan } from "./imageTypeConverters";
+
+// Remove the conflicting import
+// import { extractImageUrls } from "./imageTypeConverters";
 
 /**
  * Converts any image array (string[] or mixed) to PropertyImage[]
@@ -99,19 +102,19 @@ export function convertPropertyDataToDto(propertyData: PropertyData): any {
   
   // Convert images and floorplans to URL strings for database
   if (dto.images && Array.isArray(dto.images)) {
-    dto.images = extractImageUrls(dto.images);
+    dto.imagesAsUrls = extractImageUrls(dto.images);
   }
   
   if (dto.featuredImages && Array.isArray(dto.featuredImages)) {
-    dto.featuredImages = extractImageUrls(dto.featuredImages);
+    dto.featuredImagesAsUrls = extractImageUrls(dto.featuredImages);
   }
   
   if (dto.coverImages && Array.isArray(dto.coverImages)) {
-    dto.coverImages = extractImageUrls(dto.coverImages);
+    dto.coverImagesAsUrls = extractImageUrls(dto.coverImages);
   }
   
   if (dto.gridImages && Array.isArray(dto.gridImages)) {
-    dto.gridImages = extractImageUrls(dto.gridImages);
+    dto.gridImagesAsUrls = extractImageUrls(dto.gridImages);
   }
   
   return dto;

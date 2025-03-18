@@ -5,7 +5,7 @@ import { PropertySpecs } from "./PropertySpecs";
 import { BasicDetails } from "./BasicDetails";
 import { DescriptionSection } from "./DescriptionSection";
 import { ImageSelections } from "./ImageSelections";
-import { toPropertyImage, toPropertyImageArray } from "@/utils/imageTypeConverters";
+import { toPropertyImage, toPropertyImageArray, extractImageUrls } from "@/utils/imageTypeConverters";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;

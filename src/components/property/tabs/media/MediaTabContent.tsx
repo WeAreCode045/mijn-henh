@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PropertyData } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +7,7 @@ import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
-import { toPropertyImageArray } from "@/utils/imageTypeConverters";
+import { toPropertyImageArray, extractImageUrls } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
