@@ -42,7 +42,8 @@ export function FloorplanDatabaseFetcher({
               url: item.url,
               columns: 12,
               title: 'Floorplan',
-              sort_order: item.sort_order || undefined
+              sort_order: item.sort_order || undefined,
+              type: "floorplan" // Add the required type field
             }));
             
             console.log("FloorplanDatabaseFetcher - Fetched floorplans from DB:", dbFloorplans);

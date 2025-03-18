@@ -57,11 +57,11 @@ export function toPropertyFloorplan(floorplan: string | any): PropertyFloorplan 
     type: "floorplan",
     title: floorplan.title,
     description: floorplan.description,
-    alt: floorplan.alt,
-    property_id: floorplan.property_id,
     sort_order: floorplan.sort_order,
+    property_id: floorplan.property_id,
     filePath: floorplan.filePath,
-    columns: floorplan.columns
+    columns: floorplan.columns,
+    alt: floorplan.alt
   };
 }
 

@@ -61,12 +61,12 @@ export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloo
       url: fp.url || '',
       type: "floorplan",
       title: fp.title,
-      alt: fp.alt,
       description: fp.description,
       sort_order: fp.sort_order,
       property_id: fp.property_id,
       filePath: fp.filePath,
-      columns: fp.columns
+      columns: fp.columns,
+      alt: fp.alt
     };
   });
 }

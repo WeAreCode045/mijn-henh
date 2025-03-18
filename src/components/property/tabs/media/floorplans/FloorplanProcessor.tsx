@@ -32,14 +32,16 @@ export function FloorplanProcessor({
               id: parsed.id || `floorplan-${i}`,
               url: parsed.url || '',
               filePath: parsed.filePath || '',
-              columns: typeof parsed.columns === 'number' ? parsed.columns : 1
+              columns: typeof parsed.columns === 'number' ? parsed.columns : 1,
+              type: "floorplan"
             });
           } catch (e) {
             // If not valid JSON, treat as URL string
             processed.push({
               id: `floorplan-${i}`,
               url: item,
-              columns: 1
+              columns: 1,
+              type: "floorplan"
             });
           }
         } else if (item && typeof item === 'object') {
@@ -50,7 +52,8 @@ export function FloorplanProcessor({
             id: floorplanObj.id || `floorplan-obj-${i}`,
             url: floorplanObj.url || '',
             filePath: floorplanObj.filePath || '',
-            columns: typeof floorplanObj.columns === 'number' ? floorplanObj.columns : 1
+            columns: typeof floorplanObj.columns === 'number' ? floorplanObj.columns : 1,
+            type: "floorplan"
           });
         }
       }

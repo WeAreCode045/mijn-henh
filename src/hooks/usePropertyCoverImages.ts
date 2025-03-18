@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyImage } from "@/types/property";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
@@ -16,14 +17,10 @@ export function usePropertyCoverImages(
 
   // Toggle featured image
   const handleToggleFeaturedImage = useCallback((url: string) => {
-    const isFeatured = formData.featuredImages?.includes(url);
-    let updatedFeaturedImages: string[];
-
-    if (isFeatured) {
-      updatedFeaturedImages = formData.featuredImages!.filter(featuredUrl => featuredUrl !== url);
-    } else {
-      updatedFeaturedImages = [...(formData.featuredImages || []), url];
-    }
+    // Check if the image is already featured
+    const isFeatured = formData.featuredImages?.some(img => 
+      typeof img === 'string' ? img === url : img.url === url
+    );
 
     // Get all images
     const images = Array.isArray(formData.images) ? formData.images : [];
@@ -43,7 +40,7 @@ export function usePropertyCoverImages(
       })) as PropertyImage[];
 
       updatedFormData.coverImages = coverImages;
-      updatedFormData.featuredImages = mainImages.map(img => img.url) as PropertyImage[];
+      updatedFormData.featuredImages = mainImages;
       
       setFormData(updatedFormData);
     };
@@ -62,7 +59,9 @@ export function usePropertyCoverImages(
     }) as PropertyImage[];
 
     updatedFormData.images = updatedImages;
-    updatedFormData.featuredImages = updatedFeaturedImages;
+    
+    // Update featured images list based on the is_featured_image flag
+    updatedFormData.featuredImages = updatedImages.filter(img => img.is_featured_image);
     
     setMainImages(updatedImages);
     

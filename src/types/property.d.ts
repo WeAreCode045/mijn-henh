@@ -6,7 +6,7 @@ export interface Area {
   size?: string;
   title?: string;
   description?: string;
-  images?: string[] | { url: string; id: string; }[] | PropertyImage[];
+  images?: PropertyImage[];
   imageIds?: string[];
   columns?: number;
   unit?: string;
@@ -42,7 +42,7 @@ export interface PropertyArea {
   description?: string;
   imageIds?: string[];
   columns?: number;
-  images: (PropertyImage | string)[] | string[] | { url: string; id: string; }[];
+  images: PropertyImage[];
 }
 
 export interface PropertyFloorplan {
@@ -137,9 +137,9 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features: PropertyFeature[];
-  images: (string | PropertyImage)[];
+  images: PropertyImage[];
   featuredImage: string | null;
-  featuredImages: PropertyImage[] | string[];
+  featuredImages: PropertyImage[];
   areas: PropertyArea[];
   map_image: string | null;
   nearby_places: PropertyPlaceType[];
@@ -150,7 +150,7 @@ export interface PropertyData {
   agent_id: string;
   agent?: PropertyAgent | null;
   template_id: string;
-  floorplans: (PropertyFloorplan | PropertyImage | string)[];
+  floorplans: PropertyFloorplan[];
   floorplanEmbedScript: string;
   virtualTourUrl: string;
   youtubeUrl: string;
@@ -187,7 +187,7 @@ export interface PropertyFormData {
   agent?: PropertyAgent | null;
   features: PropertyFeature[];
   areas: PropertyArea[];
-  images?: (string | PropertyImage)[];
+  images?: PropertyImage[];
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];
   nearby_cities?: PropertyCity[];
@@ -197,16 +197,16 @@ export interface PropertyFormData {
   updated_at?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  floorplans?: (PropertyFloorplan | PropertyImage | string)[];
+  floorplans?: PropertyFloorplan[];
   floorplanEmbedScript?: string;
   notes?: string;
   featuredImage?: string | null;
-  featuredImages?: string[];
+  featuredImages?: PropertyImage[];
   propertyType?: string;
   
   // Legacy fields for backward compatibility
-  coverImages?: (string | PropertyImage)[];
-  gridImages?: (string | PropertyImage)[];
+  coverImages?: PropertyImage[];
+  gridImages?: PropertyImage[];
   areaPhotos?: string[];
   
   // Structure for unified general info
@@ -249,4 +249,4 @@ export interface PropertySubmitData {
   generalInfo?: string | GeneralInfoData;
 }
 
-export type AreaImage = PropertyImage | { url: string; id: string; };
+export type AreaImage = PropertyImage;

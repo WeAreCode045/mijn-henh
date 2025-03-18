@@ -23,8 +23,8 @@ export function toFloorplan(floorplan: string | PropertyFloorplan | any): Proper
     description: floorplan.description,
     sort_order: floorplan.sort_order || 0,
     type: "floorplan",
-    property_id: floorplan.property_id,
-    alt: floorplan.alt
+    alt: floorplan.alt,
+    property_id: floorplan.property_id
   };
 }
 

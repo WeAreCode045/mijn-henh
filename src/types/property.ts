@@ -1,3 +1,4 @@
+
 // Property place type
 export interface PropertyPlaceType {
   id: string;
@@ -30,9 +31,9 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features?: PropertyFeature[];
-  images?: (string | PropertyImage)[];
+  images?: PropertyImage[];
   featuredImage?: string | null;
-  featuredImages?: PropertyImage[] | string[];
+  featuredImages?: PropertyImage[];
   areas?: PropertyArea[];
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];
@@ -43,7 +44,7 @@ export interface PropertyData {
   agent_id?: string;
   agent?: PropertyAgent | null;
   template_id?: string;
-  floorplans?: (string | PropertyImage | PropertyFloorplan)[];
+  floorplans?: PropertyFloorplan[];
   floorplanEmbedScript?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
@@ -82,7 +83,7 @@ export interface PropertyArea {
   unit?: string;
   title?: string;
   description?: string;
-  images: (string | PropertyImage)[];
+  images: PropertyImage[];
   imageIds?: string[];
   columns?: number;
 }
@@ -113,6 +114,8 @@ export interface PropertyFloorplan {
   sort_order?: number;
   columns?: number;
   type: "floorplan";
+  alt?: string;
+  property_id?: string;
 }
 
 // Property agent type

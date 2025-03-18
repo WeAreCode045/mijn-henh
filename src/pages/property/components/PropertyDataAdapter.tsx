@@ -71,7 +71,11 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         
         const featuredImages = regularImages
           .filter(img => img.is_featured_image)
-          .map(img => img.url);
+          .map(img => ({
+            id: img.id,
+            url: img.url,
+            type: "image" as const
+          }));
         
         const dataAreas = Array.isArray(areas) ? areas : [];
         
@@ -137,8 +141,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             phone: propertyData.agent.phone,
             photoUrl: propertyData.agent.avatar_url
           } : undefined,
-          propertyType: propertyData.property_type || propertyData.propertyType || "",
-          property_type: propertyData.property_type || propertyData.propertyType || ""
+          propertyType: propertyData.property_type || propertyData.propertyType || ""
         };
         
         setProperty(transformedData);
