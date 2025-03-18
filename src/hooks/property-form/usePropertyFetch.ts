@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity, PropertyFloorplan, GeneralInfoData } from "@/types/property";
@@ -204,7 +205,9 @@ export function usePropertyFetch(id: string | undefined) {
             generalInfo, 
             coverImages: convertToPropertyImageArray(regularImages.filter(img => img.is_featured_image)),
             gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
-            areaPhotos: []
+            areaPhotos: [],
+            // Map property_type to propertyType for consistency
+            propertyType: propertyData.property_type || propertyData.propertyType || "",
           };
           
           setFormData(updatedFormData);

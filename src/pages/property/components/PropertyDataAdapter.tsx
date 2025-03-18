@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +44,8 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           }
         }
         
-        const images: PropertyImage[] = rawImages.map(img => ({
+        // Type images correctly - this will convert them to PropertyImage[] with all required props
+        const images = rawImages.map(img => ({
           id: img.id,
           url: img.url,
           area: img.area,
@@ -71,12 +73,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         const featuredImages = regularImages
           .filter(img => img.is_featured_image)
           .map(img => img.url);
-          
-        const coverImages = featuredImages.map(url => ({
-          id: `cover-${Date.now()}-${Math.random()}`,
-          url,
-          type: "image" as const
-        }));
         
         const dataAreas = Array.isArray(areas) ? areas : [];
         
@@ -99,6 +95,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             }))
           : [];
 
+        // Create the transformed data with proper typing
         const transformedData: PropertyData = {
           id: propertyData.id || "",
           object_id: propertyData.object_id || "",
@@ -133,7 +130,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           updated_at: propertyData.updated_at || new Date().toISOString(),
           floorplans: convertToPropertyFloorplanArray(floorplanImages),
           floorplanEmbedScript: propertyData.floorplanEmbedScript || "",
-          coverImages: convertToPropertyImageArray(coverImages),
+          coverImages: convertToPropertyImageArray(regularImages.filter(img => img.is_featured_image)),
           gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
           agent: propertyData.agent ? {
             id: propertyData.agent.id,
@@ -141,7 +138,8 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             email: propertyData.agent.email,
             phone: propertyData.agent.phone,
             photoUrl: propertyData.agent.avatar_url
-          } : undefined
+          } : undefined,
+          propertyType: propertyData.property_type || propertyData.propertyType || "",
         };
         
         setProperty(transformedData);

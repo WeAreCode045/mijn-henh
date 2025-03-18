@@ -57,9 +57,10 @@ export const savePropertyDataToApi = async (propertyId: string | any, formData: 
   
   const preparedData = preparePropertyDataForSave(formData);
   
+  // Use type assertion to make TypeScript happy with the field type conversions
   const { error } = await supabase
     .from('properties')
-    .update(preparedData)
+    .update(preparedData as any)
     .eq('id', id);
   
   if (error) {

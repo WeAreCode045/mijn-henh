@@ -40,12 +40,12 @@ export function useImageRemoveHandler(
         id: `temp-${Date.now()}-${Math.random()}`,
         url: url,
         type: "image" as const
-      }));
+      })) as PropertyImage[];
       
-      // Create an updated form data object with type casts to ensure type compatibility
-      const updatedFormData = {
+      // Create an updated form data object with proper typing
+      const updatedFormData: PropertyFormData = {
         ...formData,
-        images: updatedImages as PropertyImage[],
+        images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
         coverImages: updatedCoverImages
@@ -135,12 +135,12 @@ export function useImageRemoveHandler(
         id: `temp-${Date.now()}-${Math.random()}`,
         url: url,
         type: "image" as const
-      }));
+      })) as PropertyImage[];
       
-      // Create an updated form data object with type casts to ensure type compatibility
-      const updatedFormData = {
+      // Create an updated form data object with proper typing
+      const updatedFormData: PropertyFormData = {
         ...formData,
-        images: updatedImages as PropertyImage[],
+        images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
         coverImages: updatedCoverImages

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyImage } from "@/types/property";
 
@@ -29,44 +30,43 @@ export function usePropertyCoverImages(
 
     // Set main images
     const setMainImages = (images: PropertyImage[]) => {
-      setFormData(prevFormData => {
-        // Filter main images
-        const mainImages = images.filter(img => img.is_featured_image);
-        
-        // Convert to PropertyImage[] type
-        const coverImages = mainImages.map(img => ({
-          id: img.id,
-          url: img.url,
-          type: img.type || "image" as const
-        }));
+      const updatedFormData: PropertyFormData = { ...formData };
+      
+      // Filter main images
+      const mainImages = images.filter(img => img.is_featured_image);
+      
+      // Convert to PropertyImage[] type
+      const coverImages = mainImages.map(img => ({
+        id: img.id,
+        url: img.url,
+        type: img.type || "image" as const
+      })) as PropertyImage[];
 
-        return {
-          ...prevFormData,
-          coverImages,
-          featuredImages: mainImages.map(img => img.url)
-        };
-      });
+      updatedFormData.coverImages = coverImages;
+      updatedFormData.featuredImages = mainImages.map(img => img.url);
+      
+      setFormData(updatedFormData);
     };
 
-    setFormData(prevFormData => {
-      const updatedImages = images.map(img => {
-        const imageUrl = typeof img === 'string' ? img : img.url;
-        if (imageUrl === url) {
-          return {
-            ...img,
-            is_featured_image: !isFeatured
-          };
-        }
-        return img;
-      });
+    const updatedFormData: PropertyFormData = { ...formData };
+    
+    const updatedImages = images.map(img => {
+      const imageUrl = typeof img === 'string' ? img : img.url;
+      if (imageUrl === url) {
+        return {
+          ...img,
+          is_featured_image: !isFeatured
+        };
+      }
+      return img;
+    }) as PropertyImage[];
 
-      setMainImages(updatedImages as PropertyImage[]);
-
-      return {
-        ...prevFormData,
-        featuredImages: updatedFeaturedImages
-      };
-    });
+    updatedFormData.images = updatedImages;
+    updatedFormData.featuredImages = updatedFeaturedImages;
+    
+    setMainImages(updatedImages);
+    
+    setFormData(updatedFormData);
   }, [formData, setFormData]);
 
   return {

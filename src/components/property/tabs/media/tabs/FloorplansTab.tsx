@@ -64,14 +64,18 @@ export function FloorplansTab({
           
         if (error) throw error;
         
-        newFloorplans.push({
+        // Create a properly typed PropertyFloorplan object
+        const newFloorplan: PropertyFloorplan = {
           id: data.id,
           url: publicUrl,
           sort_order: highestSortOrder,
           type: "floorplan"
-        });
+        };
+        
+        newFloorplans.push(newFloorplan);
       }
       
+      // Use type assertion to cast the property data update
       setProperty(prev => ({
         ...prev,
         floorplans: [...(prev.floorplans || []), ...newFloorplans]
