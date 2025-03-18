@@ -1,84 +1,69 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { PropertyFormData } from '@/types/property';
-import { fetchPropertyDataFromApi } from './operations/propertyFetchOperations';
-import { savePropertyDataToApi } from './operations/propertySaveOperations';
 import { shouldFetchProperty } from './utils/dataTransformationUtils';
+import { fetchPropertyDataFromApi, savePropertyDataToApi } from './operations/propertyFetchOperations';
 
-export function usePropertyContent(propertyId: string | any) {
-  const [formData, setFormData] = useState<PropertyFormData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+export function usePropertyContent(id?: string) {
   const [pendingChanges, setPendingChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const fetchPropertyData = useCallback(async () => {
-    setIsLoading(true);
+  // Refresh data from API
+  const refreshData = useCallback(async (): Promise<PropertyFormData | null> => {
+    if (!id) return null;
+    
     try {
-      const data = await fetchPropertyDataFromApi(propertyId);
-      if (data) {
-        setFormData(data);
-      }
+      const data = await fetchPropertyDataFromApi(id);
+      return data;
     } catch (error) {
-      console.error('Error fetching property data:', error);
+      console.error('Error refreshing property data:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load property data',
-        variant: 'destructive',
+        description: 'Failed to refresh property data',
+        variant: 'destructive'
       });
-    } finally {
-      setIsLoading(false);
+      return null;
     }
-  }, [propertyId, toast]);
+  }, [id, toast]);
 
-  const savePropertyData = useCallback(async () => {
-    if (!formData) return;
+  // Save property data
+  const savePropertyData = useCallback(async (formData: PropertyFormData): Promise<boolean> => {
+    if (!id) return false;
     
     setIsSaving(true);
+    
     try {
-      await savePropertyDataToApi(propertyId, formData);
+      await savePropertyDataToApi(id, formData);
       
       toast({
         title: 'Success',
-        description: 'Property data saved successfully',
+        description: 'Property saved successfully'
       });
       
       setPendingChanges(false);
+      return true;
     } catch (error) {
-      console.error('Error saving property data:', error);
+      console.error('Error saving property:', error);
+      
       toast({
         title: 'Error',
-        description: 'Failed to save property data',
-        variant: 'destructive',
+        description: 'Failed to save property',
+        variant: 'destructive'
       });
+      
+      return false;
     } finally {
       setIsSaving(false);
     }
-  }, [formData, propertyId, toast]);
-
-  useEffect(() => {
-    if (shouldFetchProperty(propertyId)) {
-      fetchPropertyData();
-    }
-  }, [propertyId, fetchPropertyData]);
-
-  const updateFormData = useCallback((updatedData: Partial<PropertyFormData>) => {
-    setFormData((prev) => {
-      if (!prev) return null;
-      return { ...prev, ...updatedData };
-    });
-    setPendingChanges(true);
-  }, []);
+  }, [id, toast]);
 
   return {
-    formData,
-    updateFormData,
-    isLoading,
-    isSaving,
+    refreshData,
     savePropertyData,
     pendingChanges,
     setPendingChanges,
-    refreshData: fetchPropertyData
+    isSaving
   };
 }

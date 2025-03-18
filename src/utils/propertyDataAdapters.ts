@@ -15,7 +15,7 @@ export function convertToPropertyImageArray(images: (string | PropertyImage)[] |
         type: "image" as const
       };
     }
-    return img;
+    return img as PropertyImage;
   });
 }
 
@@ -62,18 +62,26 @@ export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | 
  * Adapts PropertyFormData to ensure all fields have the correct type
  */
 export function adaptPropertyFormData(formData: PropertyFormData): PropertyFormData {
+  // Convert all image arrays to proper types
+  const images = convertToPropertyImageArray(formData.images as any);
+  const floorplans = convertToPropertyFloorplanArray(formData.floorplans as any);
+  const coverImages = convertToPropertyImageArray(formData.coverImages as any);
+  const gridImages = convertToPropertyImageArray(formData.gridImages as any);
+  
+  // Ensure areas have correctly typed images
+  const areas = (formData.areas || []).map(area => ({
+    ...area,
+    images: convertToPropertyImageArray(area.images as any),
+    imageIds: area.imageIds || []
+  }));
+  
   return {
     ...formData,
-    images: convertToPropertyImageArray(formData.images as any),
-    floorplans: convertToPropertyFloorplanArray(formData.floorplans as any),
+    images,
+    floorplans,
     featuredImages: formData.featuredImages || [],
-    coverImages: convertToPropertyImageArray(formData.coverImages as any),
-    gridImages: convertToPropertyImageArray(formData.gridImages as any),
-    // Ensure areas have correctly typed images
-    areas: (formData.areas || []).map(area => ({
-      ...area,
-      images: convertToPropertyImageArray(area.images as any),
-      imageIds: area.imageIds || []
-    }))
+    coverImages,
+    gridImages,
+    areas
   };
 }

@@ -1,158 +1,148 @@
+
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { OverviewSection } from "../sections/OverviewSection";
-import { DetailsSection } from "../sections/DetailsSection";
-import { AreasSection } from "../sections/AreasSection";
-import { SingleAreaSection } from "../sections/SingleAreaSection";
+import { PropertySection } from "../sections/PropertySection";
+import { IntroductionSection } from "../sections/IntroductionSection";
+import { FeaturesSection } from "../sections/FeaturesSection";
+import { LocationSection } from "../sections/LocationSection";
+import { NearbyPlacesSection } from "../sections/NearbyPlacesSection";
+import { NearbyPlacesList } from "../nearby/NearbyPlacesList";
+import { VirtualTourSection } from "../sections/VirtualTourSection";
 import { FloorplanSection } from "../sections/FloorplanSection";
-import { NeighborhoodSection } from "../sections/NeighborhoodSection";
-import { ContactSection } from "../sections/ContactSection";
-import React from "react";
-import { PropertyImage, PropertyArea } from "@/types/property";
+import { FloorplanEmbedSection } from "../sections/FloorplanEmbedSection";
+import { YoutubeVideoSection } from "../sections/YoutubeVideoSection";
+import { AgentSection } from "../sections/AgentSection";
+import { MainGallerySection } from "../sections/MainGallerySection";
+import { SingleAreaSection } from "../sections/SingleAreaSection";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
-interface SectionConfigProps {
-  property: PropertyData;
-  settings: AgencySettings;
-  currentPage: number;
-  waitForPlaces?: boolean;
-  isPrintView?: boolean;
-}
-
-interface Section {
+// Define the structure for a section configuration
+export interface SectionConfig {
+  id: string;
   title: string;
-  content: React.ReactNode;
+  Component: React.FC<any>;
+  props?: any;
+  visible: (property: PropertyData, settings: AgencySettings) => boolean;
 }
 
-export function getSections({
-  property,
-  settings,
-  currentPage,
-  waitForPlaces = false,
-  isPrintView = false
-}: SectionConfigProps): Section[] {
-  // Debug log for floorplan script
-  console.log('getSections - Property floorplan check:', {
-    propertyId: property.id,
-    hasFloorplanScript: !!property.floorplanEmbedScript,
-    scriptType: typeof property.floorplanEmbedScript,
-    scriptLength: property.floorplanEmbedScript ? property.floorplanEmbedScript.length : 0,
-    scriptEmpty: property.floorplanEmbedScript === '',
-    scriptFirstChars: property.floorplanEmbedScript ? property.floorplanEmbedScript.substring(0, 30) + '...' : 'none'
-  });
-
-  // Start with the fixed sections
-  const sections: Section[] = [
+export const getSections = (property: PropertyData, settings: AgencySettings): SectionConfig[] => {
+  const sections: SectionConfig[] = [
     {
-      title: "Overview",
-      content: <OverviewSection property={property} settings={settings} />
+      id: 'introduction',
+      title: 'Introduction',
+      Component: IntroductionSection,
+      props: { property, settings },
+      visible: (p) => Boolean(p.description)
     },
     {
-      title: "Details",
-      content: <DetailsSection property={property} />
+      id: 'main-gallery',
+      title: 'Gallery',
+      Component: MainGallerySection,
+      props: { property, settings },
+      visible: (p) => p.images && p.images.length > 0
+    },
+    {
+      id: 'features',
+      title: 'Features',
+      Component: FeaturesSection,
+      props: { property, settings },
+      visible: (p) => p.features && p.features.length > 0
+    },
+    // Display each area as a separate section
+    ...(property.areas || []).map((area, index) => {
+      // Find the images for this area
+      const areaImages = (property.images || [])
+        .filter(img => typeof img === 'object' && img.area === area.id)
+        .map(img => {
+          if (typeof img === 'string') {
+            return {
+              id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+              url: img,
+              type: "image" as const
+            };
+          }
+          return {
+            ...img,
+            type: img.type as "image" | "floorplan"
+          };
+        });
+      
+      return {
+        id: `area-${area.id || index}`,
+        title: area.name || `Area ${index + 1}`,
+        Component: SingleAreaSection,
+        props: { area, areaImages },
+        visible: () => true
+      };
+    }),
+    {
+      id: 'location',
+      title: 'Location',
+      Component: LocationSection,
+      props: { property, settings },
+      visible: (p) => Boolean(p.location_description || (p.latitude && p.longitude))
+    },
+    {
+      id: 'nearby-places',
+      title: 'Nearby Places',
+      Component: NearbyPlacesSection,
+      props: { 
+        property, 
+        settings,
+        children: <NearbyPlacesList 
+          places={property.nearby_places || []} 
+          cities={property.nearby_cities || []}
+        /> 
+      },
+      visible: (p) => (p.nearby_places && p.nearby_places.length > 0) || (p.nearby_cities && p.nearby_cities.length > 0)
+    },
+    {
+      id: 'virtual-tour',
+      title: 'Virtual Tour',
+      Component: VirtualTourSection,
+      props: { property, settings },
+      visible: (p) => Boolean(p.virtualTourUrl)
+    },
+    {
+      id: 'floorplan',
+      title: 'Floorplan',
+      Component: FloorplanSection,
+      props: { 
+        property, 
+        settings,
+        floorplans: convertToPropertyImageArray(property.floorplans || [])
+      },
+      visible: (p) => p.floorplans && p.floorplans.length > 0
+    },
+    {
+      id: 'floorplan-embed',
+      title: 'Interactive Floorplan',
+      Component: FloorplanEmbedSection,
+      props: { property, settings },
+      visible: (p) => Boolean(p.floorplanEmbedScript)
+    },
+    {
+      id: 'youtube',
+      title: 'Video',
+      Component: YoutubeVideoSection,
+      props: { property, settings },
+      visible: (p) => Boolean(p.youtubeUrl)
+    },
+    {
+      id: 'agent',
+      title: 'Agent',
+      Component: AgentSection,
+      props: { property, settings },
+      visible: (p) => Boolean(p.agent)
     }
   ];
-  
-  // Add individual area sections
-  if (property.areas && property.areas.length > 0) {
-    property.areas.forEach((area, index) => {
-      sections.push({
-        title: `Area: ${area.title || `Area ${index + 1}`}`,
-        content: <SingleAreaSection property={property} settings={settings} areaIndex={index} />
-      });
-    });
-  }
-  
-  // Add floorplan section if available - improved check to handle empty strings
-  if (property.floorplanEmbedScript && property.floorplanEmbedScript.trim() !== '') {
-    console.log('Adding floorplan section to sections array');
-    sections.push({
-      title: "Floorplan",
-      content: <FloorplanSection property={property} settings={settings} />
-    });
-  } else {
-    console.log('Skipping floorplan section - script is empty or missing:', 
-      property.floorplanEmbedScript === undefined ? 'undefined' : 
-      property.floorplanEmbedScript === null ? 'null' : 
-      property.floorplanEmbedScript === '' ? 'empty string' : 
-      `non-empty but possibly whitespace: "${property.floorplanEmbedScript}"`);
-  }
-  
-  // Add remaining sections
-  sections.push({
-    title: "Neighborhood",
-    content: <NeighborhoodSection 
-      property={property} 
-      settings={settings} 
-      waitForPlaces={waitForPlaces} 
-    />
-  });
-  
-  // Add contact section if not in print view
-  if (!isPrintView) {
-    sections.push({
-      title: "Contact",
-      content: <ContactSection property={property} settings={settings} />
-    });
-  }
 
-  // Log the final sections structure for debugging
-  console.log('Sections generated:', sections.map(s => s.title).join(', '), 
-    { totalSections: sections.length, hasFloorplan: !!property.floorplanEmbedScript });
+  return sections.filter(section => section.visible(property, settings));
+};
 
-  return sections;
+export function getDefaultSection(property: PropertyData): string {
+  if (property.description) return 'introduction';
+  if (property.images && property.images.length > 0) return 'main-gallery';
+  if (property.features && property.features.length > 0) return 'features';
+  return 'property';
 }
-
-export const getAreaSections = (property: PropertyData, settings: AgencySettings) => {
-  if (!property.areas || property.areas.length === 0) return [];
-
-  return property.areas.map((area, index) => {
-    // Get area images
-    const areaImages = property.images
-      ? property.images
-          .filter(img => {
-            if (typeof img === 'string') return false;
-            return img.area === area.id;
-          })
-          .map(img => {
-            if (typeof img === 'string') {
-              return { id: `img-${index}`, url: img, area: area.id, type: 'image' };
-            }
-            return img;
-          })
-      : [];
-
-    return {
-      id: `area-${area.id}`,
-      title: area.title || area.name,
-      component: () => (
-        <SingleAreaSection 
-          area={area} 
-          areaImages={areaImages}
-          property={property}
-          settings={settings}
-          areaIndex={index}
-        />
-      ),
-    };
-  });
-};
-
-export const renderAreaSection = (property: PropertyData, settings: AgencySettings, areaIndex: number) => {
-  if (!property.areas || !property.areas[areaIndex]) {
-    return null;
-  }
-  
-  const area = property.areas[areaIndex];
-  
-  // Find images for this area
-  const areaImages = property.images.filter(img => {
-    if (typeof img === 'string') return false;
-    return img.area === area.id;
-  });
-  
-  // Convert images to proper type
-  const processedAreaImages = convertToPropertyImageArray(areaImages);
-  
-  return <SingleAreaSection area={area} areaImages={processedAreaImages} property={property} settings={settings} areaIndex={areaIndex} />;
-};

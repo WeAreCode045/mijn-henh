@@ -8,8 +8,13 @@ import {
   transformNearbyPlaces, 
   transformGeneralInfo 
 } from '../propertyDataTransformer';
-import { parsePropertyCities, parsePropertyFeatures, parsePropertyAreas, parsePropertyPlaceTypes } from '@/utils/supabaseHelpers';
-import { Json } from '@/utils/supabaseHelpers';
+import { 
+  parsePropertyCities, 
+  parsePropertyFeatures, 
+  parsePropertyAreas, 
+  parsePropertyPlaceTypes 
+} from '@/utils/supabaseJsonTypes';
+import { Json } from '@/utils/supabaseJsonTypes';
 
 /**
  * Fetches property data from Supabase
@@ -43,9 +48,9 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
   }
   
   // Parse and transform the property data
-  const features = safelyParse<PropertyFeature[]>(data.features, transformFeatures);
-  const areas = safelyParse<PropertyArea[]>(data.areas, transformAreas);
-  const nearbyPlaces = safelyParse<PropertyPlaceType[]>(data.nearby_places, transformNearbyPlaces);
+  const features = transformFeatures(parsePropertyFeatures(data.features));
+  const areas = transformAreas(parsePropertyAreas(data.areas));
+  const nearbyPlaces = transformNearbyPlaces(parsePropertyPlaceTypes(data.nearby_places));
   
   // Parse nearby cities with our helper
   const nearbyCities = parsePropertyCities(data.nearby_cities);
@@ -92,6 +97,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     gridImages: [],
     map_image: null,
     created_at: data.created_at || new Date().toISOString(),
-    updated_at: data.updated_at || new Date().toISOString()
+    updated_at: data.updated_at || new Date().toISOString(),
+    areaPhotos: []
   };
 };
