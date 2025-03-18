@@ -12,6 +12,7 @@ import { WebViewFullPage } from "@/components/property/webview/WebViewFullPage";
 import { useWebViewBackground } from "@/components/property/webview/hooks/useWebViewBackground";
 import { hexToHSL } from "@/components/property/webview/utils/colorUtils";
 import "./webview/styles/WebViewStyles.css";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PropertyWebViewProps {
   property?: PropertyData;
@@ -26,6 +27,7 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
   const { settings } = useAgencySettings();
   const contentRef = useRef<HTMLDivElement>(null);
   const printContentRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
   // Debugging the id parameter
   useEffect(() => {
@@ -34,6 +36,17 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
   }, [id, property]);
   
   const { propertyData, isLoading, error } = usePropertyData(id, property);
+  
+  useEffect(() => {
+    if (error) {
+      console.error("PropertyWebView - Error loading property data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load property data. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
   
   const {
     selectedImage,
