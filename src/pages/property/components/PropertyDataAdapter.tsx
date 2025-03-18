@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";

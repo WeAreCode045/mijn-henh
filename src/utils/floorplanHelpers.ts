@@ -22,7 +22,6 @@ export function toFloorplan(floorplan: string | PropertyFloorplan | any): Proper
     title: floorplan.title,
     description: floorplan.description,
     sort_order: floorplan.sort_order || 0,
-    property_id: floorplan.property_id,
     type: "floorplan",
     alt: floorplan.alt
   };
