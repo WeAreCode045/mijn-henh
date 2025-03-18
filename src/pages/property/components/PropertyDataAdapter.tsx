@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
-import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
+import { convertToPropertyImageArray, convertToPropertyFloorplanArray } from "@/utils/propertyDataAdapters";
 
 const safeParseJSON = <T,>(value: string | null | undefined, defaultValue: T): T => {
   if (!value) return defaultValue;
@@ -116,7 +116,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           description: propertyData.description || "",
           location_description: propertyData.location_description || "",
           features: features,
-          images: images,
+          images: convertToPropertyImageArray(images),
           featuredImage: featuredImage,
           featuredImages: featuredImages,
           areas: transformedAreas,
@@ -131,7 +131,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           youtubeUrl: propertyData.youtubeUrl || "",
           created_at: propertyData.created_at || new Date().toISOString(),
           updated_at: propertyData.updated_at || new Date().toISOString(),
-          floorplans: floorplanImages,
+          floorplans: convertToPropertyFloorplanArray(floorplanImages),
           floorplanEmbedScript: propertyData.floorplanEmbedScript || "",
           coverImages: convertToPropertyImageArray(coverImages),
           gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),

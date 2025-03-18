@@ -1,6 +1,8 @@
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyImage } from "@/types/property";
+import { toPropertyImageArray } from "@/utils/imageHelpers";
 
 export function useImageRemoveHandler(
   formData: PropertyFormData,
@@ -22,7 +24,7 @@ export function useImageRemoveHandler(
     if (!formData.id) {
       // If we don't have a property ID yet, just update the local state
       // Create a copy of the images array without the removed image
-      const updatedImages = formData.images.filter((_, i) => i !== index);
+      const updatedImages = [...formData.images].filter((_, i) => i !== index);
       
       // Update the featured image if it was removed
       let updatedFeaturedImage = formData.featuredImage;
@@ -34,23 +36,19 @@ export function useImageRemoveHandler(
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
       // Convert featuredImages to PropertyImage[] for coverImages if needed
-      const updatedCoverImages = updatedFeaturedImages.map(url => {
-        // If it's already a PropertyImage, return it
-        if (typeof url !== 'string') return url;
-        // Otherwise create a new PropertyImage
-        return {
-          id: `temp-${Date.now()}-${Math.random()}`,
-          url: url
-        };
-      });
+      const updatedCoverImages = updatedFeaturedImages.map(url => ({
+        id: `temp-${Date.now()}-${Math.random()}`,
+        url: url,
+        type: "image" as const
+      }));
       
-      // Create an updated form data object
-      const updatedFormData: PropertyFormData = {
+      // Create an updated form data object with type casts to ensure type compatibility
+      const updatedFormData = {
         ...formData,
-        images: updatedImages,
+        images: updatedImages as PropertyImage[],
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages.map(img => ({ ...img, type: "image" as const })) // Ensure proper type
+        coverImages: updatedCoverImages
       };
       
       // Update the form state
@@ -121,7 +119,7 @@ export function useImageRemoveHandler(
       }
       
       // Create a copy of the images array without the removed image
-      const updatedImages = formData.images.filter((_, i) => i !== index);
+      const updatedImages = [...formData.images].filter((_, i) => i !== index);
       
       // Update the featured image if it was removed
       let updatedFeaturedImage = formData.featuredImage;
@@ -133,23 +131,19 @@ export function useImageRemoveHandler(
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
       // Convert featuredImages to PropertyImage[] for coverImages if needed
-      const updatedCoverImages = updatedFeaturedImages.map(url => {
-        // If it's already a PropertyImage, return it
-        if (typeof url !== 'string') return url;
-        // Otherwise create a new PropertyImage
-        return {
-          id: `temp-${Date.now()}-${Math.random()}`,
-          url: url
-        };
-      });
+      const updatedCoverImages = updatedFeaturedImages.map(url => ({
+        id: `temp-${Date.now()}-${Math.random()}`,
+        url: url,
+        type: "image" as const
+      }));
       
-      // Create an updated form data object
-      const updatedFormData: PropertyFormData = {
+      // Create an updated form data object with type casts to ensure type compatibility
+      const updatedFormData = {
         ...formData,
-        images: updatedImages,
+        images: updatedImages as PropertyImage[],
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages.map(img => ({ ...img, type: "image" as const })) // Ensure proper type
+        coverImages: updatedCoverImages
       };
       
       // Update the form state

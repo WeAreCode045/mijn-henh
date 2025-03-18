@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +68,7 @@ export function FloorplansTab({
           id: data.id,
           url: publicUrl,
           sort_order: highestSortOrder,
-          type: "floorplan" as const
+          type: "floorplan"
         });
       }
       

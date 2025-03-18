@@ -67,7 +67,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     energyLabel: data.energyLabel || '',
     hasGarden: !!data.hasGarden,
     description: data.description || '',
-    shortDescription: data.shortDescription || data.description || '', // Use description as fallback
+    shortDescription: data.description || '', // Use description as fallback for shortDescription
     location_description: data.location_description || '',
     features,
     areas,
