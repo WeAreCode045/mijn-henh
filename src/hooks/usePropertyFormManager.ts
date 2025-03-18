@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { usePropertyFormState } from '@/hooks/usePropertyFormState';
 import { usePropertyFeatures } from './property-form/usePropertyFeatures';
@@ -9,16 +9,9 @@ import { usePropertyImages } from './property-form/usePropertyImages';
 import { usePropertyFloorplans } from './images/usePropertyFloorplans';
 import { usePropertyAreaPhotos } from './images/usePropertyAreaPhotos';
 import { usePropertyCoverImages } from './usePropertyCoverImages';
-
-// Define a wrapper for handleFieldChange
-const createFieldChangeWrapper = (handleFieldChange: <K extends keyof PropertyFormData>(field: K, value: PropertyFormData[K]) => void) => {
-  return (data: PropertyFormData) => {
-    // For each property in data, call handleFieldChange
-    Object.entries(data).forEach(([key, value]) => {
-      handleFieldChange(key as keyof PropertyFormData, value as any);
-    });
-  };
-};
+import { usePropertyMediaHandlers } from './property-form/usePropertyMediaHandlers';
+import { useSaveHandlers } from './property-form/useSaveHandlers';
+import { createFieldChangeWrapper } from './property-form/utils/fieldChangeUtils';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
@@ -27,6 +20,9 @@ export function usePropertyFormManager(property: PropertyFormData) {
   const { 
     handleFieldChange 
   } = usePropertyFormState(formState, setFormState);
+  
+  // Create a wrapper function for hooks that expect a function with (data: PropertyFormData) signature
+  const fieldChangeWrapper = createFieldChangeWrapper(handleFieldChange);
   
   // Hook for managing features
   const { 
@@ -46,28 +42,8 @@ export function usePropertyFormManager(property: PropertyFormData) {
     isUploading
   } = usePropertyAreas(formState, handleFieldChange);
   
-  // Create a wrapper function for hooks that expect a function with (data: PropertyFormData) signature
-  const fieldChangeWrapper = createFieldChangeWrapper(handleFieldChange);
-  
-  // Hook for managing content and steps
-  const { 
-    fetchLocationData,
-    fetchCategoryPlaces,
-    fetchNearbyCities,
-    generateLocationDescription,
-    generateMapImage,
-    removeNearbyPlace,
-    isLoadingLocationData,
-    isGeneratingMap,
-    currentStep,
-    handleStepClick,
-    handleNext,
-    handlePrevious,
-    lastSaved,
-    isSaving,
-    setPendingChanges,
-    onSubmit
-  } = usePropertyContent(formState, handleFieldChange);
+  // Property content hook (for loading/saving data)
+  const propertyContentHook = usePropertyContent(property.id);
   
   // Hook for managing images
   const {
@@ -76,14 +52,8 @@ export function usePropertyFormManager(property: PropertyFormData) {
     images
   } = usePropertyImages(formState, handleFieldChange);
   
-  // Get the floorplan hooks but create a stub for missing methods
+  // Get the floorplan hooks
   const floorplanHooks = usePropertyFloorplans(formState, fieldChangeWrapper);
-  
-  // Create a stub for handleFloorplanEmbedScriptUpdate if it doesn't exist
-  const handleFloorplanEmbedScriptUpdate = floorplanHooks.handleFloorplanEmbedScriptUpdate || 
-    ((script: string) => {
-      handleFieldChange('floorplanEmbedScript', script);
-    });
   
   // Hook for managing area photos
   const {
@@ -91,33 +61,22 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveAreaPhoto
   } = usePropertyAreaPhotos(formState, setFormState);
   
-  // Get the cover image hooks but create stubs for missing methods
+  // Get the cover image hooks
   const coverImageHooks = usePropertyCoverImages(formState, fieldChangeWrapper);
   
-  // Create stubs for missing methods
-  const handleSetFeaturedImage = coverImageHooks.handleSetFeaturedImage || 
-    ((url: string | null) => {
-      handleFieldChange('featuredImage', url);
-    });
-  
-  const handleToggleFeaturedImage = coverImageHooks.handleToggleFeaturedImage || 
-    ((url: string) => {
-      const featuredImages = [...(formState.featuredImages || [])];
-      if (featuredImages.includes(url)) {
-        handleFieldChange('featuredImages', featuredImages.filter(img => img !== url));
-      } else {
-        handleFieldChange('featuredImages', [...featuredImages, url]);
-      }
-    });
-  
   // Media update handlers
-  const handleVirtualTourUpdate = (url: string) => {
-    handleFieldChange('virtualTourUrl', url);
-  };
+  const {
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate
+  } = usePropertyMediaHandlers(formState, handleFieldChange);
   
-  const handleYoutubeUrlUpdate = (url: string) => {
-    handleFieldChange('youtubeUrl', url);
-  };
+  // Save handlers
+  const {
+    handleSaveObjectId,
+    handleSaveAgent,
+    handleSaveTemplate
+  } = useSaveHandlers(handleFieldChange);
   
   return {
     formState,
@@ -136,27 +95,12 @@ export function usePropertyFormManager(property: PropertyFormData) {
     onAreaImagesSelect: handleAreaImagesSelect,
     handleAreaImageUpload,
     
-    // Location methods
-    onFetchLocationData: fetchLocationData,
-    onFetchCategoryPlaces: fetchCategoryPlaces,
-    onFetchNearbyCities: fetchNearbyCities,
-    onGenerateLocationDescription: generateLocationDescription,
-    onGenerateMap: generateMapImage,
-    onRemoveNearbyPlace: removeNearbyPlace,
-    isLoadingLocationData,
-    isGeneratingMap,
-    
-    // Step navigation
-    onSubmit,
-    currentStep,
-    handleStepClick,
-    handleNext,
-    handlePrevious,
-    
-    // Status
-    lastSaved,
-    isSaving,
-    setPendingChanges,
+    // Property content methods
+    refreshData: propertyContentHook.refreshData,
+    pendingChanges: propertyContentHook.pendingChanges,
+    setPendingChanges: propertyContentHook.setPendingChanges,
+    savePropertyData: propertyContentHook.savePropertyData,
+    isSaving: propertyContentHook.isSaving,
     
     // Image methods
     handleImageUpload,
@@ -175,22 +119,22 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveAreaPhoto,
     
     // Featured image methods
-    handleSetFeaturedImage,
-    handleToggleFeaturedImage,
+    handleSetFeaturedImage: coverImageHooks.handleSetFeaturedImage,
+    handleToggleFeaturedImage: coverImageHooks.handleToggleFeaturedImage,
     
     // Media update methods
     handleVirtualTourUpdate,
     handleYoutubeUrlUpdate,
     
     // Save handlers
-    handleSaveObjectId: (objectId: string) => {
-      handleFieldChange('object_id', objectId);
-    },
-    handleSaveAgent: (agentId: string) => {
-      handleFieldChange('agent_id', agentId);
-    },
-    handleSaveTemplate: (templateId: string) => {
-      handleFieldChange('template_id', templateId);
-    }
+    handleSaveObjectId,
+    handleSaveAgent,
+    handleSaveTemplate,
+    
+    // Stub properties to maintain compatibility with PropertyFormManagerChildrenProps
+    currentStep: 0,
+    handleStepClick: () => {},
+    lastSaved: null,
+    onSubmit: () => {}
   };
 }
