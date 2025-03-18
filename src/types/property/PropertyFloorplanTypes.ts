@@ -13,6 +13,6 @@ export interface PropertyFloorplan {
   property_id?: string;
   is_featured?: boolean;
   timestamp?: string;
-  type: "floorplan";  // Adding required type property
+  type: "floorplan";  // Required type property to distinguish from images
   columns?: number;
 }

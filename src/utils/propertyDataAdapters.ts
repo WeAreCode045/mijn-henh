@@ -1,5 +1,7 @@
 
 import { PropertyImage, PropertyFloorplan, PropertyFormData } from "@/types/property";
+import { toFloorplan } from "./floorplanHelpers";
+import { normalizeImage } from "./imageHelpers";
 
 /**
  * Convert mixed image types to PropertyImage[]

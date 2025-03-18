@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
+import { PropertyData, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
 import { supabase } from "@/integrations/supabase/client";
