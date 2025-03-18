@@ -8,7 +8,7 @@ import {
   transformNearbyPlaces, 
   transformGeneralInfo 
 } from '../propertyDataTransformer';
-import { safeJsonParse } from '@/utils/supabaseTypes';
+import { safeJsonParse, jsonToString } from '@/utils/supabaseTypes';
 
 /**
  * Fetches property data from Supabase
@@ -41,10 +41,10 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     return null;
   }
   
-  // Parse and transform the property data
-  const features = transformFeatures(safeJsonParse(data.features as string, []));
-  const areas = transformAreas(safeJsonParse(data.areas as string, []));
-  const nearbyPlaces = transformNearbyPlaces(safeJsonParse(data.nearby_places as string, []));
+  // Parse and transform the property data - convert from JSON strings to objects
+  const features = transformFeatures(safeJsonParse<any[]>(data.features as string, []));
+  const areas = transformAreas(safeJsonParse<any[]>(data.areas as string, []));
+  const nearbyPlaces = transformNearbyPlaces(safeJsonParse<any[]>(data.nearby_places as string, []));
   
   // Parse nearby cities with our helper
   const nearbyCities = safeJsonParse<PropertyCity[]>(data.nearby_cities as string, []);
@@ -66,7 +66,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     energyLabel: data.energyLabel || '',
     hasGarden: !!data.hasGarden,
     description: data.description || '',
-    shortDescription: data.description || '', // Fallback to description
+    shortDescription: data.shortDescription || data.description || '', // Fallback to description
     location_description: data.location_description || '',
     features,
     areas,
@@ -81,7 +81,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
-    propertyType: '', // Default to empty string
+    propertyType: data.propertyType || '', // Default to empty string
     generalInfo,
     images: [],
     floorplans: [],

@@ -1,57 +1,29 @@
 
-import { PropertyFormData } from "@/types/property";
-
-/**
- * Extracts a property ID from various formats
- */
-export const extractPropertyId = (propertyId: string | any): string => {
-  if (typeof propertyId === 'string') {
-    return propertyId;
-  }
-  
-  if (propertyId && typeof propertyId === 'object' && 'id' in propertyId) {
-    return propertyId.id;
-  }
-  
+// Helper to safely extract property ID
+export function extractPropertyId(propertyId: string | any): string {
+  // Handle different types to ensure we return a string or empty string
+  if (typeof propertyId === 'string') return propertyId;
+  if (propertyId && typeof propertyId === 'object' && propertyId.id) return propertyId.id.toString();
   return '';
-};
+}
 
-/**
- * Checks if a property ID is empty
- */
-export const isPropertyIdEmpty = (id: string): boolean => {
+// Check if property ID is empty
+export function isPropertyIdEmpty(id: string): boolean {
   return !id || id.trim() === '';
-};
+}
 
-/**
- * Safely parses JSON or returns default value
- */
-export const safelyParse = <T,>(value: string | undefined | null, transformer: (val: any) => T): T => {
-  if (!value) return transformer([]);
-  
+// Helper to safely parse JSON
+export function safelyParse<T>(json: string | null | undefined, defaultValue: T): T {
+  if (!json) return defaultValue;
   try {
-    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
-    return transformer(parsed);
+    return JSON.parse(json) as T;
   } catch (e) {
-    console.error('Error parsing:', e);
-    return transformer([]);
+    console.error('Failed to parse JSON:', e);
+    return defaultValue;
   }
-};
+}
 
-/**
- * Checks if a form has pending changes
- */
-export const hasFormChanges = (formData: PropertyFormData, originalData: PropertyFormData): boolean => {
-  return JSON.stringify(formData) !== JSON.stringify(originalData);
-};
-
-/**
- * Determines if we should fetch property data based on current state
- */
-export const shouldFetchProperty = (
-  id: string | undefined, 
-  isLoading: boolean,
-  formData: PropertyFormData
-): boolean => {
-  return !!id && !isLoading && !formData.id;
-};
+// Determine if we should fetch property data
+export function shouldFetchProperty(id: string | undefined): boolean {
+  return id !== undefined && id !== null && id !== '';
+}

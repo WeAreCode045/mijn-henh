@@ -32,3 +32,9 @@ export function safeJsonParse<T>(value: string | null | undefined, defaultValue:
     return defaultValue;
   }
 }
+
+// Convert Json to string for database operations
+export function jsonToString(value: any): string {
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value);
+}

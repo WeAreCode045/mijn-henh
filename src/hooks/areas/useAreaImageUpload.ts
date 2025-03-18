@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData, PropertyImage, PropertyArea } from "@/types/property";
-import { normalizeImage } from "@/utils/imageHelpers";
 import { convertToPropertyImageArray } from '@/utils/propertyDataAdapters';
 
 export function useAreaImageUpload(property_id: string, areaId: string, imageIds: string[], setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>) {
@@ -78,22 +77,30 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
           is_main: imageData.is_main,
           is_featured_image: imageData.is_featured_image,
           sort_order: imageData.sort_order,
-          type: imageData.type as "image" | "floorplan"
+          type: (imageData.type || 'image') as "image" | "floorplan"
         };
         
         uploadedImages.push(normalizedImage);
       }
       
       // Update the form state with the new image IDs
-      setFormState(prevFormData => {
+      setFormState((prevFormData: PropertyFormData) => {
         // Create a deep copy of the areas array
-        const updatedAreas = prevFormData.areas.map(area => {
+        const updatedAreas = prevFormData.areas.map((area) => {
           if (area.id === areaId) {
+            // Convert any existing string images to PropertyImage objects
+            const normalizedImages = Array.isArray(area.images) 
+              ? convertToPropertyImageArray(area.images as any[])
+              : [];
+              
+            // Combine existing and new images
+            const combinedImages = [...normalizedImages, ...uploadedImages];
+            
             // Create a copy of this specific area with updated imageIds and images
             return {
               ...area,
               imageIds: [...(area.imageIds || []), ...uploadedImageIds],
-              images: [...(area.images || []), ...uploadedImages]
+              images: combinedImages
             };
           }
           return area;

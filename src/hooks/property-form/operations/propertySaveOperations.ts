@@ -2,17 +2,17 @@
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
 import { extractPropertyId, isPropertyIdEmpty } from '../utils/dataTransformationUtils';
-import { asJsonArray } from '@/utils/supabaseTypes';
+import { jsonToString, asJsonArray, Json } from '@/utils/supabaseTypes';
 
 /**
  * Prepares property data for saving to Supabase
  */
 export const preparePropertyDataForSave = (formData: PropertyFormData) => {
   // Safely convert objects to JSON strings
-  const features = Array.isArray(formData.features) ? JSON.stringify(formData.features) : JSON.stringify([]);
-  const areas = Array.isArray(formData.areas) ? JSON.stringify(formData.areas) : JSON.stringify([]);
-  const nearby_places = Array.isArray(formData.nearby_places) ? JSON.stringify(formData.nearby_places) : JSON.stringify([]);
-  const nearby_cities = Array.isArray(formData.nearby_cities) ? JSON.stringify(formData.nearby_cities) : JSON.stringify([]);
+  const features = JSON.stringify(Array.isArray(formData.features) ? formData.features : []);
+  const areas = JSON.stringify(Array.isArray(formData.areas) ? formData.areas : []);
+  const nearby_places = JSON.stringify(Array.isArray(formData.nearby_places) ? formData.nearby_places : []);
+  const nearby_cities = JSON.stringify(Array.isArray(formData.nearby_cities) ? formData.nearby_cities : []);
   const generalInfo = formData.generalInfo ? JSON.stringify(formData.generalInfo) : null;
   
   return {

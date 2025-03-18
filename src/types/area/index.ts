@@ -15,4 +15,4 @@ export interface AreaImage {
 }
 
 // Re-exports for backwards compatibility
-export { Area as AreaImageData };
+export type AreaImageData = AreaImage;

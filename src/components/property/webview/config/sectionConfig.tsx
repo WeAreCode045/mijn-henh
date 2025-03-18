@@ -17,10 +17,26 @@ export const getSections = (property: PropertyData, settings: AgencySettings): S
   const sections: SectionConfig[] = [
     // Display each area as a separate section
     ...(property.areas || []).map((area, index) => {
-      // Find the images for this area
+      // Find the images for this area - make sure to handle both string and PropertyImage objects
       const areaImages = (property.images || [])
-        .filter(img => img.area === area.id)
-        .map(img => convertToPropertyImageArray([img])[0]);
+        .filter(img => {
+          // If img is a string, it can't have an area property
+          if (typeof img === 'string') return false;
+          // If img is an object, check if its area property matches the area id
+          return img.area === area.id;
+        })
+        .map(img => {
+          // Ensure all images are PropertyImage objects
+          if (typeof img === 'string') {
+            // Convert string to PropertyImage - this shouldn't happen based on the filter above
+            return {
+              id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              url: img,
+              type: "image" as const
+            };
+          }
+          return img; // Already a PropertyImage
+        });
       
       return {
         id: `area-${area.id || index}`,
