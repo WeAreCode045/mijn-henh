@@ -1,5 +1,5 @@
 
-import { PropertyImage, PropertyFloorplan, PropertyArea } from "@/types/property";
+import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
  * Utility functions to handle mixed types (string and object types)
@@ -20,7 +20,7 @@ export function stringToPropertyImage(url: string): PropertyImage {
   return {
     id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     url,
-    type: 'image'
+    type: "image"
   };
 }
 

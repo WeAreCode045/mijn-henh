@@ -58,9 +58,9 @@ export interface PropertyAgent {
 }
 
 export interface GeneralInfoData {
-  propertyDetails: Record<string, any>;
-  description: Record<string, any>;
-  keyInformation: Record<string, any>;
+  propertyDetails?: Record<string, any>;
+  description?: Record<string, any>;
+  keyInformation?: Record<string, any>;
   [key: string]: any;
 }
 

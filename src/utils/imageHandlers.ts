@@ -1,81 +1,61 @@
 
-import { PropertyImage, PropertyFloorplan } from '@/types/property';
+import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Safe function to get the URL from any image type
+ * Safely gets a URL from a mixed type (string or PropertyImage)
+ * This is essential for handling components that accept both formats
  */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
-  if (!image) return '';
+export function safelyGetImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return "";
   if (typeof image === 'string') return image;
-  return image.url || '';
+  return image.url;
 }
 
 /**
- * Safe function to get the alt text from any image type
+ * Normalizes an image collection to ensure consistent handling
+ * This handles arrays that could contain strings, PropertyImage objects, or both
  */
-export function getImageAlt(image: string | PropertyImage | PropertyFloorplan | null | undefined, defaultAlt: string = ''): string {
-  if (!image || typeof image === 'string') return defaultAlt;
-  return (image as any).alt || (image as any).title || defaultAlt;
+export function normalizeImageCollection(images: (string | PropertyImage)[]): PropertyImage[] {
+  if (!images) return [];
+  
+  return images.map(img => {
+    if (typeof img === 'string') {
+      return {
+        id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        url: img,
+        type: 'image'
+      };
+    }
+    return img;
+  });
 }
 
 /**
- * Convert a string to a PropertyImage object
+ * Transforms any image-like object into a PropertyImage
+ * This is useful when working with data from different sources
  */
-export function stringToImage(url: string): PropertyImage {
-  return {
-    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url,
-    type: 'image'
-  };
-}
-
-/**
- * Converts any input to a PropertyImage
- */
-export function asPropertyImage(input: string | PropertyImage | PropertyFloorplan): PropertyImage {
-  if (typeof input === 'string') {
-    return stringToImage(input);
+export function transformToPropertyImage(image: any): PropertyImage {
+  if (typeof image === 'string') {
+    return {
+      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: image,
+      type: 'image'
+    };
   }
   
-  // Already a PropertyImage or close enough
+  // If it's already an object, ensure it has the required properties
   return {
-    id: input.id,
-    url: input.url,
-    type: (input as any).type || 'image',
-    title: (input as any).title,
-    description: (input as any).description,
-    alt: (input as any).alt,
-    area: (input as any).area,
-    is_main: (input as any).is_main,
-    is_featured_image: (input as any).is_featured_image,
-    sort_order: (input as any).sort_order,
-    filePath: (input as any).filePath,
-    property_id: (input as any).property_id
+    id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: image.url || '',
+    type: image.type || 'image',
+    alt: image.alt,
+    title: image.title,
+    description: image.description,
+    is_main: image.is_main,
+    is_featured_image: image.is_featured_image,
+    sort_order: image.sort_order,
+    property_id: image.property_id,
+    area: image.area,
+    filePath: image.filePath
   };
 }
-
-/**
- * Converts any array of images to a consistent PropertyImage array
- */
-export function normalizeImageArray(images: (string | PropertyImage | PropertyFloorplan)[]): PropertyImage[] {
-  if (!images || !Array.isArray(images)) return [];
-  return images.map(img => asPropertyImage(img));
-}
-
-/**
- * Safely gets a property from an image that might be a string
- */
-export function getImageProperty<T>(
-  image: string | PropertyImage | PropertyFloorplan | null | undefined,
-  prop: string,
-  defaultValue: T
-): T {
-  if (!image || typeof image === 'string') return defaultValue;
-  return (image as any)[prop] !== undefined ? (image as any)[prop] : defaultValue;
-}
-
-/**
- * Functions for safe image access with normalization
- */
-export const safelyGetImageUrl = getImageUrl;
-export const normalizeImageCollection = normalizeImageArray;

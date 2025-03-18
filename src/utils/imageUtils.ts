@@ -1,63 +1,69 @@
 
-import { PropertyImage } from "@/types/property";
+import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Convert a string URL or a raw object to a PropertyImage object
+ * Convert a string URL to a PropertyImage object
  */
-export function toPropertyImage(
-  image: string | Record<string, any>
-): PropertyImage {
-  if (typeof image === 'string') {
-    return {
-      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: image,
-      type: "image"
-    };
-  }
-  
-  if (image && typeof image === 'object') {
-    return {
-      id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: image.url || '',
-      area: image.area || null,
-      property_id: image.property_id || undefined,
-      is_main: image.is_main || false,
-      is_featured_image: image.is_featured_image || false,
-      sort_order: image.sort_order || 0,
-      type: image.type || "image",
-      title: image.title || '',
-      description: image.description || '',
-      filePath: image.filePath || undefined,
-      alt: image.alt || ''
-    };
-  }
-  
-  // Default fallback
+export function toPropertyImage(url: string): PropertyImage {
   return {
     id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url: '',
-    type: "image"
+    url,
+    type: 'image'
   };
 }
 
 /**
- * Gets the title or alt text from an image, with fallbacks
+ * Normalize different image formats into a consistent PropertyImage
  */
-export function getImageTitle(
-  image: PropertyImage | Record<string, any> | null | undefined,
-  defaultTitle: string = 'Image'
-): string {
-  if (!image) return defaultTitle;
-  return image.title || image.alt || defaultTitle;
+export function normalizeImage(img: string | PropertyImage | Record<string, any>): PropertyImage {
+  // If it's a simple string URL
+  if (typeof img === 'string') {
+    return toPropertyImage(img);
+  }
+  
+  // If it's already a PropertyImage or a similar object
+  return {
+    id: img.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: img.url,
+    type: img.type || 'image',
+    area: img.area,
+    property_id: img.property_id,
+    is_main: img.is_main,
+    is_featured_image: img.is_featured_image,
+    sort_order: img.sort_order,
+    title: img.title,
+    description: img.description,
+    alt: img.alt,
+    filePath: img.filePath
+  };
 }
 
 /**
- * Gets URL from any object that might be an image
+ * Safely get image URL regardless of type
  */
-export function getImageUrl(
-  input: string | PropertyImage | Record<string, any> | null | undefined
-): string {
-  if (!input) return '';
-  if (typeof input === 'string') return input;
-  return input.url || '';
+export function getImageUrl(image: string | PropertyImage | null | undefined): string {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  return image.url;
+}
+
+/**
+ * Format image data for display
+ */
+export function formatImageForDisplay(img: PropertyImage | string): PropertyImage {
+  if (typeof img === 'string') {
+    return {
+      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`,
+      url: img,
+      type: 'image'
+    };
+  }
+  return img;
+}
+
+/**
+ * Get image title or generate one
+ */
+export function getImageTitle(img: PropertyImage | PropertyFloorplan): string {
+  return img.title || 'Image';
 }
