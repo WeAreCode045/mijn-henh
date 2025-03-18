@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyFormData } from '@/types/property';
+import { PropertyFormData, PropertyImage } from '@/types/property';
 import { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
+import { toPropertyImage, getImageUrl } from '@/utils/imageTypeConverters';
 
 // Define the submission type for this custom hook
 export interface Submission {
@@ -99,13 +100,19 @@ export function usePropertyMainImages(
   };
 
   // Toggle whether an image is in the featured images collection
-  const handleToggleFeaturedImage = async (url: string) => {
+  const handleToggleFeaturedImage = async (image: PropertyImage | string) => {
     if (!formData.id) return;
+    
+    const imageUrl = typeof image === 'string' ? image : image.url;
     
     setIsUpdating(true);
     try {
       // Check if the image is already in the featured images
-      const isInFeatured = formData.featuredImages?.includes(url) || false;
+      const featuredImagesUrls = formData.featuredImages?.map(img => 
+        typeof img === 'string' ? img : img.url
+      ) || [];
+      
+      const isInFeatured = featuredImagesUrls.includes(imageUrl);
       
       if (!isInFeatured) {
         // Check if we already have 4 featured images
@@ -113,13 +120,15 @@ export function usePropertyMainImages(
         if (currentFeaturedImages.length >= 4) {
           // Remove the oldest featured image
           const oldestFeaturedImage = currentFeaturedImages[0];
+          const oldestUrl = typeof oldestFeaturedImage === 'string' ? 
+            oldestFeaturedImage : oldestFeaturedImage.url;
           
           // Unmark it in the database
           const { error: resetError } = await supabase
             .from('property_images')
             .update({ is_featured_image: false })
             .eq('property_id', formData.id)
-            .eq('url', oldestFeaturedImage);
+            .eq('url', oldestUrl);
             
           if (resetError) {
             throw resetError;
@@ -132,7 +141,7 @@ export function usePropertyMainImages(
         .from('property_images')
         .update({ is_featured_image: !isInFeatured })
         .eq('property_id', formData.id)
-        .eq('url', url);
+        .eq('url', imageUrl);
         
       if (updateError) {
         throw updateError;
@@ -141,14 +150,21 @@ export function usePropertyMainImages(
       // Update local state
       setFormData(prevState => {
         const currentFeaturedImages = prevState.featuredImages || [];
-        let updatedFeaturedImages;
+        const currentFeaturedUrls = currentFeaturedImages.map(img => 
+          typeof img === 'string' ? img : img.url
+        );
+        
+        let updatedFeaturedImages: PropertyImage[];
         
         if (isInFeatured) {
           // Remove from featured
-          updatedFeaturedImages = currentFeaturedImages.filter(img => img !== url);
+          updatedFeaturedImages = currentFeaturedImages.filter(img => 
+            getImageUrl(img) !== imageUrl
+          );
         } else {
           // Add to featured, maintaining max 4 images
-          updatedFeaturedImages = [...currentFeaturedImages, url];
+          const newImage = typeof image === 'string' ? toPropertyImage(image) : image;
+          updatedFeaturedImages = [...currentFeaturedImages, newImage];
           if (updatedFeaturedImages.length > 4) {
             updatedFeaturedImages = updatedFeaturedImages.slice(1); // Remove oldest
           }

@@ -1,8 +1,8 @@
 
 import { PropertyData, PropertyImage, PropertyFloorplan, PropertyFeature, PropertyPlaceType, PropertyCity, PropertyGeneralInfo } from "@/types/property";
-import { toPropertyImage, toPropertyFloorplan } from "./imageTypeConverters";
+import { toPropertyImage, toPropertyFloorplan, getImageUrl, extractImageUrls as getImageUrls } from "./imageTypeConverters";
 
-// Remove the conflicting import
+// Remove the conflicting import - using getImageUrls instead
 // import { extractImageUrls } from "./imageTypeConverters";
 
 /**
@@ -100,22 +100,25 @@ export function convertPropertyDataToDto(propertyData: PropertyData): any {
     dto.generalInfo = JSON.stringify(dto.generalInfo);
   }
   
+  // Add URL string arrays for database compatibility
+  const result: any = { ...dto };
+  
   // Convert images and floorplans to URL strings for database
   if (dto.images && Array.isArray(dto.images)) {
-    dto.imagesAsUrls = extractImageUrls(dto.images);
+    result.imagesUrls = extractImageUrls(dto.images);
   }
   
   if (dto.featuredImages && Array.isArray(dto.featuredImages)) {
-    dto.featuredImagesAsUrls = extractImageUrls(dto.featuredImages);
+    result.featuredImagesUrls = extractImageUrls(dto.featuredImages);
   }
   
   if (dto.coverImages && Array.isArray(dto.coverImages)) {
-    dto.coverImagesAsUrls = extractImageUrls(dto.coverImages);
+    result.coverImagesUrls = extractImageUrls(dto.coverImages);
   }
   
   if (dto.gridImages && Array.isArray(dto.gridImages)) {
-    dto.gridImagesAsUrls = extractImageUrls(dto.gridImages);
+    result.gridImagesUrls = extractImageUrls(dto.gridImages);
   }
   
-  return dto;
+  return result;
 }

@@ -7,7 +7,7 @@ import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
-import { toPropertyImageArray, extractImageUrls } from "@/utils/imageTypeConverters";
+import { toPropertyImageArray, extractImageUrls, getImageUrl } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -39,6 +39,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
   const images = convertToPropertyImageArray(localProperty.images || []);
+  const featuredImages = toPropertyImageArray(localProperty.featuredImages || []);
 
   return (
     <div className="space-y-6">
@@ -56,7 +57,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             onRemoveImage={handleRemoveImage} 
             isUploading={isSaving}
             featuredImage={localProperty.featuredImage}
-            featuredImages={toPropertyImageArray(localProperty.featuredImages || [])}
+            featuredImages={featuredImages}
             onSetFeaturedImage={handleSetFeaturedImage}
             onToggleFeaturedImage={handleToggleFeaturedImage}
             propertyId={localProperty.id}
