@@ -81,7 +81,7 @@ export function DashboardTabContent({
               </div>
               <div>
                 <span className="font-medium">Type:</span>
-                <p>{property.propertyType || property.property_type || 'Not specified'}</p>
+                <p>{property.propertyType || 'Not specified'}</p>
               </div>
               <div>
                 <span className="font-medium">Features:</span>

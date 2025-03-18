@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ interface ContentTabContentProps {
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
+  handleNext?: () => void;
+  handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onFetchNearbyCities?: () => Promise<any>;
