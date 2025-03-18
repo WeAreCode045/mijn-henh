@@ -44,9 +44,11 @@ export function usePropertyContent(propertyId: string) {
       // Log the ID for debugging purposes
       console.log("Attempting to fetch property with ID:", id);
       
-      // Only validate that we have an ID, but don't throw an error yet
-      if (!id) {
+      // If the ID is empty, just set a default form data and exit early
+      if (!id || id.trim() === '') {
         console.warn('Empty property ID provided:', propertyId);
+        setIsLoading(false);
+        return;
       }
 
       const { data, error } = await supabase
@@ -135,7 +137,8 @@ export function usePropertyContent(propertyId: string) {
       // Ensure propertyId is a string
       const id = typeof propertyId === 'string' ? propertyId : '';
       
-      if (!id) {
+      // Validate ID before attempting to save
+      if (!id || id.trim() === '') {
         console.error('Invalid property ID for saving:', propertyId);
         throw new Error('Invalid property ID');
       }
@@ -200,7 +203,7 @@ export function usePropertyContent(propertyId: string) {
   }, [formData, propertyId, toast]);
 
   useEffect(() => {
-    if (propertyId) {
+    if (propertyId && propertyId.trim() !== '') {
       fetchPropertyData();
     }
   }, [propertyId, fetchPropertyData]);
