@@ -9,6 +9,7 @@ import { PropertyData } from '@/types/property';
 import { Button } from './ui/button';
 import { useToast } from './ui/use-toast';
 import { usePropertyTabs } from '@/hooks/usePropertyTabs';
+import { PropertyTabContents } from '@/components/property/tabs/wrapper/PropertyTabContents';
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -68,7 +69,41 @@ export function PropertyForm() {
           <PropertyFormManager property={emptyProperty}>
             {(formProps) => (
               <div className="mt-4">
-                {/* Content will be loaded based on active tab via PropertyTabContents */}
+                <PropertyTabContents
+                  activeTab={activeTab}
+                  property={emptyProperty}
+                  formState={formProps.formState}
+                  agentInfo={{ id: '', name: '' }}
+                  templateInfo={{ id: 'default', name: 'Default Template' }}
+                  isUpdating={false}
+                  onDelete={() => Promise.resolve()}
+                  onFieldChange={formProps.handleFieldChange}
+                  onAddFeature={formProps.addFeature}
+                  onRemoveFeature={formProps.removeFeature}
+                  onUpdateFeature={formProps.updateFeature}
+                  onAddArea={formProps.addArea}
+                  onRemoveArea={formProps.removeArea}
+                  onUpdateArea={formProps.updateArea}
+                  onAreaImageRemove={formProps.handleAreaImageRemove}
+                  onAreaImagesSelect={formProps.handleAreaImagesSelect}
+                  onAreaImageUpload={formProps.handleAreaImageUpload}
+                  handleImageUpload={formProps.handleImageUpload}
+                  handleRemoveImage={formProps.handleRemoveImage}
+                  isUploading={formProps.isUploading}
+                  handleAreaPhotosUpload={formProps.handleAreaPhotosUpload}
+                  handleRemoveAreaPhoto={formProps.handleRemoveAreaPhoto}
+                  handleFloorplanUpload={formProps.handleFloorplanUpload}
+                  handleRemoveFloorplan={formProps.handleRemoveFloorplan}
+                  isUploadingFloorplan={formProps.isUploadingFloorplan || false}
+                  handleSetFeaturedImage={formProps.handleSetFeaturedImage}
+                  handleToggleFeaturedImage={formProps.handleToggleFeaturedImage}
+                  handleVirtualTourUpdate={formProps.handleVirtualTourUpdate}
+                  handleYoutubeUrlUpdate={formProps.handleYoutubeUrlUpdate}
+                  handleFloorplanEmbedScriptUpdate={formProps.handleFloorplanEmbedScriptUpdate}
+                  currentStep={formProps.currentStep || 0}
+                  handleStepClick={formProps.handleStepClick || (() => {})}
+                  onSubmit={() => console.log("Form submitted")}
+                />
               </div>
             )}
           </PropertyFormManager>

@@ -78,7 +78,17 @@ export const TabContentRenderers = {
     if (activeTab === 'content') {
       return renderContentTab({
         formData: formState,
-        ...handlers
+        ...handlers,
+        handleNext: () => {
+          if (handlers.currentStep < 3) {
+            handlers.handleStepClick(handlers.currentStep + 1);
+          }
+        },
+        handlePrevious: () => {
+          if (handlers.currentStep > 0) {
+            handlers.handleStepClick(handlers.currentStep - 1);
+          }
+        }
       });
     }
     
