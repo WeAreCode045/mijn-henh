@@ -52,6 +52,12 @@ export function PropertyForm() {
     }
   }, [id]);
 
+  // Create a wrapper that returns a Promise for functions that don't
+  const asyncWrapper = (fn: Function) => async (...args: any[]) => {
+    fn(...args);
+    return Promise.resolve();
+  };
+
   return (
     <Card className="shadow-md">
       <CardHeader>
@@ -87,12 +93,12 @@ export function PropertyForm() {
                   onAreaImageRemove={formProps.handleAreaImageRemove}
                   onAreaImagesSelect={formProps.handleAreaImagesSelect}
                   onAreaImageUpload={formProps.handleAreaImageUpload}
-                  handleImageUpload={formProps.handleImageUpload}
+                  handleImageUpload={asyncWrapper(formProps.handleImageUpload)}
                   handleRemoveImage={formProps.handleRemoveImage}
                   isUploading={formProps.isUploading}
-                  handleAreaPhotosUpload={formProps.handleAreaPhotosUpload}
+                  handleAreaPhotosUpload={formProps.handleAreaPhotosUpload || (async () => Promise.resolve())}
                   handleRemoveAreaPhoto={formProps.handleRemoveAreaPhoto}
-                  handleFloorplanUpload={formProps.handleFloorplanUpload}
+                  handleFloorplanUpload={asyncWrapper(formProps.handleFloorplanUpload)}
                   handleRemoveFloorplan={formProps.handleRemoveFloorplan}
                   isUploadingFloorplan={formProps.isUploadingFloorplan || false}
                   handleSetFeaturedImage={formProps.handleSetFeaturedImage}
