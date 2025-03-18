@@ -1,66 +1,47 @@
 
-import { useState } from 'react';
-import { useToast } from "@/components/ui/use-toast";
-import type { PropertyArea, PropertyFormData } from '@/types/property';
-import { Dispatch, SetStateAction } from 'react';
+import { useState, useCallback } from 'react';
+import { PropertyFormData, PropertyArea } from '@/types/property';
 
 export function useAreaManagement(
   formData: PropertyFormData,
-  setFormData: Dispatch<SetStateAction<PropertyFormData>>
+  setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>
 ) {
-  const { toast } = useToast();
-
-  // Add a new area to the property
-  const addArea = () => {
+  const addArea = useCallback(() => {
     const newArea: PropertyArea = {
       id: crypto.randomUUID(),
-      title: '', 
       name: '',
       size: '',
       unit: '',
       description: '',
-      columns: 2, // Default to 2 columns
+      title: '',
       images: [],
       imageIds: []
     };
     
-    console.log("Adding new area with default columns:", newArea);
-    
-    setFormData(prevData => ({
-      ...prevData,
-      areas: [...(prevData.areas || []), newArea],
+    setFormState(prev => ({
+      ...prev,
+      areas: [...(prev.areas || []), newArea]
     }));
-  };
-
-  // Remove an area from the property
-  const removeArea = (id: string) => {
-    console.log(`Removing area ${id}`);
-    
-    setFormData(prevData => ({
-      ...prevData,
-      areas: prevData.areas.filter(area => area.id !== id),
+  }, [setFormState]);
+  
+  const removeArea = useCallback((id: string) => {
+    setFormState(prev => ({
+      ...prev,
+      areas: prev.areas.filter(area => area.id !== id)
     }));
-  };
-
-  // Update a specific field of an area
-  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
-    console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
-    
-    setFormData(prevData => {
-      const updatedAreas = prevData.areas.map(area => 
-        area.id === id ? { ...area, [field]: value } : area
-      );
-      
-      return {
-        ...prevData,
-        areas: updatedAreas,
-      };
-    });
-    
-    // Log the updated areas for debugging
-    console.log("Areas after update - request sent");
-  };
-
+  }, [setFormState]);
+  
+  const updateArea = useCallback((id: string, field: keyof PropertyArea, value: any) => {
+    setFormState(prev => ({
+      ...prev,
+      areas: prev.areas.map(area => 
+        area.id === id 
+          ? { ...area, [field]: value }
+          : area
+      )
+    }));
+  }, [setFormState]);
+  
   return {
     addArea,
     removeArea,

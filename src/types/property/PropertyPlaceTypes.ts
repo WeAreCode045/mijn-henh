@@ -9,6 +9,8 @@ export interface PropertyPlaceType {
   types?: string[];
   distance?: number;
   visible_in_webview?: boolean;
+  rating?: number;
+  user_ratings_total?: number;
 }
 
 // Nearby place type (alternative interface for backward compatibility)

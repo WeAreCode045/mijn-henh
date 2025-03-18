@@ -1,3 +1,4 @@
+
 // Property place type
 export interface PropertyPlaceType {
   id: string;
@@ -8,6 +9,8 @@ export interface PropertyPlaceType {
   types?: string[];
   distance?: number;
   visible_in_webview?: boolean;
+  rating?: number;
+  user_ratings_total?: number;
 }
 
 // Basic property data interface
@@ -77,9 +80,12 @@ export interface PropertyArea {
   id: string;
   name: string;
   size: string;
-  unit: string;
-  description: string;
-  images: string[];
+  unit?: string;
+  title?: string;
+  description?: string;
+  images: string[] | PropertyImage[];
+  imageIds?: string[];
+  columns?: number;
 }
 
 // Property image type
@@ -87,6 +93,15 @@ export interface PropertyImage {
   id: string;
   url: string;
   alt?: string;
+  title?: string;
+  description?: string;
+  type?: "image" | "floorplan";
+  is_main?: boolean;
+  is_featured_image?: boolean;
+  sort_order?: number;
+  property_id?: string;
+  area?: string | null;
+  filePath?: string;
 }
 
 // Property floorplan type
@@ -94,6 +109,10 @@ export interface PropertyFloorplan {
   id: string;
   url: string;
   title?: string;
+  description?: string;
+  filePath?: string;
+  sort_order?: number;
+  columns?: number;
 }
 
 // Property agent type
@@ -102,18 +121,23 @@ export interface PropertyAgent {
   name: string;
   email: string;
   phone: string;
-  avatar?: string;
+  photoUrl?: string;
+  address?: string;
 }
 
 // Property city type
 export interface PropertyCity {
   id: string;
   name: string;
-  distance: number;
+  distance?: number;
+  visible_in_webview?: boolean;
 }
 
 // Property general info type
 export interface PropertyGeneralInfo {
+  propertyDetails?: Record<string, any>;
+  description?: Record<string, any>;
+  keyInformation?: Record<string, any>;
   yearBuilt?: number;
   lotSize?: string;
   parking?: string;
@@ -121,3 +145,7 @@ export interface PropertyGeneralInfo {
   cooling?: string;
   // Add more fields as needed
 }
+
+// Re-export for backwards compatibility
+export type GeneralInfoData = PropertyGeneralInfo;
+export type PropertyNearbyPlace = PropertyPlaceType;

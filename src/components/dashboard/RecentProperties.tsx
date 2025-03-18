@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyData } from "@/types/property";
@@ -8,6 +9,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getImageUrl } from "@/utils/imageUrlHelpers";
 
 export function RecentProperties() {
   const navigate = useNavigate();
@@ -111,7 +113,7 @@ export function RecentProperties() {
                 onClick={() => navigate(`/property/${property.id}/edit`)}
               >
                 <img
-                  src={displayImage}
+                  src={getImageUrl(displayImage)}
                   alt={property.title}
                   className="w-16 h-16 object-cover rounded-lg"
                 />

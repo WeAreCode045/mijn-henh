@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { WebViewSectionProps } from "../types";
 import { useState } from "react";
@@ -22,7 +21,7 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
   // Get area photos by finding property images that have this area's id
   const areaPhotos = property.images
     .filter(img => img.area === area.id)
-    .map(img => img.url);
+    .map(img => getImageUrl(img));
   
   return (
     <div className="space-y-6">
