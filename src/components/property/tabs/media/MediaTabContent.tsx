@@ -7,7 +7,7 @@ import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
-import { toPropertyImageArray, extractImageUrls, getImageUrl } from "@/utils/imageTypeConverters";
+import { extractImageUrls } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -41,6 +41,9 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   const images = convertToPropertyImageArray(localProperty.images || []);
   const featuredImages = convertToPropertyImageArray(localProperty.featuredImages || []);
 
+  // Extract URLs from featured images for components that expect string arrays
+  const featuredImageUrls = extractImageUrls(featuredImages);
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -57,7 +60,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             onRemoveImage={handleRemoveImage} 
             isUploading={isSaving}
             featuredImage={localProperty.featuredImage}
-            featuredImages={featuredImages}
+            featuredImages={featuredImageUrls}
             onSetFeaturedImage={handleSetFeaturedImage}
             onToggleFeaturedImage={handleToggleFeaturedImage}
             propertyId={localProperty.id}
