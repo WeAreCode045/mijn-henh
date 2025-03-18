@@ -6,6 +6,7 @@ import { PropertyImagesCard } from "./PropertyImagesCard";
 import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
+import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -38,6 +39,9 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleFloorplanEmbedScriptSave
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
+  // Convert the images to PropertyImage[] for compatibility
+  const images = convertToPropertyImageArray(localProperty.images || []);
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -49,7 +53,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
         
         <TabsContent value="images" className="space-y-6">
           <PropertyImagesCard 
-            images={localProperty.images || []} 
+            images={images} 
             onImageUpload={handleImageUpload} 
             onRemoveImage={handleRemoveImage} 
             isUploading={isSaving}

@@ -1,71 +1,48 @@
 
 import React from "react";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFloorplan, PropertyImage } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FloorplanUploader } from "./media/floorplans/FloorplanUploader";
-import { SortableFloorplanGrid } from "./media/floorplans/SortableFloorplanGrid";
-import { FloorplanEmbed } from "./media/floorplans/FloorplanEmbed";
+import { convertToPropertyFloorplanArray } from "@/utils/propertyDataAdapters";
 
 interface FloorplansTabProps {
   property: PropertyData;
-  setProperty: React.Dispatch<React.SetStateAction<PropertyData>>;
+  onRemoveFloorplan: (index: number) => void;
 }
 
-export function FloorplansTab({ property, setProperty }: FloorplansTabProps) {
-  const [isUploading, setIsUploading] = React.useState(false);
-  
-  const handleFloorplanUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Implementation would go here
-    console.log("Floorplan upload triggered");
-  };
-  
-  const handleRemoveFloorplan = (index: number) => {
-    // Implementation would go here
-    console.log("Remove floorplan triggered for index:", index);
-  };
-  
-  const handleScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setProperty({
-      ...property,
-      floorplanEmbedScript: e.target.value
-    });
-  };
-  
+export function FloorplansTab({ property, onRemoveFloorplan }: FloorplansTabProps) {
+  // Convert mixed floorplan types to PropertyFloorplan[]
+  const floorplans = convertToPropertyFloorplanArray(property.floorplans || []);
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Floorplans</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <FloorplanUploader 
-            onFloorplanUpload={handleFloorplanUpload} 
-            isUploading={isUploading}
-          />
-          
-          {property.floorplans && property.floorplans.length > 0 ? (
-            <SortableFloorplanGrid 
-              floorplans={property.floorplans} 
-              propertyId={property.id}
-              onRemoveFloorplan={handleRemoveFloorplan}
-            />
-          ) : (
-            <p className="text-center text-muted-foreground">No floorplans uploaded yet.</p>
-          )}
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>3D Floorplan Embed</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FloorplanEmbed 
-            script={property.floorplanEmbedScript || ''} 
-            onChange={handleScriptChange}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Floorplans</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {floorplans.length === 0 ? (
+          <div className="text-center text-gray-500 py-4">
+            No floorplans added yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {floorplans.map((floorplan, index) => (
+              <div key={floorplan.id || index} className="relative">
+                <img
+                  src={floorplan.url}
+                  alt={`Floorplan ${index + 1}`}
+                  className="rounded-md w-full h-auto"
+                />
+                <button
+                  onClick={() => onRemoveFloorplan(index)}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

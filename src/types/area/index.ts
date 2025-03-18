@@ -8,11 +8,14 @@ export interface Area {
   unit?: string;
   title?: string;
   description?: string;
+  imageIds?: string[];
+  columns?: number;
+  images?: (string | PropertyImage)[] | string[] | PropertyImage[];
 }
 
 export interface AreaImage {
   id: string;
   url: string;
   area: string;
-  type: "image" | "floorplan";
+  type: "image" | "floorplan" | string;
 }

@@ -1,48 +1,46 @@
 
 import React from "react";
-import { PropertyArea, PropertyImage } from "@/types/property";
-import { getImageUrl } from "@/utils/imageUrlHelpers";
+import { Area, PropertyImage } from "@/types/property";
+import { getImageUrl } from "@/utils/propertyDataAdapters";
 
 interface SingleAreaSectionProps {
-  area: PropertyArea;
-  className?: string;
+  area: Area;
+  areaImages: PropertyImage[] | string[];
+  property?: any;  // Add property to the props
+  settings?: any;  // Add settings to the props
+  areaIndex?: number; // Add areaIndex to the props
 }
 
-export function SingleAreaSection({ area, className = "" }: SingleAreaSectionProps) {
-  // Filter images that belong to this area
-  const areaImages = React.useMemo(() => {
-    return Array.isArray(area.images) ? area.images : [];
-  }, [area.images]);
-
-  if (!area || areaImages.length === 0) {
-    return null;
-  }
+export function SingleAreaSection({ area, areaImages, property, settings, areaIndex }: SingleAreaSectionProps) {
+  // Convert all images to PropertyImage type
+  const processedImages = areaImages.map(img => 
+    typeof img === 'string' 
+      ? { id: `img-${Math.random()}`, url: img, type: 'image' as const } 
+      : img
+  );
 
   return (
-    <section className={`area-section ${className}`}>
-      <h2 className="text-2xl font-bold mb-4">{area.title || area.name}</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {areaImages.map((image, index) => {
-          const imageUrl = getImageUrl(image);
-          
-          return (
-            <div key={index} className="area-image rounded-lg overflow-hidden">
-              <img
-                src={imageUrl}
-                alt={`${area.name} - Image ${index + 1}`}
-                className="w-full h-64 object-cover"
-              />
-            </div>
-          );
-        })}
+    <div className="section area-section">
+      <div className="section-header">
+        <h2 className="section-title">{area.title || area.name}</h2>
+        {area.description && (
+          <p className="section-description">{area.description}</p>
+        )}
       </div>
       
-      {area.description && (
-        <div className="mt-4 prose max-w-none">
-          <p>{area.description}</p>
+      {processedImages.length > 0 && (
+        <div className="area-images">
+          {processedImages.map((img) => (
+            <div key={img.id} className="area-image-item">
+              <img 
+                src={getImageUrl(img)} 
+                alt={`${area.title || area.name} - ${img.id}`} 
+                className="area-image"
+              />
+            </div>
+          ))}
         </div>
       )}
-    </section>
+    </div>
   );
 }

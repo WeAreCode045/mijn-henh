@@ -1,8 +1,8 @@
 
-import { PropertyImage } from './PropertyImageTypes';
+import { PropertyImage } from "./PropertyImageTypes";
 
 /**
- * Represents an area of a property
+ * Represents a property area
  */
 export interface PropertyArea {
   id: string;
@@ -11,7 +11,7 @@ export interface PropertyArea {
   unit?: string;
   title?: string;
   description?: string;
-  imageIds?: string[]; // Array of image IDs
+  imageIds?: string[];
   columns?: number;
-  images: (PropertyImage | string)[]; // Can be either PropertyImage objects or strings (URLs)
+  images: (string | PropertyImage)[] | string[] | PropertyImage[];
 }

@@ -1,11 +1,13 @@
+
 import React, { useState } from "react";
-import { PropertyData, PropertyImage } from "@/types/property";
+import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { toast } from "sonner";
 import { AdvancedImageUploader } from "@/components/ui/AdvancedImageUploader";
+import { convertToPropertyFloorplanArray } from "@/utils/propertyDataAdapters";
 
 interface FloorplansTabProps {
   property: PropertyData;
@@ -21,7 +23,10 @@ export function FloorplansTab({
   setIsSaving = () => {}
 }: FloorplansTabProps) {
   const { uploadFile } = useFileUpload();
-  const floorplans = property.floorplans || [];
+  const mixedFloorplans = property.floorplans || [];
+  
+  // Convert to PropertyFloorplan[] for components that expect this type
+  const floorplans = convertToPropertyFloorplanArray(mixedFloorplans);
 
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault(); // Prevent form submission
@@ -32,13 +37,13 @@ export function FloorplansTab({
     
     setIsSaving(true);
     const files = Array.from(e.target.files);
-    const newFloorplans: PropertyImage[] = [];
+    const newFloorplans: PropertyFloorplan[] = [];
     
     try {
       // Get the highest sort order of existing floorplans
       let highestSortOrder = 0;
       floorplans.forEach(floorplan => {
-        if (typeof floorplan === 'object' && floorplan.sort_order && floorplan.sort_order > highestSortOrder) {
+        if (floorplan.sort_order && floorplan.sort_order > highestSortOrder) {
           highestSortOrder = floorplan.sort_order;
         }
       });
@@ -97,8 +102,8 @@ export function FloorplansTab({
     setIsSaving(true);
     try {
       const floorplanToRemove = floorplans[index];
-      const floorplanUrl = typeof floorplanToRemove === 'string' ? floorplanToRemove : floorplanToRemove.url;
-      const floorplanId = typeof floorplanToRemove === 'object' ? floorplanToRemove.id : null;
+      const floorplanUrl = floorplanToRemove.url;
+      const floorplanId = floorplanToRemove.id;
       
       // Delete from database if we have an ID
       if (floorplanId) {
@@ -151,7 +156,7 @@ export function FloorplansTab({
           multiple={true}
         />
         
-        {(!floorplans || floorplans.length === 0) ? (
+        {floorplans.length === 0 ? (
           <div className="text-center py-6 mt-4">
             <p className="text-muted-foreground">No floorplans uploaded yet</p>
           </div>

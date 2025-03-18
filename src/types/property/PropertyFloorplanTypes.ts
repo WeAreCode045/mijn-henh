@@ -13,6 +13,6 @@ export interface PropertyFloorplan {
   property_id?: string;
   is_featured?: boolean;
   timestamp?: string;
-  type: "floorplan";
+  type?: "floorplan" | string;
   columns?: number;
 }

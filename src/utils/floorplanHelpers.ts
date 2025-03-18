@@ -1,6 +1,5 @@
 
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
-import { toPropertyImage } from "./imageUtils";
 
 /**
  * Converts a floorplan to the required PropertyFloorplan format
@@ -27,7 +26,7 @@ export function normalizeFloorplan(floorplan: any): PropertyFloorplan {
     sort_order: floorplan.sort_order !== undefined ? floorplan.sort_order : 0,
     filePath: floorplan.filePath || '',
     columns: typeof floorplan.columns === 'number' ? floorplan.columns : 1,
-    type: "floorplan"
+    type: floorplan.type || "floorplan"
   };
 }
 

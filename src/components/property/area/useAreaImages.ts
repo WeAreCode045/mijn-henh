@@ -3,18 +3,7 @@ import { useState, useEffect } from "react";
 import { PropertyArea, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeImage } from "@/utils/imageHelpers";
-
-interface AreaImageData {
-  id: string;
-  url: string;
-  area?: string | null;
-  property_id?: string;
-  is_main?: boolean;
-  is_featured_image?: boolean;
-  sort_order?: number;
-  type: "image" | "floorplan";
-  created_at?: string;
-}
+import { AreaImageData } from "@/types/area/AreaImageData";
 
 export function useAreaImages(area: PropertyArea, propertyId?: string) {
   const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
@@ -43,11 +32,11 @@ export function useAreaImages(area: PropertyArea, propertyId?: string) {
           } else if (data && data.length > 0) {
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
             // Convert the raw data to PropertyImage[] with correctly typed 'type' property
-            const convertedImages: PropertyImage[] = data.map((img: AreaImageData) => ({
+            const convertedImages: PropertyImage[] = data.map((img: any) => ({
               id: img.id,
               url: img.url,
               area: img.area,
-              type: (img.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan",
+              type: (img.type === "floorplan" ? "floorplan" : "image"),
               is_main: img.is_main,
               is_featured_image: img.is_featured_image,
               sort_order: img.sort_order,
@@ -71,7 +60,7 @@ export function useAreaImages(area: PropertyArea, propertyId?: string) {
             // Ensure type is always "image" or "floorplan"
             return {
               ...normalized,
-              type: (normalized.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan"
+              type: (normalized.type === "floorplan" ? "floorplan" : "image")
             };
           });
           setAreaImages(normalizedImages);

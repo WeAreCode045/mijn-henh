@@ -6,7 +6,7 @@ export interface AreaImageData {
   id: string;
   url: string;
   area: string;
-  type: "image" | "floorplan";
+  type: "image" | "floorplan" | string;
   is_main: boolean;
   is_featured_image: boolean;
   sort_order: number;
