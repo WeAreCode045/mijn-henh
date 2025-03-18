@@ -13,6 +13,14 @@ export function toPropertyImage(url: string): PropertyImage {
 }
 
 /**
+ * Convert array of strings/objects to PropertyImage array
+ */
+export function toPropertyImageArray(images: (string | PropertyImage | any)[]): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
+  return images.map(img => normalizeImage(img));
+}
+
+/**
  * Normalize different image formats into a consistent PropertyImage
  */
 export function normalizeImage(img: string | PropertyImage | Record<string, any>): PropertyImage {

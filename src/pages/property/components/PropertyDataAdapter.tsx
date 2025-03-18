@@ -111,7 +111,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           description: propertyData.description || "",
           location_description: propertyData.location_description || "",
           features: features,
-          images: convertToPropertyImageArray(images),
+          images: convertToPropertyImageArray(regularImages),
           featuredImage: featuredImage,
           featuredImages: featuredImages,
           areas: transformedAreas,

@@ -27,3 +27,9 @@ export function toFloorplan(floorplan: string | PropertyFloorplan | any): Proper
     alt: floorplan.alt
   };
 }
+
+// Convert array to PropertyFloorplan array
+export function toFloorplanArray(floorplans: (string | PropertyFloorplan | any)[]): PropertyFloorplan[] {
+  if (!Array.isArray(floorplans)) return [];
+  return floorplans.map(fp => toFloorplan(fp));
+}

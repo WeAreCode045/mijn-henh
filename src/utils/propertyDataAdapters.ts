@@ -1,7 +1,7 @@
 
 import { PropertyImage, PropertyFloorplan, PropertyFormData } from "@/types/property";
-import { toFloorplan } from "./floorplanHelpers";
-import { normalizeImage } from "./imageHelpers";
+import { toFloorplan, toFloorplanArray } from "./floorplanHelpers";
+import { normalizeImage, toPropertyImageArray } from "./imageHelpers";
 
 /**
  * Convert mixed image types to PropertyImage[]
@@ -75,13 +75,27 @@ export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloo
  * Fix image types in PropertyFormData for saving
  */
 export function normalizePropertyImageTypes(formData: PropertyFormData): PropertyFormData {
+  // Create a deeply copied object to avoid modifying the original
   const normalized: PropertyFormData = {
-    ...formData,
-    images: convertToPropertyImageArray(formData.images || []),
-    floorplans: convertToPropertyFloorplanArray(formData.floorplans || []),
-    coverImages: convertToPropertyImageArray(formData.coverImages || []),
-    gridImages: convertToPropertyImageArray(formData.gridImages || []),
+    ...formData
   };
+  
+  // Convert image arrays to PropertyImage[] arrays
+  if (formData.images) {
+    normalized.images = convertToPropertyImageArray(formData.images);
+  }
+  
+  if (formData.floorplans) {
+    normalized.floorplans = convertToPropertyFloorplanArray(formData.floorplans);
+  }
+  
+  if (formData.coverImages) {
+    normalized.coverImages = convertToPropertyImageArray(formData.coverImages);
+  }
+  
+  if (formData.gridImages) {
+    normalized.gridImages = convertToPropertyImageArray(formData.gridImages);
+  }
   
   return normalized;
 }
