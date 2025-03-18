@@ -41,7 +41,7 @@ export function useImageRemoveHandler(
         id: `temp-${Date.now()}-${Math.random()}`,
         url: url,
         type: "image" as const
-      })) as PropertyImage[];
+      }));
       
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {
@@ -136,7 +136,7 @@ export function useImageRemoveHandler(
         id: `temp-${Date.now()}-${Math.random()}`,
         url: url,
         type: "image" as const
-      })) as PropertyImage[];
+      }));
       
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {

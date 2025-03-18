@@ -2,82 +2,68 @@
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Normalizes any image representation to PropertyImage
+ * Convert a string URL to a PropertyImage object
  */
-export function normalizeImage(image: string | PropertyImage | any): PropertyImage {
-  if (typeof image === 'string') {
-    return {
-      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: image,
-      type: "image"
-    };
-  }
-  
-  // Ensure we have all the required fields
+export function toPropertyImage(url: string): PropertyImage {
   return {
-    id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url: image.url || '',
-    type: image.type === 'floorplan' ? 'floorplan' : 'image',
-    is_main: image.is_main,
-    is_featured_image: image.is_featured_image,
-    sort_order: image.sort_order,
-    title: image.title,
-    description: image.description,
-    alt: image.alt,
-    property_id: image.property_id,
-    area: image.area,
-    filePath: image.filePath
+    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url,
+    type: 'image'
   };
 }
 
 /**
- * Normalize any floorplan representation to PropertyFloorplan
+ * Normalize different image formats into a consistent PropertyImage
  */
-export function normalizeFloorplan(floorplan: string | PropertyFloorplan | any): PropertyFloorplan {
-  if (typeof floorplan === 'string') {
-    return {
-      id: `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: floorplan,
-      type: "floorplan"
-    };
+export function normalizeImage(img: string | PropertyImage | Record<string, any>): PropertyImage {
+  // If it's a simple string URL
+  if (typeof img === 'string') {
+    return toPropertyImage(img);
   }
   
-  // Ensure we have all the required fields
+  // If it's already a PropertyImage or a similar object
   return {
-    id: floorplan.id || `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url: floorplan.url || '',
-    type: "floorplan",
-    title: floorplan.title,
-    description: floorplan.description,
-    alt: floorplan.alt,
-    property_id: floorplan.property_id,
-    sort_order: floorplan.sort_order,
-    filePath: floorplan.filePath,
-    columns: floorplan.columns
+    id: img.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url: img.url,
+    type: img.type || 'image',
+    area: img.area,
+    property_id: img.property_id,
+    is_main: img.is_main,
+    is_featured_image: img.is_featured_image,
+    sort_order: img.sort_order,
+    title: img.title,
+    description: img.description,
+    alt: img.alt,
+    filePath: img.filePath
   };
 }
 
 /**
- * Converts mixed array to PropertyImage[] array
+ * Safely get image URL regardless of type
  */
-export function toPropertyImageArray(items: any[]): PropertyImage[] {
-  if (!Array.isArray(items)) return [];
-  return items.map(item => normalizeImage(item));
-}
-
-/**
- * Converts mixed array to PropertyFloorplan[] array
- */
-export function toFloorplanArray(items: any[]): PropertyFloorplan[] {
-  if (!Array.isArray(items)) return [];
-  return items.map(item => normalizeFloorplan(item));
-}
-
-/**
- * Gets a URL from any image type
- */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+export function getImageUrl(image: string | PropertyImage | null | undefined): string {
   if (!image) return '';
   if (typeof image === 'string') return image;
-  return image.url || '';
+  return image.url;
+}
+
+/**
+ * Format image data for display
+ */
+export function formatImageForDisplay(img: PropertyImage | string): PropertyImage {
+  if (typeof img === 'string') {
+    return {
+      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`,
+      url: img,
+      type: 'image'
+    };
+  }
+  return img;
+}
+
+/**
+ * Get image title or generate one
+ */
+export function getImageTitle(img: PropertyImage | PropertyFloorplan): string {
+  return img.title || 'Image';
 }
