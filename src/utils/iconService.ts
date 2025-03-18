@@ -87,4 +87,5 @@ export const availableIcons = [
   'door',
   'sun',
   'leaf',
+  'plot',
 ];
