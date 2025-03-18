@@ -1,21 +1,26 @@
 
-// Re-export types from separate files using 'export type' syntax
-export type { PropertyImage } from './PropertyImageTypes';
-export type { PropertyArea } from './PropertyAreaTypes';
-export type { PropertyData } from './PropertyDataTypes';
-export type { PropertyFormData } from './PropertyFormTypes';
+// Property place type
+export interface PropertyPlaceType {
+  id: string;
+  place_id: string; // Making this required since it's used in several places
+  name: string;
+  vicinity?: string;
+  type: string;
+  types?: string[];
+  distance?: number;
+  visible_in_webview?: boolean;
+  rating?: number;
+  user_ratings_total?: number;
+}
 
-// Re-export types from PropertyTypes.ts 
-export type {
-  PropertyFeature,
-  PropertyFloorplan,
-  PropertyNearbyPlace,
-  PropertyPlaceType,
-  PropertyCity,
-  PropertyAgent,
-  PropertySubmitData,
-  GeneralInfoData,
-} from './PropertyTypes';
+// Re-exports for backwards compatibility
+export * from './PropertyTypes';
+export * from './PropertyImageTypes';
+export * from './PropertyFloorplanTypes';
+export * from './PropertyAreaTypes';
+export * from './PropertyFormTypes';
+export * from './PropertyDataTypes';
 
-// Re-export types from Area types
-export type { Area, AreaImage, AreaImageData } from '../area';
+// Import AreaImage type correctly
+import { AreaImage } from '../area';
+export type { AreaImage };

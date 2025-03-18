@@ -8,13 +8,7 @@ import { jsonToString, asJsonArray, Json } from '@/utils/supabaseTypes';
  * Prepares property data for saving to Supabase
  */
 export const preparePropertyDataForSave = (formData: PropertyFormData) => {
-  // Safely convert objects to JSON strings
-  const features = JSON.stringify(Array.isArray(formData.features) ? formData.features : []);
-  const areas = JSON.stringify(Array.isArray(formData.areas) ? formData.areas : []);
-  const nearby_places = JSON.stringify(Array.isArray(formData.nearby_places) ? formData.nearby_places : []);
-  const nearby_cities = JSON.stringify(Array.isArray(formData.nearby_cities) ? formData.nearby_cities : []);
-  const generalInfo = formData.generalInfo ? JSON.stringify(formData.generalInfo) : null;
-  
+  // Convert arrays to JSON strings for database storage
   return {
     title: formData.title,
     price: formData.price,
@@ -30,10 +24,10 @@ export const preparePropertyDataForSave = (formData: PropertyFormData) => {
     description: formData.description,
     shortDescription: formData.shortDescription,
     location_description: formData.location_description,
-    features,
-    areas,
-    nearby_places,
-    nearby_cities,
+    features: JSON.stringify(formData.features || []),
+    areas: JSON.stringify(formData.areas || []),
+    nearby_places: JSON.stringify(formData.nearby_places || []),
+    nearby_cities: JSON.stringify(formData.nearby_cities || []),
     latitude: formData.latitude,
     longitude: formData.longitude,
     object_id: formData.object_id,
@@ -43,8 +37,8 @@ export const preparePropertyDataForSave = (formData: PropertyFormData) => {
     virtualTourUrl: formData.virtualTourUrl,
     youtubeUrl: formData.youtubeUrl,
     notes: formData.notes,
-    propertyType: formData.propertyType,
-    generalInfo
+    property_type: formData.propertyType, // Use property_type field name to match database
+    generalInfo: formData.generalInfo ? JSON.stringify(formData.generalInfo) : null
   };
 };
 

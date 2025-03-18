@@ -1,24 +1,28 @@
 
-import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
+import { PropertyImage, PropertyFloorplan, PropertyFormData } from "@/types/property";
 
-// Convert mixed types to PropertyImage array
+/**
+ * Convert mixed image types to PropertyImage[]
+ */
 export function convertToPropertyImageArray(images: any[]): PropertyImage[] {
-  if (!Array.isArray(images)) return [];
+  if (!Array.isArray(images)) {
+    return [];
+  }
   
-  return images.map(img => {
+  return images.map((img): PropertyImage => {
     if (typeof img === 'string') {
       return {
-        id: `image-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         url: img,
         type: "image"
       };
     }
     
-    // If it's already an object, ensure it has the required properties
+    // Make sure all required fields are present
     return {
-      id: img.id || `image-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id: img.id || `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       url: img.url || '',
-      type: img.type || "image",
+      type: img.type === 'floorplan' ? 'floorplan' : 'image',
       alt: img.alt,
       title: img.title,
       description: img.description,
@@ -29,39 +33,60 @@ export function convertToPropertyImageArray(images: any[]): PropertyImage[] {
       area: img.area,
       filePath: img.filePath
     };
-  }) as PropertyImage[];
+  });
 }
 
-// Convert mixed types to PropertyFloorplan array
+/**
+ * Convert mixed floorplan types to PropertyFloorplan[]
+ */
 export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloorplan[] {
-  if (!Array.isArray(floorplans)) return [];
+  if (!Array.isArray(floorplans)) {
+    return [];
+  }
   
-  return floorplans.map(floorplan => {
-    if (typeof floorplan === 'string') {
+  return floorplans.map((fp): PropertyFloorplan => {
+    if (typeof fp === 'string') {
       return {
-        id: `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        url: floorplan,
+        id: `fp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        url: fp,
         type: "floorplan"
       };
     }
     
-    // If it's already an object, ensure it has the required properties
+    // Make sure all required fields are present
     return {
-      id: floorplan.id || `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: floorplan.url || '',
+      id: fp.id || `fp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      url: fp.url || '',
       type: "floorplan",
-      title: floorplan.title,
-      alt: floorplan.alt,
-      description: floorplan.description,
-      sort_order: floorplan.sort_order,
-      property_id: floorplan.property_id,
-      is_featured: floorplan.is_featured,
-      columns: floorplan.columns
+      title: fp.title,
+      alt: fp.alt,
+      description: fp.description,
+      sort_order: fp.sort_order,
+      property_id: fp.property_id,
+      filePath: fp.filePath,
+      columns: fp.columns
     };
-  }) as PropertyFloorplan[];
+  });
 }
 
-// Get image URL regardless of the type
+/**
+ * Fix image types in PropertyFormData for saving
+ */
+export function normalizePropertyImageTypes(formData: PropertyFormData): PropertyFormData {
+  const normalized: PropertyFormData = {
+    ...formData,
+    images: convertToPropertyImageArray(formData.images || []),
+    floorplans: convertToPropertyFloorplanArray(formData.floorplans || []),
+    coverImages: convertToPropertyImageArray(formData.coverImages || []),
+    gridImages: convertToPropertyImageArray(formData.gridImages || []),
+  };
+  
+  return normalized;
+}
+
+/**
+ * Helper to safely get an image URL from any image format
+ */
 export function getImageUrl(image: string | PropertyImage | null | undefined): string {
   if (!image) return '';
   if (typeof image === 'string') return image;

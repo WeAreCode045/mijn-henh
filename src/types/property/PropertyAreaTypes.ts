@@ -1,5 +1,5 @@
 
-import { PropertyImage } from "./PropertyImageTypes";
+import { PropertyImage } from './PropertyImageTypes';
 
 /**
  * Represents a property area
@@ -11,7 +11,7 @@ export interface PropertyArea {
   unit?: string;
   title?: string;
   description?: string;
+  images: PropertyImage[];
   imageIds?: string[];
   columns?: number;
-  images: PropertyImage[];
 }

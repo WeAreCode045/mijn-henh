@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +24,10 @@ export function FloorplansTab({
   const { uploadFile } = useFileUpload();
   const mixedFloorplans = property.floorplans || [];
   
-  // Convert to PropertyFloorplan[] for components that expect this type
   const floorplans = convertToPropertyFloorplanArray(mixedFloorplans);
 
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     
     if (!e.target.files || e.target.files.length === 0 || !property.id) {
       return;
@@ -40,7 +38,6 @@ export function FloorplansTab({
     const newFloorplans: PropertyFloorplan[] = [];
     
     try {
-      // Get the highest sort order of existing floorplans
       let highestSortOrder = 0;
       floorplans.forEach(floorplan => {
         if (floorplan.sort_order && floorplan.sort_order > highestSortOrder) {
@@ -48,15 +45,11 @@ export function FloorplansTab({
         }
       });
       
-      // Process each file
       for (const file of files) {
-        // Upload file
         const publicUrl = await uploadFile(file, property.id, 'floorplans');
         
-        // Increment sort order
         highestSortOrder += 1;
         
-        // Create database record
         const { error, data } = await supabase
           .from('property_images')
           .insert({
@@ -70,7 +63,6 @@ export function FloorplansTab({
           
         if (error) throw error;
         
-        // Add to new floorplans array
         newFloorplans.push({
           id: data.id,
           url: publicUrl,
@@ -79,7 +71,6 @@ export function FloorplansTab({
         });
       }
       
-      // Update local state
       setProperty(prev => ({
         ...prev,
         floorplans: [...(prev.floorplans || []), ...newFloorplans]
@@ -91,7 +82,6 @@ export function FloorplansTab({
       toast.error("Failed to upload floorplans");
     } finally {
       setIsSaving(false);
-      // Reset the file input
       e.target.value = '';
     }
   };
@@ -105,7 +95,6 @@ export function FloorplansTab({
       const floorplanUrl = floorplanToRemove.url;
       const floorplanId = floorplanToRemove.id;
       
-      // Delete from database if we have an ID
       if (floorplanId) {
         const { error } = await supabase
           .from('property_images')
@@ -114,7 +103,6 @@ export function FloorplansTab({
           
         if (error) throw error;
       } else if (floorplanUrl) {
-        // Try to delete by URL if we don't have an ID
         const { error } = await supabase
           .from('property_images')
           .delete()
@@ -125,7 +113,6 @@ export function FloorplansTab({
         if (error) throw error;
       }
       
-      // Update local state
       const newFloorplans = [...floorplans];
       newFloorplans.splice(index, 1);
       

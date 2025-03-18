@@ -8,7 +8,7 @@ import {
   transformNearbyPlaces, 
   transformGeneralInfo 
 } from '../propertyDataTransformer';
-import { safeJsonParse, jsonToString } from '@/utils/supabaseTypes';
+import { safeJsonParse, jsonToString, Json } from '@/utils/supabaseTypes';
 
 /**
  * Fetches property data from Supabase
@@ -42,6 +42,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
   }
   
   // Parse and transform the property data - convert from JSON strings to objects
+  // Use type casting to safely convert JSON to our expected types
   const features = transformFeatures(safeJsonParse<any[]>(data.features as string, []));
   const areas = transformAreas(safeJsonParse<any[]>(data.areas as string, []));
   const nearbyPlaces = transformNearbyPlaces(safeJsonParse<any[]>(data.nearby_places as string, []));
@@ -66,7 +67,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     energyLabel: data.energyLabel || '',
     hasGarden: !!data.hasGarden,
     description: data.description || '',
-    shortDescription: data.shortDescription || data.description || '', // Fallback to description
+    shortDescription: data.description || '', // Use description as fallback since shortDescription might not exist
     location_description: data.location_description || '',
     features,
     areas,
@@ -81,7 +82,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
-    propertyType: data.propertyType || '', // Default to empty string
+    propertyType: data.property_type || '', // Use property_type field name to match database
     generalInfo,
     images: [],
     floorplans: [],

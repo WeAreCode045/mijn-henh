@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
+import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
-// Safely parse JSON to the expected type
 const safeParseJSON = <T,>(value: string | null | undefined, defaultValue: T): T => {
   if (!value) return defaultValue;
   
@@ -28,7 +27,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
       if (!propertyData) return;
       
       try {
-        // Fetch images from property_images table
         let rawImages: any[] = [];
         
         if (propertyData.id) {
@@ -45,7 +43,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           }
         }
         
-        // Process images to PropertyImage objects with proper type
         const images: PropertyImage[] = rawImages.map(img => ({
           id: img.id,
           url: img.url,
@@ -54,43 +51,35 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           is_main: img.is_main,
           is_featured_image: img.is_featured_image,
           sort_order: img.sort_order,
-          type: (img.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan" // Type casting
+          type: (img.type === "floorplan" ? "floorplan" : "image") as "image" | "floorplan"
         }));
         
-        // Parse complex data
         const features = safeParseJSON(propertyData.features, []);
         const areas = safeParseJSON(propertyData.areas, []);
         const nearby_places = safeParseJSON(propertyData.nearby_places, []);
         
-        // Handle nearby_cities with proper checks
         let nearby_cities = [];
         if (propertyData.nearby_cities !== undefined) {
           nearby_cities = safeParseJSON(propertyData.nearby_cities, []);
         }
         
-        // Filter images by type
         const regularImages = images.filter(img => img.type === 'image' || !img.type);
         const floorplanImages = images.filter(img => img.type === 'floorplan');
         
-        // Find the main image
         const featuredImage = regularImages.find(img => img.is_main)?.url || null;
         
-        // Get featured images
         const featuredImages = regularImages
           .filter(img => img.is_featured_image)
           .map(img => img.url);
           
-        // Create coverImages for backward compatibility
         const coverImages = featuredImages.map(url => ({
           id: `cover-${Date.now()}-${Math.random()}`,
           url,
           type: "image" as "image" | "floorplan"
         }));
         
-        // Ensure areas is an array
         const dataAreas = Array.isArray(areas) ? areas : [];
         
-        // Transform areas to include images from property_images table
         const transformedAreas = dataAreas.map((area: any) => ({
           ...area,
           images: images
@@ -103,7 +92,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             }))
         }));
 
-        // Ensure nearby_places has 'types' property
         const transformedNearbyPlaces = Array.isArray(nearby_places)
           ? nearby_places.map((place: any) => ({
               ...place,
@@ -111,7 +99,6 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             }))
           : [];
 
-        // Create the transformed property data with all required fields
         const transformedData: PropertyData = {
           id: propertyData.id || "",
           object_id: propertyData.object_id || "",
@@ -146,8 +133,8 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           updated_at: propertyData.updated_at || new Date().toISOString(),
           floorplans: floorplanImages,
           floorplanEmbedScript: propertyData.floorplanEmbedScript || "",
-          coverImages: coverImages as PropertyImage[],
-          gridImages: regularImages.slice(0, 4) as PropertyImage[],
+          coverImages: convertToPropertyImageArray(coverImages),
+          gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
           agent: propertyData.agent ? {
             id: propertyData.agent.id,
             name: propertyData.agent.full_name,
