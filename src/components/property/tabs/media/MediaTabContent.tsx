@@ -39,7 +39,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
   const images = convertToPropertyImageArray(localProperty.images || []);
-  const featuredImages = toPropertyImageArray(localProperty.featuredImages || []);
+  const featuredImages = convertToPropertyImageArray(localProperty.featuredImages || []);
 
   return (
     <div className="space-y-6">
