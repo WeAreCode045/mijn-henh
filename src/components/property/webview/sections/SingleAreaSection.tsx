@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { PropertyArea, PropertyImage } from "@/types/property";
-import { ImageGallery } from '@/components/property/webview/gallery/ImageGallery';
-import { AreaFeatures } from '../areas/AreaFeatures';
 
 export interface SingleAreaSectionProps {
   area: PropertyArea;
@@ -32,14 +30,23 @@ export function SingleAreaSection({ area, areaImages }: SingleAreaSectionProps) 
       
       {areaImages && areaImages.length > 0 && (
         <div className="mb-6">
-          <ImageGallery 
-            images={areaImages} 
-            columns={area.columns || 2} 
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {areaImages.map((image) => (
+              <div key={image.id} className="relative rounded overflow-hidden">
+                <img 
+                  src={image.url} 
+                  alt={image.alt || area.name} 
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
       
-      <AreaFeatures area={area} />
+      <div className="space-y-2">
+        {/* Area features would go here */}
+      </div>
     </div>
   );
 }

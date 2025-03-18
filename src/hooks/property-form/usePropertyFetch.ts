@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity, GeneralInfoData } from "@/types/property";
+import { PropertyFormData, PropertyImage, PropertyAgent, PropertyCity, PropertyFloorplan, GeneralInfoData } from "@/types/property";
 import { initialFormData } from "./initialFormData";
-import { normalizeImage } from "@/utils/imageHelpers";
+import { convertToPropertyImageArray, convertToPropertyFloorplanArray } from "@/utils/propertyDataAdapters";
 
 // Helper function to safely convert JSON or array to array
 const safeParseArray = (value: any, defaultValue: any[] = []): any[] => {
@@ -202,8 +203,8 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImages: featuredImages,
             agent: agentData,
             generalInfo, 
-            coverImages: regularImages.filter(img => img.is_featured_image),
-            gridImages: regularImages.slice(0, 4),
+            coverImages: convertToPropertyImageArray(regularImages.filter(img => img.is_featured_image)),
+            gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
             areaPhotos: []
           };
           

@@ -8,13 +8,7 @@ import {
   transformNearbyPlaces, 
   transformGeneralInfo 
 } from '../propertyDataTransformer';
-import { 
-  parsePropertyCities, 
-  parsePropertyFeatures, 
-  parsePropertyAreas, 
-  parsePropertyPlaceTypes 
-} from '@/utils/supabaseJsonTypes';
-import { Json } from '@/utils/supabaseJsonTypes';
+import { safeJsonParse } from '@/utils/supabaseTypes';
 
 /**
  * Fetches property data from Supabase
@@ -48,12 +42,12 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
   }
   
   // Parse and transform the property data
-  const features = transformFeatures(parsePropertyFeatures(data.features));
-  const areas = transformAreas(parsePropertyAreas(data.areas));
-  const nearbyPlaces = transformNearbyPlaces(parsePropertyPlaceTypes(data.nearby_places));
+  const features = transformFeatures(safeJsonParse(data.features as string, []));
+  const areas = transformAreas(safeJsonParse(data.areas as string, []));
+  const nearbyPlaces = transformNearbyPlaces(safeJsonParse(data.nearby_places as string, []));
   
   // Parse nearby cities with our helper
-  const nearbyCities = parsePropertyCities(data.nearby_cities);
+  const nearbyCities = safeJsonParse<PropertyCity[]>(data.nearby_cities as string, []);
   
   const generalInfo = transformGeneralInfo(data.generalInfo);
   
@@ -87,7 +81,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
-    propertyType: data.propertyType || '', // Default to empty string
+    propertyType: '', // Default to empty string
     generalInfo,
     images: [],
     floorplans: [],

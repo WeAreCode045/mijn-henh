@@ -2,8 +2,8 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { PropertyFormData } from '@/types/property';
-import { shouldFetchProperty } from './utils/dataTransformationUtils';
-import { fetchPropertyDataFromApi, savePropertyDataToApi } from './operations/propertyFetchOperations';
+import { fetchPropertyDataFromApi } from './operations/propertyFetchOperations';
+import { savePropertyDataToApi } from './operations/propertySaveOperations';
 
 export function usePropertyContent(id?: string) {
   const [pendingChanges, setPendingChanges] = useState(false);

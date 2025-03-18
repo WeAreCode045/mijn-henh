@@ -1,23 +1,18 @@
 
-import { PropertyImage } from "../property/PropertyImageTypes";
-
-export { type AreaImageData } from './AreaImageData';
-
+// Basic area type definitions
 export interface Area {
   id: string;
   name: string;
-  size: string;
-  unit?: string;
-  title?: string;
+  size?: string;
   description?: string;
-  imageIds?: string[];
-  columns?: number;
-  images?: PropertyImage[];
 }
 
 export interface AreaImage {
   id: string;
   url: string;
-  area: string;
+  area_id?: string;
   type: "image" | "floorplan";
 }
+
+// Re-exports for backwards compatibility
+export { Area as AreaImageData };

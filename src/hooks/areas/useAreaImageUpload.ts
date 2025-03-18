@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData, PropertyImage, PropertyArea } from "@/types/property";
 import { normalizeImage } from "@/utils/imageHelpers";
+import { convertToPropertyImageArray } from '@/utils/propertyDataAdapters';
 
 export function useAreaImageUpload(property_id: string, areaId: string, imageIds: string[], setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>) {
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +54,7 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
             property_id,
             area: areaId,
             url: publicUrl,
-            type: 'image', // Use a string that matches the allowed type values
+            type: 'image',
             sort_order: imageIds.length + i
           })
           .select('*')
@@ -69,7 +70,17 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
         uploadedImageIds.push(imageData.id);
         
         // Create a normalized image object
-        const normalizedImage = normalizeImage(imageData);
+        const normalizedImage: PropertyImage = {
+          id: imageData.id,
+          url: imageData.url,
+          area: imageData.area,
+          property_id: imageData.property_id,
+          is_main: imageData.is_main,
+          is_featured_image: imageData.is_featured_image,
+          sort_order: imageData.sort_order,
+          type: imageData.type as "image" | "floorplan"
+        };
+        
         uploadedImages.push(normalizedImage);
       }
       
@@ -82,7 +93,7 @@ export function useAreaImageUpload(property_id: string, areaId: string, imageIds
             return {
               ...area,
               imageIds: [...(area.imageIds || []), ...uploadedImageIds],
-              images: [...(Array.isArray(area.images) ? area.images : []), ...uploadedImages]
+              images: [...(area.images || []), ...uploadedImages]
             };
           }
           return area;

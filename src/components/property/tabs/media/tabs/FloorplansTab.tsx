@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,87 +1,69 @@
 
-import { PropertyData, PropertyFormData, PropertyImage, PropertyFloorplan, PropertyArea } from "@/types/property";
+import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
 
-/**
- * Converts string or mixed arrays to PropertyImage arrays
- */
-export function convertToPropertyImageArray(images: (string | PropertyImage)[] | string[] | PropertyImage[]): PropertyImage[] {
-  if (!images) return [];
+// Convert mixed types to PropertyImage array
+export function convertToPropertyImageArray(images: any[]): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
   
   return images.map(img => {
     if (typeof img === 'string') {
       return {
-        id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: `image-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         url: img,
-        type: "image" as const
+        type: "image"
       };
     }
-    return img as PropertyImage;
-  });
+    
+    // If it's already an object, ensure it has the required properties
+    return {
+      id: img.id || `image-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: img.url || '',
+      type: img.type || "image",
+      alt: img.alt,
+      title: img.title,
+      description: img.description,
+      is_main: img.is_main,
+      is_featured_image: img.is_featured_image,
+      sort_order: img.sort_order,
+      property_id: img.property_id,
+      area: img.area,
+      filePath: img.filePath
+    };
+  }) as PropertyImage[];
 }
 
-/**
- * Converts string or mixed arrays to PropertyFloorplan arrays
- */
-export function convertToPropertyFloorplanArray(
-  floorplans: (string | PropertyImage | PropertyFloorplan)[]
-): PropertyFloorplan[] {
-  if (!floorplans) return [];
+// Convert mixed types to PropertyFloorplan array
+export function convertToPropertyFloorplanArray(floorplans: any[]): PropertyFloorplan[] {
+  if (!Array.isArray(floorplans)) return [];
   
-  return floorplans.map(plan => {
-    if (typeof plan === 'string') {
+  return floorplans.map(floorplan => {
+    if (typeof floorplan === 'string') {
       return {
         id: `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        url: plan,
-        type: "floorplan" as const
-      };
-    } else if ((plan as any).type === 'image') {
-      // Convert PropertyImage to PropertyFloorplan
-      return {
-        id: plan.id,
-        url: plan.url,
-        title: (plan as any).title,
-        description: (plan as any).description,
-        sort_order: (plan as any).sort_order,
-        type: "floorplan" as const
+        url: floorplan,
+        type: "floorplan"
       };
     }
-    return plan as PropertyFloorplan;
-  });
+    
+    // If it's already an object, ensure it has the required properties
+    return {
+      id: floorplan.id || `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: floorplan.url || '',
+      type: "floorplan",
+      title: floorplan.title,
+      alt: floorplan.alt,
+      description: floorplan.description,
+      sort_order: floorplan.sort_order,
+      property_id: floorplan.property_id,
+      is_featured: floorplan.is_featured,
+      columns: floorplan.columns
+    };
+  }) as PropertyFloorplan[];
 }
 
-/**
- * Safely gets an image URL regardless of type
- */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null): string {
+// Get image URL regardless of the type
+export function getImageUrl(image: string | PropertyImage | null | undefined): string {
   if (!image) return '';
   if (typeof image === 'string') return image;
   return image.url;
-}
-
-/**
- * Adapts PropertyFormData to ensure all fields have the correct type
- */
-export function adaptPropertyFormData(formData: PropertyFormData): PropertyFormData {
-  // Convert all image arrays to proper types
-  const images = convertToPropertyImageArray(formData.images as any);
-  const floorplans = convertToPropertyFloorplanArray(formData.floorplans as any);
-  const coverImages = convertToPropertyImageArray(formData.coverImages as any);
-  const gridImages = convertToPropertyImageArray(formData.gridImages as any);
-  
-  // Ensure areas have correctly typed images
-  const areas = (formData.areas || []).map(area => ({
-    ...area,
-    images: convertToPropertyImageArray(area.images as any),
-    imageIds: area.imageIds || []
-  }));
-  
-  return {
-    ...formData,
-    images,
-    floorplans,
-    featuredImages: formData.featuredImages || [],
-    coverImages,
-    gridImages,
-    areas
-  };
 }

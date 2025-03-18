@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
 import { extractPropertyId, isPropertyIdEmpty } from '../utils/dataTransformationUtils';
-import { convertToJsonString } from '@/utils/supabaseHelpers';
+import { asJsonArray } from '@/utils/supabaseTypes';
 
 /**
  * Prepares property data for saving to Supabase
