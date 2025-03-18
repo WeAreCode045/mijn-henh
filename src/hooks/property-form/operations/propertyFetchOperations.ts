@@ -55,6 +55,9 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
   // Building the data object with proper typings and property names
   const typedData = data as any; // Use type assertion for flexibility
   
+  // Get property type from database 
+  const propertyType = typedData.property_type || typedData.propertyType || '';
+  
   // Build and return the property form data
   return {
     id: typedData.id,
@@ -85,7 +88,8 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     virtualTourUrl: typedData.virtualTourUrl || '',
     youtubeUrl: typedData.youtubeUrl || '',
     notes: typedData.notes || '',
-    propertyType: typedData.property_type || typedData.propertyType || '', // Map database field to our property
+    propertyType: propertyType, // Use consistent property name
+    property_type: propertyType, // Add for database compatibility
     created_at: typedData.created_at || new Date().toISOString(),
     updated_at: typedData.updated_at || new Date().toISOString(),
     images: [], // These will be populated elsewhere

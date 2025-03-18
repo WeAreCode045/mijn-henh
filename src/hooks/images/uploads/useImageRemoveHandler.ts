@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyImage } from "@/types/property";
 import { toPropertyImageArray } from "@/utils/imageHelpers";
+import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 export function useImageRemoveHandler(
   formData: PropertyFormData,
@@ -24,7 +25,7 @@ export function useImageRemoveHandler(
     if (!formData.id) {
       // If we don't have a property ID yet, just update the local state
       // Create a copy of the images array without the removed image
-      const updatedImages = [...formData.images].filter((_, i) => i !== index);
+      const updatedImages = convertToPropertyImageArray([...formData.images].filter((_, i) => i !== index));
       
       // Update the featured image if it was removed
       let updatedFeaturedImage = formData.featuredImage;
@@ -35,12 +36,12 @@ export function useImageRemoveHandler(
       // Update featured images if they include the removed image
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
-      // Convert featuredImages to PropertyImage[] for coverImages if needed
+      // Convert featuredImages to PropertyImage[] for coverImages
       const updatedCoverImages = updatedFeaturedImages.map(url => ({
         id: `temp-${Date.now()}-${Math.random()}`,
         url: url,
         type: "image" as const
-      })) as PropertyImage[];
+      }));
       
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {
@@ -119,7 +120,7 @@ export function useImageRemoveHandler(
       }
       
       // Create a copy of the images array without the removed image
-      const updatedImages = [...formData.images].filter((_, i) => i !== index);
+      const updatedImages = convertToPropertyImageArray([...formData.images].filter((_, i) => i !== index));
       
       // Update the featured image if it was removed
       let updatedFeaturedImage = formData.featuredImage;
@@ -130,12 +131,12 @@ export function useImageRemoveHandler(
       // Update featured images if they include the removed image
       const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
-      // Convert featuredImages to PropertyImage[] for coverImages if needed
+      // Convert featuredImages to PropertyImage[] for coverImages
       const updatedCoverImages = updatedFeaturedImages.map(url => ({
         id: `temp-${Date.now()}-${Math.random()}`,
         url: url,
         type: "image" as const
-      })) as PropertyImage[];
+      }));
       
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {

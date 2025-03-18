@@ -186,6 +186,9 @@ export function usePropertyFetch(id: string | undefined) {
           // Process generalInfo
           const generalInfo = formatGeneralInfo(propertyData.generalInfo);
           
+          // Get property type from either property_type or propertyType field
+          const propertyType = ((propertyData as any).property_type || (propertyData as any).propertyType || "");
+          
           // Set the form data with safe defaults for new fields
           const updatedFormData: PropertyFormData = {
             ...initialFormData,
@@ -207,7 +210,8 @@ export function usePropertyFetch(id: string | undefined) {
             gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
             areaPhotos: [],
             // Map property_type to propertyType for consistency
-            propertyType: propertyData.property_type || propertyData.propertyType || "",
+            propertyType,
+            property_type: propertyType
           };
           
           setFormData(updatedFormData);

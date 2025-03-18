@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyImage } from "@/types/property";
+import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 export function usePropertyCoverImages(
   formData: PropertyFormData,

@@ -140,6 +140,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
             photoUrl: propertyData.agent.avatar_url
           } : undefined,
           propertyType: propertyData.property_type || propertyData.propertyType || "",
+          property_type: propertyData.property_type || propertyData.propertyType || ""
         };
         
         setProperty(transformedData);
