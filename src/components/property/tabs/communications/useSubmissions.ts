@@ -109,7 +109,7 @@ export function usePropertyMainImages(
     try {
       // Check if the image is already in the featured images
       const featuredImagesUrls = formData.featuredImages?.map(img => 
-        typeof img === 'string' ? img : img.url
+        getImageUrl(img)
       ) || [];
       
       const isInFeatured = featuredImagesUrls.includes(imageUrl);
@@ -120,8 +120,7 @@ export function usePropertyMainImages(
         if (currentFeaturedImages.length >= 4) {
           // Remove the oldest featured image
           const oldestFeaturedImage = currentFeaturedImages[0];
-          const oldestUrl = typeof oldestFeaturedImage === 'string' ? 
-            oldestFeaturedImage : oldestFeaturedImage.url;
+          const oldestUrl = getImageUrl(oldestFeaturedImage);
           
           // Unmark it in the database
           const { error: resetError } = await supabase
@@ -151,7 +150,7 @@ export function usePropertyMainImages(
       setFormData(prevState => {
         const currentFeaturedImages = prevState.featuredImages || [];
         const currentFeaturedUrls = currentFeaturedImages.map(img => 
-          typeof img === 'string' ? img : img.url
+          getImageUrl(img)
         );
         
         let updatedFeaturedImages: PropertyImage[];

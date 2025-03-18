@@ -1,9 +1,13 @@
 
 import { PropertyData, PropertyImage, PropertyFloorplan, PropertyFeature, PropertyPlaceType, PropertyCity, PropertyGeneralInfo } from "@/types/property";
-import { toPropertyImage, toPropertyFloorplan, getImageUrl, extractImageUrls as getImageUrls } from "./imageTypeConverters";
+import { toPropertyImage, toPropertyFloorplan, getImageUrl } from "./imageTypeConverters";
 
-// Remove the conflicting import - using getImageUrls instead
-// import { extractImageUrls } from "./imageTypeConverters";
+// Define a more specific function name for local use to avoid the naming conflict
+function getImageUrls(images: (string | PropertyImage)[] | undefined): string[] {
+  if (!Array.isArray(images)) return [];
+  
+  return images.map(img => typeof img === 'string' ? img : img.url);
+}
 
 /**
  * Converts any image array (string[] or mixed) to PropertyImage[]
@@ -82,22 +86,22 @@ export function convertPropertyDataToDto(propertyData: PropertyData): any {
   
   // Parse features to string if needed
   if (Array.isArray(dto.features) && dto.features.length > 0) {
-    dto.features = JSON.stringify(dto.features);
+    dto.featuresJson = JSON.stringify(dto.features);
   }
   
   // Parse nearby_places to string if needed
   if (Array.isArray(dto.nearby_places) && dto.nearby_places.length > 0) {
-    dto.nearby_places = JSON.stringify(dto.nearby_places);
+    dto.nearby_placesJson = JSON.stringify(dto.nearby_places);
   }
   
   // Parse nearby_cities to string if needed
   if (Array.isArray(dto.nearby_cities) && dto.nearby_cities.length > 0) {
-    dto.nearby_cities = JSON.stringify(dto.nearby_cities);
+    dto.nearby_citiesJson = JSON.stringify(dto.nearby_cities);
   }
   
   // Parse generalInfo to string if needed
   if (dto.generalInfo) {
-    dto.generalInfo = JSON.stringify(dto.generalInfo);
+    dto.generalInfoJson = JSON.stringify(dto.generalInfo);
   }
   
   // Add URL string arrays for database compatibility
