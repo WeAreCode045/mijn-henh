@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,10 +38,20 @@ export function usePropertyContent(propertyId: string) {
   const fetchPropertyData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Make sure propertyId is a string, not an object
+      const id = typeof propertyId === 'string' ? propertyId : '';
+      
+      if (!id) {
+        console.error('Invalid property ID:', propertyId);
+        throw new Error('Invalid property ID');
+      }
+
+      console.log("Fetching property with ID:", id);
+      
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('id', propertyId)
+        .eq('id', id)
         .single();
       
       if (error) {
@@ -118,6 +129,14 @@ export function usePropertyContent(propertyId: string) {
     
     setIsSaving(true);
     try {
+      // Ensure propertyId is a string
+      const id = typeof propertyId === 'string' ? propertyId : '';
+      
+      if (!id) {
+        console.error('Invalid property ID for saving:', propertyId);
+        throw new Error('Invalid property ID');
+      }
+      
       const preparedData = {
         title: formData.title,
         price: formData.price,
@@ -153,7 +172,7 @@ export function usePropertyContent(propertyId: string) {
       const { error } = await supabase
         .from('properties')
         .update(preparedData)
-        .eq('id', propertyId);
+        .eq('id', id);
       
       if (error) {
         throw error;
