@@ -68,6 +68,7 @@ export function FloorplansTab({
         const newFloorplan: PropertyFloorplan = {
           id: data.id,
           url: publicUrl,
+          property_id: property.id,
           sort_order: highestSortOrder,
           type: "floorplan"
         };

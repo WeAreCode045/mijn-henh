@@ -89,7 +89,6 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     youtubeUrl: typedData.youtubeUrl || '',
     notes: typedData.notes || '',
     propertyType: propertyType, // Use consistent property name
-    property_type: propertyType, // Add for database compatibility
     created_at: typedData.created_at || new Date().toISOString(),
     updated_at: typedData.updated_at || new Date().toISOString(),
     images: [], // These will be populated elsewhere

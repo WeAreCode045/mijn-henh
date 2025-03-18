@@ -49,7 +49,7 @@ export function useImageRemoveHandler(
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages
+        coverImages: updatedCoverImages as PropertyImage[]
       };
       
       // Update the form state
@@ -144,7 +144,7 @@ export function useImageRemoveHandler(
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedCoverImages
+        coverImages: updatedCoverImages as PropertyImage[]
       };
       
       // Update the form state

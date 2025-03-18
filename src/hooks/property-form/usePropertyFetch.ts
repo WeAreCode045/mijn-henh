@@ -210,8 +210,7 @@ export function usePropertyFetch(id: string | undefined) {
             gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
             areaPhotos: [],
             // Map property_type to propertyType for consistency
-            propertyType,
-            property_type: propertyType
+            propertyType
           };
           
           setFormData(updatedFormData);
