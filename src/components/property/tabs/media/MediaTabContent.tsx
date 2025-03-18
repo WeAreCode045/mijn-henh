@@ -46,6 +46,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-2xl font-bold mb-6">Media</h2>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-6">
           <TabsTrigger value="images">Images</TabsTrigger>

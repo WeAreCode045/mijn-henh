@@ -122,6 +122,8 @@ export function PropertyTabContents({
   
   // Show appropriate tab content based on active tab
   const renderTabContent = () => {
+    console.log("Rendering tab content for:", activeTab);
+    
     switch (activeTab) {
       case 'dashboard':
         return (
