@@ -41,13 +41,14 @@ export function usePropertyContent(propertyId: string) {
       // Make sure propertyId is a string, not an object
       const id = typeof propertyId === 'string' ? propertyId : '';
       
+      // Log the ID for debugging purposes
+      console.log("Attempting to fetch property with ID:", id);
+      
+      // Only validate that we have an ID, but don't throw an error yet
       if (!id) {
-        console.error('Invalid property ID:', propertyId);
-        throw new Error('Invalid property ID');
+        console.warn('Empty property ID provided:', propertyId);
       }
 
-      console.log("Fetching property with ID:", id);
-      
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -111,6 +112,8 @@ export function usePropertyContent(propertyId: string) {
           propertyType: data.propertyType || '',
           generalInfo
         });
+      } else {
+        console.warn('No data found for property ID:', id);
       }
     } catch (error) {
       console.error('Error fetching property data:', error);
