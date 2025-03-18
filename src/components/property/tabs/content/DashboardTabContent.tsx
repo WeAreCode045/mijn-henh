@@ -36,16 +36,13 @@ export function DashboardTabContent({
   const safeHandleGeneratePDF = handleGeneratePDF || (() => {});
   const safeHandleWebView = onWebView || (() => {});
 
-  // Use propertyType instead of property_type
-  const propertyTypeValue = property.propertyType || '';
-
   return (
     <PropertyDashboardTab
       id={property.id}
       objectId={property.object_id}
       title={property.title || 'Untitled Property'}
       agentId={property.agent_id}
-      agentName={property.agent?.name}
+      agentName={agentInfo?.name}
       templateId={property.template_id}
       templateName={templateInfo?.name}
       createdAt={property.created_at}

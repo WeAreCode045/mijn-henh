@@ -50,7 +50,7 @@ export function PropertyForm() {
     if (id && activeTab) {
       navigate(`/property/${id}/${activeTab}`);
     }
-  }, [id]);
+  }, [id, activeTab, navigate]);
 
   // Create a wrapper that returns a Promise for functions that don't
   const asyncWrapper = (fn: Function) => async (...args: any[]) => {

@@ -90,3 +90,17 @@ export function extractImageUrls(images: PropertyImage[]): string[] {
   if (!Array.isArray(images)) return [];
   return images.map(img => img.url);
 }
+
+/**
+ * Converts PropertyImage array to a standard format
+ */
+export function convertToPropertyImageArray(images: (string | PropertyImage | any)[]): PropertyImage[] {
+  return toPropertyImageArray(images);
+}
+
+/**
+ * Converts PropertyFloorplan array to a standard format
+ */
+export function convertToPropertyFloorplanArray(floorplans: (string | PropertyFloorplan | any)[]): PropertyFloorplan[] {
+  return toPropertyFloorplanArray(floorplans);
+}

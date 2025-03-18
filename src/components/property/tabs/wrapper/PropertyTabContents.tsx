@@ -33,12 +33,12 @@ interface PropertyTabContentsProps {
   onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   
   // Media tab props
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
   handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleRemoveFloorplan: (index: number) => void;
   isUploadingFloorplan: boolean;
   handleSetFeaturedImage: (url: string | null) => void;
@@ -132,6 +132,12 @@ export function PropertyTabContents({
             onDelete={onDelete}
             onWebView={handleWebView}
             handleSaveAgent={handleSaveAgent}
+            handleSaveObjectId={handleSaveObjectId}
+            handleSaveTemplate={handleSaveTemplate}
+            handleGeneratePDF={handleGeneratePDF}
+            isUpdating={isUpdating}
+            agentInfo={agentInfo}
+            templateInfo={templateInfo}
           />
         );
       
