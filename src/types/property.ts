@@ -1,4 +1,3 @@
-
 // Property place type
 export interface PropertyPlaceType {
   id: string;
@@ -13,7 +12,7 @@ export interface PropertyPlaceType {
   user_ratings_total?: number;
 }
 
-// Basic property data interface
+// Main property data interface
 export interface PropertyData {
   id: string;
   title: string;
@@ -32,8 +31,8 @@ export interface PropertyData {
   location_description: string;
   features?: PropertyFeature[];
   images?: PropertyImage[];
-  featuredImage?: string | null;
-  featuredImages?: PropertyImage[];
+  featuredImage: string | null;
+  featuredImages: PropertyImage[];
   areas?: PropertyArea[];
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];

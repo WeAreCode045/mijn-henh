@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PropertyData } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +6,7 @@ import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
+import { toPropertyImageArray } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -23,12 +23,10 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   const [localProperty, setLocalProperty] = React.useState<PropertyData>(property);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  // Update localProperty when property changes
   React.useEffect(() => {
     setLocalProperty(property);
   }, [property]);
 
-  // Use custom hook for media handlers
   const {
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
@@ -39,7 +37,6 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleFloorplanEmbedScriptSave
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
-  // Convert the images to PropertyImage[] for compatibility
   const images = convertToPropertyImageArray(localProperty.images || []);
 
   return (
@@ -58,7 +55,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             onRemoveImage={handleRemoveImage} 
             isUploading={isSaving}
             featuredImage={localProperty.featuredImage}
-            featuredImages={localProperty.featuredImages || []}
+            featuredImages={toPropertyImageArray(localProperty.featuredImages || [])}
             onSetFeaturedImage={handleSetFeaturedImage}
             onToggleFeaturedImage={handleToggleFeaturedImage}
             propertyId={localProperty.id}

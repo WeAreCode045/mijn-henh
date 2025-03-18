@@ -1,10 +1,11 @@
 
-import { PropertyFormData, GeneralInfoData } from "@/types/property";
+import { PropertyFormData, GeneralInfoData, PropertyImage } from "@/types/property";
 import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { BasicDetails } from "./BasicDetails";
 import { DescriptionSection } from "./DescriptionSection";
 import { ImageSelections } from "./ImageSelections";
+import { toPropertyImage, toPropertyImageArray } from "@/utils/imageTypeConverters";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
@@ -73,12 +74,7 @@ export function GeneralInfoStep({
   };
 
   // Convert images to PropertyImage[] format
-  const propertyImages = formData.images?.map(img => {
-    if (typeof img === 'string') {
-      return { url: img, id: img }; // Use URL as ID if string
-    }
-    return img;
-  }) || [];
+  const propertyImages = formData.images ? toPropertyImageArray(formData.images) : [];
 
   // Handle changes to generalInfo
   const handleGeneralInfoChange = (
@@ -153,7 +149,7 @@ export function GeneralInfoStep({
         <ImageSelections
           images={propertyImages}
           featuredImage={formData.featuredImage || null}
-          featuredImages={formData.featuredImages || []}
+          featuredImages={toPropertyImageArray(formData.featuredImages || [])}
           onFeaturedImageSelect={handleFeaturedImageSelect}
           onFeaturedImageToggle={handleFeaturedImageToggle}
         />

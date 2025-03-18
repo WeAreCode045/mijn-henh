@@ -1,7 +1,6 @@
 
 import { PropertyImage } from "@/types/property";
-import { getImageUrl } from "@/utils/typeGuards";
-import { toPropertyImageArray } from "@/utils/propertyTypeGuards";
+import { getImageUrl } from "@/utils/imageTypeConverters";
 
 // Helper to convert string or object to a PropertyImage array
 function normalizeImages(images: string[] | PropertyImage[] | undefined): PropertyImage[] {

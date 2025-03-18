@@ -3,6 +3,7 @@ import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
+import { getImageUrl } from "@/utils/imageTypeConverters";
 
 /**
  * Hook for removing images from a property
@@ -22,7 +23,7 @@ export function useRemoveImage(
     setIsSaving(true);
     try {
       const imageToRemove = property.images[index];
-      const imageUrl = typeof imageToRemove === 'string' ? imageToRemove : imageToRemove.url;
+      const imageUrl = getImageUrl(imageToRemove);
       const imageId = typeof imageToRemove === 'object' ? imageToRemove.id : null;
       
       // Delete from database if we have an ID
@@ -51,14 +52,17 @@ export function useRemoveImage(
         // Use the convertToPropertyImageArray helper to ensure proper typing
         const updatedImages = convertToPropertyImageArray(newImages);
         
+        // Check if the removed image was a featured image
+        const removedImageUrl = getImageUrl(imageToRemove);
+        
         return {
           ...prev,
           images: updatedImages,
           // If the removed image was the featured image, clear it
-          featuredImage: prev.featuredImage === imageUrl ? null : prev.featuredImage,
+          featuredImage: prev.featuredImage === removedImageUrl ? null : prev.featuredImage,
           // Remove from featured images if present
-          featuredImages: (prev.featuredImages || []).filter(img => img !== imageUrl)
-        } as PropertyData; // Type assertion to ensure compatibility
+          featuredImages: prev.featuredImages.filter(img => getImageUrl(img) !== removedImageUrl)
+        };
       });
       
       // Call handler if provided

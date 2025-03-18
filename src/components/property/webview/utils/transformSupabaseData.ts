@@ -1,7 +1,7 @@
-
 import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
+import { toPropertyImage } from "@/utils/imageTypeConverters";
 
 export interface SupabasePropertyData {
   id: string;
@@ -65,7 +65,7 @@ export function transformSupabaseData(
   // Extract images from property_images
   const images: PropertyImage[] = [];
   let featuredImage: string | null = null;
-  const featuredImages: string[] = [];
+  const featuredImages: PropertyImage[] = [];
 
   // Process property images
   if (data.property_images && data.property_images.length > 0) {
@@ -86,7 +86,11 @@ export function transformSupabaseData(
 
         // Check if this is a featured image (previously grid image)
         if (img.is_featured_image) {
-          featuredImages.push(img.url);
+          featuredImages.push({
+            id: img.id,
+            url: img.url,
+            type: "image"
+          });
         }
       }
     });

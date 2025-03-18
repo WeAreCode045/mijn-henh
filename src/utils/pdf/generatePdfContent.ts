@@ -1,8 +1,7 @@
-
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
-import { generateImageSection } from './components/imageSection';
+import { createImageSection } from './components/imageSection';
 import { generateInfoSection } from './components/infoSection';
 import { generateContactSection } from './components/contactSection';
 

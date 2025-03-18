@@ -52,12 +52,12 @@ export function usePropertyCoverImages(
       const imageUrl = typeof img === 'string' ? img : img.url;
       if (imageUrl === url) {
         return {
-          ...img,
+          ...toPropertyImage(img),
           is_featured_image: !isFeatured
         };
       }
-      return img;
-    }) as PropertyImage[];
+      return typeof img === 'string' ? toPropertyImage(img) : img;
+    });
 
     updatedFormData.images = updatedImages;
     

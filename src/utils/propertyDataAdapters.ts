@@ -1,6 +1,6 @@
 
-import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
-import { toPropertyImage, toPropertyFloorplan } from "./imageTypeConverters";
+import { PropertyData, PropertyImage, PropertyFloorplan, PropertyFeature, PropertyPlaceType, PropertyCity, PropertyGeneralInfo } from "@/types/property";
+import { toPropertyImage, toPropertyFloorplan, extractImageUrls } from "./imageTypeConverters";
 
 /**
  * Converts any image array (string[] or mixed) to PropertyImage[]
@@ -77,28 +77,42 @@ export function convertApiDataToPropertyData(apiData: any): PropertyData {
 export function convertPropertyDataToDto(propertyData: PropertyData): any {
   const dto = { ...propertyData };
   
-  // Convert complex objects to strings where needed
+  // Parse features to string if needed
   if (Array.isArray(dto.features) && dto.features.length > 0) {
     dto.features = JSON.stringify(dto.features);
   }
   
+  // Parse nearby_places to string if needed
   if (Array.isArray(dto.nearby_places) && dto.nearby_places.length > 0) {
     dto.nearby_places = JSON.stringify(dto.nearby_places);
   }
   
+  // Parse nearby_cities to string if needed
   if (Array.isArray(dto.nearby_cities) && dto.nearby_cities.length > 0) {
     dto.nearby_cities = JSON.stringify(dto.nearby_cities);
   }
   
+  // Parse generalInfo to string if needed
   if (dto.generalInfo) {
     dto.generalInfo = JSON.stringify(dto.generalInfo);
   }
   
-  // Convert images and floorplans to URL arrays
-  dto.images = extractImageUrls(dto.images);
-  dto.featuredImages = extractImageUrls(dto.featuredImages);
-  dto.coverImages = extractImageUrls(dto.coverImages);
-  dto.gridImages = extractImageUrls(dto.gridImages);
+  // Convert images and floorplans to URL strings for database
+  if (dto.images && Array.isArray(dto.images)) {
+    dto.images = extractImageUrls(dto.images);
+  }
+  
+  if (dto.featuredImages && Array.isArray(dto.featuredImages)) {
+    dto.featuredImages = extractImageUrls(dto.featuredImages);
+  }
+  
+  if (dto.coverImages && Array.isArray(dto.coverImages)) {
+    dto.coverImages = extractImageUrls(dto.coverImages);
+  }
+  
+  if (dto.gridImages && Array.isArray(dto.gridImages)) {
+    dto.gridImages = extractImageUrls(dto.gridImages);
+  }
   
   return dto;
 }

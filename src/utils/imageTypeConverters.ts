@@ -82,3 +82,11 @@ export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | 
   if (typeof image === 'string') return image;
   return image.url || '';
 }
+
+/**
+ * Extract URLs from a PropertyImage array
+ */
+export function extractImageUrls(images: PropertyImage[]): string[] {
+  if (!Array.isArray(images)) return [];
+  return images.map(img => img.url);
+}
