@@ -35,11 +35,11 @@ export function convertToPropertyImages(images: (string | PropertyImage | Proper
       return {
         id: img.id,
         url: img.url,
-        title: (img as PropertyFloorplan).title || undefined,
-        description: (img as PropertyFloorplan).description || undefined,
+        title: (img as any).title || undefined,
+        description: (img as any).description || undefined,
         type: "floorplan",
-        sort_order: (img as PropertyFloorplan).sort_order,
-        filePath: (img as PropertyFloorplan).filePath
+        sort_order: (img as any).sort_order,
+        filePath: (img as any).filePath
       };
     }
     

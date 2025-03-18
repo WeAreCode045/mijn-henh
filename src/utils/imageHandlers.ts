@@ -63,13 +63,6 @@ export function normalizeImageArray(images: (string | PropertyImage | PropertyFl
 }
 
 /**
- * Checks if an image is of a certain type
- */
-export function isImageType(image: PropertyImage | PropertyFloorplan, type: 'image' | 'floorplan'): boolean {
-  return (image as any).type === type;
-}
-
-/**
  * Safely gets a property from an image that might be a string
  */
 export function getImageProperty<T>(
@@ -80,3 +73,9 @@ export function getImageProperty<T>(
   if (!image || typeof image === 'string') return defaultValue;
   return (image as any)[prop] !== undefined ? (image as any)[prop] : defaultValue;
 }
+
+/**
+ * Functions for safe image access with normalization
+ */
+export const safelyGetImageUrl = getImageUrl;
+export const normalizeImageCollection = normalizeImageArray;

@@ -54,7 +54,8 @@ export function toPropertyImageArray(images: (string | PropertyImage | PropertyF
       sort_order: (img as any).sort_order,
       filePath: (img as any).filePath,
       title: (img as any).title,
-      description: (img as any).description
+      description: (img as any).description,
+      alt: (img as any).alt
     };
   });
 }

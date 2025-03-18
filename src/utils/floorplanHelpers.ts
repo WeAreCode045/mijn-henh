@@ -50,10 +50,10 @@ export function processFloorplans(
       return {
         id: floorplan.id,
         url: floorplan.url,
-        title: floorplan.title || '',
-        description: floorplan.description || '',
-        sort_order: floorplan.sort_order !== undefined ? floorplan.sort_order : 0,
-        filePath: floorplan.filePath || '',
+        title: (floorplan as any).title || '',
+        description: (floorplan as any).description || '',
+        sort_order: (floorplan as any).sort_order !== undefined ? (floorplan as any).sort_order : 0,
+        filePath: (floorplan as any).filePath || '',
         type: "floorplan",
         columns: 1
       };
