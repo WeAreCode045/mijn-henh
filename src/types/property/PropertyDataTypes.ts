@@ -23,7 +23,7 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features: PropertyFeature[];
-  images: (string | PropertyImage)[];
+  images: PropertyImage[];
   featuredImage: string | null;
   featuredImages: string[];
   areas: PropertyArea[];
@@ -36,7 +36,7 @@ export interface PropertyData {
   agent_id: string;
   agent?: PropertyAgent | null;
   template_id: string;
-  floorplans: (PropertyFloorplan | PropertyImage | string)[];
+  floorplans: PropertyFloorplan[];
   floorplanEmbedScript: string;
   virtualTourUrl: string;
   youtubeUrl: string;

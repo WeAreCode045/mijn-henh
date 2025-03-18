@@ -1,6 +1,8 @@
 
-import { Json } from "@supabase/supabase-js";
 import { PropertyCity, PropertyArea, PropertyFeature, PropertyPlaceType } from "@/types/property";
+
+// Define a generic Json type since it's not exported from supabase-js
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 /**
  * Safely converts an array of objects to a format compatible with Supabase's JSON storage

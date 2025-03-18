@@ -12,12 +12,12 @@ export interface Area {
   description?: string;
   imageIds?: string[];
   columns?: number;
-  images?: (string | PropertyImage)[] | string[] | PropertyImage[];
+  images?: PropertyImage[];
 }
 
 export interface AreaImage {
   id: string;
   url: string;
   area: string;
-  type: "image" | "floorplan" | string;
+  type: "image" | "floorplan";
 }

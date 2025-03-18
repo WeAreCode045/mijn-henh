@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyFeature, PropertyPlaceType, PropertyCity, GeneralInfoData } from "@/types/property";
 import { transformFeatures, transformNearbyPlaces, transformGeneralInfo } from "./propertyDataTransformer";
 
@@ -56,9 +55,16 @@ export function usePropertyDataPreparer() {
     
     return processedData;
   };
-  
+
+  // Add the missing prepareSubmitData function:
+  const prepareSubmitData = (formData: PropertyFormData) => {
+    // Similar to preparePropertyData but with any specific transformations needed for submission
+    return preparePropertyData(formData);
+  };
+
   return {
     preparePropertyData,
-    processPropertyData
+    processPropertyData,
+    prepareSubmitData
   };
 }

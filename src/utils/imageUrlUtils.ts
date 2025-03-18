@@ -1,13 +1,12 @@
 
-import { PropertyImage, PropertyFloorplan } from "@/types/property";
+import { PropertyImage } from "@/types/property";
 
 /**
- * Helper function to get an image URL regardless of input type
+ * Gets the URL from a string or PropertyImage object
  */
-export function getImageUrl(
-  image: string | PropertyImage | PropertyFloorplan | null | undefined
-): string {
-  if (!image) return '';
-  if (typeof image === 'string') return image;
+export function getImageUrl(image: string | PropertyImage): string {
+  if (typeof image === 'string') {
+    return image;
+  }
   return image.url;
 }

@@ -9,6 +9,7 @@ import {
   transformGeneralInfo 
 } from '../propertyDataTransformer';
 import { parsePropertyCities, parsePropertyFeatures, parsePropertyAreas, parsePropertyPlaceTypes } from '@/utils/supabaseHelpers';
+import { Json } from '@/utils/supabaseHelpers';
 
 /**
  * Fetches property data from Supabase
@@ -42,9 +43,9 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
   }
   
   // Parse and transform the property data
-  const features = safelyParse<PropertyFeature>(data.features, transformFeatures);
-  const areas = safelyParse<PropertyArea>(data.areas, transformAreas);
-  const nearbyPlaces = safelyParse<PropertyPlaceType>(data.nearby_places, transformNearbyPlaces);
+  const features = safelyParse<PropertyFeature[]>(data.features, transformFeatures);
+  const areas = safelyParse<PropertyArea[]>(data.areas, transformAreas);
+  const nearbyPlaces = safelyParse<PropertyPlaceType[]>(data.nearby_places, transformNearbyPlaces);
   
   // Parse nearby cities with our helper
   const nearbyCities = parsePropertyCities(data.nearby_cities);
@@ -66,7 +67,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     energyLabel: data.energyLabel || '',
     hasGarden: !!data.hasGarden,
     description: data.description || '',
-    shortDescription: data.shortDescription || '',
+    shortDescription: data.description || '', // Fallback to description
     location_description: data.location_description || '',
     features,
     areas,
@@ -81,7 +82,7 @@ export const fetchPropertyDataFromApi = async (propertyId: string | any): Promis
     virtualTourUrl: data.virtualTourUrl || '',
     youtubeUrl: data.youtubeUrl || '',
     notes: data.notes || '',
-    propertyType: data.propertyType || '',
+    propertyType: data.propertyType || '', // Default to empty string
     generalInfo,
     images: [],
     floorplans: [],

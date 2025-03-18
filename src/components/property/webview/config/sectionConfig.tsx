@@ -8,6 +8,8 @@ import { FloorplanSection } from "../sections/FloorplanSection";
 import { NeighborhoodSection } from "../sections/NeighborhoodSection";
 import { ContactSection } from "../sections/ContactSection";
 import React from "react";
+import { PropertyImage, PropertyArea } from "@/types/property";
+import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 interface SectionConfigProps {
   property: PropertyData;
@@ -134,4 +136,23 @@ export const getAreaSections = (property: PropertyData, settings: AgencySettings
       ),
     };
   });
+};
+
+export const renderAreaSection = (property: PropertyData, settings: AgencySettings, areaIndex: number) => {
+  if (!property.areas || !property.areas[areaIndex]) {
+    return null;
+  }
+  
+  const area = property.areas[areaIndex];
+  
+  // Find images for this area
+  const areaImages = property.images.filter(img => {
+    if (typeof img === 'string') return false;
+    return img.area === area.id;
+  });
+  
+  // Convert images to proper type
+  const processedAreaImages = convertToPropertyImageArray(areaImages);
+  
+  return <SingleAreaSection area={area} areaImages={processedAreaImages} property={property} settings={settings} areaIndex={areaIndex} />;
 };

@@ -8,7 +8,7 @@ export interface PropertyImage {
   alt?: string;
   title?: string;
   description?: string;
-  type?: "image" | "floorplan" | string;
+  type: "image" | "floorplan";
   is_main?: boolean;
   is_featured_image?: boolean;
   sort_order?: number;

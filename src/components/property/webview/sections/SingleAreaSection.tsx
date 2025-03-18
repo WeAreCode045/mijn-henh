@@ -1,6 +1,6 @@
+
 import React from "react";
 import { PropertyImage, PropertyArea } from "@/types/property";
-import { getImageUrl } from "@/utils/imageUrlUtils";
 
 export interface SingleAreaSectionProps {
   area: PropertyArea;
@@ -32,7 +32,7 @@ export function SingleAreaSection({ area, areaImages }: SingleAreaSectionProps) 
           {processedImages.map((img) => (
             <div key={img.id} className="area-image-item">
               <img 
-                src={getImageUrl(img)} 
+                src={img.url} 
                 alt={`${area.title || area.name} - ${img.id}`} 
                 className="area-image"
               />
