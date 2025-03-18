@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PropertyTabSelector } from '@/components/property/tabs/PropertyTabSelector';
@@ -96,7 +96,7 @@ export function PropertyForm() {
                   handleImageUpload={asyncWrapper(formProps.handleImageUpload)}
                   handleRemoveImage={formProps.handleRemoveImage}
                   isUploading={formProps.isUploading}
-                  handleAreaPhotosUpload={formProps.handleAreaPhotosUpload || (async () => Promise.resolve())}
+                  handleAreaPhotosUpload={asyncWrapper(formProps.handleAreaPhotosUpload || (() => {}))}
                   handleRemoveAreaPhoto={formProps.handleRemoveAreaPhoto}
                   handleFloorplanUpload={asyncWrapper(formProps.handleFloorplanUpload)}
                   handleRemoveFloorplan={formProps.handleRemoveFloorplan}
