@@ -28,7 +28,7 @@ const safelyParse = <T,>(data: any, transformer: (data: any[]) => T[]): T[] => {
   return [] as T[];
 };
 
-export function usePropertyContent(propertyId: string) {
+export function usePropertyContent(propertyId: string | any) {
   const [formData, setFormData] = useState<PropertyFormData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -38,14 +38,16 @@ export function usePropertyContent(propertyId: string) {
   const fetchPropertyData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Make sure propertyId is a string, not an object
-      const id = typeof propertyId === 'string' ? propertyId : '';
+      // Ensure propertyId is a string
+      const id = typeof propertyId === 'string' ? propertyId : 
+                (propertyId && typeof propertyId === 'object' && propertyId.id) ? 
+                propertyId.id : '';
       
       // Log the ID for debugging purposes
       console.log("Attempting to fetch property with ID:", id);
       
       // If the ID is empty, just set a default form data and exit early
-      if (!id || id.trim() === '') {
+      if (!id || (typeof id === 'string' && id.trim() === '')) {
         console.warn('Empty property ID provided:', propertyId);
         setIsLoading(false);
         return;
@@ -135,10 +137,12 @@ export function usePropertyContent(propertyId: string) {
     setIsSaving(true);
     try {
       // Ensure propertyId is a string
-      const id = typeof propertyId === 'string' ? propertyId : '';
+      const id = typeof propertyId === 'string' ? propertyId : 
+                (propertyId && typeof propertyId === 'object' && propertyId.id) ? 
+                propertyId.id : '';
       
       // Validate ID before attempting to save
-      if (!id || id.trim() === '') {
+      if (!id || (typeof id === 'string' && id.trim() === '')) {
         console.error('Invalid property ID for saving:', propertyId);
         throw new Error('Invalid property ID');
       }
@@ -203,7 +207,13 @@ export function usePropertyContent(propertyId: string) {
   }, [formData, propertyId, toast]);
 
   useEffect(() => {
-    if (propertyId && propertyId.trim() !== '') {
+    // Check if propertyId exists, but handle the case when it's an object
+    const shouldFetch = propertyId && (
+      (typeof propertyId === 'string' && propertyId.trim() !== '') ||
+      (typeof propertyId === 'object' && propertyId.id && typeof propertyId.id === 'string' && propertyId.id.trim() !== '')
+    );
+    
+    if (shouldFetch) {
       fetchPropertyData();
     }
   }, [propertyId, fetchPropertyData]);
