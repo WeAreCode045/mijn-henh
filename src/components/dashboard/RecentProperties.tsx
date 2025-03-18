@@ -111,7 +111,7 @@ export function RecentProperties() {
               <div 
                 key={property.id} 
                 className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                onClick={() => navigate(`/property/${property.id}/edit`)}
+                onClick={() => navigate(`/property/${property.id}/dashboard`)}
               >
                 <img
                   src={displayImage}
