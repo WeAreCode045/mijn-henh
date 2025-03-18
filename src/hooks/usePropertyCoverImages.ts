@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyImage } from "@/types/property";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
@@ -44,7 +43,7 @@ export function usePropertyCoverImages(
       })) as PropertyImage[];
 
       updatedFormData.coverImages = coverImages;
-      updatedFormData.featuredImages = mainImages.map(img => img.url);
+      updatedFormData.featuredImages = mainImages.map(img => img.url) as PropertyImage[];
       
       setFormData(updatedFormData);
     };

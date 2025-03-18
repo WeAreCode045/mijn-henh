@@ -82,19 +82,19 @@ export function normalizePropertyImageTypes(formData: PropertyFormData): Propert
   
   // Convert image arrays to PropertyImage[] arrays
   if (formData.images) {
-    normalized.images = convertToPropertyImageArray(formData.images);
+    normalized.images = convertToPropertyImageArray(formData.images as any[]);
   }
   
   if (formData.floorplans) {
-    normalized.floorplans = convertToPropertyFloorplanArray(formData.floorplans);
+    normalized.floorplans = convertToPropertyFloorplanArray(formData.floorplans as any[]);
   }
   
   if (formData.coverImages) {
-    normalized.coverImages = convertToPropertyImageArray(formData.coverImages);
+    normalized.coverImages = convertToPropertyImageArray(formData.coverImages as any[]);
   }
   
   if (formData.gridImages) {
-    normalized.gridImages = convertToPropertyImageArray(formData.gridImages);
+    normalized.gridImages = convertToPropertyImageArray(formData.gridImages as any[]);
   }
   
   return normalized;

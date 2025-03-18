@@ -56,7 +56,7 @@ export interface PropertyFloorplan {
   property_id?: string;
   is_featured?: boolean;
   timestamp?: string;
-  type?: "floorplan";
+  type: "floorplan";
   columns?: number;
 }
 
@@ -139,7 +139,7 @@ export interface PropertyData {
   features: PropertyFeature[];
   images: (string | PropertyImage)[];
   featuredImage: string | null;
-  featuredImages: string[];
+  featuredImages: PropertyImage[] | string[];
   areas: PropertyArea[];
   map_image: string | null;
   nearby_places: PropertyPlaceType[];

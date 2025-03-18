@@ -34,7 +34,9 @@ export function useImageRemoveHandler(
       }
       
       // Update featured images if they include the removed image
-      const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
+      const updatedFeaturedImages = (formData.featuredImages || []).filter(url => 
+        typeof url === 'string' ? url !== imageUrl : url.url !== imageUrl
+      );
       
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {
@@ -42,11 +44,11 @@ export function useImageRemoveHandler(
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedFeaturedImages.map(url => ({
-          id: `temp-${Date.now()}-${Math.random()}`,
-          url: url,
-          type: "image" as const
-        }))
+        coverImages: updatedFeaturedImages.map(url => 
+          typeof url === 'string' 
+            ? { id: `temp-${Date.now()}-${Math.random()}`, url: url, type: "image" as const } 
+            : url
+        )
       };
       
       // Update the form state
@@ -126,7 +128,9 @@ export function useImageRemoveHandler(
       }
       
       // Update featured images if they include the removed image
-      const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
+      const updatedFeaturedImages = (formData.featuredImages || []).filter(url => 
+        typeof url === 'string' ? url !== imageUrl : url.url !== imageUrl
+      );
       
       // Create an updated form data object with proper typing
       const updatedFormData: PropertyFormData = {
@@ -134,11 +138,11 @@ export function useImageRemoveHandler(
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedFeaturedImages.map(url => ({
-          id: `temp-${Date.now()}-${Math.random()}`,
-          url: url,
-          type: "image" as const
-        }))
+        coverImages: updatedFeaturedImages.map(url => 
+          typeof url === 'string' 
+            ? { id: `temp-${Date.now()}-${Math.random()}`, url: url, type: "image" as const } 
+            : url
+        )
       };
       
       // Update the form state

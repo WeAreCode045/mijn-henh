@@ -1,4 +1,3 @@
-
 // Property place type
 export interface PropertyPlaceType {
   id: string;
@@ -31,9 +30,9 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features?: PropertyFeature[];
-  images?: string[] | PropertyImage[];
+  images?: (string | PropertyImage)[];
   featuredImage?: string | null;
-  featuredImages?: string[];
+  featuredImages?: PropertyImage[] | string[];
   areas?: PropertyArea[];
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];
@@ -50,11 +49,11 @@ export interface PropertyData {
   youtubeUrl?: string;
   notes?: string;
   generalInfo?: PropertyGeneralInfo;
-  propertyType?: string; // Add property type field
+  propertyType?: string;
   created_at?: string;
   updated_at?: string;
-  coverImages?: string[];
-  gridImages?: string[];
+  coverImages?: PropertyImage[];
+  gridImages?: PropertyImage[];
   areaPhotos?: string[];
 }
 
@@ -83,7 +82,7 @@ export interface PropertyArea {
   unit?: string;
   title?: string;
   description?: string;
-  images: string[] | PropertyImage[];
+  images: (string | PropertyImage)[];
   imageIds?: string[];
   columns?: number;
 }
@@ -113,6 +112,7 @@ export interface PropertyFloorplan {
   filePath?: string;
   sort_order?: number;
   columns?: number;
+  type: "floorplan";
 }
 
 // Property agent type
