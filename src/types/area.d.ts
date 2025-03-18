@@ -13,6 +13,7 @@ export interface Area {
   images?: string[] | { url: string; id: string; }[];
   imageIds?: string[];
   columns?: number;
+  unit?: string;
 }
 
 /**

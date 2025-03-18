@@ -1,13 +1,15 @@
-// Area type definition (previously missing)
+
+// Area type definition
 export interface Area {
   id: string;
   name?: string;
   size?: string;
   title?: string;
   description?: string;
-  images?: string[] | { url: string; id: string; }[];
+  images?: string[] | { url: string; id: string; }[] | PropertyImage[];
   imageIds?: string[];
   columns?: number;
+  unit?: string;
 }
 
 // Basic property data types
@@ -22,6 +24,7 @@ export interface PropertyImage {
   area?: string | null;
   title?: string;
   description?: string;
+  alt?: string;
   filePath?: string;
 }
 
@@ -32,30 +35,34 @@ export interface PropertyFeature {
 
 export interface PropertyArea {
   id: string;
-  title: string;
-  description: string;
-  imageIds: string[];
-  columns: number;
   name: string;
   size: string;
-  images: PropertyImage[] | string[] | { url: string; id: string; }[];
+  unit?: string;
+  title?: string;
+  description?: string;
+  imageIds?: string[];
+  columns?: number;
+  images: (PropertyImage | string)[] | string[] | { url: string; id: string; }[];
 }
 
 export interface PropertyFloorplan {
   id: string;
   url: string;
   title?: string;
+  alt?: string;
   description?: string;
   filePath?: string;
   sort_order?: number;
   property_id?: string;
   is_featured?: boolean;
   timestamp?: string;
+  type?: "floorplan";
   columns?: number;
 }
 
 export interface PropertyNearbyPlace {
   id: string;
+  place_id: string;
   name: string;
   type: string;
   types?: string[];
@@ -85,27 +92,31 @@ export interface PropertyAgent {
   phone?: string;
   photoUrl?: string;
   address?: string;
+  avatar?: string;
 }
 
 export interface GeneralInfoData {
   propertyDetails?: {
-    title: string;
-    price: string;
-    address: string;
-    objectId: string;
+    title?: string;
+    price?: string;
+    address?: string;
+    objectId?: string;
   };
   description?: {
-    shortDescription: string;
-    fullDescription: string;
+    shortDescription?: string;
+    fullDescription?: string;
   };
   keyInformation?: {
-    buildYear: string;
-    lotSize: string;
-    livingArea: string;
-    bedrooms: string;
-    bathrooms: string;
-    energyClass: string;
+    buildYear?: string;
+    lotSize?: string;
+    livingArea?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+    energyClass?: string;
+    garages?: string;
+    hasGarden?: boolean;
   };
+  [key: string]: any;
 }
 
 // Main property data interface
@@ -126,20 +137,20 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features: PropertyFeature[];
-  images: PropertyImage[];
+  images: (string | PropertyImage)[];
   featuredImage: string | null;
   featuredImages: string[];
   areas: PropertyArea[];
   map_image: string | null;
-  nearby_places: PropertyNearbyPlace[];
+  nearby_places: PropertyPlaceType[];
   nearby_cities: PropertyCity[];
   latitude: number | null;
   longitude: number | null;
   object_id: string;
   agent_id: string;
-  agent?: PropertyAgent;
+  agent?: PropertyAgent | null;
   template_id: string;
-  floorplans: PropertyFloorplan[] | PropertyImage[];
+  floorplans: (PropertyFloorplan | PropertyImage | string)[];
   floorplanEmbedScript: string;
   virtualTourUrl: string;
   youtubeUrl: string;
@@ -149,12 +160,14 @@ export interface PropertyData {
   coverImages: PropertyImage[];
   gridImages: PropertyImage[];
   generalInfo?: GeneralInfoData;
+  propertyType?: string;
+  areaPhotos?: string[];
 }
 
 // Property form data extends PropertyData with optional fields
 export interface PropertyFormData {
   id: string;
-  title?: string;
+  title: string;
   price?: string;
   address?: string;
   bedrooms?: string;
@@ -171,10 +184,10 @@ export interface PropertyFormData {
   template_id?: string;
   object_id?: string;
   agent_id?: string;
-  agent?: PropertyAgent;
+  agent?: PropertyAgent | null;
   features: PropertyFeature[];
   areas: PropertyArea[];
-  images?: PropertyImage[] | string[];
+  images?: (string | PropertyImage)[];
   map_image?: string | null;
   nearby_places?: PropertyPlaceType[];
   nearby_cities?: PropertyCity[];
@@ -184,7 +197,7 @@ export interface PropertyFormData {
   updated_at?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
-  floorplans?: PropertyImage[] | string[];
+  floorplans?: (PropertyFloorplan | PropertyImage | string)[];
   floorplanEmbedScript?: string;
   notes?: string;
   featuredImage?: string | null;
@@ -192,8 +205,8 @@ export interface PropertyFormData {
   propertyType?: string;
   
   // Legacy fields for backward compatibility
-  coverImages?: string[];
-  gridImages?: string[];
+  coverImages?: (string | PropertyImage)[];
+  gridImages?: (string | PropertyImage)[];
   areaPhotos?: string[];
   
   // Structure for unified general info
@@ -236,4 +249,4 @@ export interface PropertySubmitData {
   generalInfo?: string | GeneralInfoData;
 }
 
-export type AreaImage = PropertyImage | { url: string; id: string };
+export type AreaImage = PropertyImage | { url: string; id: string; };

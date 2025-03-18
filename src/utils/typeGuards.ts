@@ -2,7 +2,7 @@
 import { PropertyImage, PropertyFloorplan, PropertyArea } from "@/types/property";
 
 /**
- * Type guard to check if value is a PropertyImage
+ * Type guard to check if a value is a PropertyImage
  */
 export function isPropertyImage(value: any): value is PropertyImage {
   return (
@@ -14,7 +14,7 @@ export function isPropertyImage(value: any): value is PropertyImage {
 }
 
 /**
- * Type guard to check if value is a PropertyFloorplan
+ * Type guard to check if a value is a PropertyFloorplan
  */
 export function isPropertyFloorplan(value: any): value is PropertyFloorplan {
   return (
@@ -28,7 +28,7 @@ export function isPropertyFloorplan(value: any): value is PropertyFloorplan {
 }
 
 /**
- * Type guard to check if value is a PropertyArea
+ * Type guard to check if a value is a PropertyArea
  */
 export function isPropertyArea(value: any): value is PropertyArea {
   return (
@@ -41,7 +41,7 @@ export function isPropertyArea(value: any): value is PropertyArea {
 }
 
 /**
- * Type guard to check if value is a URL string
+ * Type guard to check if a value is a URL string
  */
 export function isUrlString(value: any): value is string {
   return typeof value === 'string' && (

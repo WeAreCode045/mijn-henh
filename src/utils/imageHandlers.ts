@@ -39,7 +39,7 @@ export function transformToPropertyImage(image: any): PropertyImage {
     return {
       id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       url: image,
-      type: 'image'
+      type: "image"
     };
   }
   
