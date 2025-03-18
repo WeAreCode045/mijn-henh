@@ -23,7 +23,7 @@ export interface PropertyData {
   shortDescription?: string;
   location_description: string;
   features: PropertyFeature[];
-  images: PropertyImage[];
+  images: PropertyImage[];  // Changed from string[] to PropertyImage[]
   featuredImage: string | null;
   featuredImages: string[];
   areas: PropertyArea[];
@@ -46,8 +46,8 @@ export interface PropertyData {
   created_at: string;
   updated_at: string;
   // For backward compatibility
-  coverImages: PropertyImage[];
-  gridImages: PropertyImage[];
+  coverImages: PropertyImage[];  // Changed from string[] to PropertyImage[]
+  gridImages: PropertyImage[];   // Changed from string[] to PropertyImage[]
   areaPhotos?: string[];
   generalInfo?: GeneralInfoData;
 }
