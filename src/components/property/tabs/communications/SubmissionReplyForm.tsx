@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface SubmissionReplyFormProps {
   value: string;
@@ -27,7 +28,9 @@ export function SubmissionReplyForm({
 
   return (
     <form onSubmit={handleSubmit}>
+      <Label htmlFor="reply-message">Your Reply</Label>
       <Textarea 
+        id="reply-message"
         className="w-full p-2 border rounded resize-none"
         rows={4}
         placeholder="Type your reply here..."

@@ -54,9 +54,9 @@ export function PropertyDetails({
   return (
     <div className="space-y-6">
       <div>
-        <Label htmlFor="title">Titel Woning</Label>
+        <Label htmlFor="property-title">Titel Woning</Label>
         <Input
-          id="title"
+          id="property-title"
           name="title"
           value={title}
           onChange={onChange}
@@ -66,9 +66,9 @@ export function PropertyDetails({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="price">Prijs</Label>
+          <Label htmlFor="property-price">Prijs</Label>
           <Input
-            id="price"
+            id="property-price"
             name="price"
             type="text"
             value={price}
@@ -77,9 +77,9 @@ export function PropertyDetails({
           />
         </div>
         <div>
-          <Label htmlFor="buildYear">Bouwjaar</Label>
+          <Label htmlFor="property-buildYear">Bouwjaar</Label>
           <Input
-            id="buildYear"
+            id="property-buildYear"
             name="buildYear"
             type="number"
             value={buildYear}
@@ -90,9 +90,9 @@ export function PropertyDetails({
       </div>
 
       <div>
-        <Label htmlFor="address">Adres</Label>
+        <Label htmlFor="property-address">Adres</Label>
         <Input
-          id="address"
+          id="property-address"
           name="address"
           value={address}
           onChange={onChange}
@@ -102,9 +102,9 @@ export function PropertyDetails({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="sqft">Perceeloppervlakte (m²)</Label>
+          <Label htmlFor="property-sqft">Perceeloppervlakte (m²)</Label>
           <Input
-            id="sqft"
+            id="property-sqft"
             name="sqft"
             type="number"
             value={sqft}
@@ -113,9 +113,9 @@ export function PropertyDetails({
           />
         </div>
         <div>
-          <Label htmlFor="livingArea">Woonoppervlak (m²)</Label>
+          <Label htmlFor="property-livingArea">Woonoppervlak (m²)</Label>
           <Input
-            id="livingArea"
+            id="property-livingArea"
             name="livingArea"
             type="number"
             value={livingArea}
@@ -127,9 +127,9 @@ export function PropertyDetails({
 
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="bedrooms">Slaapkamers</Label>
+          <Label htmlFor="property-bedrooms">Slaapkamers</Label>
           <Input
-            id="bedrooms"
+            id="property-bedrooms"
             name="bedrooms"
             type="number"
             value={bedrooms}
@@ -138,9 +138,9 @@ export function PropertyDetails({
           />
         </div>
         <div>
-          <Label htmlFor="bathrooms">Badkamers</Label>
+          <Label htmlFor="property-bathrooms">Badkamers</Label>
           <Input
-            id="bathrooms"
+            id="property-bathrooms"
             name="bathrooms"
             type="number"
             value={bathrooms}
@@ -149,9 +149,9 @@ export function PropertyDetails({
           />
         </div>
         <div>
-          <Label htmlFor="garages">Garages</Label>
+          <Label htmlFor="property-garages">Garages</Label>
           <Input
-            id="garages"
+            id="property-garages"
             name="garages"
             type="number"
             value={garages}
@@ -163,9 +163,9 @@ export function PropertyDetails({
 
       <div className="grid grid-cols-2 gap-4 items-center">
         <div>
-          <Label htmlFor="energyLabel">Energielabel</Label>
+          <Label htmlFor="property-energyLabel">Energielabel</Label>
           <select
-            id="energyLabel"
+            id="property-energyLabel"
             name="energyLabel"
             value={energyLabel}
             onChange={onChange}
@@ -186,11 +186,11 @@ export function PropertyDetails({
         </div>
         <div className="flex items-center space-x-2">
           <Switch
-            id="hasGarden"
+            id="property-hasGarden"
             checked={hasGarden}
             onCheckedChange={handleGardenChange}
           />
-          <Label htmlFor="hasGarden">Tuin</Label>
+          <Label htmlFor="property-hasGarden">Tuin</Label>
         </div>
       </div>
     </div>

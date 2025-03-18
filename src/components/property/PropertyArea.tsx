@@ -40,14 +40,17 @@ export function PropertyArea({
   handleAreaImageUpload,
   isUploading = false,
 }: PropertyAreaProps) {
+  const titleId = `area-title-${id}`;
+  const descriptionId = `area-description-${id}`;
+  
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <div className="space-y-1 mb-2">
-            <Label htmlFor={`area-title-${id}`}>Title</Label>
+            <Label htmlFor={titleId}>Title</Label>
             <Input
-              id={`area-title-${id}`}
+              id={titleId}
               value={title}
               onChange={(e) => onUpdate('title', e.target.value)}
               placeholder="Area name"
@@ -60,6 +63,7 @@ export function PropertyArea({
             onClick={onRemove}
             className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
             title="Remove Area"
+            aria-label="Remove Area"
           >
             <Trash2 className="h-5 w-5" />
           </Button>
@@ -68,9 +72,9 @@ export function PropertyArea({
       
       <CardContent className="space-y-4 pb-2">
         <div className="space-y-1">
-          <Label htmlFor={`area-description-${id}`}>Description</Label>
+          <Label htmlFor={descriptionId}>Description</Label>
           <Textarea
-            id={`area-description-${id}`}
+            id={descriptionId}
             value={description}
             onChange={(e) => onUpdate('description', e.target.value)}
             placeholder="Describe this area"
@@ -79,7 +83,7 @@ export function PropertyArea({
         </div>
         
         <div>
-          <Label>Images</Label>
+          <Label htmlFor={`area-images-${id}`}>Images</Label>
           <div className="mt-2 space-y-4">
             <AreaImageGallery
               areaImages={images}

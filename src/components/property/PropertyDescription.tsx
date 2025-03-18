@@ -16,9 +16,9 @@ export function PropertyDescription({
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="description">Beschrijving woning</Label>
+        <Label htmlFor="property-description">Beschrijving woning</Label>
         <Textarea
-          id="description"
+          id="property-description"
           name="description"
           value={description}
           onChange={onChange}
@@ -30,9 +30,9 @@ export function PropertyDescription({
       
       {location_description !== undefined && (
         <div>
-          <Label htmlFor="location_description">Locatiebeschrijving</Label>
+          <Label htmlFor="property-location_description">Locatiebeschrijving</Label>
           <Textarea
-            id="location_description"
+            id="property-location_description"
             name="location_description"
             value={location_description}
             onChange={onChange}
