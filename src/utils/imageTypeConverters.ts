@@ -49,3 +49,48 @@ export function getPropertyFromImageArray<T>(
     return (img as any)[property] || defaultValue;
   });
 }
+
+/**
+ * Convert a string URL to a PropertyImage object
+ */
+export function toPropertyImage(url: string): PropertyImage {
+  return {
+    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url,
+    type: 'image'
+  };
+}
+
+/**
+ * Convert a string URL to a PropertyFloorplan object
+ */
+export function toPropertyFloorplan(url: string): PropertyFloorplan {
+  return {
+    id: `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url,
+    type: 'floorplan'
+  };
+}
+
+/**
+ * Convert array of strings to PropertyFloorplan array
+ */
+export function toPropertyFloorplanArray(urls: (string | PropertyFloorplan)[]): PropertyFloorplan[] {
+  if (!Array.isArray(urls)) return [];
+  
+  return urls.map(url => {
+    if (typeof url === 'string') {
+      return toPropertyFloorplan(url);
+    }
+    return url;
+  });
+}
+
+/**
+ * Safely get image URL regardless of type
+ */
+export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  return image.url;
+}

@@ -2,9 +2,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from './ui/input';
 
-interface GoogleAddressAutocompleteProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface GoogleAddressAutocompleteProps {
   onSelect?: (address: string) => void;
   apiKey: string;
+  value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  required?: boolean;
+  id?: string;
+  name?: string;
 }
 
 export function GoogleAddressAutocomplete({ 

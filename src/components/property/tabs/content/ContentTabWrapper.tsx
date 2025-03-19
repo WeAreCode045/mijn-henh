@@ -62,15 +62,31 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   return (
     <ContentTabContent
       formData={formData}
-      handlers={{
-        ...handlers,
-        // Don't pass the external currentStep/handleStepClick if we're using our own
-        currentStep: handlers.currentStep !== undefined ? handlers.currentStep : currentStep,
-        handleStepClick: handleStepNavigation,
-        handleNext,
-        handlePrevious,
-        setPendingChanges: handlers.setPendingChanges || setPendingChanges
-      }}
+      onFieldChange={handlers.onFieldChange}
+      onAddFeature={handlers.onAddFeature}
+      onRemoveFeature={handlers.onRemoveFeature}
+      onUpdateFeature={handlers.onUpdateFeature}
+      onAddArea={handlers.onAddArea}
+      onRemoveArea={handlers.onRemoveArea}
+      onUpdateArea={handlers.onUpdateArea}
+      onAreaImageRemove={handlers.onAreaImageRemove}
+      onAreaImagesSelect={handlers.onAreaImagesSelect}
+      handleAreaImageUpload={handlers.handleAreaImageUpload}
+      currentStep={handlers.currentStep !== undefined ? handlers.currentStep : currentStep}
+      handleStepClick={handleStepNavigation}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      setPendingChanges={handlers.setPendingChanges || setPendingChanges}
+      onFetchLocationData={handlers.onFetchLocationData}
+      onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
+      onFetchNearbyCities={handlers.onFetchNearbyCities}
+      onGenerateLocationDescription={handlers.onGenerateLocationDescription}
+      onGenerateMap={handlers.onGenerateMap}
+      onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
+      isLoadingLocationData={handlers.isLoadingLocationData}
+      isGeneratingMap={handlers.isGeneratingMap}
+      isUploading={handlers.isUploading}
+      isSaving={handlers.isSaving}
       lastSaved={lastSaved}
     />
   );
