@@ -52,7 +52,7 @@ export function usePropertyCoverImages(
       const imageUrl = typeof img === 'string' ? img : img.url;
       if (imageUrl === url) {
         return {
-          ...toPropertyImage(img),
+          ...toPropertyImage(imageUrl), // Fixed: Now properly pass the URL string instead of the whole image object
           is_featured_image: !isFeatured
         };
       }

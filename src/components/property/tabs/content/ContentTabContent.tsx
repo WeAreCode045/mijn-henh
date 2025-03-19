@@ -32,6 +32,7 @@ export interface ContentTabContentProps {
   // Adding these props to fix the TypeScript errors
   handleNext?: () => void;
   handlePrevious?: () => void;
+  lastSaved?: Date | null;
 }
 
 export function ContentTabContent({
@@ -61,7 +62,8 @@ export function ContentTabContent({
   setPendingChanges,
   isUploading,
   isSaving,
-  onSubmit
+  onSubmit,
+  lastSaved
 }: ContentTabContentProps) {
   // Default implementations if not provided
   const handleNextStep = handleNext || (() => {
@@ -94,8 +96,8 @@ export function ContentTabContent({
         onAreaImageUpload={handleAreaImageUpload}
         currentStep={currentStep}
         handleStepClick={handleStepClick}
-        handleNext={handleNextStep}
-        handlePrevious={handlePreviousStep}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
         onFetchLocationData={onFetchLocationData}
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         onFetchNearbyCities={onFetchNearbyCities}
