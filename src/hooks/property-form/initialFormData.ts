@@ -15,7 +15,7 @@ export const initialFormData: PropertyFormData = {
   energyLabel: "",
   hasGarden: false,
   description: "",
-  shortDescription: "", // Added shortDescription field
+  shortDescription: "", // This field is now correctly defined in PropertyFormData
   location_description: "",
   features: [],
   images: [],

@@ -1,3 +1,4 @@
+
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -67,6 +68,7 @@ export interface PropertyFormData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription: string; // Added shortDescription field
   location_description: string;
   features: PropertyFeature[];
   images: PropertyImage[] | string[] | { url: string }[];
