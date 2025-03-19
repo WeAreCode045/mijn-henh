@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { PropertyData } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyImagesCard } from "./PropertyImagesCard";
@@ -24,15 +24,32 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   const [activeTab, setActiveTab] = React.useState("images");
   const [localProperty, setLocalProperty] = React.useState<PropertyData>(property);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [fetchComplete, setFetchComplete] = React.useState(false);
 
-  // Update localProperty when property changes
-  useEffect(() => {
+  // Using a stable callback reference to avoid infinite re-renders
+  const updateLocalProperty = useCallback((newProps: Partial<PropertyData>) => {
     setLocalProperty(prev => ({
       ...prev,
-      ...property,
+      ...newProps,
     }));
-    console.log("MediaTabContent - Updated with property:", property);
-  }, [property]);
+  }, []);
+
+  // Update localProperty when property changes, but only for significant changes
+  useEffect(() => {
+    const shouldUpdate = 
+      property.id !== localProperty.id || 
+      property.images?.length !== localProperty.images?.length ||
+      property.floorplans?.length !== localProperty.floorplans?.length ||
+      property.virtualTourUrl !== localProperty.virtualTourUrl ||
+      property.youtubeUrl !== localProperty.youtubeUrl ||
+      property.floorplanEmbedScript !== localProperty.floorplanEmbedScript;
+    
+    if (shouldUpdate) {
+      updateLocalProperty(property);
+      console.log("MediaTabContent - Updated with property:", 
+        { id: property.id, imagesCount: property.images?.length });
+    }
+  }, [property, localProperty, updateLocalProperty]);
 
   const {
     handleSetFeaturedImage,
@@ -45,9 +62,9 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
   // Function to handle database images fetch completion
-  const handleImagesFromDatabase = (dbImages: any[]) => {
-    if (dbImages && dbImages.length > 0) {
-      console.log("MediaTabContent - Received images from DB:", dbImages);
+  const handleImagesFromDatabase = useCallback((dbImages: any[]) => {
+    if (dbImages && dbImages.length > 0 && !fetchComplete) {
+      console.log("MediaTabContent - Received images from DB:", dbImages.length);
       
       // Find the main image
       const mainImage = dbImages.find(img => img.is_main)?.url || null;
@@ -57,15 +74,15 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
         .filter(img => img.is_featured_image)
         .map(img => img.url);
       
-      const updatedProperty = {
-        ...localProperty,
+      updateLocalProperty({
         images: dbImages,
         featuredImage: mainImage,
         featuredImages: featuredImagesList
-      };
-      setLocalProperty(updatedProperty);
+      });
+      
+      setFetchComplete(true);
     }
-  };
+  }, [updateLocalProperty, fetchComplete]);
 
   // Process images for display
   const images = convertToPropertyImageArray(localProperty.images || []);
@@ -74,15 +91,6 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
 
   // Extract URLs from featured images for components that expect string arrays
   const featuredImageUrls = extractImageUrls(featuredImages);
-
-  console.log("MediaTabContent - Current property data:", {
-    id: localProperty.id,
-    imageCount: images.length,
-    floorplanCount: floorplans.length,
-    virtualTourUrl: localProperty.virtualTourUrl,
-    youtubeUrl: localProperty.youtubeUrl,
-    floorplanEmbedScript: localProperty.floorplanEmbedScript ? localProperty.floorplanEmbedScript.substring(0, 20) + '...' : 'none'
-  });
 
   return (
     <div className="space-y-6">

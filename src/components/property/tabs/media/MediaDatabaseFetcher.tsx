@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
@@ -14,69 +14,78 @@ export function MediaDatabaseFetcher({
   images,
   onFetchComplete
 }: MediaDatabaseFetcherProps) {
-  const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
+  const [hasFetched, setHasFetched] = useState(false);
   
-  // Force re-fetch every 3 seconds when uploads might be happening
+  // Separate state to track the last fetch time
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+  
   useEffect(() => {
+    // Only poll for new images every 30 seconds
     const interval = setInterval(() => {
       if (propertyId) {
-        setLastFetchTime(Date.now());
+        setFetchTrigger(prev => prev + 1);
       }
-    }, 3000);
+    }, 30000); // 30 seconds instead of 3 seconds
     
     return () => clearInterval(interval);
   }, [propertyId]);
   
-  useEffect(() => {
-    console.log("MediaDatabaseFetcher - checking if fetch needed", {
-      propertyId, 
-      imagesLength: images?.length,
-      lastFetchTime
-    });
+  const fetchImages = useCallback(async () => {
+    if (!propertyId || hasFetched) return;
     
-    if (propertyId) {
-      const fetchImages = async () => {
-        try {
-          console.log("MediaDatabaseFetcher - fetching images for property:", propertyId);
-          
-          const { data, error } = await supabase
-            .from('property_images')
-            .select('id, url, is_main, is_featured_image, sort_order')
-            .eq('property_id', propertyId)
-            .eq('type', 'image')
-            .order('sort_order', { ascending: true }) // Order by sort_order first
-            .order('created_at', { ascending: false }); // Then by created_at as fallback
-            
-          if (error) {
-            console.error("MediaDatabaseFetcher - Error fetching images:", error);
-            throw error;
-          }
-          
-          if (data && data.length > 0) {
-            // Transform to PropertyImage objects
-            const dbImages: PropertyImage[] = data.map(item => ({
-              id: item.id,
-              url: item.url,
-              is_main: item.is_main,
-              is_featured_image: item.is_featured_image,
-              sort_order: item.sort_order
-            }));
-            
-            console.log("MediaDatabaseFetcher - Fetched images from DB:", dbImages);
-            onFetchComplete(dbImages);
-          } else {
-            console.log("MediaDatabaseFetcher - No images found in DB");
-            onFetchComplete([]);
-          }
-        } catch (error) {
-          console.error("Error fetching images from database:", error);
-          onFetchComplete([]);
-        }
-      };
+    try {
+      console.log("MediaDatabaseFetcher - fetching images for property:", propertyId);
       
+      const { data, error } = await supabase
+        .from('property_images')
+        .select('id, url, is_main, is_featured_image, sort_order')
+        .eq('property_id', propertyId)
+        .eq('type', 'image')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        console.error("MediaDatabaseFetcher - Error fetching images:", error);
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        // Transform to PropertyImage objects
+        const dbImages: PropertyImage[] = data.map(item => ({
+          id: item.id,
+          url: item.url,
+          is_main: item.is_main,
+          is_featured_image: item.is_featured_image,
+          sort_order: item.sort_order,
+          type: "image" // Add the required type field
+        }));
+        
+        console.log("MediaDatabaseFetcher - Fetched images from DB:", dbImages.length);
+        onFetchComplete(dbImages);
+      } else {
+        console.log("MediaDatabaseFetcher - No images found in DB");
+        onFetchComplete([]);
+      }
+      
+      setHasFetched(true);
+    } catch (error) {
+      console.error("Error fetching images from database:", error);
+    }
+  }, [propertyId, hasFetched, onFetchComplete]);
+
+  useEffect(() => {
+    // Reset fetch state when property ID changes
+    if (propertyId) {
+      setHasFetched(false);
+    }
+  }, [propertyId]);
+  
+  // Trigger fetch when property ID changes or fetchTrigger updates
+  useEffect(() => {
+    if (propertyId && !hasFetched) {
       fetchImages();
     }
-  }, [propertyId, lastFetchTime, onFetchComplete]);
+  }, [propertyId, fetchTrigger, fetchImages, hasFetched]);
 
   return null; // This is a logic-only component with no UI
 }

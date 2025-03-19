@@ -30,6 +30,7 @@ interface ContentTabWrapperProps {
     isGeneratingMap?: boolean;
     isUploading?: boolean;
     isSaving?: boolean;
+    onSubmit?: () => void; // Added this prop to match ContentTabContentProps
   };
 }
 
@@ -58,6 +59,11 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   
   // Prioritize external step handler if provided
   const handleStepNavigation = handlers.handleStepClick || handleStepClick;
+
+  // Create a dummy onSubmit if not provided to prevent loops or errors
+  const handleSubmit = handlers.onSubmit || (() => {
+    console.log("Default submit handler called");
+  });
 
   return (
     <ContentTabContent
@@ -88,6 +94,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
       isUploading={handlers.isUploading}
       isSaving={handlers.isSaving}
       lastSaved={lastSaved}
+      onSubmit={handleSubmit} // Add the onSubmit prop here
     />
   );
 }
