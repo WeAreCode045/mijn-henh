@@ -160,6 +160,7 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImage: featuredImage,
             featuredImages: featuredImages,
             agent: agentData,
+            shortDescription: propertyData.shortDescription || "", // Include shortDescription with fallback
             // Add backward compatibility fields
             coverImages, // Now as PropertyImage[]
             gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]

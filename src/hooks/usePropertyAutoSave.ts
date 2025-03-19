@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -38,6 +39,7 @@ export function usePropertyAutoSave() {
         energy_label: formData.energyLabel,
         has_garden: formData.hasGarden,
         description: formData.description,
+        shortDescription: formData.shortDescription, // Include shortDescription in autosave
         location_description: formData.location_description,
         features: JSON.stringify(formData.features),
         latitude: formData.latitude,

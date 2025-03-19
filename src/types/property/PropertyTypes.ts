@@ -108,6 +108,7 @@ export interface PropertySubmitData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription?: string;
   location_description: string;
   features: string;
   areas: any;

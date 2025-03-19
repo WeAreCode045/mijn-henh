@@ -55,6 +55,7 @@ export function usePropertyDatabase() {
       
       // Ensure floorplanEmbedScript is included in the data to update
       console.log("usePropertyDatabase - floorplanEmbedScript value:", finalDataToUpdate.floorplanEmbedScript);
+      console.log("usePropertyDatabase - shortDescription value:", finalDataToUpdate.shortDescription);
       
       console.log("usePropertyDatabase - Final update data:", finalDataToUpdate);
       
@@ -116,6 +117,7 @@ export function usePropertyDatabase() {
 
       // Ensure floorplanEmbedScript is included in the data
       console.log("usePropertyDatabase - floorplanEmbedScript value for new property:", data.floorplanEmbedScript);
+      console.log("usePropertyDatabase - shortDescription value for new property:", data.shortDescription);
 
       // Make a copy of data without fields that don't exist in the database
       const { 

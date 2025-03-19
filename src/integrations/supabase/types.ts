@@ -208,6 +208,7 @@ export type Database = {
           notes: string | null
           object_id: string | null
           price: string | null
+          shortDescription: string | null
           sqft: string | null
           template_id: string | null
           title: string | null
@@ -242,6 +243,7 @@ export type Database = {
           notes?: string | null
           object_id?: string | null
           price?: string | null
+          shortDescription?: string | null
           sqft?: string | null
           template_id?: string | null
           title?: string | null
@@ -276,6 +278,7 @@ export type Database = {
           notes?: string | null
           object_id?: string | null
           price?: string | null
+          shortDescription?: string | null
           sqft?: string | null
           template_id?: string | null
           title?: string | null
