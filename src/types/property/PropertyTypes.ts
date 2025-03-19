@@ -41,10 +41,10 @@ export interface PropertyCity {
  */
 export interface PropertyAgent {
   id: string;
-  full_name: string;
+  name: string;
   email?: string;
   phone?: string;
-  avatar_url?: string;
+  photoUrl?: string;
   whatsapp_number?: string;
 }
 

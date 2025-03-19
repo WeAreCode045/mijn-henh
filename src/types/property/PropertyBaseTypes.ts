@@ -1,3 +1,4 @@
+
 export interface PropertyBase {
   id?: string;
   title: string;
