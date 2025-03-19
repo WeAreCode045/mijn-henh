@@ -38,12 +38,12 @@ export function FloorplanDatabaseFetcher({
           const formattedFloorplans = data.map((fp): PropertyFloorplan => ({
             id: fp.id,
             url: fp.url,
-            title: fp.title || '',
-            description: fp.description || '',
+            title: fp.title || '', // Handle missing title property
+            description: fp.description || '', // Handle missing description property
             sort_order: fp.sort_order || 0,
             property_id: fp.property_id,
             type: 'floorplan',
-            alt: fp.title || '',
+            alt: fp.title || '', // Handle missing title property
           }));
           onFloorplansUpdate(formattedFloorplans);
         }

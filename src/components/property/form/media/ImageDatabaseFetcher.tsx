@@ -44,9 +44,9 @@ export function ImageDatabaseFetcher({
             sort_order: img.sort_order || 0,
             property_id: img.property_id,
             area: img.area || null,
-            alt: img.title || '',
-            title: img.title || '',
-            description: img.description || ''
+            alt: img.title || '', // Handle missing title property
+            title: img.title || '', // Handle missing title property
+            description: img.description || '' // Handle missing description property
           }));
           onImagesUpdate(formattedImages);
         }
