@@ -51,3 +51,47 @@ export function toPropertyFloorplanArray(dbFloorplans: any[]): PropertyFloorplan
   if (!dbFloorplans || !Array.isArray(dbFloorplans)) return [];
   return dbFloorplans.map(toPropertyFloorplan);
 }
+
+/**
+ * Gets the URL from a PropertyImage object or returns the string if it's already a URL
+ */
+export function getImageUrl(image: PropertyImage | string): string {
+  if (typeof image === 'string') return image;
+  return image.url || '';
+}
+
+/**
+ * Converts an array of mixed types to PropertyImage array
+ */
+export function convertToPropertyImageArray(images: (PropertyImage | string)[]): PropertyImage[] {
+  if (!images || !Array.isArray(images)) return [];
+  
+  return images.map(img => {
+    if (typeof img === 'string') {
+      return {
+        id: `img-${Date.now()}-${Math.random()}`,
+        url: img,
+        type: 'image'
+      };
+    }
+    return img;
+  });
+}
+
+/**
+ * Converts an array of mixed types to PropertyFloorplan array
+ */
+export function convertToFloorplanArray(floorplans: (PropertyFloorplan | string)[]): PropertyFloorplan[] {
+  if (!floorplans || !Array.isArray(floorplans)) return [];
+  
+  return floorplans.map(fp => {
+    if (typeof fp === 'string') {
+      return {
+        id: `fp-${Date.now()}-${Math.random()}`,
+        url: fp,
+        type: 'floorplan'
+      };
+    }
+    return fp;
+  });
+}

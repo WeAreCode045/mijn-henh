@@ -40,7 +40,7 @@ export function FloorplanDatabaseFetcher({
             url: fp.url,
             title: fp.title || '',
             description: fp.description || '',
-            sort_order: fp.sort_order,
+            sort_order: fp.sort_order || 0,
             property_id: fp.property_id,
             type: 'floorplan',
             alt: fp.title || '',

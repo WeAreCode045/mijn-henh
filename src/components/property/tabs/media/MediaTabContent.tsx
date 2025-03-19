@@ -1,128 +1,150 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
-import { TabsContent } from "@/components/ui/tabs";
-import { MediaTabNavigation } from "./MediaTabNavigation";
-import { ImagesTab } from "./tabs/ImagesTab";
-import { FloorplansTab } from "./tabs/FloorplansTab";
-import { VirtualToursTab } from "./tabs/VirtualToursTab";
-import { Tabs } from "@/components/ui/tabs";
-import { MediaDatabaseFetcher } from "./MediaDatabaseFetcher";
-import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
-import { convertToFloorplanArray } from "@/utils/imageTypeConverters";
+import { ImageUploader } from "@/components/property/form/media/ImageUploader";
+import { FloorplanUploader } from "@/components/property/form/media/FloorplanUploader";
+import { FeaturedImagesSelector } from "@/components/property/form/media/FeaturedImagesSelector";
+import { VirtualToursTab } from "@/components/property/form/media/VirtualToursTab";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImageDatabaseFetcher } from "@/components/property/form/media/ImageDatabaseFetcher";
+import { FloorplanDatabaseFetcher } from "@/components/property/form/media/FloorplanDatabaseFetcher";
+import { convertToPropertyImageArray } from "@/utils/imageTypeConverters";
+import { getImageUrl } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
-  handlers: {
-    handleVirtualTourUpdate: (url: string) => void;
-    handleYoutubeUrlUpdate: (url: string) => void;
-    handleFloorplanEmbedScriptUpdate: (script: string) => void;
-    setPendingChanges?: (pending: boolean) => void;
-  };
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleRemoveImage: (index: number) => void;
+  isUploading?: boolean;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleRemoveFloorplan: (index: number) => void;
+  isUploadingFloorplan?: boolean;
+  handleSetFeaturedImage: (url: string | null) => void;
+  handleToggleFeaturedImage: (url: string) => void;
+  handleVirtualTourUpdate: (url: string) => void;
+  handleYoutubeUrlUpdate: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate: (scriptContent: string) => void;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  floorplanEmbedScript?: string;
 }
-
-type MediaTab = "images" | "floorplans" | "virtual-tours";
 
 export function MediaTabContent({
   property,
-  handlers
+  handleImageUpload,
+  handleRemoveImage,
+  isUploading,
+  handleFloorplanUpload,
+  handleRemoveFloorplan,
+  isUploadingFloorplan,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage,
+  handleVirtualTourUpdate,
+  handleYoutubeUrlUpdate,
+  handleFloorplanEmbedScriptUpdate,
+  virtualTourUrl = '',
+  youtubeUrl = '',
+  floorplanEmbedScript = ''
 }: MediaTabContentProps) {
-  const [currentTab, setCurrentTab] = useState<MediaTab>("images");
-  const [isSaving, setIsSaving] = useState(false);
-  const [localProperty, setLocalProperty] = useState<PropertyData>(property);
+  const [activeTab, setActiveTab] = useState("images");
+  const [images, setImages] = useState<PropertyImage[]>([]);
+  const [floorplans, setFloorplans] = useState<PropertyFloorplan[]>([]);
+  const [featuredImage, setFeaturedImage] = useState<string | null>(property.featuredImage);
+  const [featuredImages, setFeaturedImages] = useState<string[]>(
+    property.featuredImages && Array.isArray(property.featuredImages) 
+      ? property.featuredImages.map(img => typeof img === 'string' ? img : img.url)
+      : []
+  );
+
+  console.log("MediaTabContent - Updated with property:", {
+    id: property.id,
+    imagesCount: (property.images || []).length,
+    floorplans: (property.floorplans || []).length,
+    virtualTourUrl,
+    youtubeUrl
+  });
   
-  // Update local state when property changes
-  useEffect(() => {
-    setLocalProperty(property);
-    console.log("MediaTabContent - Updated with property:", {
-      id: property.id,
-      imagesCount: property.images?.length || 0,
-      floorplans: property.floorplans?.length || 0,
-      virtualTourUrl: property.virtualTourUrl,
-      youtubeUrl: property.youtubeUrl
-    });
-  }, [property]);
-  
-  // When the tab changes, mark that there are pending changes
-  const handleTabChange = (tab: MediaTab) => {
-    setCurrentTab(tab);
-    if (handlers.setPendingChanges) {
-      handlers.setPendingChanges(true);
-    }
-  };
-  
-  // When new database images are fetched, update the local property state
-  const handleImagesFetched = (images: PropertyImage[]) => {
-    if (images.length > 0) {
-      console.log("MediaTabContent - Received images from DB:", images.length);
-      setLocalProperty(prev => ({
-        ...prev,
-        images: images
-      }));
-    }
+  // Handle image updates from database fetcher
+  const handleImagesUpdate = (newImages: PropertyImage[]) => {
+    console.log("MediaTabContent - Received images from DB:", newImages.length);
+    setImages(newImages);
   };
 
-  // When new floorplans are fetched, update the local property state
-  const handleFloorplansFetched = (floorplans: PropertyImage[]) => {
-    if (floorplans.length > 0) {
-      console.log("MediaTabContent - Received floorplans from DB:", floorplans.length);
-      // Convert to PropertyFloorplan[] type
-      const typedFloorplans = convertToFloorplanArray(floorplans);
-      
-      setLocalProperty(prev => ({
-        ...prev,
-        floorplans: typedFloorplans
-      }));
-    }
+  // Handle floorplan updates from database fetcher
+  const handleFloorplansUpdate = (newFloorplans: PropertyFloorplan[]) => {
+    console.log("MediaTabContent - Received floorplans from DB:", newFloorplans.length);
+    setFloorplans(newFloorplans);
+  };
+
+  // Handle setting the featured image
+  const handleFeatureImage = (url: string | null) => {
+    setFeaturedImage(url);
+    handleSetFeaturedImage(url);
+  };
+
+  // Handle toggling a featured image
+  const handleToggleFeature = (url: string) => {
+    const newFeaturedImages = featuredImages.includes(url)
+      ? featuredImages.filter(img => img !== url)
+      : [...featuredImages, url];
+    
+    setFeaturedImages(newFeaturedImages);
+    handleToggleFeaturedImage(url);
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Media</h2>
-      
-      {/* Fetch media from database */}
-      <MediaDatabaseFetcher
-        propertyId={property.id}
-        images={localProperty.images}
-        onFetchComplete={handleImagesFetched}
-      />
-      
-      <FloorplanDatabaseFetcher
-        propertyId={property.id}
-        floorplans={localProperty.floorplans}
-        onFetchComplete={handleFloorplansFetched}
-      />
-      
-      <Tabs value={currentTab} onValueChange={handleTabChange as (value: string) => void}>
-        <MediaTabNavigation currentTab={currentTab} />
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="images">Images</TabsTrigger>
+          <TabsTrigger value="floorplans">Floorplans</TabsTrigger>
+          <TabsTrigger value="virtualTours">Virtual Tours</TabsTrigger>
+        </TabsList>
         
-        <TabsContent value="images" className="p-0 border-0">
-          <ImagesTab
-            property={localProperty}
-            setProperty={setLocalProperty}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
+        <TabsContent value="images" className="space-y-6">
+          <ImageDatabaseFetcher 
+            propertyId={property.id} 
+            onImagesUpdate={handleImagesUpdate} 
+          />
+          
+          <ImageUploader
+            images={images}
+            onUpload={handleImageUpload}
+            onRemove={handleRemoveImage}
+            isUploading={isUploading}
+          />
+          
+          <FeaturedImagesSelector
+            images={images}
+            featuredImage={featuredImage}
+            featuredImages={featuredImages}
+            onFeatureImage={handleFeatureImage}
+            onToggleFeature={handleToggleFeature}
           />
         </TabsContent>
         
-        <TabsContent value="floorplans" className="p-0 border-0">
-          <FloorplansTab
-            property={localProperty}
-            setProperty={setLocalProperty}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
-            handlers={{
-              handleFloorplanEmbedScriptUpdate: handlers.handleFloorplanEmbedScriptUpdate
-            }}
+        <TabsContent value="floorplans" className="space-y-6">
+          <FloorplanDatabaseFetcher
+            propertyId={property.id}
+            onFloorplansUpdate={handleFloorplansUpdate}
+          />
+          
+          <FloorplanUploader
+            floorplans={floorplans}
+            onUpload={handleFloorplanUpload}
+            onRemove={handleRemoveFloorplan}
+            isUploading={isUploadingFloorplan}
+            embedScript={floorplanEmbedScript}
+            onEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
           />
         </TabsContent>
         
-        <TabsContent value="virtual-tours" className="p-0 border-0">
+        <TabsContent value="virtualTours" className="space-y-6">
           <VirtualToursTab
-            property={localProperty}
-            setProperty={setLocalProperty}
-            isSaving={isSaving}
-            setIsSaving={setIsSaving}
+            virtualTourUrl={virtualTourUrl}
+            youtubeUrl={youtubeUrl}
+            onVirtualTourUpdate={handleVirtualTourUpdate}
+            onYoutubeUrlUpdate={handleYoutubeUrlUpdate}
           />
         </TabsContent>
       </Tabs>

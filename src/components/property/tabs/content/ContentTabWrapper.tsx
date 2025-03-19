@@ -8,8 +8,9 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface ContentTabWrapperProps {
-  property: PropertyData;
+  property?: PropertyData;
   formData: PropertyFormData;
+  handlers?: any; // For passing handlers as a group
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -32,35 +33,37 @@ export interface ContentTabWrapperProps {
   isLoadingLocationData?: boolean;
   isGeneratingMap?: boolean;
   onSubmit: () => void;
-  handlers?: any; // Added for compatibility with existing code
 }
 
 export function ContentTabWrapper(props: ContentTabWrapperProps) {
+  // Allow props to be passed either directly or via handlers
+  const handlers = props.handlers || {};
+  
   const {
     property,
     formData,
-    onFieldChange,
-    onAddFeature,
-    onRemoveFeature,
-    onUpdateFeature,
-    onAddArea,
-    onRemoveArea,
-    onUpdateArea,
-    onAreaImageRemove,
-    onAreaImagesSelect,
-    onAreaImageUpload,
-    currentStep,
-    handleStepClick,
-    setPendingChanges,
-    onFetchLocationData,
-    onFetchCategoryPlaces,
-    onFetchNearbyCities,
-    onGenerateLocationDescription,
-    onGenerateMap,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    isGeneratingMap,
-    onSubmit
+    onFieldChange = handlers.onFieldChange,
+    onAddFeature = handlers.onAddFeature,
+    onRemoveFeature = handlers.onRemoveFeature, 
+    onUpdateFeature = handlers.onUpdateFeature,
+    onAddArea = handlers.onAddArea,
+    onRemoveArea = handlers.onRemoveArea,
+    onUpdateArea = handlers.onUpdateArea,
+    onAreaImageRemove = handlers.onAreaImageRemove,
+    onAreaImagesSelect = handlers.onAreaImagesSelect,
+    onAreaImageUpload = handlers.onAreaImageUpload,
+    currentStep = handlers.currentStep || 0,
+    handleStepClick = handlers.handleStepClick || (() => {}),
+    setPendingChanges = handlers.setPendingChanges,
+    onFetchLocationData = handlers.onFetchLocationData,
+    onFetchCategoryPlaces = handlers.onFetchCategoryPlaces || (() => Promise.resolve({})),
+    onFetchNearbyCities = handlers.onFetchNearbyCities || (() => Promise.resolve({})),
+    onGenerateLocationDescription = handlers.onGenerateLocationDescription,
+    onGenerateMap = handlers.onGenerateMap,
+    onRemoveNearbyPlace = handlers.onRemoveNearbyPlace,
+    isLoadingLocationData = handlers.isLoadingLocationData,
+    isGeneratingMap = handlers.isGeneratingMap,
+    onSubmit = handlers.onSubmit || (() => {})
   } = props;
 
   const [activeTab, setActiveTab] = useState<string>(String(currentStep || 0));

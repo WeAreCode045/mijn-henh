@@ -1,13 +1,14 @@
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import React from 'react';
 
 export function useAdaptedAreaPhotoHandlers(
   handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>,
   handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>,
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void,
+  handleRemoveAreaPhoto?: (index: number) => void,
   handleAreaImageRemove?: (areaId: string, imageId: string) => void
 ) {
-  // Adapter for area photos upload (converts e.target.files to first file)
+  // Adapter for area photos upload (ensures e: ChangeEvent<HTMLInputElement>)
   const adaptedHandleAreaPhotosUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (handleAreaPhotosUpload) {
@@ -18,17 +19,21 @@ export function useAdaptedAreaPhotoHandlers(
     [handleAreaPhotosUpload]
   );
 
-  // Adapter for area image upload (converts File to FileList)
+  // Adapter for area image upload (handles both File and FileList)
   const adaptedHandleAreaImageUpload = useCallback(
-    async (areaId: string, file: File) => {
+    async (areaId: string, fileOrFiles: File | FileList) => {
       if (handleAreaImageUpload) {
-        // Create a FileList-like object
+        if (fileOrFiles instanceof FileList) {
+          return handleAreaImageUpload(areaId, fileOrFiles);
+        }
+        
+        // Convert single File to FileList-like object
         const fileList = {
-          0: file,
+          0: fileOrFiles,
           length: 1,
-          item: (index: number) => (index === 0 ? file : null),
+          item: (index: number) => (index === 0 ? fileOrFiles : null),
           [Symbol.iterator]: function* () {
-            yield file;
+            yield fileOrFiles;
           }
         } as FileList;
         
@@ -39,15 +44,18 @@ export function useAdaptedAreaPhotoHandlers(
     [handleAreaImageUpload]
   );
 
-  // Adapter for remove area photo (index to areaId + imageId)
+  // Adapter for remove area photo (converts index to areaId + imageId OR adapts areaId, imageId to index)
   const adaptedHandleRemoveAreaPhoto = useCallback(
-    (index: number) => {
-      if (handleRemoveAreaPhoto) {
-        // Since we don't have proper mapping, we'll just use index as both area and image ID
-        handleRemoveAreaPhoto(`area-${index}`, `image-${index}`);
+    (indexOrAreaId: number | string, imageId?: string) => {
+      if (typeof indexOrAreaId === 'number' && handleRemoveAreaPhoto) {
+        // If called with index, use handleRemoveAreaPhoto
+        handleRemoveAreaPhoto(indexOrAreaId);
+      } else if (typeof indexOrAreaId === 'string' && imageId && handleAreaImageRemove) {
+        // If called with areaId and imageId, use handleAreaImageRemove
+        handleAreaImageRemove(indexOrAreaId, imageId);
       }
     },
-    [handleRemoveAreaPhoto]
+    [handleRemoveAreaPhoto, handleAreaImageRemove]
   );
 
   return {

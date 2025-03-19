@@ -173,7 +173,11 @@ export function PropertyTabContents({
         />
       );
     case PropertyTabsValue.COMMUNICATIONS:
-      return <CommunicationsTabContent property={property} />;
+      return (
+        <CommunicationsTabContent
+          property={property}
+        />
+      );
     default:
       return <div>No content available for this tab</div>;
   }
