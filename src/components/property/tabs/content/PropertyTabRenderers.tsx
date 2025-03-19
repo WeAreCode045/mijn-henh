@@ -1,7 +1,8 @@
 
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { DashboardTabContent } from "./DashboardTabContent";
+import { ContentTabWrapper } from "./ContentTabWrapper";
 
 interface MediaTabRendererProps {
   property: PropertyData;
@@ -50,6 +51,44 @@ export function DashboardTabRenderer(props: DashboardTabRendererProps) {
       isUpdating={props.handlers.isUpdating}
       agentInfo={props.agentInfo}
       templateInfo={props.templateInfo}
+    />
+  );
+}
+
+interface ContentTabRendererProps {
+  formData: PropertyFormData;
+  handlers: {
+    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+    onAddFeature: () => void;
+    onRemoveFeature: (id: string) => void;
+    onUpdateFeature: (id: string, description: string) => void;
+    onAddArea: () => void;
+    onRemoveArea: (id: string) => void;
+    onUpdateArea: (id: string, field: any, value: any) => void;
+    onAreaImageRemove: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    currentStep: number;
+    handleStepClick: (step: number) => void;
+    onFetchLocationData?: () => Promise<void>;
+    onFetchCategoryPlaces?: (category: string) => Promise<any>;
+    onFetchNearbyCities?: () => Promise<any>;
+    onGenerateLocationDescription?: () => Promise<void>;
+    onGenerateMap?: () => Promise<void>;
+    onRemoveNearbyPlace?: (index: number) => void;
+    isLoadingLocationData?: boolean;
+    isGeneratingMap?: boolean;
+    setPendingChanges?: (pending: boolean) => void;
+    isUploading?: boolean;
+    isSaving?: boolean;
+  };
+}
+
+export function ContentTabRenderer(props: ContentTabRendererProps) {
+  return (
+    <ContentTabWrapper
+      formData={props.formData}
+      handlers={props.handlers}
     />
   );
 }

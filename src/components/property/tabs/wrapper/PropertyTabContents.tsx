@@ -1,10 +1,10 @@
 
 import React from "react";
 import { PropertyFormData, PropertyData } from "@/types/property";
-import { ContentTabContent } from "../content/ContentTabContent";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { DashboardTabContent } from "../content/DashboardTabContent";
 import { CommunicationsTabContent } from "../communications/CommunicationsTabContent";
+import { ContentTabWrapper } from "../content/ContentTabWrapper";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -134,7 +134,7 @@ export function PropertyTabContents({
             handleSaveAgent={handleSaveAgent}
             handleSaveObjectId={handleSaveObjectId}
             handleSaveTemplate={handleSaveTemplate}
-            handleGeneratePDF={handleGeneratePDF}
+            handleGeneratePDF={handleGeneratePDF instanceof Function ? handleGeneratePDF : undefined}
             isUpdating={isUpdating}
             agentInfo={agentInfo}
             templateInfo={templateInfo}
@@ -143,32 +143,33 @@ export function PropertyTabContents({
       
       case 'content':
         return (
-          <ContentTabContent
+          <ContentTabWrapper
             formData={formState}
-            onFieldChange={onFieldChange}
-            onAddFeature={onAddFeature}
-            onRemoveFeature={onRemoveFeature}
-            onUpdateFeature={onUpdateFeature}
-            onAddArea={onAddArea}
-            onRemoveArea={onRemoveArea}
-            onUpdateArea={onUpdateArea}
-            onAreaImageRemove={onAreaImageRemove}
-            onAreaImagesSelect={onAreaImagesSelect}
-            handleAreaImageUpload={onAreaImageUpload}
-            currentStep={currentStep}
-            handleStepClick={handleStepClick}
-            onFetchLocationData={onFetchLocationData}
-            onFetchCategoryPlaces={onFetchCategoryPlaces}
-            onFetchNearbyCities={onFetchNearbyCities}
-            onGenerateLocationDescription={onGenerateLocationDescription}
-            onGenerateMap={onGenerateMap}
-            onRemoveNearbyPlace={onRemoveNearbyPlace}
-            isLoadingLocationData={isLoadingLocationData}
-            isGeneratingMap={isGeneratingMap}
-            setPendingChanges={setPendingChanges}
-            isUploading={isUploading}
-            onSubmit={onSubmit}
-            isSaving={isSaving}
+            handlers={{
+              onFieldChange,
+              onAddFeature,
+              onRemoveFeature,
+              onUpdateFeature,
+              onAddArea,
+              onRemoveArea,
+              onUpdateArea,
+              onAreaImageRemove,
+              onAreaImagesSelect,
+              handleAreaImageUpload: onAreaImageUpload,
+              currentStep,
+              handleStepClick,
+              onFetchLocationData,
+              onFetchCategoryPlaces,
+              onFetchNearbyCities,
+              onGenerateLocationDescription,
+              onGenerateMap,
+              onRemoveNearbyPlace,
+              isLoadingLocationData,
+              isGeneratingMap,
+              setPendingChanges,
+              isUploading,
+              isSaving
+            }}
           />
         );
         

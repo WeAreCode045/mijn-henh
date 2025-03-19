@@ -19,6 +19,8 @@ interface ContentTabWrapperProps {
     handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
+    handleNext?: () => void;
+    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
     onFetchCategoryPlaces?: (category: string) => Promise<any>;
     onFetchNearbyCities?: () => Promise<any>;
@@ -72,8 +74,8 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         handleAreaImageUpload={handlers.handleAreaImageUpload}
         currentStep={handlers.currentStep}
         handleStepClick={handlers.handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
+        handleNext={handlers.handleNext || handleNext}
+        handlePrevious={handlers.handlePrevious || handlePrevious}
         onFetchLocationData={handlers.onFetchLocationData}
         onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
         onFetchNearbyCities={handlers.onFetchNearbyCities}

@@ -43,10 +43,14 @@ export function DashboardTabContent({
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">{property.title || 'Untitled Property'}</h1>
-          <p className="text-muted-foreground mt-1">{property.address?.street}, {property.address?.city}</p>
+          <p className="text-muted-foreground mt-1">
+            {typeof property.address === 'object' && property.address ? 
+              `${property.address.street || ''}, ${property.address.city || ''}` : 
+              (property.address || '')}
+          </p>
         </div>
         <Badge variant="outline" className="text-sm">
-          {property.type || 'Residential'}
+          {property.propertyType || property.property_type || 'Residential'}
         </Badge>
       </div>
       
@@ -91,13 +95,13 @@ export function DashboardTabContent({
                   <div>
                     <p className="text-sm font-medium">Price</p>
                     <p className="text-sm text-muted-foreground">
-                      {property.price ? `€${property.price.toLocaleString()}` : 'Not set'}
+                      {property.price ? `€${property.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : 'Not set'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">Size</p>
                     <p className="text-sm text-muted-foreground">
-                      {property.size ? `${property.size} m²` : 'Not set'}
+                      {property.livingArea ? `${property.livingArea} m²` : 'Not set'}
                     </p>
                   </div>
                 </div>
