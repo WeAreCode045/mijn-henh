@@ -38,15 +38,26 @@ export function DashboardTabContent({
   const featuredImage = getPropertyMainImageUrl(property);
   const handleWebView = onWebView ? (e?: React.MouseEvent) => onWebView(e) : undefined;
 
+  // Helper function to format address
+  const renderAddress = () => {
+    if (typeof property.address === 'object' && property.address !== null) {
+      // For object-based addresses
+      const street = property.address.street || '';
+      const city = property.address.city || '';
+      return `${street}${street && city ? ', ' : ''}${city}`;
+    } else {
+      // For string addresses
+      return property.address || '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">{property.title || 'Untitled Property'}</h1>
           <p className="text-muted-foreground mt-1">
-            {typeof property.address === 'object' && property.address ? 
-              `${property.address.street || ''}, ${property.address.city || ''}` : 
-              (property.address || '')}
+            {renderAddress()}
           </p>
         </div>
         <Badge variant="outline" className="text-sm">
