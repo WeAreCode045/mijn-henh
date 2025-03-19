@@ -1,163 +1,158 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyData, PropertyFloorplan } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
+import { Button } from "@/components/ui/button";
+import { UploadIcon } from "lucide-react";
+import { FloorplansCard } from "../FloorplansCard";
 import { supabase } from "@/integrations/supabase/client";
-import { useFileUpload } from "@/hooks/useFileUpload";
-import { toast } from "sonner";
-import { AdvancedImageUploader } from "@/components/ui/AdvancedImageUploader";
+import { FloorplanDatabaseFetcher } from "../floorplans/FloorplanDatabaseFetcher";
 import { convertToPropertyFloorplanArray } from "@/utils/propertyDataAdapters";
 
 interface FloorplansTabProps {
   property: PropertyData;
   setProperty: React.Dispatch<React.SetStateAction<PropertyData>>;
-  isSaving?: boolean;
-  setIsSaving?: React.Dispatch<React.SetStateAction<boolean>>;
+  isSaving: boolean;
+  setIsSaving: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function FloorplansTab({ 
-  property, 
+export function FloorplansTab({
+  property,
   setProperty,
-  isSaving = false,
-  setIsSaving = () => {}
+  isSaving,
+  setIsSaving
 }: FloorplansTabProps) {
-  const { uploadFile } = useFileUpload();
-  const mixedFloorplans = property.floorplans || [];
-  
-  const floorplans = convertToPropertyFloorplanArray(mixedFloorplans);
+  const [localFloorplans, setLocalFloorplans] = useState<PropertyFloorplan[]>(
+    Array.isArray(property.floorplans) ? property.floorplans : []
+  );
+
+  useEffect(() => {
+    if (property.floorplans) {
+      setLocalFloorplans(property.floorplans);
+    }
+  }, [property.floorplans]);
 
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    
     if (!e.target.files || e.target.files.length === 0 || !property.id) {
       return;
     }
     
     setIsSaving(true);
-    const files = Array.from(e.target.files);
-    const newFloorplans: PropertyFloorplan[] = [];
     
     try {
-      let highestSortOrder = 0;
-      floorplans.forEach(floorplan => {
-        if (floorplan.sort_order && floorplan.sort_order > highestSortOrder) {
-          highestSortOrder = floorplan.sort_order;
-        }
-      });
-      
-      for (const file of files) {
-        const publicUrl = await uploadFile(file, property.id, 'floorplans');
+      const files = Array.from(e.target.files);
+      const uploadPromises = files.map(async (file, index) => {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `${property.id}/floorplans/${Date.now()}-${index}.${fileExt}`;
         
-        highestSortOrder += 1;
+        const { data, error } = await supabase.storage
+          .from('properties')
+          .upload(filePath, file);
+          
+        if (error) throw error;
         
-        const { error, data } = await supabase
+        const { data: { publicUrl } } = supabase.storage
+          .from('properties')
+          .getPublicUrl(filePath);
+          
+        // Insert into property_images table
+        const { data: imageData, error: imageError } = await supabase
           .from('property_images')
           .insert({
             property_id: property.id,
             url: publicUrl,
             type: 'floorplan',
-            sort_order: highestSortOrder
+            sort_order: localFloorplans.length + index
           })
-          .select()
+          .select('id')
           .single();
           
-        if (error) throw error;
+        if (imageError) throw imageError;
         
-        const newFloorplan: PropertyFloorplan = {
-          id: data.id,
+        return {
+          id: imageData.id,
           url: publicUrl,
-          sort_order: highestSortOrder,
-          type: "floorplan"
+          type: 'floorplan' as const,
+          columns: 12,
+          title: 'Floorplan'
         };
-        
-        newFloorplans.push(newFloorplan);
-      }
+      });
       
+      const newFloorplans = await Promise.all(uploadPromises);
+      const updatedFloorplans = [...localFloorplans, ...newFloorplans];
+      
+      setLocalFloorplans(updatedFloorplans);
       setProperty(prev => ({
         ...prev,
-        floorplans: [...(prev.floorplans || []), ...newFloorplans]
+        floorplans: updatedFloorplans
       }));
       
-      toast.success(`${newFloorplans.length} floorplan${newFloorplans.length !== 1 ? 's' : ''} uploaded`);
     } catch (error) {
-      console.error("Error uploading floorplans:", error);
-      toast.error("Failed to upload floorplans");
+      console.error('Error uploading floorplan:', error);
     } finally {
       setIsSaving(false);
       e.target.value = '';
     }
   };
-
+  
   const handleRemoveFloorplan = async (index: number) => {
-    if (!property.id || !floorplans || index < 0 || index >= floorplans.length) return;
+    if (!property.id || !localFloorplans[index]) return;
     
     setIsSaving(true);
+    
     try {
-      const floorplanToRemove = floorplans[index];
-      const floorplanUrl = floorplanToRemove.url;
-      const floorplanId = floorplanToRemove.id;
+      const floorplanToRemove = localFloorplans[index];
       
-      if (floorplanId) {
-        const { error } = await supabase
-          .from('property_images')
-          .delete()
-          .eq('id', floorplanId);
-          
-        if (error) throw error;
-      } else if (floorplanUrl) {
-        const { error } = await supabase
-          .from('property_images')
-          .delete()
-          .eq('property_id', property.id)
-          .eq('url', floorplanUrl)
-          .eq('type', 'floorplan');
-          
-        if (error) throw error;
-      }
+      // Delete from database
+      const { error } = await supabase
+        .from('property_images')
+        .delete()
+        .eq('id', floorplanToRemove.id);
+        
+      if (error) throw error;
       
-      const newFloorplans = [...floorplans];
-      newFloorplans.splice(index, 1);
-      
+      // Update local state
+      const updatedFloorplans = localFloorplans.filter((_, i) => i !== index);
+      setLocalFloorplans(updatedFloorplans);
       setProperty(prev => ({
         ...prev,
-        floorplans: newFloorplans
+        floorplans: updatedFloorplans
       }));
       
-      toast.success("Floorplan removed");
     } catch (error) {
-      console.error("Error removing floorplan:", error);
-      toast.error("Failed to remove floorplan");
+      console.error('Error removing floorplan:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
+  // Callback for when floorplans are fetched from the database
+  const handleFloorplansFetched = (floorplans: PropertyFloorplan[]) => {
+    if (floorplans.length > 0) {
+      setLocalFloorplans(floorplans);
+      setProperty(prev => ({
+        ...prev,
+        floorplans
+      }));
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Floorplans</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <AdvancedImageUploader 
-          onUpload={handleFloorplanUpload} 
-          isUploading={isSaving} 
-          label="Upload Floorplans"
-          multiple={true}
-        />
-        
-        {floorplans.length === 0 ? (
-          <div className="text-center py-6 mt-4">
-            <p className="text-muted-foreground">No floorplans uploaded yet</p>
-          </div>
-        ) : (
-          <SortableFloorplanGrid 
-            floorplans={floorplans} 
-            onRemoveFloorplan={handleRemoveFloorplan}
-            propertyId={property.id}
-          />
-        )}
-      </CardContent>
-    </Card>
+    <>
+      {/* Fetch floorplans from database if not already loaded */}
+      <FloorplanDatabaseFetcher 
+        propertyId={property.id} 
+        floorplans={localFloorplans}
+        onFetchComplete={handleFloorplansFetched}
+      />
+      
+      <FloorplansCard
+        floorplans={localFloorplans}
+        onFloorplanUpload={handleFloorplanUpload}
+        onRemoveFloorplan={handleRemoveFloorplan}
+        isUploading={isSaving}
+        propertyId={property.id}
+      />
+    </>
   );
 }

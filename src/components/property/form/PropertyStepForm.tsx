@@ -4,7 +4,7 @@ import { PropertyFormData } from "@/types/property";
 import { FormStepActions } from "./steps/FormStepActions";
 import { FormStepNavigation } from "./FormStepNavigation";
 import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 
 interface PropertyStepFormProps {
   formData: PropertyFormData;
@@ -27,7 +27,10 @@ export function PropertyStepForm({
 }: PropertyStepFormProps) {
   // Initialize react-hook-form to provide the context
   const formMethods = useForm({
-    defaultValues: formData
+    defaultValues: formData,
+    // Set values and mode
+    values: formData,
+    mode: "onChange"
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,24 +40,27 @@ export function PropertyStepForm({
     }
   };
 
+  // Use form provider to make form context available to all child components
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
-      <FormStepNavigation
-        currentStep={step}
-        onStepClick={onStepChange}
-      />
-      
-      <div className="mt-6">
-        {children}
-      </div>
-
-      {onSubmit && (
-        <FormStepActions
-          onSubmit={onSubmit}
-          isSubmitting={isSubmitting}
-          submitText="Save Property"
+    <FormProvider {...formMethods}>
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <FormStepNavigation
+          currentStep={step}
+          onStepClick={onStepChange}
         />
-      )}
-    </form>
+        
+        <div className="mt-6">
+          {children}
+        </div>
+
+        {onSubmit && (
+          <FormStepActions
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
+            submitText="Save Property"
+          />
+        )}
+      </form>
+    </FormProvider>
   );
 }

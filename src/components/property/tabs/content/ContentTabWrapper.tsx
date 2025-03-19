@@ -1,8 +1,8 @@
 
-import { useState } from 'react';
+import React, { useState } from "react";
 import { PropertyFormData } from "@/types/property";
-import { ContentTabNavigation } from './ContentTabNavigation';
-import { ContentTabContent } from './ContentTabContent';
+import { ContentTabContent } from "./ContentTabContent";
+import { useFormSteps } from "@/hooks/useFormSteps";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -16,11 +16,10 @@ interface ContentTabWrapperProps {
     onUpdateArea: (id: string, field: any, value: any) => void;
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-    currentStep: number;
-    handleStepClick: (step: number) => void;
-    handleNext?: () => void;
-    handlePrevious?: () => void;
+    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
+    setPendingChanges?: (pending: boolean) => void;
+    currentStep?: number;
+    handleStepClick?: (step: number) => void;
     onFetchLocationData?: () => Promise<void>;
     onFetchCategoryPlaces?: (category: string) => Promise<any>;
     onFetchNearbyCities?: () => Promise<any>;
@@ -29,70 +28,50 @@ interface ContentTabWrapperProps {
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
     isGeneratingMap?: boolean;
-    setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
     isSaving?: boolean;
   };
 }
 
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
-  // Create local handlers if they're not provided
-  const handleNext = () => {
-    if (handlers.currentStep < 3) {
-      handlers.handleStepClick(handlers.currentStep + 1);
+  // Local state to manage autosave
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [pendingChanges, setPendingChanges] = useState(false);
+  
+  // Use this as a dummy autosave function since we don't want to implement full
+  // autosave functionality in this component right now
+  const handleAutosave = () => {
+    if (handlers.setPendingChanges) {
+      handlers.setPendingChanges(true);
+    } else {
+      setPendingChanges(true);
     }
+    setLastSaved(new Date());
   };
-
-  const handlePrevious = () => {
-    if (handlers.currentStep > 0) {
-      handlers.handleStepClick(handlers.currentStep - 1);
-    }
-  };
-
-  // Dummy onSubmit function
-  const onSubmit = () => {
-    console.log("Form submitted");
-  };
-
-  console.log("ContentTabWrapper - currentStep:", handlers.currentStep);
-  console.log("ContentTabWrapper - formData:", formData);
+  
+  // Initialize form step handling
+  const { currentStep, handleNext, handlePrevious, handleStepClick } = useFormSteps(
+    formData,
+    handleAutosave,
+    5 // Max 5 steps
+  );
+  
+  // Prioritize external step handler if provided
+  const handleStepNavigation = handlers.handleStepClick || handleStepClick;
 
   return (
-    <div className="space-y-6">
-      <ContentTabNavigation 
-        currentStep={handlers.currentStep}
-        onStepClick={handlers.handleStepClick}
-      />
-      
-      <ContentTabContent
-        formData={formData}
-        onFieldChange={handlers.onFieldChange}
-        onAddFeature={handlers.onAddFeature}
-        onRemoveFeature={handlers.onRemoveFeature}
-        onUpdateFeature={handlers.onUpdateFeature}
-        onAddArea={handlers.onAddArea}
-        onRemoveArea={handlers.onRemoveArea}
-        onUpdateArea={handlers.onUpdateArea}
-        onAreaImageRemove={handlers.onAreaImageRemove}
-        onAreaImagesSelect={handlers.onAreaImagesSelect}
-        handleAreaImageUpload={handlers.handleAreaImageUpload}
-        currentStep={handlers.currentStep}
-        handleStepClick={handlers.handleStepClick}
-        handleNext={handlers.handleNext || handleNext}
-        handlePrevious={handlers.handlePrevious || handlePrevious}
-        onFetchLocationData={handlers.onFetchLocationData}
-        onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
-        onFetchNearbyCities={handlers.onFetchNearbyCities}
-        onGenerateLocationDescription={handlers.onGenerateLocationDescription}
-        onGenerateMap={handlers.onGenerateMap}
-        onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-        isLoadingLocationData={handlers.isLoadingLocationData}
-        isGeneratingMap={handlers.isGeneratingMap}
-        setPendingChanges={handlers.setPendingChanges}
-        isUploading={handlers.isUploading}
-        isSaving={handlers.isSaving}
-        onSubmit={onSubmit}
-      />
-    </div>
+    <ContentTabContent
+      formData={formData}
+      handlers={{
+        ...handlers,
+        // Don't pass the external currentStep/handleStepClick if we're using our own
+        currentStep: handlers.currentStep !== undefined ? handlers.currentStep : currentStep,
+        handleStepClick: handleStepNavigation,
+        handleNext,
+        handlePrevious,
+        setPendingChanges: handlers.setPendingChanges || setPendingChanges
+      }}
+      lastSaved={lastSaved}
+    />
   );
 }

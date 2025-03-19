@@ -1,13 +1,15 @@
 
+import React, { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { GoogleAddressAutocomplete } from "@/components/GoogleAddressAutocomplete";
 
 interface BasicDetailsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onGeneralInfoChange: (section: string, field: string, value: any) => void;
+  onGeneralInfoChange?: (section: string, field: string, value: any) => void;
 }
 
 export function BasicDetails({
@@ -15,16 +17,53 @@ export function BasicDetails({
   onFieldChange,
   onGeneralInfoChange
 }: BasicDetailsProps) {
-  // Access propertyDetails fields from generalInfo
-  const details = formData.generalInfo?.propertyDetails || {
-    title: formData.title || '',
-    price: formData.price || '',
-    address: formData.address || '',
-    objectId: formData.object_id || ''
+  const { settings } = useAgencySettings();
+  const [useGoogleAutocomplete, setUseGoogleAutocomplete] = useState(false);
+
+  useEffect(() => {
+    // Check if Google Maps API key is available
+    if (settings?.googleMapsApiKey) {
+      setUseGoogleAutocomplete(true);
+    }
+  }, [settings]);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (onGeneralInfoChange) {
+      onGeneralInfoChange('propertyDetails', 'title', value);
+    }
+    onFieldChange("title", value);
   };
 
-  const handleChange = (field: string, value: string) => {
-    onGeneralInfoChange('propertyDetails', field, value);
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (onGeneralInfoChange) {
+      onGeneralInfoChange('propertyDetails', 'price', value);
+    }
+    onFieldChange("price", value);
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (onGeneralInfoChange) {
+      onGeneralInfoChange('propertyDetails', 'address', value);
+    }
+    onFieldChange("address", value);
+  };
+
+  const handleAddressSelect = (address: string) => {
+    if (onGeneralInfoChange) {
+      onGeneralInfoChange('propertyDetails', 'address', address);
+    }
+    onFieldChange("address", address);
+  };
+
+  const handleObjectIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (onGeneralInfoChange) {
+      onGeneralInfoChange('propertyDetails', 'objectId', value);
+    }
+    onFieldChange("object_id", value);
   };
 
   return (
@@ -33,46 +72,56 @@ export function BasicDetails({
         <CardTitle>Basic Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <label htmlFor="propertyTitle" className="text-sm font-medium">Property Title</label>
             <Input
-              id="title"
-              value={details.title}
-              onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="Property title"
+              id="propertyTitle"
+              value={formData.title || ""}
+              onChange={handleTitleChange}
+              placeholder="Enter property title"
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
+            <label htmlFor="propertyPrice" className="text-sm font-medium">Price</label>
             <Input
-              id="price"
-              value={details.price}
-              onChange={(e) => handleChange('price', e.target.value)}
-              placeholder="Property price"
+              id="propertyPrice"
+              value={formData.price || ""}
+              onChange={handlePriceChange}
+              placeholder="Enter price"
             />
           </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
-          <Input
-            id="address"
-            value={details.address}
-            onChange={(e) => handleChange('address', e.target.value)}
-            placeholder="Property address"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="objectId">Object ID</Label>
-          <Input
-            id="objectId"
-            value={details.objectId}
-            onChange={(e) => handleChange('objectId', e.target.value)}
-            placeholder="Object ID"
-          />
+
+          <div className="space-y-2">
+            <label htmlFor="propertyAddress" className="text-sm font-medium">Address</label>
+            {useGoogleAutocomplete ? (
+              <GoogleAddressAutocomplete
+                id="propertyAddress"
+                value={formData.address || ""}
+                onChange={handleAddressChange}
+                onSelect={handleAddressSelect}
+                apiKey={settings?.googleMapsApiKey || ""}
+              />
+            ) : (
+              <Input
+                id="propertyAddress"
+                value={formData.address || ""}
+                onChange={handleAddressChange}
+                placeholder="Enter property address"
+              />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="objectId" className="text-sm font-medium">Object ID</label>
+            <Input
+              id="objectId"
+              value={formData.object_id || ""}
+              onChange={handleObjectIdChange}
+              placeholder="Enter object ID"
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

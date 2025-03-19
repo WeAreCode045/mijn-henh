@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyImagesCard } from "./PropertyImagesCard";
@@ -25,8 +25,12 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
   const [localProperty, setLocalProperty] = React.useState<PropertyData>(property);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  React.useEffect(() => {
-    setLocalProperty(property);
+  // Update localProperty when property changes
+  useEffect(() => {
+    setLocalProperty(prev => ({
+      ...prev,
+      ...property,
+    }));
     console.log("MediaTabContent - Updated with property:", property);
   }, [property]);
 
@@ -40,18 +44,30 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleFloorplanEmbedScriptSave
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
-  // Make sure we have images even if they're not in the property object
+  // Function to handle database images fetch completion
   const handleImagesFromDatabase = (dbImages: any[]) => {
     if (dbImages && dbImages.length > 0) {
       console.log("MediaTabContent - Received images from DB:", dbImages);
+      
+      // Find the main image
+      const mainImage = dbImages.find(img => img.is_main)?.url || null;
+      
+      // Find featured images
+      const featuredImagesList = dbImages
+        .filter(img => img.is_featured_image)
+        .map(img => img.url);
+      
       const updatedProperty = {
         ...localProperty,
-        images: dbImages
+        images: dbImages,
+        featuredImage: mainImage,
+        featuredImages: featuredImagesList
       };
       setLocalProperty(updatedProperty);
     }
   };
 
+  // Process images for display
   const images = convertToPropertyImageArray(localProperty.images || []);
   const featuredImages = convertToPropertyImageArray(localProperty.featuredImages || []);
   const floorplans = convertToPropertyImageArray(localProperty.floorplans || []);
@@ -72,7 +88,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold mb-6">Media</h2>
       
-      {/* Fetch images from database if not available in the property object */}
+      {/* Fetch images from database */}
       <MediaDatabaseFetcher 
         propertyId={localProperty.id} 
         images={images}

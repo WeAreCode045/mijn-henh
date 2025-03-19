@@ -2,105 +2,50 @@
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Converts a string or mixed image to PropertyImage
+ * Extract URLs from an array of PropertyImage objects or string URLs
  */
-export function toPropertyImage(image: string | any): PropertyImage {
-  if (typeof image === 'string') {
-    return {
-      id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: image,
-      type: "image"
-    };
-  }
-  
-  // Ensure we have all the required fields
-  return {
-    id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url: image.url || '',
-    type: image.type === 'floorplan' ? 'floorplan' : 'image',
-    is_main: image.is_main,
-    is_featured_image: image.is_featured_image,
-    sort_order: image.sort_order,
-    title: image.title,
-    description: image.description,
-    alt: image.alt,
-    property_id: image.property_id,
-    area: image.area,
-    filePath: image.filePath
-  };
-}
-
-/**
- * Converts a mixed array to PropertyImage[]
- */
-export function toPropertyImageArray(images: (string | PropertyImage | any)[]): PropertyImage[] {
+export function extractImageUrls(images: (PropertyImage | string)[]): string[] {
   if (!Array.isArray(images)) return [];
-  return images.map(img => toPropertyImage(img));
-}
-
-/**
- * Converts a string or mixed floorplan to PropertyFloorplan
- */
-export function toPropertyFloorplan(floorplan: string | any): PropertyFloorplan {
-  if (typeof floorplan === 'string') {
-    return {
-      id: `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      url: floorplan,
-      type: "floorplan",
-      alt: ""
-    };
-  }
   
-  // Ensure we have all the required fields
-  return {
-    id: floorplan.id || `fp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    url: floorplan.url || '',
-    type: "floorplan",
-    title: floorplan.title,
-    description: floorplan.description,
-    sort_order: floorplan.sort_order,
-    property_id: floorplan.property_id,
-    filePath: floorplan.filePath,
-    columns: floorplan.columns,
-    alt: floorplan.alt || ""
-  };
+  return images.map(img => {
+    if (typeof img === 'string') return img;
+    return img.url;
+  });
 }
 
 /**
- * Converts a mixed array to PropertyFloorplan[]
+ * Convert PropertyImage objects to simple URL strings
  */
-export function toPropertyFloorplanArray(floorplans: (string | PropertyFloorplan | any)[]): PropertyFloorplan[] {
-  if (!Array.isArray(floorplans)) return [];
-  return floorplans.map(fp => toPropertyFloorplan(fp));
-}
-
-/**
- * Gets a URL from any image type
- */
-export function getImageUrl(image: string | PropertyImage | PropertyFloorplan | null | undefined): string {
-  if (!image) return '';
-  if (typeof image === 'string') return image;
-  return image.url || '';
-}
-
-/**
- * Extract URLs from a PropertyImage array
- */
-export function extractImageUrls(images: PropertyImage[]): string[] {
+export function propertyImagesToUrlArray(images: PropertyImage[]): string[] {
   if (!Array.isArray(images)) return [];
   return images.map(img => img.url);
 }
 
 /**
- * Converts PropertyImage array to a standard format
+ * Convert URL strings to PropertyImage objects
  */
-export function convertToPropertyImageArray(images: (string | PropertyImage | any)[]): PropertyImage[] {
-  return toPropertyImageArray(images);
+export function urlArrayToPropertyImages(urls: string[]): PropertyImage[] {
+  if (!Array.isArray(urls)) return [];
+  
+  return urls.map(url => ({
+    id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    url,
+    type: 'image'
+  }));
 }
 
 /**
- * Converts PropertyFloorplan array to a standard format
+ * Extract property from array of different image types
  */
-export function convertToPropertyFloorplanArray(floorplans: (string | PropertyFloorplan | any)[]): PropertyFloorplan[] {
-  return toPropertyFloorplanArray(floorplans);
+export function getPropertyFromImageArray<T>(
+  images: (PropertyImage | PropertyFloorplan | string)[], 
+  property: keyof PropertyImage, 
+  defaultValue: T
+): T[] {
+  if (!Array.isArray(images)) return [];
+  
+  return images.map(img => {
+    if (typeof img === 'string') return defaultValue;
+    return (img as any)[property] || defaultValue;
+  });
 }
