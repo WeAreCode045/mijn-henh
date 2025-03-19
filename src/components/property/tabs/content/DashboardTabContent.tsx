@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { PropertyData } from "@/types/property";
-import { PropertyOverviewCard } from "@/components/property/dashboard/PropertyOverviewCard";
-import { ExternalLinksCard } from "@/components/property/dashboard/ExternalLinksCard";
+import { PropertyDashboardTab } from "@/components/property/tabs/dashboard/PropertyDashboardTab";
 
 interface DashboardTabContentProps {
   property: PropertyData;
@@ -30,15 +29,24 @@ export function DashboardTabContent({
   templateInfo
 }: DashboardTabContentProps) {
   return (
-    <div className="space-y-6">
-      <PropertyOverviewCard 
-        property={property} 
-        handleSaveAgent={handleSaveAgent}
-      />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ExternalLinksCard property={property} />
-      </div>
-    </div>
+    <PropertyDashboardTab
+      id={property.id}
+      title={property.title || 'Untitled Property'}
+      propertyData={property}
+      objectId={property.object_id}
+      agentId={property.agent_id}
+      templateId={property.template_id}
+      createdAt={property.created_at}
+      updatedAt={property.updated_at}
+      onDelete={onDelete}
+      onWebView={onWebView}
+      onGeneratePDF={handleGeneratePDF}
+      onSaveAgent={handleSaveAgent}
+      onSaveObjectId={handleSaveObjectId}
+      onSaveTemplate={handleSaveTemplate}
+      isUpdating={isUpdating}
+      agentInfo={agentInfo}
+      templateInfo={templateInfo}
+    />
   );
 }
