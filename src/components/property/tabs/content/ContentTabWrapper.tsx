@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
 import { PropertyStepForm } from "@/components/property/form/PropertyStepForm";
-import { GeneralInfoContent } from "@/components/property/form/steps/general-info/GeneralInfoContent";
-import { LocationContent } from "@/components/property/form/steps/location/LocationContent";
-import { FeaturesContent } from "@/components/property/form/steps/features/FeaturesContent";
-import { AreasContent } from "@/components/property/form/steps/areas/AreasContent";
+import { GeneralInfoContent } from "../../form/steps/general-info/GeneralInfoContent";
+import { LocationContent } from "../../form/steps/location/LocationContent";
+import { FeaturesContent } from "../../form/steps/features/FeaturesContent";
+import { AreasContent } from "../../form/steps/areas/AreasContent";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
