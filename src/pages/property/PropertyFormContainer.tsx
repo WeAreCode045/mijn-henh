@@ -1,18 +1,20 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
 import { PropertyForm } from "@/components/PropertyForm";
+import { useParams } from "react-router-dom";
 
 export function PropertyFormContainer() {
   const { isAdmin } = useAuth();
+  const { id } = useParams<{ id: string }>();
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
   
   const {
-    id,
+    id: propertyId,
     formData,
     setFormData,
     isLoading,
@@ -40,6 +42,19 @@ export function PropertyFormContainer() {
     toast,
     agents
   );
+
+  // Log fetched data for debugging
+  useEffect(() => {
+    if (formData && !isLoading) {
+      console.log("PropertyFormContainer - Form data loaded:", {
+        id: formData.id,
+        title: formData.title,
+        price: formData.price,
+        address: formData.address,
+        imagesCount: formData.images?.length || 0
+      });
+    }
+  }, [formData, isLoading]);
 
   if (isLoading || !formData) {
     return <PropertyFormLoader />;

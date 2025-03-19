@@ -27,7 +27,7 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
   if (typeof agentData === 'string') {
     return {
       id: agentData,
-      name: 'Unknown Agent',
+      full_name: 'Unknown Agent',
       email: '',
       phone: '',
     };
@@ -36,11 +36,10 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
   if (typeof agentData === 'object') {
     return {
       id: agentData.id || '',
-      name: agentData.name || agentData.full_name || 'Unknown Agent',
+      full_name: agentData.full_name || 'Unknown Agent',
       email: agentData.email || '',
       phone: agentData.phone || '',
-      photoUrl: agentData.avatar_url, // Using avatar_url instead of agent_photo
-      address: agentData.address,
+      avatar_url: agentData.avatar_url,
     };
   }
   
@@ -88,10 +87,14 @@ export function usePropertyFetch(id: string | undefined) {
       console.log("Fetching property data for ID:", id);
       
       try {
-        // Fetch the property from the database
+        // Fetch the property with related images and agent data in a single request
         const { data: propertyData, error } = await supabase
           .from('properties')
-          .select('*')
+          .select(`
+            *,
+            property_images(*),
+            agent:profiles(id, full_name, email, phone, avatar_url)
+          `)
           .eq('id', id)
           .single();
         
@@ -99,94 +102,46 @@ export function usePropertyFetch(id: string | undefined) {
           throw error;
         }
         
-        // Fetch images from property_images table
-        const { data: imageData, error: imageError } = await supabase
-          .from('property_images')
-          .select('*')
-          .eq('property_id', id)
-          .order('sort_order', { ascending: true });
-          
-        if (imageError) {
-          console.error('Error fetching property images:', imageError);
-        }
-        
-        // Process images with proper type conversion
-        const processedImages = imageData ? imageData.map((img: any) => ({
-          id: img.id,
-          url: img.url,
-          area: img.area,
-          property_id: img.property_id,
-          is_main: img.is_main,
-          is_featured_image: img.is_featured_image,
-          sort_order: img.sort_order,
-          type: (img.type || "image") as "image" | "floorplan"
-        })) : [];
-        
-        // Filter images by type and flags
-        const regularImages = processedImages.filter(img => img.type === 'image' || !img.type);
-        const floorplanImages = processedImages.filter(img => img.type === 'floorplan');
-        const featuredImage = regularImages.find(img => img.is_main)?.url || null;
-        const featuredImages = regularImages
-          .filter(img => img.is_featured_image)
-          .map(img => img.url);
+        console.log("Raw property data:", propertyData);
         
         if (propertyData) {
-          console.log("Property data retrieved:", propertyData.title);
+          // Extract and process images from the joined data
+          const imageData = propertyData.property_images || [];
+          
+          // Process images with proper type conversion
+          const processedImages = imageData.map((img: any) => ({
+            id: img.id,
+            url: img.url,
+            area: img.area,
+            property_id: img.property_id,
+            is_main: img.is_main,
+            is_featured_image: img.is_featured_image,
+            sort_order: img.sort_order,
+            type: (img.type || "image") as "image" | "floorplan"
+          }));
+          
+          // Filter images by type and flags
+          const regularImages = processedImages.filter(img => img.type === 'image' || !img.type);
+          const floorplanImages = processedImages.filter(img => img.type === 'floorplan');
+          const featuredImage = regularImages.find(img => img.is_main)?.url || null;
+          const featuredImages = regularImages
+            .filter(img => img.is_featured_image)
+            .map(img => img.url);
+          
+          console.log("Property data retrieved:", {
+            title: propertyData.title,
+            imagesCount: processedImages.length,
+            floorplansCount: floorplanImages.length
+          });
           
           // Parse JSON strings from the database to objects
           const features = safeParseArray(propertyData.features);
           const areas = safeParseArray(propertyData.areas);
           const nearby_places = safeParseArray(propertyData.nearby_places);
+          const nearby_cities = safeParseArray(propertyData.nearby_cities || []);
           
-          // Handle nearby_cities with fallback for older database entries
-          let nearby_cities: PropertyCity[] = [];
-          
-          try {
-            // Use type assertion to safely access the property
-            const dbData = propertyData as any;
-            
-            if (dbData && typeof dbData === 'object' && 'nearby_cities' in dbData) {
-              nearby_cities = safeParseArray(dbData.nearby_cities);
-            } else {
-              console.warn('No nearby_cities property found in database record, using empty array');
-              nearby_cities = [];
-            }
-          } catch (error) {
-            console.warn('Error parsing nearby_cities, using empty array', error);
-            nearby_cities = [];
-          }
-          
-          // Process agent data for backward compatibility
-          const agentId = propertyData.agent_id;
-          let agentData: PropertyAgent | undefined;
-          
-          if (agentId) {
-            console.log("Fetching agent info for ID:", agentId);
-            // Fetch agent information from profiles table
-            const { data: agentProfile } = await supabase
-              .from('profiles')
-              .select('id, full_name, email, phone, avatar_url')
-              .eq('id', agentId)
-              .single();
-            
-            if (agentProfile) {
-              console.log("Agent profile found:", agentProfile.full_name);
-              agentData = {
-                id: agentProfile.id,
-                name: agentProfile.full_name || 'Unknown Agent',
-                email: agentProfile.email || '',
-                phone: agentProfile.phone || '',
-                photoUrl: agentProfile.avatar_url
-              };
-            } else {
-              agentData = {
-                id: agentId,
-                name: 'Unknown Agent',
-                email: '',
-                phone: '',
-              };
-            }
-          }
+          // Process agent data
+          const agentData = propertyData.agent ? formatAgentData(propertyData.agent) : undefined;
           
           // Process generalInfo
           const generalInfo = formatGeneralInfo(propertyData.generalInfo) || {
@@ -197,7 +152,7 @@ export function usePropertyFetch(id: string | undefined) {
               objectId: propertyData.object_id || '',
             },
             description: {
-              shortDescription: propertyData.description || '',
+              shortDescription: propertyData.shortDescription || propertyData.description || '',
               fullDescription: propertyData.description || '',
             },
             keyInformation: {
@@ -207,23 +162,36 @@ export function usePropertyFetch(id: string | undefined) {
               bedrooms: propertyData.bedrooms || '',
               bathrooms: propertyData.bathrooms || '',
               energyClass: propertyData.energyLabel || '',
+              garages: propertyData.garages || '',
+              hasGarden: propertyData.hasGarden || false,
             }
           };
           
           // Get property type from either property_type or propertyType field
-          const propertyType = ((propertyData as any).propertyType || "");
+          const propertyType = propertyData.property_type || propertyData.propertyType || "";
           
-          // Set the form data with safe defaults for new fields
+          // Set the form data with all the processed values
           const updatedFormData: PropertyFormData = {
             ...initialFormData,
             ...propertyData,
             id: propertyData.id || "",
             title: propertyData.title || "",
+            price: propertyData.price || "",
+            address: propertyData.address || "",
+            bedrooms: propertyData.bedrooms || "",
+            bathrooms: propertyData.bathrooms || "",
+            sqft: propertyData.sqft || "",
+            livingArea: propertyData.livingArea || "",
+            buildYear: propertyData.buildYear || "",
+            garages: propertyData.garages || "",
+            energyLabel: propertyData.energyLabel || "",
+            hasGarden: propertyData.hasGarden || false,
+            description: propertyData.description || "",
+            shortDescription: propertyData.shortDescription || propertyData.description || "",
             features,
             areas,
             nearby_places,
             nearby_cities,
-            hasGarden: propertyData.hasGarden || false,
             images: convertToPropertyImageArray(regularImages),
             floorplans: convertToPropertyFloorplanArray(floorplanImages),
             featuredImage: featuredImage,
@@ -237,9 +205,25 @@ export function usePropertyFetch(id: string | undefined) {
             virtualTourUrl: propertyData.virtualTourUrl || '',
             youtubeUrl: propertyData.youtubeUrl || '',
             floorplanEmbedScript: propertyData.floorplanEmbedScript || '',
+            object_id: propertyData.object_id || '',
+            agent_id: propertyData.agent_id || '',
+            template_id: propertyData.template_id || 'default',
+            latitude: propertyData.latitude || null,
+            longitude: propertyData.longitude || null,
+            location_description: propertyData.location_description || '',
+            created_at: propertyData.created_at || new Date().toISOString(),
+            updated_at: propertyData.updated_at || new Date().toISOString(),
           };
           
-          console.log("Form data prepared with virtual tour URL:", updatedFormData.virtualTourUrl);
+          console.log("Processed form data:", {
+            title: updatedFormData.title,
+            price: updatedFormData.price,
+            address: updatedFormData.address,
+            imagesCount: updatedFormData.images.length,
+            features: updatedFormData.features.length,
+            areas: updatedFormData.areas.length
+          });
+          
           setFormData(updatedFormData);
         }
       } catch (error) {
