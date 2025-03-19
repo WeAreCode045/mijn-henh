@@ -1,16 +1,14 @@
 
-import { ReactNode } from "react";
+import React from "react";
+import { PropertyActionsPanel } from "../components/PropertyActionsPanel";
 import { PropertyData } from "@/types/property";
-import { Settings } from "@/types/settings";
-
-// Import our header component
-import { PropertyFormHeader } from "./components/PropertyFormHeader";
+import { AgencySettings } from "@/types/agency";
 
 interface PropertyFormLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
   title: string;
   propertyData: PropertyData;
-  settings: Settings | null | undefined;
+  settings: AgencySettings;
   isAdmin: boolean;
   agents: any[];
   selectedAgent: string | null;
@@ -19,11 +17,9 @@ interface PropertyFormLayoutProps {
   onSaveProperty: () => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
-  images: string[]; // This expects string[] not PropertyImage[]
+  images: string[];
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
-  isSubmitting?: boolean;
-  actionButtons?: ReactNode; // Add new prop for action buttons
 }
 
 export function PropertyFormLayout({
@@ -41,29 +37,31 @@ export function PropertyFormLayout({
   onRemoveImage,
   images,
   agentInfo,
-  templateInfo,
-  isSubmitting,
-  actionButtons
+  templateInfo
 }: PropertyFormLayoutProps) {
   return (
-    <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <PropertyFormHeader 
-          title={title} 
-          propertyId={propertyData.id} 
-          objectId={propertyData.object_id} 
-        />
-
-        {/* Add action buttons above the tabs */}
-        {actionButtons && (
-          <div className="mt-4 mb-2">
-            {actionButtons}
+    <div className="space-y-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 h-full">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">{title}</h1>
           </div>
-        )}
-
-        <div className="mt-6">
           {children}
         </div>
+
+        <PropertyActionsPanel
+          propertyData={propertyData}
+          agencySettings={settings}
+          isAdmin={isAdmin}
+          agents={agents}
+          selectedAgent={selectedAgent}
+          onAgentSelect={onAgentSelect}
+          onDeleteProperty={onDeleteProperty}
+          onSaveProperty={onSaveProperty}
+          onImageUpload={onImageUpload}
+          onRemoveImage={onRemoveImage}
+          images={images}
+        />
       </div>
     </div>
   );

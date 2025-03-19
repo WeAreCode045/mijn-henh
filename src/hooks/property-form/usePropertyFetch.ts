@@ -85,6 +85,7 @@ export function usePropertyFetch(id: string | undefined) {
       if (!id) return;
       
       setIsLoading(true);
+      console.log("Fetching property data for ID:", id);
       
       try {
         // Fetch the property from the database
@@ -130,6 +131,8 @@ export function usePropertyFetch(id: string | undefined) {
           .map(img => img.url);
         
         if (propertyData) {
+          console.log("Property data retrieved:", propertyData.title);
+          
           // Parse JSON strings from the database to objects
           const features = safeParseArray(propertyData.features);
           const areas = safeParseArray(propertyData.areas);
@@ -158,6 +161,7 @@ export function usePropertyFetch(id: string | undefined) {
           let agentData: PropertyAgent | undefined;
           
           if (agentId) {
+            console.log("Fetching agent info for ID:", agentId);
             // Fetch agent information from profiles table
             const { data: agentProfile } = await supabase
               .from('profiles')
@@ -166,6 +170,7 @@ export function usePropertyFetch(id: string | undefined) {
               .single();
             
             if (agentProfile) {
+              console.log("Agent profile found:", agentProfile.full_name);
               agentData = {
                 id: agentProfile.id,
                 name: agentProfile.full_name || 'Unknown Agent',
@@ -184,7 +189,26 @@ export function usePropertyFetch(id: string | undefined) {
           }
           
           // Process generalInfo
-          const generalInfo = formatGeneralInfo(propertyData.generalInfo);
+          const generalInfo = formatGeneralInfo(propertyData.generalInfo) || {
+            propertyDetails: {
+              title: propertyData.title || '',
+              price: propertyData.price || '',
+              address: propertyData.address || '',
+              objectId: propertyData.object_id || '',
+            },
+            description: {
+              shortDescription: propertyData.shortDescription || propertyData.description || '',
+              fullDescription: propertyData.description || '',
+            },
+            keyInformation: {
+              buildYear: propertyData.buildYear || '',
+              lotSize: propertyData.sqft || '',
+              livingArea: propertyData.livingArea || '',
+              bedrooms: propertyData.bedrooms || '',
+              bathrooms: propertyData.bathrooms || '',
+              energyClass: propertyData.energyLabel || '',
+            }
+          };
           
           // Get property type from either property_type or propertyType field
           const propertyType = ((propertyData as any).property_type || (propertyData as any).propertyType || "");
@@ -210,9 +234,13 @@ export function usePropertyFetch(id: string | undefined) {
             gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
             areaPhotos: [],
             // Map property_type to propertyType for consistency
-            propertyType
+            propertyType,
+            virtualTourUrl: propertyData.virtualTourUrl || '',
+            youtubeUrl: propertyData.youtubeUrl || '',
+            floorplanEmbedScript: propertyData.floorplanEmbedScript || '',
           };
           
+          console.log("Form data prepared with virtual tour URL:", updatedFormData.virtualTourUrl);
           setFormData(updatedFormData);
         }
       } catch (error) {

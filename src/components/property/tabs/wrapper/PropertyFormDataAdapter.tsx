@@ -44,7 +44,26 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     youtubeUrl: property.youtubeUrl || '',
     floorplanEmbedScript: property.floorplanEmbedScript || '',
     propertyType: property.propertyType || '',
-    generalInfo: property.generalInfo || undefined
+    generalInfo: property.generalInfo || {
+      propertyDetails: {
+        title: property.title || '',
+        price: property.price || '',
+        address: property.address || '',
+        objectId: property.object_id || '',
+      },
+      description: {
+        shortDescription: property.shortDescription || property.description || '',
+        fullDescription: property.description || '',
+      },
+      keyInformation: {
+        buildYear: property.buildYear || '',
+        lotSize: property.sqft || '',
+        livingArea: property.livingArea || '',
+        bedrooms: property.bedrooms || '',
+        bathrooms: property.bathrooms || '',
+        energyClass: property.energyLabel || '',
+      }
+    }
   };
   
   // Create a compatible PropertyFormData object with required title
