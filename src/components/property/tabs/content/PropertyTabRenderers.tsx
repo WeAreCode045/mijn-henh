@@ -92,6 +92,7 @@ interface ContentTabRendererProps {
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
     isSaving?: boolean;
+    onSubmit?: () => void;
   };
 }
 
@@ -103,6 +104,20 @@ export function ContentTabRenderer(props: ContentTabRendererProps) {
     <ContentTabWrapper
       formData={props.formData}
       handlers={props.handlers}
+      // Required props with dummy implementations to satisfy type checking
+      onFieldChange={(field, value) => props.handlers.onFieldChange(field, value)}
+      onAddFeature={() => props.handlers.onAddFeature()}
+      onRemoveFeature={(id) => props.handlers.onRemoveFeature(id)}
+      onUpdateFeature={(id, desc) => props.handlers.onUpdateFeature(id, desc)}
+      onAddArea={() => props.handlers.onAddArea()}
+      onRemoveArea={(id) => props.handlers.onRemoveArea(id)}
+      onUpdateArea={(id, field, value) => props.handlers.onUpdateArea(id, field, value)}
+      onAreaImageRemove={(areaId, imgId) => props.handlers.onAreaImageRemove(areaId, imgId)}
+      onAreaImagesSelect={(areaId, imgIds) => props.handlers.onAreaImagesSelect(areaId, imgIds)}
+      onAreaImageUpload={(areaId, files) => props.handlers.onAreaImageUpload(areaId, files)}
+      currentStep={props.handlers.currentStep}
+      handleStepClick={(step) => props.handlers.handleStepClick(step)}
+      onSubmit={() => props.handlers.onSubmit ? props.handlers.onSubmit() : console.log("Form submitted")}
     />
   );
 }

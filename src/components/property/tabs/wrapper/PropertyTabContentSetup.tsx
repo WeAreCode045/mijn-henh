@@ -48,17 +48,6 @@ export function PropertyTabContentSetup({
     formHandlers.handleAreaImageRemove
   );
 
-  // Here we need to create a wrapper for adaptedHandleAreaImageUpload to convert File to FileList
-  const adaptedFileListUpload = async (areaId: string, files: FileList): Promise<void> => {
-    if (files && files.length > 0) {
-      // Get the first file from the FileList
-      const file = files[0];
-      // Call the adapted handler with the File
-      return adaptedHandleAreaImageUpload(areaId, file);
-    }
-    return Promise.resolve();
-  };
-
   return (
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -85,12 +74,12 @@ export function PropertyTabContentSetup({
             onUpdateArea={formHandlers.updateArea}
             onAreaImageRemove={formHandlers.handleAreaImageRemove}
             onAreaImagesSelect={formHandlers.handleAreaImagesSelect}
-            onAreaImageUpload={adaptedFileListUpload}
+            onAreaImageUpload={formHandlers.handleAreaImageUpload}
             handleImageUpload={formHandlers.handleImageUpload}
             handleRemoveImage={formHandlers.handleRemoveImage}
             isUploading={formHandlers.isUploading}
             handleAreaPhotosUpload={adaptedHandleAreaPhotosUpload}
-            handleRemoveAreaPhoto={adaptedHandleRemoveAreaPhoto}
+            handleRemoveAreaPhoto={formHandlers.handleRemoveAreaPhoto || (() => {})}
             handleFloorplanUpload={formHandlers.handleFloorplanUpload}
             handleRemoveFloorplan={formHandlers.handleRemoveFloorplan}
             isUploadingFloorplan={formHandlers.isUploadingFloorplan}

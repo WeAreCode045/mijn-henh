@@ -52,23 +52,18 @@ export function PropertyForm() {
     }
   }, [id, activeTab, navigate]);
 
-  // Adapter functions to handle type mismatches
-  const handleAreaImageRemove = (areaId: string, imageId: string) => {
-    // Adapt to expected signature (index: number) => void
-    console.log(`Removing image ${imageId} from area ${areaId}`);
-    // This is a placeholder - in a real implementation, you would 
-    // find the index of the image and call the actual remove function
-  }
-
-  const handleAreaPhotosUpload = async (areaId: string, files: FileList) => {
-    // If files exist, handle the first file
-    if (files && files.length > 0) {
-      const file = files[0];
-      console.log(`Uploading file ${file.name} to area ${areaId}`);
-      // Add actual implementation here
-      return Promise.resolve();
+  // Create adapter functions for type compatibility
+  const handleAreaImageUploadAdapter = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      // This is a dummy function that will be replaced in the PropertyFormManager
+      console.log(`Received ${e.target.files.length} files to upload`);
     }
     return Promise.resolve();
+  };
+
+  const handleRemoveAreaPhotoAdapter = (index: number) => {
+    // This is a dummy function that will be replaced in the PropertyFormManager
+    console.log(`Removing photo at index ${index}`);
   };
 
   return (
@@ -103,14 +98,14 @@ export function PropertyForm() {
                   onAddArea={formProps.addArea}
                   onRemoveArea={formProps.removeArea}
                   onUpdateArea={formProps.updateArea}
-                  onAreaImageRemove={handleAreaImageRemove}
+                  onAreaImageRemove={formProps.handleAreaImageRemove}
                   onAreaImagesSelect={formProps.handleAreaImagesSelect}
                   onAreaImageUpload={formProps.handleAreaImageUpload}
                   handleImageUpload={async () => Promise.resolve()}
                   handleRemoveImage={(index: number) => console.log(`Removing image at index ${index}`)}
                   isUploading={formProps.isUploading}
-                  handleAreaPhotosUpload={handleAreaPhotosUpload}
-                  handleRemoveAreaPhoto={(areaId: string, imageId: string) => console.log(`Removing area photo ${imageId} from area ${areaId}`)}
+                  handleAreaPhotosUpload={handleAreaImageUploadAdapter}
+                  handleRemoveAreaPhoto={handleRemoveAreaPhotoAdapter}
                   handleFloorplanUpload={async () => Promise.resolve()}
                   handleRemoveFloorplan={formProps.handleRemoveFloorplan}
                   isUploadingFloorplan={formProps.isUploadingFloorplan || false}

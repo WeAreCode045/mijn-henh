@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PropertyData, PropertyImage, PropertyFloorplan } from "@/types/property";
 import { ImageUploader } from "@/components/property/form/media/ImageUploader";
@@ -13,38 +14,45 @@ import { getImageUrl } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
-  handleRemoveImage: (index: number) => void;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleRemoveImage?: (index: number) => void;
   isUploading?: boolean;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
-  handleRemoveFloorplan: (index: number) => void;
+  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleRemoveFloorplan?: (index: number) => void;
   isUploadingFloorplan?: boolean;
-  handleSetFeaturedImage: (url: string | null) => void;
-  handleToggleFeaturedImage: (url: string) => void;
-  handleVirtualTourUpdate: (url: string) => void;
-  handleYoutubeUrlUpdate: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate: (scriptContent: string) => void;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
+  handleVirtualTourUpdate?: (url: string) => void;
+  handleYoutubeUrlUpdate?: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate?: (scriptContent: string) => void;
   virtualTourUrl?: string;
   youtubeUrl?: string;
   floorplanEmbedScript?: string;
+  handlers?: {
+    handleVirtualTourUpdate: (url: string) => void;
+    handleYoutubeUrlUpdate: (url: string) => void;
+    handleFloorplanEmbedScriptUpdate: (script: string) => void;
+    setPendingChanges?: (pending: boolean) => void;
+  };
 }
 
 export function MediaTabContent({
   property,
-  handleImageUpload,
-  handleRemoveImage,
-  isUploading,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  isUploadingFloorplan,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage,
+  handleImageUpload = async () => {},
+  handleRemoveImage = () => {},
+  isUploading = false,
+  handleFloorplanUpload = async () => {},
+  handleRemoveFloorplan = () => {},
+  isUploadingFloorplan = false,
+  handleSetFeaturedImage = () => {},
+  handleToggleFeaturedImage = () => {},
   handleVirtualTourUpdate,
   handleYoutubeUrlUpdate,
   handleFloorplanEmbedScriptUpdate,
   virtualTourUrl = '',
   youtubeUrl = '',
-  floorplanEmbedScript = ''
+  floorplanEmbedScript = '',
+  handlers
 }: MediaTabContentProps) {
   const [activeTab, setActiveTab] = useState("images");
   const [images, setImages] = useState<PropertyImage[]>([]);
@@ -56,6 +64,11 @@ export function MediaTabContent({
       : []
   );
 
+  // Use handlers if provided, otherwise use props
+  const virtualTourUpdateHandler = handlers?.handleVirtualTourUpdate || handleVirtualTourUpdate || (() => {});
+  const youtubeUrlUpdateHandler = handlers?.handleYoutubeUrlUpdate || handleYoutubeUrlUpdate || (() => {});
+  const floorplanEmbedScriptUpdateHandler = handlers?.handleFloorplanEmbedScriptUpdate || handleFloorplanEmbedScriptUpdate || (() => {});
+  
   console.log("MediaTabContent - Updated with property:", {
     id: property.id,
     imagesCount: (property.images || []).length,
@@ -80,6 +93,9 @@ export function MediaTabContent({
   const handleFeatureImage = (url: string | null) => {
     setFeaturedImage(url);
     handleSetFeaturedImage(url);
+    if (handlers?.setPendingChanges) {
+      handlers.setPendingChanges(true);
+    }
   };
 
   // Handle toggling a featured image
@@ -90,6 +106,9 @@ export function MediaTabContent({
     
     setFeaturedImages(newFeaturedImages);
     handleToggleFeaturedImage(url);
+    if (handlers?.setPendingChanges) {
+      handlers.setPendingChanges(true);
+    }
   };
 
   return (
@@ -135,7 +154,7 @@ export function MediaTabContent({
             onRemove={handleRemoveFloorplan}
             isUploading={isUploadingFloorplan}
             embedScript={floorplanEmbedScript}
-            onEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
+            onEmbedScriptUpdate={floorplanEmbedScriptUpdateHandler}
           />
         </TabsContent>
         
@@ -143,8 +162,8 @@ export function MediaTabContent({
           <VirtualToursTab
             virtualTourUrl={virtualTourUrl}
             youtubeUrl={youtubeUrl}
-            onVirtualTourUpdate={handleVirtualTourUpdate}
-            onYoutubeUrlUpdate={handleYoutubeUrlUpdate}
+            onVirtualTourUpdate={virtualTourUpdateHandler}
+            onYoutubeUrlUpdate={youtubeUrlUpdateHandler}
           />
         </TabsContent>
       </Tabs>

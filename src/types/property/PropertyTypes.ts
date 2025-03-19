@@ -1,72 +1,72 @@
 
-import { PropertyImage } from './PropertyImageTypes';
 import { PropertyArea } from './PropertyAreaTypes';
+import { PropertyImage } from './PropertyImageTypes';
 
+/**
+ * Represents a property feature
+ */
 export interface PropertyFeature {
   id: string;
   description: string;
 }
 
-export interface PropertyFloorplan {
-  id: string;
-  url: string;
-  title?: string;
-  alt?: string;
-  description?: string;
-  filePath?: string;
-  sort_order?: number;
-  property_id?: string;
-  is_featured?: boolean;
-  timestamp?: string;
-  type: "floorplan";
-  columns?: number;
-}
-
+/**
+ * Represents a nearby place
+ */
 export interface PropertyPlaceType {
   id: string;
-  place_id: string; // Required field
+  place_id: string;
   name: string;
-  type?: string;
-  types?: string[]; 
   vicinity?: string;
+  type: string;
+  types?: string[];
+  distance?: number;
   rating?: number;
   user_ratings_total?: number;
   visible_in_webview?: boolean;
-  distance?: number;
 }
 
-// Alias for backward compatibility
-export type PropertyNearbyPlace = PropertyPlaceType;
-
+/**
+ * Represents a nearby city
+ */
 export interface PropertyCity {
   id: string;
   name: string;
   distance?: number;
-  visible_in_webview?: boolean;
-  duration?: number;
-  description?: string;
-  image?: string;
+  population?: number;
 }
 
+/**
+ * Represents a property agent
+ */
 export interface PropertyAgent {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
-  photoUrl?: string;
-  address?: string;
+  full_name: string;
+  email?: string;
+  phone?: string;
+  avatar_url?: string;
+  whatsapp_number?: string;
 }
 
-export interface GeneralInfoData {
-  propertyDetails?: Record<string, any>;
-  description?: Record<string, any>;
-  keyInformation?: Record<string, any>;
-  [key: string]: any;
-}
-
-export interface PropertySubmitData {
+/**
+ * Represents a property floorplan
+ */
+export interface PropertyFloorplan {
   id: string;
-  title: string;
+  url: string;
+  property_id?: string;
+  title?: string;
+  description?: string;
+  sort_order?: number;
+  type: 'floorplan';
+  alt?: string;
+}
+
+/**
+ * Represents general information data for a property
+ */
+export interface GeneralInfoData {
+  propertyType?: string;
   price?: string;
   address?: string;
   bedrooms?: string;
@@ -77,21 +77,4 @@ export interface PropertySubmitData {
   garages?: string;
   energyLabel?: string;
   hasGarden?: boolean;
-  description?: string;
-  shortDescription?: string;
-  location_description?: string;
-  features?: PropertyFeature[] | string;
-  nearby_places?: PropertyPlaceType[] | string;
-  nearby_cities?: PropertyCity[] | string;
-  latitude?: number | null;
-  longitude?: number | null;
-  object_id?: string;
-  agent_id?: string;
-  template_id?: string;
-  floorplanEmbedScript?: string;
-  virtualTourUrl?: string;
-  youtubeUrl?: string;
-  notes?: string;
-  propertyType?: string;
-  generalInfo?: GeneralInfoData | string;
 }

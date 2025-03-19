@@ -55,14 +55,14 @@ export function ContentTabWrapper(props: ContentTabWrapperProps) {
     currentStep = handlers.currentStep || 0,
     handleStepClick = handlers.handleStepClick || (() => {}),
     setPendingChanges = handlers.setPendingChanges,
-    onFetchLocationData = handlers.onFetchLocationData,
+    onFetchLocationData = handlers.onFetchLocationData || (() => Promise.resolve()),
     onFetchCategoryPlaces = handlers.onFetchCategoryPlaces || (() => Promise.resolve({})),
     onFetchNearbyCities = handlers.onFetchNearbyCities || (() => Promise.resolve({})),
-    onGenerateLocationDescription = handlers.onGenerateLocationDescription,
-    onGenerateMap = handlers.onGenerateMap,
-    onRemoveNearbyPlace = handlers.onRemoveNearbyPlace,
-    isLoadingLocationData = handlers.isLoadingLocationData,
-    isGeneratingMap = handlers.isGeneratingMap,
+    onGenerateLocationDescription = handlers.onGenerateLocationDescription || (() => Promise.resolve()),
+    onGenerateMap = handlers.onGenerateMap || (() => Promise.resolve()),
+    onRemoveNearbyPlace = handlers.onRemoveNearbyPlace || (() => {}),
+    isLoadingLocationData = handlers.isLoadingLocationData || false,
+    isGeneratingMap = handlers.isGeneratingMap || false,
     onSubmit = handlers.onSubmit || (() => {})
   } = props;
 

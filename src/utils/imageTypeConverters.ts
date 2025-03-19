@@ -2,96 +2,171 @@
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Converts a database image record to a PropertyImage type
+ * Converts various image data formats to a PropertyImage object
  */
-export function toPropertyImage(dbImage: any): PropertyImage {
+export function toPropertyImage(image: any): PropertyImage {
+  if (typeof image === 'string') {
+    return {
+      id: crypto.randomUUID(),
+      url: image,
+      type: 'image'
+    };
+  } else if (typeof image === 'object' && image !== null) {
+    return {
+      id: image.id || crypto.randomUUID(),
+      url: image.url || '',
+      type: image.type || 'image',
+      is_main: image.is_main || false,
+      is_featured_image: image.is_featured_image || false,
+      sort_order: image.sort_order || 0,
+      property_id: image.property_id || null,
+      area: image.area || null,
+      alt: image.alt || image.title || '',
+      title: image.title || '',
+      description: image.description || ''
+    };
+  }
+  
   return {
-    id: dbImage.id,
-    url: dbImage.url,
-    type: (dbImage.type || 'image') as 'image' | 'floorplan',
-    is_main: dbImage.is_main || false,
-    is_featured_image: dbImage.is_featured_image || false,
-    sort_order: dbImage.sort_order || 0,
-    property_id: dbImage.property_id,
-    area: dbImage.area || null,
-    alt: dbImage.title || '',
-    title: dbImage.title || '',
-    description: dbImage.description || ''
+    id: crypto.randomUUID(),
+    url: '',
+    type: 'image'
   };
 }
 
 /**
- * Converts an array of database image records to PropertyImage type
+ * Converts various floorplan data formats to a PropertyFloorplan object
  */
-export function toPropertyImageArray(dbImages: any[]): PropertyImage[] {
-  if (!dbImages || !Array.isArray(dbImages)) return [];
-  return dbImages.map(toPropertyImage);
-}
-
-/**
- * Converts a database floorplan record to a PropertyFloorplan type
- */
-export function toPropertyFloorplan(dbFloorplan: any): PropertyFloorplan {
+export function toPropertyFloorplan(floorplan: any): PropertyFloorplan {
+  if (typeof floorplan === 'string') {
+    return {
+      id: crypto.randomUUID(),
+      url: floorplan,
+      type: 'floorplan',
+      title: '',
+      description: '',
+      sort_order: 0
+    };
+  } else if (typeof floorplan === 'object' && floorplan !== null) {
+    return {
+      id: floorplan.id || crypto.randomUUID(),
+      url: floorplan.url || '',
+      type: 'floorplan',
+      title: floorplan.title || '',
+      description: floorplan.description || '',
+      sort_order: floorplan.sort_order || 0,
+      property_id: floorplan.property_id || null,
+      alt: floorplan.alt || floorplan.title || ''
+    };
+  }
+  
   return {
-    id: dbFloorplan.id,
-    url: dbFloorplan.url,
-    title: dbFloorplan.title || '',
-    description: dbFloorplan.description || '',
-    sort_order: dbFloorplan.sort_order || 0,
-    property_id: dbFloorplan.property_id,
+    id: crypto.randomUUID(),
+    url: '',
     type: 'floorplan',
-    alt: dbFloorplan.title || '',
+    title: '',
+    description: '',
+    sort_order: 0
   };
 }
 
 /**
- * Converts an array of database floorplan records to PropertyFloorplan type
+ * Converts an array of image data to an array of PropertyImage objects
  */
-export function toPropertyFloorplanArray(dbFloorplans: any[]): PropertyFloorplan[] {
-  if (!dbFloorplans || !Array.isArray(dbFloorplans)) return [];
-  return dbFloorplans.map(toPropertyFloorplan);
+export function toPropertyImageArray(images: any[]): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
+  return images.map(toPropertyImage);
 }
 
 /**
- * Gets the URL from a PropertyImage object or returns the string if it's already a URL
+ * Converts an array of floorplan data to an array of PropertyFloorplan objects
+ */
+export function toPropertyFloorplanArray(floorplans: any[]): PropertyFloorplan[] {
+  if (!Array.isArray(floorplans)) return [];
+  return floorplans.map(toPropertyFloorplan);
+}
+
+/**
+ * Gets the URL from a PropertyImage or a string
  */
 export function getImageUrl(image: PropertyImage | string): string {
-  if (typeof image === 'string') return image;
+  if (typeof image === 'string') {
+    return image;
+  }
   return image.url || '';
 }
 
 /**
- * Converts an array of mixed types to PropertyImage array
+ * Converts any image type to a PropertyImage array
  */
-export function convertToPropertyImageArray(images: (PropertyImage | string)[]): PropertyImage[] {
-  if (!images || !Array.isArray(images)) return [];
+export function convertToPropertyImageArray(images: any[]): PropertyImage[] {
+  if (!Array.isArray(images)) return [];
   
   return images.map(img => {
     if (typeof img === 'string') {
       return {
-        id: `img-${Date.now()}-${Math.random()}`,
+        id: crypto.randomUUID(),
         url: img,
         type: 'image'
       };
+    } else if (typeof img === 'object' && img !== null) {
+      return {
+        id: img.id || crypto.randomUUID(),
+        url: img.url || '',
+        type: img.type || 'image',
+        is_main: img.is_main || false,
+        is_featured_image: img.is_featured_image || false,
+        sort_order: img.sort_order || 0,
+        property_id: img.property_id || null,
+        area: img.area || null,
+        alt: img.alt || img.title || '',
+        title: img.title || '',
+        description: img.description || ''
+      };
     }
-    return img;
+    return {
+      id: crypto.randomUUID(),
+      url: '',
+      type: 'image'
+    };
   });
 }
 
 /**
- * Converts an array of mixed types to PropertyFloorplan array
+ * Converts any floorplan type to a PropertyFloorplan array
  */
-export function convertToFloorplanArray(floorplans: (PropertyFloorplan | string)[]): PropertyFloorplan[] {
-  if (!floorplans || !Array.isArray(floorplans)) return [];
+export function convertToFloorplanArray(floorplans: any[]): PropertyFloorplan[] {
+  if (!Array.isArray(floorplans)) return [];
   
   return floorplans.map(fp => {
     if (typeof fp === 'string') {
       return {
-        id: `fp-${Date.now()}-${Math.random()}`,
+        id: crypto.randomUUID(),
         url: fp,
-        type: 'floorplan'
+        type: 'floorplan',
+        title: '',
+        description: '',
+        sort_order: 0
+      };
+    } else if (typeof fp === 'object' && fp !== null) {
+      return {
+        id: fp.id || crypto.randomUUID(),
+        url: fp.url || '',
+        type: 'floorplan',
+        title: fp.title || '',
+        description: fp.description || '',
+        sort_order: fp.sort_order || 0,
+        property_id: fp.property_id || null,
+        alt: fp.alt || fp.title || ''
       };
     }
-    return fp;
+    return {
+      id: crypto.randomUUID(),
+      url: '',
+      type: 'floorplan',
+      title: '',
+      description: '',
+      sort_order: 0
+    };
   });
 }

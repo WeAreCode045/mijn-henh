@@ -4,7 +4,7 @@ import { PropertyData } from '@/types/property';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CommunicationsTabContentProps {
-  property: PropertyData;
+  property?: PropertyData;
   propertyId?: string; // For compatibility with older code
 }
 

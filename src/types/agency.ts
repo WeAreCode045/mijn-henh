@@ -2,42 +2,28 @@
 export interface AgencySettings {
   id?: string;
   name?: string;
-  logoUrl?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
   primaryColor?: string;
   secondaryColor?: string;
-  accentColor?: string;
-  fontFamily?: string;
-  website?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  socialLinks?: {
-    facebook?: string;
-    twitter?: string;
-    instagram?: string;
-    linkedin?: string;
-  };
-  currencySymbol?: string;
-  backgroundImage?: string;
-  showBranding?: boolean;
-  
-  // Additional properties used in the application
-  webviewBgImage?: string;
-  webviewBackgroundUrl?: string;
+  logoUrl?: string;
+  description_background_url?: string;
+  // Added properties
   pdfBackgroundUrl?: string;
+  webviewBackgroundUrl?: string;
   iconBuildYear?: string;
   iconBedrooms?: string;
   iconBathrooms?: string;
-  iconGarages?: string;
+  iconGarages?: string; 
   iconEnergyClass?: string;
   iconSqft?: string;
   iconLivingSpace?: string;
   googleMapsApiKey?: string;
   xmlImportUrl?: string;
-  instagramUrl?: string;
+  instagramUrl?: string; 
   youtubeUrl?: string;
   facebookUrl?: string;
-  
   // SMTP settings
   smtp_host?: string;
   smtp_port?: string | number;
@@ -46,7 +32,22 @@ export interface AgencySettings {
   smtp_from_email?: string;
   smtp_from_name?: string;
   smtp_secure?: boolean;
-  
-  // OpenAI API key
+  // API Keys
   openai_api_key?: string;
+  // DB fields
+  icon_build_year?: string;
+  icon_bedrooms?: string; 
+  icon_bathrooms?: string;
+  icon_garages?: string;
+  icon_energy_class?: string;
+  icon_sqft?: string;
+  icon_living_space?: string;
+  google_maps_api_key?: string;
+  xml_import_url?: string;
+  instagram_url?: string;
+  youtube_url?: string;
+  facebook_url?: string;
+  created_at?: string;
+  updated_at?: string;
+  agents?: any[];
 }
