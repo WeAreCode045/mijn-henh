@@ -1,11 +1,10 @@
 
-import { PropertyFormData, GeneralInfoData, PropertyImage } from "@/types/property";
-import { useState } from "react";
+import { PropertyFormData, GeneralInfoData } from "@/types/property";
+import { useState, useCallback } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { BasicDetails } from "./BasicDetails";
 import { DescriptionSection } from "./DescriptionSection";
 import { ImageSelections } from "./ImageSelections";
-import { toPropertyImage, toPropertyImageArray, extractImageUrls } from "@/utils/imageTypeConverters";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
@@ -16,7 +15,7 @@ interface GeneralInfoStepProps {
   setPendingChanges?: (pending: boolean) => void;
 }
 
-// Define the allowed sections for the generalInfo object
+// Define specific type for the sections in generalInfo
 type GeneralInfoSections = 'propertyDetails' | 'description' | 'keyInformation';
 
 export function GeneralInfoStep({
@@ -47,8 +46,6 @@ export function GeneralInfoStep({
         bedrooms: formData.bedrooms || '',
         bathrooms: formData.bathrooms || '',
         energyClass: formData.energyLabel || '',
-        garages: formData.garages || '',
-        hasGarden: formData.hasGarden || false,
       }
     };
   }
@@ -74,11 +71,16 @@ export function GeneralInfoStep({
   };
 
   // Convert images to PropertyImage[] format
-  const propertyImages = formData.images ? toPropertyImageArray(formData.images) : [];
+  const propertyImages = formData.images?.map(img => {
+    if (typeof img === 'string') {
+      return { url: img, id: img }; // Use URL as ID if string
+    }
+    return img;
+  }) || [];
 
   // Handle changes to generalInfo
-  const handleGeneralInfoChange = (
-    section: GeneralInfoSections,
+  const handleGeneralInfoChange = useCallback((
+    section: GeneralInfoSections, // Use the defined type
     field: string,
     value: any
   ) => {
@@ -111,14 +113,12 @@ export function GeneralInfoStep({
       if (field === 'bedrooms') onFieldChange('bedrooms', value);
       if (field === 'bathrooms') onFieldChange('bathrooms', value);
       if (field === 'energyClass') onFieldChange('energyLabel', value);
-      if (field === 'garages') onFieldChange('garages', value);
-      if (field === 'hasGarden') onFieldChange('hasGarden', value);
     }
     
     if (setPendingChanges) {
       setPendingChanges(true);
     }
-  };
+  }, [formData.generalInfo, onFieldChange, setPendingChanges]);
 
   return (
     <div className="space-y-6">
@@ -149,7 +149,7 @@ export function GeneralInfoStep({
         <ImageSelections
           images={propertyImages}
           featuredImage={formData.featuredImage || null}
-          featuredImages={toPropertyImageArray(formData.featuredImages || [])}
+          featuredImages={formData.featuredImages || []}
           onFeaturedImageSelect={handleFeaturedImageSelect}
           onFeaturedImageToggle={handleFeaturedImageToggle}
         />

@@ -1,5 +1,5 @@
+
 import React from "react";
-import { FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,8 +84,8 @@ export function PropertySpecs({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <FormItem>
-            <FormLabel>Property Type</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="propertyType" className="text-sm font-medium">Property Type</label>
             <Select value={formData.propertyType || ""} onValueChange={handleSelectPropertyType}>
               <SelectTrigger>
                 <SelectValue placeholder="Select property type" />
@@ -102,81 +102,88 @@ export function PropertySpecs({
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Lot Size (sqft)</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="sqft" className="text-sm font-medium">Lot Size (sqft)</label>
             <Input
+              id="sqft"
               type="text"
               value={formData.sqft || ""}
               onChange={handleLotSizeChange}
             />
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Living Area (sqft)</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="livingArea" className="text-sm font-medium">Living Area (sqft)</label>
             <Input
+              id="livingArea"
               type="text"
               value={formData.livingArea || ""}
               onChange={handleLivingAreaChange}
             />
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Build Year</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="buildYear" className="text-sm font-medium">Build Year</label>
             <Input
+              id="buildYear"
               type="text"
               value={formData.buildYear || ""}
               onChange={handleBuildYearChange}
             />
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Bedrooms</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="bedrooms" className="text-sm font-medium">Bedrooms</label>
             <Input
+              id="bedrooms"
               type="text"
               value={formData.bedrooms || ""}
               onChange={handleBedroomsChange}
             />
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Bathrooms</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="bathrooms" className="text-sm font-medium">Bathrooms</label>
             <Input
+              id="bathrooms"
               type="text"
               value={formData.bathrooms || ""}
               onChange={handleBathroomsChange}
             />
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Energy Label</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="energyLabel" className="text-sm font-medium">Energy Label</label>
             <Input
+              id="energyLabel"
               type="text"
               value={formData.energyLabel || ""}
               onChange={handleEnergyLabelChange}
             />
-          </FormItem>
+          </div>
 
-          <FormItem>
-            <FormLabel>Garages</FormLabel>
+          <div className="space-y-2">
+            <label htmlFor="garages" className="text-sm font-medium">Garages</label>
             <Input
+              id="garages"
               type="text"
               value={formData.garages || ""}
               onChange={handleInputChange("garages")}
             />
-          </FormItem>
+          </div>
           
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+          <div className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
             <Checkbox 
               id="hasGarden" 
               checked={formData.hasGarden || false}
               onCheckedChange={handleGardenChange}
             />
             <div className="space-y-1 leading-none">
-              <FormLabel htmlFor="hasGarden">Has Garden</FormLabel>
+              <label htmlFor="hasGarden" className="text-sm font-medium">Has Garden</label>
             </div>
-          </FormItem>
+          </div>
         </div>
       </CardContent>
     </Card>
