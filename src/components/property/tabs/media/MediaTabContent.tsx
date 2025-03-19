@@ -8,6 +8,7 @@ import { FloorplansTab } from "./tabs/FloorplansTab";
 import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { Tabs } from "@/components/ui/tabs";
 import { MediaDatabaseFetcher } from "./MediaDatabaseFetcher";
+import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -34,7 +35,8 @@ export function MediaTabContent({
     setLocalProperty(property);
     console.log("MediaTabContent - Updated with property:", {
       id: property.id,
-      imagesCount: property.images?.length || 0
+      imagesCount: property.images?.length || 0,
+      floorplans: property.floorplans?.length || 0
     });
   }, [property]);
   
@@ -57,6 +59,17 @@ export function MediaTabContent({
     }
   };
 
+  // When new floorplans are fetched, update the local property state
+  const handleFloorplansFetched = (floorplans: PropertyImage[]) => {
+    if (floorplans.length > 0) {
+      console.log("MediaTabContent - Received floorplans from DB:", floorplans.length);
+      setLocalProperty(prev => ({
+        ...prev,
+        floorplans: floorplans
+      }));
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Media</h2>
@@ -66,6 +79,12 @@ export function MediaTabContent({
         propertyId={property.id}
         images={localProperty.images}
         onFetchComplete={handleImagesFetched}
+      />
+      
+      <FloorplanDatabaseFetcher
+        propertyId={property.id}
+        floorplans={localProperty.floorplans}
+        onFetchComplete={handleFloorplansFetched}
       />
       
       <Tabs value={currentTab} onValueChange={handleTabChange as (value: string) => void}>
@@ -86,6 +105,9 @@ export function MediaTabContent({
             setProperty={setLocalProperty}
             isSaving={isSaving}
             setIsSaving={setIsSaving}
+            handlers={{
+              handleFloorplanEmbedScriptUpdate: handlers.handleFloorplanEmbedScriptUpdate
+            }}
           />
         </TabsContent>
         

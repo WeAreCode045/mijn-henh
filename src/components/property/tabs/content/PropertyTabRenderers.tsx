@@ -7,19 +7,28 @@ import { ContentTabWrapper } from "./ContentTabWrapper";
 interface MediaTabRendererProps {
   property: PropertyData;
   handlers: {
-    handleVirtualTourUpdate?: (url: string) => void;
-    handleYoutubeUrlUpdate?: (url: string) => void;
-    handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+    handleVirtualTourUpdate: (url: string) => void;
+    handleYoutubeUrlUpdate: (url: string) => void;
+    handleFloorplanEmbedScriptUpdate: (script: string) => void;
     setPendingChanges?: (pending: boolean) => void;
   };
 }
 
 export function MediaTabRenderer(props: MediaTabRendererProps) {
   console.log("MediaTabRenderer - Property data:", props.property);
+  
+  // Ensure all required handlers are provided
+  const handlers = {
+    handleVirtualTourUpdate: props.handlers.handleVirtualTourUpdate || ((url: string) => {}),
+    handleYoutubeUrlUpdate: props.handlers.handleYoutubeUrlUpdate || ((url: string) => {}),
+    handleFloorplanEmbedScriptUpdate: props.handlers.handleFloorplanEmbedScriptUpdate || ((script: string) => {}),
+    setPendingChanges: props.handlers.setPendingChanges
+  };
+  
   return (
     <MediaTabContent 
       property={props.property} 
-      handlers={props.handlers}
+      handlers={handlers}
     />
   );
 }
@@ -68,6 +77,7 @@ interface ContentTabRendererProps {
     onUpdateArea: (id: string, field: any, value: any) => void;
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+    onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
