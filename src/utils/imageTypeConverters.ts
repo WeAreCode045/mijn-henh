@@ -82,7 +82,7 @@ export function toPropertyFloorplanArray(images: PropertyImage[] | (string | Pro
     return {
       id: img.id || `flp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       url: img.url,
-      type: "floorplan",
+      type: "floorplan" as const, // Fixed: Explicitly set as literal "floorplan" type
       title: img.title,
       description: img.description,
       area: img.area,
