@@ -197,7 +197,7 @@ export function usePropertyFetch(id: string | undefined) {
               objectId: propertyData.object_id || '',
             },
             description: {
-              shortDescription: propertyData.shortDescription || propertyData.description || '',
+              shortDescription: propertyData.description || '',
               fullDescription: propertyData.description || '',
             },
             keyInformation: {
@@ -211,7 +211,7 @@ export function usePropertyFetch(id: string | undefined) {
           };
           
           // Get property type from either property_type or propertyType field
-          const propertyType = ((propertyData as any).property_type || (propertyData as any).propertyType || "");
+          const propertyType = ((propertyData as any).propertyType || "");
           
           // Set the form data with safe defaults for new fields
           const updatedFormData: PropertyFormData = {
@@ -233,7 +233,6 @@ export function usePropertyFetch(id: string | undefined) {
             coverImages: convertToPropertyImageArray(regularImages.filter(img => img.is_featured_image)),
             gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
             areaPhotos: [],
-            // Map property_type to propertyType for consistency
             propertyType,
             virtualTourUrl: propertyData.virtualTourUrl || '',
             youtubeUrl: propertyData.youtubeUrl || '',

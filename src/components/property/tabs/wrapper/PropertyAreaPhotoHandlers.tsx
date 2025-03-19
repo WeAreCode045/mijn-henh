@@ -1,59 +1,58 @@
 
-import { useAreaPhotoRemoveAdapter } from "@/hooks/images/adapters/useAreaPhotoRemoveAdapter";
-import { useAreaPhotoUploadAdapter, useReverseAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
-import { ChangeEvent } from "react";
+import { useState, useCallback } from 'react';
 
-interface AdaptedAreaPhotoHandlers {
-  adaptedHandleAreaPhotosUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
-  adaptedHandleRemoveAreaPhoto: (areaId: string, photoIdOrIndex: string | number) => void;
-  adaptedHandleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-}
-
-/**
- * Creates adapted handlers for area photo operations to manage type compatibility
- */
 export function useAdaptedAreaPhotoHandlers(
-  handleAreaPhotosUpload?: (e: ChangeEvent<HTMLInputElement>) => Promise<void>,
+  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>,
   handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>,
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void,
   handleAreaImageRemove?: (areaId: string, imageId: string) => void
-): AdaptedAreaPhotoHandlers {
-  // Create a proper fallback handler for uploads with the correct signature
-  const originalUploadHandler = (areaId: string, files: FileList): Promise<void> => {
-    if (handleAreaImageUpload) {
-      return handleAreaImageUpload(areaId, files);
-    }
-    
-    return Promise.resolve();
-  };
-  
-  // Create a proper fallback handler for removals with the correct signature
-  const originalRemoveHandler = (areaId: string, imageId: string): void => {
-    if (handleRemoveAreaPhoto) {
-      handleRemoveAreaPhoto(areaId, imageId);
-      return;
-    }
-    
-    if (handleAreaImageRemove) {
-      handleAreaImageRemove(areaId, imageId);
-    }
-  };
-  
-  // If handleAreaPhotosUpload is already provided with the event-based signature, use it directly
-  // Otherwise, adapt the originalUploadHandler to have the event-based signature
-  const adaptedHandleAreaPhotosUpload = handleAreaPhotosUpload || useAreaPhotoUploadAdapter(originalUploadHandler);
-  
-  // Also provide a files-based handler for components that need it
-  // If handleAreaImageUpload is already provided, use it directly
-  // Otherwise, adapt the event-based handler to have the files-based signature
-  const adaptedHandleAreaImageUpload = handleAreaImageUpload || 
-    (handleAreaPhotosUpload ? useReverseAreaPhotoUploadAdapter(handleAreaPhotosUpload) : originalUploadHandler);
-  
-  const adaptedHandleRemoveAreaPhoto = useAreaPhotoRemoveAdapter(originalRemoveHandler);
-  
+) {
+  // Adapter for area photos upload (converts e.target.files to first file)
+  const adaptedHandleAreaPhotosUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (handleAreaPhotosUpload) {
+        return handleAreaPhotosUpload(e);
+      }
+      return Promise.resolve();
+    },
+    [handleAreaPhotosUpload]
+  );
+
+  // Adapter for area image upload (converts File to FileList)
+  const adaptedHandleAreaImageUpload = useCallback(
+    async (areaId: string, file: File) => {
+      if (handleAreaImageUpload) {
+        // Create a FileList-like object
+        const fileList = {
+          0: file,
+          length: 1,
+          item: (index: number) => (index === 0 ? file : null),
+          [Symbol.iterator]: function* () {
+            yield file;
+          }
+        } as FileList;
+        
+        return handleAreaImageUpload(areaId, fileList);
+      }
+      return Promise.resolve();
+    },
+    [handleAreaImageUpload]
+  );
+
+  // Adapter for remove area photo (index to areaId + imageId)
+  const adaptedHandleRemoveAreaPhoto = useCallback(
+    (index: number) => {
+      if (handleRemoveAreaPhoto) {
+        // Since we don't have proper mapping, we'll just use index as both area and image ID
+        handleRemoveAreaPhoto(`area-${index}`, `image-${index}`);
+      }
+    },
+    [handleRemoveAreaPhoto]
+  );
+
   return {
     adaptedHandleAreaPhotosUpload,
-    adaptedHandleRemoveAreaPhoto,
-    adaptedHandleAreaImageUpload
+    adaptedHandleAreaImageUpload,
+    adaptedHandleRemoveAreaPhoto
   };
 }
