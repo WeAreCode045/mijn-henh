@@ -27,7 +27,7 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
   if (typeof agentData === 'string') {
     return {
       id: agentData,
-      full_name: 'Unknown Agent',
+      name: 'Unknown Agent',
       email: '',
       phone: '',
     };
@@ -36,10 +36,10 @@ const formatAgentData = (agentData: any): PropertyAgent | undefined => {
   if (typeof agentData === 'object') {
     return {
       id: agentData.id || '',
-      full_name: agentData.full_name || 'Unknown Agent',
+      name: agentData.full_name || 'Unknown Agent', // Map full_name to name
       email: agentData.email || '',
       phone: agentData.phone || '',
-      avatar_url: agentData.avatar_url,
+      photoUrl: agentData.avatar_url, // Map avatar_url to photoUrl
     };
   }
   
@@ -152,7 +152,7 @@ export function usePropertyFetch(id: string | undefined) {
               objectId: propertyData.object_id || '',
             },
             description: {
-              shortDescription: propertyData.shortDescription || propertyData.description || '',
+              shortDescription: propertyData.description || '',
               fullDescription: propertyData.description || '',
             },
             keyInformation: {
@@ -167,8 +167,8 @@ export function usePropertyFetch(id: string | undefined) {
             }
           };
           
-          // Get property type from either property_type or propertyType field
-          const propertyType = propertyData.property_type || propertyData.propertyType || "";
+          // Get property type from either property_type property (if it exists) or generate an empty string
+          const propertyType = (propertyData as any).property_type || (propertyData as any).propertyType || "";
           
           // Set the form data with all the processed values
           const updatedFormData: PropertyFormData = {
@@ -187,7 +187,7 @@ export function usePropertyFetch(id: string | undefined) {
             energyLabel: propertyData.energyLabel || "",
             hasGarden: propertyData.hasGarden || false,
             description: propertyData.description || "",
-            shortDescription: propertyData.shortDescription || propertyData.description || "",
+            shortDescription: propertyData.description || "", // Use description as fallback for shortDescription
             features,
             areas,
             nearby_places,
