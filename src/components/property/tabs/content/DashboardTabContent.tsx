@@ -50,7 +50,7 @@ export function DashboardTabContent({
           </p>
         </div>
         <Badge variant="outline" className="text-sm">
-          {property.propertyType || property.property_type || 'Residential'}
+          {property.propertyType || (property as any).property_type || 'Residential'}
         </Badge>
       </div>
       
