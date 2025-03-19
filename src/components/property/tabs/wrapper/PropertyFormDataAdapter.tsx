@@ -43,7 +43,7 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     virtualTourUrl: property.virtualTourUrl || '',
     youtubeUrl: property.youtubeUrl || '',
     floorplanEmbedScript: property.floorplanEmbedScript || '',
-    propertyType: property.propertyType || property.property_type || '',
+    propertyType: property.propertyType || '',
     agent: property.agent ? {
       id: property.agent.id,
       name: property.agent.name,

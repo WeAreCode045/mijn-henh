@@ -5,4 +5,5 @@ export interface PropertyAgent {
   email?: string;
   phone?: string;
   photoUrl?: string;
+  whatsapp_number?: string;
 }
