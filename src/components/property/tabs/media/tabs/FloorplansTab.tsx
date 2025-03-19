@@ -1,145 +1,168 @@
-
 import React, { useState } from "react";
-import { PropertyData } from "@/types/property";
-import { FloorplansCard } from "../FloorplansCard";
+import { PropertyData, PropertyImage } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { LayoutIcon } from "lucide-react";
+import { SortableFloorplanGrid } from "../floorplans/SortableFloorplanGrid";
+import { supabase } from "@/integrations/supabase/client";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import { toast } from "sonner";
+import { AdvancedImageUploader } from "@/components/ui/AdvancedImageUploader";
 
 interface FloorplansTabProps {
   property: PropertyData;
   setProperty: React.Dispatch<React.SetStateAction<PropertyData>>;
-  isSaving: boolean;
-  setIsSaving: React.Dispatch<React.SetStateAction<boolean>>;
-  handlers?: {
-    handleFloorplanEmbedScriptUpdate: (script: string) => void;
-  };
+  isSaving?: boolean;
+  setIsSaving?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function FloorplansTab({
-  property,
+export function FloorplansTab({ 
+  property, 
   setProperty,
-  isSaving,
-  setIsSaving,
-  handlers
+  isSaving = false,
+  setIsSaving = () => {}
 }: FloorplansTabProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [floorplanEmbedScript, setFloorplanEmbedScript] = useState<string>(property.floorplanEmbedScript || "");
-  
+  const { uploadFile } = useFileUpload();
+  const floorplans = property.floorplans || [];
+
   const handleFloorplanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !property.id) return;
+    e.preventDefault(); // Prevent form submission
     
-    setIsUploading(true);
+    if (!e.target.files || e.target.files.length === 0 || !property.id) {
+      return;
+    }
+    
+    setIsSaving(true);
+    const files = Array.from(e.target.files);
+    const newFloorplans: PropertyImage[] = [];
     
     try {
-      console.log("Uploading floorplans...");
-      // Simulating successful upload
-      const newFloorplans = Array.from(e.target.files).map(file => ({
-        id: `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        url: URL.createObjectURL(file),
-        type: "floorplan" as const
-      }));
+      // Get the highest sort order of existing floorplans
+      let highestSortOrder = 0;
+      floorplans.forEach(floorplan => {
+        if (typeof floorplan === 'object' && floorplan.sort_order && floorplan.sort_order > highestSortOrder) {
+          highestSortOrder = floorplan.sort_order;
+        }
+      });
       
-      // Update the property with new floorplans
+      // Process each file
+      for (const file of files) {
+        // Upload file
+        const publicUrl = await uploadFile(file, property.id, 'floorplans');
+        
+        // Increment sort order
+        highestSortOrder += 1;
+        
+        // Create database record
+        const { error, data } = await supabase
+          .from('property_images')
+          .insert({
+            property_id: property.id,
+            url: publicUrl,
+            type: 'floorplan',
+            sort_order: highestSortOrder
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        // Add to new floorplans array
+        newFloorplans.push({
+          id: data.id,
+          url: publicUrl,
+          type: 'floorplan',
+          sort_order: highestSortOrder
+        });
+      }
+      
+      // Update local state
       setProperty(prev => ({
         ...prev,
         floorplans: [...(prev.floorplans || []), ...newFloorplans]
       }));
       
+      toast.success(`${newFloorplans.length} floorplan${newFloorplans.length !== 1 ? 's' : ''} uploaded`);
     } catch (error) {
       console.error("Error uploading floorplans:", error);
+      toast.error("Failed to upload floorplans");
     } finally {
-      setIsUploading(false);
+      setIsSaving(false);
+      // Reset the file input
       e.target.value = '';
     }
   };
-  
-  const handleRemoveFloorplan = (index: number) => {
-    if (!property.id) return;
+
+  const handleRemoveFloorplan = async (index: number) => {
+    if (!property.id || !floorplans || index < 0 || index >= floorplans.length) return;
     
     setIsSaving(true);
-    
     try {
-      // Update the property by removing the floorplan at the specified index
+      const floorplanToRemove = floorplans[index];
+      const floorplanUrl = typeof floorplanToRemove === 'string' ? floorplanToRemove : floorplanToRemove.url;
+      const floorplanId = typeof floorplanToRemove === 'object' ? floorplanToRemove.id : null;
+      
+      // Delete from database if we have an ID
+      if (floorplanId) {
+        const { error } = await supabase
+          .from('property_images')
+          .delete()
+          .eq('id', floorplanId);
+          
+        if (error) throw error;
+      } else if (floorplanUrl) {
+        // Try to delete by URL if we don't have an ID
+        const { error } = await supabase
+          .from('property_images')
+          .delete()
+          .eq('property_id', property.id)
+          .eq('url', floorplanUrl)
+          .eq('type', 'floorplan');
+          
+        if (error) throw error;
+      }
+      
+      // Update local state
+      const newFloorplans = [...floorplans];
+      newFloorplans.splice(index, 1);
+      
       setProperty(prev => ({
         ...prev,
-        floorplans: prev.floorplans.filter((_, i) => i !== index)
+        floorplans: newFloorplans
       }));
       
+      toast.success("Floorplan removed");
     } catch (error) {
       console.error("Error removing floorplan:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveFloorplanEmbed = () => {
-    if (!property.id) return;
-    
-    setIsSaving(true);
-    
-    try {
-      // Update the property with the new floorplan embed script
-      setProperty(prev => ({
-        ...prev,
-        floorplanEmbedScript
-      }));
-      
-      // Call the handler if provided
-      if (handlers?.handleFloorplanEmbedScriptUpdate) {
-        handlers.handleFloorplanEmbedScriptUpdate(floorplanEmbedScript);
-      }
-    } catch (error) {
-      console.error("Error saving floorplan embed script:", error);
+      toast.error("Failed to remove floorplan");
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <FloorplansCard
-        floorplans={property.floorplans || []}
-        onFloorplanUpload={handleFloorplanUpload}
-        onRemoveFloorplan={handleRemoveFloorplan}
-        isUploading={isUploading}
-        propertyId={property.id}
-      />
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LayoutIcon className="h-5 w-5" />
-            Floorplan Embed Script
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              If you have an interactive floorplan service, paste the embed script here.
-            </p>
-            <Textarea
-              value={floorplanEmbedScript}
-              onChange={(e) => setFloorplanEmbedScript(e.target.value)}
-              placeholder="Paste floorplan embed script here"
-              rows={6}
-            />
-            <Button onClick={handleSaveFloorplanEmbed} disabled={isSaving}>
-              Save Floorplan Embed
-            </Button>
+    <Card>
+      <CardHeader>
+        <CardTitle>Floorplans</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <AdvancedImageUploader 
+          onUpload={handleFloorplanUpload} 
+          isUploading={isSaving} 
+          label="Upload Floorplans"
+          multiple={true}
+        />
+        
+        {(!floorplans || floorplans.length === 0) ? (
+          <div className="text-center py-6 mt-4">
+            <p className="text-muted-foreground">No floorplans uploaded yet</p>
           </div>
-          
-          {floorplanEmbedScript && (
-            <div className="mt-4 aspect-video w-full border rounded-md">
-              <div
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: floorplanEmbedScript }}
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+        ) : (
+          <SortableFloorplanGrid 
+            floorplans={floorplans} 
+            onRemoveFloorplan={handleRemoveFloorplan}
+            propertyId={property.id}
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }

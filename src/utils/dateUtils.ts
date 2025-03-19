@@ -1,20 +1,21 @@
 
-import { format, parseISO } from "date-fns";
-
 /**
- * Formats a date string to a more readable format
- * @param dateString - ISO date string
- * @param formatPattern - Optional custom format pattern 
+ * Format a date string into a readable format
+ * @param dateString ISO date string
  * @returns Formatted date string
  */
-export function formatDate(dateString: string, formatPattern: string = "MMM d, yyyy 'at' h:mm a"): string {
-  if (!dateString) return "Unknown date";
-  
+export function formatDate(dateString: string): string {
   try {
-    const date = typeof dateString === 'string' ? parseISO(dateString) : new Date(dateString);
-    return format(date, formatPattern);
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   } catch (error) {
-    console.error("Error formatting date:", error);
-    return "Invalid date";
+    console.error('Error formatting date:', error);
+    return dateString || 'N/A';
   }
 }

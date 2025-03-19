@@ -1,19 +1,13 @@
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import type { PropertyFormData } from "@/types/property";
 
 export function useFormSteps(
   formData: PropertyFormData, 
   onAutosave: () => void,
-  maxSteps: number = 5
+  maxSteps: number = 5  // Updated to 5 after removing FloorplansStep
 ) {
   const [currentStep, setCurrentStep] = useState(1);
-
-  // Make sure formData is properly loaded initially
-  useEffect(() => {
-    // Perform any initialization after formData is loaded
-    console.log("Form steps initialized with data:", formData?.id);
-  }, [formData]);
 
   // Validate that the form data is ready before allowing navigation
   const isFormDataReady = useCallback(() => {
@@ -57,7 +51,6 @@ export function useFormSteps(
     currentStep,
     handleNext,
     handlePrevious,
-    handleStepClick,
-    maxSteps
+    handleStepClick
   };
 }

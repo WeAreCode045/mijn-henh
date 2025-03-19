@@ -8,7 +8,7 @@ import { PropertyData, PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, MinusCircle } from "lucide-react";
+import { PlusCircle, MinusCircle, Save } from "lucide-react";
 
 interface FeaturesStepProps {
   features: any;
@@ -197,6 +197,8 @@ export function PropertyFormContent({
   removeArea,
   updateArea,
   handleAreaImageUpload,
+  onSubmit,
+  isSaving,
   setPendingChanges
 }: PropertyFormManagerChildrenProps) {
 
@@ -267,6 +269,29 @@ export function PropertyFormContent({
   return (
     <div className="space-y-6">
       <div>{renderStepContent()}</div>
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={() => {
+            // Set pending changes to true when user saves
+            setPendingChanges(true);
+            onSubmit();
+          }}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <span className="animate-spin mr-2">⏳</span>
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

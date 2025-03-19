@@ -6,31 +6,21 @@ import { usePropertyFeatures } from './property-form/usePropertyFeatures';
 import { usePropertyAreas } from './property-form/usePropertyAreas';
 import { usePropertyContent } from './property-form/usePropertyContent';
 import { usePropertyImages } from './property-form/usePropertyImages';
-import { usePropertyFloorplans } from './images/usePropertyFloorplans';
-import { usePropertyAreaPhotos } from './images/usePropertyAreaPhotos';
-import { usePropertyCoverImages } from './usePropertyCoverImages';
-import { usePropertyMediaHandlers } from './property-form/usePropertyMediaHandlers';
-import { useSaveHandlers } from './property-form/useSaveHandlers';
-import { createFieldChangeWrapper } from './property-form/utils/fieldChangeUtils';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
-  const [currentStep, setCurrentStep] = useState<number>(0);
   
   // Hook for handling form state
   const { 
-    handleFieldChange 
+    onFieldChange 
   } = usePropertyFormState(formState, setFormState);
-  
-  // Create a wrapper function for hooks that expect a function with (data: PropertyFormData) signature
-  const fieldChangeWrapper = createFieldChangeWrapper(handleFieldChange);
   
   // Hook for managing features
   const { 
     addFeature, 
     removeFeature, 
     updateFeature 
-  } = usePropertyFeatures(formState, handleFieldChange);
+  } = usePropertyFeatures(formState, onFieldChange);
   
   // Hook for managing areas
   const { 
@@ -38,56 +28,41 @@ export function usePropertyFormManager(property: PropertyFormData) {
     removeArea, 
     updateArea, 
     handleAreaImageRemove, 
-    handleAreaImagesSelect, 
+    handleAreaImagesSelect,
     handleAreaImageUpload,
     isUploading
-  } = usePropertyAreas(formState, handleFieldChange);
+  } = usePropertyAreas(formState, onFieldChange);
   
-  // Property content hook (for loading/saving data)
-  const propertyContentHook = usePropertyContent(property.id);
+  // Hook for managing content and steps
+  const { 
+    fetchLocationData,
+    fetchCategoryPlaces,
+    fetchNearbyCities,
+    generateLocationDescription,
+    generateMapImage,
+    removeNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    lastSaved,
+    isSaving,
+    setPendingChanges,
+    onSubmit
+  } = usePropertyContent(formState, onFieldChange);
   
   // Hook for managing images
   const {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyImages(formState, handleFieldChange);
-  
-  // Get the floorplan hooks
-  const floorplanHooks = usePropertyFloorplans(formState, fieldChangeWrapper);
-  
-  // Hook for managing area photos
-  const {
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto
-  } = usePropertyAreaPhotos(formState, setFormState);
-  
-  // Get the cover image hooks
-  const coverImageHooks = usePropertyCoverImages(formState, fieldChangeWrapper);
-  
-  // Media update handlers
-  const {
-    handleVirtualTourUpdate,
-    handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate
-  } = usePropertyMediaHandlers(formState, handleFieldChange);
-  
-  // Save handlers
-  const {
-    handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate
-  } = useSaveHandlers(handleFieldChange);
-  
-  // Handle form step navigation
-  const handleStepClick = (step: number) => {
-    console.log(`Setting current step to: ${step}`);
-    setCurrentStep(step);
-  };
+  } = usePropertyImages(formState, onFieldChange);
   
   return {
     formState,
-    handleFieldChange,
+    handleFieldChange: onFieldChange,
     
     // Feature methods
     onAddFeature: addFeature,
@@ -102,12 +77,27 @@ export function usePropertyFormManager(property: PropertyFormData) {
     onAreaImagesSelect: handleAreaImagesSelect,
     handleAreaImageUpload,
     
-    // Property content methods
-    refreshData: propertyContentHook.refreshData,
-    pendingChanges: propertyContentHook.pendingChanges,
-    setPendingChanges: propertyContentHook.setPendingChanges,
-    savePropertyData: propertyContentHook.savePropertyData,
-    isSaving: propertyContentHook.isSaving,
+    // Location methods
+    onFetchLocationData: fetchLocationData,
+    onFetchCategoryPlaces: fetchCategoryPlaces,
+    onFetchNearbyCities: fetchNearbyCities,
+    onGenerateLocationDescription: generateLocationDescription,
+    onGenerateMap: generateMapImage,
+    onRemoveNearbyPlace: removeNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    
+    // Step navigation
+    onSubmit,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    
+    // Status
+    lastSaved,
+    isSaving,
+    setPendingChanges,
     
     // Image methods
     handleImageUpload,
@@ -115,35 +105,15 @@ export function usePropertyFormManager(property: PropertyFormData) {
     images,
     isUploading,
     
-    // Floorplan methods
-    handleFloorplanUpload: floorplanHooks.handleFloorplanUpload,
-    handleRemoveFloorplan: floorplanHooks.handleRemoveFloorplan,
-    isUploadingFloorplan: floorplanHooks.isUploadingFloorplan,
-    handleFloorplanEmbedScriptUpdate,
-    
-    // Area photos methods
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto,
-    
-    // Featured image methods
-    handleSetFeaturedImage: coverImageHooks.handleSetFeaturedImage,
-    handleToggleFeaturedImage: coverImageHooks.handleToggleFeaturedImage,
-    
-    // Media update methods
-    handleVirtualTourUpdate,
-    handleYoutubeUrlUpdate,
-    
-    // Save handlers
-    handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate,
-    
-    // Step navigation
-    currentStep,
-    handleStepClick,
-    
-    // Stub properties to maintain compatibility
-    lastSaved: null,
-    onSubmit: () => {}
+    // Placeholder methods for required properties in PropertyFormManagerChildrenProps
+    handleSaveObjectId: (objectId: string) => {
+      onFieldChange('object_id', objectId);
+    },
+    handleSaveAgent: (agentId: string) => {
+      onFieldChange('agent_id', agentId);
+    },
+    handleSaveTemplate: (templateId: string) => {
+      onFieldChange('template_id', templateId);
+    }
   };
 }

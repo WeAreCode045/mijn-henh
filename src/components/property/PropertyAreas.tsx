@@ -1,27 +1,26 @@
-
-import { PropertyArea } from "./PropertyArea";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { PropertyImage, PropertyArea as PropertyAreaType } from "@/types/property";
-import { ChangeEvent } from "react";
+import { PropertyArea, PropertyImage } from "@/types/property";
+import { useEffect } from "react";
+import { AreaCard } from "./AreaCard";
+import { EmptyAreaMessage } from "./EmptyAreaMessage";
 
 interface PropertyAreasProps {
-  areas: PropertyAreaType[];
+  areas: PropertyArea[];
   images: PropertyImage[];
   propertyId: string;
   onAdd: () => void;
   onRemove: (id: string) => void;
-  onUpdate: (id: string, field: string, value: any) => void;
+  onUpdate: (id: string, field: any, value: any) => void;
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesSelect: (areaId: string, imageIds: string[]) => void;
-  onImageUpload: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
-  handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
+  onImageUpload: (areaId: string, files: FileList) => Promise<void>;
   isUploading?: boolean;
 }
 
 export function PropertyAreas({
-  areas,
-  images,
+  areas = [],
+  images = [],
   propertyId,
   onAdd,
   onRemove,
@@ -29,56 +28,66 @@ export function PropertyAreas({
   onImageRemove,
   onImagesSelect,
   onImageUpload,
-  handleAreaImageUpload,
-  isUploading = false,
+  isUploading,
 }: PropertyAreasProps) {
+  useEffect(() => {
+    console.log("PropertyAreas - Current areas:", areas);
+    console.log("PropertyAreas - Available images:", images);
+    console.log("PropertyAreas - Property ID:", propertyId);
+    
+    // Debug each area's images
+    areas.forEach(area => {
+      console.log(`Area ${area.id} (${area.title}) - images:`, 
+        Array.isArray(area.images) ? area.images : 'Not an array: ' + JSON.stringify(area.images));
+    });
+  }, [areas, images, propertyId]);
+
+  const handleAddArea = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAdd();
+  };
+
+  // Make sure all areas have images as arrays
+  const normalizedAreas = areas.map(area => ({
+    ...area,
+    images: Array.isArray(area.images) ? area.images : []
+  }));
+
   return (
-    <div>
-      <div className="mb-4">
-        <Button
-          type="button" 
-          variant="outline" 
-          onClick={onAdd} 
-          className="w-full"
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-estate-800">Property Areas</h2>
+        <Button 
+          onClick={handleAddArea} 
+          size="sm" 
+          className="flex items-center" 
+          type="button"
         >
-          <PlusCircle className="mr-2 h-4 w-4" />
+          <PlusCircle className="h-4 w-4 mr-2" />
           Add Area
         </Button>
       </div>
-      
-      {areas.length === 0 && (
-        <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
-          No areas added yet. Click the button above to add an area.
+
+      {!normalizedAreas || normalizedAreas.length === 0 ? (
+        <EmptyAreaMessage />
+      ) : (
+        <div className="space-y-6">
+          {normalizedAreas.map((area, index) => (
+            <AreaCard
+              key={area.id}
+              area={area}
+              images={images}
+              propertyId={propertyId}
+              isFirstArea={index === 0}
+              onRemove={onRemove}
+              onUpdate={onUpdate}
+              onImageRemove={onImageRemove}
+              onImagesSelect={onImagesSelect}
+            />
+          ))}
         </div>
       )}
-      
-      {areas.map((area) => {
-        // Get the images assigned to this area
-        const areaImages = images.filter(img => {
-          // Check if image is assigned to this area based on area property or imageIds
-          if (img.area === area.id) return true;
-          if (area.imageIds && area.imageIds.includes(img.id)) return true;
-          return false;
-        });
-        
-        return (
-          <PropertyArea
-            key={area.id}
-            id={area.id}
-            title={area.title}
-            description={area.description}
-            images={areaImages}
-            allImages={images}
-            onRemove={() => onRemove(area.id)}
-            onUpdate={(field, value) => onUpdate(area.id, field, value)}
-            onImageUpload={onImageUpload}
-            onImageRemove={(imageId) => onImageRemove(area.id, imageId)}
-            onImagesSelect={(imageIds) => onImagesSelect(area.id, imageIds)}
-            handleAreaImageUpload={handleAreaImageUpload}
-            isUploading={isUploading}
-          />
-        );
-      })}
     </div>
   );
 }

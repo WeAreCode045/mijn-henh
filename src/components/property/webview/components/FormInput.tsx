@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 interface FormInputProps {
-  id?: string;
   type: "text" | "email" | "tel" | "textarea";
   name: string;
   placeholder: string;
@@ -14,7 +13,6 @@ interface FormInputProps {
 }
 
 export function FormInput({ 
-  id,
   type, 
   name, 
   placeholder, 
@@ -26,7 +24,6 @@ export function FormInput({
   if (type === "textarea") {
     return (
       <Textarea
-        id={id}
         placeholder={placeholder}
         name={name}
         value={value}
@@ -39,7 +36,6 @@ export function FormInput({
 
   return (
     <Input
-      id={id}
       placeholder={placeholder}
       name={name}
       type={type}

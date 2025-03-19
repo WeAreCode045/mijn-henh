@@ -3,7 +3,6 @@ import { PropertyData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
-import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 /**
  * Hook for uploading images to a property
@@ -81,15 +80,11 @@ export function useUploadImage(
         });
       }
       
-      // Update local state with properly typed images
-      setProperty(prev => {
-        // Convert current images to PropertyImage[] if they aren't already
-        const currentImages = convertToPropertyImageArray(prev.images || []);
-        return {
-          ...prev,
-          images: [...currentImages, ...newImages]
-        };
-      });
+      // Update local state
+      setProperty(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...newImages]
+      }));
       
       // Call handler if provided
       if (handlers?.setPendingChanges) handlers.setPendingChanges(true);

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PropertyFormData, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,9 +126,7 @@ export function useImageUploadHandler(
       console.log("Adding new images to form state:", newImages);
       setFormData({
         ...formData,
-        images: [...currentImages, ...newImages].map(img => typeof img === 'string' ? 
-          { id: `img-${Date.now()}-${Math.random()}`, url: img, type: "image" as const } : 
-          { ...img, type: img.type || "image" as const })
+        images: [...currentImages, ...newImages]
       });
       
       if (newImages.length > 0) {

@@ -1,15 +1,109 @@
-
-import { useState } from 'react';
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { PropertyFormData } from "@/types/property";
+import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "./property-form/preparePropertyData";
 
 export function usePropertyAutoSave() {
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [pendingChanges, setPendingChanges] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
 
-  // Stub functions that don't actually save
-  const autosaveData = async () => {
-    console.log("Autosave functionality has been disabled");
-    return true;
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
+    if (!formData.id) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      const submitData = {
+        title: formData.title,
+        price: formData.price,
+        address: formData.address,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        sqft: formData.sqft,
+        living_area: formData.livingArea,
+        build_year: formData.buildYear,
+        garages: formData.garages,
+        energy_label: formData.energyLabel,
+        has_garden: formData.hasGarden,
+        description: formData.description,
+        location_description: formData.location_description,
+        features: JSON.stringify(formData.features),
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        object_id: formData.object_id,
+        agent_id: formData.agent_id,
+        template_id: formData.template_id,
+        virtual_tour_url: formData.virtualTourUrl,
+        youtube_url: formData.youtubeUrl,
+        floorplan_embed_script: formData.floorplanEmbedScript,
+      };
+      
+      console.log('Auto-saving property data...', formData);
+
+      const { error } = await supabase
+        .from('properties')
+        .update(submitData)
+        .eq('id', formData.id);
+
+      if (error) {
+        console.error('Auto-save error:', error);
+        throw error;
+      }
+
+      if (formData.floorplans && formData.floorplans.length > 0) {
+        try {
+          const { data: existingFloorplans } = await supabase
+            .from('property_images')
+            .select('id, url')
+            .eq('property_id', formData.id)
+            .eq('type', 'floorplan');
+            
+          const existingUrls = existingFloorplans?.map(f => f.url) || [];
+          
+          for (const floorplan of formData.floorplans) {
+            const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
+            if (!floorplanUrl || existingUrls.includes(floorplanUrl)) continue;
+            
+            await supabase
+              .from('property_images')
+              .insert({
+                property_id: formData.id,
+                url: floorplanUrl,
+                type: 'floorplan'
+              });
+          }
+        } catch (error) {
+          console.error('Error updating floorplans:', error);
+        }
+      }
+
+      setLastSaved(new Date());
+      setPendingChanges(false);
+      console.log('Auto-save successful');
+      return true;
+    } catch (error: any) {
+      console.error('Auto-save failed:', error);
+      toast({
+        title: "Auto-save Failed",
+        description: error.message || "An error occurred during auto-save",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return {

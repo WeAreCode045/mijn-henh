@@ -1,7 +1,6 @@
 
-import type { PropertyFeature, PropertyPlaceType, PropertyCity, GeneralInfoData } from "@/types/property";
-import { PropertyImage } from "@/types/property";
-import { PropertyArea } from "@/types/property";
+import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType } from "@/types/property";
+import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
 
 export function transformFeatures(features: any[]): PropertyFeature[] {
@@ -58,25 +57,22 @@ export function transformAreas(areas: any[]): PropertyArea[] {
           id: area.id || crypto.randomUUID(),
           title: area.title || "",
           description: area.description || "",
-          name: area.name || "",
-          size: area.size || "",
-          unit: area.unit || "",
           imageIds: imageIds,
           columns: typeof area.columns === 'number' ? area.columns : 2,
+          name: area.name || "",
+          size: area.size || "",
           images: processedImages
         };
       })
     : [];
 }
 
-export function transformNearbyPlaces(places: any[]): PropertyPlaceType[] {
+export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
   return Array.isArray(places)
     ? places.map((place: any) => ({
         id: place.id || "",
-        place_id: place.place_id || place.id || "", // Ensure place_id exists
         name: place.name || "",
         type: place.type || "other",
-        types: place.types || [place.type || "other"], // Ensure types exists
         vicinity: place.vicinity || "",
         rating: place.rating || 0,
         user_ratings_total: place.user_ratings_total || 0,
@@ -90,35 +86,4 @@ export function transformImages(images: any[]): PropertyImage[] {
   return Array.isArray(images)
     ? images.map((img: any) => normalizeImage(img))
     : [];
-}
-
-// Helper to transform GeneralInfoData
-export function transformGeneralInfo(data: any): GeneralInfoData | undefined {
-  if (!data) return undefined;
-  
-  if (typeof data === 'object' && !Array.isArray(data)) {
-    // It's already an object, check if it looks like GeneralInfoData
-    if ('propertyDetails' in data || 'description' in data || 'keyInformation' in data) {
-      return data as GeneralInfoData;
-    }
-  }
-  
-  if (typeof data === 'string') {
-    try {
-      const parsed = JSON.parse(data);
-      if (typeof parsed === 'object' && !Array.isArray(parsed)) {
-        return parsed as GeneralInfoData;
-      }
-    } catch (e) {
-      // Return undefined if parsing fails
-      return undefined;
-    }
-  }
-  
-  // Default empty object with the expected structure
-  return {
-    propertyDetails: {},
-    description: {},
-    keyInformation: {}
-  };
 }

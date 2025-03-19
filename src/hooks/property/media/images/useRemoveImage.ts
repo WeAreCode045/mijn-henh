@@ -1,9 +1,7 @@
 
-import { PropertyData, PropertyImage } from "@/types/property";
+import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
-import { getImageUrl } from "@/utils/imageTypeConverters";
 
 /**
  * Hook for removing images from a property
@@ -23,7 +21,7 @@ export function useRemoveImage(
     setIsSaving(true);
     try {
       const imageToRemove = property.images[index];
-      const imageUrl = getImageUrl(imageToRemove);
+      const imageUrl = typeof imageToRemove === 'string' ? imageToRemove : imageToRemove.url;
       const imageId = typeof imageToRemove === 'object' ? imageToRemove.id : null;
       
       // Delete from database if we have an ID
@@ -45,25 +43,18 @@ export function useRemoveImage(
         if (error) throw error;
       }
       
-      // Update local state - use type assertion to ensure proper typing
-      const newImages = property.images.filter((_, i) => i !== index);
+      // Update local state
+      const newImages = [...property.images];
+      newImages.splice(index, 1);
       
-      setProperty(prev => {
-        // Use the convertToPropertyImageArray helper to ensure proper typing
-        const updatedImages = convertToPropertyImageArray(newImages);
-        
-        // Check if the removed image was a featured image
-        const removedImageUrl = getImageUrl(imageToRemove);
-        
-        return {
-          ...prev,
-          images: updatedImages,
-          // If the removed image was the featured image, clear it
-          featuredImage: prev.featuredImage === removedImageUrl ? null : prev.featuredImage,
-          // Remove from featured images if present
-          featuredImages: prev.featuredImages.filter(img => getImageUrl(img) !== removedImageUrl)
-        };
-      });
+      setProperty(prev => ({
+        ...prev,
+        images: newImages,
+        // If the removed image was the featured image, clear it
+        featuredImage: prev.featuredImage === imageUrl ? null : prev.featuredImage,
+        // Remove from featured images if present
+        featuredImages: (prev.featuredImages || []).filter(img => img !== imageUrl)
+      }));
       
       // Call handler if provided
       if (handlers?.setPendingChanges) handlers.setPendingChanges(true);

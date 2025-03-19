@@ -1,42 +1,54 @@
 
-import React from 'react';
-import { PropertyArea, PropertyImage } from "@/types/property";
+import { PropertyData } from "@/types/property";
+import { WebViewSectionProps } from "../types";
+import { useState } from "react";
+import "../styles/WebViewStyles.css";
 
-export interface SingleAreaSectionProps {
-  area: PropertyArea;
-  areaImages: PropertyImage[];
-}
-
-export function SingleAreaSection({ area, areaImages }: SingleAreaSectionProps) {
-  if (!area) return null;
+export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebViewSectionProps & { areaIndex?: number }) {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
+  // Ensure areas exist and the requested index is valid
+  if (!property.areas || !property.areas[areaIndex]) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+        <p className="text-gray-500">No area information available</p>
+      </div>
+    );
+  }
+  
+  const area = property.areas[areaIndex];
+  const areaTitle = area.title || `Area ${areaIndex + 1}`;
+  
+  // Get area photos by finding property images that have this area's id
+  const areaPhotos = property.images
+    .filter(img => img.area === area.id)
+    .map(img => img.url);
   
   return (
-    <div className="my-8">
-      <h3 className="text-2xl font-bold mb-4">{area.name || 'Area'}</h3>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-estate-800">{areaTitle}</h2>
       
+      {/* Area description */}
       {area.description && (
-        <div className="mb-6 text-gray-700">
+        <div className="prose prose-slate max-w-none">
           <p>{area.description}</p>
         </div>
       )}
       
-      {area.size && (
-        <div className="mb-6">
-          <p className="text-lg">
-            <span className="font-medium">Size:</span> {area.size} {area.unit || 'm²'}
-          </p>
-        </div>
-      )}
-      
-      {areaImages && areaImages.length > 0 && (
-        <div className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {areaImages.map((image) => (
-              <div key={image.id} className="relative rounded overflow-hidden">
+      {/* Area images gallery */}
+      {areaPhotos.length > 0 && (
+        <div className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {areaPhotos.map((photo, index) => (
+              <div 
+                key={index} 
+                className="relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => setSelectedImage(photo)}
+              >
                 <img 
-                  src={image.url} 
-                  alt={image.alt || area.name} 
-                  className="w-full h-64 object-cover"
+                  src={photo} 
+                  alt={`${areaTitle} photo ${index + 1}`}
+                  className="object-cover w-full h-full"
                 />
               </div>
             ))}
@@ -44,9 +56,40 @@ export function SingleAreaSection({ area, areaImages }: SingleAreaSectionProps) 
         </div>
       )}
       
-      <div className="space-y-2">
-        {/* Area features would go here */}
+      {/* Area details - Only show if there's custom data for this area */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        {/* We don't have sqft in the PropertyArea type, so we won't display it directly */}
+        {property.sqft && (
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold">Area:</span>
+            <span>{property.sqft} sq ft</span>
+          </div>
+        )}
+        
+        {/* Similarly, dimensions isn't in the PropertyArea type */}
+        {property.livingArea && (
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold">Living Area:</span>
+            <span>{property.livingArea}</span>
+          </div>
+        )}
       </div>
+      
+      {/* Modal for full-size image view */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="max-w-4xl max-h-[90vh]">
+            <img 
+              src={selectedImage} 
+              alt="Area full view" 
+              className="object-contain max-h-[90vh] max-w-full"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

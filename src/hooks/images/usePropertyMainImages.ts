@@ -1,10 +1,9 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyFormData, PropertyImage } from '@/types/property';
+import { PropertyFormData } from '@/types/property';
 import { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
-import { toPropertyImage } from '@/utils/imageTypeConverters';
 
 export function usePropertyMainImages(
   formData: PropertyFormData,
@@ -68,16 +67,12 @@ export function usePropertyMainImages(
     
     setIsUpdating(true);
     try {
-      // Convert featuredImages to PropertyImage objects if they're strings
-      const currentFeaturedImages = (formData.featuredImages || []).map(img => 
-        typeof img === 'string' ? toPropertyImage(img) : img
-      );
-      
       // Check if the image is already in the featured images
-      const isInFeatured = currentFeaturedImages.some(img => img.url === url);
+      const isInFeatured = formData.featuredImages?.includes(url) || false;
       
       if (!isInFeatured) {
         // Check if we already have 4 featured images
+        const currentFeaturedImages = formData.featuredImages || [];
         if (currentFeaturedImages.length >= 4) {
           // Remove the oldest featured image
           const oldestFeaturedImage = currentFeaturedImages[0];
@@ -87,7 +82,7 @@ export function usePropertyMainImages(
             .from('property_images')
             .update({ is_featured_image: false })
             .eq('property_id', formData.id)
-            .eq('url', oldestFeaturedImage.url);
+            .eq('url', oldestFeaturedImage);
             
           if (resetError) {
             throw resetError;
@@ -108,19 +103,15 @@ export function usePropertyMainImages(
       
       // Update local state
       setFormData(prevState => {
-        // Convert featuredImages to PropertyImage objects if they're strings
-        const prevFeaturedImages = (prevState.featuredImages || []).map(img => 
-          typeof img === 'string' ? toPropertyImage(img) : img
-        );
-        
-        let updatedFeaturedImages: PropertyImage[];
+        const currentFeaturedImages = prevState.featuredImages || [];
+        let updatedFeaturedImages;
         
         if (isInFeatured) {
           // Remove from featured
-          updatedFeaturedImages = prevFeaturedImages.filter(img => img.url !== url);
+          updatedFeaturedImages = currentFeaturedImages.filter(img => img !== url);
         } else {
           // Add to featured, maintaining max 4 images
-          updatedFeaturedImages = [...prevFeaturedImages, toPropertyImage(url)];
+          updatedFeaturedImages = [...currentFeaturedImages, url];
           if (updatedFeaturedImages.length > 4) {
             updatedFeaturedImages = updatedFeaturedImages.slice(1); // Remove oldest
           }

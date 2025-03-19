@@ -1,35 +1,48 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PropertyNearbyPlace } from "@/types/property";
+import { PlaceItem } from "./PlaceItem";
 
-export interface CategorySectionProps {
-  title: string;
-  icon: string | React.ReactNode;
-  onClick: () => Promise<void>;
-  isLoading: boolean;
+interface CategorySectionProps {
+  category: string;
+  places: PropertyNearbyPlace[];
+  onRemovePlace?: (index: number) => void;
+  toggleVisibility?: (placeIndex: number, visible: boolean) => void;
+  isVisible?: (place: PropertyNearbyPlace) => boolean;
 }
 
-export function CategorySection({ title, icon, onClick, isLoading }: CategorySectionProps) {
+export function CategorySection({ 
+  category, 
+  places, 
+  onRemovePlace,
+  toggleVisibility,
+  isVisible = () => true
+}: CategorySectionProps) {
+  const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+  
   return (
-    <div className="border rounded-md p-4">
-      <Button
-        variant="outline"
-        className="w-full justify-start gap-2"
-        onClick={onClick}
-        disabled={isLoading}
-      >
-        {typeof icon === "string" ? (
-          <span className="text-lg">{icon}</span>
-        ) : (
-          icon
-        )}
-        <span>{title}</span>
-        {isLoading && (
-          <span className="ml-auto">
-            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
-          </span>
-        )}
-      </Button>
-    </div>
+    <Card>
+      <CardHeader className="py-3">
+        <CardTitle className="text-md">{formattedCategory} ({places.length})</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {places.map((place, idx) => (
+            <PlaceItem 
+              key={place.id || idx} 
+              place={place} 
+              index={idx}
+              originalIndex={place.id ? parseInt(place.id) : idx}
+              category={category}
+              onRemove={onRemovePlace ? () => onRemovePlace(idx) : undefined}
+              onVisibilityChange={toggleVisibility ? 
+                (index, visible) => toggleVisibility(index, visible) : 
+                () => {}}
+              visible={isVisible(place)}
+            />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

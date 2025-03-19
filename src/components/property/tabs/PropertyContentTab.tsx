@@ -18,18 +18,12 @@ interface PropertyContentTabProps {
     handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    handleNext?: () => void;
-    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
-    onFetchCategoryPlaces?: (category: string) => Promise<any>;
-    onFetchNearbyCities?: () => Promise<any>;
-    onGenerateLocationDescription?: () => Promise<void>;
-    onGenerateMap?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
-    isGeneratingMap?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
+    onSubmit: () => void;
     isSaving?: boolean;
   };
 }
@@ -37,22 +31,8 @@ interface PropertyContentTabProps {
 export function PropertyContentTab({ formData, handlers }: PropertyContentTabProps) {
   return (
     <ContentTabWrapper 
-      formData={formData}
-      handlers={handlers}
-      // Required props with dummy implementations to satisfy type checking
-      onFieldChange={(field, value) => handlers.onFieldChange(field, value)}
-      onAddFeature={() => handlers.onAddFeature()}
-      onRemoveFeature={(id) => handlers.onRemoveFeature(id)}
-      onUpdateFeature={(id, desc) => handlers.onUpdateFeature(id, desc)}
-      onAddArea={() => handlers.onAddArea()}
-      onRemoveArea={(id) => handlers.onRemoveArea(id)}
-      onUpdateArea={(id, field, value) => handlers.onUpdateArea(id, field, value)}
-      onAreaImageRemove={(areaId, imgId) => handlers.onAreaImageRemove(areaId, imgId)}
-      onAreaImagesSelect={(areaId, imgIds) => handlers.onAreaImagesSelect(areaId, imgIds)}
-      onAreaImageUpload={(areaId, files) => handlers.handleAreaImageUpload(areaId, files)}
-      currentStep={handlers.currentStep}
-      handleStepClick={(step) => handlers.handleStepClick(step)}
-      onSubmit={() => console.log("Form submitted")}
+      formData={formData} 
+      handlers={handlers} 
     />
   );
 }

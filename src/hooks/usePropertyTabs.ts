@@ -8,7 +8,7 @@ export function usePropertyTabs() {
   const location = useLocation();
   
   // Valid tab values and their corresponding paths
-  const validTabs = ['dashboard', 'content', 'media', 'communications'];
+  const validTabs = ['dashboard', 'content', 'media', 'floorplans', 'communications'];
   
   // Extract the current tab from the URL path
   const getTabFromPath = (path: string): string => {

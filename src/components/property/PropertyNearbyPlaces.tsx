@@ -8,15 +8,11 @@ interface PropertyNearbyPlacesProps {
 export function PropertyNearbyPlaces({ places }: PropertyNearbyPlacesProps) {
   if (!places || places.length === 0) return null;
 
-  // Group places by type
   const placesByType = places.reduce((acc: Record<string, PropertyPlaceType[]>, place) => {
-    // Use place.type if it exists, otherwise use the first item from place.types array or 'other'
-    const placeType = place.type || (place.types && place.types.length > 0 ? place.types[0] : 'other');
-    
-    if (!acc[placeType]) {
-      acc[placeType] = [];
+    if (!acc[place.type]) {
+      acc[place.type] = [];
     }
-    acc[placeType].push(place);
+    acc[place.type].push(place);
     return acc;
   }, {});
 

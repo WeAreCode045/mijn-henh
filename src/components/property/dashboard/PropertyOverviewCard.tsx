@@ -1,10 +1,10 @@
+
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { getImageUrl } from "@/utils/imageUrlHelpers";
 
 interface PropertyOverviewCardProps {
   property: PropertyData;
@@ -55,7 +55,7 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
     }
   };
 
-  const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? getImageUrl(property.images[0]) : null);
+  const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? property.images[0].url : null);
 
   return (
     <Card className="md:col-span-3">

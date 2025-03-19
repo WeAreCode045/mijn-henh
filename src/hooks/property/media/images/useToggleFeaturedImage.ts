@@ -1,8 +1,7 @@
 
-import { PropertyData, PropertyImage } from "@/types/property";
+import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { toPropertyImage } from "@/utils/imageTypeConverters";
 
 /**
  * Hook for toggling an image as featured/grid image
@@ -22,15 +21,10 @@ export function useToggleFeaturedImage(
     setIsSaving(true);
     try {
       const featuredImages = property.featuredImages || [];
-      // Convert string to PropertyImage if needed
-      const normalizedFeaturedImages = featuredImages.map(img => 
-        typeof img === 'string' ? toPropertyImage(img) : img
-      );
-      
-      const isAlreadyFeatured = normalizedFeaturedImages.some(img => img.url === url);
+      const isAlreadyFeatured = featuredImages.includes(url);
       
       // Check max featured images limit
-      if (!isAlreadyFeatured && normalizedFeaturedImages.length >= 4) {
+      if (!isAlreadyFeatured && featuredImages.length >= 4) {
         toast.warning("Maximum of 4 featured images allowed. Please remove one first.");
         setIsSaving(false);
         return;
@@ -65,28 +59,14 @@ export function useToggleFeaturedImage(
       }
       
       // Update local state
-      setProperty(prev => {
-        const prevFeaturedImages = prev.featuredImages || [];
-        const normalizedPrevFeaturedImages = prevFeaturedImages.map(img => 
-          typeof img === 'string' ? toPropertyImage(img) : img
-        );
+      const newFeaturedImages = isAlreadyFeatured
+        ? featuredImages.filter(img => img !== url)
+        : [...featuredImages, url];
         
-        let newFeaturedImages: PropertyImage[];
-        
-        if (isAlreadyFeatured) {
-          // Remove from featured
-          newFeaturedImages = normalizedPrevFeaturedImages.filter(img => img.url !== url);
-        } else {
-          // Add to featured
-          const imageToAdd = toPropertyImage(url);
-          newFeaturedImages = [...normalizedPrevFeaturedImages, imageToAdd];
-        }
-        
-        return {
-          ...prev,
-          featuredImages: newFeaturedImages
-        };
-      });
+      setProperty(prev => ({
+        ...prev,
+        featuredImages: newFeaturedImages
+      }));
       
       // Call handler if provided
       if (handlers?.setPendingChanges) handlers.setPendingChanges(true);

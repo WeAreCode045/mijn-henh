@@ -1,5 +1,5 @@
-import React from 'react';
-import { getImageUrl, getImageProperty } from "@/utils/imageUrlHelpers";
+
+import React from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,24 +17,17 @@ export function FloorplansTabContent({ property }: FloorplansTabContentProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {property.floorplans?.map((floorplan, index) => {
-              const id = getImageProperty(floorplan, 'id', '');
-              const url = getImageUrl(floorplan);
-              const title = getImageProperty(floorplan, 'title', '');
-              const description = getImageProperty(floorplan, 'description', '');
-
-              return (
-                <div key={id || index} className="relative overflow-hidden rounded-md border">
-                  <img src={url} alt={title || `Floorplan ${index + 1}`} className="object-contain w-full h-auto" />
-                  {title && (
-                    <div className="p-2 bg-white border-t">
-                      <p className="font-medium">{title}</p>
-                      {description && <p className="text-sm text-gray-500">{description}</p>}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {property.floorplans?.map((floorplan, index) => (
+              <div key={floorplan.id || index} className="relative overflow-hidden rounded-md border">
+                <img src={floorplan.url} alt={floorplan.title || `Floorplan ${index + 1}`} className="object-contain w-full h-auto" />
+                {floorplan.title && (
+                  <div className="p-2 bg-white border-t">
+                    <p className="font-medium">{floorplan.title}</p>
+                    {floorplan.description && <p className="text-sm text-gray-500">{floorplan.description}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
             {(!property.floorplans || property.floorplans.length === 0) && (
               <p className="col-span-full text-center py-8 text-gray-500">No floorplans available</p>
             )}

@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +8,6 @@ import { ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getImageUrl } from "@/utils/imageUrlHelpers";
 
 export function RecentProperties() {
   const navigate = useNavigate();
@@ -105,13 +102,13 @@ export function RecentProperties() {
         <div className="space-y-4">
           {(recentProperties || []).map((property: PropertyData) => {
             const displayImage = property.featuredImage || 
-                               (property.images?.[0] ? getImageUrl(property.images[0]) : '/placeholder.svg');
+                               (property.images?.[0]?.url || '/placeholder.svg');
             
             return (
               <div 
                 key={property.id} 
                 className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                onClick={() => navigate(`/property/${property.id}/dashboard`)}
+                onClick={() => navigate(`/property/${property.id}/edit`)}
               >
                 <img
                   src={displayImage}

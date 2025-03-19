@@ -1,9 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, FileDown, Globe, Trash2 } from "lucide-react";
+import { Share2, FileDown, Globe, Trash2, Save } from "lucide-react";
 
 interface PropertyActionButtonsProps {
+  onSave: () => void;
   onDelete: () => void;
   onGeneratePDF: () => void;
   onWebView: () => void;
@@ -11,6 +12,7 @@ interface PropertyActionButtonsProps {
 }
 
 export function PropertyActionButtons({
+  onSave,
   onDelete,
   onGeneratePDF,
   onWebView,
@@ -23,6 +25,29 @@ export function PropertyActionButtons({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
+          <Button 
+            variant="outline" 
+            className="w-full justify-start" 
+            onClick={(e) => {
+              e.preventDefault(); // Prevent any default form behavior
+              console.log("Save button in Actions panel clicked, triggering onSave callback");
+              
+              // Trigger the form submission programmatically
+              const propertyForm = document.getElementById("propertyForm") as HTMLFormElement;
+              if (propertyForm) {
+                propertyForm.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+              } else {
+                console.error("Property form element not found");
+                // Fall back to the callback if the form element is not found
+                onSave();
+              }
+            }}
+            type="button"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save Changes
+          </Button>
+
           <Button
             variant="outline"
             className="w-full justify-start"

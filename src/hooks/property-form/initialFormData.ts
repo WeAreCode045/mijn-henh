@@ -1,5 +1,5 @@
 
-import { PropertyFormData } from "@/types/property";
+import type { PropertyFormData } from "@/types/property";
 
 export const initialFormData: PropertyFormData = {
   id: "",
@@ -15,36 +15,25 @@ export const initialFormData: PropertyFormData = {
   energyLabel: "",
   hasGarden: false,
   description: "",
-  shortDescription: "",
+  shortDescription: "", // Added shortDescription field
   location_description: "",
   features: [],
   images: [],
   featuredImage: null,
-  featuredImages: [],
+  featuredImages: [], 
   areas: [],
   map_image: null,
   nearby_places: [],
   nearby_cities: [],
   latitude: null,
   longitude: null,
-  object_id: "",
-  agent_id: "",
-  agent: null,
-  template_id: "",
-  floorplans: [],
-  floorplanEmbedScript: "",
+  template_id: "default", // Set default template_id
+  floorplans: [], // Empty floorplans array
+  floorplanEmbedScript: "", // Empty floorplanEmbedScript with empty string default
   virtualTourUrl: "",
   youtubeUrl: "",
-  notes: "",
-  generalInfo: {
-    propertyDetails: {},
-    description: {},
-    keyInformation: {}
-  },
-  propertyType: "",
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  // For backward compatibility
+  areaPhotos: [], 
   coverImages: [],
-  gridImages: [],
-  areaPhotos: []
+  gridImages: []
 };

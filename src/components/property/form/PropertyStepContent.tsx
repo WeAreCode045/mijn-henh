@@ -8,8 +8,6 @@ import { AreasStep } from "@/components/property/form/steps/AreasStep";
 import { LocationStep } from "@/components/property/form/steps/LocationStep";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useAreaPhotoUploadAdapter } from "@/hooks/images/adapters/useAreaPhotoUploadAdapter";
-import { ChangeEvent } from "react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
@@ -28,8 +26,8 @@ interface PropertyStepContentProps {
   handleNext?: () => void;
   handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
-  onFetchCategoryPlaces?: (category: string) => Promise<any>;
-  onFetchNearbyCities?: () => Promise<any>;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>; // Added missing property
+  onFetchNearbyCities?: () => Promise<any>; // Added missing property
   onGenerateLocationDescription?: () => Promise<void>;
   onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -37,6 +35,8 @@ interface PropertyStepContentProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
+  onSubmit?: () => void; 
+  isSaving?: boolean;
 }
 
 export function PropertyStepContent({
@@ -56,8 +56,6 @@ export function PropertyStepContent({
   handleNext,
   handlePrevious,
   onFetchLocationData,
-  onFetchCategoryPlaces,
-  onFetchNearbyCities,
   onGenerateLocationDescription,
   onGenerateMap,
   onRemoveNearbyPlace,
@@ -65,12 +63,9 @@ export function PropertyStepContent({
   isGeneratingMap,
   setPendingChanges,
   isUploading,
+  onSubmit,
+  isSaving,
 }: PropertyStepContentProps) {
-  // Convert the areaId+files handler to an event-based handler for AreasStep
-  const areaImageUploadEventHandler = onAreaImageUpload 
-    ? useAreaPhotoUploadAdapter(onAreaImageUpload)
-    : async (e: ChangeEvent<HTMLInputElement>) => Promise.resolve();
-
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -87,8 +82,6 @@ export function PropertyStepContent({
             formData={formData}
             onFieldChange={onFieldChange}
             onFetchLocationData={onFetchLocationData}
-            onFetchCategoryPlaces={onFetchCategoryPlaces}
-            onFetchNearbyCities={onFetchNearbyCities}
             onGenerateLocationDescription={onGenerateLocationDescription}
             onGenerateMap={onGenerateMap}
             onRemoveNearbyPlace={onRemoveNearbyPlace}
@@ -117,7 +110,7 @@ export function PropertyStepContent({
             onUpdateArea={onUpdateArea}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
-            onAreaImageUpload={areaImageUploadEventHandler}
+            onAreaImageUpload={onAreaImageUpload}
             setPendingChanges={setPendingChanges}
             isUploading={isUploading}
           />
@@ -132,6 +125,8 @@ export function PropertyStepContent({
       <FormStepNavigation
         currentStep={currentStep}
         onStepClick={handleStepClick}
+        onSave={onSubmit}
+        isSaving={isSaving}
       />
       <div className="mt-6">
         {renderStep()}

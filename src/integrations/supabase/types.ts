@@ -195,7 +195,6 @@ export type Database = {
           features: Json | null
           floorplanEmbedScript: string | null
           garages: string | null
-          generalInfo: Json | null
           hasGarden: boolean | null
           id: string
           latitude: number | null
@@ -229,7 +228,6 @@ export type Database = {
           features?: Json | null
           floorplanEmbedScript?: string | null
           garages?: string | null
-          generalInfo?: Json | null
           hasGarden?: boolean | null
           id?: string
           latitude?: number | null
@@ -263,7 +261,6 @@ export type Database = {
           features?: Json | null
           floorplanEmbedScript?: string | null
           garages?: string | null
-          generalInfo?: Json | null
           hasGarden?: boolean | null
           id?: string
           latitude?: number | null

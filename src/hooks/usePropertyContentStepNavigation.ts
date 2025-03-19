@@ -1,6 +1,7 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
+import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { steps } from "@/components/property/form/formSteps";
 
 export function usePropertyContentStepNavigation(
@@ -15,13 +16,46 @@ export function usePropertyContentStepNavigation(
   externalHandlePrevious?: () => void
 ) {
   const { toast } = useToast();
+  const { handleSubmit } = usePropertyFormSubmit();
   const maxSteps = steps.length;
 
-  // Unified function to handle navigation without saving
-  const handleNavigation = async (action: 'step' | 'next' | 'previous', stepNum?: number) => {
-    console.log("Navigating without saving, pendingChanges:", pendingChanges, "formData.id:", formData.id);
+  // Unified function to handle saving before changing steps
+  const saveBeforeStepChange = async (action: 'step' | 'next' | 'previous', stepNum?: number) => {
+    console.log("Saving before changing steps, pendingChanges:", pendingChanges, "formData.id:", formData.id);
     
-    // Always proceed with the navigation
+    // Only save if there are pending changes and the property exists
+    if (pendingChanges && formData.id) {
+      try {
+        const formEvent = {} as React.FormEvent;
+        const success = await handleSubmit(formEvent, formData, false);
+        
+        if (success) {
+          setLastSaved(new Date());
+          setPendingChanges(false);
+          console.log("Save successful before navigation");
+        } else {
+          console.warn("Save was not successful before navigation");
+          toast({
+            title: "Warning",
+            description: "Unable to save changes before navigation",
+            variant: "destructive",
+          });
+          // Still continue with navigation
+        }
+      } catch (error) {
+        console.error(`Failed to save before ${action}:`, error);
+        toast({
+          title: "Warning",
+          description: "Changes couldn't be saved before navigation",
+          variant: "destructive",
+        });
+        // Still continue with navigation
+      }
+    } else {
+      console.log("No need to save before navigation");
+    }
+    
+    // Always proceed with the navigation, even if save fails
     switch (action) {
       case 'step':
         if (stepNum !== undefined) {
@@ -54,17 +88,17 @@ export function usePropertyContentStepNavigation(
 
   const handleStepClick = (step: number) => {
     console.log("Step clicked in PropertyContentTab:", step);
-    handleNavigation('step', step);
+    saveBeforeStepChange('step', step);
   };
   
   const handleNext = () => {
     console.log("Next clicked in PropertyContentTab");
-    handleNavigation('next');
+    saveBeforeStepChange('next');
   };
   
   const handlePrevious = () => {
     console.log("Previous clicked in PropertyContentTab");
-    handleNavigation('previous');
+    saveBeforeStepChange('previous');
   };
 
   return {

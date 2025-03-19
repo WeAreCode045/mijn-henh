@@ -2,16 +2,15 @@
 import { PropertyImage } from './PropertyImageTypes';
 
 /**
- * Represents a property area
+ * Represents an area of a property
  */
 export interface PropertyArea {
   id: string;
   name: string;
   size: string;
-  unit?: string;
-  title?: string;
-  description?: string;
-  images: PropertyImage[];
-  imageIds?: string[];
-  columns?: number;
+  title: string;
+  description: string;
+  imageIds: string[]; // Explicitly defined property
+  columns: number;
+  images: PropertyImage[] | string[];
 }

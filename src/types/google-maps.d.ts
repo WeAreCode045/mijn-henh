@@ -14,17 +14,6 @@ interface GoogleMapsAutocomplete {
   getPlace: () => GoogleMapsPlace;
 }
 
-declare namespace google.maps.places {
-  class Autocomplete {
-    constructor(
-      input: HTMLInputElement,
-      options?: { types: string[] }
-    );
-    addListener: (event: string, callback: () => void) => void;
-    getPlace: () => GoogleMapsPlace;
-  }
-}
-
 interface GoogleMapsWindow extends Window {
   google?: {
     maps?: {

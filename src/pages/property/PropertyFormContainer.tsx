@@ -1,20 +1,18 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
-import { PropertyForm } from "@/components/PropertyForm";
-import { useParams } from "react-router-dom";
 
 export function PropertyFormContainer() {
   const { isAdmin } = useAuth();
-  const { id } = useParams<{ id: string }>();
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
   
   const {
-    id: propertyId,
+    id,
     formData,
     setFormData,
     isLoading,
@@ -23,12 +21,14 @@ export function PropertyFormContainer() {
     selectedAgent,
     setSelectedAgent,
     templateInfo,
+    isSubmitting,
     setIsSubmitting,
     toast
   } = usePropertyFormContainerData();
 
   const {
     deleteProperty,
+    saveProperty,
     handleAgentChange,
     handleImageUpload,
     handleRemoveImage,
@@ -42,19 +42,6 @@ export function PropertyFormContainer() {
     toast,
     agents
   );
-
-  // Log fetched data for debugging
-  useEffect(() => {
-    if (formData && !isLoading) {
-      console.log("PropertyFormContainer - Form data loaded:", {
-        id: formData.id,
-        title: formData.title,
-        price: formData.price,
-        address: formData.address,
-        imagesCount: formData.images?.length || 0
-      });
-    }
-  }, [formData, isLoading]);
 
   if (isLoading || !formData) {
     return <PropertyFormLoader />;
@@ -70,12 +57,13 @@ export function PropertyFormContainer() {
       selectedAgent={selectedAgent}
       onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
+      onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
       images={images}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
-      onSaveProperty={() => console.log("Save property functionality has been disabled")}
+      isSubmitting={isSubmitting}
     >
       <PropertyForm />
     </PropertyFormLayout>

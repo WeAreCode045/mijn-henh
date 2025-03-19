@@ -2,7 +2,6 @@
 import { WebViewSectionProps } from "../types";
 import { WebViewImageGrid } from "../WebViewImageGrid";
 import "../styles/WebViewStyles.css";
-import { getImageUrl } from "@/utils/imageTypeConverters";
 
 export function OverviewSection({ property, settings }: WebViewSectionProps) {
   // Format price with thousand separators
@@ -22,44 +21,46 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
   console.log("OverviewSection rendering with main image:", property.featuredImage);
   console.log("Featured images:", property.featuredImages);
 
-  // Get the image URL to display (main image, first featured image, or first regular image)
-  const mainImageUrl = property.featuredImage || 
-                   (property.featuredImages && property.featuredImages.length > 0 ? getImageUrl(property.featuredImages[0]) : null) ||
-                   (property.images && property.images.length > 0 ? getImageUrl(property.images[0]) : null);
+  // Get the image to display (main image, first featured image, or first regular image)
+  const mainImage = property.featuredImage || 
+                   (property.featuredImages && property.featuredImages.length > 0 ? property.featuredImages[0] : null) ||
+                   (property.images && property.images.length > 0 ? 
+                     (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url) : null);
 
-  console.log("Selected main image for display:", mainImageUrl);
+  console.log("Selected main image for display:", mainImage);
 
   return (
     <div className="space-y-4 pb-24">
       <div className="space-y-4 mt-2">
-        {mainImageUrl && (
+        {mainImage && (
           <>
             <div className="relative px-6">
               <img
-                src={mainImageUrl}
+                src={mainImage}
                 alt={property.title}
                 className="w-full h-[450px] object-cover rounded-lg shadow-lg"
               />
             </div>
             
-            {/* Featured images grid (previously Grid images) */}
-            {property.featuredImages && property.featuredImages.length > 0 && (
-              <div className="px-6 mt-4">
-                <div className="grid grid-cols-4 gap-2">
-                  {property.featuredImages.slice(0, 4).map((image, index) => (
-                    <div key={index} className="rounded-md overflow-hidden">
-                      <img 
-                        src={getImageUrl(image)} 
-                        alt={`Property ${index + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  ))}
+         
+        
+        {/* Featured images grid (previously Grid images) */}
+        {property.featuredImages && property.featuredImages.length > 0 && (
+          <div className="px-6 mt-4">
+            <div className="grid grid-cols-4 gap-2">
+              {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
+                <div key={index} className="rounded-md overflow-hidden">
+                  <img 
+                    src={imageUrl} 
+                    alt={`Property ${index + 1}`}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-              </div>
-            )}
-            
-            {/* Blue bar with title and price */}
+              ))}
+            </div>
+          </div>
+        )}
+   {/* Blue bar with title and price */}
             <div 
               className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
               style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}

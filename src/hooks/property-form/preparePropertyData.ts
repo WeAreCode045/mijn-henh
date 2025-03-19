@@ -4,50 +4,36 @@ import { Json } from "@/integrations/supabase/types";
 
 /**
  * Transforms array of area objects into JSON array for database storage
- * Updated to properly handle PropertyArea to Json conversion
+ * Updated to support both PropertyArea[] and Json[] input types
  */
 export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): Json[] {
   if (!areas || !Array.isArray(areas)) return [];
   
-  console.log("prepareAreasForFormSubmission input:", areas);
-  
-  const result = areas.map(area => {
-    // Check if the area is already a primitive Json type
+  return areas.map(area => {
+    // Check if the area is already a Json object
     if (typeof area === 'string' || typeof area === 'number' || typeof area === 'boolean' || area === null) {
       return area;
     }
     
     // Handle both PropertyArea and Json object types
-    const areaObj = area as any;
+    const id = (area as any).id || '';
+    const title = (area as any).title || '';
+    const description = (area as any).description || '';
+    const columns = (area as any).columns || 2; // Default to 2 columns if not specified
+    const name = (area as any).name || '';
+    const size = (area as any).size || '';
+    const images = (area as any).images || [];
     
-    // Create a simple record object that conforms to Json type
-    const jsonObject: Record<string, Json> = {};
-    
-    // Add all properties that exist on the area object
-    if ('id' in areaObj) jsonObject.id = areaObj.id || '';
-    if ('title' in areaObj) jsonObject.title = areaObj.title || '';
-    if ('description' in areaObj) jsonObject.description = areaObj.description || '';
-    if ('columns' in areaObj) jsonObject.columns = areaObj.columns || 2;
-    if ('name' in areaObj) jsonObject.name = areaObj.name || '';
-    if ('size' in areaObj) jsonObject.size = areaObj.size || '';
-    
-    // Handle images array
-    if ('images' in areaObj && Array.isArray(areaObj.images)) {
-      jsonObject.images = areaObj.images;
-    } else {
-      jsonObject.images = [];
-    }
-    
-    // Handle imageIds array
-    if ('imageIds' in areaObj && Array.isArray(areaObj.imageIds)) {
-      jsonObject.imageIds = areaObj.imageIds;
-    }
-    
-    return jsonObject as Json;
+    return {
+      id,
+      title,
+      description,
+      columns,
+      name,
+      size,
+      images
+    };
   });
-  
-  console.log("prepareAreasForFormSubmission output:", result);
-  return result;
 }
 
 /**

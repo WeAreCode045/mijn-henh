@@ -27,6 +27,7 @@ export interface PropertyTabContentsProps {
   onRemoveNearbyPlace: (index: number) => void;
   isLoadingLocationData: boolean;
   isGeneratingMap: boolean;
+  onSave: () => void;
   onDelete: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => void;
   handleSaveAgent: (agentId: string) => void;
@@ -51,6 +52,7 @@ export interface PropertyTabContentsProps {
   handleYoutubeUrlUpdate?: (url: string) => void;
   handleFloorplanEmbedScriptUpdate?: (script: string) => void;
   handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
+  onSubmit?: () => void;
 }
 
 export interface PropertyFormManagerChildrenProps {
@@ -117,6 +119,7 @@ export interface PropertyTabProps {
   templateInfo: { id: string; name: string };
   isUpdating: boolean;
   handlers: {
+    onSave: () => void;
     onDelete: () => Promise<void>;
     handleSaveObjectId: (objectId: string) => void;
     handleSaveAgent: (agentId: string) => void;

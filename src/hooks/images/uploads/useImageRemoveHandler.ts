@@ -1,9 +1,6 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyImage } from "@/types/property";
-import { normalizeImage } from "@/utils/imageHelpers";
-import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 
 export function useImageRemoveHandler(
   formData: PropertyFormData,
@@ -25,7 +22,7 @@ export function useImageRemoveHandler(
     if (!formData.id) {
       // If we don't have a property ID yet, just update the local state
       // Create a copy of the images array without the removed image
-      const updatedImages = convertToPropertyImageArray([...formData.images].filter((_, i) => i !== index));
+      const updatedImages = formData.images.filter((_, i) => i !== index);
       
       // Update the featured image if it was removed
       let updatedFeaturedImage = formData.featuredImage;
@@ -34,20 +31,26 @@ export function useImageRemoveHandler(
       }
       
       // Update featured images if they include the removed image
-      let updatedFeaturedImages: PropertyImage[] = [];
-      if (formData.featuredImages) {
-        updatedFeaturedImages = formData.featuredImages.filter(img => 
-          typeof img === 'string' ? img !== imageUrl : img.url !== imageUrl
-        ) as PropertyImage[];
-      }
+      const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
-      // Create an updated form data object with proper typing
-      const updatedFormData: PropertyFormData = {
+      // Convert featuredImages to PropertyImage[] for coverImages if needed
+      const updatedCoverImages = updatedFeaturedImages.map(url => {
+        // If it's already a PropertyImage, return it
+        if (typeof url !== 'string') return url;
+        // Otherwise create a new PropertyImage
+        return {
+          id: `temp-${Date.now()}-${Math.random()}`,
+          url: url
+        };
+      });
+      
+      // Create an updated form data object
+      const updatedFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedFeaturedImages
+        coverImages: updatedCoverImages // Properly typed coverImages
       };
       
       // Update the form state
@@ -118,7 +121,7 @@ export function useImageRemoveHandler(
       }
       
       // Create a copy of the images array without the removed image
-      const updatedImages = convertToPropertyImageArray([...formData.images].filter((_, i) => i !== index));
+      const updatedImages = formData.images.filter((_, i) => i !== index);
       
       // Update the featured image if it was removed
       let updatedFeaturedImage = formData.featuredImage;
@@ -127,20 +130,26 @@ export function useImageRemoveHandler(
       }
       
       // Update featured images if they include the removed image
-      let updatedFeaturedImages: PropertyImage[] = [];
-      if (formData.featuredImages) {
-        updatedFeaturedImages = formData.featuredImages.filter(img => 
-          typeof img === 'string' ? img !== imageUrl : img.url !== imageUrl
-        ) as PropertyImage[];
-      }
+      const updatedFeaturedImages = (formData.featuredImages || []).filter(url => url !== imageUrl);
       
-      // Create an updated form data object with proper typing
-      const updatedFormData: PropertyFormData = {
+      // Convert featuredImages to PropertyImage[] for coverImages if needed
+      const updatedCoverImages = updatedFeaturedImages.map(url => {
+        // If it's already a PropertyImage, return it
+        if (typeof url !== 'string') return url;
+        // Otherwise create a new PropertyImage
+        return {
+          id: `temp-${Date.now()}-${Math.random()}`,
+          url: url
+        };
+      });
+      
+      // Create an updated form data object
+      const updatedFormData = {
         ...formData,
         images: updatedImages,
         featuredImage: updatedFeaturedImage,
         featuredImages: updatedFeaturedImages,
-        coverImages: updatedFeaturedImages
+        coverImages: updatedCoverImages // Properly typed coverImages
       };
       
       // Update the form state

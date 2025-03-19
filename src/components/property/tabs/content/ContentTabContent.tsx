@@ -1,9 +1,8 @@
 
-import React, { useEffect } from 'react';
 import { PropertyFormData } from "@/types/property";
-import { PropertyStepContent } from "../../form/PropertyStepContent";
+import { PropertyStepContent } from "@/components/property/form/PropertyStepContent";
 
-export interface ContentTabContentProps {
+interface ContentTabContentProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
@@ -17,6 +16,8 @@ export interface ContentTabContentProps {
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
+  handleNext: () => void;
+  handlePrevious: () => void;
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onFetchNearbyCities?: () => Promise<any>;
@@ -27,12 +28,8 @@ export interface ContentTabContentProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
+  onSubmit?: () => void;
   isSaving?: boolean;
-  onSubmit: () => void;
-  // Adding these props to fix the TypeScript errors
-  handleNext?: () => void;
-  handlePrevious?: () => void;
-  lastSaved?: Date | null;
 }
 
 export function ContentTabContent({
@@ -61,54 +58,37 @@ export function ContentTabContent({
   isGeneratingMap,
   setPendingChanges,
   isUploading,
-  isSaving,
   onSubmit,
-  lastSaved
+  isSaving
 }: ContentTabContentProps) {
-  // Default implementations if not provided
-  const handleNextStep = handleNext || (() => {
-    if (currentStep < 3) {
-      handleStepClick(currentStep + 1);
-    }
-  });
-
-  const handlePreviousStep = handlePrevious || (() => {
-    if (currentStep > 0) {
-      handleStepClick(currentStep - 1);
-    }
-  });
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-6">Content</h2>
-      
-      <PropertyStepContent
-        formData={formData}
-        onFieldChange={onFieldChange}
-        onAddFeature={onAddFeature}
-        onRemoveFeature={onRemoveFeature}
-        onUpdateFeature={onUpdateFeature}
-        onAddArea={onAddArea}
-        onRemoveArea={onRemoveArea}
-        onUpdateArea={onUpdateArea}
-        onAreaImageRemove={onAreaImageRemove}
-        onAreaImagesSelect={onAreaImagesSelect}
-        onAreaImageUpload={handleAreaImageUpload}
-        currentStep={currentStep}
-        handleStepClick={handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
-        onFetchLocationData={onFetchLocationData}
-        onFetchCategoryPlaces={onFetchCategoryPlaces}
-        onFetchNearbyCities={onFetchNearbyCities}
-        onGenerateLocationDescription={onGenerateLocationDescription}
-        onGenerateMap={onGenerateMap}
-        onRemoveNearbyPlace={onRemoveNearbyPlace}
-        isLoadingLocationData={isLoadingLocationData}
-        isGeneratingMap={isGeneratingMap}
-        setPendingChanges={setPendingChanges}
-        isUploading={isUploading}
-      />
-    </div>
+    <PropertyStepContent
+      formData={formData}
+      onFieldChange={onFieldChange}
+      onAddFeature={onAddFeature}
+      onRemoveFeature={onRemoveFeature}
+      onUpdateFeature={onUpdateFeature}
+      onAddArea={onAddArea}
+      onRemoveArea={onRemoveArea}
+      onUpdateArea={onUpdateArea}
+      onAreaImageRemove={onAreaImageRemove}
+      onAreaImagesSelect={onAreaImagesSelect}
+      onAreaImageUpload={handleAreaImageUpload}
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      onFetchLocationData={onFetchLocationData}
+      onFetchCategoryPlaces={onFetchCategoryPlaces}
+      onGenerateLocationDescription={onGenerateLocationDescription}
+      onGenerateMap={onGenerateMap}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
+      isGeneratingMap={isGeneratingMap}
+      setPendingChanges={setPendingChanges}
+      isUploading={isUploading}
+      onSubmit={onSubmit}
+      isSaving={isSaving}
+    />
   );
 }

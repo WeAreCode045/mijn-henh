@@ -1,16 +1,50 @@
 
-import { 
-  PropertyFeature, 
-  PropertyPlaceType, 
-  PropertyCity, 
-  PropertyAgent, 
-  PropertyFloorplan,
-  GeneralInfoData
-} from './PropertyTypes';
-import { PropertyImage } from './PropertyImageTypes';
-import { PropertyArea } from './PropertyAreaTypes';
-import { PropertyData } from './PropertyDataTypes';
+import { PropertyData } from "../property";
+import { PropertyCity } from "../property";
+import { PropertyFeature } from "../property";
+import { PropertyArea } from "../property";
+import { PropertyNearbyPlace } from "../property";
+import { PropertyAgent } from "../property";
 
+// Property form data extends PropertyData
 export interface PropertyFormData extends PropertyData {
-  // Additional form-specific fields can be added here
+  areaPhotos?: string[];
+  coverImages?: string[];
+  gridImages?: string[];
+  nearby_cities?: PropertyCity[];
+}
+
+// Property submit data
+export interface PropertySubmitData {
+  title: string;
+  price: string;
+  address: string;
+  bedrooms: string;
+  bathrooms: string;
+  sqft: string;
+  livingArea: string;
+  buildYear: string;
+  garages: string;
+  energyLabel: string;
+  hasGarden: boolean;
+  description: string;
+  location_description?: string;
+  features: string;
+  images: string[];
+  areas: PropertyArea[];
+  map_image?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  nearby_places?: string;
+  nearby_cities?: string;
+  object_id?: string;
+  agent_id?: string;
+  template_id?: string;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
+  notes?: string;
+  floorplans?: string[];
+  featuredImage?: string | null;
+  featuredImages?: string[];
+  floorplanEmbedScript?: string;
 }

@@ -1,125 +1,120 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { PropertyFormData } from "@/types/property";
+import type { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { GoogleAddressAutocomplete } from "@/components/GoogleAddressAutocomplete";
 
 interface BasicDetailsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onGeneralInfoChange?: (section: string, field: string, value: any) => void;
 }
 
-export function BasicDetails({
-  formData,
-  onFieldChange,
-  onGeneralInfoChange
-}: BasicDetailsProps) {
+export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
   const { settings } = useAgencySettings();
-  const [useGoogleAutocomplete, setUseGoogleAutocomplete] = useState(false);
+  const addressInputRef = useRef<HTMLInputElement>(null);
 
+  const handleChange = (field: keyof PropertyFormData, value: string) => {
+    console.log(`BasicDetails - ${field} changed to:`, value);
+    onFieldChange(field, value);
+  };
+
+  // Set up Google Places Autocomplete for address field
   useEffect(() => {
-    // Check if Google Maps API key is available
-    if (settings?.googleMapsApiKey) {
-      setUseGoogleAutocomplete(true);
-    }
-  }, [settings]);
+    const googleApiKey = settings?.googleMapsApiKey;
+    if (!googleApiKey || !addressInputRef.current) return;
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (onGeneralInfoChange) {
-      onGeneralInfoChange('propertyDetails', 'title', value);
-    }
-    onFieldChange("title", value);
-  };
+    // Load the Google Maps JavaScript API
+    const loadGoogleMapsScript = () => {
+      const scriptId = 'google-maps-script';
+      if (document.getElementById(scriptId)) return;
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (onGeneralInfoChange) {
-      onGeneralInfoChange('propertyDetails', 'price', value);
-    }
-    onFieldChange("price", value);
-  };
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = initializeAutocomplete;
+      document.head.appendChild(script);
+    };
 
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (onGeneralInfoChange) {
-      onGeneralInfoChange('propertyDetails', 'address', value);
-    }
-    onFieldChange("address", value);
-  };
+    const initializeAutocomplete = () => {
+      // Use window with type assertion to access the google object
+      if (!(window as GoogleMapsWindow).google || 
+          !(window as GoogleMapsWindow).google?.maps || 
+          !(window as GoogleMapsWindow).google?.maps?.places) {
+        console.error('Google Maps Places API not loaded');
+        return;
+      }
 
-  const handleAddressSelect = (address: string) => {
-    if (onGeneralInfoChange) {
-      onGeneralInfoChange('propertyDetails', 'address', address);
-    }
-    onFieldChange("address", address);
-  };
+      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
+        addressInputRef.current as HTMLInputElement,
+        { types: ['address'] }
+      );
 
-  const handleObjectIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (onGeneralInfoChange) {
-      onGeneralInfoChange('propertyDetails', 'objectId', value);
-    }
-    onFieldChange("object_id", value);
-  };
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.formatted_address) {
+          handleChange('address', place.formatted_address);
+        }
+      });
+    };
+
+    loadGoogleMapsScript();
+  }, [settings, onFieldChange]);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Basic Details</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-medium">Property Details</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 gap-4">
+      <CardContent className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label htmlFor="propertyTitle" className="text-sm font-medium">Property Title</label>
+            <Label htmlFor="title">Title</Label>
             <Input
-              id="propertyTitle"
-              value={formData.title || ""}
-              onChange={handleTitleChange}
-              placeholder="Enter property title"
+              id="title"
+              type="text"
+              value={formData.title || ''}
+              onChange={(e) => handleChange('title', e.target.value)}
+              placeholder="Title"
+              className="mt-1 p-2"
             />
           </div>
-
           <div className="space-y-2">
-            <label htmlFor="propertyPrice" className="text-sm font-medium">Price</label>
+            <Label htmlFor="price">Price</Label>
             <Input
-              id="propertyPrice"
-              value={formData.price || ""}
-              onChange={handlePriceChange}
-              placeholder="Enter price"
+              id="price"
+              type="text"
+              value={formData.price || ''}
+              onChange={(e) => handleChange('price', e.target.value)}
+              placeholder="Price"
+              className="mt-1 p-2"
             />
           </div>
-
           <div className="space-y-2">
-            <label htmlFor="propertyAddress" className="text-sm font-medium">Address</label>
-            {useGoogleAutocomplete ? (
-              <GoogleAddressAutocomplete
-                id="propertyAddress"
-                value={formData.address || ""}
-                onChange={handleAddressChange}
-                onSelect={handleAddressSelect}
-                apiKey={settings?.googleMapsApiKey || ""}
-              />
-            ) : (
-              <Input
-                id="propertyAddress"
-                value={formData.address || ""}
-                onChange={handleAddressChange}
-                placeholder="Enter property address"
-              />
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="objectId" className="text-sm font-medium">Object ID</label>
+            <Label htmlFor="address">Address</Label>
             <Input
-              id="objectId"
-              value={formData.object_id || ""}
-              onChange={handleObjectIdChange}
-              placeholder="Enter object ID"
+              id="address"
+              type="text"
+              value={formData.address || ''}
+              onChange={(e) => handleChange('address', e.target.value)}
+              placeholder="Address"
+              className="mt-1 p-2"
+              ref={addressInputRef}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="object_id">Object ID</Label>
+            <Input
+              id="object_id"
+              type="text"
+              value={formData.object_id || ''}
+              onChange={(e) => handleChange('object_id', e.target.value)}
+              placeholder="Object ID"
+              className="mt-1 p-2"
             />
           </div>
         </div>

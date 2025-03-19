@@ -21,9 +21,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
         {/* Left column */}
         <div className="space-y-4">
           <div>
-            <Label htmlFor="contact-name">Uw naam *</Label>
             <FormInput
-              id="contact-name"
               type="text"
               placeholder="Uw naam *"
               name="name"
@@ -33,9 +31,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="contact-phone">Uw telefoonnummer *</Label>
             <FormInput
-              id="contact-phone"
               type="tel"
               placeholder="Uw telefoonnummer *"
               name="phone"
@@ -45,9 +41,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="contact-email">Uw e-mailadres *</Label>
             <FormInput
-              id="contact-email"
               type="email"
               placeholder="Uw e-mailadres *"
               name="email"
@@ -67,7 +61,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
               value={formData.inquiry_type} 
               onValueChange={(value) => handleSelectChange("inquiry_type", value)}
             >
-              <SelectTrigger id="inquiry_type">
+              <SelectTrigger>
                 <SelectValue placeholder="Selecteer een optie" />
               </SelectTrigger>
               <SelectContent>
@@ -78,9 +72,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
             </Select>
           </div>
           <div>
-            <Label htmlFor="contact-message">Uw bericht *</Label>
             <FormInput
-              id="contact-message"
               type="textarea"
               placeholder="Uw bericht *"
               name="message"

@@ -1,8 +1,7 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyImage } from '@/types/property';
-import { normalizeImage } from "@/utils/imageHelpers";
+import type { PropertyFormData } from '@/types/property';
 
 export function useAreaImageRemove(
   formData: PropertyFormData,
@@ -26,12 +25,7 @@ export function useAreaImageRemove(
       // First update the area's images in the local state
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          // Ensure images is a PropertyImage[] and filter out the removed image
-          const normalizedImages = Array.isArray(area.images) 
-            ? area.images.map(img => normalizeImage(img))
-            : [];
-          const updatedImages = normalizedImages.filter(img => img.id !== imageId);
-          
+          const updatedImages = area.images.filter(img => img.id !== imageId);
           console.log(`Updating area ${areaId} images after removal:`, updatedImages);
           return {
             ...area,

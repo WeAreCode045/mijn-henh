@@ -1,7 +1,6 @@
 
-import { PropertyFormData, PropertyImage } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
-import { toPropertyImage } from "@/utils/imageTypeConverters";
 
 export function usePropertyImageSaver() {
   const savePropertyImages = async (formData: PropertyFormData): Promise<boolean> => {
@@ -30,8 +29,7 @@ export function usePropertyImageSaver() {
       
       // Set featured images
       if (formData.featuredImages && formData.featuredImages.length > 0) {
-        for (const image of formData.featuredImages) {
-          const imageUrl = typeof image === 'string' ? image : image.url;
+        for (const imageUrl of formData.featuredImages) {
           console.log("Setting featured image in database:", imageUrl);
           const { error } = await supabase
             .from('property_images')

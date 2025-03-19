@@ -1,51 +1,49 @@
 
-import { useCallback, useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { usePropertyActions } from "@/hooks/usePropertyActions";
+import { useState } from "react";
+import { PropertyData } from "@/types/property";
+import { AgencySettings } from "@/types/agency";
+import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 
 interface PropertyTabActionsHandlerProps {
   propertyId: string;
-  children: (props: WebViewProps) => React.ReactNode;
+  propertyData?: PropertyData;
+  settings?: AgencySettings;
+  children: (props: {
+    webViewOpen: boolean;
+    setWebViewOpen: (open: boolean) => void;
+    handleGeneratePDF: () => void;
+    handleOpenWebView: (e?: React.MouseEvent) => void;
+  }) => React.ReactNode;
 }
 
-interface WebViewProps {
-  webViewOpen: boolean;
-  setWebViewOpen: (open: boolean) => void;
-  handleGeneratePDF: () => void;
-  handleOpenWebView: (e?: React.MouseEvent) => void;
-}
-
-export function PropertyTabActionsHandler({ propertyId, children }: PropertyTabActionsHandlerProps) {
+export function PropertyTabActionsHandler({ 
+  propertyId, 
+  propertyData,
+  settings,
+  children 
+}: PropertyTabActionsHandlerProps) {
   const [webViewOpen, setWebViewOpen] = useState(false);
-  const { toast } = useToast();
+  const { handleWebView } = usePropertyActions(propertyId);
+  const { generatePDF } = useGeneratePDF();
 
-  const handleGeneratePDF = useCallback(() => {
-    toast({
-      title: "Generating PDF",
-      description: "The PDF is being generated. This may take a moment.",
-    });
-    
-    // Implement PDF generation logic here
-    setTimeout(() => {
-      toast({
-        title: "PDF Generated",
-        description: "Your PDF has been generated and is ready for download.",
-      });
-    }, 2000);
-  }, [toast]);
+  // Web view functions - opens in new tab
+  const handleOpenWebView = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    handleWebView(e);
+  };
 
-  const handleOpenWebView = useCallback((e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
+  // PDF generation function
+  const handleGeneratePDF = async () => {
+    if (propertyData && settings) {
+      await generatePDF(propertyData);
     }
-    setWebViewOpen(true);
-  }, []);
+  };
 
-  const webViewProps: WebViewProps = {
+  return children({
     webViewOpen,
     setWebViewOpen,
     handleGeneratePDF,
     handleOpenWebView
-  };
-
-  return children(webViewProps);
+  });
 }

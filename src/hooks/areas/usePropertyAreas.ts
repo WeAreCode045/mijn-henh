@@ -17,23 +17,7 @@ export function usePropertyAreas(
   const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormState);
   const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormState);
   const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormState);
-  
-  // Create a handleAreaImageUpload function for each area
-  const handleAreaImageUpload = (areaId: string, files: FileList) => {
-    // Find the area's existing imageIds
-    const area = formData.areas?.find(a => a.id === areaId);
-    const imageIds = area?.imageIds || [];
-    
-    // Create and use a new instance of useAreaImageUpload for this specific area
-    const { handleAreaImageUpload: uploadHandler } = useAreaImageUpload(
-      formData.id || '',
-      areaId,
-      imageIds,
-      setFormState
-    );
-    
-    return uploadHandler(files);
-  };
+  const { handleAreaImageUpload } = useAreaImageUpload(formData, setFormState, setIsUploading);
 
   return {
     // Area management

@@ -1,98 +1,87 @@
 
-import React from 'react';
-import { PropertyFormData } from "@/types/property";
-import { ContentTabContent } from './ContentTabContent';
+import { DashboardTabContent } from "./DashboardTabContent";
+import { ContentTabContent } from "./ContentTabContent";
+import { MediaTabContent } from "../media/MediaTabContent";
+import { FloorplansTabContent } from "../floorplans/FloorplansTabContent";
+import { CommunicationsTabContent } from "./CommunicationsTabContent";
+import { PropertyTabProps } from "../wrapper/types/PropertyTabTypes";
+import { normalizeImages } from "@/utils/imageHelpers";
+import { PropertyData } from "@/types/property";
 
-// Create a single tab content renderer function
-const renderContentTab = ({
-  formData,
-  onFieldChange,
-  onAddFeature,
-  onRemoveFeature,
-  onUpdateFeature,
-  onAddArea,
-  onRemoveArea,
-  onUpdateArea,
-  onAreaImageRemove,
-  onAreaImagesSelect,
-  handleAreaImageUpload,
-  currentStep,
-  handleStepClick,
-  handleNext,
-  handlePrevious,
-  onFetchLocationData,
-  onFetchCategoryPlaces,
-  onFetchNearbyCities,
-  onGenerateLocationDescription,
-  onGenerateMap,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  isGeneratingMap,
-  setPendingChanges,
-  isUploading,
-  isSaving
-}) => {
-  // Create a dummy onSubmit function if it's missing
-  const onSubmit = () => {
-    console.log("Form submitted");
-  };
-
-  return (
-    <ContentTabContent
-      formData={formData}
-      onFieldChange={onFieldChange}
-      onAddFeature={onAddFeature}
-      onRemoveFeature={onRemoveFeature}
-      onUpdateFeature={onUpdateFeature}
-      onAddArea={onAddArea}
-      onRemoveArea={onRemoveArea}
-      onUpdateArea={onUpdateArea}
-      onAreaImageRemove={onAreaImageRemove}
-      onAreaImagesSelect={onAreaImagesSelect}
-      handleAreaImageUpload={handleAreaImageUpload}
-      currentStep={currentStep}
-      handleStepClick={handleStepClick}
-      handleNext={handleNext}
-      handlePrevious={handlePrevious}
-      onFetchLocationData={onFetchLocationData}
-      onFetchCategoryPlaces={onFetchCategoryPlaces}
-      onFetchNearbyCities={onFetchNearbyCities}
-      onGenerateLocationDescription={onGenerateLocationDescription}
-      onGenerateMap={onGenerateMap}
-      onRemoveNearbyPlace={onRemoveNearbyPlace}
-      isLoadingLocationData={isLoadingLocationData}
-      isGeneratingMap={isGeneratingMap}
-      setPendingChanges={setPendingChanges}
-      isUploading={isUploading}
-      isSaving={isSaving}
-      onSubmit={onSubmit}
-    />
-  );
-};
-
-// Export the TabContentRenderers object
 export const TabContentRenderers = {
-  renderContentTab,
-  renderTabContent: ({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }) => {
-    // Add logic to render the appropriate tab content based on activeTab
-    if (activeTab === 'content') {
-      return renderContentTab({
-        formData: formState,
-        ...handlers,
-        handleNext: () => {
-          if (handlers.currentStep < 3) {
+  renderTabContent: function({ activeTab, property, formState, agentInfo, templateInfo, isUpdating, handlers }: PropertyTabProps) {
+    // Cast property to PropertyData with all required fields for type safety
+    const propertyData = property as PropertyData;
+    
+    switch (activeTab) {
+      case "dashboard":
+        return (
+          <DashboardTabContent 
+            property={propertyData} 
+            onDelete={handlers.onDelete}
+            onSave={handlers.onSave}
+          />
+        );
+      case "content":
+        // Define handleNext and handlePrevious for ContentTabContent
+        const handleNext = () => {
+          if (handlers.currentStep < 3) { // 3 is the max step (0-indexed)
             handlers.handleStepClick(handlers.currentStep + 1);
           }
-        },
-        handlePrevious: () => {
+        };
+
+        const handlePrevious = () => {
           if (handlers.currentStep > 0) {
             handlers.handleStepClick(handlers.currentStep - 1);
           }
-        }
-      });
+        };
+
+        return (
+          <ContentTabContent
+            formData={formState}
+            onFieldChange={handlers.onFieldChange}
+            onAddFeature={handlers.onAddFeature}
+            onRemoveFeature={handlers.onRemoveFeature}
+            onUpdateFeature={handlers.onUpdateFeature}
+            onAddArea={handlers.onAddArea}
+            onRemoveArea={handlers.onRemoveArea}
+            onUpdateArea={handlers.onUpdateArea}
+            onAreaImageRemove={handlers.onAreaImageRemove}
+            onAreaImagesSelect={handlers.onAreaImagesSelect}
+            handleAreaImageUpload={handlers.handleAreaImageUpload}
+            currentStep={handlers.currentStep}
+            handleStepClick={handlers.handleStepClick}
+            handleNext={handleNext}
+            handlePrevious={handlePrevious}
+            onFetchLocationData={handlers.onFetchLocationData}
+            onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
+            onFetchNearbyCities={handlers.onFetchNearbyCities}
+            onGenerateLocationDescription={handlers.onGenerateLocationDescription}
+            onGenerateMap={handlers.onGenerateMap}
+            onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
+            isLoadingLocationData={handlers.isLoadingLocationData}
+            isGeneratingMap={handlers.isGeneratingMap}
+            setPendingChanges={handlers.setPendingChanges}
+            onSubmit={handlers.onSave}
+            isSaving={handlers.isSaving}
+          />
+        );
+      case "media":
+        // Pass the property data to the MediaTabContent component
+        return (
+          <MediaTabContent
+            property={{
+              ...propertyData,
+              images: normalizeImages(property.images)
+            }}
+          />
+        );
+      case "floorplans":
+        return <FloorplansTabContent property={propertyData} />;
+      case "communications":
+        return <CommunicationsTabContent property={propertyData} />;
+      default:
+        return null;
     }
-    
-    // For other tabs, return null or other content
-    return null;
   }
 };

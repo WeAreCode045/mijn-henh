@@ -1,12 +1,16 @@
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
+import { AreaImageGrid } from "./AreaImageGrid";
 import { AreaCardHeader } from "./area/AreaCardHeader";
-import { AreaContent } from "./area/AreaContent";
+import { AreaDescription } from "./area/AreaDescription";
+import { AreaColumnsSelector } from "./area/AreaColumnsSelector";
+import { AreaImageActions } from "./area/AreaImageActions";
+import { AreaImageSelectDialog } from "./area/AreaImageSelectDialog";
+import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAreaImages } from "./area/useAreaImages";
 
 interface AreaCardProps {
   area: PropertyArea;
@@ -19,6 +23,15 @@ interface AreaCardProps {
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
+type AreaImage = {
+  id: string;
+  url: string;
+  area?: string | null;
+  property_id?: string;
+  created_at?: string;
+  type?: string;
+};
+
 export function AreaCard({
   area,
   images,
@@ -29,8 +42,52 @@ export function AreaCard({
   onImageRemove,
   onImagesSelect,
 }: AreaCardProps) {
+  const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [areaImages, setAreaImages] = useState<AreaImage[]>([]);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
-  const { areaImages } = useAreaImages(area, propertyId);
+  
+  // Get area images based on area ID from property_images table
+  useEffect(() => {
+    const fetchAreaImages = async () => {
+      if (!area) {
+        setAreaImages([]);
+        return;
+      }
+      
+      // If we have a propertyId, fetch images from property_images table
+      if (propertyId) {
+        try {
+          const { data, error } = await supabase
+            .from('property_images')
+            .select('*')
+            .eq('property_id', propertyId)
+            .eq('area', area.id);
+            
+          if (error) {
+            console.error(`Error fetching images for area ${area.id} from property_images:`, error);
+          } else if (data && data.length > 0) {
+            console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
+            setAreaImages(data as AreaImage[]);
+            return;
+          } else {
+            console.log(`AreaCard ${area.id} - No images found in property_images table`);
+            setAreaImages([]);
+          }
+        } catch (err) {
+          console.error(`Error in fetching area images from property_images:`, err);
+        }
+      } else {
+        // Use area.images directly if available
+        if (area.images && area.images.length > 0) {
+          setAreaImages(area.images as AreaImage[]);
+        } else {
+          setAreaImages([]);
+        }
+      }
+    };
+    
+    fetchAreaImages();
+  }, [area, propertyId]);
 
   const handleUpdateTitle = (value: string) => {
     onUpdate(area.id, "title", value);
@@ -44,16 +101,19 @@ export function AreaCard({
     onUpdate(area.id, "columns", columns);
   };
 
+  const handleUpdateImageIds = (imageIds: string[]) => {
+    console.log(`Updating area ${area.id} image IDs:`, imageIds);
+    
+    // Additional callback for external handling if needed
+    if (onImagesSelect) {
+      onImagesSelect(area.id, imageIds);
+    }
+  };
+
   const toggleExpand = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsExpanded(!isExpanded);
-  };
-
-  const handleImagesSelect = (areaId: string, imageIds: string[]) => {
-    if (onImagesSelect) {
-      onImagesSelect(areaId, imageIds);
-    }
   };
 
   return (
@@ -76,16 +136,45 @@ export function AreaCard({
       </AreaCardHeader>
 
       {isExpanded && (
-        <AreaContent 
-          area={area}
-          areaImages={areaImages}
-          allImages={images}
-          onUpdateDescription={handleUpdateDescription}
-          onUpdateColumns={handleUpdateColumns}
-          onImageRemove={onImageRemove}
-          onImagesSelect={handleImagesSelect}
-        />
+        <CardContent className="space-y-4">
+          <AreaDescription
+            description={area.description}
+            areaId={area.id}
+            onDescriptionChange={handleUpdateDescription}
+          />
+          
+          <AreaColumnsSelector
+            columns={area.columns || 2}
+            areaId={area.id}
+            onColumnsChange={handleUpdateColumns}
+          />
+
+          <div>
+            <AreaImageActions
+              onSelectClick={() => setIsSelectDialogOpen(true)}
+            />
+            
+            <div className="mt-2">
+              <p className="text-sm font-medium mb-2">Selected Images ({areaImages.length})</p>
+              <AreaImageGrid
+                areaImages={areaImages}
+                areaId={area.id}
+                areaTitle={area.title}
+                onImageRemove={onImageRemove}
+              />
+            </div>
+          </div>
+        </CardContent>
       )}
+      
+      <AreaImageSelectDialog
+        open={isSelectDialogOpen}
+        onOpenChange={setIsSelectDialogOpen}
+        images={images}
+        areaTitle={area.title}
+        selectedImageIds={areaImages.map(img => img.id)}
+        onUpdate={handleUpdateImageIds}
+      />
     </Card>
   );
 }

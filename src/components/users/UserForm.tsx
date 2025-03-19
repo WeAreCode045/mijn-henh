@@ -153,14 +153,13 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="profile-photo">Profile Photo</Label>
+        <Label>Profile Photo</Label>
         <div className="flex items-center gap-4">
           <Avatar className="w-20 h-20">
             <AvatarImage src={photoPreview} alt="Profile photo" />
             <AvatarFallback>{formData.fullName?.charAt(0) || "U"}</AvatarFallback>
           </Avatar>
           <Input
-            id="profile-photo"
             type="file"
             accept="image/*"
             onChange={handlePhotoChange}
@@ -170,9 +169,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="user-email">Email</Label>
+        <Label htmlFor="email">Email</Label>
         <Input
-          id="user-email"
+          id="email"
           type="email"
           value={formData.email}
           onChange={(e) =>
@@ -184,9 +183,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
       </div>
       {!isEditMode && (
         <div className="space-y-2">
-          <Label htmlFor="user-password">Password</Label>
+          <Label htmlFor="password">Password</Label>
           <Input
-            id="user-password"
+            id="password"
             type="password"
             value={formData.password}
             onChange={(e) =>
@@ -197,9 +196,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         </div>
       )}
       <div className="space-y-2">
-        <Label htmlFor="user-fullName">Full Name</Label>
+        <Label htmlFor="fullName">Full Name</Label>
         <Input
-          id="user-fullName"
+          id="fullName"
           value={formData.fullName}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, fullName: e.target.value }))
@@ -208,9 +207,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="user-phone">Phone</Label>
+        <Label htmlFor="phone">Phone</Label>
         <Input
-          id="user-phone"
+          id="phone"
           type="tel"
           value={formData.phone}
           onChange={(e) =>
@@ -219,9 +218,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="user-whatsappNumber">WhatsApp Number</Label>
+        <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
         <Input
-          id="user-whatsappNumber"
+          id="whatsappNumber"
           type="tel"
           value={formData.whatsappNumber}
           onChange={(e) =>
@@ -230,14 +229,14 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="user-role">Role</Label>
+        <Label htmlFor="role">Role</Label>
         <Select
           value={formData.role}
           onValueChange={(value: "admin" | "agent") =>
             setFormData((prev) => ({ ...prev, role: value }))
           }
         >
-          <SelectTrigger id="user-role">
+          <SelectTrigger>
             <SelectValue placeholder="Select a role" />
           </SelectTrigger>
           <SelectContent>

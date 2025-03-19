@@ -45,26 +45,23 @@ export function usePropertyAreaPhotos(
           .getPublicUrl(filePath);
 
         if (data.publicUrl) {
-          const newImage: PropertyImage = {
+          uploadedImages.push(normalizeImage({
             id: crypto.randomUUID(),
             url: data.publicUrl,
-            area: areaId,
-            type: "image"
-          };
-          uploadedImages.push(newImage);
+            filePath,
+            area: areaId
+          }));
         }
       }
 
       // Find the area and add the images to it
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          // Ensure area.images is an array and all items are PropertyImage objects
-          const normalizedImages = Array.isArray(area.images) 
-            ? area.images.map(img => normalizeImage(img))
-            : [];
+          // Ensure area.images is an array and add the new images
+          const existingImages = Array.isArray(area.images) ? area.images : [];
           return {
             ...area,
-            images: [...normalizedImages, ...uploadedImages]
+            images: [...existingImages, ...uploadedImages]
           };
         }
         return area;
@@ -96,13 +93,10 @@ export function usePropertyAreaPhotos(
   const handleRemoveAreaPhoto = (areaId: string, imageId: string) => {
     const updatedAreas = formData.areas.map(area => {
       if (area.id === areaId) {
-        // Ensure area.images is an array and all items are PropertyImage objects
-        const normalizedImages = Array.isArray(area.images) 
-          ? area.images.map(img => normalizeImage(img))
-          : [];
+        const images = Array.isArray(area.images) ? area.images : [];
         return {
           ...area,
-          images: normalizedImages.filter(image => image.id !== imageId)
+          images: images.filter(image => image.id !== imageId)
         };
       }
       return area;

@@ -29,7 +29,7 @@ export async function getOrCreateWebViewUrl(propertyId: string, objectId: string
       .from('property_web_views')
       .insert({
         property_id: propertyId,
-        object_id: objectId || null // Ensure we handle empty object_id gracefully
+        object_id: objectId
       });
 
     if (insertError) {

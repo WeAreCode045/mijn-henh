@@ -8,9 +8,7 @@ export const defaultAgencySettings: AgencySettings = {
   address: "",
   primaryColor: "#40497A",
   secondaryColor: "#E2E8F0",
-  logoUrl: "",
-  webviewBackgroundUrl: "",
-  pdfBackgroundUrl: "",
+  webviewBgImage: "",
   iconBuildYear: "calendar",
   iconBedrooms: "bed",
   iconBathrooms: "bath",
@@ -22,5 +20,5 @@ export const defaultAgencySettings: AgencySettings = {
   xmlImportUrl: "",
   instagramUrl: "",
   youtubeUrl: "",
-  facebookUrl: "",
+  facebookUrl: ""
 };

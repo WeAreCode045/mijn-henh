@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
 interface Agent {
   id: string;
@@ -23,34 +22,16 @@ interface AgentCardProps {
 export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false }: AgentCardProps) {
   const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    // Update the selected agent when the prop changes
-    if (agentId !== undefined) {
-      setCurrentAgentId(agentId);
-    }
-  }, [agentId]);
 
   useEffect(() => {
     const fetchAgents = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('role', 'agent');
-        
-        if (error) throw error;
-        
-        if (data) {
-          setAgents(data);
-        }
-      } catch (error) {
-        console.error("Error fetching agents:", error);
-      } finally {
-        setIsLoading(false);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'agent');
+      
+      if (!error && data) {
+        setAgents(data);
       }
     };
     
@@ -60,15 +41,6 @@ export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false 
   const handleSaveAgent = (e: React.MouseEvent) => {
     e.preventDefault();
     onSaveAgent(currentAgentId);
-    
-    toast({
-      title: "Agent updated",
-      description: "The agent has been assigned to this property"
-    });
-  };
-
-  const handleAgentChange = (value: string) => {
-    setCurrentAgentId(value);
   };
 
   return (
@@ -84,14 +56,13 @@ export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false 
           <Label htmlFor="agent-select">Select Agent</Label>
           <Select 
             value={currentAgentId} 
-            onValueChange={handleAgentChange}
-            disabled={isLoading}
+            onValueChange={setCurrentAgentId}
           >
             <SelectTrigger id="agent-select">
               <SelectValue placeholder="Select an agent" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {agents.map((agent) => (
                 <SelectItem key={agent.id} value={agent.id}>
                   {agent.full_name}
@@ -99,15 +70,9 @@ export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false 
               ))}
             </SelectContent>
           </Select>
-          
-          {currentAgentId && agentName && (
-            <div className="text-sm text-muted-foreground mt-1">
-              Currently assigned: {agentName}
-            </div>
-          )}
         </div>
         
-        <Button onClick={handleSaveAgent} disabled={isUpdating || isLoading}>
+        <Button onClick={handleSaveAgent} disabled={isUpdating}>
           <Save className="h-4 w-4 mr-2" />
           {isUpdating ? "Saving..." : "Assign Agent"}
         </Button>

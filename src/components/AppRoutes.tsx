@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Route, Routes, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -79,7 +80,6 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Property tab routes */}
       <Route path="/property/:id/dashboard" element={
         <ProtectedRoute>
           <PropertyLayout>
@@ -112,7 +112,6 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Legacy edit route - redirect to content tab */}
       <Route path="/property/:id/edit" element={
         <ProtectedRoute>
           <PropertyEditRedirect />

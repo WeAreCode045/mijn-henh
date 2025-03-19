@@ -13,7 +13,6 @@ interface PropertyImagesCardProps {
   onSetFeaturedImage?: (url: string | null) => void;
   onToggleFeaturedImage?: (url: string) => void;
   featuredImage?: string | null;
-  // Update the type here to accept string[] instead of PropertyImage[]
   featuredImages?: string[];
   propertyId?: string;
 }

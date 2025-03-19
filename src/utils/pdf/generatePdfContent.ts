@@ -2,7 +2,7 @@
 import { PropertyData } from '@/types/property';
 import { AgencySettings } from '@/types/agency';
 import jsPDF from 'jspdf';
-import { createImageSection } from './components/imageSection';
+import { generateImageSection } from './components/imageSection';
 import { generateInfoSection } from './components/infoSection';
 import { generateContactSection } from './components/contactSection';
 
@@ -29,7 +29,7 @@ export const generatePdfContent = async (
   const rightColumnWidth = contentWidth * 0.6; // 60% for title/description/features
   
   // Generate the main image and featured images section (left column)
-  await createImageSection(
+  await generateImageSection(
     pdf, 
     property, 
     margin, 

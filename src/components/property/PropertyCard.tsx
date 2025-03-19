@@ -1,6 +1,5 @@
-import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { getImageUrl } from "@/utils/imageUrlHelpers";
+
+import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { getOrCreateWebViewUrl } from "@/utils/webViewUtils";
 import { PropertyQROverlay } from "./PropertyQROverlay";
@@ -101,7 +100,7 @@ export const PropertyCard = ({
 
   // Get the main display image (featured image first, then first regular image)
   const displayImage = property.featuredImage || 
-                      (property.images?.length > 0 ? getImageUrl(property.images[0]) : '/placeholder.svg');
+                      (property.images?.length > 0 ? property.images[0].url : '/placeholder.svg');
 
   return (
     <>

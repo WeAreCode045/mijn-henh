@@ -9,23 +9,6 @@ import { Loader2, MapPin, Search } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 
-// Define window interface with Google Maps
-interface GoogleMapsWindow extends Window {
-  google?: {
-    maps?: {
-      places?: {
-        Autocomplete: new (
-          input: HTMLInputElement,
-          options?: { types: string[] }
-        ) => {
-          addListener: (event: string, callback: () => void) => void;
-          getPlace: () => { formatted_address?: string; geometry?: { location: { lat: () => number; lng: () => number } } };
-        };
-      };
-    };
-  };
-}
-
 interface AddressSectionProps {
   formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
@@ -90,15 +73,6 @@ export function AddressSection({
         const place = autocomplete.getPlace();
         if (place.formatted_address && onFieldChange) {
           onFieldChange('address', place.formatted_address);
-          
-          // If the place includes latitude and longitude, update those as well
-          if (place.geometry?.location) {
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
-            
-            onFieldChange('latitude', lat);
-            onFieldChange('longitude', lng);
-          }
         }
       });
     };

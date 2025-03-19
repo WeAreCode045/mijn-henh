@@ -1,62 +1,70 @@
 
-import { useState } from "react";
-import { PropertyFormData } from "@/types/property";
-import { fetchPropertyDataFromApi } from "./operations/propertyFetchOperations";
-import { savePropertyDataToApi } from "./operations/propertySaveOperations";
+import { useState, useCallback } from 'react';
+import { PropertyFormData } from '@/types/property';
+import { useLocationDataFetch } from '@/hooks/useLocationDataFetch';
 
-export function usePropertyContent(propertyId: string) {
-  const [isLoading, setIsLoading] = useState(false);
+export function usePropertyContent(
+  formData: PropertyFormData,
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void
+) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
-  // Function to refresh property data from API
-  const refreshData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await fetchPropertyDataFromApi(propertyId);
-      setIsLoading(false);
-      return data;
-    } catch (err: any) {
-      setError(err);
-      setIsLoading(false);
-      return null;
+  const { 
+    fetchLocationData, 
+    fetchCategoryPlaces,
+    fetchNearbyCities,
+    generateLocationDescription, 
+    generateMapImage,
+    removeNearbyPlace,
+    isLoading: isLoadingLocationData,
+    isGeneratingMap
+  } = useLocationDataFetch(formData, onFieldChange);
+  
+  const handleStepClick = useCallback((step: number) => {
+    setCurrentStep(step);
+  }, []);
+  
+  const handleNext = useCallback(() => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
     }
-  };
+  }, [currentStep]);
   
-  // Function to save property data to API
-  const savePropertyData = async (data: PropertyFormData) => {
-    try {
-      setIsSaving(true);
-      setError(null);
-      await savePropertyDataToApi(propertyId, data);
-      setLastSaved(new Date());
+  const handlePrevious = useCallback(() => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  }, [currentStep]);
+  
+  const onSubmit = useCallback(() => {
+    setIsSaving(true);
+    // Simulate API call
+    setTimeout(() => {
       setPendingChanges(false);
+      setLastSaved(new Date());
       setIsSaving(false);
-      return true;
-    } catch (err: any) {
-      setError(err);
-      setIsSaving(false);
-      return false;
-    }
-  };
-  
-  // Function to determine if property data should be fetched
-  const shouldFetchProperty = () => {
-    return !!propertyId && propertyId !== "new" && propertyId !== "undefined";
-  };
+    }, 1000);
+  }, []);
   
   return {
-    refreshData,
-    savePropertyData,
-    shouldFetchProperty,
-    isLoading,
+    fetchLocationData,
+    fetchCategoryPlaces,
+    fetchNearbyCities,
+    generateLocationDescription,
+    generateMapImage,
+    removeNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    lastSaved,
     isSaving,
-    error,
-    pendingChanges,
     setPendingChanges,
-    lastSaved
+    onSubmit
   };
 }

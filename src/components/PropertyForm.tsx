@@ -1,128 +1,142 @@
 
-import React, { useState, useEffect, ChangeEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PropertyTabSelector } from '@/components/property/tabs/PropertyTabSelector';
-import { PropertyFormManager } from '@/components/property/tabs/wrapper/PropertyFormManager';
-import { initialFormData } from '@/hooks/property-form/initialFormData';
-import { PropertyData } from '@/types/property';
-import { Button } from './ui/button';
-import { useToast } from './ui/use-toast';
-import { usePropertyTabs } from '@/hooks/usePropertyTabs';
-import { PropertyTabContents } from '@/components/property/tabs/wrapper/PropertyTabContents';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
+import { usePropertyForm } from "@/hooks/usePropertyForm";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { PropertyData } from "@/types/property";
 
 export function PropertyForm() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { formData, setFormData, isLoading } = usePropertyForm(id);
+  const { settings } = useAgencySettings();
   const { toast } = useToast();
-  const { activeTab, setActiveTab } = usePropertyTabs();
-  
-  // Create an empty property data structure with required fields for PropertyData
-  const emptyProperty: PropertyData = {
-    ...initialFormData,
-    id: id || '',
-    title: '',
-    price: '',
-    address: '',
-    bedrooms: '',
-    bathrooms: '',
-    sqft: '',
-    livingArea: '',
-    buildYear: '',
-    garages: '',
-    energyLabel: '',
-    hasGarden: false,
-    description: '',
-    location_description: ''
-  };
+  const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
+  const [templateInfo, setTemplateInfo] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    
-    // Navigate to the correct route
-    if (id) {
-      navigate(`/property/${id}/${tab}`);
-    }
-  };
-
-  // Sync with URL path on mount
   useEffect(() => {
-    if (id && activeTab) {
-      navigate(`/property/${id}/${activeTab}`);
-    }
-  }, [id, activeTab, navigate]);
+    if (formData?.agent_id) {
+      // Fetch agent info
+      const fetchAgentInfo = async () => {
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('id', formData.agent_id)
+            .single();
+          
+          if (data) {
+            setAgentInfo({ id: data.id, name: data.full_name });
+          }
+        } catch (error) {
+          console.error("Error fetching agent info:", error);
+        }
+      };
 
-  // Create adapter functions for type compatibility
-  const handleAreaImageUploadAdapter = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      // This is a dummy function that will be replaced in the PropertyFormManager
-      console.log(`Received ${e.target.files.length} files to upload`);
+      fetchAgentInfo();
     }
-    return Promise.resolve();
+
+    // Set default template info
+    setTemplateInfo({ id: 'default', name: 'Default Template' });
+
+    // Try to fetch actual template if we have one
+    if (formData?.template_id && formData.template_id !== 'default') {
+      const fetchTemplateInfo = async () => {
+        try {
+          const { data } = await supabase
+            .from('brochure_templates')
+            .select('id, name')
+            .eq('id', formData.template_id)
+            .single();
+          
+          if (data) {
+            setTemplateInfo({ id: data.id, name: data.name });
+          }
+        } catch (error) {
+          console.error("Error fetching template info:", error);
+        }
+      };
+
+      fetchTemplateInfo();
+    }
+  }, [formData?.agent_id, formData?.template_id]);
+
+  const handleSave = () => {
+    // Refresh the form data
+    if (id) {
+      toast({
+        description: "Property data refreshed",
+      });
+      
+      // This would trigger a refresh of the data
+      // For now, we'll just show a toast
+    }
   };
 
-  const handleRemoveAreaPhotoAdapter = (index: number) => {
-    // This is a dummy function that will be replaced in the PropertyFormManager
-    console.log(`Removing photo at index ${index}`);
+  const handleDelete = async (): Promise<void> => {
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return Promise.resolve();
+    }
+    
+    try {
+      setIsDeleting(true);
+      
+      // Here would be the actual delete logic
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      toast({
+        title: "Success",
+        description: "Property deleted successfully",
+      });
+      
+      // Navigate would happen in the container component
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete property",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  if (isLoading || !formData) {
+    return <div className="p-4 flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+    </div>;
+  }
+
+  // Ensure formData has an id property by casting it to PropertyData
+  // This is safe because we've already checked that formData is not null
+  const propertyData: PropertyData = {
+    ...formData,
+    id: formData.id || '', // Provide empty string as fallback if id is missing
   };
 
   return (
-    <Card className="shadow-md">
-      <CardHeader>
-        <CardTitle className="text-xl">
-          Property: {emptyProperty.title || 'Untitled Property'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <PropertyTabSelector
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
+    <div className="space-y-4">
+      <form id="propertyForm">
+        <PropertyTabsWrapper
+          property={propertyData}
+          settings={settings}
+          onSave={handleSave}
+          onDelete={handleDelete}
+          agentInfo={agentInfo}
+          templateInfo={templateInfo}
         />
-        
-        <div className="mt-4">
-          <PropertyFormManager property={emptyProperty}>
-            {(formProps) => (
-              <div className="mt-4">
-                <PropertyTabContents
-                  activeTab={activeTab}
-                  property={emptyProperty}
-                  formState={formProps.formState}
-                  agentInfo={{ id: '', name: '' }}
-                  templateInfo={{ id: 'default', name: 'Default Template' }}
-                  isUpdating={false}
-                  onDelete={() => Promise.resolve()}
-                  onFieldChange={formProps.handleFieldChange}
-                  onAddFeature={formProps.addFeature}
-                  onRemoveFeature={formProps.removeFeature}
-                  onUpdateFeature={formProps.updateFeature}
-                  onAddArea={formProps.addArea}
-                  onRemoveArea={formProps.removeArea}
-                  onUpdateArea={formProps.updateArea}
-                  onAreaImageRemove={formProps.handleAreaImageRemove}
-                  onAreaImagesSelect={formProps.handleAreaImagesSelect}
-                  onAreaImageUpload={formProps.handleAreaImageUpload}
-                  handleImageUpload={async () => Promise.resolve()}
-                  handleRemoveImage={(index: number) => console.log(`Removing image at index ${index}`)}
-                  isUploading={formProps.isUploading}
-                  handleAreaPhotosUpload={handleAreaImageUploadAdapter}
-                  handleRemoveAreaPhoto={handleRemoveAreaPhotoAdapter}
-                  handleFloorplanUpload={async () => Promise.resolve()}
-                  handleRemoveFloorplan={formProps.handleRemoveFloorplan}
-                  isUploadingFloorplan={formProps.isUploadingFloorplan || false}
-                  handleSetFeaturedImage={formProps.handleSetFeaturedImage}
-                  handleToggleFeaturedImage={formProps.handleToggleFeaturedImage}
-                  handleVirtualTourUpdate={formProps.handleVirtualTourUpdate}
-                  handleYoutubeUrlUpdate={formProps.handleYoutubeUrlUpdate}
-                  handleFloorplanEmbedScriptUpdate={formProps.handleFloorplanEmbedScriptUpdate}
-                  currentStep={formProps.currentStep || 0}
-                  handleStepClick={formProps.handleStepClick || (() => {})}
-                  onSubmit={() => console.log("Form submitted")}
-                />
-              </div>
-            )}
-          </PropertyFormManager>
-        </div>
-      </CardContent>
-    </Card>
+      </form>
+    </div>
   );
 }

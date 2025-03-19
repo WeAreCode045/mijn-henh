@@ -1,19 +1,32 @@
 
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import { AgencySettings } from "@/types/agency";
+import { useThemeColors } from "@/hooks/useThemeColors";
 
-export const useWebViewBackground = (settings: any) => {
+export function useWebViewBackground(settings: AgencySettings) {
+  // Use the generic theme colors hook for color properties
+  useThemeColors(settings);
+  
   useEffect(() => {
-    // Set background from settings if available
-    if (settings?.backgroundImage) {
-      document.documentElement.style.setProperty('--webview-background', `url(${settings.backgroundImage})`);
+    // Set background image if available
+    if (settings?.webviewBackgroundUrl) {
+      document.documentElement.style.setProperty(
+        '--webview-bg-image', 
+        `url(${settings.webviewBackgroundUrl})`
+      );
+      document.documentElement.style.setProperty(
+        '--webview-bg-position',
+        'bottom right'
+      );
     } else {
-      // Default background
-      document.documentElement.style.setProperty('--webview-background', 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)');
+      document.documentElement.style.removeProperty('--webview-bg-image');
+      document.documentElement.style.removeProperty('--webview-bg-position');
     }
     
-    // Cleanup function
+    // Cleanup function to remove the properties when component unmounts
     return () => {
-      document.documentElement.style.removeProperty('--webview-background');
+      document.documentElement.style.removeProperty('--webview-bg-image');
+      document.documentElement.style.removeProperty('--webview-bg-position');
     };
-  }, [settings?.backgroundImage]);
-};
+  }, [settings?.webviewBackgroundUrl]);
+}
