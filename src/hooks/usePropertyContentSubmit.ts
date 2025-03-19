@@ -15,6 +15,7 @@ export function usePropertyContentSubmit(
   const onSubmit = async () => {
     console.log("Submit clicked in PropertyContentTab");
     
+    // If there's an external submit handler provided, use that
     if (externalOnSubmit) {
       externalOnSubmit();
       return;
@@ -25,7 +26,9 @@ export function usePropertyContentSubmit(
     // Final save when clicking submit
     if (formData.id) {
       try {
+        // Create a form event to pass to handleSubmit
         const formEvent = {} as React.FormEvent;
+        // Pass the current formData and set redirectAfterSave to false
         const success = await handleSubmit(formEvent, formData, false);
         
         if (success) {

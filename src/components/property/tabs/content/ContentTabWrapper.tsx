@@ -38,6 +38,8 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
+    // Pass the original onSubmit handler from props as the external handler
+    // This ensures we're not overriding any existing functionality
     handlers.onSubmit
   );
 
