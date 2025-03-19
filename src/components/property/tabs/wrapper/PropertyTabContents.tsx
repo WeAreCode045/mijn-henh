@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { PropertyData, PropertyFormData, PropertyTabsValue } from '@/types/property';
+import { PropertyData, PropertyFormData } from '@/types/property';
+import { PropertyTabsValue } from '@/types/property/PropertyTypes';
 import { CommunicationsTabContent } from '../content/CommunicationsTabContent';
 import { ContentTabRenderer, DashboardTabRenderer, MediaTabRenderer } from '../content/PropertyTabRenderers';
 

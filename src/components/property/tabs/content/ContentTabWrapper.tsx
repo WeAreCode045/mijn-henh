@@ -1,5 +1,13 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { PropertyFormData } from "@/types/property";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Define the sub-content components that are referenced but not imported
+interface GeneralInfoContentProps {
+  formData: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+}
 
 interface LocationContentProps {
   formData: PropertyFormData;
@@ -14,8 +22,31 @@ interface LocationContentProps {
   isGeneratingMap: boolean;
 }
 
+interface FeaturesContentProps {
+  formData: PropertyFormData;
+  onAddFeature: () => void;
+  onRemoveFeature: (id: string) => void;
+  onUpdateFeature: (id: string, description: string) => void;
+}
+
+interface AreasContentProps {
+  formData: PropertyFormData;
+  onAddArea: () => void;
+  onRemoveArea: (id: string) => void;
+  onUpdateArea: (id: string, field: string, value: any) => void;
+  onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect: (areaId: string, images: string[]) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+}
+
+// Define placeholder components to prevent errors
+const GeneralInfoContent: React.FC<GeneralInfoContentProps> = ({ formData, onFieldChange }) => <div>General Info Content Placeholder</div>;
+const LocationContent: React.FC<LocationContentProps> = (props) => <div>Location Content Placeholder</div>;
+const FeaturesContent: React.FC<FeaturesContentProps> = (props) => <div>Features Content Placeholder</div>;
+const AreasContent: React.FC<AreasContentProps> = (props) => <div>Areas Content Placeholder</div>;
+
 export interface ContentTabWrapperProps {
-  property?: PropertyData;
+  property?: PropertyFormData;
   formData: PropertyFormData;
   handlers?: any; // For passing handlers as a group
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;

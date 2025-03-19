@@ -129,3 +129,13 @@ export function convertToFloorplanArray(floorplans: any[]): PropertyFloorplan[] 
     };
   });
 }
+
+/**
+ * Convert to property image array - alias for toPropertyImageArray for backward compatibility
+ */
+export const convertToPropertyImageArray = toPropertyImageArray;
+
+/**
+ * Convert to property floorplan array - alias for toPropertyFloorplanArray for backward compatibility
+ */
+export const convertToPropertyFloorplanArray = toPropertyFloorplanArray;

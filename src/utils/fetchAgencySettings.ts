@@ -31,6 +31,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
       secondaryColor: data.secondary_color || "#E2E8F0",
       logoUrl: data.logo_url || "",
       webviewBackgroundUrl: data.description_background_url || "",
+      webviewBgImage: data.description_background_url || "", // For backward compatibility
       pdfBackgroundUrl: data.description_background_url || "",
       iconBuildYear: data.icon_build_year || "calendar",
       iconBedrooms: data.icon_bedrooms || "bed",
@@ -52,7 +53,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
       smtp_from_name: data.smtp_from_name || "",
       smtp_secure: data.smtp_secure || false,
       openai_api_key: data.openai_api_key || "",
-      agents: data.agents || []
+      agents: Array.isArray(data.agents) ? data.agents : []
     };
 
     return settings;

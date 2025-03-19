@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageDatabaseFetcher } from "@/components/property/form/media/ImageDatabaseFetcher";
 import { FloorplanDatabaseFetcher } from "@/components/property/form/media/FloorplanDatabaseFetcher";
-import { convertToPropertyImageArray } from "@/utils/imageTypeConverters";
-import { getImageUrl } from "@/utils/imageTypeConverters";
+import { toPropertyImageArray, getImageUrl } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;

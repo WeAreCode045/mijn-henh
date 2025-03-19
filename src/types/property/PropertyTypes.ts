@@ -98,5 +98,6 @@ export enum PropertyTabsValue {
   MEDIA = "media",
   LOCATION = "location",
   COMMUNICATIONS = "communications",
-  SETTINGS = "settings"
+  SETTINGS = "settings",
+  DASHBOARD = "dashboard"
 }
