@@ -45,12 +45,13 @@ export function DashboardTabContent({
     }
     
     if (typeof property.address === 'object') {
-      // For object-based addresses
-      const street = property.address.street || '';
-      const city = property.address.city || '';
+      // For object-based addresses - using non-null assertion after the check
+      const addressObj = property.address as { street?: string; city?: string };
+      const street = addressObj.street || '';
+      const city = addressObj.city || '';
       return `${street}${street && city ? ', ' : ''}${city}`;
     } else {
-      // For string addresses
+      // For string addresses - address is already verified as non-null
       return property.address;
     }
   };
