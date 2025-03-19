@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { PropertyData } from "@/types/property";
-import { PropertyDashboardTab } from "@/components/property/tabs/PropertyDashboardTab";
+import { PropertyOverviewCard } from "@/components/property/dashboard/PropertyOverviewCard";
+import { ExternalLinksCard } from "@/components/property/dashboard/ExternalLinksCard";
 
 interface DashboardTabContentProps {
   property: PropertyData;
@@ -29,26 +30,15 @@ export function DashboardTabContent({
   templateInfo
 }: DashboardTabContentProps) {
   return (
-    <PropertyDashboardTab
-      id={property.id}
-      objectId={property.object_id}
-      title={property.title || 'Untitled Property'}
-      agentId={property.agent_id}
-      agentName={agentInfo?.name}
-      templateId={property.template_id}
-      templateName={templateInfo?.name}
-      createdAt={property.created_at}
-      updatedAt={property.updated_at}
-      onSave={() => console.log("Property saved")}
-      onDelete={onDelete || (() => Promise.resolve())}
-      handleGeneratePDF={handleGeneratePDF || (() => {})}
-      handleWebView={onWebView || (() => {})}
-      handleSaveAgent={handleSaveAgent || (() => {})}
-      handleSaveObjectId={handleSaveObjectId || (() => {})}
-      handleSaveTemplate={handleSaveTemplate || (() => {})}
-      isUpdating={isUpdating}
-      agentInfo={agentInfo}
-      templateInfo={templateInfo}
-    />
+    <div className="space-y-6">
+      <PropertyOverviewCard 
+        property={property} 
+        handleSaveAgent={handleSaveAgent}
+      />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ExternalLinksCard property={property} />
+      </div>
+    </div>
   );
 }
