@@ -36,6 +36,7 @@ interface ContentTabWrapperProps {
 }
 
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
+  // Create local handlers if they're not provided
   const handleNext = () => {
     if (handlers.currentStep < 3) {
       handlers.handleStepClick(handlers.currentStep + 1);
@@ -52,6 +53,9 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   const onSubmit = () => {
     console.log("Form submitted");
   };
+
+  console.log("ContentTabWrapper - currentStep:", handlers.currentStep);
+  console.log("ContentTabWrapper - formData:", formData);
 
   return (
     <div className="space-y-6">

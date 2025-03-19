@@ -15,6 +15,7 @@ interface MediaTabRendererProps {
 }
 
 export function MediaTabRenderer(props: MediaTabRendererProps) {
+  console.log("MediaTabRenderer - Property data:", props.property);
   return (
     <MediaTabContent 
       property={props.property} 
@@ -85,6 +86,9 @@ interface ContentTabRendererProps {
 }
 
 export function ContentTabRenderer(props: ContentTabRendererProps) {
+  console.log("ContentTabRenderer - Form data:", props.formData);
+  console.log("ContentTabRenderer - Current step:", props.handlers.currentStep);
+  
   return (
     <ContentTabWrapper
       formData={props.formData}

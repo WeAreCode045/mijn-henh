@@ -8,6 +8,7 @@ import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandlers";
 import { convertToPropertyImageArray } from "@/utils/propertyDataAdapters";
 import { extractImageUrls } from "@/utils/imageTypeConverters";
+import { MediaDatabaseFetcher } from "./MediaDatabaseFetcher";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -26,6 +27,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
 
   React.useEffect(() => {
     setLocalProperty(property);
+    console.log("MediaTabContent - Updated with property:", property);
   }, [property]);
 
   const {
@@ -38,15 +40,45 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleFloorplanEmbedScriptSave
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
+  // Make sure we have images even if they're not in the property object
+  const handleImagesFromDatabase = (dbImages: any[]) => {
+    if (dbImages && dbImages.length > 0) {
+      console.log("MediaTabContent - Received images from DB:", dbImages);
+      const updatedProperty = {
+        ...localProperty,
+        images: dbImages
+      };
+      setLocalProperty(updatedProperty);
+    }
+  };
+
   const images = convertToPropertyImageArray(localProperty.images || []);
   const featuredImages = convertToPropertyImageArray(localProperty.featuredImages || []);
+  const floorplans = convertToPropertyImageArray(localProperty.floorplans || []);
 
   // Extract URLs from featured images for components that expect string arrays
   const featuredImageUrls = extractImageUrls(featuredImages);
 
+  console.log("MediaTabContent - Current property data:", {
+    id: localProperty.id,
+    imageCount: images.length,
+    floorplanCount: floorplans.length,
+    virtualTourUrl: localProperty.virtualTourUrl,
+    youtubeUrl: localProperty.youtubeUrl,
+    floorplanEmbedScript: localProperty.floorplanEmbedScript ? localProperty.floorplanEmbedScript.substring(0, 20) + '...' : 'none'
+  });
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold mb-6">Media</h2>
+      
+      {/* Fetch images from database if not available in the property object */}
+      <MediaDatabaseFetcher 
+        propertyId={localProperty.id} 
+        images={images}
+        onFetchComplete={handleImagesFromDatabase}
+      />
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 w-full mb-6">
           <TabsTrigger value="images">Images</TabsTrigger>
