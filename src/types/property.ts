@@ -1,3 +1,4 @@
+
 // Property place type
 export interface PropertyPlaceType {
   id: string;
@@ -125,6 +126,7 @@ export interface PropertyAgent {
   phone: string;
   photoUrl?: string;
   address?: string;
+  whatsapp_number?: string;
 }
 
 // Property city type
