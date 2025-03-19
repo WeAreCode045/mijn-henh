@@ -1,4 +1,3 @@
-
 import { PropertyData, PropertyFeature, PropertyPlaceType, PropertyCity, PropertyArea, PropertyAgent } from "@/types/property";
 import { GeneralInfoData } from "@/types/property/PropertyTypes";
 
@@ -80,25 +79,32 @@ export const transformAgent = (agent: any): PropertyAgent | null => {
 /**
  * Transforms raw general info data to GeneralInfoData type
  */
-export const transformGeneralInfo = (data: any): GeneralInfoData | undefined => {
+export function transformGeneralInfo(data: any): GeneralInfoData | undefined {
   if (!data) return undefined;
   
-  try {
-    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-    
-    // Ensure it has the required structure
-    return {
-      propertyDetails: parsedData.propertyDetails || {},
-      description: parsedData.description || {},
-      keyInformation: parsedData.keyInformation || {},
-      ...parsedData
-    };
-  } catch (e) {
-    console.error("Error transforming general info:", e);
-    return {
-      propertyDetails: {},
-      description: {},
-      keyInformation: {}
-    };
+  if (typeof data === 'object' && !Array.isArray(data)) {
+    // It's already an object, check if it looks like GeneralInfoData
+    if ('propertyDetails' in data || 'description' in data || 'keyInformation' in data) {
+      return data as GeneralInfoData;
+    }
   }
-};
+  
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as GeneralInfoData;
+      }
+    } catch (e) {
+      // Return undefined if parsing fails
+      return undefined;
+    }
+  }
+  
+  // Default empty object with the expected structure
+  return {
+    propertyDetails: {},
+    description: {},
+    keyInformation: {}
+  };
+}

@@ -12,6 +12,7 @@ export interface AgencySettings {
   // Added properties
   pdfBackgroundUrl?: string;
   webviewBackgroundUrl?: string;
+  webviewBgImage?: string; // Added for backward compatibility
   iconBuildYear?: string;
   iconBedrooms?: string;
   iconBathrooms?: string;

@@ -89,7 +89,8 @@ export function toPropertyFloorplanArray(floorplans: any[]): PropertyFloorplan[]
 /**
  * Gets the URL from a PropertyImage or a string
  */
-export function getImageUrl(image: PropertyImage | string): string {
+export function getImageUrl(image: PropertyImage | string | null | undefined): string {
+  if (!image) return '';
   if (typeof image === 'string') {
     return image;
   }
@@ -97,43 +98,7 @@ export function getImageUrl(image: PropertyImage | string): string {
 }
 
 /**
- * Converts any image type to a PropertyImage array
- */
-export function convertToPropertyImageArray(images: any[]): PropertyImage[] {
-  if (!Array.isArray(images)) return [];
-  
-  return images.map(img => {
-    if (typeof img === 'string') {
-      return {
-        id: crypto.randomUUID(),
-        url: img,
-        type: 'image'
-      };
-    } else if (typeof img === 'object' && img !== null) {
-      return {
-        id: img.id || crypto.randomUUID(),
-        url: img.url || '',
-        type: img.type || 'image',
-        is_main: img.is_main || false,
-        is_featured_image: img.is_featured_image || false,
-        sort_order: img.sort_order || 0,
-        property_id: img.property_id || null,
-        area: img.area || null,
-        alt: img.alt || img.title || '',
-        title: img.title || '',
-        description: img.description || ''
-      };
-    }
-    return {
-      id: crypto.randomUUID(),
-      url: '',
-      type: 'image'
-    };
-  });
-}
-
-/**
- * Converts any floorplan type to a PropertyFloorplan array
+ * Convert floorplans array to array of PropertyFloorplan objects
  */
 export function convertToFloorplanArray(floorplans: any[]): PropertyFloorplan[] {
   if (!Array.isArray(floorplans)) return [];
@@ -143,10 +108,7 @@ export function convertToFloorplanArray(floorplans: any[]): PropertyFloorplan[] 
       return {
         id: crypto.randomUUID(),
         url: fp,
-        type: 'floorplan',
-        title: '',
-        description: '',
-        sort_order: 0
+        type: 'floorplan'
       };
     } else if (typeof fp === 'object' && fp !== null) {
       return {
@@ -163,10 +125,7 @@ export function convertToFloorplanArray(floorplans: any[]): PropertyFloorplan[] 
     return {
       id: crypto.randomUUID(),
       url: '',
-      type: 'floorplan',
-      title: '',
-      description: '',
-      sort_order: 0
+      type: 'floorplan'
     };
   });
 }

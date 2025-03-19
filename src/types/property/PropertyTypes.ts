@@ -66,15 +66,37 @@ export interface PropertyFloorplan {
  * Represents general information data for a property
  */
 export interface GeneralInfoData {
-  propertyType?: string;
-  price?: string;
-  address?: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  sqft?: string;
-  livingArea?: string;
-  buildYear?: string;
-  garages?: string;
-  energyLabel?: string;
-  hasGarden?: boolean;
+  propertyDetails?: {
+    title?: string;
+    price?: string;
+    address?: string;
+    objectId?: string;
+  };
+  description?: {
+    shortDescription?: string;
+    fullDescription?: string;
+  };
+  keyInformation?: {
+    buildYear?: string;
+    lotSize?: string;
+    livingArea?: string;
+    bedrooms?: string;
+    bathrooms?: string;
+    energyClass?: string;
+    garages?: string;
+    hasGarden?: boolean;
+  };
+  [key: string]: any;
+}
+
+/**
+ * Enum for property tab values
+ */
+export enum PropertyTabsValue {
+  OVERVIEW = "overview",
+  CONTENT = "content",
+  MEDIA = "media",
+  LOCATION = "location",
+  COMMUNICATIONS = "communications",
+  SETTINGS = "settings"
 }

@@ -1,11 +1,18 @@
+import React from 'react';
+import { PropertyFormData } from "@/types/property";
 
-import { PropertyData, PropertyFormData } from "@/types/property";
-import { GeneralInfoContent } from "@/components/property/form/steps/general-info/GeneralInfoContent";
-import { LocationContent } from "@/components/property/form/steps/location/LocationContent";
-import { FeaturesContent } from "@/components/property/form/steps/features/FeaturesContent";
-import { AreasContent } from "@/components/property/form/steps/areas/AreasContent";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+interface LocationContentProps {
+  formData: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFetchLocationData: () => Promise<void>;
+  onFetchCategoryPlaces: (category: string) => Promise<any>;
+  onFetchNearbyCities: () => Promise<any>;
+  onGenerateLocationDescription: () => Promise<void>;
+  onGenerateMap: () => Promise<void>;
+  onRemoveNearbyPlace: (index: number) => void;
+  isLoadingLocationData: boolean;
+  isGeneratingMap: boolean;
+}
 
 export interface ContentTabWrapperProps {
   property?: PropertyData;
