@@ -1,84 +1,53 @@
+
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
- * Converts an array of PropertyImage objects to PropertyFloorplan[] type
- * Useful when the API returns all images with the same schema and we need to separate them
+ * Converts a database image record to a PropertyImage type
  */
-export function convertToFloorplanArray(images: PropertyImage[]): PropertyFloorplan[] {
-  if (!images || !Array.isArray(images)) return [];
-  
-  return images.map(img => ({
-    id: img.id,
-    url: img.url,
-    title: img.title || '',
-    description: img.description || '',
-    sort_order: img.sort_order || 0,
-    property_id: img.property_id || undefined,
-    type: 'floorplan',
-    alt: img.alt || ''
-  }));
-}
-
-/**
- * Creates a new PropertyImage object from a URL string
- */
-export function toPropertyImage(url: string, isMain: boolean = false): PropertyImage {
+export function toPropertyImage(dbImage: any): PropertyImage {
   return {
-    id: `img-${Math.random().toString(36).substr(2, 9)}`,
-    url: url,
-    type: 'image',
-    is_main: isMain,
-    is_featured_image: false,
-    sort_order: 0,
-    property_id: null,
-    area: null
+    id: dbImage.id,
+    url: dbImage.url,
+    type: (dbImage.type || 'image') as 'image' | 'floorplan',
+    is_main: dbImage.is_main || false,
+    is_featured_image: dbImage.is_featured_image || false,
+    sort_order: dbImage.sort_order || 0,
+    property_id: dbImage.property_id,
+    area: dbImage.area || null,
+    alt: dbImage.title || '',
+    title: dbImage.title || '',
+    description: dbImage.description || ''
   };
 }
 
 /**
- * Creates a new PropertyFloorplan object from a URL string
+ * Converts an array of database image records to PropertyImage type
  */
-export function toPropertyFloorplan(url: string): PropertyFloorplan {
+export function toPropertyImageArray(dbImages: any[]): PropertyImage[] {
+  if (!dbImages || !Array.isArray(dbImages)) return [];
+  return dbImages.map(toPropertyImage);
+}
+
+/**
+ * Converts a database floorplan record to a PropertyFloorplan type
+ */
+export function toPropertyFloorplan(dbFloorplan: any): PropertyFloorplan {
   return {
-    id: `fp-${Math.random().toString(36).substr(2, 9)}`,
-    url: url,
-    title: '',
-    description: '',
-    sort_order: 0,
-    property_id: null,
+    id: dbFloorplan.id,
+    url: dbFloorplan.url,
+    title: dbFloorplan.title || '',
+    description: dbFloorplan.description || '',
+    sort_order: dbFloorplan.sort_order || 0,
+    property_id: dbFloorplan.property_id,
     type: 'floorplan',
-    alt: ''
+    alt: dbFloorplan.title || '',
   };
 }
 
 /**
- * Converts an array of URL strings to PropertyFloorplan[] type
+ * Converts an array of database floorplan records to PropertyFloorplan type
  */
-export function toPropertyFloorplanArray(urls: string[] | PropertyFloorplan[]): PropertyFloorplan[] {
-  if (!urls || !Array.isArray(urls)) return [];
-  
-  // If the array already contains PropertyFloorplan objects, return it
-  if (urls.length > 0 && typeof urls[0] === 'object') {
-    return urls as PropertyFloorplan[];
-  }
-  
-  // Otherwise, convert URL strings to PropertyFloorplan objects
-  return (urls as string[]).map(url => toPropertyFloorplan(url));
-}
-
-/**
- * Gets the image URL from various image object formats
- */
-export function getImageUrl(image: any): string {
-  if (!image) return '';
-  
-  if (typeof image === 'string') {
-    return image;
-  }
-  
-  if (typeof image === 'object' && image !== null) {
-    return image.url || image.src || '';
-  }
-  
-  return '';
+export function toPropertyFloorplanArray(dbFloorplans: any[]): PropertyFloorplan[] {
+  if (!dbFloorplans || !Array.isArray(dbFloorplans)) return [];
+  return dbFloorplans.map(toPropertyFloorplan);
 }

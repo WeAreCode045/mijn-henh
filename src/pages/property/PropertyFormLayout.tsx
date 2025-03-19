@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyActionsPanel } from "../components/PropertyActionsPanel";
+import { PropertyActionsPanel } from "@/pages/property/components/PropertyActionsPanel";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 

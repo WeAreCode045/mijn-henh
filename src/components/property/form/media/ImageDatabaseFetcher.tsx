@@ -38,7 +38,7 @@ export function ImageDatabaseFetcher({
           const formattedImages = data.map((img): PropertyImage => ({
             id: img.id,
             url: img.url,
-            type: img.type as "image" | "floorplan" || 'image',
+            type: (img.type || 'image') as "image" | "floorplan",
             is_main: img.is_main,
             is_featured_image: img.is_featured_image,
             sort_order: img.sort_order,
