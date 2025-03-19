@@ -15,6 +15,7 @@ import { createFieldChangeWrapper } from './property-form/utils/fieldChangeUtils
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
+  const [currentStep, setCurrentStep] = useState<number>(0);
   
   // Hook for handling form state
   const { 
@@ -78,6 +79,12 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleSaveTemplate
   } = useSaveHandlers(handleFieldChange);
   
+  // Handle form step navigation
+  const handleStepClick = (step: number) => {
+    console.log(`Setting current step to: ${step}`);
+    setCurrentStep(step);
+  };
+  
   return {
     formState,
     handleFieldChange,
@@ -131,9 +138,11 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleSaveAgent,
     handleSaveTemplate,
     
-    // Stub properties to maintain compatibility with PropertyFormManagerChildrenProps
-    currentStep: 0,
-    handleStepClick: () => {},
+    // Step navigation
+    currentStep,
+    handleStepClick,
+    
+    // Stub properties to maintain compatibility
     lastSaved: null,
     onSubmit: () => {}
   };

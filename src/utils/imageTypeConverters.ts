@@ -19,7 +19,7 @@ export function toPropertyFloorplan(url: string): PropertyFloorplan {
   return {
     id: `flp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     url,
-    type: "floorplan"
+    type: "floorplan" as const
   };
 }
 
@@ -38,7 +38,7 @@ export function convertToFloorplanArray(images: PropertyImage[]): PropertyFloorp
       sort_order: img.sort_order,
       property_id: img.property_id,
       alt: img.alt,
-      type: "floorplan"
+      type: "floorplan" as const
     }));
 }
 
@@ -82,7 +82,7 @@ export function toPropertyFloorplanArray(images: PropertyImage[] | (string | Pro
     return {
       id: img.id || `flp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       url: img.url,
-      type: "floorplan" as const, // Fixed: Explicitly set as literal "floorplan" type
+      type: "floorplan" as const,
       title: img.title,
       description: img.description,
       area: img.area,

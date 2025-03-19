@@ -20,6 +20,7 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     energyLabel: property.energyLabel || '',
     hasGarden: property.hasGarden || false,
     description: property.description || '',
+    shortDescription: property.shortDescription || '',
     location_description: property.location_description || '',
     features: property.features || [],
     areas: property.areas || [],
@@ -27,6 +28,8 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     nearby_cities: property.nearby_cities || [],
     images: property.images || [],
     floorplans: property.floorplans || [],
+    featuredImage: property.featuredImage || null,
+    featuredImages: property.featuredImages || [],
     created_at: property.created_at || new Date().toISOString(),
     updated_at: property.updated_at || new Date().toISOString(),
     coverImages: property.coverImages || [],
@@ -40,6 +43,8 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     virtualTourUrl: property.virtualTourUrl || '',
     youtubeUrl: property.youtubeUrl || '',
     floorplanEmbedScript: property.floorplanEmbedScript || '',
+    propertyType: property.propertyType || property.property_type || '',
+    generalInfo: property.generalInfo || undefined
   };
   
   // Create a compatible PropertyFormData object with required title

@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { PropertyFloorplan, PropertyImage } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
+import { toPropertyFloorplanArray } from "@/utils/imageTypeConverters";
 
 interface FloorplanDatabaseFetcherProps {
   propertyId: string;

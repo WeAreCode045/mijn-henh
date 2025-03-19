@@ -9,6 +9,7 @@ import { VirtualToursTab } from "./tabs/VirtualToursTab";
 import { Tabs } from "@/components/ui/tabs";
 import { MediaDatabaseFetcher } from "./MediaDatabaseFetcher";
 import { FloorplanDatabaseFetcher } from "./floorplans/FloorplanDatabaseFetcher";
+import { convertToFloorplanArray } from "@/utils/imageTypeConverters";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -36,7 +37,9 @@ export function MediaTabContent({
     console.log("MediaTabContent - Updated with property:", {
       id: property.id,
       imagesCount: property.images?.length || 0,
-      floorplans: property.floorplans?.length || 0
+      floorplans: property.floorplans?.length || 0,
+      virtualTourUrl: property.virtualTourUrl,
+      youtubeUrl: property.youtubeUrl
     });
   }, [property]);
   
@@ -59,29 +62,12 @@ export function MediaTabContent({
     }
   };
 
-  // Convert PropertyImage to PropertyFloorplan
-  const convertToPropertyFloorplan = (images: PropertyImage[]): PropertyFloorplan[] => {
-    return images
-      .filter(img => img.type === "floorplan")
-      .map(img => ({
-        id: img.id,
-        url: img.url,
-        title: img.title,
-        description: img.description,
-        filePath: img.filePath,
-        sort_order: img.sort_order,
-        property_id: img.property_id,
-        alt: img.alt,
-        type: "floorplan"
-      }));
-  };
-
   // When new floorplans are fetched, update the local property state
   const handleFloorplansFetched = (floorplans: PropertyImage[]) => {
     if (floorplans.length > 0) {
       console.log("MediaTabContent - Received floorplans from DB:", floorplans.length);
-      // Convert to PropertyFloorplan[] type to match the expected type
-      const typedFloorplans = convertToPropertyFloorplan(floorplans);
+      // Convert to PropertyFloorplan[] type
+      const typedFloorplans = convertToFloorplanArray(floorplans);
       
       setLocalProperty(prev => ({
         ...prev,

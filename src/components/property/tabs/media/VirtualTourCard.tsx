@@ -1,11 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface VirtualTourCardProps {
-  id?: string; // Added required id prop
+  id?: string;
   virtualTourUrl: string;
   youtubeUrl: string;
   onVirtualTourUpdate: (url: string) => void;
@@ -13,7 +13,7 @@ interface VirtualTourCardProps {
 }
 
 export function VirtualTourCard({
-  id = "", // Default value
+  id = "",
   virtualTourUrl = "",
   youtubeUrl = "",
   onVirtualTourUpdate,
@@ -22,12 +22,32 @@ export function VirtualTourCard({
   const [localVirtualTourUrl, setLocalVirtualTourUrl] = useState(virtualTourUrl);
   const [localYoutubeUrl, setLocalYoutubeUrl] = useState(youtubeUrl);
 
+  // Update local state when props change
+  useEffect(() => {
+    setLocalVirtualTourUrl(virtualTourUrl);
+    setLocalYoutubeUrl(youtubeUrl);
+    console.log("VirtualTourCard - Received URLs:", { virtualTourUrl, youtubeUrl });
+  }, [virtualTourUrl, youtubeUrl]);
+
   const handleVirtualTourSubmit = () => {
     onVirtualTourUpdate(localVirtualTourUrl);
   };
 
   const handleYoutubeUrlSubmit = () => {
     onYoutubeUrlUpdate(localYoutubeUrl);
+  };
+
+  // Fix YouTube URL for embedding if it's in watch format
+  const getEmbedUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('youtube.com/embed/')) return url;
+    if (url.includes('youtube.com/watch?v=')) {
+      return url.replace('watch?v=', 'embed/');
+    }
+    if (url.includes('youtu.be/')) {
+      return url.replace('youtu.be/', 'youtube.com/embed/');
+    }
+    return url;
   };
 
   return (
@@ -68,7 +88,7 @@ export function VirtualTourCard({
           {youtubeUrl && (
             <div className="mt-4 aspect-video w-full">
               <iframe
-                src={youtubeUrl.replace("watch?v=", "embed/")}
+                src={getEmbedUrl(youtubeUrl)}
                 className="w-full h-full border-0"
                 allowFullScreen
                 title="YouTube video"
