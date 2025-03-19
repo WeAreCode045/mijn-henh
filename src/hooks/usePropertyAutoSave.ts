@@ -33,13 +33,13 @@ export function usePropertyAutoSave() {
         bedrooms: formData.bedrooms,
         bathrooms: formData.bathrooms,
         sqft: formData.sqft,
-        living_area: formData.livingArea,
-        build_year: formData.buildYear,
+        livingArea: formData.livingArea,
+        buildYear: formData.buildYear,
         garages: formData.garages,
-        energy_label: formData.energyLabel,
-        has_garden: formData.hasGarden,
+        energyLabel: formData.energyLabel,
+        hasGarden: formData.hasGarden,
         description: formData.description,
-        shortDescription: formData.shortDescription, // Include shortDescription in autosave
+        shortDescription: formData.shortDescription,
         location_description: formData.location_description,
         features: JSON.stringify(formData.features),
         latitude: formData.latitude,
@@ -47,9 +47,9 @@ export function usePropertyAutoSave() {
         object_id: formData.object_id,
         agent_id: formData.agent_id,
         template_id: formData.template_id,
-        virtual_tour_url: formData.virtualTourUrl,
-        youtube_url: formData.youtubeUrl,
-        floorplan_embed_script: formData.floorplanEmbedScript,
+        virtualTourUrl: formData.virtualTourUrl,
+        youtubeUrl: formData.youtubeUrl,
+        floorplanEmbedScript: formData.floorplanEmbedScript,
       };
       
       console.log('Auto-saving property data...', formData);

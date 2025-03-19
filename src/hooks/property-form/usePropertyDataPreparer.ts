@@ -31,7 +31,7 @@ export function usePropertyDataPreparer() {
       energyLabel: formData.energyLabel,
       hasGarden: formData.hasGarden,
       description: formData.description,
-      shortDescription: formData.shortDescription, // Include shortDescription in the submit data
+      shortDescription: formData.shortDescription,
       location_description: formData.location_description,
       features: featuresJson as string,
       areas: areasForSubmission as any,
