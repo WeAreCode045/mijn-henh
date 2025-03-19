@@ -40,14 +40,18 @@ export function DashboardTabContent({
 
   // Helper function to format address
   const renderAddress = () => {
-    if (typeof property.address === 'object' && property.address !== null) {
+    if (!property.address) {
+      return ''; // Return empty string if address is null or undefined
+    }
+    
+    if (typeof property.address === 'object') {
       // For object-based addresses
       const street = property.address.street || '';
       const city = property.address.city || '';
       return `${street}${street && city ? ', ' : ''}${city}`;
     } else {
       // For string addresses
-      return property.address || '';
+      return property.address;
     }
   };
 
