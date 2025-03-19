@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabContent } from "./ContentTabContent";
 import { useFormSteps } from "@/hooks/useFormSteps";
@@ -30,7 +30,7 @@ interface ContentTabWrapperProps {
     isGeneratingMap?: boolean;
     isUploading?: boolean;
     isSaving?: boolean;
-    onSubmit?: () => void; // Added this prop to match ContentTabContentProps
+    onSubmit?: () => void;
   };
 }
 
@@ -58,13 +58,15 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
   );
   
   // Prioritize external step handler if provided
-  const handleStepNavigation = handlers.handleStepClick || handleStepClick;
+  const stepClickHandler = handlers.handleStepClick || handleStepClick;
+  const currentStepValue = handlers.currentStep !== undefined ? handlers.currentStep : currentStep;
 
   // Create a dummy onSubmit if not provided to prevent loops or errors
-  const handleSubmit = handlers.onSubmit || (() => {
+  const submitHandler = handlers.onSubmit || (() => {
     console.log("Default submit handler called");
   });
 
+  // We're passing all the handlers individually to avoid TypeScript errors
   return (
     <ContentTabContent
       formData={formData}
@@ -78,8 +80,8 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
       onAreaImageRemove={handlers.onAreaImageRemove}
       onAreaImagesSelect={handlers.onAreaImagesSelect}
       handleAreaImageUpload={handlers.handleAreaImageUpload}
-      currentStep={handlers.currentStep !== undefined ? handlers.currentStep : currentStep}
-      handleStepClick={handleStepNavigation}
+      currentStep={currentStepValue}
+      handleStepClick={stepClickHandler}
       handleNext={handleNext}
       handlePrevious={handlePrevious}
       setPendingChanges={handlers.setPendingChanges || setPendingChanges}
@@ -94,7 +96,7 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
       isUploading={handlers.isUploading}
       isSaving={handlers.isSaving}
       lastSaved={lastSaved}
-      onSubmit={handleSubmit} // Add the onSubmit prop here
+      onSubmit={submitHandler}
     />
   );
 }

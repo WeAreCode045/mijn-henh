@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFloorplan } from "@/types/property";
 
@@ -15,18 +15,21 @@ export function FloorplanDatabaseFetcher({
   onFetchComplete
 }: FloorplanDatabaseFetcherProps) {
   const [hasFetched, setHasFetched] = useState(false);
+  const fetchingRef = useRef(false);
   
   useEffect(() => {
     // Reset fetch state when property ID changes
     if (propertyId) {
       setHasFetched(false);
+      fetchingRef.current = false;
     }
   }, [propertyId]);
   
   const fetchFloorplans = useCallback(async () => {
-    if (!propertyId || hasFetched) return;
+    if (!propertyId || hasFetched || fetchingRef.current) return;
     
     try {
+      fetchingRef.current = true;
       console.log("FloorplanDatabaseFetcher - fetching floorplans for property:", propertyId);
       
       const { data, error } = await supabase
@@ -63,11 +66,13 @@ export function FloorplanDatabaseFetcher({
       setHasFetched(true);
     } catch (error) {
       console.error("Error fetching floorplans from database:", error);
+    } finally {
+      fetchingRef.current = false;
     }
   }, [propertyId, hasFetched, onFetchComplete]);
   
   useEffect(() => {
-    if (propertyId && !hasFetched) {
+    if (propertyId && !hasFetched && !fetchingRef.current) {
       fetchFloorplans();
     }
   }, [propertyId, fetchFloorplans, hasFetched]);

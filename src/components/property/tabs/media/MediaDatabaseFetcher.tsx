@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
 
@@ -15,25 +15,21 @@ export function MediaDatabaseFetcher({
   onFetchComplete
 }: MediaDatabaseFetcherProps) {
   const [hasFetched, setHasFetched] = useState(false);
-  
-  // Separate state to track the last fetch time
-  const [fetchTrigger, setFetchTrigger] = useState(0);
+  const fetchingRef = useRef(false);
   
   useEffect(() => {
-    // Only poll for new images every 30 seconds
-    const interval = setInterval(() => {
-      if (propertyId) {
-        setFetchTrigger(prev => prev + 1);
-      }
-    }, 30000); // 30 seconds instead of 3 seconds
-    
-    return () => clearInterval(interval);
+    // Reset fetch state when property ID changes
+    if (propertyId) {
+      setHasFetched(false);
+      fetchingRef.current = false;
+    }
   }, [propertyId]);
   
   const fetchImages = useCallback(async () => {
-    if (!propertyId || hasFetched) return;
+    if (!propertyId || hasFetched || fetchingRef.current) return;
     
     try {
+      fetchingRef.current = true;
       console.log("MediaDatabaseFetcher - fetching images for property:", propertyId);
       
       const { data, error } = await supabase
@@ -70,22 +66,16 @@ export function MediaDatabaseFetcher({
       setHasFetched(true);
     } catch (error) {
       console.error("Error fetching images from database:", error);
+    } finally {
+      fetchingRef.current = false;
     }
   }, [propertyId, hasFetched, onFetchComplete]);
 
   useEffect(() => {
-    // Reset fetch state when property ID changes
-    if (propertyId) {
-      setHasFetched(false);
-    }
-  }, [propertyId]);
-  
-  // Trigger fetch when property ID changes or fetchTrigger updates
-  useEffect(() => {
-    if (propertyId && !hasFetched) {
+    if (propertyId && !hasFetched && !fetchingRef.current) {
       fetchImages();
     }
-  }, [propertyId, fetchTrigger, fetchImages, hasFetched]);
+  }, [propertyId, fetchImages, hasFetched]);
 
   return null; // This is a logic-only component with no UI
 }

@@ -2,153 +2,144 @@
 import React, { useState } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { VideoCameraIcon } from "lucide-react";
 
 interface VirtualToursTabProps {
   property: PropertyData;
   setProperty: React.Dispatch<React.SetStateAction<PropertyData>>;
-  onVirtualTourSave: (url: string) => void;
-  onYoutubeUrlSave: (url: string) => void;
-  onFloorplanEmbedScriptSave: (script: string) => void;
-  isSaving?: boolean;
+  isSaving: boolean;
+  setIsSaving: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function VirtualToursTab({
   property,
   setProperty,
-  onVirtualTourSave,
-  onYoutubeUrlSave,
-  onFloorplanEmbedScriptSave,
-  isSaving = false
+  isSaving,
+  setIsSaving
 }: VirtualToursTabProps) {
-  const [virtualTourUrl, setVirtualTourUrl] = useState(property.virtualTourUrl || "");
-  const [youtubeUrl, setYoutubeUrl] = useState(property.youtubeUrl || "");
-  const [floorplanEmbedScript, setFloorplanEmbedScript] = useState(property.floorplanEmbedScript || "");
-  const [activeTab, setActiveTab] = useState<string>("virtual-tour");
-
-  const handleSaveVirtualTour = () => {
-    onVirtualTourSave(virtualTourUrl);
+  const [virtualTourUrl, setVirtualTourUrl] = useState<string>(property.virtualTourUrl || "");
+  const [youtubeUrl, setYoutubeUrl] = useState<string>(property.youtubeUrl || "");
+  
+  const handleSaveVirtualTour = async () => {
+    if (!property.id) return;
+    
+    setIsSaving(true);
+    
+    try {
+      // Update the property with the new virtual tour URL
+      const { error } = await fetch(`/api/properties/${property.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          virtualTourUrl
+        }),
+      }).then(res => res.json());
+      
+      if (error) throw error;
+      
+      // Update local state
+      setProperty(prev => ({
+        ...prev,
+        virtualTourUrl
+      }));
+      
+    } catch (error) {
+      console.error('Error saving virtual tour URL:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
   
-  const handleSaveYoutubeUrl = () => {
-    onYoutubeUrlSave(youtubeUrl);
-  };
-  
-  const handleSaveFloorplanEmbed = () => {
-    onFloorplanEmbedScriptSave(floorplanEmbedScript);
+  const handleSaveYoutubeUrl = async () => {
+    if (!property.id) return;
+    
+    setIsSaving(true);
+    
+    try {
+      // Update the property with the new YouTube URL
+      const { error } = await fetch(`/api/properties/${property.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          youtubeUrl
+        }),
+      }).then(res => res.json());
+      
+      if (error) throw error;
+      
+      // Update local state
+      setProperty(prev => ({
+        ...prev,
+        youtubeUrl
+      }));
+      
+    } catch (error) {
+      console.error('Error saving YouTube URL:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Virtual Tours and Embeds</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="virtual-tour">Virtual Tour</TabsTrigger>
-              <TabsTrigger value="youtube">YouTube Video</TabsTrigger>
-              <TabsTrigger value="floorplan-embed">Floorplan Embed</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="virtual-tour" className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="virtualTourUrl" className="text-sm font-medium">Virtual Tour URL</label>
-                <Input
-                  id="virtualTourUrl"
-                  value={virtualTourUrl}
-                  onChange={(e) => setVirtualTourUrl(e.target.value)}
-                  placeholder="Enter virtual tour URL"
-                />
-              </div>
-              <Button 
-                onClick={handleSaveVirtualTour} 
-                disabled={isSaving || virtualTourUrl === property.virtualTourUrl}
-              >
-                Save Virtual Tour
-              </Button>
-              
-              {property.virtualTourUrl && (
-                <div className="mt-6">
-                  <h4 className="text-sm font-medium mb-2">Preview</h4>
-                  <div className="w-full h-96 border rounded overflow-hidden">
-                    <iframe
-                      src={property.virtualTourUrl}
-                      className="w-full h-full"
-                      allowFullScreen
-                      title="Virtual Tour"
-                    />
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="youtube" className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="youtubeUrl" className="text-sm font-medium">YouTube Video URL</label>
-                <Input
-                  id="youtubeUrl"
-                  value={youtubeUrl}
-                  onChange={(e) => setYoutubeUrl(e.target.value)}
-                  placeholder="Enter YouTube video URL"
-                />
-              </div>
-              <Button 
-                onClick={handleSaveYoutubeUrl} 
-                disabled={isSaving || youtubeUrl === property.youtubeUrl}
-              >
-                Save YouTube URL
-              </Button>
-              
-              {property.youtubeUrl && (
-                <div className="mt-6">
-                  <h4 className="text-sm font-medium mb-2">Preview</h4>
-                  <div className="w-full h-96 border rounded overflow-hidden">
-                    <iframe
-                      src={property.youtubeUrl.replace('watch?v=', 'embed/')}
-                      className="w-full h-full"
-                      allowFullScreen
-                      title="YouTube Video"
-                    />
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="floorplan-embed" className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="floorplanEmbed" className="text-sm font-medium">Floorplan Embed Script</label>
-                <Textarea
-                  id="floorplanEmbed"
-                  value={floorplanEmbedScript}
-                  onChange={(e) => setFloorplanEmbedScript(e.target.value)}
-                  placeholder="Enter floorplan embed script"
-                  rows={8}
-                />
-              </div>
-              <Button 
-                onClick={handleSaveFloorplanEmbed} 
-                disabled={isSaving || floorplanEmbedScript === property.floorplanEmbedScript}
-              >
-                Save Embed Script
-              </Button>
-              
-              {property.floorplanEmbedScript && (
-                <div className="mt-6">
-                  <h4 className="text-sm font-medium mb-2">Preview</h4>
-                  <div className="w-full min-h-96 border rounded p-4 overflow-hidden" 
-                    dangerouslySetInnerHTML={{ __html: property.floorplanEmbedScript }} 
-                  />
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </>
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <VideoCameraIcon className="h-5 w-5" />
+          Virtual Tours & Videos
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">Matterport or other 3D Tour URL</h3>
+          <div className="flex gap-2">
+            <Input
+              value={virtualTourUrl}
+              onChange={(e) => setVirtualTourUrl(e.target.value)}
+              placeholder="Paste 3D tour embed URL here"
+            />
+            <Button onClick={handleSaveVirtualTour} disabled={isSaving}>Save</Button>
+          </div>
+          {virtualTourUrl && (
+            <div className="mt-4 aspect-video w-full">
+              <iframe
+                src={virtualTourUrl}
+                className="w-full h-full border-0"
+                allowFullScreen
+                title="Virtual Tour"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium">YouTube Video URL</h3>
+          <div className="flex gap-2">
+            <Input
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="Paste YouTube video URL here"
+            />
+            <Button onClick={handleSaveYoutubeUrl} disabled={isSaving}>Save</Button>
+          </div>
+          {youtubeUrl && (
+            <div className="mt-4 aspect-video w-full">
+              <iframe
+                src={youtubeUrl.replace("watch?v=", "embed/")}
+                className="w-full h-full border-0"
+                allowFullScreen
+                title="YouTube video"
+              />
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
