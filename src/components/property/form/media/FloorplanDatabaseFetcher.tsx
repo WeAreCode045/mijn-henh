@@ -43,6 +43,7 @@ export function FloorplanDatabaseFetcher({
             sort_order: fp.sort_order,
             property_id: fp.property_id,
             type: 'floorplan',
+            alt: fp.title || '',
           }));
           onFloorplansUpdate(formattedFloorplans);
         }

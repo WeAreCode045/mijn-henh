@@ -38,12 +38,15 @@ export function ImageDatabaseFetcher({
           const formattedImages = data.map((img): PropertyImage => ({
             id: img.id,
             url: img.url,
-            type: img.type || 'image',
+            type: img.type as "image" | "floorplan" || 'image',
             is_main: img.is_main,
             is_featured_image: img.is_featured_image,
             sort_order: img.sort_order,
             property_id: img.property_id,
-            area: img.area
+            area: img.area,
+            alt: img.title || '',
+            title: img.title || '',
+            description: img.description || ''
           }));
           onImagesUpdate(formattedImages);
         }

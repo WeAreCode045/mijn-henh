@@ -1,13 +1,14 @@
 
-import React, { useState } from 'react';
-import { PropertyFormData } from '@/types/property';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GeneralInfoContent } from '../../form/steps/general-info/GeneralInfoContent';
-import { LocationContent } from '../../form/steps/location/LocationContent';
-import { FeaturesContent } from '../../form/steps/features/FeaturesContent';
-import { AreasContent } from '../../form/steps/areas/AreasContent';
+import { PropertyData, PropertyFormData } from "@/types/property";
+import { GeneralInfoContent } from "@/components/property/form/steps/general-info/GeneralInfoContent";
+import { LocationContent } from "@/components/property/form/steps/location/LocationContent";
+import { FeaturesContent } from "@/components/property/form/steps/features/FeaturesContent";
+import { AreasContent } from "@/components/property/form/steps/areas/AreasContent";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface ContentTabWrapperProps {
+export interface ContentTabWrapperProps {
+  property: PropertyData;
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
@@ -17,8 +18,11 @@ interface ContentTabWrapperProps {
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: string, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  onAreaImagesSelect: (areaId: string, images: string[]) => void;
   onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  setPendingChanges?: (pending: boolean) => void;
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onFetchNearbyCities?: () => Promise<any>;
@@ -27,89 +31,81 @@ interface ContentTabWrapperProps {
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   isGeneratingMap?: boolean;
-  currentStep?: number;
-  handleStepClick?: (step: number) => void;
-  setPendingChanges?: (pending: boolean) => void;
-  onSubmit?: () => void;
+  onSubmit: () => void;
+  handlers?: any; // Added for compatibility with existing code
 }
 
-export function ContentTabWrapper({
-  formData,
-  onFieldChange,
-  onAddFeature,
-  onRemoveFeature,
-  onUpdateFeature,
-  onAddArea,
-  onRemoveArea,
-  onUpdateArea,
-  onAreaImageRemove,
-  onAreaImagesSelect,
-  onAreaImageUpload,
-  onFetchLocationData,
-  onGenerateLocationDescription,
-  onGenerateMap,
-  isLoadingLocationData,
-  isGeneratingMap,
-  currentStep = 0,
-  handleStepClick,
-  setPendingChanges,
-  onSubmit
-}: ContentTabWrapperProps) {
-  const [activeTab, setActiveTab] = useState('general');
+export function ContentTabWrapper(props: ContentTabWrapperProps) {
+  const {
+    property,
+    formData,
+    onFieldChange,
+    onAddFeature,
+    onRemoveFeature,
+    onUpdateFeature,
+    onAddArea,
+    onRemoveArea,
+    onUpdateArea,
+    onAreaImageRemove,
+    onAreaImagesSelect,
+    onAreaImageUpload,
+    currentStep,
+    handleStepClick,
+    setPendingChanges,
+    onFetchLocationData,
+    onFetchCategoryPlaces,
+    onFetchNearbyCities,
+    onGenerateLocationDescription,
+    onGenerateMap,
+    onRemoveNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    onSubmit
+  } = props;
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+  const [activeTab, setActiveTab] = useState<string>(String(currentStep || 0));
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    handleStepClick(Number(tab));
     if (setPendingChanges) {
       setPendingChanges(true);
-    }
-    if (handleStepClick) {
-      switch (value) {
-        case 'general':
-          handleStepClick(0);
-          break;
-        case 'location':
-          handleStepClick(1);
-          break;
-        case 'features':
-          handleStepClick(2);
-          break;
-        case 'areas':
-          handleStepClick(3);
-          break;
-      }
     }
   };
 
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid grid-cols-4 mb-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="location">Location</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="areas">Areas</TabsTrigger>
+        <TabsList className="grid grid-cols-4 w-full">
+          <TabsTrigger value="0">General Info</TabsTrigger>
+          <TabsTrigger value="1">Location</TabsTrigger>
+          <TabsTrigger value="2">Features</TabsTrigger>
+          <TabsTrigger value="3">Areas</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="general">
-          <GeneralInfoContent 
-            formData={formData} 
-            onFieldChange={onFieldChange} 
+        
+        <TabsContent value="0" className="space-y-4 pt-4">
+          <GeneralInfoContent
+            formData={formData}
+            onFieldChange={onFieldChange}
           />
         </TabsContent>
-
-        <TabsContent value="location">
-          <LocationContent 
-            formData={formData} 
+        
+        <TabsContent value="1" className="space-y-4 pt-4">
+          <LocationContent
+            formData={formData}
             onFieldChange={onFieldChange}
             onFetchLocationData={onFetchLocationData}
+            onFetchCategoryPlaces={onFetchCategoryPlaces}
+            onFetchNearbyCities={onFetchNearbyCities}
             onGenerateLocationDescription={onGenerateLocationDescription}
             onGenerateMap={onGenerateMap}
+            onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
             isGeneratingMap={isGeneratingMap}
           />
         </TabsContent>
-
-        <TabsContent value="features">
+        
+        <TabsContent value="2" className="space-y-4 pt-4">
           <FeaturesContent
             formData={formData}
             onAddFeature={onAddFeature}
@@ -117,8 +113,8 @@ export function ContentTabWrapper({
             onUpdateFeature={onUpdateFeature}
           />
         </TabsContent>
-
-        <TabsContent value="areas">
+        
+        <TabsContent value="3" className="space-y-4 pt-4">
           <AreasContent
             formData={formData}
             onAddArea={onAddArea}

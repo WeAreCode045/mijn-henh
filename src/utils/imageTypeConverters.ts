@@ -1,4 +1,3 @@
-
 import { PropertyImage, PropertyFloorplan } from "@/types/property";
 
 /**
@@ -18,6 +17,53 @@ export function convertToFloorplanArray(images: PropertyImage[]): PropertyFloorp
     type: 'floorplan',
     alt: img.alt || ''
   }));
+}
+
+/**
+ * Creates a new PropertyImage object from a URL string
+ */
+export function toPropertyImage(url: string, isMain: boolean = false): PropertyImage {
+  return {
+    id: `img-${Math.random().toString(36).substr(2, 9)}`,
+    url: url,
+    type: 'image',
+    is_main: isMain,
+    is_featured_image: false,
+    sort_order: 0,
+    property_id: null,
+    area: null
+  };
+}
+
+/**
+ * Creates a new PropertyFloorplan object from a URL string
+ */
+export function toPropertyFloorplan(url: string): PropertyFloorplan {
+  return {
+    id: `fp-${Math.random().toString(36).substr(2, 9)}`,
+    url: url,
+    title: '',
+    description: '',
+    sort_order: 0,
+    property_id: null,
+    type: 'floorplan',
+    alt: ''
+  };
+}
+
+/**
+ * Converts an array of URL strings to PropertyFloorplan[] type
+ */
+export function toPropertyFloorplanArray(urls: string[] | PropertyFloorplan[]): PropertyFloorplan[] {
+  if (!urls || !Array.isArray(urls)) return [];
+  
+  // If the array already contains PropertyFloorplan objects, return it
+  if (urls.length > 0 && typeof urls[0] === 'object') {
+    return urls as PropertyFloorplan[];
+  }
+  
+  // Otherwise, convert URL strings to PropertyFloorplan objects
+  return (urls as string[]).map(url => toPropertyFloorplan(url));
 }
 
 /**

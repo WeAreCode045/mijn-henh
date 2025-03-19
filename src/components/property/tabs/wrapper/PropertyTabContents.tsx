@@ -19,7 +19,7 @@ interface PropertyTabContentsProps {
   onUpdateArea: (id: string, field: string, value: any) => void;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
   onAreaImagesSelect: (areaId: string, images: string[]) => void;
-  onAreaImageUpload: (areaId: string, file: File) => Promise<any>;
+  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleRemoveImage: (index: number) => void;
   isUploading?: boolean;
@@ -173,7 +173,7 @@ export function PropertyTabContents({
         />
       );
     case PropertyTabsValue.COMMUNICATIONS:
-      return <CommunicationsTabContent propertyId={property.id} />;
+      return <CommunicationsTabContent property={property} />;
     default:
       return <div>No content available for this tab</div>;
   }
