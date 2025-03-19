@@ -113,6 +113,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           energyLabel: propertyData.energyLabel || "",
           hasGarden: propertyData.hasGarden || false,
           description: propertyData.description || "",
+          shortDescription: propertyData.shortDescription || propertyData.description || "",
           location_description: propertyData.location_description || "",
           features: features,
           images: convertToPropertyImageArray(regularImages),
@@ -136,10 +137,10 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           gridImages: convertToPropertyImageArray(regularImages.slice(0, 4)),
           agent: propertyData.agent ? {
             id: propertyData.agent.id,
-            name: propertyData.agent.full_name,
+            name: propertyData.agent.full_name || propertyData.agent.name,
             email: propertyData.agent.email,
             phone: propertyData.agent.phone,
-            photoUrl: propertyData.agent.avatar_url
+            photoUrl: propertyData.agent.avatar_url || propertyData.agent.photoUrl
           } : undefined,
           propertyType: propertyData.property_type || propertyData.propertyType || ""
         };

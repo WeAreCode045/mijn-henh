@@ -20,7 +20,7 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     energyLabel: property.energyLabel || '',
     hasGarden: property.hasGarden || false,
     description: property.description || '',
-    shortDescription: property.shortDescription || '',
+    shortDescription: property.shortDescription || property.description || '',
     location_description: property.location_description || '',
     features: property.features || [],
     areas: property.areas || [],
@@ -43,7 +43,14 @@ export function adaptPropertyDataToFormData(property: PropertyData): PropertyFor
     virtualTourUrl: property.virtualTourUrl || '',
     youtubeUrl: property.youtubeUrl || '',
     floorplanEmbedScript: property.floorplanEmbedScript || '',
-    propertyType: property.propertyType || '',
+    propertyType: property.propertyType || property.property_type || '',
+    agent: property.agent ? {
+      id: property.agent.id,
+      name: property.agent.name,
+      email: property.agent.email,
+      phone: property.agent.phone,
+      photoUrl: property.agent.photoUrl
+    } : undefined,
     generalInfo: property.generalInfo || {
       propertyDetails: {
         title: property.title || '',

@@ -34,7 +34,10 @@ export const mapPropertyDataToFormData = (propertyData: any, images: PropertyIma
   const generalInfo = formatGeneralInfo(propertyData.generalInfo) || createDefaultGeneralInfo(propertyData);
   
   // Get property type from either property_type property (if it exists) or generate an empty string
-  const propertyType = (propertyData as any).property_type || (propertyData as any).propertyType || "";
+  const propertyType = propertyData.property_type || propertyData.propertyType || "";
+  
+  // Create a shortDescription if it doesn't exist
+  const shortDescription = propertyData.shortDescription || propertyData.description || "";
   
   // Build and return the property form data
   return {
@@ -53,7 +56,7 @@ export const mapPropertyDataToFormData = (propertyData: any, images: PropertyIma
     energyLabel: propertyData.energyLabel || "",
     hasGarden: !!propertyData.hasGarden,
     description: propertyData.description || "",
-    shortDescription: propertyData.description || "", // Use description as fallback for shortDescription
+    shortDescription, // Use the prepared shortDescription
     features,
     areas,
     nearby_places,

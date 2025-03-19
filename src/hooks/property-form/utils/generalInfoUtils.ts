@@ -2,20 +2,17 @@
 import { GeneralInfoData } from "@/types/property";
 
 /**
- * Helper function to safely convert generalInfo
+ * Format general info data from various sources
  */
 export const formatGeneralInfo = (data: any): GeneralInfoData | undefined => {
   if (!data) return undefined;
   
-  // If it's already an object with the right shape, return it
+  // If it's already an object, use it directly
   if (typeof data === 'object' && !Array.isArray(data)) {
-    // Check if it has at least one expected property
-    if ('propertyDetails' in data || 'description' in data || 'keyInformation' in data) {
-      return data as GeneralInfoData;
-    }
+    return data as GeneralInfoData;
   }
   
-  // If it's a string, try to parse it to an object
+  // Try to parse it if it's a string
   if (typeof data === 'string') {
     try {
       const parsed = JSON.parse(data);
@@ -23,17 +20,16 @@ export const formatGeneralInfo = (data: any): GeneralInfoData | undefined => {
         return parsed as GeneralInfoData;
       }
     } catch (e) {
-      // Failed to parse, return undefined
+      console.error("Error parsing generalInfo:", e);
       return undefined;
     }
   }
   
-  // Return undefined if we couldn't convert to GeneralInfoData
   return undefined;
 };
 
 /**
- * Creates a default GeneralInfo object from property data
+ * Create default general info from property data
  */
 export const createDefaultGeneralInfo = (propertyData: any): GeneralInfoData => {
   return {
@@ -44,7 +40,7 @@ export const createDefaultGeneralInfo = (propertyData: any): GeneralInfoData => 
       objectId: propertyData.object_id || '',
     },
     description: {
-      shortDescription: propertyData.description || '',
+      shortDescription: propertyData.shortDescription || propertyData.description || '',
       fullDescription: propertyData.description || '',
     },
     keyInformation: {
@@ -56,6 +52,6 @@ export const createDefaultGeneralInfo = (propertyData: any): GeneralInfoData => 
       energyClass: propertyData.energyLabel || '',
       garages: propertyData.garages || '',
       hasGarden: propertyData.hasGarden || false,
-    }
+    },
   };
 };

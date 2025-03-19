@@ -18,7 +18,7 @@ export const fetchPropertyData = async (id: string) => {
     .select(`
       *,
       property_images(*),
-      agent:profiles(id, full_name, email, phone, avatar_url)
+      agent:profiles(id, full_name, email, phone, avatar_url, whatsapp_number)
     `)
     .eq('id', id)
     .single();
