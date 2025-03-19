@@ -28,14 +28,6 @@ export function DashboardTabContent({
   agentInfo,
   templateInfo
 }: DashboardTabContentProps) {
-  // Safe defaults for callback functions
-  const safeOnDelete = onDelete || (() => Promise.resolve());
-  const safeHandleSaveAgent = handleSaveAgent || (() => {});
-  const safeHandleSaveObjectId = handleSaveObjectId || (() => {});
-  const safeHandleSaveTemplate = handleSaveTemplate || (() => {});
-  const safeHandleGeneratePDF = handleGeneratePDF || (() => {});
-  const safeHandleWebView = onWebView || (() => {});
-
   return (
     <PropertyDashboardTab
       id={property.id}
@@ -48,12 +40,12 @@ export function DashboardTabContent({
       createdAt={property.created_at}
       updatedAt={property.updated_at}
       onSave={() => console.log("Property saved")}
-      onDelete={safeOnDelete}
-      handleGeneratePDF={safeHandleGeneratePDF}
-      handleWebView={safeHandleWebView}
-      handleSaveAgent={safeHandleSaveAgent}
-      handleSaveObjectId={safeHandleSaveObjectId}
-      handleSaveTemplate={safeHandleSaveTemplate}
+      onDelete={onDelete || (() => Promise.resolve())}
+      handleGeneratePDF={handleGeneratePDF || (() => {})}
+      handleWebView={onWebView || (() => {})}
+      handleSaveAgent={handleSaveAgent || (() => {})}
+      handleSaveObjectId={handleSaveObjectId || (() => {})}
+      handleSaveTemplate={handleSaveTemplate || (() => {})}
       isUpdating={isUpdating}
       agentInfo={agentInfo}
       templateInfo={templateInfo}
