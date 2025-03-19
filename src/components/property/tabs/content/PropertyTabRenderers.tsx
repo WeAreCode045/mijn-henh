@@ -17,11 +17,11 @@ interface MediaTabRendererProps {
 export function MediaTabRenderer(props: MediaTabRendererProps) {
   console.log("MediaTabRenderer - Property data:", props.property);
   
-  // Ensure all required handlers are provided
+  // Ensure all required handlers are provided with default implementations
   const handlers = {
-    handleVirtualTourUpdate: props.handlers.handleVirtualTourUpdate || ((url: string) => {}),
-    handleYoutubeUrlUpdate: props.handlers.handleYoutubeUrlUpdate || ((url: string) => {}),
-    handleFloorplanEmbedScriptUpdate: props.handlers.handleFloorplanEmbedScriptUpdate || ((script: string) => {}),
+    handleVirtualTourUpdate: props.handlers.handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate: props.handlers.handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate: props.handlers.handleFloorplanEmbedScriptUpdate,
     setPendingChanges: props.handlers.setPendingChanges
   };
   
