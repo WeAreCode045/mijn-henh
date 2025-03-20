@@ -6,9 +6,12 @@ import { usePropertyFeatures } from './property-form/usePropertyFeatures';
 import { usePropertyAreas } from './property-form/usePropertyAreas';
 import { usePropertyContent } from './property-form/usePropertyContent';
 import { usePropertyImages } from './property-form/usePropertyImages';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
+  const { toast } = useToast();
   
   // Hook for handling form state
   const { 
@@ -59,6 +62,121 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveImage,
     images
   } = usePropertyImages(formState, onFieldChange);
+
+  // Implementation for the save object ID function that returns a Promise
+  const handleSaveObjectId = async (objectId: string): Promise<void> => {
+    if (!formState.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return Promise.reject(new Error("Property ID is missing"));
+    }
+    
+    try {
+      onFieldChange('object_id', objectId);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ object_id: objectId })
+        .eq('id', formState.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Object ID saved successfully",
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error saving object ID:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save object ID",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    }
+  };
+
+  // Implementation for the save agent function that returns a Promise
+  const handleSaveAgent = async (agentId: string): Promise<void> => {
+    if (!formState.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return Promise.reject(new Error("Property ID is missing"));
+    }
+    
+    try {
+      // Update local state
+      onFieldChange('agent_id', agentId === "" ? null : agentId);
+      
+      // Save to database
+      const { error } = await supabase
+        .from('properties')
+        .update({ agent_id: agentId === "" ? null : agentId })
+        .eq('id', formState.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Agent assigned successfully",
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error saving agent:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign agent",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    }
+  };
+
+  // Implementation for the save template function that returns a Promise
+  const handleSaveTemplate = async (templateId: string): Promise<void> => {
+    if (!formState.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return Promise.reject(new Error("Property ID is missing"));
+    }
+    
+    try {
+      // Update local state
+      onFieldChange('template_id', templateId);
+      
+      // Save to database
+      const { error } = await supabase
+        .from('properties')
+        .update({ template_id: templateId })
+        .eq('id', formState.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Template assigned successfully",
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error saving template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign template",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    }
+  };
   
   return {
     formState,
@@ -105,15 +223,9 @@ export function usePropertyFormManager(property: PropertyFormData) {
     images,
     isUploading,
     
-    // Placeholder methods for required properties in PropertyFormManagerChildrenProps
-    handleSaveObjectId: (objectId: string) => {
-      onFieldChange('object_id', objectId);
-    },
-    handleSaveAgent: (agentId: string) => {
-      onFieldChange('agent_id', agentId);
-    },
-    handleSaveTemplate: (templateId: string) => {
-      onFieldChange('template_id', templateId);
-    }
+    // Methods that now return Promises
+    handleSaveObjectId,
+    handleSaveAgent,
+    handleSaveTemplate
   };
 }

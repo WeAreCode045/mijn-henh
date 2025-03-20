@@ -22,7 +22,7 @@ export function usePropertyFormActions(
         description: "Property ID is missing",
         variant: "destructive",
       });
-      return;
+      return Promise.reject(new Error("Property ID is missing"));
     }
     
     try {
@@ -38,6 +38,7 @@ export function usePropertyFormActions(
       });
       
       setPendingChanges(true);
+      return Promise.resolve();
     } catch (error) {
       console.error('Error saving object ID:', error);
       toast({
@@ -45,7 +46,7 @@ export function usePropertyFormActions(
         description: "Failed to save object ID",
         variant: "destructive",
       });
-      throw error;
+      return Promise.reject(error);
     }
   };
 
@@ -59,7 +60,7 @@ export function usePropertyFormActions(
         description: "Property ID is missing",
         variant: "destructive",
       });
-      return;
+      return Promise.reject(new Error("Property ID is missing"));
     }
     
     // If agentId is empty string, we want to set it to null in the database
@@ -78,6 +79,7 @@ export function usePropertyFormActions(
       });
       
       setPendingChanges(true);
+      return Promise.resolve();
     } catch (error) {
       console.error("Error updating agent:", error);
       toast({
@@ -85,7 +87,7 @@ export function usePropertyFormActions(
         description: "Failed to assign agent",
         variant: "destructive",
       });
-      throw error;
+      return Promise.reject(error);
     }
   };
 
@@ -99,7 +101,7 @@ export function usePropertyFormActions(
         description: "Property ID is missing",
         variant: "destructive",
       });
-      return;
+      return Promise.reject(new Error("Property ID is missing"));
     }
     
     try {
@@ -115,6 +117,7 @@ export function usePropertyFormActions(
       });
       
       setPendingChanges(true);
+      return Promise.resolve();
     } catch (error) {
       console.error('Error assigning template:', error);
       toast({
@@ -122,7 +125,7 @@ export function usePropertyFormActions(
         description: "Failed to assign template",
         variant: "destructive",
       });
-      throw error;
+      return Promise.reject(error);
     }
   };
 

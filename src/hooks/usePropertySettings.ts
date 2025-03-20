@@ -7,14 +7,14 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const handleSaveObjectId = async (objectId: string) => {
+  const handleSaveObjectId = async (objectId: string): Promise<void> => {
     if (!propertyId) {
       toast({
         title: "Error",
         description: "Property ID is missing",
         variant: "destructive",
       });
-      return;
+      return Promise.reject(new Error("Property ID is missing"));
     }
 
     try {
@@ -32,6 +32,7 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
       });
       
       onSaveCallback();
+      return Promise.resolve();
     } catch (error) {
       console.error('Error saving object ID:', error);
       toast({
@@ -39,19 +40,20 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
         description: "Failed to save object ID",
         variant: "destructive",
       });
+      return Promise.reject(error);
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const handleSaveAgent = async (agentId: string) => {
+  const handleSaveAgent = async (agentId: string): Promise<void> => {
     if (!propertyId) {
       toast({
         title: "Error",
         description: "Property ID is missing",
         variant: "destructive",
       });
-      return;
+      return Promise.reject(new Error("Property ID is missing"));
     }
 
     try {
@@ -72,6 +74,7 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
       });
       
       onSaveCallback();
+      return Promise.resolve();
     } catch (error) {
       console.error('Error assigning agent:', error);
       toast({
@@ -79,19 +82,20 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
         description: "Failed to assign agent",
         variant: "destructive",
       });
+      return Promise.reject(error);
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const handleSaveTemplate = async (templateId: string) => {
+  const handleSaveTemplate = async (templateId: string): Promise<void> => {
     if (!propertyId) {
       toast({
         title: "Error",
         description: "Property ID is missing",
         variant: "destructive",
       });
-      return;
+      return Promise.reject(new Error("Property ID is missing"));
     }
 
     try {
@@ -109,6 +113,7 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
       });
       
       onSaveCallback();
+      return Promise.resolve();
     } catch (error) {
       console.error('Error assigning template:', error);
       toast({
@@ -116,6 +121,7 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
         description: "Failed to assign template",
         variant: "destructive",
       });
+      return Promise.reject(error);
     } finally {
       setIsUpdating(false);
     }
