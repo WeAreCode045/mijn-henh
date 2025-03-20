@@ -1,5 +1,5 @@
 
-import { usePropertyFormManager } from "@/hooks/usePropertyFormManager";
+import { usePropertyFormManager } from "@/hooks/property-form/usePropertyFormManager";
 import { PropertyFormManagerProps } from "./types/PropertyFormManagerTypes";
 
 export function PropertyFormManager({ property, children }: PropertyFormManagerProps) {
@@ -42,7 +42,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleRemoveImage: formManagerProps.handleRemoveImage,
     isUploading: formManagerProps.isUploading,
     // Placeholder implementations for missing properties
-    handleAreaPhotosUpload: () => {}, // Add stub implementation
+    handleAreaPhotosUpload: async () => {}, // Add stub implementation
     handleRemoveAreaPhoto: () => {}, // Add stub implementation
     handleFloorplanUpload: () => {}, // Add stub implementation
     handleRemoveFloorplan: () => {}, // Add stub implementation

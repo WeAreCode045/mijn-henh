@@ -6,8 +6,8 @@ import { usePropertyFeatures } from './property-form/usePropertyFeatures';
 import { usePropertyAreas } from './property-form/usePropertyAreas';
 import { usePropertyContent } from './property-form/usePropertyContent';
 import { usePropertyImages } from './property-form/usePropertyImages';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);

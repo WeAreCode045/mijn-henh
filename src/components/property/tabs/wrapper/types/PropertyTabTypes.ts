@@ -5,8 +5,8 @@ export interface PropertyTabContentsProps {
   activeTab: string;
   property: PropertyData;
   formState: PropertyFormData;
-  agentInfo: { id: string; name: string };
-  templateInfo: { id: string; name: string };
+  agentInfo?: { id: string; name: string } | null;
+  templateInfo?: { id: string; name: string } | null;
   isUpdating?: boolean;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -27,8 +27,8 @@ export interface PropertyTabContentsProps {
   onRemoveNearbyPlace: (index: number) => void;
   isLoadingLocationData: boolean;
   isGeneratingMap: boolean;
-  onSave: () => void;
-  onDelete: () => Promise<void>;
+  onSave?: () => void;
+  onDelete?: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveTemplate: (templateId: string) => Promise<void>;
@@ -58,9 +58,9 @@ export interface PropertyTabContentsProps {
 export interface PropertyFormManagerChildrenProps {
   formState: PropertyFormData;
   handleFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  handleSaveObjectId: (objectId: string) => void;
-  handleSaveAgent: (agentId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   addFeature: () => void;
   removeFeature: (id: string) => void;
   updateFeature: (id: string, description: string) => void;
@@ -115,12 +115,12 @@ export interface PropertyTabProps {
   activeTab: string;
   property: PropertyData;
   formState: PropertyFormData;
-  agentInfo: { id: string; name: string };
-  templateInfo: { id: string; name: string };
+  agentInfo?: { id: string; name: string } | null;
+  templateInfo?: { id: string; name: string } | null;
   isUpdating: boolean;
   handlers: {
-    onSave: () => void;
-    onDelete: () => Promise<void>;
+    onSave?: () => void;
+    onDelete?: () => Promise<void>;
     handleSaveObjectId: (objectId: string) => Promise<void>;
     handleSaveAgent: (agentId: string) => Promise<void>;
     handleSaveTemplate: (templateId: string) => Promise<void>;
