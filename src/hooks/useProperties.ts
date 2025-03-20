@@ -99,7 +99,8 @@ export const useProperties = () => {
       youtubeUrl: data.youtubeUrl || "",
       floorplanEmbedScript: data.floorplanEmbedScript || "",
       created_at: data.created_at,
-      updated_at: data.updated_at
+      updated_at: data.updated_at,
+      template_id: data.template_id || "default" // Add default template_id
     };
   }
 

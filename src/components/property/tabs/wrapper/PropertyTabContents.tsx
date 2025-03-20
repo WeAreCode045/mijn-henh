@@ -78,7 +78,9 @@ export function PropertyTabContents({
     handleStepClick,
     setPendingChanges,
     isSaving: isSaving || false,
-    handleWebView // Add the handleWebView prop
+    handleWebView, // Add the handleWebView prop
+    // Dummy handleSaveTemplate to satisfy the interface requirement until we can update the type
+    handleSaveTemplate: (templateId: string) => Promise.resolve()
   };
 
   return TabContentRenderers.renderTabContent({

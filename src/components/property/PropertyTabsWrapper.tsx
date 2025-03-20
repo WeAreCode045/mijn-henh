@@ -38,7 +38,6 @@ export function PropertyTabsWrapper({
               handleFieldChange,
               handleSaveObjectId,
               handleSaveAgent,
-              handleSaveTemplate,
               addFeature,
               removeFeature,
               updateFeature,
@@ -91,7 +90,6 @@ export function PropertyTabsWrapper({
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
-                      handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
                       handleWebView={handleOpenWebView} // Pass the function that accepts an event
                       onFieldChange={handleFieldChange}

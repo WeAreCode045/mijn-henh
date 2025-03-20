@@ -12,13 +12,13 @@ import React from 'react';
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<ProtectedRoute element={<Properties />} />} />
-      <Route path="/properties" element={<ProtectedRoute element={<Properties />} />} />
-      <Route path="/properties/new" element={<ProtectedRoute element={<PropertyFormContainer />} />} />
-      <Route path="/properties/:id" element={<ProtectedRoute element={<PropertyFormContainer />} />} />
-      <Route path="/properties/:id/edit" element={<ProtectedRoute element={<PropertyFormContainer />} />} />
-      <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
-      <Route path="/users" element={<ProtectedRoute element={<Users />} />} />
+      <Route path="/" element={<ProtectedRoute><Properties /></ProtectedRoute>} />
+      <Route path="/properties" element={<ProtectedRoute><Properties /></ProtectedRoute>} />
+      <Route path="/properties/new" element={<ProtectedRoute><PropertyFormContainer /></ProtectedRoute>} />
+      <Route path="/properties/:id" element={<ProtectedRoute><PropertyFormContainer /></ProtectedRoute>} />
+      <Route path="/properties/:id/edit" element={<ProtectedRoute><PropertyFormContainer /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
       <Route path="/auth" element={<Auth />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
