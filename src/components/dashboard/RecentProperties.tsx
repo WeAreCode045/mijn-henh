@@ -36,12 +36,13 @@ export function RecentProperties() {
         }
 
         return (data || []).map(item => {
+          // Create a copy of the item with the properties we need
           const itemWithAgent = {
             ...item,
-            agent: item.agent || null,
-            template_id: item.template_id || "default" // Add default template_id if missing
+            agent: item.agent || null
           };
-          return transformSupabaseData(itemWithAgent);
+          // Pass the item directly to transformSupabaseData, which will handle the template_id
+          return transformSupabaseData(itemWithAgent as any);
         });
       } catch (err) {
         console.error('Error fetching properties:', err);

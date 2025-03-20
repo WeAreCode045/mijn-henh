@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -30,13 +29,13 @@ export const useProperties = () => {
     }
 
     return (data || []).map(item => {
-      // Ensure each item has the agent property structured correctly and add template_id if missing
+      // Create a copy of the item with the properties we need
       const propertyWithAgent = {
         ...item,
-        agent: item.agent || null,
-        template_id: item.template_id || "default" // Ensure template_id exists
+        agent: item.agent || null
       };
-      return transformSupabaseData(propertyWithAgent);
+      // Pass the property directly to transformSupabaseData which will handle template_id
+      return transformSupabaseData(propertyWithAgent as any);
     });
   };
 
