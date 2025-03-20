@@ -7,13 +7,13 @@ import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 export function useSendResponse({ 
   submissionId, 
   agentId, 
-  onSuccess,
-  propertyId
+  propertyId, 
+  onSuccess
 }: { 
   submissionId: string; 
   agentId: string; 
-  onSuccess?: () => void;
   propertyId: string;
+  onSuccess?: () => void;
 }) {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
