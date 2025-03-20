@@ -91,44 +91,6 @@ export function usePropertyFormActions(
     }
   };
 
-  // Handle saving template
-  const handleSaveTemplate = async (templateId: string): Promise<void> => {
-    console.log("Saving template ID:", templateId);
-    
-    if (!formData.id) {
-      toast({
-        title: "Error",
-        description: "Property ID is missing",
-        variant: "destructive",
-      });
-      return Promise.reject(new Error("Property ID is missing"));
-    }
-    
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .update({ template_id: templateId })
-        .eq('id', formData.id);
-      
-      if (error) throw error;
-      
-      toast({
-        description: "Template assigned successfully",
-      });
-      
-      setPendingChanges(true);
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error assigning template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign template",
-        variant: "destructive",
-      });
-      return Promise.reject(error);
-    }
-  };
-
   const onSubmit = () => {
     // Final save when clicking submit
     if (formData.id) {
@@ -158,7 +120,6 @@ export function usePropertyFormActions(
   return {
     handleSaveObjectId,
     handleSaveAgent,
-    handleSaveTemplate,
     onSubmit
   };
 }

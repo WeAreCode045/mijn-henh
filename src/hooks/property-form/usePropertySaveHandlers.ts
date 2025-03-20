@@ -88,48 +88,8 @@ export function usePropertySaveHandlers(
     }
   };
 
-  // Updated to return Promise<void>
-  const handleSaveTemplate = async (templateId: string): Promise<void> => {
-    if (!formState.id) {
-      toast({
-        title: "Error",
-        description: "Property ID is missing",
-        variant: "destructive",
-      });
-      return Promise.reject(new Error("Property ID is missing"));
-    }
-    
-    try {
-      // Update local state
-      onFieldChange('template_id', templateId);
-      
-      // Save to database
-      const { error } = await supabase
-        .from('properties')
-        .update({ template_id: templateId })
-        .eq('id', formState.id);
-      
-      if (error) throw error;
-      
-      toast({
-        description: "Template assigned successfully",
-      });
-      
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error saving template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign template",
-        variant: "destructive",
-      });
-      return Promise.reject(error);
-    }
-  };
-
   return {
     handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate
+    handleSaveAgent
   };
 }

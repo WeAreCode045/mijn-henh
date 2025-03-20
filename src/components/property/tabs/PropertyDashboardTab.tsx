@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,28 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Submission } from "@/types/submission";
 
-interface Submission {
-  id: string;
-  property_id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  inquiry_type: string;
-  is_read: boolean;
-  created_at: string;
-  updated_at: string;
-  agent_id: string;
-}
-
 interface Agent {
   id: string;
   full_name: string;
-}
-
-interface Template {
-  id: string;
-  name: string;
 }
 
 interface PropertyDashboardTabProps {
@@ -43,8 +25,6 @@ interface PropertyDashboardTabProps {
   title: string;
   agentId?: string;
   agentName?: string;
-  templateId?: string;
-  templateName?: string;
   createdAt?: string;
   updatedAt?: string;
   onSave: () => void;
@@ -53,10 +33,8 @@ interface PropertyDashboardTabProps {
   handleWebView: (e: React.MouseEvent) => void;
   handleSaveAgent: (agentId: string) => void;
   handleSaveObjectId: (objectId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
 }
 
 export function PropertyDashboardTab({
@@ -65,8 +43,6 @@ export function PropertyDashboardTab({
   title,
   agentId,
   agentName,
-  templateId,
-  templateName,
   createdAt,
   updatedAt,
   onSave,
@@ -75,10 +51,8 @@ export function PropertyDashboardTab({
   handleWebView,
   handleSaveAgent,
   handleSaveObjectId,
-  handleSaveTemplate,
   isUpdating,
-  agentInfo,
-  templateInfo
+  agentInfo
 }: PropertyDashboardTabProps) {
   const [notes, setNotes] = useState<string>("");
   const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
@@ -88,9 +62,7 @@ export function PropertyDashboardTab({
   
   const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
   const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
-  const [currentTemplateId, setCurrentTemplateId] = useState(templateId || "default");
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [templates, setTemplates] = useState<Template[]>([]);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -104,18 +76,7 @@ export function PropertyDashboardTab({
       }
     };
     
-    const fetchTemplates = async () => {
-      const { data, error } = await supabase
-        .from('brochure_templates')
-        .select('id, name');
-      
-      if (!error && data) {
-        setTemplates(data);
-      }
-    };
-    
     fetchAgents();
-    fetchTemplates();
   }, []);
 
   const handleOpenSubmissions = async () => {
@@ -202,11 +163,6 @@ export function PropertyDashboardTab({
   const handleSaveObjectIdClick = (e: React.MouseEvent) => {
     e.preventDefault();
     handleSaveObjectId(currentObjectId);
-  };
-  
-  const handleSaveTemplateClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleSaveTemplate(currentTemplateId);
   };
 
   return (
@@ -356,60 +312,25 @@ export function PropertyDashboardTab({
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Brochure Template
-            </CardTitle>
+            <CardTitle>Notes</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="template-select">Select Template</Label>
-              <Select 
-                value={currentTemplateId} 
-                onValueChange={setCurrentTemplateId}
-              >
-                <SelectTrigger id="template-select">
-                  <SelectValue placeholder="Select a template" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Default Template</SelectItem>
-                  {templates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <Button onClick={handleSaveTemplateClick} disabled={isUpdating}>
+          <CardContent>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes about this property..."
+              className="min-h-32"
+            />
+            <Button 
+              className="mt-4" 
+              onClick={handleSaveNotes}
+            >
               <Save className="h-4 w-4 mr-2" />
-              {isUpdating ? "Saving..." : "Set Template"}
+              Save Notes
             </Button>
           </CardContent>
         </Card>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Notes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add notes about this property..."
-            className="min-h-32"
-          />
-          <Button 
-            className="mt-4" 
-            onClick={handleSaveNotes}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save Notes
-          </Button>
-        </CardContent>
-      </Card>
       
       <PropertySubmissionsDialog 
         open={isSubmissionsOpen}

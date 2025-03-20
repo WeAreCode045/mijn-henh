@@ -12,34 +12,14 @@ export function usePropertyFormContainerData() {
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [templateInfo, setTemplateInfo] = useState<{id: string, name: string} | null>(null);
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
 
   const { formData, setFormData, isLoading } = usePropertyForm(id);
   const { agents, selectedAgent, setSelectedAgent } = useAgentSelect(formData?.agent_id);
 
-  // Fetch template and agent info when formData changes
+  // Fetch agent info when formData changes
   useEffect(() => {
     if (formData && formData.id) {
-      const fetchTemplateInfo = async () => {
-        const templateId = formData.template_id || 'default';
-        
-        if (templateId !== 'default') {
-          const { data } = await supabase
-            .from('brochure_templates')
-            .select('id, name')
-            .eq('id', templateId)
-            .single();
-            
-          if (data) {
-            setTemplateInfo(data);
-            return;
-          }
-        }
-        
-        setTemplateInfo({ id: 'default', name: 'Default Template' });
-      };
-
       const fetchAgentInfo = async () => {
         if (formData.agent_id) {
           const { data } = await supabase
@@ -58,7 +38,6 @@ export function usePropertyFormContainerData() {
         }
       };
 
-      fetchTemplateInfo();
       fetchAgentInfo();
     }
   }, [formData]);
@@ -72,7 +51,6 @@ export function usePropertyFormContainerData() {
     agents,
     selectedAgent,
     setSelectedAgent,
-    templateInfo,
     agentInfo,
     isSubmitting,
     setIsSubmitting,

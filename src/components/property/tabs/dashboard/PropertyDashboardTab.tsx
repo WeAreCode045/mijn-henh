@@ -13,7 +13,6 @@ import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
-import { TemplateCard } from "./cards/TemplateCard";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -21,8 +20,6 @@ interface PropertyDashboardTabProps {
   title: string;
   agentId?: string;
   agentName?: string;
-  templateId?: string;
-  templateName?: string;
   createdAt?: string;
   updatedAt?: string;
   onSave: () => void;
@@ -31,10 +28,8 @@ interface PropertyDashboardTabProps {
   handleWebView: (e: React.MouseEvent) => void;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
-  handleSaveTemplate: (templateId: string) => Promise<void>;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
 }
 
 export function PropertyDashboardTab({
@@ -43,8 +38,6 @@ export function PropertyDashboardTab({
   title,
   agentId,
   agentName,
-  templateId,
-  templateName,
   createdAt,
   updatedAt,
   onSave,
@@ -53,10 +46,8 @@ export function PropertyDashboardTab({
   handleWebView,
   handleSaveAgent,
   handleSaveObjectId,
-  handleSaveTemplate,
   isUpdating,
-  agentInfo,
-  templateInfo
+  agentInfo
 }: PropertyDashboardTabProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [openSubmissionsDialog, setOpenSubmissionsDialog] = useState(false);
@@ -224,12 +215,7 @@ export function PropertyDashboardTab({
         />
         
         <div className="space-y-6">
-          <TemplateCard
-            templateId={templateId}
-            templateName={templateName || templateInfo?.name}
-            onSaveTemplate={handleSaveTemplate}
-            isUpdating={isUpdating}
-          />
+          {/* Agent card or other content could go here */}
         </div>
       </div>
       

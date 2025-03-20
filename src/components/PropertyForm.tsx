@@ -14,7 +14,6 @@ export function PropertyForm() {
   const { settings } = useAgencySettings();
   const { toast } = useToast();
   const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
-  const [templateInfo, setTemplateInfo] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -38,31 +37,7 @@ export function PropertyForm() {
 
       fetchAgentInfo();
     }
-
-    // Set default template info
-    setTemplateInfo({ id: 'default', name: 'Default Template' });
-
-    // Try to fetch actual template if we have one
-    if (formData?.template_id && formData.template_id !== 'default') {
-      const fetchTemplateInfo = async () => {
-        try {
-          const { data } = await supabase
-            .from('brochure_templates')
-            .select('id, name')
-            .eq('id', formData.template_id)
-            .single();
-          
-          if (data) {
-            setTemplateInfo({ id: data.id, name: data.name });
-          }
-        } catch (error) {
-          console.error("Error fetching template info:", error);
-        }
-      };
-
-      fetchTemplateInfo();
-    }
-  }, [formData?.agent_id, formData?.template_id]);
+  }, [formData?.agent_id]);
 
   const handleSave = () => {
     // Refresh the form data
@@ -134,7 +109,6 @@ export function PropertyForm() {
           onSave={handleSave}
           onDelete={handleDelete}
           agentInfo={agentInfo}
-          templateInfo={templateInfo}
         />
       </form>
     </div>

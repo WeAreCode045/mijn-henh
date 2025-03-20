@@ -88,49 +88,9 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
     }
   };
 
-  const handleSaveTemplate = async (templateId: string): Promise<void> => {
-    if (!propertyId) {
-      toast({
-        title: "Error",
-        description: "Property ID is missing",
-        variant: "destructive",
-      });
-      return Promise.reject(new Error("Property ID is missing"));
-    }
-
-    try {
-      setIsUpdating(true);
-      
-      const { error } = await supabase
-        .from('properties')
-        .update({ template_id: templateId })
-        .eq('id', propertyId);
-      
-      if (error) throw error;
-      
-      toast({
-        description: "Template assigned successfully",
-      });
-      
-      onSaveCallback();
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error assigning template:', error);
-      toast({
-        title: "Error",
-        description: "Failed to assign template",
-        variant: "destructive",
-      });
-      return Promise.reject(error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   return {
     isUpdating,
     handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate
+    handleSaveAgent
   };
 }
