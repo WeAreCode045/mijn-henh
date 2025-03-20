@@ -9,21 +9,11 @@ import { PropertySubmissionsDialog } from "./PropertySubmissionsDialog";
 import { PropertyData } from "@/types/property";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
+import { Submission } from "@/types/submission";
 
 interface PropertyCardProps {
   property: PropertyData;
   onDelete: (id: string) => void;
-}
-
-interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  inquiry_type: string;
-  message: string;
-  created_at: string;
-  is_read: boolean;
 }
 
 export const PropertyCard = ({
@@ -80,8 +70,22 @@ export const PropertyCard = ({
       .order('created_at', { ascending: false });
 
     if (data) {
-      setSubmissions(data);
-      setUnreadCount(data.filter(s => !s.is_read).length);
+      const formattedSubmissions: Submission[] = data.map(item => ({
+        id: item.id,
+        property_id: item.property_id,
+        name: item.name,
+        email: item.email,
+        phone: item.phone,
+        message: item.message || "",
+        inquiry_type: item.inquiry_type,
+        is_read: !!item.is_read,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        agent_id: item.agent_id,
+      }));
+      
+      setSubmissions(formattedSubmissions);
+      setUnreadCount(formattedSubmissions.filter(s => !s.is_read).length);
     }
   };
 

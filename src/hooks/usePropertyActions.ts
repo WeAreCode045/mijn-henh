@@ -9,12 +9,9 @@ export function usePropertyActions(propertyId: string) {
   const navigate = useNavigate();
   const [showWebView, setShowWebView] = useState(false);
 
-  const handleGeneratePDF = useCallback(async (property?: PropertyData, settings?: AgencySettings) => {
-    if (property && settings) {
-      await generatePropertyPDF(property, settings);
-    } else {
-      console.log("Generate PDF for property:", propertyId);
-    }
+  const handleGeneratePDF = useCallback(() => {
+    console.log("Generate PDF for property:", propertyId);
+    // The implementation will be provided by the actual PDF generator
   }, [propertyId]);
 
   const handleWebView = useCallback((e?: React.MouseEvent) => {

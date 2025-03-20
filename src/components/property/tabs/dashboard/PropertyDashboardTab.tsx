@@ -26,12 +26,12 @@ interface PropertyDashboardTabProps {
   createdAt?: string;
   updatedAt?: string;
   onSave: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
   handleGeneratePDF: () => void;
   handleWebView: (e: React.MouseEvent) => void;
-  handleSaveAgent: (agentId: string) => void;
-  handleSaveObjectId: (objectId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
   templateInfo?: { id: string; name: string } | null;
@@ -75,8 +75,21 @@ export function PropertyDashboardTab({
           description: error.message,
           variant: "destructive"
         });
-      } else {
-        setSubmissions(data || []);
+      } else if (data) {
+        const formattedSubmissions: Submission[] = data.map(item => ({
+          id: item.id,
+          property_id: item.property_id,
+          name: item.name,
+          email: item.email,
+          phone: item.phone,
+          message: item.message || "",
+          inquiry_type: item.inquiry_type,
+          is_read: !!item.is_read,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          agent_id: item.agent_id,
+        }));
+        setSubmissions(formattedSubmissions);
       }
     };
 
@@ -102,32 +115,44 @@ export function PropertyDashboardTab({
     } else {
       toast({
         title: "Submission marked as read",
-        description: "The submission has been marked as read.",
+        description: "The submission has been marked as read."
       });
+      
+      // Update the submissions list
+      setSubmissions(prev => 
+        prev.map(sub => sub.id === submissionId ? {...sub, is_read: true} : sub)
+      );
     }
   };
 
   const handleSaveNotes = async (notes: string) => {
-    const { error } = await supabase
-      .from('property_notes')
-      .insert({ property_id: id, content: notes, title: "Notes" });
+    try {
+      const { error } = await supabase
+        .from('property_notes')
+        .insert({ 
+          property_id: id, 
+          content: notes, 
+          title: "Notes" 
+        });
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Notes saved",
+        description: "The notes have been saved."
+      });
+    } catch (error: any) {
       toast({
         title: "Error saving notes",
         description: error.message,
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Notes saved",
-        description: "The notes have been saved.",
-      });
     }
   };
 
-  const handleGeneratePDFClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleGeneratePDFClick = () => {
     handleGeneratePDF();
   };
 
