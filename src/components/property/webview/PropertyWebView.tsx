@@ -3,32 +3,39 @@ import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { usePropertyWebView } from "@/components/property/usePropertyWebView";
 import { useNavigate, useParams } from "react-router-dom";
 import { PropertyData } from "@/types/property";
-import { Dispatch, SetStateAction, useRef } from "react";
-import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
-import { PropertyWebViewMain } from "@/components/property/webview/PropertyWebViewMain";
-import { PropertyBreadcrumb } from "@/components/property/webview/PropertyBreadcrumb";
-import { WebViewFooter } from "@/components/property/webview/WebViewFooter";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { usePropertyData } from "@/components/property/webview/hooks/usePropertyData";
-import { usePageCalculation } from "@/components/property/webview/hooks/usePageCalculation";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { WebViewLoading } from "@/components/property/webview/WebViewLoading";
+import { WebViewError } from "@/components/property/webview/WebViewError";
+import { WebViewDialogContent } from "@/components/property/webview/WebViewDialogContent";
+import { WebViewFullPage } from "@/components/property/webview/WebViewFullPage";
+import { useWebViewBackground } from "@/components/property/webview/hooks/useWebViewBackground";
+import { hexToHSL } from "@/components/property/webview/utils/colorUtils";
+import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
+import "./webview/styles/WebViewStyles.css";
 
 interface PropertyWebViewProps {
   property?: PropertyData;
   open?: boolean;
   onOpenChange?: Dispatch<SetStateAction<boolean>>;
+  isDialog?: boolean;
 }
 
-export function PropertyWebView({ property, open, onOpenChange }: PropertyWebViewProps = {}) {
+export function PropertyWebView({ property, open, onOpenChange, isDialog = false }: PropertyWebViewProps = {}) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { settings } = useAgencySettings();
   const contentRef = useRef<HTMLDivElement>(null);
   const printContentRef = useRef<HTMLDivElement>(null);
   
+  // Debugging the id parameter
+  useEffect(() => {
+    console.log("PropertyWebView - Received ID parameter:", id);
+    console.log("PropertyWebView - Received property prop:", property?.id);
+  }, [id, property]);
+  
   const { propertyData, isLoading, error } = usePropertyData(id, property);
-  const { calculateTotalPages } = usePageCalculation();
+  
   const {
     selectedImage,
     setSelectedImage,
@@ -40,138 +47,63 @@ export function PropertyWebView({ property, open, onOpenChange }: PropertyWebVie
     handlePrevious
   } = usePropertyWebView();
 
+  // Set webview background image from settings
+  useWebViewBackground(settings);
+
+  // Apply primary color from settings to buttons and accent elements
+  useEffect(() => {
+    if (settings.primaryColor) {
+      const hslColor = hexToHSL(settings.primaryColor);
+      if (hslColor) {
+        document.documentElement.style.setProperty('--estate-600', `${hslColor.h} ${hslColor.s}% ${hslColor.l}%`);
+        document.documentElement.style.setProperty('--estate-700', `${hslColor.h} ${hslColor.s}% ${Math.max(0, hslColor.l - 10)}%`);
+      }
+    }
+    
+    // Cleanup function
+    return () => {
+      document.documentElement.style.removeProperty('--estate-600');
+      document.documentElement.style.removeProperty('--estate-700');
+    };
+  }, [settings.primaryColor]);
+
   // Loading state
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full space-y-4">
-          <Skeleton className="h-8 w-3/4 mx-auto" />
-          <Skeleton className="h-64 w-full rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="h-4 w-4/6" />
-          </div>
-        </div>
-      </div>
-    );
+    return <WebViewLoading isDialog={isDialog} />;
   }
 
   // Error state
   if (error || !propertyData) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6">
-          <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-          <h1 className="text-2xl font-bold text-gray-800">Property Not Found</h1>
-          <p className="text-gray-600">
-            {error || "We couldn't find the property you're looking for. It may have been removed or the URL is incorrect."}
-          </p>
-          <div className="flex space-x-4 justify-center">
-            <Button onClick={() => navigate('/properties')} variant="default">
-              View All Properties
-            </Button>
-            <Button onClick={() => navigate('/')} variant="outline">
-              Go Home
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    console.error("PropertyWebView - Error or no property data:", error);
+    return <WebViewError error={error} isDialog={isDialog} />;
   }
 
-  const totalPages = calculateTotalPages(propertyData);
-
-  if (typeof open !== 'undefined' && onOpenChange) {
+  // If this is being rendered in a dialog
+  if (isDialog && onOpenChange && open !== undefined) {
     return (
       <PropertyWebViewDialog
         propertyData={propertyData}
         isOpen={open}
-        open={open}
         onOpenChange={onOpenChange}
-        settings={settings}
-        contentRef={contentRef}
-        printContentRef={printContentRef}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-        handleShare={handleShare}
-        handlePrint={handlePrint}
-        handleDownload={async () => {}}
       />
     );
   }
 
-  // Use the new URL structure
-  const handleBackNavigation = () => {
-    // Use the new URL structure
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigate('/properties');
-    }
-  };
-
+  // Full page view
   return (
-    <div className="min-h-screen bg-white relative">
-      {/* Fixed Breadcrumb */}
-      <div className="fixed top-0 left-0 right-0 z-10 bg-white shadow-sm">
-        <div className="container mx-auto px-4">
-          <PropertyBreadcrumb 
-            title={propertyData.title}
-            onBack={handleBackNavigation}
-          />
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="container mx-auto min-h-screen overflow-hidden">
-        <div className="flex flex-col items-center h-full pt-20 pb-24">
-          {/* Container with padding */}
-          <div className="w-full flex-1 px-4 sm:px-8 py-4">
-            <div className="flex justify-center">
-              <div className="w-full max-w-[800px] p-0 sm:p-4 h-full">
-                <div className="bg-white shadow-[0_0_15px_rgba(0,0,0,0.1)] rounded-xl overflow-hidden h-full flex flex-col max-h-[calc(100vh-14rem)]">
-                  <div className="w-full flex-1 overflow-y-auto">
-                    <PropertyWebViewMain
-                      propertyData={propertyData}
-                      settings={settings}
-                      contentRef={contentRef}
-                      printContentRef={printContentRef}
-                      currentPage={currentPage}
-                      setCurrentPage={setCurrentPage}
-                      selectedImage={selectedImage}
-                      setSelectedImage={setSelectedImage}
-                      handleShare={handleShare}
-                      handlePrint={handlePrint}
-                      handleDownload={async () => {}}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Fixed Footer */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 bg-estate-100 shadow-lg">
-        <div className="container mx-auto py-4 px-4">
-          <div className="flex justify-center">
-            <div className="w-full max-w-[800px]">
-              <WebViewFooter 
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onShare={handleShare}
-                onPrint={handlePrint}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <WebViewFullPage
+      propertyData={propertyData}
+      settings={settings}
+      contentRef={contentRef}
+      printContentRef={printContentRef}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      selectedImage={selectedImage}
+      setSelectedImage={setSelectedImage}
+      handleShare={handleShare}
+      handlePrint={handlePrint}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+    />
   );
 }

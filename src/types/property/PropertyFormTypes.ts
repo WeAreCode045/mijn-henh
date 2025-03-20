@@ -12,6 +12,7 @@ export interface PropertyFormData extends PropertyData {
   coverImages?: string[];
   gridImages?: string[];
   nearby_cities?: PropertyCity[];
+  status?: string; // Added status property
 }
 
 // Property submit data
@@ -47,4 +48,5 @@ export interface PropertySubmitData {
   featuredImage?: string | null;
   featuredImages?: string[];
   floorplanEmbedScript?: string;
+  status?: string; // Added status property
 }

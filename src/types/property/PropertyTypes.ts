@@ -92,6 +92,7 @@ export interface PropertyFormData {
   gridImages?: string[];
   created_at?: string;
   updated_at?: string;
+  status?: string; // Added status property
 }
 
 export interface PropertySubmitData {
@@ -124,6 +125,7 @@ export interface PropertySubmitData {
   youtubeUrl: string;
   images: string[];
   floorplanEmbedScript: string;
+  status?: string; // Added status property
 }
 
 // Export PropertyPlaceType as the interface itself (not a string union)
