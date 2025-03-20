@@ -31,8 +31,15 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
         
       if (fetchError) throw fetchError;
       
+      // Type assertion to access metadata property
+      type RawPropertyData = {
+        metadata?: Record<string, any>;
+        [key: string]: any;
+      };
+      
       // Prepare the metadata object, preserving any existing metadata
-      const currentMetadata = propertyData?.metadata || {};
+      const typedPropertyData = propertyData as RawPropertyData;
+      const currentMetadata = typedPropertyData.metadata || {};
       const updatedMetadata = {
         ...currentMetadata,
         status

@@ -154,6 +154,13 @@ export function usePropertyFetch(id: string | undefined) {
             propertyDataAny.metadata?.status || 
             propertyDataAny.status || 
             'Draft';
+
+          // Convert areaPhotos to PropertyImage[] if they exist
+          const areaPhotos: PropertyImage[] = Array.isArray(propertyData.areaPhotos) ? 
+            propertyData.areaPhotos.map((url: string) => ({
+              id: `area-${Date.now()}-${Math.random()}`,
+              url
+            })) : [];
           
           // Set the form data with safe defaults for new fields
           setFormData({
@@ -174,7 +181,8 @@ export function usePropertyFetch(id: string | undefined) {
             metadata, // Include the metadata field
             // Add backward compatibility fields
             coverImages, // Now as PropertyImage[]
-            gridImages: regularImages.slice(0, 4) // Now as PropertyImage[]
+            gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
+            areaPhotos // Now as PropertyImage[]
           });
         }
       } catch (error) {

@@ -5,14 +5,19 @@ import { PropertyFeature } from "../property";
 import { PropertyArea } from "../property";
 import { PropertyNearbyPlace } from "../property";
 import { PropertyAgent } from "../property";
+import { PropertyImage } from "../property";
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends PropertyData {
-  areaPhotos?: string[];
-  coverImages?: string[];
-  gridImages?: string[];
+  areaPhotos?: PropertyImage[] | string[];
+  coverImages?: PropertyImage[] | string[];
+  gridImages?: PropertyImage[] | string[];
   nearby_cities?: PropertyCity[];
   status?: string; // Added status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  };
 }
 
 // Property submit data
@@ -49,4 +54,8 @@ export interface PropertySubmitData {
   featuredImages?: string[];
   floorplanEmbedScript?: string;
   status?: string; // Added status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  };
 }

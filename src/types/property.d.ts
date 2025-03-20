@@ -115,12 +115,13 @@ export interface PropertyData {
   // For backward compatibility - can be PropertyImage[] or string[]
   coverImages?: PropertyImage[] | string[];
   gridImages?: PropertyImage[] | string[];
+  areaPhotos?: PropertyImage[] | string[];
 }
 
 // Property form data extends PropertyData
 export interface PropertyFormData extends PropertyData {
   // For backward compatibility in the form
-  areaPhotos?: PropertyImage[];
+  areaPhotos?: PropertyImage[] | string[];
 }
 
 // Property submit data
