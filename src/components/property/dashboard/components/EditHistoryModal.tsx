@@ -87,6 +87,15 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
     return value || "(empty)";
   };
 
+  // Format the date for display
+  const formatDateTime = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "MMM d, yyyy HH:mm:ss");
+    } catch (error) {
+      return "Unknown date";
+    }
+  };
+
   // Add a proper dialog state change handler to ensure state is updated correctly
   const handleOpenChange = (newOpenState: boolean) => {
     console.log("Dialog open state changing to:", newOpenState);
@@ -118,7 +127,7 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
                   <div className="flex justify-between mb-2">
                     <span className="font-medium">{formatFieldName(log.field_name)}</span>
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
+                      {formatDateTime(log.created_at)}
                     </span>
                   </div>
                   <div className="text-sm mb-1">
