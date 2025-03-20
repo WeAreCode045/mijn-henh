@@ -35,6 +35,12 @@ export function usePropertyDatabase() {
         ? data.nearby_cities
         : JSON.stringify(data.nearby_cities);
       
+      // Create or update metadata if status exists
+      const metadata = data.metadata || {};
+      if (data.status) {
+        metadata.status = data.status;
+      }
+      
       // Make a copy of data without fields that don't exist in the database
       const { 
         featuredImage, 
@@ -50,12 +56,14 @@ export function usePropertyDatabase() {
         ...dataToUpdate,
         features: featuresJson,
         nearby_places: nearby_placesJson,
-        nearby_cities: nearby_citiesJson
+        nearby_cities: nearby_citiesJson,
+        metadata: metadata
       };
       
       // Ensure floorplanEmbedScript is included in the data to update
       console.log("usePropertyDatabase - floorplanEmbedScript value:", finalDataToUpdate.floorplanEmbedScript);
       console.log("usePropertyDatabase - shortDescription value:", finalDataToUpdate.shortDescription);
+      console.log("usePropertyDatabase - metadata value:", finalDataToUpdate.metadata);
       
       console.log("usePropertyDatabase - Final update data:", finalDataToUpdate);
       
@@ -115,9 +123,16 @@ export function usePropertyDatabase() {
         ? data.nearby_cities
         : JSON.stringify(data.nearby_cities);
 
+      // Create metadata if status exists
+      const metadata = data.metadata || {};
+      if (data.status) {
+        metadata.status = data.status;
+      }
+
       // Ensure floorplanEmbedScript is included in the data
       console.log("usePropertyDatabase - floorplanEmbedScript value for new property:", data.floorplanEmbedScript);
       console.log("usePropertyDatabase - shortDescription value for new property:", data.shortDescription);
+      console.log("usePropertyDatabase - metadata value for new property:", metadata);
 
       // Make a copy of data without fields that don't exist in the database
       const { 
@@ -134,7 +149,8 @@ export function usePropertyDatabase() {
         ...dataToCreate,
         features: featuresJson,
         nearby_places: nearby_placesJson,
-        nearby_cities: nearby_citiesJson
+        nearby_cities: nearby_citiesJson,
+        metadata: metadata
       };
 
       console.log("usePropertyDatabase - Final create data:", finalDataToCreate);

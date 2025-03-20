@@ -43,6 +43,10 @@ export interface PropertyData {
   created_at?: string;
   updated_at?: string;
   status?: string; // Added status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  }; // Add metadata property to handle the status field
   agent?: {
     id: string;
     name: string;

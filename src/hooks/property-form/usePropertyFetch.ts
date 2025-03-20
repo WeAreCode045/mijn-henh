@@ -146,6 +146,12 @@ export function usePropertyFetch(id: string | undefined) {
             url
           }));
           
+          // Get status from metadata or direct status field
+          const status = 
+            propertyData.metadata?.status || 
+            propertyData.status || 
+            'Draft';
+          
           // Set the form data with safe defaults for new fields
           setFormData({
             ...initialFormData,
@@ -161,6 +167,7 @@ export function usePropertyFetch(id: string | undefined) {
             featuredImages: featuredImages,
             agent: agentData,
             shortDescription: propertyData.shortDescription || "", // Include shortDescription with fallback
+            status, // Use the resolved status
             // Add backward compatibility fields
             coverImages, // Now as PropertyImage[]
             gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]

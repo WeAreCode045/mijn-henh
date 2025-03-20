@@ -49,6 +49,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         const features = safeParseJSON(propertyData.features, []);
         const areas = safeParseJSON(propertyData.areas, []);
         const nearby_places = safeParseJSON(propertyData.nearby_places, []);
+        const metadata = safeParseJSON(propertyData.metadata, { status: propertyData.status || 'Draft' });
         
         // Handle nearby_cities with proper checks
         let nearby_cities: PropertyCity[] = [];
@@ -73,6 +74,9 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           id: `cover-${Date.now()}-${Math.random()}`,
           url
         }));
+        
+        // Determine status from metadata or direct property field
+        const status = metadata?.status || propertyData.status || 'Draft';
         
         // Create the structured property data
         const structuredProperty: PropertyData = {
@@ -110,6 +114,8 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           floorplanEmbedScript: propertyData.floorplanEmbedScript || "",
           created_at: propertyData.created_at,
           updated_at: propertyData.updated_at,
+          status,
+          metadata,
           // Add backward compatibility fields
           coverImages, // Now as PropertyImage[]
           gridImages: regularImages.slice(0, 4) // Now as PropertyImage[]

@@ -45,6 +45,12 @@ export function usePropertySubmit() {
         data.floorplans = processedFloorplans;
       }
       
+      // Create metadata if status exists
+      if (data.status && (!data.metadata || !data.metadata.status)) {
+        data.metadata = data.metadata || {};
+        data.metadata.status = data.status;
+      }
+      
       if (id) {
         console.log(`usePropertySubmit - Updating property ${id} with data:`, JSON.stringify(data));
         

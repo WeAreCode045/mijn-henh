@@ -29,8 +29,8 @@ export function ActionsCard({
   handleSaveAgent,
   agentId
 }: ActionsCardProps) {
-  // Get initial status from propertyData metadata
-  const initialStatus = propertyData?.metadata?.status as string || "Draft";
+  // Get initial status from propertyData metadata or fall back to status property
+  const initialStatus = propertyData?.metadata?.status || propertyData?.status || "Draft";
 
   // Handle PDF generation using the ActionButtons component
   const onGeneratePDF = async () => {

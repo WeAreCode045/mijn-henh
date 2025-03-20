@@ -108,6 +108,10 @@ export interface PropertyData {
   created_at?: string;
   updated_at?: string;
   status?: string; // Added status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  }; // Add metadata property
   // For backward compatibility - can be PropertyImage[] or string[]
   coverImages?: PropertyImage[] | string[];
   gridImages?: PropertyImage[] | string[];
@@ -154,4 +158,8 @@ export interface PropertySubmitData {
   featuredImages?: string[];
   floorplanEmbedScript?: string;
   status?: string; // Added status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  }; // Add metadata property
 }

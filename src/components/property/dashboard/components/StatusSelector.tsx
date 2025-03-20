@@ -22,14 +22,28 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
 
   const handleStatusChange = async (status: string) => {
     try {
-      // Instead of directly updating the status in the properties table,
-      // we create a metadata column entry
+      // Get the current property data first
+      const { data: propertyData, error: fetchError } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', propertyId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      // Prepare the metadata object, preserving any existing metadata
+      const currentMetadata = propertyData.metadata || {};
+      const updatedMetadata = {
+        ...currentMetadata,
+        status
+      };
+      
+      // Update the property with the new metadata
       const { error } = await supabase
         .from('properties')
         .update({ 
-          metadata: {
-            status
-          }
+          metadata: updatedMetadata,
+          status: status // Also update the direct status field for backward compatibility
         })
         .eq('id', propertyId);
       
