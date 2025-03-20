@@ -5,6 +5,7 @@ import { PlaceOption } from "../components/SelectPlacesModal";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
+import { useCategories } from "./useCategories";
 
 export function useNearbyPlacesSection({
   formData,
@@ -26,27 +27,11 @@ export function useNearbyPlacesSection({
   const [selectedPlacesToDelete, setSelectedPlacesToDelete] = useState<number[]>([]);
   const { toast } = useToast();
   
-  const categories = [
-    { id: "restaurant", label: "Restaurants" },
-    { id: "education", label: "Education" },
-    { id: "supermarket", label: "Supermarkets" },
-    { id: "shopping", label: "Shopping" },
-    { id: "sport", label: "Sport Facilities" },
-    { id: "leisure", label: "Leisure" }
-  ];
+  // Use the dedicated categories hook
+  const { categories, groupPlacesByCategory } = useCategories();
   
-  // Group places by category
-  const placesByCategory: Record<string, PropertyNearbyPlace[]> = {
-    all: [...nearbyPlaces]
-  };
-  
-  nearbyPlaces.forEach((place) => {
-    const category = place.type || 'other';
-    if (!placesByCategory[category]) {
-      placesByCategory[category] = [];
-    }
-    placesByCategory[category].push(place);
-  });
+  // Create the placesByCategory object using the helper from useCategories
+  const placesByCategory = groupPlacesByCategory(nearbyPlaces);
   
   const handleFetchCategory = async (category: string) => {
     if (!onFetchNearbyPlaces) return;
