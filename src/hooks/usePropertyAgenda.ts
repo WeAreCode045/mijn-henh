@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export interface AgendaItem {
   id: string;
@@ -17,6 +18,7 @@ export function usePropertyAgenda(propertyId: string) {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { logPropertyChange } = usePropertyEditLogger();
 
   const fetchAgendaItems = async () => {
     setIsLoading(true);
@@ -66,6 +68,14 @@ export function usePropertyAgenda(propertyId: string) {
         .select();
 
       if (error) throw error;
+      
+      // Log the agenda item addition without exposing the details
+      await logPropertyChange(
+        propertyId,
+        "property_agenda",
+        "",
+        "Agenda Item Added"
+      );
       
       console.log('Agenda item added:', data);
       toast({

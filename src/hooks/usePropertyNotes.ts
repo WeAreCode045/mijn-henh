@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export interface PropertyNote {
   id: string;
@@ -15,6 +16,7 @@ export function usePropertyNotes(propertyId: string) {
   const [notes, setNotes] = useState<PropertyNote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { logPropertyChange } = usePropertyEditLogger();
 
   const fetchNotes = async () => {
     setIsLoading(true);
@@ -50,6 +52,14 @@ export function usePropertyNotes(propertyId: string) {
         });
 
       if (error) throw error;
+      
+      // Log the note addition without exposing the content
+      await logPropertyChange(
+        propertyId,
+        "property_notes",
+        "",
+        "Note Added"
+      );
       
       toast({
         title: "Success",
