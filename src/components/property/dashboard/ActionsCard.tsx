@@ -4,7 +4,7 @@ import { PropertyData } from "@/types/property";
 import { StatusSelector } from "./components/StatusSelector";
 import { AgentSelector } from "./components/AgentSelector";
 import { PropertyDates } from "./components/PropertyDates";
-import { ActionButtons } from "./components/ActionButtons";
+import { Trash, Eye, FileText } from "lucide-react"; // Import necessary icons
 
 interface ActionsCardProps {
   propertyId: string;
@@ -59,13 +59,17 @@ export function ActionsCard({
           )}
         </div>
         
-        <ActionButtons
-          propertyId={propertyId}
-          propertyData={propertyData}
-          onDelete={onDelete}
-          onWebView={onWebView}
-          onGeneratePDF={onGeneratePDF}
-        />
+       <div className="flex space-x-4">
+            <button onClick={onDelete} className="bg-red-600 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1 text-white">
+              <Trash className="h-5 w-5" />
+            </button>
+            <button onClick={onWebView} className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1">
+              <Eye className="h-5 w-5" />
+            </button>
+            <button onClick={onGeneratePDF} className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1">
+              <FileText className="h-5 w-5" />
+            </button>
+          </div>
       </CardContent>
     </Card>
   );
