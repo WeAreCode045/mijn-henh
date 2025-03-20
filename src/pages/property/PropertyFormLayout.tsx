@@ -46,7 +46,7 @@ export function PropertyFormLayout({
   actionButtons
 }: PropertyFormLayoutProps) {
   return (
-    <div className="min-h-screen bg-estate-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         <PropertyFormHeader 
           title={title} 
