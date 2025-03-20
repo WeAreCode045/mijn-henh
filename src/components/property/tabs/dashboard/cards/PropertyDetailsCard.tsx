@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Code } from "@/components/ui/code";
 import { Save } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PropertyDetailsCardProps {
   id: string;
@@ -37,6 +38,7 @@ export function PropertyDetailsCard({
   formattedUpdateDate
 }: PropertyDetailsCardProps) {
   const [currentObjectId, setCurrentObjectId] = React.useState(objectId || "");
+  const isMobile = useIsMobile();
   
   const handleSaveObjectIdClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -44,26 +46,27 @@ export function PropertyDetailsCard({
   };
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Property Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <span className="text-sm font-medium">ID:</span>
-          <p className="text-sm font-mono">{id}</p>
+          <p className="text-sm font-mono break-all">{id}</p>
         </div>
         
         <div className="space-y-2">
           <Label htmlFor="object-id">Object ID</Label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               id="object-id"
               value={currentObjectId}
               onChange={(e) => setCurrentObjectId(e.target.value)}
               placeholder="Enter object ID"
+              className="sm:flex-1"
             />
-            <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size="sm">
+            <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size={isMobile ? "sm" : "default"}>
               <Save className="h-4 w-4 mr-2" />
               {isUpdating ? "Saving..." : "Save"}
             </Button>
@@ -72,7 +75,7 @@ export function PropertyDetailsCard({
         
         <div>
           <span className="text-sm font-medium">API Endpoint:</span>
-          <Code className="text-xs mt-1">{apiEndpoint}</Code>
+          <Code className="text-xs mt-1 overflow-x-auto w-full block">{apiEndpoint}</Code>
         </div>
         
         {createdAt && (

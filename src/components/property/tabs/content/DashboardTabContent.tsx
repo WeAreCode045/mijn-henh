@@ -23,25 +23,29 @@ export function DashboardTabContent({
 }: DashboardTabContentProps) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <PropertyOverviewCard 
-          property={property}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="lg:col-span-3">
+          <PropertyOverviewCard 
+            property={property}
+          />
+        </div>
         
-        <ActionsCard 
-          propertyId={property.id}
-          propertyData={property}
-          createdAt={property.created_at}
-          updatedAt={property.updated_at}
-          onSave={onSave}
-          onDelete={onDelete}
-          onWebView={onWebView}
-          handleSaveAgent={handleSaveAgent}
-          agentId={property.agent_id}
-        />
+        <div className="lg:col-span-1">
+          <ActionsCard 
+            propertyId={property.id}
+            propertyData={property}
+            createdAt={property.created_at}
+            updatedAt={property.updated_at}
+            onSave={onSave}
+            onDelete={onDelete}
+            onWebView={onWebView}
+            handleSaveAgent={handleSaveAgent}
+            agentId={property.agent_id}
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <NotesCard propertyId={property.id} />
         <AgendaCard propertyId={property.id} />
       </div>

@@ -1,80 +1,86 @@
 
 import { Button } from "@/components/ui/button";
-import { FileDown, Share2, Globe, Trash2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { PropertyData } from "@/types/property";
-import { useGeneratePDF } from "@/hooks/useGeneratePDF";
+import { TrashIcon, EyeIcon, FileTextIcon } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ActionButtonsProps {
   propertyId: string;
-  propertyData?: PropertyData;
-  onDelete?: () => Promise<void>;
-  onWebView?: (e: React.MouseEvent) => void;
-  isGenerating?: boolean;
+  onDelete: () => Promise<void>;
+  onWebView: (e: React.MouseEvent) => void;
   onGeneratePDF: () => void;
+  isCompact?: boolean;
 }
 
 export function ActionButtons({ 
   propertyId, 
-  propertyData,
   onDelete, 
-  onWebView,
-  isGenerating = false,
-  onGeneratePDF
+  onWebView, 
+  onGeneratePDF,
+  isCompact = false
 }: ActionButtonsProps) {
-  const { toast } = useToast();
-
-  const handleShare = () => {
-    // Use objectId as slug if available, otherwise use id
-    const slug = propertyData?.object_id || propertyId;
-    const url = `${window.location.origin}/share/${slug}`;
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "Link copied to clipboard",
-      description: "You can now share this link with others",
-    });
-  };
+  const isMobile = useIsMobile();
+  const useCompact = isCompact || isMobile;
 
   return (
-    <div className="flex flex-col gap-2">
-      <Button 
-        onClick={onDelete}
-        variant="destructive"
-        className="w-full flex items-center gap-2"
-        size="sm"
-      >
-        <Trash2 className="h-4 w-4" />
-        Delete
-      </Button>
-      <Button
-        onClick={onWebView}
-        variant="outline"
-        className="w-full flex items-center gap-2"
-        size="sm"
-        type="button" 
-      >
-        <Globe className="h-4 w-4" />
-        Web View
-      </Button>
-      <Button
-        onClick={onGeneratePDF}
-        variant="outline"
-        className="w-full flex items-center gap-2"
-        size="sm"
-        disabled={isGenerating}
-      >
-        <FileDown className="h-4 w-4" />
-        {isGenerating ? "Generating..." : "Generate PDF"}
-      </Button>
-      <Button
-        onClick={handleShare}
-        variant="outline"
-        className="w-full flex items-center gap-2"
-        size="sm"
-      >
-        <Share2 className="h-4 w-4" />
-        Share
-      </Button>
-    </div>
+    <>
+      {useCompact ? (
+        <>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="w-full"
+            onClick={onWebView}
+          >
+            <EyeIcon className="h-4 w-4 mr-1" />
+            Web View
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="w-full"
+            onClick={onGeneratePDF}
+          >
+            <FileTextIcon className="h-4 w-4 mr-1" />
+            PDF
+          </Button>
+          <Button 
+            variant="destructive" 
+            size="sm"
+            className="w-full col-span-2 mt-2"
+            onClick={onDelete}
+          >
+            <TrashIcon className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
+        </>
+      ) : (
+        <div className="space-y-2">
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={onWebView}
+          >
+            <EyeIcon className="h-4 w-4 mr-2" />
+            Web View
+          </Button>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={onGeneratePDF}
+          >
+            <FileTextIcon className="h-4 w-4 mr-2" />
+            Generate PDF
+          </Button>
+          <Button 
+            variant="destructive" 
+            className="w-full mt-1"
+            onClick={onDelete}
+          >
+            <TrashIcon className="h-4 w-4 mr-2" />
+            Delete Property
+          </Button>
+        </div>
+      )}
+    </>
   );
 }

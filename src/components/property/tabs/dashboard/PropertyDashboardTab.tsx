@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,12 +7,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
-import { NotesCard } from "./cards/NotesCard";
+import { NotesCard } from "../../dashboard/NotesCard";
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
 import { ActionButtons } from "../../dashboard/components/ActionButtons";
 import { StatusSelector } from "../../dashboard/components/StatusSelector";
 import { AgentSelector } from "../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../dashboard/components/PropertyDates";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -48,6 +50,7 @@ export function PropertyDashboardTab({
 }: PropertyDashboardTabProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [openSubmissionsDialog, setOpenSubmissionsDialog] = useState(false);
+  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -112,8 +115,8 @@ export function PropertyDashboardTab({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{title}</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold truncate">{title}</h2>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
@@ -126,7 +129,7 @@ export function PropertyDashboardTab({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <PropertyDetailsCard
           id={id}
           objectId={objectId}
@@ -144,7 +147,7 @@ export function PropertyDashboardTab({
           formattedCreateDate={formatDate(createdAt)}
         />
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-medium">Property Management</CardTitle>
@@ -162,20 +165,33 @@ export function PropertyDashboardTab({
                 onAgentChange={handleSaveAgent}
               />
               
-              <ActionButtons
-                propertyId={id}
-                onDelete={onDelete}
-                onWebView={handleWebView}
-                onGeneratePDF={handleGeneratePDFClick}
-              />
+              {isMobile ? (
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <ActionButtons
+                    propertyId={id}
+                    onDelete={onDelete}
+                    onWebView={handleWebView}
+                    onGeneratePDF={handleGeneratePDFClick}
+                    isCompact={true}
+                  />
+                </div>
+              ) : (
+                <ActionButtons
+                  propertyId={id}
+                  onDelete={onDelete}
+                  onWebView={handleWebView}
+                  onGeneratePDF={handleGeneratePDFClick}
+                  isCompact={false}
+                />
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <ActivityCard />
-        <NotesCard />
+        <NotesCard propertyId={id} />
       </div>
     </div>
   );
