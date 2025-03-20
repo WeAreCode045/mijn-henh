@@ -57,9 +57,12 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
     try {
       setIsUpdating(true);
       
+      // If agentId is empty string, set it to null in the database
+      const finalAgentId = agentId === "" ? null : agentId;
+      
       const { error } = await supabase
         .from('properties')
-        .update({ agent_id: agentId })
+        .update({ agent_id: finalAgentId })
         .eq('id', propertyId);
       
       if (error) throw error;
@@ -94,12 +97,9 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
     try {
       setIsUpdating(true);
       
-      // Using type assertion to fix TypeScript error
-      const updateData: { template_id: string } = { template_id: templateId };
-      
       const { error } = await supabase
         .from('properties')
-        .update(updateData as any)
+        .update({ template_id: templateId })
         .eq('id', propertyId);
       
       if (error) throw error;

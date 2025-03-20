@@ -38,6 +38,13 @@ export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false 
     fetchAgents();
   }, []);
 
+  // Update currentAgentId when the prop changes
+  useEffect(() => {
+    if (agentId !== undefined) {
+      setCurrentAgentId(agentId);
+    }
+  }, [agentId]);
+
   const handleSaveAgent = (e: React.MouseEvent) => {
     e.preventDefault();
     onSaveAgent(currentAgentId);
@@ -62,7 +69,7 @@ export function AgentCard({ agentId, agentName, onSaveAgent, isUpdating = false 
               <SelectValue placeholder="Select an agent" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="">None</SelectItem>
               {agents.map((agent) => (
                 <SelectItem key={agent.id} value={agent.id}>
                   {agent.full_name}

@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface PropertyOverviewCardProps {
   property: PropertyData;
-  handleSaveAgent?: (agentId: string) => void;
+  handleSaveAgent?: (agentId: string) => Promise<void>;
 }
 
 export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOverviewCardProps) {
@@ -43,15 +43,24 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
     fetchAgents();
   }, []);
 
-  const handleAgentChange = (agentId: string) => {
+  const handleAgentChange = async (agentId: string) => {
     if (handleSaveAgent) {
       const finalAgentId = agentId === "no-agent" ? "" : agentId;
-      handleSaveAgent(finalAgentId);
-      
-      toast({
-        title: "Agent updated",
-        description: "The property agent has been updated",
-      });
+      try {
+        await handleSaveAgent(finalAgentId);
+        
+        toast({
+          title: "Agent updated",
+          description: "The property agent has been updated",
+        });
+      } catch (error) {
+        console.error("Error saving agent:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update the property agent",
+          variant: "destructive",
+        });
+      }
     }
   };
 

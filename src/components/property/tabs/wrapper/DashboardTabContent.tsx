@@ -14,9 +14,9 @@ interface DashboardTabContentProps {
   isUpdating: boolean;
   onSave: () => void;
   onDelete: () => Promise<void>;
-  handleSaveObjectId: (objectId: string) => void;
-  handleSaveAgent: (agentId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   handleGeneratePDF: () => void;
   handleWebView: () => void;
 }
