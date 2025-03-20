@@ -2,22 +2,24 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow, format } from "date-fns";
-import { FileDown, Globe, Share2, Trash2, Mailbox } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Mailbox } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Code } from "@/components/ui/code";
 import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
+import { ActionButtons } from "../dashboard/components/ActionButtons";
+import { StatusSelector } from "../dashboard/components/StatusSelector";
+import { AgentSelector } from "../dashboard/components/AgentSelector";
+import { PropertyDates } from "../dashboard/components/PropertyDates";
 
 interface PropertyDashboardTabProps {
   id: string;
   objectId?: string;
   title: string;
   agentId?: string;
-  agentName?: string;
   createdAt?: string;
   updatedAt?: string;
   onSave: () => void;
@@ -35,7 +37,6 @@ export function PropertyDashboardTab({
   objectId,
   title,
   agentId,
-  agentName,
   createdAt,
   updatedAt,
   onSave,
@@ -89,48 +90,9 @@ export function PropertyDashboardTab({
     setOpenSubmissionsDialog(true);
   };
 
-  const handleMarkAsRead = async (submissionId: string) => {
-    const { error } = await supabase
-      .from('property_contact_submissions')
-      .update({ is_read: true })
-      .eq('id', submissionId);
-
-    if (error) {
-      toast({
-        title: "Error marking submission as read",
-        description: error.message,
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Submission marked as read",
-        description: "The submission has been marked as read."
-      });
-      
-      // Update the submissions list
-      setSubmissions(prev => 
-        prev.map(sub => sub.id === submissionId ? {...sub, is_read: true} : sub)
-      );
-    }
-  };
-
   // This wrapper function allows us to call handleGeneratePDF without passing the event
   const handleGeneratePDFClick = () => {
     handleGeneratePDF();
-  };
-
-  // This wrapper function allows us to call handleWebView with a synthetic event
-  const handleWebViewClick = () => {
-    const syntheticEvent = {} as React.MouseEvent;
-    handleWebView(syntheticEvent);
-  };
-
-  // Function to generate webview URL using objectId as slug if available
-  const getWebViewUrl = () => {
-    if (objectId) {
-      return `/property/${objectId}/webview`;
-    }
-    return `/property/${id}/webview`;
   };
 
   // Format the date properly
@@ -139,7 +101,13 @@ export function PropertyDashboardTab({
     
     try {
       const date = new Date(dateString);
-      return format(date, "dd/MM/yyyy HH:mm");
+      return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
     } catch (error) {
       console.error("Error formatting date:", error);
       return dateString;
@@ -154,41 +122,10 @@ export function PropertyDashboardTab({
           <Button 
             variant="outline" 
             size="icon" 
-            asChild
-            title="Web View"
-          >
-            <a href={getWebViewUrl()} target="_blank" rel="noopener noreferrer">
-              <Globe className="h-4 w-4" />
-            </a>
-          </Button>
-          <Button variant="outline" size="icon" onClick={handleGeneratePDFClick} title="Generate PDF">
-            <FileDown className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon"
-            asChild
-            title="Share Link"
-          >
-            <a href={objectId ? `/share/${objectId}` : `/share/${id}`} target="_blank" rel="noopener noreferrer">
-              <Share2 className="h-4 w-4" />
-            </a>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
             onClick={handleOpenSubmissions}
             title="Contact Submissions"
           >
             <Mailbox className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="destructive" 
-            size="icon" 
-            onClick={onDelete}
-            title="Delete Property"
-          >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -203,8 +140,8 @@ export function PropertyDashboardTab({
           apiEndpoint={`/api/properties/${id}`}
           onSaveObjectId={handleSaveObjectId}
           isUpdating={isUpdating}
-          onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebViewClick}
+          onGeneratePDF={handleGeneratePDFClick}
+          onWebView={handleWebView}
           onSave={onSave}
           onDelete={onDelete}
           formattedUpdateDate={formatDate(updatedAt)}
@@ -212,7 +149,31 @@ export function PropertyDashboardTab({
         />
         
         <div className="space-y-6">
-          {/* Agent card or other content could go here */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-medium">Property Management</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />
+              
+              <StatusSelector 
+                propertyId={id} 
+                initialStatus={""} 
+              />
+              
+              <AgentSelector 
+                initialAgentId={agentId} 
+                onAgentChange={handleSaveAgent}
+              />
+              
+              <ActionButtons
+                propertyId={id}
+                onDelete={onDelete}
+                onWebView={handleWebView}
+                onGeneratePDF={handleGeneratePDFClick}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
       

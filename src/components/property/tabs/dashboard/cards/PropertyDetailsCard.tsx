@@ -1,71 +1,43 @@
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { Save } from "lucide-react";
 
 interface PropertyDetailsCardProps {
   id: string;
   objectId?: string;
-  title?: string;
+  title: string;
+  apiEndpoint: string;
   createdAt?: string;
   updatedAt?: string;
-  apiEndpoint: string;
-  onSaveObjectId: (objectId: string) => void;
+  onSaveObjectId: (objectId: string) => Promise<void>;
   isUpdating: boolean;
-  onGeneratePDF?: () => void;
-  onWebView?: () => void;
-  onSave?: () => void;
-  onDelete?: () => Promise<void>;
-  formattedCreateDate?: string;
-  formattedUpdateDate?: string;
+  onGeneratePDF: () => void;
+  onWebView: (e: React.MouseEvent) => void;
+  onSave: () => void;
+  onDelete: () => Promise<void>;
+  formattedCreateDate: string;
+  formattedUpdateDate: string;
 }
 
 export function PropertyDetailsCard({
   id,
   objectId,
   title,
+  apiEndpoint,
   createdAt,
   updatedAt,
-  apiEndpoint,
   onSaveObjectId,
   isUpdating,
-  onGeneratePDF,
-  onWebView,
-  onSave,
-  onDelete,
   formattedCreateDate,
   formattedUpdateDate
 }: PropertyDetailsCardProps) {
-  const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
+  const [currentObjectId, setCurrentObjectId] = React.useState(objectId || "");
   
-  // Format dates properly
-  const [formattedCreate, setFormattedCreate] = useState<string | undefined>(formattedCreateDate);
-  const [formattedUpdate, setFormattedUpdate] = useState<string | undefined>(formattedUpdateDate);
-  
-  useEffect(() => {
-    // Format dates whenever they change
-    if (createdAt) {
-      try {
-        setFormattedCreate(format(new Date(createdAt), 'MMM d, yyyy h:mm a'));
-      } catch (e) {
-        setFormattedCreate(createdAt);
-      }
-    }
-    
-    if (updatedAt) {
-      try {
-        setFormattedUpdate(format(new Date(updatedAt), 'MMM d, yyyy h:mm a'));
-      } catch (e) {
-        setFormattedUpdate(updatedAt);
-      }
-    }
-  }, [createdAt, updatedAt]);
-
-  const handleSaveObjectId = (e: React.MouseEvent) => {
+  const handleSaveObjectIdClick = (e: React.MouseEvent) => {
     e.preventDefault();
     onSaveObjectId(currentObjectId);
   };
@@ -90,7 +62,8 @@ export function PropertyDetailsCard({
               onChange={(e) => setCurrentObjectId(e.target.value)}
               placeholder="Enter object ID"
             />
-            <Button onClick={handleSaveObjectId} disabled={isUpdating} size="sm">
+            <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size="sm">
+              <Save className="h-4 w-4 mr-2" />
               {isUpdating ? "Saving..." : "Save"}
             </Button>
           </div>
@@ -104,14 +77,14 @@ export function PropertyDetailsCard({
         {createdAt && (
           <div>
             <span className="text-sm font-medium">Created:</span>
-            <p className="text-sm">{formattedCreate || "N/A"}</p>
+            <p className="text-sm">{formattedCreateDate}</p>
           </div>
         )}
         
         {updatedAt && (
           <div>
             <span className="text-sm font-medium">Last Modified:</span>
-            <p className="text-sm">{formattedUpdate || "N/A"}</p>
+            <p className="text-sm">{formattedUpdateDate}</p>
           </div>
         )}
       </CardContent>
