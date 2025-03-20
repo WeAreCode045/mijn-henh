@@ -1,15 +1,17 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { AgencySettings } from "@/types/agency";
 import { PropertyData } from "@/types/property";
 import { ContactFormData, submitContactForm } from "../utils/contactFormUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function useContactForm(property: PropertyData, settings: AgencySettings) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { logPropertyChange } = usePropertyEditLogger();
 
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
@@ -43,6 +45,16 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
     try {
       const result = await submitContactForm(formData, property, settings);
       console.log("Form submission result:", result);
+
+      // Log the submission without exposing personal details
+      if (property.id) {
+        await logPropertyChange(
+          property.id,
+          "contact_form",
+          "",
+          `Form Submission: ${formData.inquiry_type}`
+        );
+      }
 
       // Success message
       toast({

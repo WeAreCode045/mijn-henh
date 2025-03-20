@@ -1,11 +1,12 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function usePropertySettings(propertyId: string, onSaveCallback: () => void) {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
+  const { logPropertyChange } = usePropertyEditLogger();
 
   const handleSaveObjectId = async (objectId: string): Promise<void> => {
     if (!propertyId) {
@@ -20,12 +21,27 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
     try {
       setIsUpdating(true);
       
+      const { data: currentData } = await supabase
+        .from('properties')
+        .select('object_id')
+        .eq('id', propertyId)
+        .single();
+        
+      const currentObjectId = currentData?.object_id || '';
+      
       const { error } = await supabase
         .from('properties')
         .update({ object_id: objectId })
         .eq('id', propertyId);
       
       if (error) throw error;
+      
+      await logPropertyChange(
+        propertyId,
+        "object_id",
+        currentObjectId,
+        objectId
+      );
       
       toast({
         description: "Object ID saved successfully",
@@ -59,8 +75,36 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
     try {
       setIsUpdating(true);
       
-      // If agentId is empty string, set it to null in the database
+      const { data: currentData } = await supabase
+        .from('properties')
+        .select('agent_id')
+        .eq('id', propertyId)
+        .single();
+        
+      let oldAgentName = "No agent";
+      let newAgentName = "No agent";
+      
+      if (currentData?.agent_id) {
+        const { data: oldAgentData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', currentData.agent_id)
+          .single();
+          
+        oldAgentName = oldAgentData?.full_name || "Unknown agent";
+      }
+      
       const finalAgentId = agentId === "" ? null : agentId;
+      
+      if (finalAgentId) {
+        const { data: newAgentData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', finalAgentId)
+          .single();
+          
+        newAgentName = newAgentData?.full_name || "Unknown agent";
+      }
       
       const { error } = await supabase
         .from('properties')
@@ -68,6 +112,13 @@ export function usePropertySettings(propertyId: string, onSaveCallback: () => vo
         .eq('id', propertyId);
       
       if (error) throw error;
+      
+      await logPropertyChange(
+        propertyId,
+        "agent_assignment",
+        oldAgentName,
+        newAgentName
+      );
       
       toast({
         description: "Agent assigned successfully",

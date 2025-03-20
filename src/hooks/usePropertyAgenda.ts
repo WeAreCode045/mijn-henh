@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -102,6 +101,15 @@ export function usePropertyAgenda(propertyId: string) {
     eventTime: string
   ) => {
     try {
+      // Get the current agenda item before updating
+      const { data: currentItem } = await supabase
+        .from('property_agenda_items')
+        .select('title')
+        .eq('id', itemId)
+        .single();
+        
+      const oldTitle = currentItem?.title || 'Unknown agenda item';
+      
       console.log('Updating agenda item:', {
         id: itemId,
         title,
@@ -141,6 +149,15 @@ export function usePropertyAgenda(propertyId: string) {
 
   const deleteAgendaItem = async (itemId: string) => {
     try {
+      // Get the agenda item title before deleting
+      const { data: itemData } = await supabase
+        .from('property_agenda_items')
+        .select('title')
+        .eq('id', itemId)
+        .single();
+        
+      const itemTitle = itemData?.title || 'Unknown agenda item';
+      
       console.log('Deleting agenda item:', itemId);
       const { error } = await supabase
         .from('property_agenda_items')

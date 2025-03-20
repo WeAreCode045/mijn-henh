@@ -2,18 +2,22 @@
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function useSendResponse({ 
   submissionId, 
   agentId, 
-  onSuccess 
+  onSuccess,
+  propertyId
 }: { 
   submissionId: string; 
   agentId: string; 
-  onSuccess?: () => void 
+  onSuccess?: () => void;
+  propertyId: string;
 }) {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
+  const { logPropertyChange } = usePropertyEditLogger();
 
   const sendResponse = async (responseText: string) => {
     if (!responseText.trim()) {
@@ -32,10 +36,32 @@ export function useSendResponse({
         .insert({
           submission_id: submissionId,
           agent_id: agentId,
-          reply_text: responseText // Changed from 'message' to 'reply_text' to match the database schema
+          reply_text: responseText
         });
 
       if (error) throw error;
+
+      // Log the submission reply
+      if (propertyId) {
+        // Get agent name for better logging
+        let agentName = "Unknown agent";
+        if (agentId) {
+          const { data: agentData } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', agentId)
+            .single();
+            
+          agentName = agentData?.full_name || "Unknown agent";
+        }
+        
+        await logPropertyChange(
+          propertyId,
+          "submission_reply",
+          "",
+          `Response sent by ${agentName}`
+        );
+      }
 
       toast({
         title: "Success",

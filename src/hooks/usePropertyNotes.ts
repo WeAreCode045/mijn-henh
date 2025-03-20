@@ -79,12 +79,29 @@ export function usePropertyNotes(propertyId: string) {
 
   const deleteNote = async (noteId: string) => {
     try {
+      // Get the note title before deleting (for logging purposes)
+      const { data: noteData } = await supabase
+        .from('property_notes')
+        .select('title')
+        .eq('id', noteId)
+        .single();
+        
+      const noteTitle = noteData?.title || 'Unknown note';
+      
       const { error } = await supabase
         .from('property_notes')
         .delete()
         .eq('id', noteId);
 
       if (error) throw error;
+      
+      // Log the note deletion
+      await logPropertyChange(
+        propertyId,
+        "property_notes",
+        noteTitle,
+        "Note Deleted"
+      );
       
       toast({
         title: "Success",
