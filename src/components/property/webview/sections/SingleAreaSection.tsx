@@ -56,25 +56,6 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
         </div>
       )}
       
-      {/* Area details - Only show if there's custom data for this area */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        {/* We don't have sqft in the PropertyArea type, so we won't display it directly */}
-        {property.sqft && (
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold">Area:</span>
-            <span>{property.sqft} sq ft</span>
-          </div>
-        )}
-        
-        {/* Similarly, dimensions isn't in the PropertyArea type */}
-        {property.livingArea && (
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold">Living Area:</span>
-            <span>{property.livingArea}</span>
-          </div>
-        )}
-      </div>
-      
       {/* Modal for full-size image view */}
       {selectedImage && (
         <div 
