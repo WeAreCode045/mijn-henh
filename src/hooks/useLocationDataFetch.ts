@@ -237,13 +237,43 @@ export function useLocationDataFetch(
   }, [formData.latitude, formData.longitude, formData.id, onFieldChange, toast]);
   
   // Function to remove a nearby place
-  const removeNearbyPlace = useCallback((index: number) => {
+  const removeNearbyPlace = useCallback(async (index: number) => {
     if (!formData.nearby_places) return;
     
-    const updatedPlaces = [...formData.nearby_places];
-    updatedPlaces.splice(index, 1);
-    onFieldChange('nearby_places', updatedPlaces);
-  }, [formData.nearby_places, onFieldChange]);
+    try {
+      const updatedPlaces = [...formData.nearby_places];
+      const removedPlace = updatedPlaces[index]; // Save reference to the place being removed
+      updatedPlaces.splice(index, 1);
+      
+      // Update form data first
+      onFieldChange('nearby_places', updatedPlaces);
+      
+      // If we have an ID, update the property in the database too
+      if (formData.id) {
+        const { error } = await supabase
+          .from('properties')
+          .update({ nearby_places: updatedPlaces })
+          .eq('id', formData.id);
+          
+        if (error) {
+          console.error("Error removing place from database:", error);
+          throw error;
+        }
+      }
+      
+      toast({
+        title: "Place removed",
+        description: `"${removedPlace?.name || 'Place'}" has been removed.`
+      });
+    } catch (error) {
+      console.error("Error removing nearby place:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove place. Please try again."
+      });
+    }
+  }, [formData.nearby_places, formData.id, onFieldChange, toast]);
   
   return { 
     fetchLocationData, 

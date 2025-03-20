@@ -9,6 +9,7 @@ import { SelectPlacesModal, PlaceOption } from "./components/SelectPlacesModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -131,25 +132,52 @@ export function NearbyPlacesSection({
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (!onFieldChange || !formData.nearby_places || selectedPlacesToDelete.length === 0) return;
 
-    // Filter out the places that are selected for deletion
-    const updatedPlaces = formData.nearby_places.filter((_, idx) => 
-      !selectedPlacesToDelete.includes(idx)
-    );
-    
-    // Update the form data
-    onFieldChange('nearby_places', updatedPlaces);
-    
-    // Reset selection
-    setSelectedPlacesToDelete([]);
-    
-    // Show success toast
-    toast({
-      title: "Places removed",
-      description: `${selectedPlacesToDelete.length} places have been removed.`,
-    });
+    try {
+      // Get the places to be deleted
+      const placesToDelete = selectedPlacesToDelete.map(idx => formData.nearby_places![idx]);
+      
+      // Filter out the places that are selected for deletion
+      const updatedPlaces = formData.nearby_places.filter((_, idx) => 
+        !selectedPlacesToDelete.includes(idx)
+      );
+      
+      // Update the form data
+      onFieldChange('nearby_places', updatedPlaces);
+      
+      // If we have a property ID, update the database too
+      if (formData.id) {
+        const { error } = await supabase
+          .from('properties')
+          .update({ 
+            nearby_places: updatedPlaces
+          })
+          .eq('id', formData.id);
+        
+        if (error) {
+          console.error("Error updating database:", error);
+          throw error;
+        }
+      }
+      
+      // Show success toast
+      toast({
+        title: "Places removed",
+        description: `${selectedPlacesToDelete.length} places have been removed.`,
+      });
+      
+      // Reset selection
+      setSelectedPlacesToDelete([]);
+    } catch (error) {
+      console.error("Error deleting places:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove places. Please try again.",
+      });
+    }
   };
 
   return (
@@ -242,7 +270,7 @@ export function NearbyPlacesSection({
                   toggleSelection={togglePlaceSelection}
                   selectedIndices={selectedPlacesToDelete}
                   isVisible={(place) => !!place.visible_in_webview}
-                  selectionMode={true}
+                  selectionMode={selectedPlacesToDelete.length > 0}
                 />
               ) : (
                 <p className="text-center py-4 text-muted-foreground">No places found</p>
@@ -261,7 +289,7 @@ export function NearbyPlacesSection({
                     toggleSelection={togglePlaceSelection}
                     selectedIndices={selectedPlacesToDelete}
                     isVisible={(place) => !!place.visible_in_webview}
-                    selectionMode={true}
+                    selectionMode={selectedPlacesToDelete.length > 0}
                   />
                 ) : (
                   <Card>

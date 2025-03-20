@@ -32,12 +32,7 @@ export function CategorySection({
         <div className="flex items-center justify-between">
           <CardTitle>{category}</CardTitle>
           
-          {selectionMode && (
-            <div className="flex items-center space-x-2">
-              <Switch id="selection-mode" defaultChecked={true} />
-              <Label htmlFor="selection-mode">Selection Mode</Label>
-            </div>
-          )}
+          {/* Removed the selection mode switch as we control this from the parent now */}
         </div>
         <CardDescription>
           {places.length} {places.length === 1 ? 'place' : 'places'} found
