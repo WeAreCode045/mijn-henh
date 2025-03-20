@@ -8,7 +8,6 @@ export function PropertyTabContents({
   property,
   formState,
   agentInfo,
-  templateInfo,
   isUpdating = false,
   onAddFeature,
   onRemoveFeature,
@@ -32,7 +31,6 @@ export function PropertyTabContents({
   onDelete,
   handleSaveObjectId,
   handleSaveAgent,
-  handleSaveTemplate,
   currentStep,
   handleStepClick,
   setPendingChanges,
@@ -58,7 +56,6 @@ export function PropertyTabContents({
     onDelete,
     handleSaveObjectId,
     handleSaveAgent,
-    handleSaveTemplate,
     onFieldChange,
     onAddFeature,
     onRemoveFeature,
@@ -89,7 +86,6 @@ export function PropertyTabContents({
     property,
     formState,
     agentInfo,
-    templateInfo,
     isUpdating,
     handlers
   });

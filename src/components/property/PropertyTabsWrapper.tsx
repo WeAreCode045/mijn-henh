@@ -14,7 +14,6 @@ interface PropertyTabsWrapperProps {
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
 }
 
 export function PropertyTabsWrapper({
@@ -22,8 +21,7 @@ export function PropertyTabsWrapper({
   settings,
   onSave,
   onDelete,
-  agentInfo,
-  templateInfo
+  agentInfo
 }: PropertyTabsWrapperProps) {
   const { activeTab, setActiveTab } = usePropertyTabs();
   console.log("PropertyTabsWrapper - Active tab:", activeTab);
@@ -38,7 +36,6 @@ export function PropertyTabsWrapper({
               handleFieldChange,
               handleSaveObjectId,
               handleSaveAgent,
-              handleSaveTemplate,
               addFeature,
               removeFeature,
               updateFeature,
@@ -85,15 +82,13 @@ export function PropertyTabsWrapper({
                       property={propertyWithRequiredProps}
                       formState={formState}
                       agentInfo={agentInfo}
-                      templateInfo={templateInfo}
                       isUpdating={false}
                       onSave={onSave}
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
-                      handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
-                      handleWebView={handleOpenWebView} // Pass the function that accepts an event
+                      handleWebView={handleOpenWebView}
                       onFieldChange={handleFieldChange}
                       onAddFeature={addFeature}
                       onRemoveFeature={removeFeature}

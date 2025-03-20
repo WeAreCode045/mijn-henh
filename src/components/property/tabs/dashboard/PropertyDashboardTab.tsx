@@ -148,6 +148,12 @@ export function PropertyDashboardTab({
     handleGeneratePDF();
   };
 
+  // This wrapper function allows us to call handleWebView with a synthetic event
+  const handleWebViewClick = () => {
+    const syntheticEvent = {} as React.MouseEvent;
+    handleWebView(syntheticEvent);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -209,7 +215,7 @@ export function PropertyDashboardTab({
           onSaveObjectId={handleSaveObjectId}
           isUpdating={isUpdating}
           onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebView}
+          onWebView={handleWebViewClick}
           onSave={onSave}
           onDelete={onDelete}
         />

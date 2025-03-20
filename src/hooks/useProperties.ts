@@ -30,7 +30,7 @@ export const useProperties = () => {
     }
 
     return (data || []).map(item => {
-      // Ensure each item has the agent property structured correctly
+      // Ensure each item has the agent property structured correctly and add template_id if missing
       const propertyWithAgent = {
         ...item,
         agent: item.agent || null

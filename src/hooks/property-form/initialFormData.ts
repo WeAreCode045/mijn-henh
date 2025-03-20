@@ -15,7 +15,7 @@ export const initialFormData: PropertyFormData = {
   energyLabel: "",
   hasGarden: false,
   description: "",
-  shortDescription: "", // This field is now correctly defined in PropertyFormData
+  shortDescription: "", 
   location_description: "",
   features: [],
   images: [],
@@ -27,9 +27,8 @@ export const initialFormData: PropertyFormData = {
   nearby_cities: [],
   latitude: null,
   longitude: null,
-  template_id: "default", // Set default template_id
-  floorplans: [], // Empty floorplans array
-  floorplanEmbedScript: "", // Empty floorplanEmbedScript with empty string default
+  floorplans: [], 
+  floorplanEmbedScript: "", 
   virtualTourUrl: "",
   youtubeUrl: "",
   // For backward compatibility
