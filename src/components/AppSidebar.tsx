@@ -4,8 +4,7 @@ import {
   Home, 
   Settings, 
   LogOut,
-  Users as UsersIcon,
-  FileText
+  Users as UsersIcon
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -58,12 +57,6 @@ export function AppSidebar() {
               <SidebarMenuButton onClick={() => navigate('/properties')}>
                 <Home className="w-4 h-4" />
                 <span>Properties</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate('/templates')}>
-                <FileText className="w-4 h-4" />
-                <span>Templates</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             {isAdmin && (

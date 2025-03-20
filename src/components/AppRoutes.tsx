@@ -11,7 +11,6 @@ const PropertyFormPage = lazy(() => import("../pages/PropertyFormPage"));
 const Settings = lazy(() => import("../pages/Settings"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 const Auth = lazy(() => import("../pages/Auth"));
-const Templates = lazy(() => import("../pages/Templates"));
 const PropertyWebView = lazy(() => import("./property/PropertyWebView").then(module => ({ default: module.PropertyWebView })));
 const Users = lazy(() => import("../pages/Users"));
 
@@ -137,14 +136,6 @@ export function AppRoutes() {
         <ProtectedRoute>
           <PropertyLayout>
             <Users />
-          </PropertyLayout>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/templates" element={
-        <ProtectedRoute>
-          <PropertyLayout>
-            <Templates />
           </PropertyLayout>
         </ProtectedRoute>
       } />
