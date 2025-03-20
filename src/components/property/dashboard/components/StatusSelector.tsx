@@ -22,9 +22,15 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
 
   const handleStatusChange = async (status: string) => {
     try {
+      // Instead of directly updating the status in the properties table,
+      // we create a metadata column entry
       const { error } = await supabase
         .from('properties')
-        .update({ status })
+        .update({ 
+          metadata: {
+            status
+          }
+        })
         .eq('id', propertyId);
       
       if (error) throw error;

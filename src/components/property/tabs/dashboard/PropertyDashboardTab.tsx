@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
 import { Mailbox } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,10 +8,10 @@ import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
-import { ActionButtons } from "../dashboard/components/ActionButtons";
-import { StatusSelector } from "../dashboard/components/StatusSelector";
-import { AgentSelector } from "../dashboard/components/AgentSelector";
-import { PropertyDates } from "../dashboard/components/PropertyDates";
+import { ActionButtons } from "../../dashboard/components/ActionButtons";
+import { StatusSelector } from "../../dashboard/components/StatusSelector";
+import { AgentSelector } from "../../dashboard/components/AgentSelector";
+import { PropertyDates } from "../../dashboard/components/PropertyDates";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -90,12 +88,10 @@ export function PropertyDashboardTab({
     setOpenSubmissionsDialog(true);
   };
 
-  // This wrapper function allows us to call handleGeneratePDF without passing the event
   const handleGeneratePDFClick = () => {
     handleGeneratePDF();
   };
 
-  // Format the date properly
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     

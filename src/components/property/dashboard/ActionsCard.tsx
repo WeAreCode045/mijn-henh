@@ -1,8 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
-import { useGeneratePDF } from "@/hooks/useGeneratePDF";
-import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { StatusSelector } from "./components/StatusSelector";
 import { AgentSelector } from "./components/AgentSelector";
 import { PropertyDates } from "./components/PropertyDates";
@@ -31,19 +29,12 @@ export function ActionsCard({
   handleSaveAgent,
   agentId
 }: ActionsCardProps) {
-  const { generatePDF, isGenerating } = useGeneratePDF();
-  const { settings } = useAgencySettings();
+  // Get initial status from propertyData metadata
+  const initialStatus = propertyData?.metadata?.status as string || "Draft";
 
-  const handleGeneratePDF = async () => {
-    if (!propertyData) {
-      return;
-    }
-    
-    try {
-      await generatePDF(propertyData);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    }
+  // Handle PDF generation using the ActionButtons component
+  const onGeneratePDF = async () => {
+    // The actual implementation is in ActionButtons component
   };
 
   return (
@@ -57,7 +48,7 @@ export function ActionsCard({
         <div className="space-y-3">
           <StatusSelector 
             propertyId={propertyId} 
-            initialStatus={propertyData?.status}
+            initialStatus={initialStatus}
           />
           
           {handleSaveAgent && (
@@ -73,8 +64,7 @@ export function ActionsCard({
           propertyData={propertyData}
           onDelete={onDelete}
           onWebView={onWebView}
-          isGenerating={isGenerating}
-          onGeneratePDF={handleGeneratePDF}
+          onGeneratePDF={onGeneratePDF}
         />
       </CardContent>
     </Card>

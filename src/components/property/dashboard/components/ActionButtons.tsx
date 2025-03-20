@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FileDown, Share2, Globe, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyData } from "@/types/property";
+import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 
 interface ActionButtonsProps {
   propertyId: string;
@@ -10,7 +11,7 @@ interface ActionButtonsProps {
   onDelete?: () => Promise<void>;
   onWebView?: (e: React.MouseEvent) => void;
   isGenerating?: boolean;
-  onGeneratePDF: () => Promise<void>;
+  onGeneratePDF: () => void;
 }
 
 export function ActionButtons({ 
