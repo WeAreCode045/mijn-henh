@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';

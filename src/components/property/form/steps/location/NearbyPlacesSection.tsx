@@ -1,3 +1,4 @@
+
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { CategorySection } from "./components/CategorySection";
 import { Button } from "@/components/ui/button";
@@ -84,7 +85,7 @@ export function NearbyPlacesSection({
     }
   };
   
-  const handleSavePlaces = (selectedPlaces: PlaceOption[]) => {
+  const handleSavePlaces = async (selectedPlaces: PlaceOption[]) => {
     if (!onFieldChange || !formData.nearby_places) return;
     
     const newPlaces: PropertyNearbyPlace[] = selectedPlaces.map(place => ({
@@ -103,6 +104,35 @@ export function NearbyPlacesSection({
     
     const updatedPlaces = [...existingPlaces, ...newPlaces];
     onFieldChange('nearby_places', updatedPlaces);
+    
+    // Save to database if we have a property ID
+    if (formData.id) {
+      try {
+        const updatedPlacesJson = preparePropertiesForJsonField(updatedPlaces);
+        
+        const { error } = await supabase
+          .from('properties')
+          .update({ nearby_places: updatedPlacesJson })
+          .eq('id', formData.id);
+          
+        if (error) {
+          console.error("Error saving places to database:", error);
+          throw error;
+        }
+        
+        toast({
+          title: "Places saved",
+          description: `${selectedPlaces.length} places have been added.`
+        });
+      } catch (error) {
+        console.error("Error updating database:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to save places to database. Please try again.",
+        });
+      }
+    }
   };
   
   const togglePlaceVisibility = (placeIndex: number, visible: boolean) => {
