@@ -29,11 +29,11 @@ export const useProperties = () => {
     }
 
     return (data || []).map(item => {
-      // Add template_id if missing to satisfy SupabasePropertyData interface
+      // Add template_id if missing 
       const propertyWithTemplateId = {
         ...item,
         agent: item.agent || null,
-        template_id: item.template_id || "default" // Add a default template_id
+        template_id: "default" // Add a default template_id since we've removed templates functionality
       };
       return transformSupabaseData(propertyWithTemplateId);
     });

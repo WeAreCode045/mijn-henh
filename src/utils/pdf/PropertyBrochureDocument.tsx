@@ -117,8 +117,8 @@ const styles = StyleSheet.create({
 
 export const PropertyBrochureDocument = ({ property, settings }: PropertyBrochureDocumentProps) => {
   // Determine the primary color for accents, with fallback
-  const primaryColor = settings?.primary_color || '#40497A';
-  const secondaryColor = settings?.secondary_color || '#E2E8F0';
+  const primaryColor = settings?.primaryColor || '#40497A';
+  const secondaryColor = settings?.secondaryColor || '#E2E8F0';
 
   return (
     <Document>
@@ -126,8 +126,8 @@ export const PropertyBrochureDocument = ({ property, settings }: PropertyBrochur
         {/* Header with logo */}
         <View style={styles.header}>
           <Text style={styles.headerText}>{settings?.name || 'Real Estate'}</Text>
-          {settings?.logo_url && (
-            <Image src={settings.logo_url} style={styles.logo} />
+          {settings?.logoUrl && (
+            <Image src={settings.logoUrl} style={styles.logo} />
           )}
         </View>
 
