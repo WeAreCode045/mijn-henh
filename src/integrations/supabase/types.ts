@@ -173,6 +173,7 @@ export type Database = {
           location_description: string | null
           longitude: number | null
           map_image: string | null
+          metadata: Json | null
           nearby_cities: Json | null
           nearby_places: Json | null
           notes: string | null
@@ -180,6 +181,7 @@ export type Database = {
           price: string | null
           shortDescription: string | null
           sqft: string | null
+          status: string | null
           title: string | null
           updated_at: string
           virtualTourUrl: string | null
@@ -207,6 +209,7 @@ export type Database = {
           location_description?: string | null
           longitude?: number | null
           map_image?: string | null
+          metadata?: Json | null
           nearby_cities?: Json | null
           nearby_places?: Json | null
           notes?: string | null
@@ -214,6 +217,7 @@ export type Database = {
           price?: string | null
           shortDescription?: string | null
           sqft?: string | null
+          status?: string | null
           title?: string | null
           updated_at?: string
           virtualTourUrl?: string | null
@@ -241,6 +245,7 @@ export type Database = {
           location_description?: string | null
           longitude?: number | null
           map_image?: string | null
+          metadata?: Json | null
           nearby_cities?: Json | null
           nearby_places?: Json | null
           notes?: string | null
@@ -248,6 +253,7 @@ export type Database = {
           price?: string | null
           shortDescription?: string | null
           sqft?: string | null
+          status?: string | null
           title?: string | null
           updated_at?: string
           virtualTourUrl?: string | null

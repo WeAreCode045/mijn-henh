@@ -1,42 +1,34 @@
-
 import type { PropertyFormData } from "@/types/property";
 
 export const initialFormData: PropertyFormData = {
-  id: "",
-  title: "",
-  price: "",
-  address: "",
-  bedrooms: "",
-  bathrooms: "",
-  sqft: "",
-  livingArea: "",
-  buildYear: "",
-  garages: "",
-  energyLabel: "",
+  id: '',
+  title: '',
+  price: '',
+  address: '',
+  bedrooms: '',
+  bathrooms: '',
+  sqft: '',
+  livingArea: '',
+  buildYear: '',
+  garages: '',
+  energyLabel: '',
   hasGarden: false,
-  description: "",
-  shortDescription: "", 
-  location_description: "",
+  description: '',
+  shortDescription: '',
+  location_description: '',
   features: [],
-  images: [],
-  featuredImage: null,
-  featuredImages: [], 
   areas: [],
-  map_image: null,
+  images: [],
   nearby_places: [],
   nearby_cities: [],
-  latitude: null,
-  longitude: null,
-  floorplans: [], 
-  floorplanEmbedScript: "", 
-  virtualTourUrl: "",
-  youtubeUrl: "",
-  status: "Draft", // Default status
-  metadata: {
-    status: "Draft"
-  }, // Default metadata with status
-  // For backward compatibility
-  areaPhotos: [], 
+  floorplans: [],
+  featuredImage: null,
+  featuredImages: [],
   coverImages: [],
-  gridImages: []
+  gridImages: [],
+  areaPhotos: [],
+  status: 'Draft', // Default status is 'Draft'
+  metadata: {
+    status: 'Draft'
+  }
 };
