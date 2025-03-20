@@ -32,7 +32,7 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
       if (fetchError) throw fetchError;
       
       // Prepare the metadata object, preserving any existing metadata
-      const currentMetadata = propertyData.metadata || {};
+      const currentMetadata = propertyData?.metadata || {};
       const updatedMetadata = {
         ...currentMetadata,
         status

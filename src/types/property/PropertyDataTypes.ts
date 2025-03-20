@@ -42,11 +42,11 @@ export interface PropertyData {
   youtubeUrl?: string;
   created_at?: string;
   updated_at?: string;
-  status?: string; // Added status property
+  status?: string; // Property status field
   metadata?: {
     status?: string;
     [key: string]: any;
-  }; // Add metadata property to handle the status field
+  }; // Metadata object that can include status
   agent?: {
     id: string;
     name: string;

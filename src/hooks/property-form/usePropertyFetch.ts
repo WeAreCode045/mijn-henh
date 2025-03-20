@@ -146,10 +146,13 @@ export function usePropertyFetch(id: string | undefined) {
             url
           }));
           
-          // Get status from metadata or direct status field
+          // Safely access metadata and status
+          // Treat propertyData as any to avoid type errors during this transition
+          const propertyDataAny = propertyData as any;
+          const metadata = propertyDataAny.metadata || {};
           const status = 
-            propertyData.metadata?.status || 
-            propertyData.status || 
+            propertyDataAny.metadata?.status || 
+            propertyDataAny.status || 
             'Draft';
           
           // Set the form data with safe defaults for new fields
@@ -168,10 +171,10 @@ export function usePropertyFetch(id: string | undefined) {
             agent: agentData,
             shortDescription: propertyData.shortDescription || "", // Include shortDescription with fallback
             status, // Use the resolved status
+            metadata, // Include the metadata field
             // Add backward compatibility fields
             coverImages, // Now as PropertyImage[]
-            gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
-            areaPhotos: []
+            gridImages: regularImages.slice(0, 4) // Now as PropertyImage[]
           });
         }
       } catch (error) {

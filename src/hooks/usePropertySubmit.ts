@@ -45,9 +45,13 @@ export function usePropertySubmit() {
         data.floorplans = processedFloorplans;
       }
       
-      // Create metadata if status exists
-      if (data.status && (!data.metadata || !data.metadata.status)) {
-        data.metadata = data.metadata || {};
+      // Create or update metadata if status exists
+      if (data.status) {
+        // Initialize metadata if it doesn't exist
+        if (!data.metadata) {
+          data.metadata = {};
+        }
+        // Set the status in metadata
         data.metadata.status = data.status;
       }
       

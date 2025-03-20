@@ -92,7 +92,11 @@ export interface PropertyFormData {
   gridImages?: string[];
   created_at?: string;
   updated_at?: string;
-  status?: string; // Added status property
+  status?: string; // Status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  }; // Metadata property
 }
 
 export interface PropertySubmitData {
@@ -125,7 +129,11 @@ export interface PropertySubmitData {
   youtubeUrl: string;
   images: string[];
   floorplanEmbedScript: string;
-  status?: string; // Added status property
+  status?: string; // Status property
+  metadata?: {
+    status?: string;
+    [key: string]: any;
+  }; // Metadata property
 }
 
 // Export PropertyPlaceType as the interface itself (not a string union)
