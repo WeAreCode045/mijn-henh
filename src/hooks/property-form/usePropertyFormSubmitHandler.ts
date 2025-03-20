@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { usePropertyImageSaver } from "./usePropertyImageSaver";
 import { usePropertyDataPreparer } from "./usePropertyDataPreparer";
 import { usePropertyDatabase } from "./usePropertyDatabase";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function usePropertyFormSubmitHandler() {
   const { toast } = useToast();
@@ -14,6 +15,7 @@ export function usePropertyFormSubmitHandler() {
   const { savePropertyImages, savePropertyFloorplans } = usePropertyImageSaver();
   const { prepareSubmitData } = usePropertyDataPreparer();
   const { updateProperty, createProperty } = usePropertyDatabase();
+  const { logPropertyChanges } = usePropertyEditLogger();
 
   const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData, shouldRedirect = false) => {
     if (e && e.preventDefault) {
@@ -35,8 +37,20 @@ export function usePropertyFormSubmitHandler() {
       
       let success = false;
       if (formData.id) {
+        // Get the current property data before updating to compare changes
+        const { data: currentPropertyData } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', formData.id)
+          .single();
+          
         // Update existing property
         success = await updateProperty(formData.id, submitData);
+        
+        // Log the changes if update was successful
+        if (success && currentPropertyData) {
+          await logPropertyChanges(formData.id, currentPropertyData, submitData);
+        }
         
         if (success) {
           // Save or update featured images

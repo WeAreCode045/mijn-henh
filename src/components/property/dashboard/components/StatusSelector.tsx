@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 interface StatusSelectorProps {
   propertyId: string;
@@ -13,6 +14,7 @@ interface StatusSelectorProps {
 export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSelectorProps) {
   const [propertyStatus, setPropertyStatus] = useState(initialStatus);
   const { toast } = useToast();
+  const { logPropertyChange } = usePropertyEditLogger();
 
   useEffect(() => {
     if (initialStatus) {
@@ -34,12 +36,14 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
       // Type assertion to access metadata property
       type RawPropertyData = {
         metadata?: Record<string, any>;
+        status?: string;
         [key: string]: any;
       };
       
       // Prepare the metadata object, preserving any existing metadata
       const typedPropertyData = propertyData as RawPropertyData;
       const currentMetadata = typedPropertyData.metadata || {};
+      const currentStatus = typedPropertyData.status || 'Draft';
       const updatedMetadata = {
         ...currentMetadata,
         status
@@ -55,6 +59,9 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
         .eq('id', propertyId);
       
       if (error) throw error;
+      
+      // Log the status change
+      await logPropertyChange(propertyId, 'status', currentStatus, status);
       
       setPropertyStatus(status);
       toast({

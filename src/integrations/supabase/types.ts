@@ -367,6 +367,47 @@ export type Database = {
           },
         ]
       }
+      property_edit_logs: {
+        Row: {
+          created_at: string
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          property_id: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          property_id: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          property_id?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_edit_logs_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_images: {
         Row: {
           area: string | null
