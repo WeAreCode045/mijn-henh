@@ -1,23 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { formatDistanceToNow } from "date-fns";
 import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { FileDown, Globe, Share2, Save, Trash2, Mailbox, User, Tag } from "lucide-react";
+import { FileDown, Globe, Share2, Save, Trash2, Mailbox } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
+import { Code } from "@/components/ui/code";
+import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
-import { Submission } from "@/types/submission";
-
-interface Agent {
-  id: string;
-  full_name: string;
-}
+import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -28,8 +23,8 @@ interface PropertyDashboardTabProps {
   createdAt?: string;
   updatedAt?: string;
   onSave: () => void;
-  onDelete: () => void;
-  handleGeneratePDF: (e: React.MouseEvent) => void;
+  onDelete: () => Promise<void>;
+  handleGeneratePDF: () => void;
   handleWebView: (e: React.MouseEvent) => void;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
@@ -54,102 +49,103 @@ export function PropertyDashboardTab({
   isUpdating,
   agentInfo
 }: PropertyDashboardTabProps) {
-  const [isSubmissionsOpen, setIsSubmissionsOpen] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [openSubmissionsDialog, setOpenSubmissionsDialog] = useState(false);
   const { toast } = useToast();
-  const apiEndpoint = `${window.location.origin}/api/properties/${id}`;
-  
-  const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
-  const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
-  const [agents, setAgents] = useState<Agent[]>([]);
 
   useEffect(() => {
-    const fetchAgents = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('role', 'agent');
-      
-      if (!error && data) {
-        setAgents(data);
-      }
-    };
-    
-    fetchAgents();
-  }, []);
-
-  const handleOpenSubmissions = async () => {
-    try {
+    const fetchSubmissions = async () => {
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select('*')
-        .eq('property_id', id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      const formattedSubmissions: Submission[] = (data || []).map(item => ({
-        id: item.id,
-        property_id: item.property_id || "", // Add property_id to fix type error
-        name: item.name,
-        email: item.email,
-        phone: item.phone,
-        message: item.message || "",
-        inquiry_type: item.inquiry_type,
-        is_read: !!item.is_read,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        agent_id: item.agent_id
-      }));
-      
-      setSubmissions(formattedSubmissions);
-      setIsSubmissionsOpen(true);
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load contact submissions",
-        variant: "destructive",
-      });
-    }
+        .eq('property_id', id);
+
+      if (error) {
+        toast({
+          title: "Error fetching submissions",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else if (data) {
+        const formattedSubmissions: Submission[] = data.map(item => ({
+          id: item.id,
+          property_id: item.property_id,
+          name: item.name,
+          email: item.email,
+          phone: item.phone,
+          message: item.message || "",
+          inquiry_type: item.inquiry_type,
+          is_read: !!item.is_read,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          agent_id: item.agent_id,
+        }));
+        setSubmissions(formattedSubmissions);
+      }
+    };
+
+    fetchSubmissions();
+  }, [id, toast]);
+
+  const handleOpenSubmissions = () => {
+    setOpenSubmissionsDialog(true);
   };
 
   const handleMarkAsRead = async (submissionId: string) => {
-    try {
-      const { error } = await supabase
-        .from('property_contact_submissions')
-        .update({ is_read: true })
-        .eq('id', submissionId);
+    const { error } = await supabase
+      .from('property_contact_submissions')
+      .update({ is_read: true })
+      .eq('id', submissionId);
+
+    if (error) {
+      toast({
+        title: "Error marking submission as read",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Submission marked as read",
+        description: "The submission has been marked as read."
+      });
       
-      if (error) throw error;
-      
+      // Update the submissions list
       setSubmissions(prev => 
         prev.map(sub => sub.id === submissionId ? {...sub, is_read: true} : sub)
       );
-      
+    }
+  };
+
+  const handleSaveNotes = async (notes: string) => {
+    try {
+      const { error } = await supabase
+        .from('property_notes')
+        .insert({ 
+          property_id: id, 
+          content: notes, 
+          title: "Notes" 
+        });
+
+      if (error) {
+        throw error;
+      }
+
       toast({
-        description: "Marked as read",
+        title: "Notes saved",
+        description: "The notes have been saved."
       });
-    } catch (error) {
-      console.error('Error marking submission as read:', error);
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to update submission",
-        variant: "destructive",
+        title: "Error saving notes",
+        description: error.message,
+        variant: "destructive"
       });
     }
   };
 
-  const handleSaveAgentClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleSaveAgent(currentAgentId);
-  };
-
-  // Create a wrapper function that takes an event parameter
-  const handleGeneratePDFWrapper = (e: React.MouseEvent) => {
-    e.preventDefault();
-    // Call the original handleGeneratePDF
-    handleGeneratePDF(e);
+  // This wrapper function allows us to call handleGeneratePDF without passing the event
+  const handleGeneratePDFClick = () => {
+    handleGeneratePDF();
   };
 
   return (
@@ -163,12 +159,14 @@ export function PropertyDashboardTab({
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={handleWebView}
+            asChild
             title="Web View"
           >
-            <Globe className="h-4 w-4" />
+            <a href={`/property/${id}/webview`} target="_blank" rel="noopener noreferrer">
+              <Globe className="h-4 w-4" />
+            </a>
           </Button>
-          <Button variant="outline" size="icon" onClick={handleGeneratePDFWrapper} title="Generate PDF">
+          <Button variant="outline" size="icon" onClick={handleGeneratePDFClick} title="Generate PDF">
             <FileDown className="h-4 w-4" />
           </Button>
           <Button 
@@ -201,62 +199,34 @@ export function PropertyDashboardTab({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PropertyDetailsCard 
+        <PropertyDetailsCard
           id={id}
-          title={title}
           objectId={objectId}
+          title={title}
           createdAt={createdAt}
           updatedAt={updatedAt}
-          apiEndpoint={apiEndpoint}
+          apiEndpoint={`/api/properties/${id}`}
           onSaveObjectId={handleSaveObjectId}
           isUpdating={isUpdating}
+          onGeneratePDF={handleGeneratePDF}
+          onWebView={handleWebView}
+          onSave={onSave}
+          onDelete={onDelete}
         />
         
-        <ActivityCard propertyId={id} />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Assigned Agent
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="agent-select">Select Agent</Label>
-              <Select 
-                value={currentAgentId} 
-                onValueChange={setCurrentAgentId}
-              >
-                <SelectTrigger id="agent-select">
-                  <SelectValue placeholder="Select an agent" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {agents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.full_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <Button onClick={handleSaveAgentClick} disabled={isUpdating}>
-              <Save className="h-4 w-4 mr-2" />
-              {isUpdating ? "Saving..." : "Assign Agent"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        <NotesCard propertyId={id} />
+        <div className="space-y-6">
+          {/* Agent card or other content could go here */}
+        </div>
       </div>
       
-      <PropertySubmissionsDialog 
-        open={isSubmissionsOpen}
-        onOpenChange={setIsSubmissionsOpen}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ActivityCard />
+        <NotesCard />
+      </div>
+      
+      <PropertySubmissionsDialog
+        open={openSubmissionsDialog}
+        onOpenChange={setOpenSubmissionsDialog}
         propertyTitle={title}
         submissions={submissions}
         onMarkAsRead={handleMarkAsRead}

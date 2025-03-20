@@ -32,7 +32,7 @@ export function useFetchSubmissions(propertyId?: string) {
       // Create default Submission objects with empty replies arrays
       const transformedSubmissions: Submission[] = (data || []).map(item => ({
         id: item.id,
-        property_id: item.property_id || propertyId, // Ensure property_id is set
+        property_id: item.property_id,
         name: item.name,
         email: item.email,
         phone: item.phone,

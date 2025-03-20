@@ -11,6 +11,7 @@ export interface PropertyFormManagerChildrenProps {
   handleFieldChange: (field: keyof PropertyData, value: any) => void;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   addFeature: () => void;
   removeFeature: (id: string) => void;
   updateFeature: (id: string, description: string) => void;

@@ -12,6 +12,7 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     handleFieldChange: formManagerProps.handleFieldChange,
     handleSaveObjectId: formManagerProps.handleSaveObjectId,
     handleSaveAgent: formManagerProps.handleSaveAgent,
+    handleSaveTemplate: formManagerProps.handleSaveTemplate,
     addFeature: formManagerProps.onAddFeature,
     removeFeature: formManagerProps.onRemoveFeature,
     updateFeature: formManagerProps.onUpdateFeature,

@@ -1,12 +1,7 @@
 
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface ActivityCardProps {
-  propertyId: string;
-}
-
-export function ActivityCard({ propertyId }: ActivityCardProps) {
+export function ActivityCard() {
   return (
     <Card>
       <CardHeader>

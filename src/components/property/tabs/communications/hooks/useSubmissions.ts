@@ -25,7 +25,7 @@ export function useSubmissions(propertyId: string) {
       // Transform data to match Submission interface
       const transformedData = data.map(item => ({
         id: item.id,
-        property_id: item.property_id || propertyId, // Ensure property_id is set
+        property_id: item.property_id,
         name: item.name,
         email: item.email,
         phone: item.phone,

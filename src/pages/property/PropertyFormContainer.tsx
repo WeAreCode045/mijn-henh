@@ -20,6 +20,7 @@ export function PropertyFormContainer() {
     agents,
     selectedAgent,
     setSelectedAgent,
+    templateInfo,
     isSubmitting,
     setIsSubmitting,
     toast
@@ -61,6 +62,7 @@ export function PropertyFormContainer() {
       onRemoveImage={handleRemoveImage}
       images={images}
       agentInfo={agentInfo}
+      templateInfo={templateInfo}
       isSubmitting={isSubmitting}
     >
       <PropertyForm />

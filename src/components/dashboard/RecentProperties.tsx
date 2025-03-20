@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyData } from "@/types/property";
+import { transformSupabaseData } from "@/components/property/webview/utils/transformSupabaseData";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -34,12 +35,11 @@ export function RecentProperties() {
         }
 
         return (data || []).map(item => {
-          const itemWithTemplateId = {
+          const itemWithAgent = {
             ...item,
-            agent: item.agent || null,
-            template_id: "default" // Add a default template_id
+            agent: item.agent || null
           };
-          return transformSupabaseData(itemWithTemplateId);
+          return transformSupabaseData(itemWithAgent);
         });
       } catch (err) {
         console.error('Error fetching properties:', err);
@@ -50,45 +50,6 @@ export function RecentProperties() {
     staleTime: 30000,
     gcTime: 300000,
   });
-
-  // Simple transformer function for consistency
-  function transformSupabaseData(data: any): PropertyData {
-    return {
-      id: data.id,
-      title: data.title || "",
-      price: data.price || "",
-      address: data.address || "",
-      bedrooms: data.bedrooms || "",
-      bathrooms: data.bathrooms || "",
-      sqft: data.sqft || "",
-      livingArea: data.livingArea || "",
-      buildYear: data.buildYear || "",
-      garages: data.garages || "",
-      energyLabel: data.energyLabel || "",
-      hasGarden: data.hasGarden || false,
-      description: data.description || "",
-      shortDescription: data.shortDescription || "",
-      location_description: data.location_description || "",
-      features: JSON.parse(data.features || '[]'),
-      areas: JSON.parse(data.areas || '[]'),
-      nearby_places: JSON.parse(data.nearby_places || '[]'),
-      nearby_cities: JSON.parse(data.nearby_cities || '[]'),
-      images: data.property_images || [],
-      map_image: data.map_image || null,
-      latitude: data.latitude || null,
-      longitude: data.longitude || null,
-      object_id: data.object_id || "",
-      agent_id: data.agent_id || "",
-      agent: data.agent,
-      notes: data.notes || "",
-      virtualTourUrl: data.virtualTourUrl || "",
-      youtubeUrl: data.youtubeUrl || "",
-      floorplanEmbedScript: data.floorplanEmbedScript || "",
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      template_id: data.template_id || "default" // Add default template_id
-    };
-  }
 
   if (error) {
     return (

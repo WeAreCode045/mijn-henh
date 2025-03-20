@@ -3,42 +3,44 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
-export const usePropertyFormContainerData = () => {
+export function usePropertyFormContainerData() {
   const { id } = useParams();
-  const { formData, setFormData, isLoading } = usePropertyForm(id);
-  const { settings } = useAgencySettings();
   const { toast } = useToast();
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [agents, setAgents] = useState<any[]>([]);
+  const { settings } = useAgencySettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
 
+  const { formData, setFormData, isLoading } = usePropertyForm(id);
+  const { agents, selectedAgent, setSelectedAgent } = useAgentSelect(formData?.agent_id);
+
+  // Fetch agent info when formData changes
   useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .eq('role', 'agent');
-        
-        if (error) throw error;
-        
-        setAgents(data || []);
-      } catch (error) {
-        console.error('Error fetching agents:', error);
-      }
-    };
+    if (formData && formData.id) {
+      const fetchAgentInfo = async () => {
+        if (formData.agent_id) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .eq('id', formData.agent_id)
+            .single();
+          
+          if (data) {
+            setAgentInfo({ id: data.id, name: data.full_name });
+          } else {
+            setAgentInfo(null);
+          }
+        } else {
+          setAgentInfo(null);
+        }
+      };
 
-    fetchAgents();
-  }, []);
-
-  useEffect(() => {
-    if (formData?.agent_id) {
-      setSelectedAgent(formData.agent_id);
+      fetchAgentInfo();
     }
-  }, [formData?.agent_id]);
+  }, [formData]);
 
   return {
     id,
@@ -49,8 +51,9 @@ export const usePropertyFormContainerData = () => {
     agents,
     selectedAgent,
     setSelectedAgent,
+    agentInfo,
     isSubmitting,
     setIsSubmitting,
     toast
   };
-};
+}

@@ -8,6 +8,7 @@ export function PropertyTabContents({
   property,
   formState,
   agentInfo,
+  templateInfo,
   isUpdating = false,
   onAddFeature,
   onRemoveFeature,
@@ -31,6 +32,7 @@ export function PropertyTabContents({
   onDelete,
   handleSaveObjectId,
   handleSaveAgent,
+  handleSaveTemplate,
   currentStep,
   handleStepClick,
   setPendingChanges,
@@ -56,6 +58,7 @@ export function PropertyTabContents({
     onDelete,
     handleSaveObjectId,
     handleSaveAgent,
+    handleSaveTemplate,
     onFieldChange,
     onAddFeature,
     onRemoveFeature,
@@ -78,9 +81,7 @@ export function PropertyTabContents({
     handleStepClick,
     setPendingChanges,
     isSaving: isSaving || false,
-    handleWebView, // Add the handleWebView prop
-    // Dummy handleSaveTemplate to satisfy the interface requirement until we can update the type
-    handleSaveTemplate: (templateId: string) => Promise.resolve()
+    handleWebView // Add the handleWebView prop
   };
 
   return TabContentRenderers.renderTabContent({
@@ -88,6 +89,7 @@ export function PropertyTabContents({
     property,
     formState,
     agentInfo,
+    templateInfo,
     isUpdating,
     handlers
   });

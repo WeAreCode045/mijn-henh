@@ -114,6 +114,36 @@ export type Database = {
         }
         Relationships: []
       }
+      brochure_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          sections: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          sections: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          sections?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -180,6 +210,7 @@ export type Database = {
           price: string | null
           shortDescription: string | null
           sqft: string | null
+          template_id: string | null
           title: string | null
           updated_at: string
           virtualTourUrl: string | null
@@ -214,6 +245,7 @@ export type Database = {
           price?: string | null
           shortDescription?: string | null
           sqft?: string | null
+          template_id?: string | null
           title?: string | null
           updated_at?: string
           virtualTourUrl?: string | null
@@ -248,6 +280,7 @@ export type Database = {
           price?: string | null
           shortDescription?: string | null
           sqft?: string | null
+          template_id?: string | null
           title?: string | null
           updated_at?: string
           virtualTourUrl?: string | null

@@ -64,7 +64,8 @@ export function usePropertyFormManager(property: PropertyFormData) {
   // Hook for property save handlers
   const {
     handleSaveObjectId,
-    handleSaveAgent
+    handleSaveAgent,
+    handleSaveTemplate
   } = usePropertySaveHandlers(formState, onFieldChange);
   
   return {
@@ -114,6 +115,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     
     // Methods that now return Promises
     handleSaveObjectId,
-    handleSaveAgent
+    handleSaveAgent,
+    handleSaveTemplate
   };
 }

@@ -1,23 +1,17 @@
 
-import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
-interface NotesCardProps {
-  propertyId: string;
-  initialNotes?: string;
-}
-
-export function NotesCard({ propertyId, initialNotes = "" }: NotesCardProps) {
-  const [notes, setNotes] = useState(initialNotes);
+export function NotesCard() {
+  const [notes, setNotes] = useState<string>("");
   const { toast } = useToast();
 
   const handleSaveNotes = async () => {
     try {
-      // Here you would typically call an API to save the notes
       toast({
         description: "Notes saved successfully",
       });

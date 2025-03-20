@@ -42,6 +42,7 @@ export function usePropertyDataPreparer() {
       map_image: formData.map_image,
       object_id: formData.object_id,
       agent_id: formData.agent_id,
+      template_id: formData.template_id,
       virtualTourUrl: formData.virtualTourUrl,
       youtubeUrl: formData.youtubeUrl,
       floorplanEmbedScript: formData.floorplanEmbedScript || "",

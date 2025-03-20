@@ -31,7 +31,7 @@ export interface PropertyTabContentsProps {
   onDelete?: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
-  handleSaveTemplate?: (templateId: string) => Promise<void>; // Make handleSaveTemplate optional
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
   setPendingChanges: (pending: boolean) => void;
@@ -60,7 +60,7 @@ export interface PropertyFormManagerChildrenProps {
   handleFieldChange: (field: keyof PropertyFormData, value: any) => void;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
-  handleSaveTemplate?: (templateId: string) => Promise<void>; // Make handleSaveTemplate optional
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   addFeature: () => void;
   removeFeature: (id: string) => void;
   updateFeature: (id: string, description: string) => void;
@@ -123,7 +123,7 @@ export interface PropertyTabProps {
     onDelete?: () => Promise<void>;
     handleSaveObjectId: (objectId: string) => Promise<void>;
     handleSaveAgent: (agentId: string) => Promise<void>;
-    handleSaveTemplate?: (templateId: string) => Promise<void>; // Make handleSaveTemplate optional
+    handleSaveTemplate: (templateId: string) => Promise<void>;
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;

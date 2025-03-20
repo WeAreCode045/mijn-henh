@@ -1,36 +1,44 @@
 
-import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
 import { formatDistanceToNow } from "date-fns";
+import { useState } from "react";
 
 interface PropertyDetailsCardProps {
   id: string;
-  title: string;
   objectId?: string;
+  title?: string;
   createdAt?: string;
   updatedAt?: string;
   apiEndpoint: string;
-  onSaveObjectId: (objectId: string) => Promise<void>;
+  onSaveObjectId: (objectId: string) => void;
   isUpdating: boolean;
+  onGeneratePDF?: () => void;
+  onWebView?: () => void;
+  onSave?: () => void;
+  onDelete?: () => Promise<void>;
 }
 
 export function PropertyDetailsCard({
   id,
+  objectId,
   title,
-  objectId = "",
   createdAt,
   updatedAt,
   apiEndpoint,
   onSaveObjectId,
-  isUpdating
+  isUpdating,
+  onGeneratePDF,
+  onWebView,
+  onSave,
+  onDelete
 }: PropertyDetailsCardProps) {
-  const [currentObjectId, setCurrentObjectId] = useState(objectId);
+  const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
 
-  const handleSaveObjectIdClick = (e: React.MouseEvent) => {
+  const handleSaveObjectId = (e: React.MouseEvent) => {
     e.preventDefault();
     onSaveObjectId(currentObjectId);
   };
@@ -55,7 +63,7 @@ export function PropertyDetailsCard({
               onChange={(e) => setCurrentObjectId(e.target.value)}
               placeholder="Enter object ID"
             />
-            <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size="sm">
+            <Button onClick={handleSaveObjectId} disabled={isUpdating} size="sm">
               {isUpdating ? "Saving..." : "Save"}
             </Button>
           </div>
