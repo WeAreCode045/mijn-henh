@@ -46,7 +46,6 @@ export function usePropertyAutoSave() {
         longitude: formData.longitude,
         object_id: formData.object_id,
         agent_id: formData.agent_id,
-        template_id: formData.template_id,
         virtualTourUrl: formData.virtualTourUrl,
         youtubeUrl: formData.youtubeUrl,
         floorplanEmbedScript: formData.floorplanEmbedScript,
@@ -54,16 +53,30 @@ export function usePropertyAutoSave() {
       
       console.log('Auto-saving property data...', formData);
 
-      const { error } = await supabase
+      // Don't include updated_at to let Supabase update it automatically
+      const { error, data: updatedData } = await supabase
         .from('properties')
         .update(submitData)
-        .eq('id', formData.id);
+        .eq('id', formData.id)
+        .select(); // Add select to retrieve the updated data including the timestamp
 
       if (error) {
         console.error('Auto-save error:', error);
         throw error;
       }
 
+      console.log('Auto-save successful, new timestamp:', updatedData?.[0]?.updated_at);
+      
+      // If we got back data, use the actual server timestamp for lastSaved
+      if (updatedData && updatedData[0]) {
+        setLastSaved(new Date(updatedData[0].updated_at));
+      } else {
+        setLastSaved(new Date());
+      }
+      
+      setPendingChanges(false);
+      
+      // Handle floorplans if needed
       if (formData.floorplans && formData.floorplans.length > 0) {
         try {
           const { data: existingFloorplans } = await supabase
@@ -91,9 +104,6 @@ export function usePropertyAutoSave() {
         }
       }
 
-      setLastSaved(new Date());
-      setPendingChanges(false);
-      console.log('Auto-save successful');
       return true;
     } catch (error: any) {
       console.error('Auto-save failed:', error);

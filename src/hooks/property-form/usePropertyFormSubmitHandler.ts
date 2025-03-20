@@ -59,6 +59,7 @@ export function usePropertyFormSubmitHandler() {
             .single();
             
           updatedPropertyData = freshPropertyData;
+          console.log("usePropertyFormSubmit - Fetched updated property data with timestamp:", updatedPropertyData?.updated_at);
           
           // Log the changes if update was successful
           if (currentPropertyData) {
@@ -84,6 +85,7 @@ export function usePropertyFormSubmitHandler() {
               .single();
               
             updatedPropertyData = freshPropertyData;
+            console.log("usePropertyFormSubmit - New property created with timestamp:", updatedPropertyData?.updated_at);
             
             // Save images for new property
             await saveAllImagesForNewProperty(newPropertyId, formData);
@@ -96,7 +98,9 @@ export function usePropertyFormSubmitHandler() {
       }
       
       console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");
-      console.log("usePropertyFormSubmit - Updated timestamp:", updatedPropertyData?.updated_at);
+      if (updatedPropertyData) {
+        console.log("usePropertyFormSubmit - Updated timestamp:", updatedPropertyData.updated_at);
+      }
       
       // Show a toast notification to confirm the save was successful
       if (success) {

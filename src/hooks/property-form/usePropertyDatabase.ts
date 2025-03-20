@@ -67,7 +67,7 @@ export function usePropertyDatabase() {
       
       console.log("usePropertyDatabase - Final update data:", finalDataToUpdate);
       
-      // Remove updated_at to let Supabase automatically set it to current time
+      // IMPORTANT: Remove updated_at to let Supabase automatically set it to current time
       if (finalDataToUpdate.updated_at) {
         delete finalDataToUpdate.updated_at;
       }
