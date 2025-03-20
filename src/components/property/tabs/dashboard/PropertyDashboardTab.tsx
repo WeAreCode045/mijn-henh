@@ -1,37 +1,19 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { FileDown, Globe, Share2, Save, Trash2, Mailbox, User, Tag, FileText } from "lucide-react";
+import { FileDown, Globe, Share2, Save, Trash2, Mailbox } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Code } from "@/components/ui/code";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  inquiry_type: string;
-  message: string;
-  created_at: string;
-  is_read: boolean;
-}
-
-interface Agent {
-  id: string;
-  full_name: string;
-}
-
-interface Template {
-  id: string;
-  name: string;
-}
+import { Submission } from "@/types/submission";
+import { ActivityCard } from "./cards/ActivityCard";
+import { NotesCard } from "./cards/NotesCard";
+import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
+import { TemplateCard } from "./cards/TemplateCard";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -76,9 +58,6 @@ export function PropertyDashboardTab({
   agentInfo,
   templateInfo
 }: PropertyDashboardTabProps) {
-  const [currentAgentId, setCurrentAgentId] = useState<string | null>(agentId);
-  const [currentObjectId, setCurrentObjectId] = useState<string | null>(objectId);
-  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(templateId);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [openSubmissionsDialog, setOpenSubmissionsDialog] = useState(false);
   const { toast } = useToast();
@@ -86,7 +65,7 @@ export function PropertyDashboardTab({
   useEffect(() => {
     const fetchSubmissions = async () => {
       const { data, error } = await supabase
-        .from('property_submissions')
+        .from('property_contact_submissions')
         .select('*')
         .eq('property_id', id);
 
@@ -110,7 +89,7 @@ export function PropertyDashboardTab({
 
   const handleMarkAsRead = async (submissionId: string) => {
     const { error } = await supabase
-      .from('property_submissions')
+      .from('property_contact_submissions')
       .update({ is_read: true })
       .eq('id', submissionId);
 
@@ -124,7 +103,6 @@ export function PropertyDashboardTab({
       toast({
         title: "Submission marked as read",
         description: "The submission has been marked as read.",
-        variant: "success"
       });
     }
   };
@@ -132,7 +110,7 @@ export function PropertyDashboardTab({
   const handleSaveNotes = async (notes: string) => {
     const { error } = await supabase
       .from('property_notes')
-      .insert({ property_id: id, notes });
+      .insert({ property_id: id, content: notes, title: "Notes" });
 
     if (error) {
       toast({
@@ -144,24 +122,8 @@ export function PropertyDashboardTab({
       toast({
         title: "Notes saved",
         description: "The notes have been saved.",
-        variant: "success"
       });
     }
-  };
-
-  const handleSaveAgentClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleSaveAgent(currentAgentId);
-  };
-
-  const handleSaveObjectIdClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleSaveObjectId(currentObjectId);
-  };
-  
-  const handleSaveTemplateClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleSaveTemplate(currentTemplateId);
   };
 
   const handleGeneratePDFClick = (e: React.MouseEvent) => {
@@ -227,7 +189,7 @@ export function PropertyDashboardTab({
           createdAt={createdAt}
           updatedAt={updatedAt}
           apiEndpoint={`/api/properties/${id}`}
-          onSaveObjectId={handleSaveObjectIdClick}
+          onSaveObjectId={handleSaveObjectId}
           isUpdating={isUpdating}
           onGeneratePDF={handleGeneratePDF}
           onWebView={handleWebView}
@@ -239,7 +201,7 @@ export function PropertyDashboardTab({
           <TemplateCard
             templateId={templateId}
             templateName={templateName || templateInfo?.name}
-            onSaveTemplate={handleSaveTemplateClick}
+            onSaveTemplate={handleSaveTemplate}
             isUpdating={isUpdating}
           />
         </div>
@@ -252,10 +214,10 @@ export function PropertyDashboardTab({
       
       <PropertySubmissionsDialog
         open={openSubmissionsDialog}
-        onClose={() => setOpenSubmissionsDialog(false)}
+        onOpenChange={setOpenSubmissionsDialog}
+        propertyTitle={title}
         submissions={submissions}
         onMarkAsRead={handleMarkAsRead}
-        onSaveNotes={handleSaveNotes}
       />
     </div>
   );

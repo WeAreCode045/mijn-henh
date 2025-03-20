@@ -3,17 +3,7 @@ import { format } from "date-fns";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-interface Submission {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  inquiry_type: string;
-  message: string;
-  created_at: string;
-  is_read: boolean;
-}
+import { Submission } from "@/types/submission";
 
 interface PropertySubmissionsDialogProps {
   open: boolean;

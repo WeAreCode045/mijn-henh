@@ -17,14 +17,13 @@ interface DashboardTabContentProps {
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveTemplate: (templateId: string) => Promise<void>;
-  handleGeneratePDF: () => void; // Removed MouseEvent parameter
+  handleGeneratePDF: () => void;
   handleWebView: (e: React.MouseEvent) => void;
 }
 
 export function DashboardTabContent({
   id,
   title,
-  propertyData,
   objectId,
   agentId,
   createdAt,
@@ -44,7 +43,6 @@ export function DashboardTabContent({
     <PropertyDashboardTab
       id={id}
       title={title}
-      propertyData={propertyData}
       objectId={objectId}
       agentId={agentId}
       createdAt={createdAt}
@@ -54,10 +52,10 @@ export function DashboardTabContent({
       isUpdating={isUpdating}
       onSave={onSave}
       onDelete={onDelete}
-      onSaveObjectId={handleSaveObjectId}
-      onSaveAgent={handleSaveAgent}
-      onSaveTemplate={handleSaveTemplate}
-      handleGeneratePDF={handleGeneratePDF} // No longer passing an event
+      handleSaveObjectId={handleSaveObjectId}
+      handleSaveAgent={handleSaveAgent}
+      handleSaveTemplate={handleSaveTemplate}
+      handleGeneratePDF={handleGeneratePDF}
       handleWebView={handleWebView}
     />
   );
