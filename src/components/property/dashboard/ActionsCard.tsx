@@ -41,6 +41,7 @@ export function ActionsCard({
   const [agents, setAgents] = useState<{id: string, full_name: string}[]>([]);
   const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [propertyStatus, setPropertyStatus] = useState(propertyData?.status || "Draft");
 
   useEffect(() => {
     if (agentId !== undefined) {
@@ -93,6 +94,30 @@ export function ActionsCard({
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleStatusChange = async (status: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status })
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+      
+      setPropertyStatus(status);
+      toast({
+        title: "Status updated",
+        description: `Property status changed to ${status}`,
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update the property status",
+        variant: "destructive",
+      });
     }
   };
 
@@ -155,6 +180,25 @@ export function ActionsCard({
         </div>
         
         <div className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor="property-status">Property Status</Label>
+            <Select 
+              value={propertyStatus} 
+              onValueChange={handleStatusChange}
+            >
+              <SelectTrigger id="property-status" className="w-full">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Draft">Draft</SelectItem>
+                <SelectItem value="Available">Available</SelectItem>
+                <SelectItem value="Under Option">Under Option</SelectItem>
+                <SelectItem value="Sold">Sold</SelectItem>
+                <SelectItem value="Withdrawn">Withdrawn</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="agent-select">Assigned Agent</Label>
             <Select 

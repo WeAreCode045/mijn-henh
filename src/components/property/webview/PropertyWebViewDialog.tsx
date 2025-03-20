@@ -1,87 +1,64 @@
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { PropertyData } from "@/types/property";
-import { AgencySettings } from "@/types/agency";
-import { PropertyWebViewContent } from "./PropertyWebViewContent";
-import { WebViewHeader } from "./WebViewHeader";
-import { WebViewFooter } from "./WebViewFooter";
-import { usePageCalculation } from "./hooks/usePageCalculation";
+import { WebViewDialogContent } from "./WebViewDialogContent";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
 interface PropertyWebViewDialogProps {
   propertyData: PropertyData;
   isOpen: boolean;
-  open?: boolean; // Add this for compatibility
   onOpenChange: (open: boolean) => void;
-  settings?: AgencySettings;
-  contentRef?: React.RefObject<HTMLDivElement>;
-  printContentRef?: React.RefObject<HTMLDivElement>;
-  currentPage?: number;
-  setCurrentPage?: (page: number) => void;
-  selectedImage?: string | null;
-  setSelectedImage?: (image: string | null) => void;
-  handleShare?: (platform: string) => Promise<void>;
-  handlePrint?: () => void;
-  handleDownload?: () => Promise<void>;
 }
 
-export function PropertyWebViewDialog({ 
-  propertyData, 
-  isOpen, 
-  open,
+export function PropertyWebViewDialog({
+  propertyData,
+  isOpen,
   onOpenChange,
-  settings,
-  contentRef,
-  printContentRef,
-  currentPage,
-  setCurrentPage,
-  selectedImage,
-  setSelectedImage,
-  handleShare,
-  handlePrint,
-  handleDownload
 }: PropertyWebViewDialogProps) {
-  const { calculateTotalPages } = usePageCalculation();
-  
-  // Use 'open' prop if provided, otherwise use 'isOpen'
-  const dialogOpen = open !== undefined ? open : isOpen;
-  
-  // Calculate total pages for footer navigation
-  const totalPages = settings && propertyData ? calculateTotalPages(propertyData) : 0;
-  
+  // Use object_id as the slug if available, otherwise use the property ID
+  const slug = propertyData.object_id || propertyData.id;
+  const shareUrl = `/share/${slug}`;
+  const viewUrl = `/property/${slug}/webview`;
+
   return (
-    <Dialog open={dialogOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
-        {settings && (
-          <div className="flex flex-col h-full">
-            <WebViewHeader 
-              property={propertyData}
-              settings={settings}
-            />
-            <div className="flex-1 overflow-auto">
-              <PropertyWebViewContent 
-                property={propertyData}
-                settings={settings}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                selectedImage={selectedImage}
-                setSelectedImage={setSelectedImage}
-                handleShare={handleShare}
-                handlePrint={handlePrint}
-                handleDownload={handleDownload}
-              />
-            </div>
-            {currentPage !== undefined && setCurrentPage && handlePrint && handleShare && (
-              <WebViewFooter 
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPrevious={() => currentPage > 0 && setCurrentPage(currentPage - 1)}
-                onNext={() => currentPage < totalPages - 1 && setCurrentPage(currentPage + 1)}
-                onShare={handleShare}
-                onPrint={handlePrint}
-              />
-            )}
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-7xl h-[95vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex items-center justify-between flex-row p-6">
+          <DialogTitle>Property Web View</DialogTitle>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <a
+                href={shareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1"
+              >
+                <span>Share link</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a
+                href={viewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1"
+              >
+                <span>Full page</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </Button>
           </div>
-        )}
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto">
+          <WebViewDialogContent propertyData={propertyData} />
+        </div>
       </DialogContent>
     </Dialog>
   );

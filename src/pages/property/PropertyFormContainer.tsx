@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
@@ -42,13 +42,26 @@ export function PropertyFormContainer() {
     agents
   );
 
+  // Set document title based on property title
+  useEffect(() => {
+    if (formData?.title) {
+      document.title = formData.title;
+    } else {
+      document.title = id ? "Edit Property" : "Add New Property";
+    }
+    
+    return () => {
+      document.title = "Brochure Generator";
+    };
+  }, [formData?.title, id]);
+
   if (isLoading || !formData) {
     return <PropertyFormLoader />;
   }
 
   return (
     <PropertyFormLayout
-      title={id ? "Edit Property" : "Add New Property"}
+      title={formData.title || (id ? "Edit Property" : "Add New Property")}
       propertyData={formData || { id: "" } as any}
       settings={settings}
       isAdmin={isAdmin}
