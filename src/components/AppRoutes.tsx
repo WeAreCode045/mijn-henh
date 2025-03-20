@@ -1,12 +1,12 @@
 
-import { Route, Routes } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
-import { Properties } from '../pages/Properties';
+import { Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from './ProtectedRoute';
+import Properties from '../pages/Properties';
 import { PropertyFormContainer } from '../pages/property/PropertyFormContainer';
-import { Settings } from '../pages/Settings';
-import { Users } from '../pages/Users';
-import { Auth } from '../pages/Auth';
-import { NotFound } from '../pages/NotFound';
+import Settings from '../pages/Settings';
+import Users from '../pages/Users';
+import Auth from '../pages/Auth';
+import NotFound from '../pages/NotFound';
 import React from 'react';
 
 export function AppRoutes() {

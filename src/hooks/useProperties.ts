@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { PropertyData } from "@/types/property";
-import { transformSupabaseData } from "@/components/property/webview/utils/transformSupabaseData";
 import { useAuth } from "@/providers/AuthProvider";
 
 export const useProperties = () => {
@@ -30,12 +29,13 @@ export const useProperties = () => {
     }
 
     return (data || []).map(item => {
-      // Ensure each item has the agent property structured correctly
-      const propertyWithAgent = {
+      // Add template_id if missing to satisfy SupabasePropertyData interface
+      const propertyWithTemplateId = {
         ...item,
-        agent: item.agent || null
+        agent: item.agent || null,
+        template_id: item.template_id || "default" // Add a default template_id
       };
-      return transformSupabaseData(propertyWithAgent);
+      return transformSupabaseData(propertyWithTemplateId);
     });
   };
 
@@ -64,6 +64,44 @@ export const useProperties = () => {
       description: "De brochure is succesvol verwijderd",
     });
   };
+
+  // Simple transformer function for consistency
+  function transformSupabaseData(data: any): PropertyData {
+    return {
+      id: data.id,
+      title: data.title || "",
+      price: data.price || "",
+      address: data.address || "",
+      bedrooms: data.bedrooms || "",
+      bathrooms: data.bathrooms || "",
+      sqft: data.sqft || "",
+      livingArea: data.livingArea || "",
+      buildYear: data.buildYear || "",
+      garages: data.garages || "",
+      energyLabel: data.energyLabel || "",
+      hasGarden: data.hasGarden || false,
+      description: data.description || "",
+      shortDescription: data.shortDescription || "",
+      location_description: data.location_description || "",
+      features: JSON.parse(data.features || '[]'),
+      areas: JSON.parse(data.areas || '[]'),
+      nearby_places: JSON.parse(data.nearby_places || '[]'),
+      nearby_cities: JSON.parse(data.nearby_cities || '[]'),
+      images: data.property_images || [],
+      map_image: data.map_image || null,
+      latitude: data.latitude || null,
+      longitude: data.longitude || null,
+      object_id: data.object_id || "",
+      agent_id: data.agent_id || "",
+      agent: data.agent,
+      notes: data.notes || "",
+      virtualTourUrl: data.virtualTourUrl || "",
+      youtubeUrl: data.youtubeUrl || "",
+      floorplanEmbedScript: data.floorplanEmbedScript || "",
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    };
+  }
 
   return {
     properties,

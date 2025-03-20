@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -35,9 +36,7 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
   const [selectedAgent, setSelectedAgent] = useState(property?.agent_id || null);
-  const [selectedTemplate, setSelectedTemplate] = useState(property?.template_id || "default");
   const [agents, setAgents] = useState([]);
-  const [templates, setTemplates] = useState([]);
   
   // Form state management
   const [formState, setFormState] = useState(property || {});
@@ -115,7 +114,7 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
     usePropertyStepNavigation(formState, pendingChanges, setPendingChanges, setLastSaved);
   
   // Form submission and other actions
-  const { handleSaveObjectId, handleSaveAgent, handleSaveTemplate, onSubmit } = 
+  const { handleSaveObjectId, handleSaveAgent, onSubmit } = 
     usePropertyFormActions(formState, setPendingChanges, setLastSaved);
 
   // Fetch agents and templates on component mount
@@ -134,27 +133,7 @@ export function AddPropertyForm({ property, onSave, onDelete }) {
       setAgents(data || []);
     };
     
-    const fetchTemplates = async () => {
-      const { data, error } = await supabase
-        .from('brochure_templates')
-        .select('id, name');
-        
-      if (error) {
-        console.error('Error fetching templates:', error);
-        return;
-      }
-      
-      // Add default template
-      const templatesWithDefault = [
-        { id: 'default', name: 'Default Template' },
-        ...(data || [])
-      ];
-      
-      setTemplates(templatesWithDefault);
-    };
-    
     fetchAgents();
-    fetchTemplates();
   }, []);
   
   // NOTE: This component has many missing imports and should be refactored or removed.
