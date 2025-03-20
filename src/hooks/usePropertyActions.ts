@@ -28,8 +28,8 @@ export function usePropertyActions(propertyId: string) {
       e.preventDefault();
     }
     
-    // Open in a new tab instead of showing dialog
-    window.open(`/property/${propertyId}/webview`, '_blank');
+    // Open in a new tab with simplified URL structure
+    window.open(`/${propertyId}/webview`, '_blank');
   }, [propertyId]);
 
   return {

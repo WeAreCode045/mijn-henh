@@ -43,6 +43,13 @@ export function AppRoutes() {
         </Suspense>
       } />
       
+      {/* Simplified public route for webviews */}
+      <Route path="/:id/webview" element={
+        <Suspense fallback={<LoadingSpinner />}>
+          <PropertyWebView />
+        </Suspense>
+      } />
+      
       <Route path="/share/:id" element={
         <Suspense fallback={<LoadingSpinner />}>
           <PropertyWebView />

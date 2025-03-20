@@ -41,6 +41,7 @@ export function WebViewDialogContent({
   const { calculateTotalPages } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
   const navigate = useNavigate();
+  const showHeader = currentPage !== 0; // Hide header on overview page
 
   // Determine if we have a webview background from settings
   const containerStyle = settings?.webviewBackgroundUrl ? {
@@ -51,8 +52,8 @@ export function WebViewDialogContent({
   } : {};
 
   const handleOpenInNewTab = () => {
-    // Get the full URL for the webview page
-    const webviewUrl = `/property/${propertyData.id}/webview`;
+    // Use the simplified URL structure for the webview
+    const webviewUrl = `/${propertyData.id}/webview`;
     window.open(webviewUrl, '_blank');
   };
 
@@ -79,6 +80,7 @@ export function WebViewDialogContent({
           <WebViewHeader 
             property={propertyData}
             settings={settings}
+            showHeader={showHeader}
           />
         </div>
         

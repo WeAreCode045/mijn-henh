@@ -6,11 +6,14 @@ import "./styles/WebViewStyles.css";
 interface WebViewHeaderProps {
   property: PropertyData;
   settings: AgencySettings;
+  showHeader?: boolean;
 }
 
-export function WebViewHeader({ property, settings }: WebViewHeaderProps) {
+export function WebViewHeader({ property, settings, showHeader = true }: WebViewHeaderProps) {
   // Format the price for display
   const formattedPrice = formatPrice(property.price);
+  
+  if (!showHeader) return null;
   
   return (
     <div className="webview-header">

@@ -44,6 +44,9 @@ export function PropertyWebViewMain({
     currentPage
   });
 
+  // Determine if header should be shown (hide on overview page)
+  const showHeader = currentPage !== 0;
+
   return (
     <div className="w-full h-full">
       {/* Main visible content */}
@@ -58,6 +61,7 @@ export function PropertyWebViewMain({
         handleShare={handleShare}
         handlePrint={handlePrint}
         handleDownload={handleDownload}
+        showHeader={showHeader}
       />
       
       {/* Hidden print content */}

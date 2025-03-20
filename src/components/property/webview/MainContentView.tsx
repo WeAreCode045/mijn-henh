@@ -15,6 +15,7 @@ interface MainContentViewProps {
   handleShare: (platform: string) => Promise<void>;
   handlePrint: () => void;
   handleDownload: () => Promise<void>;
+  showHeader?: boolean;
 }
 
 export function MainContentView({
@@ -27,7 +28,8 @@ export function MainContentView({
   setSelectedImage,
   handleShare,
   handlePrint,
-  handleDownload
+  handleDownload,
+  showHeader = true
 }: MainContentViewProps) {
   return (
     <div ref={contentRef} className="flex-1 min-h-0">
@@ -41,6 +43,7 @@ export function MainContentView({
         handleShare={handleShare}
         handlePrint={handlePrint}
         handleDownload={handleDownload}
+        showHeader={showHeader}
       />
     </div>
   );

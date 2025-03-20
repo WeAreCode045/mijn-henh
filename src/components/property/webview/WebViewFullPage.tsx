@@ -41,6 +41,7 @@ export function WebViewFullPage({
   const navigate = useNavigate();
   const { calculateTotalPages } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
+  const showHeader = currentPage !== 0; // Hide header on overview page
 
   const handleBackNavigation = () => {
     if (window.history.length > 1) {
@@ -80,6 +81,7 @@ export function WebViewFullPage({
             <WebViewHeader 
               property={propertyData}
               settings={settings}
+              showHeader={showHeader}
             />
           </div>
           

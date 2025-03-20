@@ -20,6 +20,7 @@ interface PropertyWebViewContentProps {
   handleShare?: (platform: string) => Promise<void>;
   handlePrint?: () => void;
   handleDownload?: () => Promise<void>;
+  showHeader?: boolean;
 }
 
 export function PropertyWebViewContent({
@@ -33,7 +34,8 @@ export function PropertyWebViewContent({
   setSelectedImage,
   handleShare,
   handlePrint,
-  handleDownload
+  handleDownload,
+  showHeader = true
 }: PropertyWebViewContentProps) {
   const [internalCurrentPage, setInternalCurrentPage] = useState(0);
   
@@ -53,6 +55,7 @@ export function PropertyWebViewContent({
         currentPage={currentPage}
         isPrintView={isPrintView}
         waitForPlaces={waitForPlaces}
+        showHeader={showHeader}
       />
     </div>
   );

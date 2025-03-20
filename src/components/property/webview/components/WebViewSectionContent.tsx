@@ -11,6 +11,7 @@ interface WebViewSectionContentProps {
   currentPage: number;
   isPrintView?: boolean;
   waitForPlaces?: boolean;
+  showHeader?: boolean;
 }
 
 export function WebViewSectionContent({
@@ -18,7 +19,8 @@ export function WebViewSectionContent({
   settings,
   currentPage,
   isPrintView = false,
-  waitForPlaces = false
+  waitForPlaces = false,
+  showHeader = true
 }: WebViewSectionContentProps) {
   const { getSectionIndex, calculateTotalPages } = usePageCalculation();
   
@@ -70,6 +72,7 @@ export function WebViewSectionContent({
     totalPages,
     sectionsAvailable: sections.length,
     currentSectionTitle: currentSection?.title,
+    showHeader,
     sectionTitles: sections.map(s => s.title)
   });
   
