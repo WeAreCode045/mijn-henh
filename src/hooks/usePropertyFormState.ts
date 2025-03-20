@@ -7,7 +7,7 @@ export function usePropertyFormState(
   formState: PropertyFormData, 
   setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>
 ) {
-  const { autosaveData, setPendingChanges } = usePropertyAutoSave();
+  const { autosaveField, setPendingChanges } = usePropertyAutoSave();
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Type-safe field change handler
@@ -34,14 +34,8 @@ export function usePropertyFormState(
     // Only autosave if we have an ID (existing property)
     if (formState.id) {
       const newTimeout = setTimeout(() => {
-        // Get the latest form state with the new value
-        const updatedData = {
-          ...formState,
-          [field]: value
-        } as PropertyFormData;
-        
-        // Save to database
-        autosaveData(updatedData)
+        // Save only the changed field to database
+        autosaveField(formState.id, field, value)
           .then(success => {
             if (success) {
               console.log(`Field ${String(field)} autosaved successfully`);
@@ -54,7 +48,7 @@ export function usePropertyFormState(
       
       setSaveTimeout(newTimeout);
     }
-  }, [formState, setFormState, autosaveData, setPendingChanges, saveTimeout]);
+  }, [formState, setFormState, autosaveField, setPendingChanges, saveTimeout]);
   
   // Clean up timeout on unmount
   useEffect(() => {

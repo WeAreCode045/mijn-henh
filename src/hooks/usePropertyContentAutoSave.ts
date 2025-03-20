@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { useToast } from "@/components/ui/use-toast";
 
