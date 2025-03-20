@@ -1,4 +1,3 @@
-
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { CategorySection } from "./components/CategorySection";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -35,7 +35,6 @@ export function NearbyPlacesSection({
   const [selectedPlacesToDelete, setSelectedPlacesToDelete] = useState<number[]>([]);
   const { toast } = useToast();
   
-  // Define our categories
   const categories = [
     { id: "restaurant", label: "Restaurants" },
     { id: "education", label: "Education" },
@@ -45,12 +44,10 @@ export function NearbyPlacesSection({
     { id: "leisure", label: "Leisure" }
   ];
   
-  // Group places by category
   const placesByCategory: Record<string, PropertyNearbyPlace[]> = {
     all: [...nearbyPlaces]
   };
   
-  // Add places to their respective categories
   nearbyPlaces.forEach((place) => {
     const category = place.type || 'other';
     if (!placesByCategory[category]) {
@@ -59,7 +56,6 @@ export function NearbyPlacesSection({
     placesByCategory[category].push(place);
   });
   
-  // Handle fetch for specific category
   const handleFetchCategory = async (category: string) => {
     if (!onFetchNearbyPlaces) return;
     
@@ -69,7 +65,6 @@ export function NearbyPlacesSection({
     try {
       const results = await onFetchNearbyPlaces(category);
       if (results && results[category]) {
-        // Convert to our format
         const options: PlaceOption[] = results[category].map((place: any) => ({
           id: place.place_id,
           name: place.name,
@@ -89,11 +84,9 @@ export function NearbyPlacesSection({
     }
   };
   
-  // Handle saving selected places
   const handleSavePlaces = (selectedPlaces: PlaceOption[]) => {
     if (!onFieldChange || !formData.nearby_places) return;
     
-    // Convert to PropertyNearbyPlace
     const newPlaces: PropertyNearbyPlace[] = selectedPlaces.map(place => ({
       id: place.id,
       name: place.name,
@@ -104,12 +97,10 @@ export function NearbyPlacesSection({
       visible_in_webview: true
     }));
     
-    // Filter out existing places with the same IDs
     const existingPlaces = formData.nearby_places.filter(
       place => !newPlaces.some(newPlace => newPlace.id === place.id)
     );
     
-    // Merge existing places with new ones
     const updatedPlaces = [...existingPlaces, ...newPlaces];
     onFieldChange('nearby_places', updatedPlaces);
   };
@@ -136,23 +127,21 @@ export function NearbyPlacesSection({
     if (!onFieldChange || !formData.nearby_places || selectedPlacesToDelete.length === 0) return;
 
     try {
-      // Get the places to be deleted
       const placesToDelete = selectedPlacesToDelete.map(idx => formData.nearby_places![idx]);
       
-      // Filter out the places that are selected for deletion
       const updatedPlaces = formData.nearby_places.filter((_, idx) => 
         !selectedPlacesToDelete.includes(idx)
       );
       
-      // Update the form data
       onFieldChange('nearby_places', updatedPlaces);
       
-      // If we have a property ID, update the database too
       if (formData.id) {
+        const updatedPlacesJson = preparePropertiesForJsonField(updatedPlaces);
+        
         const { error } = await supabase
           .from('properties')
           .update({ 
-            nearby_places: updatedPlaces
+            nearby_places: updatedPlacesJson
           })
           .eq('id', formData.id);
         
@@ -162,13 +151,11 @@ export function NearbyPlacesSection({
         }
       }
       
-      // Show success toast
       toast({
         title: "Places removed",
         description: `${selectedPlacesToDelete.length} places have been removed.`,
       });
       
-      // Reset selection
       setSelectedPlacesToDelete([]);
     } catch (error) {
       console.error("Error deleting places:", error);
@@ -315,7 +302,6 @@ export function NearbyPlacesSection({
         </div>
       )}
       
-      {/* Modal for selecting places */}
       <SelectPlacesModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

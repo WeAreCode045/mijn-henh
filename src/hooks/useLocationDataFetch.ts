@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { preparePropertiesForJsonField } from '@/hooks/property-form/preparePropertyData';
 
 export function useLocationDataFetch(
   formData: PropertyFormData,
@@ -12,7 +12,6 @@ export function useLocationDataFetch(
   const [isGeneratingMap, setIsGeneratingMap] = useState(false);
   const { toast } = useToast();
   
-  // Fetch only location data (coordinates) without places or cities
   const fetchLocationData = useCallback(async () => {
     if (!formData.address) {
       toast({
@@ -39,7 +38,6 @@ export function useLocationDataFetch(
       if (data) {
         console.log("Location data fetched:", data);
         
-        // Update form data with the fetched coordinates
         if (data.latitude) onFieldChange('latitude', data.latitude);
         if (data.longitude) onFieldChange('longitude', data.longitude);
         
@@ -62,7 +60,6 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.id, onFieldChange, toast]);
   
-  // Fetch places for a specific category
   const fetchCategoryPlaces = useCallback(async (category: string) => {
     if (!formData.address) {
       toast({
@@ -101,7 +98,6 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.id, toast]);
   
-  // Fetch only nearby cities
   const fetchNearbyCities = useCallback(async () => {
     if (!formData.address) {
       toast({
@@ -140,7 +136,6 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.id, toast]);
   
-  // Generate location description using OpenAI
   const generateLocationDescription = useCallback(async () => {
     if (!formData.address) {
       toast({
@@ -185,7 +180,6 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.nearby_places, onFieldChange, toast]);
   
-  // Generate map image
   const generateMapImage = useCallback(async () => {
     if (!formData.latitude || !formData.longitude) {
       toast({
@@ -212,7 +206,6 @@ export function useLocationDataFetch(
       
       onFieldChange('map_image', mapImageUrl);
       
-      // If we have an ID, update the property in the database
       if (formData.id) {
         await supabase
           .from('properties')
@@ -236,23 +229,22 @@ export function useLocationDataFetch(
     }
   }, [formData.latitude, formData.longitude, formData.id, onFieldChange, toast]);
   
-  // Function to remove a nearby place
   const removeNearbyPlace = useCallback(async (index: number) => {
     if (!formData.nearby_places) return;
     
     try {
       const updatedPlaces = [...formData.nearby_places];
-      const removedPlace = updatedPlaces[index]; // Save reference to the place being removed
+      const removedPlace = updatedPlaces[index];
       updatedPlaces.splice(index, 1);
       
-      // Update form data first
       onFieldChange('nearby_places', updatedPlaces);
       
-      // If we have an ID, update the property in the database too
       if (formData.id) {
+        const updatedPlacesJson = preparePropertiesForJsonField(updatedPlaces);
+        
         const { error } = await supabase
           .from('properties')
-          .update({ nearby_places: updatedPlaces })
+          .update({ nearby_places: updatedPlacesJson })
           .eq('id', formData.id);
           
         if (error) {
