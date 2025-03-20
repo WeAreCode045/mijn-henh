@@ -9,12 +9,7 @@ export function usePropertyActions(propertyId: string) {
   const navigate = useNavigate();
   const [showWebView, setShowWebView] = useState(false);
 
-  const handleGeneratePDF = useCallback(async (e?: React.MouseEvent, property?: PropertyData, settings?: AgencySettings) => {
-    // Prevent default form submission if event is provided
-    if (e) {
-      e.preventDefault();
-    }
-
+  const handleGeneratePDF = useCallback(async (property?: PropertyData, settings?: AgencySettings) => {
     if (property && settings) {
       await generatePropertyPDF(property, settings);
     } else {

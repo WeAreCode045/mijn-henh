@@ -17,7 +17,7 @@ interface DashboardTabContentProps {
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveTemplate: (templateId: string) => Promise<void>;
-  handleGeneratePDF: () => void;
+  handleGeneratePDF: () => void; // Removed MouseEvent parameter
   handleWebView: (e: React.MouseEvent) => void;
 }
 
@@ -40,10 +40,6 @@ export function DashboardTabContent({
   handleGeneratePDF,
   handleWebView,
 }: DashboardTabContentProps) {
-  const handleWebViewClick = (e: React.MouseEvent) => {
-    handleWebView(e);
-  };
-
   return (
     <PropertyDashboardTab
       id={id}
@@ -61,8 +57,8 @@ export function DashboardTabContent({
       onSaveObjectId={handleSaveObjectId}
       onSaveAgent={handleSaveAgent}
       onSaveTemplate={handleSaveTemplate}
-      onGeneratePDF={handleGeneratePDF}
-      onWebView={handleWebViewClick}
+      handleGeneratePDF={handleGeneratePDF} // No longer passing an event
+      handleWebView={handleWebView}
     />
   );
 }
