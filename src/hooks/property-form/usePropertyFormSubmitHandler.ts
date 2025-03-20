@@ -47,6 +47,8 @@ export function usePropertyFormSubmitHandler() {
           .eq('id', formData.id)
           .single();
           
+        console.log("Current property data retrieved for change comparison:", currentPropertyData);
+          
         // Update existing property
         success = await updateProperty(formData.id, submitData);
         
@@ -63,6 +65,10 @@ export function usePropertyFormSubmitHandler() {
           
           // Log the changes if update was successful
           if (currentPropertyData) {
+            console.log("Logging changes between:", {
+              oldData: currentPropertyData,
+              newData: submitData
+            });
             await logPropertyChanges(formData.id, currentPropertyData, submitData);
           }
           

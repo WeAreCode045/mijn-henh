@@ -64,6 +64,29 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
     }
   };
 
+  // Format field name for display
+  const formatFieldName = (fieldName: string) => {
+    return fieldName
+      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+  };
+
+  // Format values for better display
+  const formatValue = (value: string) => {
+    // Check if it's a JSON string
+    if (value?.startsWith('{') || value?.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(value);
+        return JSON.stringify(parsed, null, 2);
+      } catch (e) {
+        // Not valid JSON, return original
+        return value || "(empty)";
+      }
+    }
+    
+    return value || "(empty)";
+  };
+
   // Add a proper dialog state change handler to ensure state is updated correctly
   const handleOpenChange = (newOpenState: boolean) => {
     console.log("Dialog open state changing to:", newOpenState);
@@ -93,18 +116,18 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
               {logs.map((log) => (
                 <div key={log.id} className="border rounded-md p-4">
                   <div className="flex justify-between mb-2">
-                    <span className="font-medium">{log.field_name}</span>
+                    <span className="font-medium">{formatFieldName(log.field_name)}</span>
                     <span className="text-sm text-muted-foreground">
                       {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
                     </span>
                   </div>
                   <div className="text-sm mb-1">
                     <span className="text-muted-foreground">From: </span>
-                    <span>{log.old_value || "(empty)"}</span>
+                    <span className="whitespace-pre-wrap break-words">{formatValue(log.old_value)}</span>
                   </div>
                   <div className="text-sm mb-2">
                     <span className="text-muted-foreground">To: </span>
-                    <span>{log.new_value || "(empty)"}</span>
+                    <span className="whitespace-pre-wrap break-words">{formatValue(log.new_value)}</span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-2">
                     Changed by: {log.user_name || "Unknown user"}

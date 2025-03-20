@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
 import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "./property-form/preparePropertyData";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function usePropertyAutoSave() {
   const [isSaving, setIsSaving] = useState(false);
@@ -11,6 +12,7 @@ export function usePropertyAutoSave() {
   const [pendingChanges, setPendingChanges] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+  const { logPropertyChanges } = usePropertyEditLogger();
 
   useEffect(() => {
     return () => {
@@ -25,6 +27,13 @@ export function usePropertyAutoSave() {
     
     try {
       setIsSaving(true);
+      
+      // Get current property data for change tracking
+      const { data: currentPropertyData } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', formData.id)
+        .single();
       
       const submitData = {
         title: formData.title,
@@ -66,6 +75,11 @@ export function usePropertyAutoSave() {
       }
 
       console.log('Auto-save successful, new timestamp:', updatedData?.[0]?.updated_at);
+      
+      // Log all changes that occurred during autosave
+      if (currentPropertyData) {
+        await logPropertyChanges(formData.id, currentPropertyData, submitData);
+      }
       
       // If we got back data, use the actual server timestamp for lastSaved
       if (updatedData && updatedData[0]) {
