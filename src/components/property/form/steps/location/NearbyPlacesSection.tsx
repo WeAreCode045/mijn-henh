@@ -62,12 +62,15 @@ export function NearbyPlacesSection({
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full">
               <TabsTrigger value="all">All ({nearbyPlaces.length})</TabsTrigger>
-              {categories.map(category => (
-                <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-1">
-                  {category.icon}
-                  {category.label} ({placesByCategory[category.id]?.length || 0})
-                </TabsTrigger>
-              ))}
+              {categories.map(category => {
+                const Icon = category.icon;
+                return (
+                  <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-1">
+                    <Icon className="h-4 w-4" />
+                    {category.label} ({placesByCategory[category.id]?.length || 0})
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
             
             <NearbyPlacesTabControls 

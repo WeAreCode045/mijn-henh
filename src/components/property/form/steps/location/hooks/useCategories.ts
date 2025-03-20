@@ -1,11 +1,12 @@
 
 import { PropertyNearbyPlace } from "@/types/property";
 import { Coffee, GraduationCap, ShoppingCart, ShoppingBag, Dumbbell, Film } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 export type Category = {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   color: string;
 };
 
@@ -15,37 +16,37 @@ export function useCategories() {
     { 
       id: "restaurant", 
       label: "Restaurants", 
-      icon: <Coffee className="h-4 w-4" />,
+      icon: Coffee,
       color: "bg-red-100 text-red-800" 
     },
     { 
       id: "education", 
       label: "Education", 
-      icon: <GraduationCap className="h-4 w-4" />,
+      icon: GraduationCap,
       color: "bg-blue-100 text-blue-800" 
     },
     { 
       id: "supermarket", 
       label: "Supermarkets", 
-      icon: <ShoppingCart className="h-4 w-4" />,
+      icon: ShoppingCart,
       color: "bg-orange-100 text-orange-800" 
     },
     { 
       id: "shopping", 
       label: "Shopping", 
-      icon: <ShoppingBag className="h-4 w-4" />,
+      icon: ShoppingBag,
       color: "bg-yellow-100 text-yellow-800" 
     },
     { 
       id: "sport", 
       label: "Sport Facilities", 
-      icon: <Dumbbell className="h-4 w-4" />,
+      icon: Dumbbell,
       color: "bg-emerald-100 text-emerald-800" 
     },
     { 
       id: "leisure", 
       label: "Leisure", 
-      icon: <Film className="h-4 w-4" />,
+      icon: Film,
       color: "bg-purple-100 text-purple-800" 
     }
   ];

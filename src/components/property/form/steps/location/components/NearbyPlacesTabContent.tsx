@@ -42,7 +42,10 @@ export function NearbyPlacesTabContent({
         isVisible={(place) => !!place.visible_in_webview}
         selectionMode={selectionMode}
         getCategoryColor={getCategoryColor}
-        getCategoryIcon={getCategoryIcon}
+        getCategoryIcon={(placeType) => {
+          const Icon = getCategoryIcon(placeType);
+          return Icon ? <Icon className="h-4 w-4" /> : null;
+        }}
       />
     );
   }
