@@ -31,6 +31,7 @@ export function PropertyTabContents({
   onDelete,
   handleSaveObjectId,
   handleSaveAgent,
+  handleSaveTemplate, // Add this parameter
   currentStep,
   handleStepClick,
   setPendingChanges,
@@ -56,6 +57,7 @@ export function PropertyTabContents({
     onDelete,
     handleSaveObjectId,
     handleSaveAgent,
+    handleSaveTemplate, // Include in handlers
     onFieldChange,
     onAddFeature,
     onRemoveFeature,

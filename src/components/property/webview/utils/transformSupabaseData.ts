@@ -44,7 +44,7 @@ export interface SupabasePropertyData {
   }[];
   created_at: string;
   updated_at: string;
-  template_id: string;
+  template_id?: string; // Make this optional since template functionality is removed
   floorplanEmbedScript?: string;
 }
 
@@ -152,7 +152,7 @@ export function transformSupabaseData(
       : undefined,
     created_at: data.created_at,
     updated_at: data.updated_at,
-    template_id: data.template_id,
+    template_id: data.template_id || "default",
     floorplanEmbedScript: data.floorplanEmbedScript || "",
     floorplans: [],
   };

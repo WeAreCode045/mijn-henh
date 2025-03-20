@@ -26,6 +26,12 @@ export function PropertyTabsWrapper({
   const { activeTab, setActiveTab } = usePropertyTabs();
   console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
+  // Add a stub function for handleSaveTemplate
+  const handleSaveTemplate = async (templateId: string) => {
+    console.log("Template functionality has been removed");
+    return Promise.resolve();
+  };
+  
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler propertyId={property.id} propertyData={property} settings={settings}>
@@ -87,6 +93,7 @@ export function PropertyTabsWrapper({
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
+                      handleSaveTemplate={handleSaveTemplate} // Add this stub function
                       handleGeneratePDF={handleGeneratePDF}
                       handleWebView={handleOpenWebView}
                       onFieldChange={handleFieldChange}

@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,8 @@ export function RecentProperties() {
         return (data || []).map(item => {
           const itemWithAgent = {
             ...item,
-            agent: item.agent || null
+            agent: item.agent || null,
+            template_id: item.template_id || "default" // Add default template_id if missing
           };
           return transformSupabaseData(itemWithAgent);
         });

@@ -33,7 +33,8 @@ export const useProperties = () => {
       // Ensure each item has the agent property structured correctly and add template_id if missing
       const propertyWithAgent = {
         ...item,
-        agent: item.agent || null
+        agent: item.agent || null,
+        template_id: item.template_id || "default" // Ensure template_id exists
       };
       return transformSupabaseData(propertyWithAgent);
     });
