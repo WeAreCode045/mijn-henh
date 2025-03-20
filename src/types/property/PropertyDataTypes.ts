@@ -42,4 +42,12 @@ export interface PropertyData {
   youtubeUrl?: string;
   created_at?: string;
   updated_at?: string;
+  status?: string; // Added status property
+  agent?: {
+    id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    photoUrl?: string;
+  };
 }

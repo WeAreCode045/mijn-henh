@@ -31,6 +31,7 @@ export const initialFormData: PropertyFormData = {
   floorplanEmbedScript: "", 
   virtualTourUrl: "",
   youtubeUrl: "",
+  status: "Draft", // Added status property with default value
   // For backward compatibility
   areaPhotos: [], 
   coverImages: [],

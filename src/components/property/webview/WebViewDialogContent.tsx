@@ -8,39 +8,35 @@ import { usePageCalculation } from "./hooks/usePageCalculation";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { usePropertyWebView } from "@/components/property/usePropertyWebView";
+import { useRef } from "react";
 
 interface WebViewDialogContentProps {
   propertyData: PropertyData;
-  settings: AgencySettings;
-  contentRef: React.RefObject<HTMLDivElement>;
-  printContentRef: React.RefObject<HTMLDivElement>;
-  currentPage: number;
-  setCurrentPage: (page: number) => void;
-  selectedImage: string | null;
-  setSelectedImage: (image: string | null) => void;
-  handleShare: (platform: string) => Promise<void>;
-  handlePrint: () => void;
-  handleNext: () => void;
-  handlePrevious: () => void;
 }
 
 export function WebViewDialogContent({
-  propertyData,
-  settings,
-  contentRef,
-  printContentRef,
-  currentPage,
-  setCurrentPage,
-  selectedImage,
-  setSelectedImage,
-  handleShare,
-  handlePrint,
-  handleNext,
-  handlePrevious
+  propertyData
 }: WebViewDialogContentProps) {
+  const { settings } = useAgencySettings();
   const { calculateTotalPages } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
   const navigate = useNavigate();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const printContentRef = useRef<HTMLDivElement>(null);
+  
+  const {
+    selectedImage,
+    setSelectedImage,
+    currentPage,
+    setCurrentPage,
+    handleShare,
+    handlePrint,
+    handleNext,
+    handlePrevious
+  } = usePropertyWebView();
+
   const showHeader = currentPage !== 0; // Hide header on overview page
 
   // Determine if we have a webview background from settings

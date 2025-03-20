@@ -11,6 +11,7 @@ import { WebViewDialogContent } from "@/components/property/webview/WebViewDialo
 import { WebViewFullPage } from "@/components/property/webview/WebViewFullPage";
 import { useWebViewBackground } from "@/components/property/webview/hooks/useWebViewBackground";
 import { hexToHSL } from "@/components/property/webview/utils/colorUtils";
+import { PropertyWebViewDialog } from "@/components/property/tabs/wrapper/PropertyWebViewDialog";
 import "./webview/styles/WebViewStyles.css";
 
 interface PropertyWebViewProps {
@@ -78,21 +79,12 @@ export function PropertyWebView({ property, open, onOpenChange, isDialog = false
   }
 
   // If this is being rendered in a dialog
-  if (isDialog && onOpenChange) {
+  if (isDialog && onOpenChange && open !== undefined) {
     return (
-      <WebViewDialogContent
+      <PropertyWebViewDialog
         propertyData={propertyData}
-        settings={settings}
-        contentRef={contentRef}
-        printContentRef={printContentRef}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        selectedImage={selectedImage}
-        setSelectedImage={setSelectedImage}
-        handleShare={handleShare}
-        handlePrint={handlePrint}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
+        isOpen={open}
+        onOpenChange={onOpenChange}
       />
     );
   }
