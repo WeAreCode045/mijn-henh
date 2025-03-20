@@ -7,6 +7,7 @@ import { usePropertyImageSaver } from "./usePropertyImageSaver";
 import { usePropertyDataPreparer } from "./usePropertyDataPreparer";
 import { usePropertyDatabase } from "./usePropertyDatabase";
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyFormSubmitHandler() {
   const { toast } = useToast();
@@ -47,7 +48,8 @@ export function usePropertyFormSubmitHandler() {
         // Update existing property
         success = await updateProperty(formData.id, submitData);
         
-        // Log the changes if update was successful
+        // Log the changes if update was successful - pass both objects directly
+        // The logPropertyChanges function is now more flexible with types
         if (success && currentPropertyData) {
           await logPropertyChanges(formData.id, currentPropertyData, submitData);
         }
@@ -100,8 +102,6 @@ export function usePropertyFormSubmitHandler() {
 }
 
 // Helper function to get the ID of a newly created property
-import { supabase } from "@/integrations/supabase/client";
-
 async function getNewPropertyId(title: string): Promise<string | null> {
   const { data: newProperty } = await supabase
     .from('properties')

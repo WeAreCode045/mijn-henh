@@ -2,6 +2,7 @@
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
+import { Json } from "@/integrations/supabase/types";
 
 export function usePropertyEditLogger() {
   const { user, profile } = useAuth();
@@ -44,8 +45,8 @@ export function usePropertyEditLogger() {
   // Compare two property objects and log all changes
   const logPropertyChanges = async (
     propertyId: string, 
-    oldData: Partial<PropertyFormData>, 
-    newData: Partial<PropertyFormData>
+    oldData: any, 
+    newData: any
   ) => {
     if (!propertyId) return;
     
