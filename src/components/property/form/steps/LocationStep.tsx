@@ -5,7 +5,6 @@ import { MapPreviewSection } from "./location/MapPreviewSection";
 import { NearbyPlacesSection } from "./location/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
 import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
-import { useState } from "react";
 
 interface LocationStepProps {
   formData: PropertyFormData;
@@ -14,12 +13,12 @@ interface LocationStepProps {
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onFetchNearbyCities?: () => Promise<any>;
   onGenerateLocationDescription?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
+  isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   handleMapImageDelete?: () => Promise<void>;
-  onGenerateMap?: () => Promise<void>;
-  isGeneratingMap?: boolean;
 }
 
 export function LocationStep({
@@ -62,7 +61,7 @@ export function LocationStep({
               formData={formData}
               onRemovePlace={onRemoveNearbyPlace}
               onFieldChange={onFieldChange}
-              onFetchNearbyPlaces={onFetchCategoryPlaces || onFetchLocationData}
+              onFetchNearbyPlaces={onFetchCategoryPlaces}
               isLoadingNearbyPlaces={isLoadingLocationData}
             />
             

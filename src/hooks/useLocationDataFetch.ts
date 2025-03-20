@@ -12,7 +12,7 @@ export function useLocationDataFetch(
   const [isGeneratingMap, setIsGeneratingMap] = useState(false);
   const { toast } = useToast();
   
-  // Function to fetch location data using Google Maps API
+  // Fetch only location data (coordinates) without places or cities
   const fetchLocationData = useCallback(async () => {
     if (!formData.address) {
       toast({
@@ -29,7 +29,8 @@ export function useLocationDataFetch(
       const { data, error } = await supabase.functions.invoke('fetch-location-data', {
         body: { 
           address: formData.address,
-          propertyId: formData.id
+          propertyId: formData.id,
+          coordinatesOnly: true
         }
       });
       
@@ -38,17 +39,16 @@ export function useLocationDataFetch(
       if (data) {
         console.log("Location data fetched:", data);
         
-        // Update form data with the fetched information
+        // Update form data with the fetched coordinates
         if (data.latitude) onFieldChange('latitude', data.latitude);
         if (data.longitude) onFieldChange('longitude', data.longitude);
-        if (data.map_image) onFieldChange('map_image', data.map_image);
-        if (data.nearby_places) onFieldChange('nearby_places', data.nearby_places);
-        if (data.nearby_cities) onFieldChange('nearby_cities', data.nearby_cities);
         
         toast({
           title: "Success",
           description: "Location data fetched successfully",
         });
+        
+        return data;
       }
     } catch (error) {
       console.error("Error fetching location data:", error);
@@ -62,7 +62,7 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.id, onFieldChange, toast]);
   
-  // Function to fetch places for a specific category
+  // Fetch places for a specific category
   const fetchCategoryPlaces = useCallback(async (category: string) => {
     if (!formData.address) {
       toast({
@@ -101,7 +101,7 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.id, toast]);
   
-  // Function to fetch only nearby cities
+  // Fetch only nearby cities
   const fetchNearbyCities = useCallback(async () => {
     if (!formData.address) {
       toast({
@@ -140,7 +140,7 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.id, toast]);
   
-  // Function to generate location description using OpenAI
+  // Generate location description using OpenAI
   const generateLocationDescription = useCallback(async () => {
     if (!formData.address) {
       toast({
@@ -185,7 +185,7 @@ export function useLocationDataFetch(
     }
   }, [formData.address, formData.nearby_places, onFieldChange, toast]);
   
-  // Function to generate map image
+  // Generate map image
   const generateMapImage = useCallback(async () => {
     if (!formData.latitude || !formData.longitude) {
       toast({

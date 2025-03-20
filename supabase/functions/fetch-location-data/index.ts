@@ -15,7 +15,7 @@ serve(async (req) => {
 
   try {
     const requestData = await req.json();
-    const { address, propertyId, category } = requestData;
+    const { address, propertyId, category, citiesOnly, coordinatesOnly } = requestData;
     
     if (!address) {
       throw new Error("Address is required");
@@ -57,6 +57,35 @@ serve(async (req) => {
     // Generate static map image URL
     const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${lat},${lng}&key=${googleMapsApiKey}`;
     console.log(`Generated map image URL`);
+
+    // If coordinatesOnly is specified, just return the coordinates
+    if (coordinatesOnly) {
+      // Update the property with coordinates if propertyId is provided
+      if (propertyId) {
+        const { error: updateError } = await supabaseAdmin
+          .from("properties")
+          .update({
+            latitude: lat,
+            longitude: lng
+          })
+          .eq("id", propertyId);
+
+        if (updateError) {
+          throw new Error(`Failed to update property: ${updateError.message}`);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          latitude: lat,
+          longitude: lng
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // If category is specified, just fetch places for that category
     if (category) {
@@ -109,7 +138,7 @@ serve(async (req) => {
     }
     
     // For cities only request
-    if (requestData.citiesOnly) {
+    if (citiesOnly) {
       // Fetch nearby cities with population data 
       const citiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=200000&type=locality&key=${googleMapsApiKey}&rankby=prominence`;
       const citiesResponse = await fetch(citiesUrl);

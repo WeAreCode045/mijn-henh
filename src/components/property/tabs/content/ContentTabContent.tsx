@@ -80,6 +80,7 @@ export function ContentTabContent({
       handlePrevious={handlePrevious}
       onFetchLocationData={onFetchLocationData}
       onFetchCategoryPlaces={onFetchCategoryPlaces}
+      onFetchNearbyCities={onFetchNearbyCities}
       onGenerateLocationDescription={onGenerateLocationDescription}
       onGenerateMap={onGenerateMap}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
