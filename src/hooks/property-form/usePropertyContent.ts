@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
-import { useLocationDataFetch } from '@/hooks/useLocationDataFetch';
+import { useLocationDataFetch } from '@/hooks/location/useLocationDataFetch';
 
 export function usePropertyContent(
   formData: PropertyFormData,
