@@ -22,8 +22,10 @@ export default function PropertyFormPage() {
   }, [formData?.title]);
 
   return (
-    <div className="container mx-auto py-8">
-      <PropertyFormContainer />
+    <div className="bg-estate-50 min-h-screen">
+      <div className="container mx-auto py-8">
+        <PropertyFormContainer />
+      </div>
     </div>
   );
 }
