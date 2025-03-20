@@ -4,6 +4,7 @@ import { CategorySection } from "./CategorySection";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyNearbyPlace } from "@/types/property";
+import { useCategories } from "../hooks/useCategories";
 
 interface NearbyPlacesTabContentProps {
   tabId: string;
@@ -26,6 +27,8 @@ export function NearbyPlacesTabContent({
   selectedIndices,
   selectionMode
 }: NearbyPlacesTabContentProps) {
+  const { getCategoryColor, getCategoryIcon } = useCategories();
+  
   if (places && places.length > 0) {
     return (
       <CategorySection
@@ -38,6 +41,8 @@ export function NearbyPlacesTabContent({
         selectedIndices={selectedIndices}
         isVisible={(place) => !!place.visible_in_webview}
         selectionMode={selectionMode}
+        getCategoryColor={getCategoryColor}
+        getCategoryIcon={getCategoryIcon}
       />
     );
   }

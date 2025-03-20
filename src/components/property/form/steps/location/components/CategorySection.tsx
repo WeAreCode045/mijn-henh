@@ -2,8 +2,6 @@
 import { PropertyNearbyPlace } from "@/types/property";
 import { PlaceItem } from "./PlaceItem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 interface CategorySectionProps {
   category: string;
@@ -14,6 +12,8 @@ interface CategorySectionProps {
   selectedIndices?: number[];
   isVisible: (place: PropertyNearbyPlace) => boolean;
   selectionMode?: boolean;
+  getCategoryColor?: (type: string) => string;
+  getCategoryIcon?: (type: string) => React.ReactNode;
 }
 
 export function CategorySection({
@@ -24,15 +24,18 @@ export function CategorySection({
   toggleSelection,
   selectedIndices = [],
   isVisible,
-  selectionMode = false
+  selectionMode = false,
+  getCategoryColor,
+  getCategoryIcon
 }: CategorySectionProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle>{category}</CardTitle>
-          
-          {/* Removed the selection mode switch as we control this from the parent now */}
+          <CardTitle className="flex items-center gap-2">
+            {getCategoryIcon && category !== 'All Places' && getCategoryIcon(places[0]?.type || '')}
+            {category}
+          </CardTitle>
         </div>
         <CardDescription>
           {places.length} {places.length === 1 ? 'place' : 'places'} found
@@ -53,6 +56,8 @@ export function CategorySection({
               category={place.type || ''}
               visible={isVisible(place)}
               selectionMode={selectionMode}
+              getCategoryColor={getCategoryColor}
+              getCategoryIcon={getCategoryIcon}
             />
           ))}
         </div>

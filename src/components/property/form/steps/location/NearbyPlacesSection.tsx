@@ -63,7 +63,8 @@ export function NearbyPlacesSection({
             <TabsList className="w-full">
               <TabsTrigger value="all">All ({nearbyPlaces.length})</TabsTrigger>
               {categories.map(category => (
-                <TabsTrigger key={category.id} value={category.id}>
+                <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-1">
+                  {category.icon}
                   {category.label} ({placesByCategory[category.id]?.length || 0})
                 </TabsTrigger>
               ))}

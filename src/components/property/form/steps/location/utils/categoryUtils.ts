@@ -1,4 +1,3 @@
-
 import { PropertyPlaceType, PropertyNearbyPlace } from "@/types/property";
 
 // Color mapping for different place categories

@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
-import { getTransportationType } from "../utils/categoryUtils";
 
 interface PlaceItemProps {
   place: PropertyPlaceType;
@@ -17,6 +16,8 @@ interface PlaceItemProps {
   visible: boolean;
   isSelected?: boolean;
   selectionMode?: boolean;
+  getCategoryColor?: (type: string) => string;
+  getCategoryIcon?: (type: string) => React.ReactNode;
 }
 
 export function PlaceItem({ 
@@ -29,8 +30,12 @@ export function PlaceItem({
   category,
   visible,
   isSelected = false,
-  selectionMode = false
+  selectionMode = false,
+  getCategoryColor,
+  getCategoryIcon
 }: PlaceItemProps) {
+  const categoryColor = getCategoryColor ? getCategoryColor(place.type || '') : "";
+  
   return (
     <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md">
       <div className="flex items-start gap-2">
@@ -54,13 +59,19 @@ export function PlaceItem({
           />
         )}
         <div>
-          <div className="font-medium">{place.name}</div>
+          <div className="font-medium flex items-center gap-1">
+            {getCategoryIcon && getCategoryIcon(place.type || '')}
+            {place.name}
+          </div>
           <div className="text-sm text-gray-500">{place.vicinity}</div>
           
           <div className="flex flex-wrap gap-1 mt-1">
-            {category === 'transportation' && (
-              <Badge variant="outline" className="text-xs">
-                {getTransportationType(place)}
+            {place.type && (
+              <Badge 
+                variant="outline" 
+                className={`text-xs ${categoryColor}`}
+              >
+                {place.type}
               </Badge>
             )}
             
