@@ -20,7 +20,7 @@ interface PropertyDashboardTabProps {
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   onGeneratePDF?: () => void;
-  onWebView?: (e?: React.MouseEvent) => void;
+  onWebView?: (e: React.MouseEvent) => void; // Updated to accept a MouseEvent
   onSaveAgent?: (agentId: string) => void;
   onSaveObjectId?: (objectId: string) => void;
   onSaveTemplate?: (templateId: string) => void;
@@ -59,7 +59,12 @@ export function PropertyDashboardTab({
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex gap-2">
           {onWebView && (
-            <Button variant="outline" size="sm" onClick={onWebView} title="Web View">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onWebView} // This now accepts an event
+              title="Web View"
+            >
               <Globe className="h-4 w-4 mr-2" />
               Web View
             </Button>

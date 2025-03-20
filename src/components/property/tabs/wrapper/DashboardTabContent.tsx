@@ -18,7 +18,7 @@ interface DashboardTabContentProps {
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveTemplate: (templateId: string) => Promise<void>;
   handleGeneratePDF: () => void;
-  handleWebView: () => void;
+  handleWebView: (e: React.MouseEvent) => void;
 }
 
 export function DashboardTabContent({
@@ -40,9 +40,8 @@ export function DashboardTabContent({
   handleGeneratePDF,
   handleWebView,
 }: DashboardTabContentProps) {
-  const handleWebViewClick = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    handleWebView();
+  const handleWebViewClick = (e: React.MouseEvent) => {
+    handleWebView(e);
   };
 
   return (

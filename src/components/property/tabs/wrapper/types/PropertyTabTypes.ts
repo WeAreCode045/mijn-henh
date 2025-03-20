@@ -38,7 +38,7 @@ export interface PropertyTabContentsProps {
   isSaving?: boolean;
   // Add the missing properties
   handleGeneratePDF?: () => void;
-  handleWebView?: () => void;
+  handleWebView?: (e: React.MouseEvent) => void; // Updated to accept MouseEvent
   handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage?: (index: number) => void;
   isUploading?: boolean;
@@ -146,6 +146,6 @@ export interface PropertyTabProps {
     handleStepClick: (step: number) => void;
     setPendingChanges: (pending: boolean) => void;
     isSaving: boolean;
-    handleWebView?: () => void;  // Add this property
+    handleWebView?: (e: React.MouseEvent) => void;  // Updated to accept MouseEvent
   }
 }

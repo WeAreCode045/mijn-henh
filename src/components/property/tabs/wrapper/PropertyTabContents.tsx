@@ -80,7 +80,8 @@ export function PropertyTabContents({
     currentStep,
     handleStepClick,
     setPendingChanges,
-    isSaving: isSaving || false
+    isSaving: isSaving || false,
+    handleWebView // Add the handleWebView prop
   };
 
   return TabContentRenderers.renderTabContent({

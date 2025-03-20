@@ -12,7 +12,7 @@ interface DashboardTabContentProps {
   property: PropertyData;
   onDelete?: () => Promise<void>;
   onSave?: () => void;
-  onWebView?: () => void;
+  onWebView?: (e: React.MouseEvent) => void; // Updated to accept a MouseEvent
   handleSaveAgent?: (agentId: string) => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ export function DashboardTabContent({
           updatedAt={property.updated_at}
           onSave={onSave}
           onDelete={onDelete}
-          onWebView={onWebView}
+          onWebView={onWebView} // This now accepts an event
           handleSaveAgent={handleSaveAgent}
           agentId={property.agent_id}
         />

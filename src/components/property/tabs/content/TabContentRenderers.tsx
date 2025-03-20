@@ -20,7 +20,7 @@ export const TabContentRenderers = {
             property={propertyData} 
             onDelete={handlers.onDelete}
             onSave={handlers.onSave}
-            onWebView={handlers.handleWebView}
+            onWebView={handlers.handleWebView} // Pass the function that takes a React.MouseEvent
             handleSaveAgent={handlers.handleSaveAgent}
           />
         );
