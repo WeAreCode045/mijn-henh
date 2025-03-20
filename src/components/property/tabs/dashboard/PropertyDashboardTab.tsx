@@ -152,6 +152,7 @@ export function PropertyDashboardTab({
     }
   };
 
+  // This wrapper function allows us to call handleGeneratePDF without passing the event
   const handleGeneratePDFClick = () => {
     handleGeneratePDF();
   };

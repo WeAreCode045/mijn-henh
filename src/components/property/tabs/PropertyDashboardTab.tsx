@@ -11,16 +11,20 @@ import { Code } from "@/components/ui/code";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Submission } from "@/types/submission";
 
 interface Submission {
   id: string;
+  property_id: string;
   name: string;
   email: string;
   phone: string;
-  inquiry_type: string;
   message: string;
-  created_at: string;
+  inquiry_type: string;
   is_read: boolean;
+  created_at: string;
+  updated_at: string;
+  agent_id: string;
 }
 
 interface Agent {
@@ -124,7 +128,21 @@ export function PropertyDashboardTab({
       
       if (error) throw error;
       
-      setSubmissions(data || []);
+      const formattedSubmissions: Submission[] = (data || []).map(item => ({
+        id: item.id,
+        property_id: item.property_id,
+        name: item.name,
+        email: item.email,
+        phone: item.phone,
+        message: item.message || "",
+        inquiry_type: item.inquiry_type,
+        is_read: !!item.is_read,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        agent_id: item.agent_id
+      }));
+      
+      setSubmissions(formattedSubmissions);
       setIsSubmissionsOpen(true);
     } catch (error) {
       console.error('Error fetching submissions:', error);
