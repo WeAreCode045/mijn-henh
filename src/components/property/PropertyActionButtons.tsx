@@ -7,7 +7,7 @@ interface PropertyActionButtonsProps {
   onSave: () => void;
   onDelete: () => void;
   onGeneratePDF: () => void;
-  onWebView: () => void;
+  onWebView: (e: React.MouseEvent) => void;
   propertyId: string;
 }
 

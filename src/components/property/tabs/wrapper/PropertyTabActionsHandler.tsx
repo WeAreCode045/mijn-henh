@@ -13,7 +13,7 @@ interface PropertyTabActionsHandlerProps {
     webViewOpen: boolean;
     setWebViewOpen: (open: boolean) => void;
     handleGeneratePDF: () => void;
-    handleOpenWebView: (e?: React.MouseEvent) => void;
+    handleOpenWebView: (e: React.MouseEvent) => void;
   }) => React.ReactNode;
 }
 
@@ -28,9 +28,12 @@ export function PropertyTabActionsHandler({
   const { generatePDF } = useGeneratePDF();
 
   // Web view functions - opens in new tab
-  const handleOpenWebView = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    handleWebView(e);
+  const handleOpenWebView = (e: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    return handleWebView(e);
   };
 
   // PDF generation function

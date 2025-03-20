@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Save, Trash2, Share2, Globe, FileText } from "lucide-react";
@@ -19,7 +18,7 @@ interface ActionsCardProps {
   updatedAt?: string;
   onSave?: () => void;
   onDelete?: () => Promise<void>;
-  onWebView?: () => void;
+  onWebView?: (e: React.MouseEvent) => void;
   handleSaveAgent?: (agentId: string) => Promise<void>;
   agentId?: string;
 }
@@ -185,6 +184,7 @@ export function ActionsCard({
             variant="outline"
             className="w-full flex items-center gap-2"
             size="sm"
+            type="button" 
           >
             <Globe className="h-4 w-4" />
             Web View
