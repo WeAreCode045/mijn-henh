@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -39,7 +40,7 @@ export const useProperties = () => {
     });
   };
 
-  const { data: properties = [], isLoading, error } = useQuery({
+  const { data: properties = [], isLoading, error, refetch } = useQuery({
     queryKey: ['properties', profile?.id, isAdmin],
     queryFn: fetchProperties,
   });
@@ -63,6 +64,9 @@ export const useProperties = () => {
       title: "Brochure verwijderd",
       description: "De brochure is succesvol verwijderd",
     });
+    
+    // Refetch the properties after deletion
+    refetch();
   };
 
   return {
@@ -70,5 +74,6 @@ export const useProperties = () => {
     isLoading,
     error,
     handleDelete,
+    refetch
   };
 };

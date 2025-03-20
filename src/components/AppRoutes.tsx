@@ -20,10 +20,10 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// This component handles the redirect from /edit to /content
+// This component handles the redirect from /edit to /dashboard
 function PropertyEditRedirect() {
   const { id } = useParams();
-  return <Navigate to={`/property/${id}/content`} replace />;
+  return <Navigate to={`/property/${id}/dashboard`} replace />;
 }
 
 // This component handles the redirect from /property/:id to /property/:id/dashboard

@@ -102,6 +102,9 @@ export function PropertyForm() {
     </div>;
   }
 
+  // Update the page title based on property title
+  document.title = formData.title || "Property";
+
   // Ensure formData has an id property by casting it to PropertyData
   const propertyData: PropertyData = {
     ...formData,
