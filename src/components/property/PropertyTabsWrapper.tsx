@@ -82,7 +82,11 @@ export function PropertyTabsWrapper({
             }) => (
               <>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <PropertyTabs activeTab={activeTab} handleTabChange={setActiveTab}>
+                  <PropertyTabs 
+                    activeTab={activeTab} 
+                    handleTabChange={setActiveTab}
+                    propertyId={property.id}
+                  >
                     <PropertyTabContents
                       activeTab={activeTab}
                       property={propertyWithRequiredProps}
@@ -93,7 +97,7 @@ export function PropertyTabsWrapper({
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
-                      handleSaveTemplate={handleSaveTemplate} // Add this stub function
+                      handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
                       handleWebView={handleOpenWebView}
                       onFieldChange={handleFieldChange}

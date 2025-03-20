@@ -26,6 +26,12 @@ function PropertyEditRedirect() {
   return <Navigate to={`/property/${id}/content`} replace />;
 }
 
+// This component handles the redirect from /property/:id to /property/:id/dashboard
+function PropertyDashboardRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/property/${id}/dashboard`} replace />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -83,6 +89,12 @@ export function AppRoutes() {
           <PropertyLayout>
             <PropertyFormPage />
           </PropertyLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/property/:id" element={
+        <ProtectedRoute>
+          <PropertyDashboardRedirect />
         </ProtectedRoute>
       } />
       

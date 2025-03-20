@@ -74,6 +74,42 @@ export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
                 </div>
               </div>
             </div>
+            
+            {/* Property Stats Section */}
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Bedrooms</p>
+                <p className="text-xl font-bold">{property.bedrooms || "N/A"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Bathrooms</p>
+                <p className="text-xl font-bold">{property.bathrooms || "N/A"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Living Area</p>
+                <p className="text-xl font-bold">{property.livingArea || "N/A"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Build Year</p>
+                <p className="text-xl font-bold">{property.buildYear || "N/A"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Energy Label</p>
+                <p className="text-xl font-bold">{property.energyLabel || "N/A"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Garden</p>
+                <p className="text-xl font-bold">{property.hasGarden ? "Yes" : "No"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Garages</p>
+                <p className="text-xl font-bold">{property.garages || "0"}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm text-gray-500">Floor Plan</p>
+                <p className="text-xl font-bold">{property.floorplans && property.floorplans.length > 0 ? "Yes" : "No"}</p>
+              </div>
+            </div>
           </div>
           <div className="w-full md:w-40 h-40 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
             {mainImage ? (

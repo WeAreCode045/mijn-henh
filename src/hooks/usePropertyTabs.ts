@@ -8,7 +8,7 @@ export function usePropertyTabs() {
   const location = useLocation();
   
   // Valid tab values and their corresponding paths
-  const validTabs = ['dashboard', 'content', 'media', 'floorplans', 'communications'];
+  const validTabs = ['dashboard', 'content', 'media', 'communications'];
   
   // Extract the current tab from the URL path
   const getTabFromPath = (path: string): string => {
@@ -42,7 +42,7 @@ export function usePropertyTabs() {
     }
     
     // If there's no specific tab in the URL (just /property/id), redirect to dashboard
-    if (id && location.pathname === `/property/${id}`) {
+    if (id && location.pathname === `//property/${id}` || location.pathname === `/property/${id}`) {
       navigate(`/property/${id}/dashboard`);
     }
   }, [location.pathname, activeTab, id, navigate]);

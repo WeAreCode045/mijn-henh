@@ -16,6 +16,19 @@ export function PropertyForm() {
   const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Set document title based on property title
+  useEffect(() => {
+    if (formData?.title) {
+      document.title = formData.title;
+    } else {
+      document.title = "Property";
+    }
+    
+    return () => {
+      document.title = "Brochure Generator";
+    };
+  }, [formData?.title]);
+
   useEffect(() => {
     if (formData?.agent_id) {
       // Fetch agent info
@@ -45,9 +58,6 @@ export function PropertyForm() {
       toast({
         description: "Property data refreshed",
       });
-      
-      // This would trigger a refresh of the data
-      // For now, we'll just show a toast
     }
   };
 
@@ -72,7 +82,6 @@ export function PropertyForm() {
         description: "Property deleted successfully",
       });
       
-      // Navigate would happen in the container component
       return Promise.resolve();
     } catch (error) {
       console.error("Error deleting property:", error);
@@ -94,7 +103,6 @@ export function PropertyForm() {
   }
 
   // Ensure formData has an id property by casting it to PropertyData
-  // This is safe because we've already checked that formData is not null
   const propertyData: PropertyData = {
     ...formData,
     id: formData.id || '', // Provide empty string as fallback if id is missing

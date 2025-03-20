@@ -1,7 +1,8 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Save, Trash2, Share2, Globe, FileText } from "lucide-react";
-import { formatDate } from "@/utils/dateUtils";
+import { FileDown, Share2, Globe, Trash2 } from "lucide-react";
+import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyData } from "@/types/property";
 import { useGeneratePDF } from "@/hooks/useGeneratePDF";
@@ -96,7 +97,9 @@ export function ActionsCard({
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/property/view/${propertyId}`;
+    // Use objectId as slug if available, otherwise use id
+    const slug = propertyData?.object_id || propertyId;
+    const url = `${window.location.origin}/share/${slug}`;
     navigator.clipboard.writeText(url);
     toast({
       title: "Link copied to clipboard",
@@ -121,6 +124,19 @@ export function ActionsCard({
     }
   };
 
+  // Format date properly
+  const formatDateString = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd/MM/yyyy HH:mm");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
   return (
     <Card className="md:col-span-1">
       <CardHeader className="pb-3">
@@ -130,11 +146,11 @@ export function ActionsCard({
         <div className="space-y-2">
           <div>
             <p className="text-sm font-medium">Created</p>
-            <p className="text-sm">{createdAt ? formatDate(createdAt) : "N/A"}</p>
+            <p className="text-sm">{createdAt ? formatDateString(createdAt) : "N/A"}</p>
           </div>
           <div>
             <p className="text-sm font-medium">Last Updated</p>
-            <p className="text-sm">{updatedAt ? formatDate(updatedAt) : "N/A"}</p>
+            <p className="text-sm">{updatedAt ? formatDateString(updatedAt) : "N/A"}</p>
           </div>
         </div>
         
@@ -163,14 +179,6 @@ export function ActionsCard({
         
         <div className="flex flex-col gap-2">
           <Button 
-            onClick={onSave}
-            className="w-full flex items-center gap-2"
-            size="sm"
-          >
-            <Save className="h-4 w-4" />
-            Save
-          </Button>
-          <Button 
             onClick={onDelete}
             variant="destructive"
             className="w-full flex items-center gap-2"
@@ -196,7 +204,7 @@ export function ActionsCard({
             size="sm"
             disabled={isGenerating}
           >
-            <FileText className="h-4 w-4" />
+            <FileDown className="h-4 w-4" />
             {isGenerating ? "Generating..." : "Generate PDF"}
           </Button>
           <Button

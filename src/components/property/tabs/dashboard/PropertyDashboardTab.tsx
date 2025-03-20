@@ -1,11 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
-import { PropertySubmissionsDialog } from "@/components/property/PropertySubmissionsDialog";
-import { FileDown, Globe, Share2, Save, Trash2, Mailbox } from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns";
+import { FileDown, Globe, Share2, Trash2, Mailbox } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Code } from "@/components/ui/code";
@@ -116,33 +114,6 @@ export function PropertyDashboardTab({
     }
   };
 
-  const handleSaveNotes = async (notes: string) => {
-    try {
-      const { error } = await supabase
-        .from('property_notes')
-        .insert({ 
-          property_id: id, 
-          content: notes, 
-          title: "Notes" 
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Notes saved",
-        description: "The notes have been saved."
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error saving notes",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
   // This wrapper function allows us to call handleGeneratePDF without passing the event
   const handleGeneratePDFClick = () => {
     handleGeneratePDF();
@@ -154,21 +125,39 @@ export function PropertyDashboardTab({
     handleWebView(syntheticEvent);
   };
 
+  // Function to generate webview URL using objectId as slug if available
+  const getWebViewUrl = () => {
+    if (objectId) {
+      return `/property/${objectId}/webview`;
+    }
+    return `/property/${id}/webview`;
+  };
+
+  // Format the date properly
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd/MM/yyyy HH:mm");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={onSave} title="Save">
-            <Save className="h-4 w-4" />
-          </Button>
           <Button 
             variant="outline" 
             size="icon" 
             asChild
             title="Web View"
           >
-            <a href={`/property/${id}/webview`} target="_blank" rel="noopener noreferrer">
+            <a href={getWebViewUrl()} target="_blank" rel="noopener noreferrer">
               <Globe className="h-4 w-4" />
             </a>
           </Button>
@@ -181,7 +170,7 @@ export function PropertyDashboardTab({
             asChild
             title="Share Link"
           >
-            <a href={`/share/${id}`} target="_blank" rel="noopener noreferrer">
+            <a href={objectId ? `/share/${objectId}` : `/share/${id}`} target="_blank" rel="noopener noreferrer">
               <Share2 className="h-4 w-4" />
             </a>
           </Button>
@@ -218,6 +207,8 @@ export function PropertyDashboardTab({
           onWebView={handleWebViewClick}
           onSave={onSave}
           onDelete={onDelete}
+          formattedUpdateDate={formatDate(updatedAt)}
+          formattedCreateDate={formatDate(createdAt)}
         />
         
         <div className="space-y-6">
@@ -229,14 +220,6 @@ export function PropertyDashboardTab({
         <ActivityCard />
         <NotesCard />
       </div>
-      
-      <PropertySubmissionsDialog
-        open={openSubmissionsDialog}
-        onOpenChange={setOpenSubmissionsDialog}
-        propertyTitle={title}
-        submissions={submissions}
-        onMarkAsRead={handleMarkAsRead}
-      />
     </div>
   );
 }

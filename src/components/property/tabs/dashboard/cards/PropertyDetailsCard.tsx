@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
-import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 
 interface PropertyDetailsCardProps {
@@ -20,6 +19,8 @@ interface PropertyDetailsCardProps {
   onWebView?: () => void;
   onSave?: () => void;
   onDelete?: () => Promise<void>;
+  formattedCreateDate?: string;
+  formattedUpdateDate?: string;
 }
 
 export function PropertyDetailsCard({
@@ -34,7 +35,9 @@ export function PropertyDetailsCard({
   onGeneratePDF,
   onWebView,
   onSave,
-  onDelete
+  onDelete,
+  formattedCreateDate,
+  formattedUpdateDate
 }: PropertyDetailsCardProps) {
   const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
 
@@ -77,14 +80,14 @@ export function PropertyDetailsCard({
         {createdAt && (
           <div>
             <span className="text-sm font-medium">Created:</span>
-            <p className="text-sm">{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</p>
+            <p className="text-sm">{formattedCreateDate || "N/A"}</p>
           </div>
         )}
         
         {updatedAt && (
           <div>
             <span className="text-sm font-medium">Last Modified:</span>
-            <p className="text-sm">{formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</p>
+            <p className="text-sm">{formattedUpdateDate || "N/A"}</p>
           </div>
         )}
       </CardContent>
