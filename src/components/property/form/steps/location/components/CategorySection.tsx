@@ -1,44 +1,63 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyNearbyPlace } from "@/types/property";
 import { PlaceItem } from "./PlaceItem";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface CategorySectionProps {
   category: string;
   places: PropertyNearbyPlace[];
   onRemovePlace?: (index: number) => void;
-  toggleVisibility?: (placeIndex: number, visible: boolean) => void;
-  isVisible?: (place: PropertyNearbyPlace) => boolean;
+  toggleVisibility: (index: number, visible: boolean) => void;
+  toggleSelection?: (index: number, selected: boolean) => void;
+  selectedIndices?: number[];
+  isVisible: (place: PropertyNearbyPlace) => boolean;
+  selectionMode?: boolean;
 }
 
-export function CategorySection({ 
-  category, 
-  places, 
+export function CategorySection({
+  category,
+  places,
   onRemovePlace,
   toggleVisibility,
-  isVisible = () => true
+  toggleSelection,
+  selectedIndices = [],
+  isVisible,
+  selectionMode = false
 }: CategorySectionProps) {
-  const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
-  
   return (
     <Card>
-      <CardHeader className="py-3">
-        <CardTitle className="text-md">{formattedCategory} ({places.length})</CardTitle>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle>{category}</CardTitle>
+          
+          {selectionMode && (
+            <div className="flex items-center space-x-2">
+              <Switch id="selection-mode" defaultChecked={true} />
+              <Label htmlFor="selection-mode">Selection Mode</Label>
+            </div>
+          )}
+        </div>
+        <CardDescription>
+          {places.length} {places.length === 1 ? 'place' : 'places'} found
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {places.map((place, idx) => (
-            <PlaceItem 
-              key={place.id || idx} 
-              place={place} 
-              index={idx}
-              originalIndex={place.id ? parseInt(place.id) : idx}
-              category={category}
-              onRemove={onRemovePlace ? () => onRemovePlace(idx) : undefined}
-              onVisibilityChange={toggleVisibility ? 
-                (index, visible) => toggleVisibility(index, visible) : 
-                () => {}}
+          {places.map((place, index) => (
+            <PlaceItem
+              key={place.id || index}
+              place={place}
+              index={index}
+              originalIndex={index}
+              onRemove={onRemovePlace}
+              onVisibilityChange={toggleVisibility}
+              onSelectionChange={toggleSelection}
+              isSelected={selectedIndices.includes(index)}
+              category={place.type || ''}
               visible={isVisible(place)}
+              selectionMode={selectionMode}
             />
           ))}
         </div>

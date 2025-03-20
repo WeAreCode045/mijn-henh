@@ -2,12 +2,13 @@
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { CategorySection } from "./components/CategorySection";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, MapPin } from "lucide-react";
+import { AlertCircle, MapPin, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { SelectPlacesModal, PlaceOption } from "./components/SelectPlacesModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -30,6 +31,8 @@ export function NearbyPlacesSection({
   const [currentCategory, setCurrentCategory] = useState("");
   const [placesForModal, setPlacesForModal] = useState<PlaceOption[]>([]);
   const [isFetchingCategory, setIsFetchingCategory] = useState(false);
+  const [selectedPlacesToDelete, setSelectedPlacesToDelete] = useState<number[]>([]);
+  const { toast } = useToast();
   
   // Define our categories
   const categories = [
@@ -120,6 +123,35 @@ export function NearbyPlacesSection({
     onFieldChange('nearby_places', updatedPlaces);
   };
 
+  const togglePlaceSelection = (placeIndex: number, selected: boolean) => {
+    if (selected) {
+      setSelectedPlacesToDelete([...selectedPlacesToDelete, placeIndex]);
+    } else {
+      setSelectedPlacesToDelete(selectedPlacesToDelete.filter(idx => idx !== placeIndex));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (!onFieldChange || !formData.nearby_places || selectedPlacesToDelete.length === 0) return;
+
+    // Filter out the places that are selected for deletion
+    const updatedPlaces = formData.nearby_places.filter((_, idx) => 
+      !selectedPlacesToDelete.includes(idx)
+    );
+    
+    // Update the form data
+    onFieldChange('nearby_places', updatedPlaces);
+    
+    // Reset selection
+    setSelectedPlacesToDelete([]);
+    
+    // Show success toast
+    toast({
+      title: "Places removed",
+      description: `${selectedPlacesToDelete.length} places have been removed.`,
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -164,7 +196,7 @@ export function NearbyPlacesSection({
               ))}
             </TabsList>
             
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-between mt-2">
               {activeTab !== 'all' && (
                 <Button 
                   variant="outline" 
@@ -185,6 +217,18 @@ export function NearbyPlacesSection({
                   )}
                 </Button>
               )}
+              
+              {selectedPlacesToDelete.length > 0 && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="ml-auto"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Selected ({selectedPlacesToDelete.length})
+                </Button>
+              )}
             </div>
             
             <TabsContent value="all" className="space-y-4 mt-4">
@@ -195,7 +239,10 @@ export function NearbyPlacesSection({
                   places={nearbyPlaces}
                   onRemovePlace={onRemovePlace}
                   toggleVisibility={togglePlaceVisibility}
+                  toggleSelection={togglePlaceSelection}
+                  selectedIndices={selectedPlacesToDelete}
                   isVisible={(place) => !!place.visible_in_webview}
+                  selectionMode={true}
                 />
               ) : (
                 <p className="text-center py-4 text-muted-foreground">No places found</p>
@@ -211,7 +258,10 @@ export function NearbyPlacesSection({
                     places={placesByCategory[category.id] || []}
                     onRemovePlace={onRemovePlace}
                     toggleVisibility={togglePlaceVisibility}
+                    toggleSelection={togglePlaceSelection}
+                    selectedIndices={selectedPlacesToDelete}
                     isVisible={(place) => !!place.visible_in_webview}
+                    selectionMode={true}
                   />
                 ) : (
                   <Card>

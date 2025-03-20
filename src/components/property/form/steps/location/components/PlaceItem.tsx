@@ -10,10 +10,13 @@ interface PlaceItemProps {
   place: PropertyPlaceType;
   onRemove?: (index: number) => void;
   onVisibilityChange: (index: number, visible: boolean) => void;
+  onSelectionChange?: (index: number, selected: boolean) => void;
   index: number;
   originalIndex: number;
   category: string;
   visible: boolean;
+  isSelected?: boolean;
+  selectionMode?: boolean;
 }
 
 export function PlaceItem({ 
@@ -22,19 +25,34 @@ export function PlaceItem({
   originalIndex, 
   onRemove, 
   onVisibilityChange,
+  onSelectionChange,
   category,
-  visible
+  visible,
+  isSelected = false,
+  selectionMode = false
 }: PlaceItemProps) {
   return (
     <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md">
       <div className="flex items-start gap-2">
-        <Checkbox 
-          id={`place-${originalIndex}`}
-          checked={visible}
-          onCheckedChange={(checked) => {
-            onVisibilityChange(originalIndex, checked === true);
-          }}
-        />
+        {selectionMode ? (
+          <Checkbox 
+            id={`place-select-${originalIndex}`}
+            checked={isSelected}
+            onCheckedChange={(checked) => {
+              if (onSelectionChange) {
+                onSelectionChange(originalIndex, checked === true);
+              }
+            }}
+          />
+        ) : (
+          <Checkbox 
+            id={`place-${originalIndex}`}
+            checked={visible}
+            onCheckedChange={(checked) => {
+              onVisibilityChange(originalIndex, checked === true);
+            }}
+          />
+        )}
         <div>
           <div className="font-medium">{place.name}</div>
           <div className="text-sm text-gray-500">{place.vicinity}</div>
@@ -62,7 +80,7 @@ export function PlaceItem({
           </div>
         </div>
       </div>
-      {onRemove && (
+      {onRemove && !selectionMode && (
         <Button 
           variant="ghost" 
           size="icon" 
