@@ -100,7 +100,7 @@ export function useCategories() {
     return category?.icon || null;
   };
   
-  // Get readable category name
+  // Get readable category label
   const getCategoryLabel = (placeType: string): string => {
     const category = categories.find(cat => cat.id === determinePlaceCategory({ type: placeType } as PropertyNearbyPlace));
     return category?.label || placeType.charAt(0).toUpperCase() + placeType.slice(1);
