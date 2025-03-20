@@ -7,28 +7,19 @@ interface PropertyDatesProps {
 }
 
 export function PropertyDates({ createdAt, updatedAt }: PropertyDatesProps) {
-  // Format date properly
-  const formatDateString = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    
-    try {
-      const date = new Date(dateString);
-      return format(date, "dd/MM/yyyy HH:mm");
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
-  };
+  // Format dates or show placeholder
+  const formattedCreatedAt = createdAt ? format(new Date(createdAt), "MMM d, yyyy HH:mm") : "Not available";
+  const formattedUpdatedAt = updatedAt ? format(new Date(updatedAt), "MMM d, yyyy HH:mm") : "Not yet saved";
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1 text-sm">
       <div>
-        <p className="text-sm font-medium">Created</p>
-        <p className="text-sm">{createdAt ? formatDateString(createdAt) : "N/A"}</p>
+        <span className="font-medium text-muted-foreground">Created:</span>{" "}
+        <span>{formattedCreatedAt}</span>
       </div>
       <div>
-        <p className="text-sm font-medium">Last Updated</p>
-        <p className="text-sm">{updatedAt ? formatDateString(updatedAt) : "N/A"}</p>
+        <span className="font-medium text-muted-foreground">Last Updated:</span>{" "}
+        <span>{formattedUpdatedAt}</span>
       </div>
     </div>
   );

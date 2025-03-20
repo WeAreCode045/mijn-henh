@@ -67,6 +67,11 @@ export function usePropertyDatabase() {
       
       console.log("usePropertyDatabase - Final update data:", finalDataToUpdate);
       
+      // Remove updated_at to let Supabase automatically set it to current time
+      if (finalDataToUpdate.updated_at) {
+        delete finalDataToUpdate.updated_at;
+      }
+      
       const { error, data: updatedData } = await supabase
         .from('properties')
         .update(finalDataToUpdate)
@@ -79,6 +84,7 @@ export function usePropertyDatabase() {
       }
       
       console.log("Property updated successfully:", updatedData);
+      console.log("New updated_at timestamp:", updatedData?.[0]?.updated_at);
       
       toast({
         title: "Success",
@@ -153,6 +159,14 @@ export function usePropertyDatabase() {
         metadata: metadata
       };
 
+      // Remove created_at and updated_at to let Supabase handle them automatically
+      if (finalDataToCreate.created_at) {
+        delete finalDataToCreate.created_at;
+      }
+      if (finalDataToCreate.updated_at) {
+        delete finalDataToCreate.updated_at;
+      }
+
       console.log("usePropertyDatabase - Final create data:", finalDataToCreate);
       
       const { error, data: createdData } = await supabase
@@ -166,6 +180,7 @@ export function usePropertyDatabase() {
       }
       
       console.log("Property created successfully:", createdData);
+      console.log("Initial timestamps - created_at:", createdData?.[0]?.created_at, "updated_at:", createdData?.[0]?.updated_at);
       
       toast({
         title: "Success",

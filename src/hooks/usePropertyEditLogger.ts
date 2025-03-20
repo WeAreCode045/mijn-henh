@@ -2,7 +2,6 @@
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
-import { Json } from "@/integrations/supabase/types";
 
 export function usePropertyEditLogger() {
   const { user, profile } = useAuth();

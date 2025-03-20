@@ -37,6 +37,8 @@ export function usePropertyFormSubmitHandler() {
       console.log("usePropertyFormSubmit - Final submit data:", submitData);
       
       let success = false;
+      let updatedPropertyData = null;
+      
       if (formData.id) {
         // Get the current property data before updating to compare changes
         const { data: currentPropertyData } = await supabase
@@ -48,13 +50,21 @@ export function usePropertyFormSubmitHandler() {
         // Update existing property
         success = await updateProperty(formData.id, submitData);
         
-        // Log the changes if update was successful - pass both objects directly
-        // The logPropertyChanges function is now more flexible with types
-        if (success && currentPropertyData) {
-          await logPropertyChanges(formData.id, currentPropertyData, submitData);
-        }
-        
+        // Retrieve the updated property to get the new updated_at timestamp
         if (success) {
+          const { data: freshPropertyData } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('id', formData.id)
+            .single();
+            
+          updatedPropertyData = freshPropertyData;
+          
+          // Log the changes if update was successful
+          if (currentPropertyData) {
+            await logPropertyChanges(formData.id, currentPropertyData, submitData);
+          }
+          
           // Save or update featured images
           await savePropertyImages(formData);
         }
@@ -66,6 +76,15 @@ export function usePropertyFormSubmitHandler() {
           const newPropertyId = await getNewPropertyId(formData.title);
           
           if (newPropertyId) {
+            // Retrieve the new property data
+            const { data: freshPropertyData } = await supabase
+              .from('properties')
+              .select('*')
+              .eq('id', newPropertyId)
+              .single();
+              
+            updatedPropertyData = freshPropertyData;
+            
             // Save images for new property
             await saveAllImagesForNewProperty(newPropertyId, formData);
           }
@@ -77,6 +96,7 @@ export function usePropertyFormSubmitHandler() {
       }
       
       console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");
+      console.log("usePropertyFormSubmit - Updated timestamp:", updatedPropertyData?.updated_at);
       
       // Show a toast notification to confirm the save was successful
       if (success) {
