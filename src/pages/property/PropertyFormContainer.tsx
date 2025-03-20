@@ -60,23 +60,25 @@ export function PropertyFormContainer() {
   }
 
   return (
-    <PropertyFormLayout
-      title={formData.title || (id ? "Edit Property" : "Add New Property")}
-      propertyData={formData || { id: "" } as any}
-      settings={settings}
-      isAdmin={isAdmin}
-      agents={agents}
-      selectedAgent={selectedAgent}
-      onAgentSelect={handleAgentChange}
-      onDeleteProperty={deleteProperty}
-      onSaveProperty={saveProperty}
-      onImageUpload={handleImageUpload}
-      onRemoveImage={handleRemoveImage}
-      images={images}
-      agentInfo={agentInfo}
-      isSubmitting={isSubmitting}
-    >
-      <PropertyForm />
-    </PropertyFormLayout>
+    <div className="bg-estate-50 min-h-screen">
+      <PropertyFormLayout
+        title={formData.title || (id ? "Edit Property" : "Add New Property")}
+        propertyData={formData || { id: "" } as any}
+        settings={settings}
+        isAdmin={isAdmin}
+        agents={agents}
+        selectedAgent={selectedAgent}
+        onAgentSelect={handleAgentChange}
+        onDeleteProperty={deleteProperty}
+        onSaveProperty={saveProperty}
+        onImageUpload={handleImageUpload}
+        onRemoveImage={handleRemoveImage}
+        images={images}
+        agentInfo={agentInfo}
+        isSubmitting={isSubmitting}
+      >
+        <PropertyForm />
+      </PropertyFormLayout>
+    </div>
   );
 }
