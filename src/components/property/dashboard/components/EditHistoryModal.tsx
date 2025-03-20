@@ -64,9 +64,15 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
     }
   };
 
+  // Add a proper dialog state change handler to ensure state is updated correctly
+  const handleOpenChange = (newOpenState: boolean) => {
+    console.log("Dialog open state changing to:", newOpenState);
+    onOpenChange(newOpenState);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" /> Property Edit History

@@ -43,6 +43,13 @@ export function ActionsCard({
     // The actual implementation is in ActionButtons component
   };
 
+  // Prevent event propagation and default behavior for the history button
+  const handleHistoryButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowEditHistory(true);
+  };
+
   return (
     <Card className="md:col-span-1">
       <CardHeader className="pb-3">
@@ -77,9 +84,10 @@ export function ActionsCard({
           </button>
           {isAdmin && (
             <button 
-              onClick={() => setShowEditHistory(true)} 
+              onClick={handleHistoryButtonClick} 
               className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1"
               title="View edit history"
+              type="button"
             >
               <History className="h-5 w-5" />
             </button>
