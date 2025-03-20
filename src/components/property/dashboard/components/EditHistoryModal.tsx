@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -36,6 +36,9 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
   const fetchEditLogs = async () => {
     try {
       setIsLoading(true);
+      setLogs([]);
+      console.log("Fetching edit logs for property:", propertyId);
+      
       const { data, error } = await supabase
         .from('property_edit_logs')
         .select('*')
@@ -43,9 +46,11 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error("Error fetching edit logs:", error);
         throw error;
       }
 
+      console.log("Fetched logs:", data?.length || 0);
       setLogs(data || []);
     } catch (error) {
       console.error("Error fetching edit logs:", error);
@@ -66,6 +71,9 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" /> Property Edit History
           </DialogTitle>
+          <DialogDescription>
+            View all changes made to this property
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] mt-4">
           {isLoading ? (
