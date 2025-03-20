@@ -7,6 +7,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyData } from "@/types/property";
 import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
 
 interface ActionsCardProps {
   propertyId: string;
@@ -16,6 +20,8 @@ interface ActionsCardProps {
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   onWebView?: () => void;
+  handleSaveAgent?: (agentId: string) => Promise<void>;
+  agentId?: string;
 }
 
 export function ActionsCard({ 
@@ -25,11 +31,70 @@ export function ActionsCard({
   updatedAt, 
   onSave, 
   onDelete, 
-  onWebView
+  onWebView,
+  handleSaveAgent,
+  agentId
 }: ActionsCardProps) {
   const { toast } = useToast();
   const { generatePDF, isGenerating } = useGeneratePDF();
   const { settings } = useAgencySettings();
+  const [agents, setAgents] = useState<{id: string, full_name: string}[]>([]);
+  const [currentAgentId, setCurrentAgentId] = useState(agentId || "");
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+
+  useEffect(() => {
+    if (agentId !== undefined) {
+      setCurrentAgentId(agentId);
+    }
+  }, [agentId]);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      setIsLoadingAgents(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, role')
+          .or('role.eq.agent,role.eq.admin');
+        
+        if (error) throw error;
+        
+        if (data) {
+          setAgents(data.map(agent => ({
+            id: agent.id,
+            full_name: agent.full_name || 'Unnamed Agent'
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching agents:", error);
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
+
+  const handleAgentChange = async (agentId: string) => {
+    if (handleSaveAgent) {
+      const finalAgentId = agentId === "no-agent" ? "" : agentId;
+      try {
+        await handleSaveAgent(finalAgentId);
+        
+        toast({
+          title: "Agent updated",
+          description: "The property agent has been updated",
+        });
+      } catch (error) {
+        console.error("Error saving agent:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update the property agent",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   const handleShare = () => {
     const url = `${window.location.origin}/property/view/${propertyId}`;
@@ -71,6 +136,29 @@ export function ActionsCard({
           <div>
             <p className="text-sm font-medium">Last Updated</p>
             <p className="text-sm">{updatedAt ? formatDate(updatedAt) : "N/A"}</p>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor="agent-select">Assigned Agent</Label>
+            <Select 
+              value={currentAgentId || 'no-agent'} 
+              onValueChange={handleAgentChange}
+              disabled={isLoadingAgents}
+            >
+              <SelectTrigger id="agent-select" className="w-full">
+                <SelectValue placeholder="Select an agent" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no-agent">No agent assigned</SelectItem>
+                {agents.map(agent => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.full_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         

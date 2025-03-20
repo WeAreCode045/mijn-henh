@@ -1,69 +1,13 @@
 
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { ExternalLink } from "lucide-react";
 
 interface PropertyOverviewCardProps {
   property: PropertyData;
-  handleSaveAgent?: (agentId: string) => Promise<void>;
 }
 
-export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOverviewCardProps) {
-  const [agents, setAgents] = useState<{id: string, name: string}[]>([]);
-  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchAgents = async () => {
-      setIsLoadingAgents(true);
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, role')
-          .or('role.eq.agent,role.eq.admin');
-        
-        if (error) throw error;
-        
-        if (data) {
-          setAgents(data.map(agent => ({
-            id: agent.id,
-            name: agent.full_name || 'Unnamed Agent'
-          })));
-        }
-      } catch (error) {
-        console.error("Error fetching agents:", error);
-      } finally {
-        setIsLoadingAgents(false);
-      }
-    };
-
-    fetchAgents();
-  }, []);
-
-  const handleAgentChange = async (agentId: string) => {
-    if (handleSaveAgent) {
-      const finalAgentId = agentId === "no-agent" ? "" : agentId;
-      try {
-        await handleSaveAgent(finalAgentId);
-        
-        toast({
-          title: "Agent updated",
-          description: "The property agent has been updated",
-        });
-      } catch (error) {
-        console.error("Error saving agent:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update the property agent",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
+export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
   const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? property.images[0].url : null);
 
   return (
@@ -93,25 +37,41 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
                 <p className="font-semibold">Type</p>
                 <p>{"Not specified"}</p>
               </div>
-              <div className="col-span-2">
-                <p className="font-semibold mb-1">Assigned Agent</p>
-                <Select 
-                  value={property.agent_id || 'no-agent'} 
-                  onValueChange={handleAgentChange}
-                  disabled={isLoadingAgents}
-                >
-                  <SelectTrigger className="w-full mb-2">
-                    <SelectValue placeholder="Select an agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="no-agent">No agent assigned</SelectItem>
-                    {agents.map(agent => (
-                      <SelectItem key={agent.id} value={agent.id}>
-                        {agent.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            </div>
+            
+            <div className="mt-4 space-y-2">
+              <p className="font-semibold">External Links</p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm">Virtual Tour</p>
+                  {property.virtualTourUrl ? (
+                    <a 
+                      href={property.virtualTourUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
+                    >
+                      Open Tour <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">Not available</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-sm">YouTube Video</p>
+                  {property.youtubeUrl ? (
+                    <a 
+                      href={property.youtubeUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
+                    >
+                      Watch Video <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">Not available</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -3,7 +3,6 @@ import React from "react";
 import { PropertyData } from "@/types/property";
 import { PropertyOverviewCard } from "../../dashboard/PropertyOverviewCard";
 import { ActionsCard } from "../../dashboard/ActionsCard";
-import { ExternalLinksCard } from "../../dashboard/ExternalLinksCard";
 import { PropertyStatsCard } from "../../dashboard/PropertyStatsCard";
 import { SubmissionsCard } from "../../dashboard/SubmissionsCard";
 import { NotesCard } from "../../dashboard/NotesCard";
@@ -28,8 +27,7 @@ export function DashboardTabContent({
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <PropertyOverviewCard 
-          property={property} 
-          handleSaveAgent={handleSaveAgent} 
+          property={property}
         />
         
         <ActionsCard 
@@ -40,6 +38,8 @@ export function DashboardTabContent({
           onSave={onSave}
           onDelete={onDelete}
           onWebView={onWebView}
+          handleSaveAgent={handleSaveAgent}
+          agentId={property.agent_id}
         />
       </div>
 
@@ -53,7 +53,6 @@ export function DashboardTabContent({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ExternalLinksCard property={property} />
         <PropertyStatsCard property={property} />
       </div>
     </div>

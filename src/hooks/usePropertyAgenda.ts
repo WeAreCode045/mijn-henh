@@ -84,6 +84,51 @@ export function usePropertyAgenda(propertyId: string) {
     }
   };
 
+  const updateAgendaItem = async (
+    itemId: string,
+    title: string,
+    description: string | null,
+    eventDate: string,
+    eventTime: string
+  ) => {
+    try {
+      console.log('Updating agenda item:', {
+        id: itemId,
+        title,
+        description,
+        event_date: eventDate,
+        event_time: eventTime
+      });
+      
+      const { error } = await supabase
+        .from('property_agenda_items')
+        .update({
+          title,
+          description,
+          event_date: eventDate,
+          event_time: eventTime
+        })
+        .eq('id', itemId);
+
+      if (error) throw error;
+      
+      console.log('Agenda item updated successfully');
+      toast({
+        title: "Success",
+        description: "Agenda item updated successfully",
+      });
+      
+      fetchAgendaItems();
+    } catch (error: any) {
+      console.error('Error updating agenda item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update agenda item",
+        variant: "destructive",
+      });
+    }
+  };
+
   const deleteAgendaItem = async (itemId: string) => {
     try {
       console.log('Deleting agenda item:', itemId);
@@ -121,6 +166,7 @@ export function usePropertyAgenda(propertyId: string) {
     agendaItems,
     isLoading,
     addAgendaItem,
+    updateAgendaItem,
     deleteAgendaItem,
     refreshAgendaItems: fetchAgendaItems
   };

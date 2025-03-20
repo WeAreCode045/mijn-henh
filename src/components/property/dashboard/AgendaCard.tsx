@@ -1,21 +1,24 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Pencil } from "lucide-react";
 import { usePropertyAgenda, AgendaItem } from "@/hooks/usePropertyAgenda";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns";
+import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, startOfDay, endOfDay, startOfMonth, endOfMonth, addDays } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AgendaCardProps {
   propertyId: string;
 }
 
+type DateRange = "today" | "tomorrow" | "thisWeek" | "thisMonth" | "all";
+
 export function AgendaCard({ propertyId }: AgendaCardProps) {
-  const { agendaItems, isLoading, addAgendaItem, deleteAgendaItem } = usePropertyAgenda(propertyId);
+  const { agendaItems, isLoading, addAgendaItem, deleteAgendaItem, updateAgendaItem } = usePropertyAgenda(propertyId);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState("09:00");
@@ -23,15 +26,57 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
   const [description, setDescription] = useState("");
   const [selectedAgendaItem, setSelectedAgendaItem] = useState<AgendaItem | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>("thisWeek");
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>(new Date());
+  const [editTime, setEditTime] = useState("");
 
-  // Filter agenda items for the current week
-  const currentWeekStart = startOfWeek(new Date());
-  const currentWeekEnd = endOfWeek(new Date());
-  
-  const thisWeekAgendaItems = agendaItems.filter(item => {
-    const itemDate = parseISO(item.event_date);
-    return isWithinInterval(itemDate, { start: currentWeekStart, end: currentWeekEnd });
-  });
+  // Filter agenda items based on the selected date range
+  const getFilteredAgendaItems = () => {
+    const today = new Date();
+    const tomorrow = addDays(today, 1);
+
+    switch (dateRange) {
+      case "today":
+        return agendaItems.filter(item => {
+          const itemDate = parseISO(item.event_date);
+          return isWithinInterval(itemDate, { 
+            start: startOfDay(today), 
+            end: endOfDay(today) 
+          });
+        });
+      case "tomorrow":
+        return agendaItems.filter(item => {
+          const itemDate = parseISO(item.event_date);
+          return isWithinInterval(itemDate, { 
+            start: startOfDay(tomorrow), 
+            end: endOfDay(tomorrow) 
+          });
+        });
+      case "thisWeek":
+        return agendaItems.filter(item => {
+          const itemDate = parseISO(item.event_date);
+          return isWithinInterval(itemDate, { 
+            start: startOfWeek(today), 
+            end: endOfWeek(today) 
+          });
+        });
+      case "thisMonth":
+        return agendaItems.filter(item => {
+          const itemDate = parseISO(item.event_date);
+          return isWithinInterval(itemDate, { 
+            start: startOfMonth(today), 
+            end: endOfMonth(today) 
+          });
+        });
+      default:
+        return agendaItems;
+    }
+  };
+
+  const filteredAgendaItems = getFilteredAgendaItems();
 
   const handleAddAgendaItem = () => {
     if (selectedDate && title) {
@@ -66,6 +111,32 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
     setIsAddDialogOpen(true);
   };
 
+  const handleEditButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (selectedAgendaItem) {
+      setEditTitle(selectedAgendaItem.title);
+      setEditDescription(selectedAgendaItem.description || "");
+      setEditDate(parseISO(selectedAgendaItem.event_date));
+      setEditTime(selectedAgendaItem.event_time.substring(0, 5));
+      setIsViewDialogOpen(false);
+      setIsEditDialogOpen(true);
+    }
+  };
+
+  const handleUpdateAgendaItem = () => {
+    if (selectedAgendaItem && editDate) {
+      const formattedDate = format(editDate, "yyyy-MM-dd");
+      updateAgendaItem(
+        selectedAgendaItem.id, 
+        editTitle, 
+        editDescription, 
+        formattedDate, 
+        editTime
+      );
+      setIsEditDialogOpen(false);
+    }
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3 flex flex-row justify-between items-center">
@@ -83,24 +154,32 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-4">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md border mx-auto"
-          />
+          <div className="flex justify-between items-center">
+            <h4 className="font-medium">Agenda Items</h4>
+            <Select value={dateRange} onValueChange={(value: DateRange) => setDateRange(value)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                <SelectItem value="thisWeek">This Week</SelectItem>
+                <SelectItem value="thisMonth">This Month</SelectItem>
+                <SelectItem value="all">All Items</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
-          <div className="mt-4">
-            <h4 className="font-medium mb-2">This Week's Agenda</h4>
+          <div>
             {isLoading ? (
               <div className="flex justify-center py-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
               </div>
-            ) : thisWeekAgendaItems.length === 0 ? (
-              <p className="text-center py-2 text-muted-foreground">No items scheduled this week</p>
+            ) : filteredAgendaItems.length === 0 ? (
+              <p className="text-center py-2 text-muted-foreground">No items scheduled for this time period</p>
             ) : (
-              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                {thisWeekAgendaItems.map((item) => (
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                {filteredAgendaItems.map((item) => (
                   <div 
                     key={item.id} 
                     className="p-2 border rounded-md hover:bg-accent cursor-pointer flex items-center gap-3 transition-colors"
@@ -223,11 +302,87 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
               )}
             </div>
             <DialogFooter className="flex justify-between items-center">
-              <Button variant="destructive" size="sm" onClick={handleDeleteAgendaItem} type="button">
-                Delete
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="destructive" size="sm" onClick={handleDeleteAgendaItem} type="button">
+                  Delete
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleEditButtonClick} type="button">
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              </div>
               <Button variant="outline" onClick={() => setIsViewDialogOpen(false)} type="button">
                 Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Agenda Item Dialog */}
+      {selectedAgendaItem && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Agenda Item</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="edit-title" className="text-right col-span-1">
+                  Title
+                </label>
+                <Input
+                  id="edit-title"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="edit-date" className="text-right col-span-1">
+                  Date
+                </label>
+                <div className="col-span-3 flex items-center gap-2">
+                  <Input
+                    id="edit-date"
+                    type="date"
+                    value={editDate ? format(editDate, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => setEditDate(e.target.value ? new Date(e.target.value) : undefined)}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="edit-time" className="text-right col-span-1">
+                  Time
+                </label>
+                <Input
+                  id="edit-time"
+                  type="time"
+                  value={editTime}
+                  onChange={(e) => setEditTime(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="edit-description" className="text-right col-span-1">
+                  Details
+                </label>
+                <Textarea
+                  id="edit-description"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="col-span-3"
+                  rows={4}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} type="button">
+                Cancel
+              </Button>
+              <Button type="button" onClick={handleUpdateAgendaItem}>
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>

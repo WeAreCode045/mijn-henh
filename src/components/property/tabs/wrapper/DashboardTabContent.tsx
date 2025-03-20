@@ -40,6 +40,11 @@ export function DashboardTabContent({
   handleGeneratePDF,
   handleWebView,
 }: DashboardTabContentProps) {
+  const handleWebViewClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    handleWebView();
+  };
+
   return (
     <PropertyDashboardTab
       id={id}
@@ -58,7 +63,7 @@ export function DashboardTabContent({
       onSaveAgent={handleSaveAgent}
       onSaveTemplate={handleSaveTemplate}
       onGeneratePDF={handleGeneratePDF}
-      onWebView={handleWebView}
+      onWebView={handleWebViewClick}
     />
   );
 }

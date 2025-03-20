@@ -1,7 +1,6 @@
 
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
 import { TemplateCard } from "./cards/TemplateCard";
-import { AgentCard } from "./cards/AgentCard";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "./cards/NotesCard";
 import { Button } from "@/components/ui/button";
@@ -91,13 +90,6 @@ export function PropertyDashboardTab({
         />
         
         <div className="space-y-6">
-          <AgentCard
-            agentId={agentId}
-            agentName={agentInfo?.name}
-            onSaveAgent={onSaveAgent}
-            isUpdating={isUpdating}
-          />
-          
           <TemplateCard
             templateId={templateId}
             templateName={templateName || templateInfo?.name}
