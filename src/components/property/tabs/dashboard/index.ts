@@ -1,6 +1,5 @@
 
-export * from './PropertyDashboardTab';
-export * from './cards/ActivityCard';
-export * from './cards/NotesCard';
-export * from './cards/PropertyDetailsCard';
-export * from './cards/TemplateCard';
+export { PropertyDashboardTab } from './PropertyDashboardTab';
+export { PropertyDetailsCard } from './cards/PropertyDetailsCard';
+export { NotesCard } from './cards/NotesCard';
+export { ActivityCard } from './cards/ActivityCard';
