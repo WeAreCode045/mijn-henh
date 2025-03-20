@@ -29,9 +29,9 @@ export interface PropertyTabContentsProps {
   isGeneratingMap: boolean;
   onSave: () => void;
   onDelete: () => Promise<void>;
-  handleSaveObjectId: (objectId: string) => void;
-  handleSaveAgent: (agentId: string) => void;
-  handleSaveTemplate: (templateId: string) => void;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveTemplate: (templateId: string) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
   setPendingChanges: (pending: boolean) => void;
@@ -121,9 +121,9 @@ export interface PropertyTabProps {
   handlers: {
     onSave: () => void;
     onDelete: () => Promise<void>;
-    handleSaveObjectId: (objectId: string) => void;
-    handleSaveAgent: (agentId: string) => void;
-    handleSaveTemplate: (templateId: string) => void;
+    handleSaveObjectId: (objectId: string) => Promise<void>;
+    handleSaveAgent: (agentId: string) => Promise<void>;
+    handleSaveTemplate: (templateId: string) => Promise<void>;
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;
@@ -146,5 +146,6 @@ export interface PropertyTabProps {
     handleStepClick: (step: number) => void;
     setPendingChanges: (pending: boolean) => void;
     isSaving: boolean;
+    handleWebView?: () => void;  // Add this property
   }
 }

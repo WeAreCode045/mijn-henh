@@ -14,7 +14,7 @@ interface DashboardTabContentProps {
   onDelete?: () => Promise<void>;
   onSave?: () => void;
   onWebView?: () => void;
-  handleSaveAgent?: (agentId: string) => void;
+  handleSaveAgent?: (agentId: string) => Promise<void>;
 }
 
 export function DashboardTabContent({ 

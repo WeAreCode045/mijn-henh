@@ -20,6 +20,8 @@ export const TabContentRenderers = {
             property={propertyData} 
             onDelete={handlers.onDelete}
             onSave={handlers.onSave}
+            onWebView={handlers.handleWebView}
+            handleSaveAgent={handlers.handleSaveAgent}
           />
         );
       case "content":

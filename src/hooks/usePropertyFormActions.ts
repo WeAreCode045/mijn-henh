@@ -13,55 +13,117 @@ export function usePropertyFormActions(
   const { toast } = useToast();
 
   // Handle saving object ID
-  const handleSaveObjectId = (objectId: string) => {
+  const handleSaveObjectId = async (objectId: string): Promise<void> => {
     console.log("Saving object ID:", objectId);
-    setPendingChanges(true);
-    return objectId;
+    
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ object_id: objectId })
+        .eq('id', formData.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Object ID saved successfully",
+      });
+      
+      setPendingChanges(true);
+    } catch (error) {
+      console.error('Error saving object ID:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save object ID",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   // Handle saving agent
-  const handleSaveAgent = async (agentId: string) => {
+  const handleSaveAgent = async (agentId: string): Promise<void> => {
     console.log("Saving agent ID:", agentId);
     
-    // If agentId is empty, we want to set it to null in the database
-    const finalAgentId = agentId.trim() === '' ? null : agentId;
-    
-    // If we have a property ID, update it immediately in the database
-    if (formData.id) {
-      try {
-        const { error } = await supabase
-          .from('properties')
-          .update({ agent_id: finalAgentId })
-          .eq('id', formData.id);
-        
-        if (error) {
-          console.error("Error updating agent:", error);
-          throw error;
-        }
-        
-        toast({
-          title: "Success",
-          description: "Agent updated successfully",
-        });
-      } catch (error) {
-        console.error("Error updating agent:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update agent",
-          variant: "destructive",
-        });
-      }
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return;
     }
     
-    setPendingChanges(true);
-    return agentId;
+    // If agentId is empty string, we want to set it to null in the database
+    const finalAgentId = agentId.trim() === '' ? null : agentId;
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ agent_id: finalAgentId })
+        .eq('id', formData.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Agent assigned successfully",
+      });
+      
+      setPendingChanges(true);
+    } catch (error) {
+      console.error("Error updating agent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to assign agent",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   // Handle saving template
-  const handleSaveTemplate = (templateId: string) => {
+  const handleSaveTemplate = async (templateId: string): Promise<void> => {
     console.log("Saving template ID:", templateId);
-    setPendingChanges(true);
-    return templateId;
+    
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ template_id: templateId })
+        .eq('id', formData.id);
+      
+      if (error) throw error;
+      
+      toast({
+        description: "Template assigned successfully",
+      });
+      
+      setPendingChanges(true);
+    } catch (error) {
+      console.error('Error assigning template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign template",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   const onSubmit = () => {
