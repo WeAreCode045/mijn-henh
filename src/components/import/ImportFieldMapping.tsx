@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFieldMapper } from "./PropertyFieldMapper";
 import { PropertySelectionTable } from "./PropertySelectionTable";
-import { usePropertyImport } from "@/hooks/import/usePropertyImport";
+import { usePropertyImport } from "@/hooks/import/property-import";
 
 interface ImportFieldMappingProps {
   xmlData: any[];
@@ -21,7 +21,7 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     livingArea: "livingArea",
     buildYear: "buildYear",
     energyLabel: "energyLabel",
-    object_id: "id", // Default for PropertyID
+    object_id: "propertyId", // Default for PropertyID
     // Default mappings for common fields
   });
   

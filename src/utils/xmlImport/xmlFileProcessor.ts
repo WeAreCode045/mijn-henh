@@ -123,7 +123,7 @@ export const processXmlProperties = (properties: Element[]) => {
       buildYear: buildYear || extractValue("buildYear") || extractValue("BuildYear") || extractValue("YearBuilt"),
       garages: extractValue("garages") || extractValue("Garages"),
       energyLabel: energyClass || extractValue("energyLabel") || extractValue("EnergyLabel"),
-      id: propertyId || extractValue("id") || extractValue("ID") || extractValue("PublicReferenceNumber") || String(index),
+      propertyId: propertyId || extractValue("id") || extractValue("ID") || extractValue("PublicReferenceNumber") || String(index),
       status: status || extractValue("status") || extractValue("Status"),
       type: propertyType || extractValue("type") || extractValue("Type"),
       images: images,
