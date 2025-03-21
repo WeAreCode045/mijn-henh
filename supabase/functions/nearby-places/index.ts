@@ -127,6 +127,8 @@ serve(async (req) => {
           }
         };
         
+        console.log(`Request body for ${categoryKey}:`, JSON.stringify(requestBody));
+        
         const placesResponse = await fetch(
           'https://places.googleapis.com/v1/places:searchNearby',
           {

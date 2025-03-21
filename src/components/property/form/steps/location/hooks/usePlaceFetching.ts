@@ -28,6 +28,7 @@ export function usePlaceFetching({
     setCurrentCategory(typeToFetch);
     
     try {
+      console.log(`Fetching places for: ${typeToFetch}`);
       const results = await onFetchNearbyPlaces(typeToFetch);
       
       if (results && results[typeToFetch] && Array.isArray(results[typeToFetch])) {
