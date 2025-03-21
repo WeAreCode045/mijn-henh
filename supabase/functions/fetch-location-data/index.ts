@@ -94,46 +94,45 @@ async function generateMapImage(lat, lng, apiKey, propertyId) {
   }
 }
 
-// Function to fetch places for a specific category
+// Map categories to their specific place types
+const categoryToTypes = {
+  'education': ['preschool', 'primary_school', 'school', 'secondary_school', 'university'],
+  'entertainment': ['zoo', 'tourist_attraction', 'park', 'night_club', 'movie_theater', 'event_venue', 'concert_hall'],
+  'shopping': ['supermarket', 'shopping_mall'],
+  'sports': ['arena', 'fitness_center', 'golf_course', 'gym', 'sports_complex', 'stadium', 'swimming_pool'],
+  'transportation': ['bus_station', 'train_station', 'transit_station']
+};
+
+// Function to fetch places for a specific category or type
 async function fetchPlacesForCategory(lat, lng, category, apiKey) {
   console.log(`Fetching places for category: ${category}`);
 
   // Define radius based on category (in meters)
   let radius = 1500; // Default radius
-  if (category === 'school' || category.includes('school') || category === 'university') {
+  if (category.includes('school') || category === 'university') {
     radius = 2000; // Schools need a wider radius
-  } else if (category === 'shopping_mall') {
-    radius = 3000; // Shopping malls can be further away
+  } else if (category === 'shopping_mall' || category === 'arena' || category === 'stadium') {
+    radius = 3000; // Larger facilities can be further away
   }
 
-  // For entertainment category, we need to use specific types that are actually entertainment venues
-  let placeType = category;
-  
-  // Map entertainment to actual Google Places API types for entertainment venues
-  if (category === 'entertainment') {
-    const entertainmentTypes = [
-      'amusement_park',
-      'aquarium',
-      'art_gallery',
-      'bowling_alley',
-      'casino',
-      'movie_theater',
-      'museum',
-      'night_club',
-      'park',
-      'tourist_attraction',
-      'zoo'
-    ];
+  // Check if category is a main category with subtypes
+  if (categoryToTypes[category]) {
+    console.log(`${category} is a main category, fetching all subtypes: ${categoryToTypes[category].join(', ')}`);
     
-    // Fetch places for each entertainment type and combine results
+    // Fetch places for each subtype and combine results
     let allPlaces = [];
-    for (const type of entertainmentTypes) {
+    for (const type of categoryToTypes[category]) {
       const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${type}&key=${apiKey}`;
       const placesResponse = await fetch(placesUrl);
       const placesData = await placesResponse.json();
       
       if (placesData.status === 'OK' && placesData.results) {
-        allPlaces = [...allPlaces, ...placesData.results];
+        // Add the specific type to each place
+        const placesWithType = placesData.results.map(place => ({
+          ...place,
+          specific_type: type
+        }));
+        allPlaces = [...allPlaces, ...placesWithType];
       }
     }
     
@@ -143,15 +142,23 @@ async function fetchPlacesForCategory(lat, lng, category, apiKey) {
       const distance = calculateDistance(lat, lng, placeLocation.lat, placeLocation.lng);
       return {
         ...place,
-        distance: parseFloat(distance.toFixed(1))
+        distance: parseFloat(distance.toFixed(1)),
+        type: place.specific_type || category // Use the specific type as the place type
       };
     });
     
     // Remove duplicates (places might appear in multiple categories)
     const uniquePlaces = Array.from(new Map(placesWithDistance.map(place => [place.place_id, place])).values());
     
-    // Sort by rating (highest first) for entertainment
-    const sortedPlaces = uniquePlaces.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    // Sort places appropriately
+    let sortedPlaces = uniquePlaces;
+    if (category === 'entertainment') {
+      // For entertainment, sort by rating (highest first)
+      sortedPlaces = uniquePlaces.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else {
+      // For others, sort by distance (closest first)
+      sortedPlaces = uniquePlaces.sort((a, b) => a.distance - b.distance);
+    }
     
     // Only return required data
     return sortedPlaces.map(place => ({
@@ -159,14 +166,15 @@ async function fetchPlacesForCategory(lat, lng, category, apiKey) {
       name: place.name,
       vicinity: place.vicinity,
       types: place.types,
+      type: place.type, // Include the specific type
       rating: place.rating,
       user_ratings_total: place.user_ratings_total,
       distance: place.distance
     }));
   }
   
-  // For non-entertainment categories, use the regular approach
-  const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${placeType}&key=${apiKey}`;
+  // For individual types (direct query)
+  const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${category}&key=${apiKey}`;
   
   const placesResponse = await fetch(placesUrl);
   const placesData = await placesResponse.json();
@@ -185,13 +193,14 @@ async function fetchPlacesForCategory(lat, lng, category, apiKey) {
     const distance = calculateDistance(lat, lng, placeLocation.lat, placeLocation.lng);
     return {
       ...place,
-      distance: parseFloat(distance.toFixed(1))
+      distance: parseFloat(distance.toFixed(1)),
+      type: category // Ensure the type is set to the requested category
     };
   });
 
-  // Sort by distance or rating depending on category
+  // Sort places
   let sortedPlaces = placesWithDistance;
-  if (category === 'entertainment') {
+  if (category === 'entertainment' || categoryToTypes['entertainment']?.includes(category)) {
     // For entertainment, sort by rating (highest first)
     sortedPlaces = placesWithDistance.sort((a, b) => (b.rating || 0) - (a.rating || 0));
   } else {
@@ -205,6 +214,7 @@ async function fetchPlacesForCategory(lat, lng, category, apiKey) {
     name: place.name,
     vicinity: place.vicinity,
     types: place.types,
+    type: category, // Set the type to the requested category
     rating: place.rating,
     user_ratings_total: place.user_ratings_total,
     distance: place.distance
@@ -213,19 +223,21 @@ async function fetchPlacesForCategory(lat, lng, category, apiKey) {
 
 // Function to fetch places for multiple categories
 async function fetchAllNearbyPlaces(lat, lng, apiKey) {
-  const types = [
-    'restaurant',
-    'supermarket',
-    'school',
-    'park',
-    'shopping_mall',
-    'bus_station',
-    'train_station',
-    'transit_station'
+  const allTypes = [
+    // Education
+    'preschool', 'primary_school', 'school', 'secondary_school', 'university',
+    // Shopping
+    'supermarket', 'shopping_mall',
+    // Transportation
+    'bus_station', 'train_station', 'transit_station',
+    // Entertainment
+    'zoo', 'tourist_attraction', 'park', 'night_club', 'movie_theater', 'event_venue', 'concert_hall',
+    // Sports
+    'arena', 'fitness_center', 'golf_course', 'gym', 'sports_complex', 'stadium', 'swimming_pool'
   ];
 
   const nearbyPlaces = {};
-  for (const type of types) {
+  for (const type of allTypes) {
     try {
       nearbyPlaces[type] = await fetchPlacesForCategory(lat, lng, type, apiKey);
     } catch (error) {
@@ -335,6 +347,7 @@ async function handleRequest(req) {
 
     // If a specific category is requested, only fetch places for that category
     if (category) {
+      console.log(`Fetching places for specific category: ${category}`);
       const places = await fetchPlacesForCategory(lat, lng, category, googleMapsApiKey);
       
       const result = {
