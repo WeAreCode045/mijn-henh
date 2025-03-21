@@ -13,6 +13,7 @@ const NotFound = lazy(() => import("../pages/NotFound"));
 const Auth = lazy(() => import("../pages/Auth"));
 const PropertyWebView = lazy(() => import("./property/PropertyWebView").then(module => ({ default: module.PropertyWebView })));
 const Users = lazy(() => import("../pages/Users"));
+const Import = lazy(() => import("../pages/Import"));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -80,6 +81,14 @@ export function AppRoutes() {
         <ProtectedRoute>
           <PropertyLayout>
             <Properties />
+          </PropertyLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/import" element={
+        <ProtectedRoute>
+          <PropertyLayout>
+            <Import />
           </PropertyLayout>
         </ProtectedRoute>
       } />
