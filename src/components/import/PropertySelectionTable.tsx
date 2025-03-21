@@ -12,6 +12,8 @@ interface PropertySelectionTableProps {
   selectedProperties: number[];
   togglePropertySelection: (id: number) => void;
   selectAllProperties: () => void;
+  importProperties?: () => Promise<void>;
+  isImporting?: boolean;
 }
 
 export function PropertySelectionTable({
@@ -19,6 +21,8 @@ export function PropertySelectionTable({
   selectedProperties,
   togglePropertySelection,
   selectAllProperties,
+  importProperties,
+  isImporting,
 }: PropertySelectionTableProps) {
   const allSelected = properties.length > 0 && selectedProperties.length === properties.length;
 
@@ -85,6 +89,17 @@ export function PropertySelectionTable({
           </TableBody>
         </Table>
       </div>
+      
+      {importProperties && (
+        <div className="flex justify-end mt-4">
+          <Button 
+            onClick={importProperties} 
+            disabled={selectedProperties.length === 0 || isImporting}
+          >
+            {isImporting ? "Importing..." : "Import Selected Properties"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

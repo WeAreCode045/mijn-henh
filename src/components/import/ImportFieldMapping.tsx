@@ -93,7 +93,7 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
       </div>
       
       <PropertySelectionTable 
-        xmlData={xmlData}
+        properties={xmlData}
         selectedProperties={selectedProperties}
         togglePropertySelection={togglePropertySelection}
         selectAllProperties={selectAllProperties}

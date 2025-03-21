@@ -63,7 +63,7 @@ export function useXmlFileUpload() {
       toast({
         title: "Warning: Duplicate Properties Found",
         description: `${existingCount} properties in this XML file already exist in your database.`,
-        variant: "warning",
+        variant: "destructive", // Changed from "warning" to "destructive"
       });
     }
     
