@@ -1,208 +1,172 @@
 
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { preparePropertyDataForSubmission } from "@/hooks/property-form/utils/propertyDataFormatter";
+import { useToast } from "@/components/ui/use-toast";
 
-interface UsePropertyImportProps {
+export function usePropertyImport({ xmlData, fieldMappings }: { 
   xmlData: any[];
   fieldMappings: Record<string, string>;
-}
-
-export const usePropertyImport = ({ xmlData, fieldMappings }: UsePropertyImportProps) => {
+}) {
   const [isImporting, setIsImporting] = useState(false);
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const togglePropertySelection = (id: number) => {
-    if (selectedProperties.includes(id)) {
-      setSelectedProperties(selectedProperties.filter(propId => propId !== id));
-    } else {
-      setSelectedProperties([...selectedProperties, id]);
-    }
+    setSelectedProperties(prev => 
+      prev.includes(id) 
+        ? prev.filter(propId => propId !== id) 
+        : [...prev, id]
+    );
   };
 
   const selectAllProperties = () => {
     if (selectedProperties.length === xmlData.length) {
       setSelectedProperties([]);
     } else {
-      setSelectedProperties(xmlData.map(prop => prop.id));
-    }
-  };
-
-  const downloadAndStoreImage = async (url: string, propertyId: string, isFloorplan: boolean = false): Promise<string | null> => {
-    try {
-      // Use the edge function to download and store the image
-      const { data: { session } } = await supabase.auth.getSession();
-      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-image`;
-
-      console.log(`Downloading ${isFloorplan ? 'floorplan' : 'image'} from URL:`, url);
-
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ 
-          imageUrl: url,
-          propertyId,
-          folder: isFloorplan ? 'floorplans' : 'photos'
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to download image: ${errorData.error || response.statusText}`);
-      }
-
-      const { publicUrl, error } = await response.json();
-      if (error) throw new Error(error);
-
-      console.log(`Successfully downloaded and stored ${isFloorplan ? 'floorplan' : 'image'}:`, publicUrl);
-      return publicUrl;
-    } catch (error) {
-      console.error(`Error downloading/storing ${isFloorplan ? 'floorplan' : 'image'}:`, error);
-      return null;
+      setSelectedProperties(xmlData.map(property => property.id));
     }
   };
 
   const importProperties = async () => {
-    try {
-      setIsImporting(true);
-      
-      // Filter only selected properties
-      const propertiesToImport = xmlData.filter(prop => 
-        selectedProperties.includes(prop.id)
-      );
-      
-      if (propertiesToImport.length === 0) {
-        toast({
-          title: "No Properties Selected",
-          description: "Please select at least one property to import.",
-          variant: "destructive",
-        });
-        setIsImporting(false);
-        return;
-      }
-      
-      // Import each property
-      const results = await Promise.all(
-        propertiesToImport.map(async (xmlProp) => {
-          try {
-            // Map XML fields to property fields based on the fieldMappings
-            const propertyData: Record<string, any> = {
-              status: "Draft",
-              metadata: { status: "Draft" },
-            };
-            
-            // Apply field mappings
-            for (const [propertyField, xmlField] of Object.entries(fieldMappings)) {
-              if (xmlField && xmlProp[xmlField]) {
-                propertyData[propertyField] = xmlProp[xmlField];
-              }
-            }
-            
-            // Format the property data for submission
-            const formattedData = preparePropertyDataForSubmission(propertyData);
-            
-            // Insert into database to get the property ID
-            const { data, error } = await supabase
-              .from('properties')
-              .insert(formattedData)
-              .select()
-              .single();
-              
-            if (error) {
-              console.error("Error importing property:", error);
-              return { success: false, error };
-            }
-            
-            const propertyId = data.id;
-            
-            // Process images
-            if (xmlProp.images && xmlProp.images.length > 0) {
-              const imageUrls = [];
-              let featuredImageUrl = null;
-              
-              for (const imageUrl of xmlProp.images) {
-                const storedUrl = await downloadAndStoreImage(imageUrl, propertyId, false);
-                if (storedUrl) {
-                  imageUrls.push(storedUrl);
-                  if (!featuredImageUrl) {
-                    featuredImageUrl = storedUrl;
-                  }
-                  
-                  // Create property_images record
-                  await supabase.from('property_images').insert({
-                    property_id: propertyId,
-                    url: storedUrl,
-                    type: 'image',
-                    sort_order: imageUrls.length
-                  });
-                }
-              }
-              
-              // Update property with featured image
-              if (imageUrls.length > 0 && featuredImageUrl) {
-                await supabase
-                  .from('properties')
-                  .update({
-                    "featuredImage": featuredImageUrl
-                  })
-                  .eq('id', propertyId);
-              }
-            }
-            
-            // Process floorplans
-            if (xmlProp.floorplans && xmlProp.floorplans.length > 0) {
-              for (const floorplanUrl of xmlProp.floorplans) {
-                const storedUrl = await downloadAndStoreImage(floorplanUrl, propertyId, true);
-                if (storedUrl) {
-                  // Create property_floorplans record
-                  const { error } = await supabase
-                    .from('property_floorplans')
-                    .insert({
-                      property_id: propertyId,
-                      url: storedUrl,
-                      sort_order: 1
-                    });
-                    
-                  if (error) {
-                    console.error("Error saving floorplan:", error);
-                  }
-                }
-              }
-            }
-            
-            return { success: true, data };
-          } catch (error) {
-            console.error("Error processing property:", error);
-            return { success: false, error };
-          }
-        })
-      );
-      
-      // Count successful imports
-      const successCount = results.filter(result => result.success).length;
-      
+    if (selectedProperties.length === 0) {
       toast({
-        title: "Import Completed",
-        description: `Successfully imported ${successCount} out of ${propertiesToImport.length} properties.`,
-        variant: successCount > 0 ? "default" : "destructive",
+        title: "No properties selected",
+        description: "Please select at least one property to import.",
+        variant: "destructive",
       });
-      
-      if (successCount > 0) {
-        // Navigate to properties page after successful import
-        setTimeout(() => navigate("/properties"), 2000);
+      return;
+    }
+
+    setIsImporting(true);
+
+    try {
+      const selectedData = xmlData.filter(property => 
+        selectedProperties.includes(property.id)
+      );
+
+      let imported = 0;
+      let updated = 0;
+      let errors = 0;
+
+      for (const property of selectedData) {
+        try {
+          // Map XML fields to property fields using the fieldMappings
+          const propertyData: Record<string, any> = {};
+          
+          Object.entries(fieldMappings).forEach(([propertyField, xmlField]) => {
+            if (xmlField && property[xmlField] !== undefined) {
+              propertyData[propertyField] = property[xmlField];
+            }
+          });
+
+          // Process images
+          const images = property.images || [];
+          const floorplans = property.floorplans || [];
+          
+          // Set object_id from title if not available
+          const objectId = property.id || Math.random().toString(36).substring(2, 9);
+          
+          // Check if property already exists
+          const { data: existingProperty } = await supabase
+            .from('properties')
+            .select('id')
+            .eq('title', propertyData.title)
+            .maybeSingle();
+
+          // Prepare featured image if available
+          if (images.length > 0) {
+            propertyData.featured_image = images[0];
+          }
+
+          if (existingProperty) {
+            // Update existing property
+            const { error: updateError } = await supabase
+              .from('properties')
+              .update(propertyData)
+              .eq('id', existingProperty.id);
+
+            if (updateError) {
+              console.error("Error updating property:", updateError);
+              errors++;
+              continue;
+            }
+
+            // Handle floorplans for existing property
+            if (floorplans.length > 0) {
+              // For floorplans, we need to use the from('property_images') table
+              // and set the is_floorplan flag to true
+              for (const floorplanUrl of floorplans) {
+                const { error: floorplanError } = await supabase
+                  .from('property_images')
+                  .insert({
+                    property_id: existingProperty.id,
+                    url: floorplanUrl,
+                    is_floorplan: true
+                  });
+
+                if (floorplanError) {
+                  console.error("Error adding floorplan:", floorplanError);
+                }
+              }
+            }
+
+            updated++;
+          } else {
+            // Insert new property
+            const { data: newProperty, error: insertError } = await supabase
+              .from('properties')
+              .insert(propertyData)
+              .select('id')
+              .single();
+
+            if (insertError || !newProperty) {
+              console.error("Error inserting property:", insertError);
+              errors++;
+              continue;
+            }
+
+            // Handle floorplans for new property
+            if (floorplans.length > 0) {
+              for (const floorplanUrl of floorplans) {
+                const { error: floorplanError } = await supabase
+                  .from('property_images')
+                  .insert({
+                    property_id: newProperty.id,
+                    url: floorplanUrl,
+                    is_floorplan: true
+                  });
+
+                if (floorplanError) {
+                  console.error("Error adding floorplan:", floorplanError);
+                }
+              }
+            }
+
+            imported++;
+          }
+        } catch (error) {
+          console.error("Error processing property:", error);
+          errors++;
+        }
       }
-    } catch (error) {
-      console.error("Error during import:", error);
+
+      const successMessage = [
+        imported > 0 ? `${imported} properties imported` : '',
+        updated > 0 ? `${updated} properties updated` : '',
+        errors > 0 ? `${errors} errors` : ''
+      ].filter(Boolean).join(', ');
+
       toast({
-        title: "Import Failed",
-        description: "There was an error importing the properties.",
+        title: imported > 0 || updated > 0 ? "Import successful" : "Import failed",
+        description: successMessage,
+        variant: imported > 0 || updated > 0 ? "default" : "destructive",
+      });
+
+    } catch (error) {
+      console.error("Import error:", error);
+      toast({
+        title: "Import failed",
+        description: "An error occurred while importing properties.",
         variant: "destructive",
       });
     } finally {
@@ -217,4 +181,4 @@ export const usePropertyImport = ({ xmlData, fieldMappings }: UsePropertyImportP
     selectAllProperties,
     importProperties
   };
-};
+}
