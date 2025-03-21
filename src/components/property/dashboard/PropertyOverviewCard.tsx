@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
@@ -223,7 +222,7 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
                 </div>
                 <div>
                   <p className="font-semibold mb-1">Object ID</p>
-                  <p className="truncate">{objectId || "Not specified"}</p>
+                  <p className="truncate">{objectId || ""}</p>
                 </div>
               </div>
             )}

@@ -24,7 +24,7 @@ export function PropertyInformationCard({ id, objectId }: PropertyInformationCar
                 <span className="font-semibold">ID:</span> {id}
               </div>
               <div>
-                <span className="font-semibold">Object ID:</span> {objectId || 'Not set'}
+                <span className="font-semibold">Object ID:</span> {objectId || ''}
               </div>
               <div>
                 <span className="font-semibold">API Endpoint:</span>

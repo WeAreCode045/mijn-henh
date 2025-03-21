@@ -17,7 +17,7 @@ export function PropertyIdSection({
   onSave, 
   isUpdating 
 }: PropertyIdSectionProps) {
-  const [currentObjectId, setCurrentObjectId] = useState(objectId);
+  const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
 
   const handleSave = () => {
     onSave(currentObjectId);
