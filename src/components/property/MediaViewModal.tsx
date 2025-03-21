@@ -8,6 +8,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface MediaViewModalProps {
   open: boolean;
@@ -60,7 +61,7 @@ export function MediaViewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-11/12 max-w-5xl h-[80vh] p-0">
+      <DialogContent className="w-[60%] max-w-4xl p-0">
         <DialogHeader className="p-4 flex-row justify-between items-center">
           <DialogTitle>{title}</DialogTitle>
           <DialogClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
@@ -68,14 +69,16 @@ export function MediaViewModal({
             <span className="sr-only">Close</span>
           </DialogClose>
         </DialogHeader>
-        <div className="w-full h-[calc(100%-4rem)] bg-gray-100">
-          <iframe
-            src={embedUrl}
-            className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={title}
-          ></iframe>
+        <div className="w-full bg-gray-100">
+          <AspectRatio ratio={4/3}>
+            <iframe
+              src={embedUrl}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={title}
+            ></iframe>
+          </AspectRatio>
         </div>
       </DialogContent>
     </Dialog>
