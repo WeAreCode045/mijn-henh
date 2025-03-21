@@ -1,17 +1,26 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { usePropertyImportActions } from "./usePropertyImportActions";
 
-export function usePropertyImport({ xmlData, fieldMappings }: { 
+interface UsePropertyImportProps {
   xmlData: any[];
   fieldMappings: Record<string, string>;
-}) {
-  const [isImporting, setIsImporting] = useState(false);
+}
+
+export function usePropertyImport({ 
+  xmlData,
+  fieldMappings 
+}: UsePropertyImportProps) {
   const [selectedProperties, setSelectedProperties] = useState<number[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
   const { toast } = useToast();
   
-  const { importSelectedProperties } = usePropertyImportActions({
+  const { 
+    importSelectedProperties, 
+    replaceMediaDialogOpen, 
+    currentImportItem,
+    setReplaceMediaDialogOpen
+  } = usePropertyImportActions({
     xmlData,
     fieldMappings,
     setIsImporting,
@@ -19,11 +28,13 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
   });
 
   const togglePropertySelection = (id: number) => {
-    setSelectedProperties(prev => 
-      prev.includes(id) 
-        ? prev.filter(propId => propId !== id) 
-        : [...prev, id]
-    );
+    setSelectedProperties(prevSelected => {
+      if (prevSelected.includes(id)) {
+        return prevSelected.filter(propId => propId !== id);
+      } else {
+        return [...prevSelected, id];
+      }
+    });
   };
 
   const selectAllProperties = () => {
@@ -45,15 +56,21 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
     }
 
     setIsImporting(true);
-    await importSelectedProperties(selectedProperties);
-    setIsImporting(false);
+    try {
+      await importSelectedProperties(selectedProperties);
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   return {
-    isImporting,
     selectedProperties,
     togglePropertySelection,
     selectAllProperties,
-    importProperties
+    importProperties,
+    isImporting,
+    replaceMediaDialogOpen,
+    currentImportItem,
+    setReplaceMediaDialogOpen
   };
 }

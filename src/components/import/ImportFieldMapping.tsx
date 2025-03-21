@@ -4,6 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PropertyFieldMapper } from "./PropertyFieldMapper";
 import { PropertySelectionTable } from "./PropertySelectionTable";
 import { usePropertyImport } from "@/hooks/import/property-import";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
 
 interface ImportFieldMappingProps {
   xmlData: any[];
@@ -61,7 +71,10 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     selectedProperties,
     togglePropertySelection,
     selectAllProperties,
-    importProperties
+    importProperties,
+    replaceMediaDialogOpen,
+    currentImportItem,
+    setReplaceMediaDialogOpen
   } = usePropertyImport({ 
     xmlData, 
     fieldMappings: Object.fromEntries(
@@ -100,6 +113,27 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
         importProperties={importProperties}
         isImporting={isImporting}
       />
+
+      {/* Replace Media Confirmation Dialog */}
+      <AlertDialog open={replaceMediaDialogOpen} onOpenChange={setReplaceMediaDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Replace existing media?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Property "{currentImportItem?.propertyData?.title || 'Unknown'}" already exists.
+              Would you like to delete and replace the existing photos and floorplans with the ones in this import file?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => currentImportItem?.onComplete(false)}>
+              No, keep existing media
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => currentImportItem?.onComplete(true)}>
+              Yes, replace media
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
