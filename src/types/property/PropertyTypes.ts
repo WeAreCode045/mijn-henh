@@ -139,5 +139,5 @@ export interface PropertySubmitData {
   }; // Metadata property
 }
 
-// Export PropertyPlaceType as the interface itself (not a string union)
-export type PropertyPlaceType = PropertyNearbyPlace;
+// Correct the PropertyPlaceType export to avoid conflicts with the interface
+export { PropertyPlaceType } from './PropertyPlaceTypes';

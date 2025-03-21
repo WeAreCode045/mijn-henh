@@ -1,3 +1,4 @@
+
 import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
