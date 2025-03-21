@@ -182,6 +182,17 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
               </div>
             )}
             
+            {/* Agent Selector - Only visible in edit mode */}
+            {isEditing && handleSaveAgent && (
+              <div className="mb-6">
+                <AgentSelector 
+                  initialAgentId={property.agent_id} 
+                  onAgentChange={handleSaveAgent}
+                />
+              </div>
+            )}
+
+            {/* Save button - Moved below agent selector when in edit mode */}
             {isEditing && (
               <div className="flex justify-end mb-4">
                 <Button 
@@ -194,16 +205,6 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
                   <Save className="h-4 w-4" />
                   Save Changes
                 </Button>
-              </div>
-            )}
-            
-            {/* Agent Selector - Only visible in edit mode */}
-            {isEditing && handleSaveAgent && (
-              <div className="mb-6">
-                <AgentSelector 
-                  initialAgentId={property.agent_id} 
-                  onAgentChange={handleSaveAgent}
-                />
               </div>
             )}
           </div>
