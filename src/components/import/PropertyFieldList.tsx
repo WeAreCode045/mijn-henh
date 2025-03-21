@@ -37,8 +37,8 @@ export function PropertyFieldList({
             fieldName={field.label}
             fieldId={field.id}
             xmlFields={xmlFields}
-            selectedField={fieldMappings[field.id] || ""}
-            onFieldChange={(xmlField) => handleMappingChange(field.id, xmlField)}
+            selectedField={fieldMappings[field.id] || "not_mapped"}
+            onFieldChange={(xmlField) => handleMappingChange(field.id, xmlField === "not_mapped" ? "" : xmlField)}
           />
         ))}
       </div>

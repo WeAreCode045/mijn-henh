@@ -11,7 +11,7 @@ export function PropertyFieldPreview({ xmlData, fieldMappings }: PropertyFieldPr
       {xmlData.length > 0 && (
         <div className="border rounded p-4 text-sm">
           {Object.entries(fieldMappings)
-            .filter(([_, xmlField]) => xmlField && xmlData[0][xmlField])
+            .filter(([_, xmlField]) => xmlField && xmlField !== "not_mapped" && xmlData[0][xmlField])
             .map(([propertyField, xmlField]) => (
               <div key={propertyField} className="mb-2">
                 <strong>{propertyField}:</strong> {xmlData[0][xmlField]}

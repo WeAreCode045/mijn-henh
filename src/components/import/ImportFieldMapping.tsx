@@ -51,7 +51,12 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     togglePropertySelection,
     selectAllProperties,
     importProperties
-  } = usePropertyImport({ xmlData, fieldMappings });
+  } = usePropertyImport({ 
+    xmlData, 
+    fieldMappings: Object.fromEntries(
+      Object.entries(fieldMappings).filter(([_, value]) => value !== "not_mapped" && value !== "")
+    ) 
+  });
 
   return (
     <div className="space-y-6">

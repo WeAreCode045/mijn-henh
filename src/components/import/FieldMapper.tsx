@@ -31,7 +31,7 @@ export function FieldMapper({
             <SelectValue placeholder="Select an XML field" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Not mapped</SelectItem>
+            <SelectItem value="not_mapped">Not mapped</SelectItem>
             {xmlFields.map((field) => (
               <SelectItem key={field} value={field}>
                 {field}
