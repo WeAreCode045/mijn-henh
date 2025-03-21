@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
 import { PropertyDates } from "./components/PropertyDates";
-import { Trash, Eye, FileText, History, ExternalLink, Globe, Youtube } from "lucide-react";
+import { Trash, History, ScanEye, Image, RotateCcw, Youtube } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { EditHistoryModal } from "./components/EditHistoryModal";
 import { 
@@ -54,90 +54,125 @@ export function ActionsCard({
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg font-medium">Actions</CardTitle>
-          {propertyId && (
-            <div className="text-xs text-muted-foreground font-mono">
-              ID: {propertyId}
-            </div>
-          )}
+          <div className="flex gap-2">
+            {isAdmin && (
+              <button 
+                onClick={handleHistoryButtonClick} 
+                className="flex items-center justify-center rounded-md w-8 h-8 bg-gray-100 hover:bg-gray-200 transition-colors"
+                title="View edit history"
+                type="button"
+              >
+                <History className="h-4 w-4" />
+              </button>
+            )}
+            <button 
+              onClick={onDelete} 
+              className="flex items-center justify-center rounded-md w-8 h-8 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+              title="Delete property"
+            >
+              <Trash className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {propertyId && (
+          <div className="text-xs text-muted-foreground font-mono">
+            ID: {propertyId}
+          </div>
+        )}
+        
         <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />
         
-        <div className="space-y-2">
-          <p className="font-semibold">External Links</p>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <p className="text-sm">Virtual Tour</p>
-              <TooltipProvider>
-                {propertyData?.virtualTourUrl ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <a 
-                        href={propertyData.virtualTourUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center justify-center rounded-md w-8 h-8 bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                      >
-                        <Globe className="h-4 w-4" />
-                      </a>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Open Tour</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <span className="text-muted-foreground text-sm">Not available</span>
-                )}
-              </TooltipProvider>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-sm">YouTube Video</p>
-              <TooltipProvider>
-                {propertyData?.youtubeUrl ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <a 
-                        href={propertyData.youtubeUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex items-center justify-center rounded-md w-8 h-8 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                      >
-                        <Youtube className="h-4 w-4" />
-                      </a>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Watch Video</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <span className="text-muted-foreground text-sm">Not available</span>
-                )}
-              </TooltipProvider>
-            </div>
+        <div>
+          <p className="font-semibold mb-3">Property Views</p>
+          <div className="flex flex-wrap gap-3">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={onWebView} 
+                    className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  >
+                    <ScanEye className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Web View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={onGeneratePDF} 
+                    className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  >
+                    <Image className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Generate PDF</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              {propertyData?.virtualTourUrl ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a 
+                      href={propertyData.virtualTourUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center justify-center rounded-md w-10 h-10 bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                    >
+                      <RotateCcw className="h-5 w-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Virtual Tour</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <button 
+                  disabled
+                  className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 text-gray-400 cursor-not-allowed"
+                >
+                  <RotateCcw className="h-5 w-5" />
+                </button>
+              )}
+            </TooltipProvider>
+
+            <TooltipProvider>
+              {propertyData?.youtubeUrl ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a 
+                      href={propertyData.youtubeUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center justify-center rounded-md w-10 h-10 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                    >
+                      <Youtube className="h-5 w-5" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>YouTube Video</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <button 
+                  disabled
+                  className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 text-gray-400 cursor-not-allowed"
+                >
+                  <Youtube className="h-5 w-5" />
+                </button>
+              )}
+            </TooltipProvider>
           </div>
-        </div>
-        
-        <div className="flex space-x-4">
-          <button onClick={onDelete} className="bg-red-600 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1 text-white">
-            <Trash className="h-5 w-5" />
-          </button>
-          <button onClick={onWebView} className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1">
-            <Eye className="h-5 w-5" />
-          </button>
-          <button onClick={onGeneratePDF} className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1">
-            <FileText className="h-5 w-5" />
-          </button>
-          {isAdmin && (
-            <button 
-              onClick={handleHistoryButtonClick} 
-              className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 flex items-center gap-1"
-              title="View edit history"
-              type="button"
-            >
-              <History className="h-5 w-5" />
-            </button>
-          )}
         </div>
         
         {isAdmin && (
