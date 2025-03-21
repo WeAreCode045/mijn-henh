@@ -179,6 +179,7 @@ export type Database = {
           notes: string | null
           object_id: string | null
           price: string | null
+          propertyType: string | null
           shortDescription: string | null
           sqft: string | null
           status: string | null
@@ -215,6 +216,7 @@ export type Database = {
           notes?: string | null
           object_id?: string | null
           price?: string | null
+          propertyType?: string | null
           shortDescription?: string | null
           sqft?: string | null
           status?: string | null
@@ -251,6 +253,7 @@ export type Database = {
           notes?: string | null
           object_id?: string | null
           price?: string | null
+          propertyType?: string | null
           shortDescription?: string | null
           sqft?: string | null
           status?: string | null

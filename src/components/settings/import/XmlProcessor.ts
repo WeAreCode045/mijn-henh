@@ -129,7 +129,7 @@ export const processXmlContent = async (xmlText: string) => {
           "Type/PropertyTypes/PropertyType",
           "PropertyType",
           "TypeOfProperty"
-        ], property), // Added propertyType field
+        ], property),
         features: [],
         images,
         floorplans: [],

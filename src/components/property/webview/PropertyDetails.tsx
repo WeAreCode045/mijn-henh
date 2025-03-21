@@ -75,6 +75,15 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               primaryColor={settings?.primaryColor || "#40497A"}
             />
           )}
+          
+          {property.propertyType && (
+            <PropertyDetailCard
+              iconName="home"
+              label="Property Type"
+              value={property.propertyType}
+              primaryColor={settings?.primaryColor || "#40497A"}
+            />
+          )}
         </div>
         
         {/* Energy Label Section - Takes up 1/4 of space on larger screens */}
