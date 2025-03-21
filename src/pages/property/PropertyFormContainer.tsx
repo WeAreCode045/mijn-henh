@@ -47,13 +47,13 @@ export function PropertyFormContainer() {
     if (formData?.title) {
       document.title = formData.title;
     } else {
-      document.title = id ? "Edit Property" : "Add New Property";
+      document.title = "Edit Property";
     }
     
     return () => {
       document.title = "Brochure Generator";
     };
-  }, [formData?.title, id]);
+  }, [formData?.title]);
 
   if (isLoading || !formData) {
     return <PropertyFormLoader />;
@@ -61,7 +61,7 @@ export function PropertyFormContainer() {
 
   return (
     <PropertyFormLayout
-      title={formData.title || (id ? "Edit Property" : "Add New Property")}
+      title={formData.title || "Edit Property"}
       propertyData={formData || { id: "" } as any}
       settings={settings}
       isAdmin={isAdmin}

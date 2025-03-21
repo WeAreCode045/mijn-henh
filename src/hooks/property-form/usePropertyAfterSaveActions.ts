@@ -2,7 +2,6 @@
 import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { usePropertyImageSaver } from "./usePropertyImageSaver";
-import { getNewPropertyId } from "./utils/propertyIdUtils";
 import { saveAllImagesForNewProperty } from "./utils/propertySaveImageUtils";
 
 export function usePropertyAfterSaveActions() {
@@ -40,28 +39,14 @@ export function usePropertyAfterSaveActions() {
   };
   
   const handleNewPropertySave = async (formData: PropertyFormData) => {
-    // Get the ID of the newly created property
-    if (!formData.title) {
-      console.log("handleNewPropertySave - No property title");
-      return null;
+    // For already created properties (we have an ID)
+    if (formData.id) {
+      console.log("handleNewPropertySave - Property already has ID:", formData.id);
+      return handleExistingPropertySave(formData);
     }
     
-    const newPropertyId = await getNewPropertyId(formData.title);
-    if (!newPropertyId) {
-      console.log("handleNewPropertySave - Failed to get new property ID");
-      return null;
-    }
-    
-    console.log("handleNewPropertySave - Got new property ID:", newPropertyId);
-    
-    // Save images for new property
-    await saveAllImagesForNewProperty(newPropertyId, formData);
-    
-    // Retrieve the new property data
-    const freshPropertyData = await fetchUpdatedPropertyData(newPropertyId);
-    console.log("usePropertyFormSubmit - New property created with timestamp:", freshPropertyData?.updated_at);
-    
-    return freshPropertyData;
+    console.log("handleNewPropertySave - This should not happen as properties are now created upfront");
+    return null;
   };
   
   return {

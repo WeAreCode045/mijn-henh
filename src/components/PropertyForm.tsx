@@ -74,8 +74,13 @@ export function PropertyForm() {
     try {
       setIsDeleting(true);
       
-      // Here would be the actual delete logic
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Delete the property from the database
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
       
       toast({
         title: "Success",
@@ -101,9 +106,6 @@ export function PropertyForm() {
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
     </div>;
   }
-
-  // Update the page title based on property title
-  document.title = formData.title || "Property";
 
   // Ensure formData has an id property by casting it to PropertyData
   const propertyData: PropertyData = {

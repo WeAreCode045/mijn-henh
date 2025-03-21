@@ -13,9 +13,9 @@ export function usePropertyFormSubmitHandler() {
   const navigate = useNavigate();
   const { validatePropertyData } = usePropertyValidation();
   const { prepareSubmitData } = usePropertyDataPreparer();
-  const { updateProperty, createProperty } = usePropertyDatabase();
+  const { updateProperty } = usePropertyDatabase();
   const { fetchCurrentPropertyData, logChanges } = usePropertyChangesLogger();
-  const { handleExistingPropertySave, handleNewPropertySave } = usePropertyAfterSaveActions();
+  const { handleExistingPropertySave } = usePropertyAfterSaveActions();
 
   const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData, shouldRedirect = false) => {
     if (e && e.preventDefault) {
@@ -24,11 +24,9 @@ export function usePropertyFormSubmitHandler() {
     
     console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
     
-    // For new properties, validate the data
-    if (!formData.id) {
-      if (!validatePropertyData(formData)) {
-        return false;
-      }
+    // For all properties, validate the data
+    if (!validatePropertyData(formData)) {
+      return false;
     }
     
     try {
@@ -43,7 +41,7 @@ export function usePropertyFormSubmitHandler() {
         // Get the current property data before updating to compare changes
         const currentPropertyData = await fetchCurrentPropertyData(formData.id);
           
-        // Update existing property
+        // Update property
         success = await updateProperty(formData.id, submitData);
         
         if (success) {
@@ -53,17 +51,18 @@ export function usePropertyFormSubmitHandler() {
           // Log the changes if update was successful
           await logChanges(formData.id, currentPropertyData, submitData);
         }
-      } else {
-        // Create new property
-        success = await createProperty(submitData);
-        
-        if (success) {
-          updatedPropertyData = await handleNewPropertySave(formData);
-        }
         
         if (success && shouldRedirect) {
           navigate('/');
         }
+      } else {
+        // This should not happen anymore since we create properties upfront
+        toast({
+          title: "Error",
+          description: "Property ID is missing. This should not happen.",
+          variant: "destructive",
+        });
+        return false;
       }
       
       console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");
@@ -75,7 +74,7 @@ export function usePropertyFormSubmitHandler() {
       if (success) {
         toast({
           title: "Success",
-          description: formData.id ? "Property updated successfully" : "Property created successfully",
+          description: "Property updated successfully",
         });
       }
       
