@@ -1,4 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+
+// Use standard ES import syntax for Deno functions
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

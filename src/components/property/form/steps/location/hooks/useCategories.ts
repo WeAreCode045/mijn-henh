@@ -1,6 +1,6 @@
 
-import { MapPin, ShoppingBag, GraduationCap, Tree, Utensils, Bus, Building, Dumbbell } from "lucide-react";
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
+import { MapPin, ShoppingBag, GraduationCap, Trees, Utensils, Bus, Building, Dumbbell } from "lucide-react";
 
 export interface CategoryType {
   id: string;
@@ -36,7 +36,7 @@ export function useCategories() {
     {
       id: 'entertainment',
       label: 'Entertainment & Recreation',
-      icon: Tree,
+      icon: Trees,
       color: 'bg-green-100 text-green-800',
       maxSelections: 10
     },
