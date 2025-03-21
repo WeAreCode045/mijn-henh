@@ -53,7 +53,14 @@ export function ActionsCard({
   return (
     <Card className="md:col-span-1">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Actions</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-medium">Actions</CardTitle>
+          {propertyId && (
+            <div className="text-xs text-muted-foreground font-mono">
+              ID: {propertyId}
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />

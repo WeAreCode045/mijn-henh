@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink, Save } from "lucide-react";
+import { ExternalLink, Save, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -22,6 +22,12 @@ export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
   const [objectId, setObjectId] = useState(property.object_id || '');
   const [isSaving, setIsSaving] = useState(false);
   
+  // Track edit states
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [editingPrice, setEditingPrice] = useState(false);
+  const [editingObjectId, setEditingObjectId] = useState(false);
+  
   const handleSaveField = async (field: string, value: string) => {
     if (!property.id) return;
     
@@ -38,6 +44,14 @@ export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
         title: "Updated",
         description: `${field} updated successfully`,
       });
+      
+      // Close edit mode after saving
+      switch (field) {
+        case 'title': setEditingTitle(false); break;
+        case 'address': setEditingAddress(false); break;
+        case 'price': setEditingPrice(false); break;
+        case 'object_id': setEditingObjectId(false); break;
+      }
     } catch (error) {
       console.error("Error updating field:", error);
       toast({
@@ -51,86 +65,142 @@ export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
   };
 
   return (
-    <Card className="md:col-span-3">
+    <Card className="md:col-span-2">
       <CardContent className="pt-6">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1">
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2">
-                <Input 
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Property Title"
-                  className="text-xl font-semibold"
-                />
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => handleSaveField('title', title)}
-                  disabled={isSaving}
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
+                {editingTitle ? (
+                  <>
+                    <Input 
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Property Title"
+                      className="text-xl font-semibold"
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleSaveField('title', title)}
+                      disabled={isSaving}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <div className="w-full flex justify-between items-center">
+                    <h3 className="text-xl font-semibold">{title || "Untitled Property"}</h3>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => setEditingTitle(true)}
+                      title="Edit Title"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
               
               <div className="flex items-center gap-2 mb-4">
-                <Input 
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Property Address"
-                  className="text-muted-foreground"
-                />
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => handleSaveField('address', address)}
-                  disabled={isSaving}
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
+                {editingAddress ? (
+                  <>
+                    <Input 
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Property Address"
+                      className="text-muted-foreground"
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleSaveField('address', address)}
+                      disabled={isSaving}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <div className="w-full flex justify-between items-center">
+                    <p className="text-muted-foreground">{address || "No address specified"}</p>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => setEditingAddress(true)}
+                      title="Edit Address"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="font-semibold mb-1">Price</p>
-                <div className="flex items-center gap-2">
-                  <Input 
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="Set price"
-                  />
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => handleSaveField('price', price)}
-                    disabled={isSaving}
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <p className="font-semibold mb-1">ID</p>
-                <p className="text-sm truncate">{property.id}</p>
+                {editingPrice ? (
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="Set price"
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleSaveField('price', price)}
+                      disabled={isSaving}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <p>{price || "Not specified"}</p>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => setEditingPrice(true)}
+                      title="Edit Price"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
                 <p className="font-semibold mb-1">Object ID</p>
-                <div className="flex items-center gap-2">
-                  <Input 
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                    placeholder="Set object ID"
-                  />
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => handleSaveField('object_id', objectId)}
-                    disabled={isSaving}
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                </div>
+                {editingObjectId ? (
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                      placeholder="Set object ID"
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleSaveField('object_id', objectId)}
+                      disabled={isSaving}
+                    >
+                      <Save className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <p className="truncate">{objectId || "Not specified"}</p>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => setEditingObjectId(true)}
+                      title="Edit Object ID"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
             
