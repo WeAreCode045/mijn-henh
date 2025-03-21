@@ -7,6 +7,8 @@ import { NearbyPlacesTabControls } from "./components/NearbyPlacesTabControls";
 import { NearbyPlacesTabContent } from "./components/NearbyPlacesTabContent";
 import { EmptyPlacesState } from "./components/EmptyPlacesState";
 import { useNearbyPlacesSection } from "./hooks/useNearbyPlacesSection";
+import { Button } from "@/components/ui/button";
+import { CategoryType } from "./hooks/useCategories";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -40,13 +42,36 @@ export function NearbyPlacesSection({
     togglePlaceVisibility,
     togglePlaceSelection,
     handleBulkDelete,
-    handleFetchAllPlaces
+    handleFetchAllPlaces,
+    getMaxSelections
   } = useNearbyPlacesSection({
     formData,
     onFieldChange,
     onFetchNearbyPlaces,
     isLoadingNearbyPlaces
   });
+
+  // Render subtypes for a category
+  const renderSubtypeButtons = (category: CategoryType) => {
+    if (!category.subtypes) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-2 mt-3">
+        {category.subtypes.map(subtype => (
+          <Button 
+            key={subtype.id}
+            size="sm"
+            variant="outline"
+            onClick={() => handleFetchCategory(category.id, subtype.id)}
+            disabled={isFetchingCategory}
+            className="text-xs"
+          >
+            Fetch {subtype.label} (max {subtype.maxSelections})
+          </Button>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -73,16 +98,37 @@ export function NearbyPlacesSection({
               })}
             </TabsList>
             
-            <NearbyPlacesTabControls 
-              activeTab={activeTab}
-              categoryLabel={categories.find(c => c.id === activeTab)?.label}
-              selectedCount={selectedPlacesToDelete.length}
-              isFetchingCategory={isFetchingCategory}
-              onFetchCategory={() => handleFetchCategory(activeTab)}
-              onBulkDelete={handleBulkDelete}
-            />
+            <div className="mt-4">
+              {activeTab !== 'all' && (
+                <div className="mb-4">
+                  <div className="flex justify-between items-center">
+                    <Button 
+                      variant="outline"
+                      onClick={() => handleFetchCategory(activeTab)}
+                      disabled={isFetchingCategory}
+                    >
+                      {isFetchingCategory ? 'Fetching...' : `Fetch All ${categories.find(c => c.id === activeTab)?.label}`}
+                    </Button>
+                    
+                    {selectedPlacesToDelete.length > 0 && (
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={handleBulkDelete}
+                        className="ml-auto"
+                      >
+                        Delete Selected ({selectedPlacesToDelete.length})
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {/* Render subtype buttons if available */}
+                  {renderSubtypeButtons(categories.find(c => c.id === activeTab) as CategoryType)}
+                </div>
+              )}
+            </div>
             
-            <TabsContent value="all" className="space-y-4 mt-4">
+            <TabsContent value="all" className="space-y-4">
               {nearbyPlaces.length > 0 ? (
                 <NearbyPlacesTabContent
                   tabId="all-places"
@@ -100,7 +146,7 @@ export function NearbyPlacesSection({
             </TabsContent>
             
             {categories.map(category => (
-              <TabsContent key={category.id} value={category.id} className="space-y-4 mt-4">
+              <TabsContent key={category.id} value={category.id} className="space-y-4">
                 <NearbyPlacesTabContent
                   tabId={category.id}
                   category={category.label}
@@ -126,6 +172,7 @@ export function NearbyPlacesSection({
         onSave={handleSavePlaces}
         category={currentCategory}
         isLoading={isFetchingCategory}
+        maxSelections={getMaxSelections(currentCategory)}
       />
     </div>
   );

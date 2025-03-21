@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export interface PlaceOption {
   id: string;
@@ -14,6 +14,7 @@ export interface PlaceOption {
   rating?: number;
   distance?: number;
   type: string;
+  maxSelections?: number;
 }
 
 interface SelectPlacesModalProps {
@@ -36,12 +37,22 @@ export function SelectPlacesModal({
   maxSelections = 5
 }: SelectPlacesModalProps) {
   const [selectedPlaces, setSelectedPlaces] = useState<PlaceOption[]>([]);
+  
+  // Get the effective max selections (from first place if available, or prop)
+  const effectiveMaxSelections = places[0]?.maxSelections || maxSelections;
+
+  // Reset selections when modal is opened with new places
+  useEffect(() => {
+    if (isOpen && places.length > 0) {
+      setSelectedPlaces([]);
+    }
+  }, [isOpen, places]);
 
   const handleTogglePlace = (place: PlaceOption) => {
     if (selectedPlaces.some(p => p.id === place.id)) {
       setSelectedPlaces(selectedPlaces.filter(p => p.id !== place.id));
     } else {
-      if (selectedPlaces.length < maxSelections) {
+      if (selectedPlaces.length < effectiveMaxSelections) {
         setSelectedPlaces([...selectedPlaces, place]);
       }
     }
@@ -53,7 +64,7 @@ export function SelectPlacesModal({
   };
 
   const formatCategory = (cat: string) => {
-    return cat.charAt(0).toUpperCase() + cat.slice(1);
+    return cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   return (
@@ -65,7 +76,7 @@ export function SelectPlacesModal({
         
         <div className="py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Select up to {maxSelections} places to include (found {places.length} places).
+            Select up to {effectiveMaxSelections} places to include (found {places.length} places).
           </p>
           
           {isLoading ? (
@@ -87,7 +98,7 @@ export function SelectPlacesModal({
                       className="mt-1"
                       checked={selectedPlaces.some(p => p.id === place.id)}
                       onCheckedChange={() => handleTogglePlace(place)}
-                      disabled={!selectedPlaces.some(p => p.id === place.id) && selectedPlaces.length >= maxSelections}
+                      disabled={!selectedPlaces.some(p => p.id === place.id) && selectedPlaces.length >= effectiveMaxSelections}
                     />
                     <div className="ml-3 space-y-1 flex-1">
                       <label 

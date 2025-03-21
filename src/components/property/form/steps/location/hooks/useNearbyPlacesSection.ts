@@ -21,7 +21,7 @@ export function useNearbyPlacesSection({
   const [activeTab, setActiveTab] = useState<string>("all");
   
   // Use the dedicated categories hook
-  const { categories, groupPlacesByCategory } = useCategories();
+  const { categories, groupPlacesByCategory, getMaxSelections } = useCategories();
   
   // Use the modal management hook
   const { 
@@ -51,7 +51,8 @@ export function useNearbyPlacesSection({
     onFetchNearbyPlaces, 
     setPlacesForModal, 
     setModalOpen, 
-    setCurrentCategory 
+    setCurrentCategory,
+    getMaxSelections
   });
   
   // Create the placesByCategory object using the helper from useCategories
@@ -75,6 +76,7 @@ export function useNearbyPlacesSection({
     togglePlaceVisibility,
     togglePlaceSelection,
     handleBulkDelete,
-    handleFetchAllPlaces
+    handleFetchAllPlaces,
+    getMaxSelections
   };
 }
