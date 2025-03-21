@@ -20,6 +20,8 @@ export function useNearbyPlaces(
     }
     
     try {
+      console.log(`Fetching nearby places for category: ${category}`);
+      
       const { data, error } = await supabase.functions.invoke('fetch-location-data', {
         body: { 
           address: formData.address,

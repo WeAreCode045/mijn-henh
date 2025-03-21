@@ -57,7 +57,10 @@ export function NearbyPlacesEmptyState({
                       disabled={isFetchingCategory || !formDataAddress}
                       className="text-xs mt-1"
                     >
-                      {subtype.label}
+                      {isFetchingCategory && currentCategory === subtype.id ?
+                        'Fetching...' :
+                        subtype.label
+                      }
                     </Button>
                   ))}
                 </div>

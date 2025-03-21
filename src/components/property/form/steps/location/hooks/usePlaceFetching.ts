@@ -30,7 +30,8 @@ export function usePlaceFetching({
     try {
       const results = await onFetchNearbyPlaces(typeToFetch);
       
-      if (results && results[typeToFetch]) {
+      if (results && results[typeToFetch] && Array.isArray(results[typeToFetch])) {
+        // Make sure we're only showing places for the requested category
         const options: PlaceOption[] = results[typeToFetch].map((place: any) => ({
           id: place.place_id,
           name: place.name,
@@ -68,11 +69,11 @@ export function usePlaceFetching({
   };
 
   // Function to handle fetching all places - triggered by button click
-  const handleFetchAllPlaces = (e: React.MouseEvent) => {
+  const handleFetchAllPlaces = async (e: React.MouseEvent) => {
     if (!onFetchNearbyPlaces) return;
     
     e.preventDefault();
-    onFetchNearbyPlaces();
+    await onFetchNearbyPlaces();
   };
 
   return {

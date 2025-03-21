@@ -51,7 +51,10 @@ export function NearbyPlacesWithTabs({
             disabled={isFetchingCategory}
             className="text-xs"
           >
-            Fetch {subtype.label} (max {subtype.maxSelections})
+            {isFetchingCategory && currentCategory === subtype.id ? 
+              'Fetching...' : 
+              `Fetch ${subtype.label} (max ${subtype.maxSelections})`
+            }
           </Button>
         ))}
       </div>
@@ -84,7 +87,10 @@ export function NearbyPlacesWithTabs({
                   onClick={() => handleFetchCategory(activeTab)}
                   disabled={isFetchingCategory}
                 >
-                  {isFetchingCategory ? 'Fetching...' : `Fetch All ${categories.find(c => c.id === activeTab)?.label}`}
+                  {isFetchingCategory && currentCategory === activeTab ? 
+                    'Fetching...' : 
+                    `Fetch All ${categories.find(c => c.id === activeTab)?.label || activeTab}`
+                  }
                 </Button>
                 
                 {selectedPlacesToDelete.length > 0 && (
