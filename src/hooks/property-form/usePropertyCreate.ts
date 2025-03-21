@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PropertySubmitData } from "@/types/property";
 import { prepareAreasForFormSubmission } from "./preparePropertyData";
 import { preparePropertyDataForSubmission } from "./utils/propertyDataFormatter";
+import { v4 as uuidv4 } from "uuid";
 
 export function usePropertyCreate() {
   const { toast } = useToast();
@@ -12,6 +13,13 @@ export function usePropertyCreate() {
     console.log("usePropertyCreate - Creating new property with data:", JSON.stringify(data));
     
     try {
+      // Generate object_id if not provided
+      if (!data.object_id) {
+        // Generate a shorter unique ID for object_id
+        data.object_id = `P-${uuidv4().substring(0, 8)}`;
+        console.log("Generated object_id:", data.object_id);
+      }
+      
       // Transform areas to the correct format for the database
       if (data.areas && Array.isArray(data.areas)) {
         const transformedAreas = prepareAreasForFormSubmission(data.areas as any);

@@ -2,7 +2,6 @@
 import { PropertyFormData } from "@/types/property";
 import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
-import { BasicDetails } from "./BasicDetails";
 import { DescriptionSection } from "./DescriptionSection";
 import { ImageSelections } from "./ImageSelections";
 
@@ -60,25 +59,19 @@ export function GeneralInfoStep({
 
   return (
     <div className="space-y-6">
-      {/* 1. Basic Details (Title, Price, Address, Object ID) */}
-      <BasicDetails 
-        formData={formData} 
-        onFieldChange={handleFieldChange} 
-      />
-
-      {/* 2. Property Description */}
+      {/* 1. Property Description */}
       <DescriptionSection 
         formData={formData}
         onFieldChange={handleFieldChange} 
       />
       
-      {/* 3. Key Information */}
+      {/* 2. Key Information */}
       <PropertySpecs 
         formData={formData} 
         onFieldChange={handleFieldChange} 
       />
 
-      {/* 4. Image Selections */}
+      {/* 3. Image Selections */}
       {formData.images && formData.images.length > 0 && (
         <ImageSelections
           images={propertyImages}

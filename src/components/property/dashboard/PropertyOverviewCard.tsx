@@ -1,7 +1,12 @@
 
+import { useState } from "react";
 import { PropertyData } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ExternalLink, Save } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyOverviewCardProps {
   property: PropertyData;
@@ -9,29 +14,123 @@ interface PropertyOverviewCardProps {
 
 export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
   const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? property.images[0].url : null);
+  const { toast } = useToast();
+  
+  const [title, setTitle] = useState(property.title || '');
+  const [address, setAddress] = useState(property.address || '');
+  const [price, setPrice] = useState(property.price || '');
+  const [objectId, setObjectId] = useState(property.object_id || '');
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const handleSaveField = async (field: string, value: string) => {
+    if (!property.id) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ [field]: value })
+        .eq('id', property.id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Updated",
+        description: `${field} updated successfully`,
+      });
+    } catch (error) {
+      console.error("Error updating field:", error);
+      toast({
+        title: "Error",
+        description: "Could not update the field",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Card className="md:col-span-3">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Property Overview</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1">
-            <h3 className="font-semibold text-xl mb-2">{property.title}</h3>
-            <p className="text-muted-foreground mb-4">{property.address}</p>
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Input 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Property Title"
+                  className="text-xl font-semibold"
+                />
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => handleSaveField('title', title)}
+                  disabled={isSaving}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-2 mb-4">
+                <Input 
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Property Address"
+                  className="text-muted-foreground"
+                />
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => handleSaveField('address', address)}
+                  disabled={isSaving}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="font-semibold">Price</p>
-                <p>{property.price || "N/A"}</p>
+                <p className="font-semibold mb-1">Price</p>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Set price"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleSaveField('price', price)}
+                    disabled={isSaving}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <div>
-                <p className="font-semibold">ID</p>
+                <p className="font-semibold mb-1">ID</p>
                 <p className="text-sm truncate">{property.id}</p>
               </div>
               <div>
-                <p className="font-semibold">Object ID</p>
-                <p>{property.object_id || "Not set"}</p>
+                <p className="font-semibold mb-1">Object ID</p>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    value={objectId}
+                    onChange={(e) => setObjectId(e.target.value)}
+                    placeholder="Set object ID"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleSaveField('object_id', objectId)}
+                    disabled={isSaving}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
             
