@@ -1,4 +1,3 @@
-
 import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
@@ -73,6 +72,7 @@ export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
         id: place.id || "",
         name: place.name || "",
         type: place.type || "other",
+        types: place.types || [], // Preserve the types array
         vicinity: place.vicinity || "",
         rating: place.rating || 0,
         user_ratings_total: place.user_ratings_total || 0,

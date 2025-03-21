@@ -9,5 +9,6 @@ export interface PropertyNearbyPlace {
   rating?: number;
   user_ratings_total?: number;
   type: PropertyPlaceType;
+  types?: string[]; // Added types array property
   visible_in_webview?: boolean;
 }

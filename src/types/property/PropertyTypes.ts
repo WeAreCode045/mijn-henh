@@ -43,6 +43,7 @@ export interface PropertyNearbyPlace {
   rating: number;
   user_ratings_total: number;
   type: string;
+  types?: string[]; // Added types array property to match Google Places API response
   visible_in_webview?: boolean;
   distance?: number;
 }

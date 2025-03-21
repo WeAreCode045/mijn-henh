@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { address, apiKey, category } = await req.json()
+    const { address, apiKey, category, propertyId } = await req.json()
     
     if (!address || !apiKey) {
       throw new Error('Address and API key are required')
@@ -110,7 +110,7 @@ serve(async (req) => {
             vicinity: place.formattedAddress || "",
             rating: place.rating || 0,
             user_ratings_total: place.userRatingCount || 0,
-            types: place.types || [place.primaryType],
+            types: place.types || [place.primaryType], // Make sure to include types array
             type: category || place.primaryType,
             distance: 0  // Unfortunately, distance isn't directly provided
           }))
@@ -134,7 +134,7 @@ serve(async (req) => {
               vicinity: place.formattedAddress || "",
               rating: place.rating || 0,
               user_ratings_total: place.userRatingCount || 0,
-              types: place.types || [place.primaryType],
+              types: place.types || [place.primaryType], // Make sure to include types array
               type: categoryName,
               distance: 0
             }))
