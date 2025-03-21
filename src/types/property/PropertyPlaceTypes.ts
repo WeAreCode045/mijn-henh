@@ -6,7 +6,7 @@ export interface PropertyNearbyPlace {
   name: string;
   distance: string | number;
   vicinity?: string;
-  rating?: number;
+  rating?: number | null;
   user_ratings_total?: number;
   type: PropertyPlaceType | string;
   types?: string[];

@@ -69,6 +69,13 @@ export function NearbyPlaces({ places, onPlaceDelete }: NearbyPlacesProps) {
                       {place.vicinity && (
                         <p className="text-gray-500 text-xs mt-1">{place.vicinity}</p>
                       )}
+                      {place.distance && (
+                        <p className="text-gray-400 text-xs">
+                          {typeof place.distance === 'number' 
+                            ? `${place.distance} km` 
+                            : place.distance}
+                        </p>
+                      )}
                     </div>
                     <Button
                       type="button"

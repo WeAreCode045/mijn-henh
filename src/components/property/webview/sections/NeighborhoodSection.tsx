@@ -139,6 +139,13 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
                               {place.rating && (
                                 <span className="ml-1 text-yellow-600">★ {place.rating}</span>
                               )}
+                              {place.distance && (
+                                <span className="ml-1 text-gray-400">
+                                  {typeof place.distance === 'number' 
+                                    ? `(${place.distance} km)` 
+                                    : `(${place.distance})`}
+                                </span>
+                              )}
                             </div>
                           </li>
                         ))}

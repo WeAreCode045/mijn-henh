@@ -27,6 +27,24 @@ const categoryConfigs = {
   }
 };
 
+// Function to calculate distance between two coordinates
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  const distance = R * c; // Distance in km
+  return distance;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -146,23 +164,37 @@ serve(async (req) => {
         if (placesData.places && Array.isArray(placesData.places)) {
           // Transform the data to match our expected format
           const transformedPlaces = placesData.places.map(place => {
-            // Calculate distance (could be added if needed)
-            // For now, just providing placeholder
-            const distance = "nearby";
+            // Calculate distance using the Haversine formula
+            const distance = place.location?.latitude && place.location?.longitude
+              ? calculateDistance(
+                  lat, 
+                  lng, 
+                  place.location.latitude, 
+                  place.location.longitude
+                )
+              : null;
             
             return {
               id: place.id,
               name: place.displayName?.text || 'Unknown Place',
               vicinity: place.formattedAddress || '',
-              rating: place.rating || 0,
+              rating: place.rating || null, // Use null instead of 0 for missing ratings
               user_ratings_total: place.userRatingCount || 0,
               type: place.primaryType || categoryKey,
               types: place.types || [],
-              distance: distance,
+              distance: distance !== null ? parseFloat(distance.toFixed(2)) : "nearby",
               visible_in_webview: true,
               latitude: place.location?.latitude,
               longitude: place.location?.longitude
             };
+          });
+          
+          // Sort by rating (places with no rating at the end)
+          transformedPlaces.sort((a, b) => {
+            if (a.rating === null && b.rating === null) return 0;
+            if (a.rating === null) return 1;
+            if (b.rating === null) return -1;
+            return b.rating - a.rating;
           });
           
           results[categoryKey] = transformedPlaces;

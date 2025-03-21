@@ -78,7 +78,7 @@ export function PlaceItem({
             {place.distance && (
               <Badge variant="secondary" className="text-xs">
                 {typeof place.distance === 'number' 
-                  ? `${place.distance.toFixed(1)} km` 
+                  ? `${place.distance} km` 
                   : place.distance}
               </Badge>
             )}
