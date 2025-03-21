@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { findValue, downloadAndStoreImage } from "@/utils/xmlImport/xmlUtils";
+import { findValue } from "@/utils/xmlImport/xmlUtils";
 
 export const processXmlContent = async (xmlText: string) => {
   const parser = new DOMParser();
@@ -55,13 +55,9 @@ export const processXmlContent = async (xmlText: string) => {
           const urlElement = attachment.getElementsByTagName('URLNormalizedFile')[0];
           
           if (urlElement?.textContent) {
-            console.log(`Processing attachment with URL: ${urlElement.textContent}`);
-            const imageUrl = await downloadAndStoreImage(urlElement.textContent);
-            
-            if (imageUrl) {
-              images.push(imageUrl);
-              if (!featuredImage) featuredImage = imageUrl;
-            }
+            console.log(`Found attachment with URL: ${urlElement.textContent}`);
+            images.push(urlElement.textContent);
+            if (!featuredImage) featuredImage = urlElement.textContent;
           }
         }
       }

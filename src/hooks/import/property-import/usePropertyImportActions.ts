@@ -3,16 +3,6 @@ import { usePropertyDataMapper } from "./usePropertyDataMapper";
 import { usePropertyImageHandler } from "./usePropertyImageHandler";
 import { usePropertyStorageService } from "./usePropertyStorageService";
 import { useState } from "react";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle 
-} from "@/components/ui/alert-dialog";
 
 interface PropertyImportActionsProps {
   xmlData: any[];
@@ -28,7 +18,7 @@ export function usePropertyImportActions({
 }: PropertyImportActionsProps) {
   const { mapPropertyData } = usePropertyDataMapper();
   const { handlePropertyImages, handlePropertyFloorplans, deleteExistingPropertyMedia } = usePropertyImageHandler();
-  const { storeProperty, checkExistingProperty } = usePropertyStorageService();
+  const { storeProperty, checkExistingProperty, processImages } = usePropertyStorageService();
   const [replaceMediaDialogOpen, setReplaceMediaDialogOpen] = useState(false);
   const [currentImportItem, setCurrentImportItem] = useState<{
     property: any,
@@ -56,15 +46,22 @@ export function usePropertyImportActions({
       if (images.length > 0 && replaceMedia) {
         // Delete existing media first
         await deleteExistingPropertyMedia(existingProperty.id);
+        
+        // Download and upload the new images
+        const uploadedImageUrls = await processImages(images, existingProperty.id, 'photos');
+        
         // Then add the new images
-        await handlePropertyImages(images, existingProperty.id);
+        await handlePropertyImages(uploadedImageUrls, existingProperty.id);
       }
 
       // Handle floorplans for existing property
       const floorplans = property.floorplans || [];
       if (floorplans.length > 0 && replaceMedia) {
-        // Already deleted media above, just add new floorplans
-        await handlePropertyFloorplans(floorplans, existingProperty.id);
+        // Download and upload the new floorplans
+        const uploadedFloorplanUrls = await processImages(floorplans, existingProperty.id, 'floorplans');
+        
+        // Add them to the database
+        await handlePropertyFloorplans(uploadedFloorplanUrls, existingProperty.id);
       }
 
       return true;
@@ -91,9 +88,9 @@ export function usePropertyImportActions({
           // Map XML fields to property fields using the fieldMappings
           const propertyData = mapPropertyData(property, fieldMappings);
           
-          // Process images
-          const images = property.images || [];
-          const floorplans = property.floorplans || [];
+          // Get image and floorplan URLs from the XML data
+          const imageUrls = property.images || [];
+          const floorplanUrls = property.floorplans || [];
           
           // Check for Virtual Tour URL
           if (property.virtualTour) {
@@ -114,7 +111,7 @@ export function usePropertyImportActions({
 
           if (existingProperty) {
             // If property exists and has media, ask user what to do
-            if ((images.length > 0 || floorplans.length > 0)) {
+            if ((imageUrls.length > 0 || floorplanUrls.length > 0)) {
               await new Promise<void>((resolve) => {
                 setCurrentImportItem({
                   property,
@@ -168,13 +165,21 @@ export function usePropertyImportActions({
             }
 
             // Handle images for new property
-            if (images.length > 0) {
-              await handlePropertyImages(images, newPropertyId);
+            if (imageUrls.length > 0) {
+              // Download and upload all images
+              const uploadedImageUrls = await processImages(imageUrls, newPropertyId, 'photos');
+              
+              // Add them to the database
+              await handlePropertyImages(uploadedImageUrls, newPropertyId);
             }
 
             // Handle floorplans for new property
-            if (floorplans.length > 0) {
-              await handlePropertyFloorplans(floorplans, newPropertyId);
+            if (floorplanUrls.length > 0) {
+              // Download and upload all floorplans
+              const uploadedFloorplanUrls = await processImages(floorplanUrls, newPropertyId, 'floorplans');
+              
+              // Add them to the database
+              await handlePropertyFloorplans(uploadedFloorplanUrls, newPropertyId);
             }
 
             imported++;
