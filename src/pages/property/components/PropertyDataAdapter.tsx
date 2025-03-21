@@ -116,6 +116,7 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
           updated_at: propertyData.updated_at,
           status,
           metadata,
+          propertyType: propertyData.propertyType || "", // Add propertyType field
           // Add backward compatibility fields
           coverImages, // Now as PropertyImage[]
           gridImages: regularImages.slice(0, 4) // Now as PropertyImage[]

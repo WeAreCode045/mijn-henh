@@ -1,3 +1,4 @@
+
 import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
@@ -45,6 +46,7 @@ export interface SupabasePropertyData {
   updated_at: string;
   template_id?: string; // Make this optional since template functionality is removed
   floorplanEmbedScript?: string;
+  propertyType?: string; // Add propertyType property
 }
 
 export function transformSupabaseData(
@@ -141,6 +143,7 @@ export function transformSupabaseData(
     longitude: data.longitude,
     map_image: data.map_image,
     agent_id: data.agent_id,
+    propertyType: data.propertyType || "", // Add propertyType to transformed data
     agent: data.agent
       ? {
           id: data.agent.id,

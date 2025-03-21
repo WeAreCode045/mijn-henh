@@ -54,4 +54,5 @@ export interface PropertyData {
     phone?: string;
     photoUrl?: string;
   };
+  propertyType?: string; // Add propertyType property to fix the error
 }
