@@ -14,6 +14,7 @@ export interface PropertyFormData extends PropertyData {
   gridImages?: PropertyImage[] | string[];
   nearby_cities?: PropertyCity[];
   status?: string; // Added status property
+  propertyType?: string; // Added propertyType property
   metadata?: {
     status?: string;
     [key: string]: any;
@@ -22,6 +23,7 @@ export interface PropertyFormData extends PropertyData {
 
 // Property submit data
 export interface PropertySubmitData {
+  id?: string;
   title: string;
   price: string;
   address: string;
@@ -34,15 +36,15 @@ export interface PropertySubmitData {
   energyLabel: string;
   hasGarden: boolean;
   description: string;
+  shortDescription?: string;
   location_description?: string;
   features: string;
-  images: string[];
-  areas: PropertyArea[];
-  map_image?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
+  areas: any;
   nearby_places?: string;
   nearby_cities?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  map_image?: string | null;
   object_id?: string;
   agent_id?: string;
   template_id?: string;
@@ -54,8 +56,9 @@ export interface PropertySubmitData {
   featuredImages?: string[];
   floorplanEmbedScript?: string;
   status?: string; // Added status property
+  propertyType?: string; // Added propertyType property
   metadata?: {
     status?: string;
     [key: string]: any;
-  };
+  }; // Added metadata property
 }

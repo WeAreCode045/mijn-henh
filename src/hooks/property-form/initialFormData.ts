@@ -1,3 +1,4 @@
+
 import type { PropertyFormData } from "@/types/property";
 
 export const initialFormData: PropertyFormData = {
@@ -28,6 +29,7 @@ export const initialFormData: PropertyFormData = {
   gridImages: [],
   areaPhotos: [],
   status: 'Draft', // Default status is 'Draft'
+  propertyType: '', // Default propertyType is empty string
   metadata: {
     status: 'Draft'
   }

@@ -143,7 +143,7 @@ export function transformSupabaseData(
     longitude: data.longitude,
     map_image: data.map_image,
     agent_id: data.agent_id,
-    propertyType: data.propertyType || "", // Add propertyType to transformed data
+    propertyType: data.propertyType || "", // Include propertyType in the transformed data
     agent: data.agent
       ? {
           id: data.agent.id,

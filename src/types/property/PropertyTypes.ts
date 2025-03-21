@@ -93,6 +93,7 @@ export interface PropertyFormData {
   created_at?: string;
   updated_at?: string;
   status?: string; // Status property
+  propertyType?: string; // Property type property
   metadata?: {
     status?: string;
     [key: string]: any;
@@ -130,6 +131,7 @@ export interface PropertySubmitData {
   images: string[];
   floorplanEmbedScript: string;
   status?: string; // Status property
+  propertyType?: string; // Property type property
   metadata?: {
     status?: string;
     [key: string]: any;

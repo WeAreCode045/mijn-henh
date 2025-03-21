@@ -112,6 +112,7 @@ export interface PropertyData {
     status?: string;
     [key: string]: any;
   }; // Add metadata property
+  propertyType?: string; // Add propertyType property
   // For backward compatibility - can be PropertyImage[] or string[]
   coverImages?: PropertyImage[] | string[];
   gridImages?: PropertyImage[] | string[];
@@ -163,4 +164,5 @@ export interface PropertySubmitData {
     status?: string;
     [key: string]: any;
   }; // Add metadata property
+  propertyType?: string; // Add propertyType property
 }

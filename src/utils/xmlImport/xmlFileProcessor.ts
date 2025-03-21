@@ -1,3 +1,4 @@
+
 export const extractXmlValue = (property: Element, path: string): string => {
   try {
     // Split the path and navigate through the XML structure

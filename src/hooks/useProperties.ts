@@ -35,7 +35,7 @@ export const useProperties = () => {
         ...item,
         agent: item.agent || null
       };
-      // Pass the property directly to transformSupabaseData which will handle template_id
+      // Pass the property directly to transformSupabaseData which will handle propertyType
       return transformSupabaseData(propertyWithAgent as any);
     });
   };
