@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Save, Pencil } from "lucide-react";
@@ -24,9 +24,31 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
   const [price, setPrice] = useState(property.price || '');
   const [objectId, setObjectId] = useState(property.object_id || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [agentName, setAgentName] = useState<string>('');
   
   // Single editing state for all fields
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Fetch agent name if agent_id exists
+  useEffect(() => {
+    const fetchAgentName = async () => {
+      if (property.agent_id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', property.agent_id)
+          .single();
+        
+        if (data && !error) {
+          setAgentName(data.full_name || 'Unnamed Agent');
+        }
+      } else {
+        setAgentName('');
+      }
+    };
+    
+    fetchAgentName();
+  }, [property.agent_id]);
   
   const handleSaveAllFields = async () => {
     if (!property.id) return;
@@ -149,6 +171,14 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
                   <p className="font-semibold mb-1">Object ID</p>
                   <p className="truncate">{objectId || "Not specified"}</p>
                 </div>
+              </div>
+            )}
+            
+            {/* Display the agent when not in edit mode */}
+            {!isEditing && (
+              <div className="mb-4">
+                <p className="font-semibold mb-1">Assigned Agent</p>
+                <p>{agentName || "No agent assigned"}</p>
               </div>
             )}
             
