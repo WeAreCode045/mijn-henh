@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Save, Pencil } from "lucide-react";
@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusSelector } from "./components/StatusSelector";
 import { AgentSelector } from "./components/AgentSelector";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface PropertyOverviewCardProps {
   property: PropertyData;
@@ -18,6 +19,7 @@ interface PropertyOverviewCardProps {
 export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOverviewCardProps) {
   const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? property.images[0].url : null);
   const { toast } = useToast();
+  const { settings } = useAgencySettings();
   
   const [title, setTitle] = useState(property.title || '');
   const [address, setAddress] = useState(property.address || '');
@@ -28,6 +30,9 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
   
   // Single editing state for all fields
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Reference for Google Places Autocomplete
+  const addressInputRef = useRef<HTMLInputElement>(null);
   
   // Fetch agent name if agent_id exists
   useEffect(() => {
@@ -49,6 +54,54 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
     
     fetchAgentName();
   }, [property.agent_id]);
+  
+  // Set up Google Places Autocomplete for address field
+  useEffect(() => {
+    // Only set up when in edit mode
+    if (!isEditing || !addressInputRef.current) return;
+    
+    const googleApiKey = settings?.googleMapsApiKey;
+    if (!googleApiKey) return;
+
+    // Load the Google Maps JavaScript API
+    const loadGoogleMapsScript = () => {
+      const scriptId = 'google-maps-script';
+      if (document.getElementById(scriptId)) return;
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = initializeAutocomplete;
+      document.head.appendChild(script);
+    };
+
+    const initializeAutocomplete = () => {
+      // Use window with type assertion to access the google object
+      if (!(window as GoogleMapsWindow).google || 
+          !(window as GoogleMapsWindow).google?.maps || 
+          !(window as GoogleMapsWindow).google?.maps?.places) {
+        console.error('Google Maps Places API not loaded');
+        return;
+      }
+
+      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
+        addressInputRef.current as HTMLInputElement,
+        { types: ['address'] }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.formatted_address) {
+          setAddress(place.formatted_address);
+        }
+      });
+    };
+
+    loadGoogleMapsScript();
+  }, [settings, isEditing]);
   
   const handleSaveAllFields = async () => {
     if (!property.id) return;
@@ -134,6 +187,7 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Property Address"
+                      ref={addressInputRef}
                     />
                   </div>
                 </div>
