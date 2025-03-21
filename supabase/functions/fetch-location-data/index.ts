@@ -86,86 +86,101 @@ serve(async (req) => {
       );
     }
 
-    // Fetch nearby places for all categories
-    const nearbyPlacesTypes = {
-      "restaurant": "restaurant",
-      "education": "school",
-      "supermarket": "supermarket", 
-      "shopping": "shopping_mall",
-      "sport": "gym",
-      "leisure": "park",
-      "transportation": "transit_station"
-    };
-    
-    const placePromises = Object.entries(nearbyPlacesTypes).map(async ([category, type]) => {
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&type=${type}&key=${googleMapsApiKey}`;
-      const response = await fetch(url);
-      const data = await response.json();
+    // Only fetch nearby places if not coordinatesOnly
+    let nearbyPlaces = [];
+    if (!coordinatesOnly) {
+      // Fetch nearby places by types
+      const nearbyPlacesTypes = {
+        "restaurant": "restaurant",
+        "education": "school",
+        "supermarket": "supermarket", 
+        "shopping": "shopping_mall",
+        "sport": "gym",
+        "leisure": "park",
+        "transportation": "transit_station"
+      };
       
-      return data.results?.map((place: any) => {
-        // Calculate distance from property to place (in km)
-        const distance = calculateDistance(lat, lng, 
-          place.geometry.location.lat, 
-          place.geometry.location.lng);
-          
-        return {
-          id: place.place_id,
-          name: place.name,
-          type: category,
-          vicinity: place.vicinity,
-          rating: place.rating,
-          user_ratings_total: place.user_ratings_total,
-          distance: parseFloat(distance.toFixed(1)),
-          visible_in_webview: true
-        };
-      }) || [];
-    });
-
-    const placesResults = await Promise.all(placePromises);
-    const nearbyPlaces = placesResults.flat();
-    console.log(`Fetched ${nearbyPlaces.length} nearby places`);
-
-    // Fetch nearby cities (top 5 by population, max 200km)
-    let nearbyCities = [];
-    try {
-      // Fetch nearby cities with population data 
-      const citiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=200000&type=locality&key=${googleMapsApiKey}&rankby=prominence`;
-      const citiesResponse = await fetch(citiesUrl);
-      const citiesData = await citiesResponse.json();
-      
-      if (citiesData.results && citiesData.results.length > 0) {
-        const cities = citiesData.results.slice(0, 5).map((city: any) => {
-          // Calculate distance from property to city (in km)
-          const cityLat = city.geometry.location.lat;
-          const cityLng = city.geometry.location.lng;
-          const distance = calculateDistance(lat, lng, cityLat, cityLng);
-          
+      const placePromises = Object.entries(nearbyPlacesTypes).map(async ([category, type]) => {
+        const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&type=${type}&key=${googleMapsApiKey}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        return data.results?.map((place: any) => {
+          // Calculate distance from property to place (in km)
+          const distance = calculateDistance(lat, lng, 
+            place.geometry.location.lat, 
+            place.geometry.location.lng);
+            
           return {
-            id: city.place_id,
-            name: city.name,
+            id: place.place_id,
+            name: place.name,
+            type: category,
+            vicinity: place.vicinity,
+            rating: place.rating,
+            user_ratings_total: place.user_ratings_total,
             distance: parseFloat(distance.toFixed(1)),
-            vicinity: city.vicinity,
             visible_in_webview: true
           };
-        });
+        }) || [];
+      });
+
+      const placesResults = await Promise.all(placePromises);
+      nearbyPlaces = placesResults.flat();
+      console.log(`Fetched ${nearbyPlaces.length} nearby places`);
+    }
+
+    // Fetch nearby cities if needed
+    let nearbyCities = [];
+    if (!coordinatesOnly && !citiesOnly) {
+      try {
+        // Fetch nearby cities with population data 
+        const citiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=200000&type=locality&key=${googleMapsApiKey}&rankby=prominence`;
+        const citiesResponse = await fetch(citiesUrl);
+        const citiesData = await citiesResponse.json();
         
-        nearbyCities = cities;
+        if (citiesData.results && citiesData.results.length > 0) {
+          const cities = citiesData.results.slice(0, 5).map((city: any) => {
+            // Calculate distance from property to city (in km)
+            const cityLat = city.geometry.location.lat;
+            const cityLng = city.geometry.location.lng;
+            const distance = calculateDistance(lat, lng, cityLat, cityLng);
+            
+            return {
+              id: city.place_id,
+              name: city.name,
+              distance: parseFloat(distance.toFixed(1)),
+              vicinity: city.vicinity,
+              visible_in_webview: true
+            };
+          });
+          
+          nearbyCities = cities;
+        }
+      } catch (error) {
+        console.error("Error fetching nearby cities:", error);
       }
-    } catch (error) {
-      console.error("Error fetching nearby cities:", error);
     }
 
     // Update the property with the new data if propertyId is provided
-    if (propertyId) {
+    if (propertyId && !coordinatesOnly) {
+      const updateData: any = {
+        latitude: lat,
+        longitude: lng,
+        map_image: mapImageUrl
+      };
+      
+      // Only include these fields if we fetched them
+      if (nearbyPlaces.length > 0) {
+        updateData.nearby_places = nearbyPlaces;
+      }
+      
+      if (nearbyCities.length > 0) {
+        updateData.nearby_cities = nearbyCities;
+      }
+      
       const { error: updateError } = await supabaseAdmin
         .from("properties")
-        .update({
-          latitude: lat,
-          longitude: lng,
-          map_image: mapImageUrl,
-          nearby_places: nearbyPlaces,
-          nearby_cities: nearbyCities
-        })
+        .update(updateData)
         .eq("id", propertyId);
 
       if (updateError) {

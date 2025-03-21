@@ -15,6 +15,7 @@ export function usePlaceFetching({
 }) {
   const [isFetchingCategory, setIsFetchingCategory] = useState(false);
 
+  // Function to handle fetching places by category - triggered by button click
   const handleFetchCategory = async (category: string) => {
     if (!onFetchNearbyPlaces) return;
     
@@ -43,6 +44,7 @@ export function usePlaceFetching({
     }
   };
 
+  // Function to handle fetching all places - triggered by button click
   const handleFetchAllPlaces = (e: React.MouseEvent) => {
     if (!onFetchNearbyPlaces) return;
     

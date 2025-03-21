@@ -83,6 +83,8 @@ export function PropertyLocation({
   }, [address, id]);
 
   const handleLocationFetch = async () => {
+    // This is the full location data fetch, including nearby places
+    // It's triggered by the "Fetch Location" button, not automatically
     const data = await fetchLocationData(address, id);
     if (data) {
       await onLocationFetch();

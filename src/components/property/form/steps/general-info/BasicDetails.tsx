@@ -25,7 +25,7 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
     console.log(`BasicDetails - ${field} changed to:`, value);
     onFieldChange(field, value);
 
-    // When the address is updated, automatically fetch coordinates
+    // When the address is updated, automatically fetch coordinates only
     if (field === 'address' && value && formData.id) {
       // Add slight delay to allow for typing to complete
       const timer = setTimeout(() => {
