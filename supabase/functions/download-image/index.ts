@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl } = await req.json()
+    const { imageUrl, propertyId, folder = 'photos' } = await req.json()
 
     if (!imageUrl) {
       return new Response(
@@ -21,6 +21,9 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
+
+    console.log(`Processing download request for: ${imageUrl}`)
+    console.log(`Property ID: ${propertyId}, Folder: ${folder}`)
 
     // Download the image
     const imageResponse = await fetch(imageUrl)
@@ -30,7 +33,8 @@ serve(async (req) => {
 
     const imageBlob = await imageResponse.blob()
     const fileExt = imageUrl.split('.').pop()?.toLowerCase() || 'jpg'
-    const fileName = `${crypto.randomUUID()}.${fileExt}`
+    const sanitizedExt = fileExt.includes('?') ? fileExt.split('?')[0] : fileExt
+    const fileName = `${crypto.randomUUID()}.${sanitizedExt}`
 
     // Initialize Supabase client
     const supabase = createClient(
@@ -38,10 +42,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Prepare the storage path based on property ID and folder
+    const storagePath = propertyId 
+      ? `properties/${propertyId}/${folder}/${fileName}`
+      : `agency_files/${fileName}`
+    
+    const bucket = propertyId ? 'properties' : 'agency_files'
+
+    console.log(`Uploading to bucket: ${bucket}, path: ${storagePath}`)
+
     // Upload to Supabase Storage
     const { data, error: uploadError } = await supabase.storage
-      .from('agency_files')
-      .upload(fileName, imageBlob, {
+      .from(bucket)
+      .upload(storagePath, imageBlob, {
         contentType: imageBlob.type,
         upsert: false
       })
@@ -52,12 +65,14 @@ serve(async (req) => {
 
     // Get the public URL
     const { data: { publicUrl }, error: urlError } = supabase.storage
-      .from('agency_files')
-      .getPublicUrl(fileName)
+      .from(bucket)
+      .getPublicUrl(storagePath)
 
     if (urlError) {
       throw urlError
     }
+
+    console.log(`Successfully processed image. Public URL: ${publicUrl}`)
 
     return new Response(
       JSON.stringify({ publicUrl }),
@@ -65,10 +80,10 @@ serve(async (req) => {
     )
 
   } catch (error) {
+    console.error("Error in download-image function:", error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }
 })
-

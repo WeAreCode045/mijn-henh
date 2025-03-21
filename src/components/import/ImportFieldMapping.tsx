@@ -9,13 +9,6 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { FieldMapper } from "./FieldMapper";
 import { useNavigate } from "react-router-dom";
@@ -34,6 +27,10 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     bedrooms: "bedrooms",
     bathrooms: "bathrooms",
     description: "description",
+    sqft: "sqft",
+    livingArea: "livingArea",
+    buildYear: "buildYear",
+    energyLabel: "energyLabel",
     // Default mappings for common fields
   });
   
@@ -57,10 +54,16 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     { id: "location_description", label: "Location Description" },
   ];
 
+  // Get all XML fields from the data
   const xmlFields = Array.from(
     new Set(
       xmlData.flatMap(item => 
-        Object.keys(item).filter(key => key !== "id" && key !== "originalXml")
+        Object.keys(item).filter(key => 
+          key !== "id" && 
+          key !== "originalXml" && 
+          key !== "images" && 
+          key !== "floorplans"
+        )
       )
     )
   );
@@ -88,6 +91,43 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     }
   };
 
+  const downloadAndStoreImage = async (url: string, propertyId: string, isFloorplan: boolean = false): Promise<string | null> => {
+    try {
+      // Use the edge function to download and store the image
+      const { data: { session } } = await supabase.auth.getSession();
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/download-image`;
+
+      console.log(`Downloading ${isFloorplan ? 'floorplan' : 'image'} from URL:`, url);
+
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ 
+          imageUrl: url,
+          propertyId,
+          folder: isFloorplan ? 'floorplans' : 'photos'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to download image: ${errorData.error || response.statusText}`);
+      }
+
+      const { publicUrl, error } = await response.json();
+      if (error) throw new Error(error);
+
+      console.log(`Successfully downloaded and stored ${isFloorplan ? 'floorplan' : 'image'}:`, publicUrl);
+      return publicUrl;
+    } catch (error) {
+      console.error(`Error downloading/storing ${isFloorplan ? 'floorplan' : 'image'}:`, error);
+      return null;
+    }
+  };
+
   const importProperties = async () => {
     try {
       setIsImporting(true);
@@ -107,41 +147,94 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
         return;
       }
       
-      // Map XML fields to property fields based on the fieldMappings
-      const mappedProperties = propertiesToImport.map(xmlProp => {
-        const propertyData: Record<string, any> = {
-          status: "Draft",
-          metadata: { status: "Draft" },
-        };
-        
-        // Apply field mappings
-        for (const [propertyField, xmlField] of Object.entries(fieldMappings)) {
-          if (xmlField && xmlProp[xmlField]) {
-            propertyData[propertyField] = xmlProp[xmlField];
-          }
-        }
-        
-        return propertyData;
-      });
-      
-      // Insert each property into the database
+      // Import each property
       const results = await Promise.all(
-        mappedProperties.map(async (property) => {
-          // Format the property data for submission
-          const formattedData = preparePropertyDataForSubmission(property);
-          
-          // Insert into database
-          const { data, error } = await supabase
-            .from('properties')
-            .insert(formattedData)
-            .select();
+        propertiesToImport.map(async (xmlProp) => {
+          try {
+            // Map XML fields to property fields based on the fieldMappings
+            const propertyData: Record<string, any> = {
+              status: "Draft",
+              metadata: { status: "Draft" },
+            };
             
-          if (error) {
-            console.error("Error importing property:", error);
+            // Apply field mappings
+            for (const [propertyField, xmlField] of Object.entries(fieldMappings)) {
+              if (xmlField && xmlProp[xmlField]) {
+                propertyData[propertyField] = xmlProp[xmlField];
+              }
+            }
+            
+            // Format the property data for submission
+            const formattedData = preparePropertyDataForSubmission(propertyData);
+            
+            // Insert into database to get the property ID
+            const { data, error } = await supabase
+              .from('properties')
+              .insert(formattedData)
+              .select()
+              .single();
+              
+            if (error) {
+              console.error("Error importing property:", error);
+              return { success: false, error };
+            }
+            
+            const propertyId = data.id;
+            
+            // Process images
+            if (xmlProp.images && xmlProp.images.length > 0) {
+              const imageUrls = [];
+              let featuredImage = null;
+              
+              for (const imageUrl of xmlProp.images) {
+                const storedUrl = await downloadAndStoreImage(imageUrl, propertyId, false);
+                if (storedUrl) {
+                  imageUrls.push(storedUrl);
+                  if (!featuredImage) {
+                    featuredImage = storedUrl;
+                  }
+                  
+                  // Create property_images record
+                  await supabase.from('property_images').insert({
+                    property_id: propertyId,
+                    url: storedUrl,
+                    type: 'image',
+                    sort_order: imageUrls.length
+                  });
+                }
+              }
+              
+              // Update property with images array and featured image
+              if (imageUrls.length > 0) {
+                await supabase
+                  .from('properties')
+                  .update({
+                    featuredImage
+                  })
+                  .eq('id', propertyId);
+              }
+            }
+            
+            // Process floorplans
+            if (xmlProp.floorplans && xmlProp.floorplans.length > 0) {
+              for (const floorplanUrl of xmlProp.floorplans) {
+                const storedUrl = await downloadAndStoreImage(floorplanUrl, propertyId, true);
+                if (storedUrl) {
+                  // Create property_floorplans record
+                  await supabase.from('property_floorplans').insert({
+                    property_id: propertyId,
+                    url: storedUrl,
+                    sort_order: 1
+                  });
+                }
+              }
+            }
+            
+            return { success: true, data };
+          } catch (error) {
+            console.error("Error processing property:", error);
             return { success: false, error };
           }
-          
-          return { success: true, data };
         })
       );
       
@@ -206,6 +299,16 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
                       <strong>{propertyField}:</strong> {xmlData[0][xmlField]}
                     </div>
                   ))}
+                {xmlData[0].images && xmlData[0].images.length > 0 && (
+                  <div className="mb-2">
+                    <strong>Images:</strong> {xmlData[0].images.length} images available
+                  </div>
+                )}
+                {xmlData[0].floorplans && xmlData[0].floorplans.length > 0 && (
+                  <div className="mb-2">
+                    <strong>Floorplans:</strong> {xmlData[0].floorplans.length} floorplans available
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -243,6 +346,7 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
               <TableHead>Bedrooms</TableHead>
               <TableHead>Bathrooms</TableHead>
               <TableHead>Address</TableHead>
+              <TableHead className="w-24">Images</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -261,6 +365,9 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
                 <TableCell>{property.bedrooms}</TableCell>
                 <TableCell>{property.bathrooms}</TableCell>
                 <TableCell>{property.address}</TableCell>
+                <TableCell>
+                  {(property.images?.length || 0) + (property.floorplans?.length || 0)} files
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
