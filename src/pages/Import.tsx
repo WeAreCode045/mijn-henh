@@ -9,7 +9,8 @@ export default function Import() {
   const {
     xmlData,
     isUploading,
-    handleFileUpload
+    handleFileUpload,
+    setXmlData
   } = useXmlFileUpload();
 
   const handleContinueToMapping = () => {
@@ -18,6 +19,10 @@ export default function Import() {
     if (mapTabTrigger) {
       mapTabTrigger.click();
     }
+  };
+  
+  const handleZipFilesProcessed = (data: any[]) => {
+    setXmlData(data);
   };
 
   return (
@@ -28,7 +33,7 @@ export default function Import() {
       
       <Tabs defaultValue="upload" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="upload">Upload XML</TabsTrigger>
+          <TabsTrigger value="upload">Upload Files</TabsTrigger>
           <TabsTrigger value="map" disabled={!xmlData}>Map Fields</TabsTrigger>
         </TabsList>
         
@@ -37,6 +42,7 @@ export default function Import() {
             xmlData={xmlData}
             isUploading={isUploading}
             onFileUpload={handleFileUpload}
+            onFilesProcessed={handleZipFilesProcessed}
             onContinueToMapping={handleContinueToMapping}
           />
         </TabsContent>

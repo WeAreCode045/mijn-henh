@@ -21,18 +21,22 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     livingArea: "livingArea",
     buildYear: "buildYear",
     energyLabel: "energyLabel",
+    object_id: "id", // Default for PropertyID
     // Default mappings for common fields
   });
+  
+  const [includedFields, setIncludedFields] = useState<Record<string, boolean>>({});
   
   // Get all XML fields from the data
   const xmlFields = Array.from(
     new Set(
       xmlData.flatMap(item => 
         Object.keys(item).filter(key => 
-          key !== "id" && 
           key !== "originalXml" && 
           key !== "images" && 
-          key !== "floorplans"
+          key !== "floorplans" &&
+          key !== "virtualTour" &&
+          key !== "youtubeUrl"
         )
       )
     )
@@ -45,6 +49,13 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
     }));
   };
 
+  const handleIncludeChange = (propertyField: string, include: boolean) => {
+    setIncludedFields(prev => ({
+      ...prev,
+      [propertyField]: include,
+    }));
+  };
+
   const {
     isImporting,
     selectedProperties,
@@ -54,7 +65,12 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
   } = usePropertyImport({ 
     xmlData, 
     fieldMappings: Object.fromEntries(
-      Object.entries(fieldMappings).filter(([_, value]) => value !== "not_mapped" && value !== "")
+      Object.entries(fieldMappings)
+        .filter(([propertyField, value]) => 
+          value !== "not_mapped" && 
+          value !== "" && 
+          includedFields[propertyField] !== false
+        )
     ) 
   });
 
@@ -63,7 +79,7 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Field Mapping</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Map the XML fields to the appropriate property fields in the system.
+          Map the XML fields to the appropriate property fields in the system. Check the fields you want to include in the import.
         </p>
         
         <PropertyFieldMapper 
@@ -71,6 +87,8 @@ export function ImportFieldMapping({ xmlData }: ImportFieldMappingProps) {
           xmlFields={xmlFields}
           xmlData={xmlData}
           handleMappingChange={handleMappingChange}
+          includedFields={includedFields}
+          handleIncludeChange={handleIncludeChange}
         />
       </div>
       

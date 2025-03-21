@@ -63,15 +63,39 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
           const images = property.images || [];
           const floorplans = property.floorplans || [];
           
-          // Set object_id from title if not available
-          const objectId = property.id || Math.random().toString(36).substring(2, 9);
+          // Check for Virtual Tour URL
+          if (property.virtualTour) {
+            propertyData.virtualTourUrl = property.virtualTour;
+          }
           
-          // Check if property already exists
-          const { data: existingProperty } = await supabase
+          // Check for YouTube URL
+          if (property.youtubeUrl) {
+            propertyData.youtubeUrl = property.youtubeUrl;
+          }
+          
+          // Get object_id - use specific mapping or fallback to property.id
+          const objectId = propertyData.object_id || property.id || Math.random().toString(36).substring(2, 9);
+          propertyData.object_id = objectId;
+          
+          // First, check if property already exists by object_id
+          let { data: existingProperty } = await supabase
             .from('properties')
             .select('id')
-            .eq('title', propertyData.title)
+            .eq('object_id', objectId)
             .maybeSingle();
+            
+          // If not found by object_id, try title as fallback
+          if (!existingProperty && propertyData.title) {
+            const { data: propertyByTitle } = await supabase
+              .from('properties')
+              .select('id')
+              .eq('title', propertyData.title)
+              .maybeSingle();
+              
+            if (propertyByTitle) {
+              existingProperty = propertyByTitle;
+            }
+          }
 
           if (existingProperty) {
             // Update existing property
@@ -88,7 +112,6 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
 
             // Handle images for existing property
             if (images.length > 0) {
-              // Handle the first image as the main image
               await handlePropertyImages(images, existingProperty.id);
             }
 

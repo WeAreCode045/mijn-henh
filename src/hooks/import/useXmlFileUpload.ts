@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { processXmlProperties } from "@/utils/xmlImport/xmlFileProcessor";
 
 export interface XmlData {
-  id: number;
+  id: number | string;
   title: string;
   price: string;
   address: string;
@@ -16,8 +16,13 @@ export interface XmlData {
   buildYear: string;
   garages: string;
   energyLabel: string;
+  status?: string;
+  type?: string;
   images: string[];
   floorplans: string[];
+  virtualTour?: string | null;
+  youtubeUrl?: string | null;
+  sourceFile?: string;
   originalXml: Element;
 }
 
@@ -95,6 +100,7 @@ export function useXmlFileUpload() {
     xmlFile,
     isUploading,
     handleFileUpload,
-    resetXmlData
+    resetXmlData,
+    setXmlData
   };
 }

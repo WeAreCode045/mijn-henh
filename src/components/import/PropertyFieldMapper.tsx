@@ -7,13 +7,17 @@ interface PropertyFieldMapperProps {
   xmlFields: string[];
   xmlData: any[];
   handleMappingChange: (propertyField: string, xmlField: string) => void;
+  includedFields: Record<string, boolean>;
+  handleIncludeChange: (propertyField: string, include: boolean) => void;
 }
 
 export function PropertyFieldMapper({
   fieldMappings,
   xmlFields,
   xmlData,
-  handleMappingChange
+  handleMappingChange,
+  includedFields,
+  handleIncludeChange
 }: PropertyFieldMapperProps) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
@@ -22,6 +26,8 @@ export function PropertyFieldMapper({
           fieldMappings={fieldMappings}
           xmlFields={xmlFields}
           handleMappingChange={handleMappingChange}
+          includedFields={includedFields}
+          handleIncludeChange={handleIncludeChange}
         />
       </div>
       
@@ -29,6 +35,7 @@ export function PropertyFieldMapper({
         <PropertyFieldPreview 
           xmlData={xmlData}
           fieldMappings={fieldMappings}
+          includedFields={includedFields}
         />
       </div>
     </div>

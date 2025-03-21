@@ -14,6 +14,20 @@ export const extractXmlValue = (property: Element, path: string): string => {
         return currentElement.getAttribute(attrName) || "";
       }
       
+      // Handle array indices (e.g., PropertyType[3])
+      if (segment.includes('[') && segment.includes(']')) {
+        const baseName = segment.substring(0, segment.indexOf('['));
+        const index = parseInt(segment.substring(segment.indexOf('[') + 1, segment.indexOf(']'))) - 1;
+        
+        const elements = currentElement.getElementsByTagName(baseName);
+        if (elements.length > index) {
+          currentElement = elements[index];
+        } else {
+          currentElement = null;
+        }
+        continue;
+      }
+      
       // Get child elements
       const elements = currentElement.getElementsByTagName(segment);
       if (elements.length === 0) {
@@ -43,6 +57,9 @@ export const processXmlProperties = (properties: Element[]) => {
     const bedroomsPath = "Counts/CountOfBedrooms";
     const bathroomsPath = "Counts/CountOfBathrooms";
     const energyClassPath = "ClimatControl/EnergyCertificate/EnergyClass";
+    const propertyIdPath = "PropertyInfo/PublicReferenceNumber";
+    const statusPath = "PropertyInfo/Status";
+    const typePath = "Type/PropertyTypes/PropertyType[3]";
     
     // Extract data using the correct paths
     const address = extractXmlValue(prop, addressPath);
@@ -54,11 +71,16 @@ export const processXmlProperties = (properties: Element[]) => {
     const bedrooms = extractXmlValue(prop, bedroomsPath);
     const bathrooms = extractXmlValue(prop, bathroomsPath);
     const energyClass = extractXmlValue(prop, energyClassPath);
+    const propertyId = extractXmlValue(prop, propertyIdPath);
+    const status = extractXmlValue(prop, statusPath);
+    const propertyType = extractXmlValue(prop, typePath);
     
-    // Extract attachments (images and floorplans)
+    // Extract attachments (images, floorplans, and videos)
     const attachments = prop.querySelectorAll("Attachments Attachment");
     const images: string[] = [];
     const floorplans: string[] = [];
+    let virtualTour: string | null = null;
+    let youtubeUrl: string | null = null;
     
     attachments.forEach(attachment => {
       const url = attachment.querySelector("URLNormalizedFile")?.textContent || "";
@@ -67,6 +89,15 @@ export const processXmlProperties = (properties: Element[]) => {
       if (url) {
         if (type.toLowerCase().includes("floorplan")) {
           floorplans.push(url);
+        } else if (type.toLowerCase().includes("video")) {
+          // Check if it's a virtual tour from zien24
+          if (url.toLowerCase().includes("zien24")) {
+            virtualTour = url;
+          } 
+          // Check if it's a YouTube video
+          else if (url.toLowerCase().includes("youtube") || url.toLowerCase().includes("youtu.be")) {
+            youtubeUrl = url;
+          }
         } else {
           images.push(url);
         }
@@ -92,8 +123,13 @@ export const processXmlProperties = (properties: Element[]) => {
       buildYear: buildYear || extractValue("buildYear") || extractValue("BuildYear") || extractValue("YearBuilt"),
       garages: extractValue("garages") || extractValue("Garages"),
       energyLabel: energyClass || extractValue("energyLabel") || extractValue("EnergyLabel"),
+      id: propertyId || extractValue("id") || extractValue("ID") || extractValue("PublicReferenceNumber") || String(index),
+      status: status || extractValue("status") || extractValue("Status"),
+      type: propertyType || extractValue("type") || extractValue("Type"),
       images: images,
       floorplans: floorplans,
+      virtualTour: virtualTour,
+      youtubeUrl: youtubeUrl,
       originalXml: prop,
     };
   });
