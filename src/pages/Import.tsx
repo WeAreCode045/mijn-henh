@@ -3,8 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImportFieldMapping } from "@/components/import/ImportFieldMapping";
 import { XmlFileUploader } from "@/components/import/XmlFileUploader";
@@ -70,6 +68,14 @@ export default function Import() {
     }
   };
 
+  const handleContinueToMapping = () => {
+    // Find the tab trigger for mapping and click it
+    const mapTabTrigger = document.querySelector('[data-value="map"]') as HTMLElement;
+    if (mapTabTrigger) {
+      mapTabTrigger.click();
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -98,7 +104,7 @@ export default function Import() {
                   <p className="text-sm text-gray-500 mb-2">
                     Found {xmlData.length} properties in the file.
                   </p>
-                  <Button onClick={() => document.querySelector('[data-value="map"]')?.click()}>
+                  <Button onClick={handleContinueToMapping}>
                     Continue to Field Mapping
                   </Button>
                 </div>
