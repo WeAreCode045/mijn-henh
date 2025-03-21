@@ -22,7 +22,7 @@ export interface XmlData {
   floorplans: string[];
   virtualTour?: string | null;
   youtubeUrl?: string | null;
-  sourceFile?: string;
+  propertyId?: string;
   originalXml: Element;
 }
 
