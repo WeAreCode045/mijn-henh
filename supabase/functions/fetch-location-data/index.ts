@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -81,89 +80,6 @@ serve(async (req) => {
           latitude: lat,
           longitude: lng
         }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // If category is specified, just fetch places for that category
-    if (category) {
-      let placeType = category;
-      
-      // Map our category names to Google Place types
-      const categoryMap: Record<string, string> = {
-        "restaurant": "restaurant",
-        "education": "school",
-        "supermarket": "supermarket",
-        "shopping": "shopping_mall",
-        "sport": "gym",
-        "leisure": "park"
-      };
-      
-      if (categoryMap[category]) {
-        placeType = categoryMap[category];
-      }
-      
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&type=${placeType}&key=${googleMapsApiKey}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      const places = data.results?.map((place: any) => {
-        // Calculate distance from property to place (in km)
-        const distance = calculateDistance(lat, lng, 
-          place.geometry.location.lat, 
-          place.geometry.location.lng);
-          
-        return {
-          place_id: place.place_id,
-          name: place.name,
-          type: category,
-          vicinity: place.vicinity,
-          rating: place.rating,
-          user_ratings_total: place.user_ratings_total,
-          distance: parseFloat(distance.toFixed(1)),
-          visible_in_webview: true
-        };
-      }) || [];
-      
-      const result = { [category]: places };
-      
-      return new Response(
-        JSON.stringify(result),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-    
-    // For cities only request
-    if (citiesOnly) {
-      // Fetch nearby cities with population data 
-      const citiesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=200000&type=locality&key=${googleMapsApiKey}&rankby=prominence`;
-      const citiesResponse = await fetch(citiesUrl);
-      const citiesData = await citiesResponse.json();
-      
-      let cities = [];
-      if (citiesData.results && citiesData.results.length > 0) {
-        cities = citiesData.results.slice(0, 5).map((city: any) => {
-          // Calculate distance from property to city (in km)
-          const cityLat = city.geometry.location.lat;
-          const cityLng = city.geometry.location.lng;
-          const distance = calculateDistance(lat, lng, cityLat, cityLng);
-          
-          return {
-            id: city.place_id,
-            name: city.name,
-            distance: parseFloat(distance.toFixed(1)),
-            vicinity: city.vicinity,
-            visible_in_webview: true
-          };
-        });
-      }
-      
-      return new Response(
-        JSON.stringify({ cities }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }

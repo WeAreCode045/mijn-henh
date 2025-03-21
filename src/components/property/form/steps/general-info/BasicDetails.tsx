@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import type { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { useToast } from "@/components/ui/use-toast";
+import { useLocationCoordinates } from "@/hooks/location/useLocationCoordinates";
+import { useState } from "react";
 
 interface BasicDetailsProps {
   formData: PropertyFormData;
@@ -13,11 +16,25 @@ interface BasicDetailsProps {
 
 export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
   const { settings } = useAgencySettings();
+  const { toast } = useToast();
   const addressInputRef = useRef<HTMLInputElement>(null);
+  const [isLoadingCoordinates, setIsLoadingCoordinates] = useState(false);
+  const { fetchLocationData } = useLocationCoordinates(formData, onFieldChange, setIsLoadingCoordinates, toast);
 
   const handleChange = (field: keyof PropertyFormData, value: string) => {
     console.log(`BasicDetails - ${field} changed to:`, value);
     onFieldChange(field, value);
+
+    // When the address is updated, automatically fetch coordinates
+    if (field === 'address' && value && formData.id) {
+      // Add slight delay to allow for typing to complete
+      const timer = setTimeout(() => {
+        console.log("Auto-fetching coordinates for address:", value);
+        fetchLocationData();
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
   };
 
   // Set up Google Places Autocomplete for address field
@@ -58,6 +75,15 @@ export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
         const place = autocomplete.getPlace();
         if (place.formatted_address) {
           handleChange('address', place.formatted_address);
+          
+          // Autocomplete also gives us the coordinates directly
+          if (place.geometry?.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            console.log("Got coordinates from Places API:", lat, lng);
+            onFieldChange('latitude', lat);
+            onFieldChange('longitude', lng);
+          }
         }
       });
     };

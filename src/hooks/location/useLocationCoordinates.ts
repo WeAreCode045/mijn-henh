@@ -40,7 +40,7 @@ export function useLocationCoordinates(
         
         toast({
           title: "Success",
-          description: "Location data fetched successfully",
+          description: "Location coordinates fetched successfully",
         });
         
         return data;
@@ -49,7 +49,7 @@ export function useLocationCoordinates(
       console.error("Error fetching location data:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch location data",
+        description: "Failed to fetch location coordinates",
         variant: "destructive",
       });
     } finally {

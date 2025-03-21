@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Search } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
+import { useToast } from "@/components/ui/use-toast";
+import { useLocationCoordinates } from "@/hooks/location/useLocationCoordinates";
 
 interface AddressSectionProps {
   formData: PropertyFormData;
@@ -27,11 +29,30 @@ export function AddressSection({
   isLoadingLocationData = false
 }: AddressSectionProps) {
   const { settings } = useAgencySettings();
+  const { toast } = useToast();
+  const [isLoadingCoordinates, setIsLoadingCoordinates] = useState(false);
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
+  const { fetchLocationData } = useLocationCoordinates(
+    formData, 
+    onFieldChange || (() => {}), 
+    setIsLoadingCoordinates, 
+    toast
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (onFieldChange) {
       onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
+      
+      // Auto-fetch coordinates when address changes
+      if (e.target.name === 'address' && e.target.value && formData.id) {
+        // Add slight delay to allow for typing to complete
+        const timer = setTimeout(() => {
+          console.log("Auto-fetching coordinates for address:", e.target.value);
+          fetchLocationData();
+        }, 1500);
+        
+        return () => clearTimeout(timer);
+      }
     }
   };
 
@@ -73,6 +94,15 @@ export function AddressSection({
         const place = autocomplete.getPlace();
         if (place.formatted_address && onFieldChange) {
           onFieldChange('address', place.formatted_address);
+          
+          // Autocomplete also gives us the coordinates directly
+          if (place.geometry?.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            console.log("Got coordinates from Places API:", lat, lng);
+            onFieldChange('latitude', lat);
+            onFieldChange('longitude', lng);
+          }
         }
       });
     };
