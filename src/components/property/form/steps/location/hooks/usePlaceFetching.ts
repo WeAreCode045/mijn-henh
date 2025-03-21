@@ -33,19 +33,18 @@ export function usePlaceFetching({
       if (results && results[typeToFetch] && Array.isArray(results[typeToFetch])) {
         // Make sure we're only showing places for the requested category
         const options: PlaceOption[] = results[typeToFetch].map((place: any) => ({
-          id: place.place_id,
+          id: place.id,
           name: place.name,
           vicinity: place.vicinity,
           rating: place.rating,
           distance: place.distance,
           type: typeToFetch,
+          types: place.types,
           maxSelections: getMaxSelections(typeToFetch)
         }));
         
-        // Sort by rating if it's entertainment
-        if (categoryId === 'entertainment') {
-          options.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        }
+        // Sort by rating
+        options.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         
         setPlacesForModal(options);
         setModalOpen(true);

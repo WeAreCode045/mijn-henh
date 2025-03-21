@@ -22,11 +22,32 @@ export function useNearbyPlaces(
     try {
       console.log(`Fetching nearby places for category: ${category}`);
       
-      const { data, error } = await supabase.functions.invoke('fetch-location-data', {
+      // Get agency settings to retrieve the API key
+      const { data: settings, error: settingsError } = await supabase
+        .from('agency_settings')
+        .select('google_maps_api_key')
+        .single();
+        
+      if (settingsError) throw settingsError;
+      
+      if (!settings?.google_maps_api_key) {
+        toast({
+          title: "Error",
+          description: "Google Maps API key not configured in agency settings",
+          variant: "destructive",
+        });
+        return null;
+      }
+      
+      const { data, error } = await supabase.functions.invoke('nearby-places', {
         body: { 
           address: formData.address,
+          apiKey: settings.google_maps_api_key,
           category: category,
-          propertyId: formData.id
+          propertyId: formData.id,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          radius: 5000  // 5km radius
         }
       });
       
@@ -47,7 +68,7 @@ export function useNearbyPlaces(
       });
       return null;
     }
-  }, [formData.address, formData.id, toast]);
+  }, [formData.address, formData.id, formData.latitude, formData.longitude, toast]);
   
   const removeNearbyPlace = useCallback(async (index: number) => {
     if (!formData.nearby_places) return;

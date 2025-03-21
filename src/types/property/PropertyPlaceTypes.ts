@@ -8,6 +8,9 @@ export interface PropertyNearbyPlace {
   vicinity?: string;
   rating?: number;
   user_ratings_total?: number;
-  type: PropertyPlaceType;
+  type: PropertyPlaceType | string;
+  types?: string[];
   visible_in_webview?: boolean;
+  latitude?: number;
+  longitude?: number;
 }

@@ -43,8 +43,11 @@ export interface PropertyNearbyPlace {
   rating: number;
   user_ratings_total: number;
   type: string;
+  types?: string[];
   visible_in_webview?: boolean;
-  distance?: number;
+  distance?: number | string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface PropertyCity {
@@ -138,5 +141,5 @@ export interface PropertySubmitData {
   }; // Metadata property
 }
 
-// Export PropertyPlaceType as the interface itself (not a string union)
-export type PropertyPlaceType = PropertyNearbyPlace;
+// Export PropertyPlaceType as a type, not the interface
+export type { PropertyPlaceType } from './PropertyPlaceTypes';
