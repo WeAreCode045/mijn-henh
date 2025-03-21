@@ -69,7 +69,7 @@ export function MediaViewModal({
           </DialogClose>
         </DialogHeader>
         <div className="w-full bg-white p-4">
-          <AspectRatio ratio={16/9}>
+          <AspectRatio ratio={4/3}>
             <iframe
               src={embedUrl}
               className="w-full h-full border-0"

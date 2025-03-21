@@ -36,7 +36,10 @@ export function PropertyFormManager({ property, children }: PropertyFormManagerP
     isSaving: formManagerProps.isSaving,
     setPendingChanges: formManagerProps.setPendingChanges,
     // Add missing properties for compatibility
-    propertyWithRequiredProps: property,
+    propertyWithRequiredProps: {
+      ...property,
+      id: property.id || '', // Ensure id is always at least an empty string
+    },
     handleImageUpload: formManagerProps.handleImageUpload,
     handleRemoveImage: formManagerProps.handleRemoveImage,
     isUploading: formManagerProps.isUploading,

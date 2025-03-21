@@ -16,7 +16,7 @@ import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 import { MediaViewModal } from "@/components/property/MediaViewModal";
 
 interface ActionsCardProps {
-  propertyId: string;
+  propertyId?: string;  // Make propertyId optional
   propertyData?: PropertyData;
   createdAt?: string;
   updatedAt?: string;
@@ -84,13 +84,16 @@ export function ActionsCard({
     }
   };
 
+  // Check if edit history button should be shown
+  const showEditHistoryButton = isAdmin && propertyId;
+
   return (
     <Card className="md:col-span-1">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg font-medium">Actions</CardTitle>
           <div className="flex gap-2">
-            {isAdmin && (
+            {showEditHistoryButton && (
               <button 
                 onClick={handleHistoryButtonClick} 
                 className="flex items-center justify-center rounded-md w-8 h-8 bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -127,13 +130,18 @@ export function ActionsCard({
                 <TooltipTrigger asChild>
                   <button 
                     onClick={onWebView} 
-                    className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    className={`flex items-center justify-center rounded-md w-10 h-10 ${
+                      propertyId 
+                        ? "bg-gray-100 hover:bg-gray-200" 
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    } transition-colors`}
+                    disabled={!propertyId}
                   >
                     <ScanEye className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Web View</p>
+                  <p>{propertyId ? "Web View" : "Save property first"}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -143,14 +151,18 @@ export function ActionsCard({
                 <TooltipTrigger asChild>
                   <button 
                     onClick={handleGeneratePDF}
-                    disabled={isGenerating} 
-                    className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    disabled={isGenerating || !propertyId} 
+                    className={`flex items-center justify-center rounded-md w-10 h-10 ${
+                      propertyId && !isGenerating 
+                        ? "bg-gray-100 hover:bg-gray-200"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    } transition-colors`}
                   >
                     <FileText className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Generate PDF</p>
+                  <p>{isGenerating ? "Generating..." : (propertyId ? "Generate PDF" : "Save property first")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -199,7 +211,7 @@ export function ActionsCard({
           </div>
         </div>
         
-        {isAdmin && (
+        {isAdmin && propertyId && (
           <EditHistoryModal
             propertyId={propertyId}
             open={showEditHistory}
