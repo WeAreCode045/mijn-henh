@@ -2,10 +2,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
-import { StatusSelector } from "./components/StatusSelector";
-import { AgentSelector } from "./components/AgentSelector";
 import { PropertyDates } from "./components/PropertyDates";
-import { Trash, Eye, FileText, History } from "lucide-react";
+import { Trash, Eye, FileText, History, ExternalLink } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { EditHistoryModal } from "./components/EditHistoryModal";
 
@@ -28,16 +26,11 @@ export function ActionsCard({
   updatedAt, 
   onSave, 
   onDelete, 
-  onWebView,
-  handleSaveAgent,
-  agentId
+  onWebView
 }: ActionsCardProps) {
   const { isAdmin } = useAuth();
   const [showEditHistory, setShowEditHistory] = useState(false);
   
-  // Get initial status from propertyData metadata or fall back to status property
-  const initialStatus = propertyData?.metadata?.status || propertyData?.status || "Draft";
-
   // Handle PDF generation using the ActionButtons component
   const onGeneratePDF = async () => {
     // The actual implementation is in ActionButtons component
@@ -65,18 +58,40 @@ export function ActionsCard({
       <CardContent className="space-y-4">
         <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />
         
-        <div className="space-y-3">
-          <StatusSelector 
-            propertyId={propertyId} 
-            initialStatus={initialStatus}
-          />
-          
-          {handleSaveAgent && (
-            <AgentSelector 
-              initialAgentId={agentId} 
-              onAgentChange={handleSaveAgent}
-            />
-          )}
+        <div className="space-y-2">
+          <p className="font-semibold">External Links</p>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <p className="text-sm">Virtual Tour</p>
+              {propertyData?.virtualTourUrl ? (
+                <a 
+                  href={propertyData.virtualTourUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
+                >
+                  Open Tour <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                <span className="text-muted-foreground text-sm">Not available</span>
+              )}
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm">YouTube Video</p>
+              {propertyData?.youtubeUrl ? (
+                <a 
+                  href={propertyData.youtubeUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
+                >
+                  Watch Video <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                <span className="text-muted-foreground text-sm">Not available</span>
+              )}
+            </div>
+          </div>
         </div>
         
         <div className="flex space-x-4">

@@ -27,6 +27,7 @@ export function DashboardTabContent({
         <div className="lg:col-span-2">
           <PropertyOverviewCard 
             property={property}
+            handleSaveAgent={handleSaveAgent}
           />
         </div>
         
@@ -39,8 +40,6 @@ export function DashboardTabContent({
             onSave={onSave}
             onDelete={onDelete}
             onWebView={onWebView}
-            handleSaveAgent={handleSaveAgent}
-            agentId={property.agent_id}
           />
         </div>
       </div>

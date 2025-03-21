@@ -7,12 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { StatusSelector } from "./components/StatusSelector";
+import { AgentSelector } from "./components/AgentSelector";
 
 interface PropertyOverviewCardProps {
   property: PropertyData;
+  handleSaveAgent?: (agentId: string) => Promise<void>;
 }
 
-export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
+export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOverviewCardProps) {
   const mainImage = property.featuredImage || (property.images && property.images.length > 0 ? property.images[0].url : null);
   const { toast } = useToast();
   
@@ -137,7 +140,7 @@ export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="font-semibold mb-1">Price</p>
                 {editingPrice ? (
@@ -204,40 +207,20 @@ export function PropertyOverviewCard({ property }: PropertyOverviewCardProps) {
               </div>
             </div>
             
-            <div className="mt-4 space-y-2">
-              <p className="font-semibold">External Links</p>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="text-sm">Virtual Tour</p>
-                  {property.virtualTourUrl ? (
-                    <a 
-                      href={property.virtualTourUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
-                    >
-                      Open Tour <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">Not available</span>
-                  )}
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-sm">YouTube Video</p>
-                  {property.youtubeUrl ? (
-                    <a 
-                      href={property.youtubeUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
-                    >
-                      Watch Video <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">Not available</span>
-                  )}
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              {property.id && (
+                <StatusSelector 
+                  propertyId={property.id} 
+                  initialStatus={property.metadata?.status || property.status || "Draft"}
+                />
+              )}
+              
+              {handleSaveAgent && (
+                <AgentSelector 
+                  initialAgentId={property.agent_id} 
+                  onAgentChange={handleSaveAgent}
+                />
+              )}
             </div>
           </div>
           <div className="w-full md:w-40 h-40 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
