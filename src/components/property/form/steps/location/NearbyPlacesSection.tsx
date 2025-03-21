@@ -89,10 +89,11 @@ export function NearbyPlacesSection({
               <TabsTrigger value="all">All ({nearbyPlaces.length})</TabsTrigger>
               {categories.map(category => {
                 const Icon = category.icon;
+                const count = placesByCategory[category.id]?.length || 0;
                 return (
                   <TabsTrigger key={category.id} value={category.id} className="flex items-center gap-1">
                     <Icon className="h-4 w-4" />
-                    {category.label} ({placesByCategory[category.id]?.length || 0})
+                    {category.label} ({count})
                   </TabsTrigger>
                 );
               })}
@@ -162,7 +163,54 @@ export function NearbyPlacesSection({
           </Tabs>
         </div>
       ) : (
-        <EmptyPlacesState />
+        <div className="space-y-6">
+          <EmptyPlacesState />
+          
+          {/* Show category buttons even when no places exist */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+            {categories.map(category => {
+              const Icon = category.icon;
+              return (
+                <div key={category.id} className={`p-4 rounded-lg border ${category.color}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon className="h-5 w-5" />
+                    <h3 className="font-medium">{category.label}</h3>
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-2"
+                    onClick={() => handleFetchCategory(category.id)}
+                    disabled={isFetchingCategory || !formData.address}
+                  >
+                    {isFetchingCategory && currentCategory === category.id ? 
+                      'Fetching...' : 
+                      `Fetch ${category.label}`
+                    }
+                  </Button>
+                  
+                  {category.subtypes && category.subtypes.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {category.subtypes.map(subtype => (
+                        <Button 
+                          key={subtype.id}
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleFetchCategory(category.id, subtype.id)}
+                          disabled={isFetchingCategory || !formData.address}
+                          className="text-xs mt-1"
+                        >
+                          {subtype.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
       
       <SelectPlacesModal
