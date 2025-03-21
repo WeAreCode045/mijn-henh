@@ -3,9 +3,15 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
 import { PropertyDates } from "./components/PropertyDates";
-import { Trash, Eye, FileText, History, ExternalLink } from "lucide-react";
+import { Trash, Eye, FileText, History, ExternalLink, Globe, Youtube } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { EditHistoryModal } from "./components/EditHistoryModal";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 
 interface ActionsCardProps {
   propertyId: string;
@@ -63,33 +69,51 @@ export function ActionsCard({
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <p className="text-sm">Virtual Tour</p>
-              {propertyData?.virtualTourUrl ? (
-                <a 
-                  href={propertyData.virtualTourUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
-                >
-                  Open Tour <ExternalLink className="h-3 w-3" />
-                </a>
-              ) : (
-                <span className="text-muted-foreground text-sm">Not available</span>
-              )}
+              <TooltipProvider>
+                {propertyData?.virtualTourUrl ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <a 
+                        href={propertyData.virtualTourUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center justify-center rounded-md w-8 h-8 bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                      >
+                        <Globe className="h-4 w-4" />
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Open Tour</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className="text-muted-foreground text-sm">Not available</span>
+                )}
+              </TooltipProvider>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm">YouTube Video</p>
-              {propertyData?.youtubeUrl ? (
-                <a 
-                  href={propertyData.youtubeUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-blue-600 hover:underline flex items-center gap-1 text-sm"
-                >
-                  Watch Video <ExternalLink className="h-3 w-3" />
-                </a>
-              ) : (
-                <span className="text-muted-foreground text-sm">Not available</span>
-              )}
+              <TooltipProvider>
+                {propertyData?.youtubeUrl ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <a 
+                        href={propertyData.youtubeUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center justify-center rounded-md w-8 h-8 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                      >
+                        <Youtube className="h-4 w-4" />
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Watch Video</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className="text-muted-foreground text-sm">Not available</span>
+                )}
+              </TooltipProvider>
             </div>
           </div>
         </div>
