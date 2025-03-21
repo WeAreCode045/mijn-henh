@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
 import { PropertyDates } from "./components/PropertyDates";
-import { Trash, History, ScanEye, Image, RotateCcw, Youtube } from "lucide-react";
+import { Trash, History, ScanEye, FileText, RotateCcw, Youtube } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { EditHistoryModal } from "./components/EditHistoryModal";
 import { 
@@ -12,6 +12,7 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 
 interface ActionsCardProps {
   propertyId: string;
@@ -34,12 +35,20 @@ export function ActionsCard({
 }: ActionsCardProps) {
   const { isAdmin } = useAuth();
   const [showEditHistory, setShowEditHistory] = useState(false);
+  const { generatePDF, isGenerating } = useGeneratePDF();
   
   // Prevent event propagation and default behavior for the history button
   const handleHistoryButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setShowEditHistory(true);
+  };
+
+  // Handle PDF generation
+  const handleGeneratePDF = async () => {
+    if (propertyData) {
+      await generatePDF(propertyData);
+    }
   };
 
   return (
@@ -100,9 +109,11 @@ export function ActionsCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button 
+                    onClick={handleGeneratePDF}
+                    disabled={isGenerating} 
                     className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 hover:bg-gray-200 transition-colors"
                   >
-                    <Image className="h-5 w-5" />
+                    <FileText className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>

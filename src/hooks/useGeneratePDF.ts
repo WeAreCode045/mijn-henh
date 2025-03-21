@@ -19,6 +19,15 @@ export function useGeneratePDF() {
       });
       return;
     }
+    
+    if (!settings) {
+      toast({
+        title: "Error",
+        description: "Agency settings are missing",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Ensure property has an ID, if not generate a temporary one
     const propertyWithId = {
@@ -27,6 +36,7 @@ export function useGeneratePDF() {
     };
 
     try {
+      console.log('Starting PDF generation for property:', propertyWithId.id);
       setIsGenerating(true);
       await generatePropertyPDF(propertyWithId, settings, templateId);
       toast({

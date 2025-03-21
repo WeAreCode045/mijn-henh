@@ -38,8 +38,11 @@ export function PropertyTabActionsHandler({
 
   // PDF generation function
   const handleGeneratePDF = async () => {
-    if (propertyData && settings) {
+    console.log('PropertyTabActionsHandler: handleGeneratePDF called');
+    if (propertyData) {
       await generatePDF(propertyData);
+    } else {
+      console.error('Cannot generate PDF: propertyData is undefined');
     }
   };
 

@@ -38,7 +38,11 @@ export function ActionButtons({
             variant="outline" 
             size="sm"
             className="w-full"
-            onClick={onGeneratePDF}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onGeneratePDF();
+            }}
           >
             <FileTextIcon className="h-4 w-4 mr-1" />
             PDF
@@ -66,7 +70,11 @@ export function ActionButtons({
           <Button 
             variant="outline" 
             className="w-full"
-            onClick={onGeneratePDF}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onGeneratePDF();
+            }}
           >
             <FileTextIcon className="h-4 w-4 mr-2" />
             Generate PDF
