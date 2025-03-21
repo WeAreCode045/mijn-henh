@@ -1,89 +1,90 @@
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { XmlData } from "@/hooks/import/useXmlFileUpload";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
 
 interface PropertySelectionTableProps {
-  xmlData: any[];
+  properties: XmlData[];
   selectedProperties: number[];
   togglePropertySelection: (id: number) => void;
   selectAllProperties: () => void;
-  importProperties: () => void;
-  isImporting: boolean;
 }
 
 export function PropertySelectionTable({
-  xmlData,
+  properties,
   selectedProperties,
   togglePropertySelection,
   selectAllProperties,
-  importProperties,
-  isImporting
 }: PropertySelectionTableProps) {
+  const allSelected = properties.length > 0 && selectedProperties.length === properties.length;
+
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Properties to Import</h2>
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={selectAllProperties}
-            >
-              {selectedProperties.length === xmlData.length ? "Deselect All" : "Select All"}
-            </Button>
-            <Button 
-              onClick={importProperties} 
-              disabled={isImporting || selectedProperties.length === 0}
-            >
-              {isImporting ? "Importing..." : `Import ${selectedProperties.length} Properties`}
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Select Properties to Import</h3>
+        <Button 
+          variant="outline" 
+          onClick={selectAllProperties}
+        >
+          {allSelected ? "Unselect All" : "Select All"}
+        </Button>
       </div>
       
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-12">Select</TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Bedrooms</TableHead>
-            <TableHead>Bathrooms</TableHead>
-            <TableHead>Address</TableHead>
-            <TableHead className="w-24">Images</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {xmlData.map((property) => (
-            <TableRow key={property.id}>
-              <TableCell>
-                <input 
-                  type="checkbox"
-                  checked={selectedProperties.includes(property.id)}
-                  onChange={() => togglePropertySelection(property.id)}
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-              </TableCell>
-              <TableCell>{property.title}</TableCell>
-              <TableCell>{property.price}</TableCell>
-              <TableCell>{property.bedrooms}</TableCell>
-              <TableCell>{property.bathrooms}</TableCell>
-              <TableCell>{property.address}</TableCell>
-              <TableCell>
-                {(property.images?.length || 0) + (property.floorplans?.length || 0)} files
-              </TableCell>
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12"></TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Bedrooms</TableHead>
+              <TableHead>Bathrooms</TableHead>
+              <TableHead className="text-right">Status</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {properties.map((property) => (
+              <TableRow 
+                key={property.id}
+                className={property.existsInDatabase ? "bg-yellow-50" : ""}
+              >
+                <TableCell>
+                  <Checkbox
+                    checked={selectedProperties.includes(property.id as number)}
+                    onCheckedChange={() => togglePropertySelection(property.id as number)}
+                  />
+                </TableCell>
+                <TableCell className="font-medium flex items-center gap-2">
+                  {property.title}
+                  {property.existsInDatabase && (
+                    <span className="inline-flex items-center" title="This property already exists in the database">
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>{property.price}</TableCell>
+                <TableCell>{property.bedrooms}</TableCell>
+                <TableCell>{property.bathrooms}</TableCell>
+                <TableCell className="text-right">
+                  {property.existsInDatabase ? (
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                      Already Exists
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                      New
+                    </Badge>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
