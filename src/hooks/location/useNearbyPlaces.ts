@@ -22,24 +22,9 @@ export function useNearbyPlaces(
     try {
       console.log(`Fetching nearby places for category: ${category}`);
       
-      const { data: settings } = await supabase
-        .from('agency_settings')
-        .select('google_maps_api_key')
-        .single();
-
-      if (!settings?.google_maps_api_key) {
-        toast({
-          title: "Error",
-          description: "Google Maps API key not configured",
-          variant: "destructive",
-        });
-        return null;
-      }
-      
-      const { data, error } = await supabase.functions.invoke('nearby-places', {
+      const { data, error } = await supabase.functions.invoke('fetch-location-data', {
         body: { 
           address: formData.address,
-          apiKey: settings.google_maps_api_key,
           category: category,
           propertyId: formData.id
         }
