@@ -167,33 +167,37 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
               </div>
             )}
             
-            <div className="grid grid-cols-2 gap-4">
-              {property.id && (
-                <StatusSelector 
-                  propertyId={property.id} 
-                  initialStatus={property.metadata?.status || property.status || "Draft"}
-                />
-              )}
-              
-              {handleSaveAgent && (
+            {/* Agent Selector - Only visible in edit mode */}
+            {isEditing && handleSaveAgent && (
+              <div className="mb-6">
                 <AgentSelector 
                   initialAgentId={property.agent_id} 
                   onAgentChange={handleSaveAgent}
                 />
+              </div>
+            )}
+          </div>
+          <div className="w-full md:w-40 flex flex-col gap-4">
+            <div className="h-40 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+              {mainImage ? (
+                <img 
+                  src={mainImage} 
+                  alt={property.title} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  No image
+                </div>
               )}
             </div>
-          </div>
-          <div className="w-full md:w-40 h-40 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-            {mainImage ? (
-              <img 
-                src={mainImage} 
-                alt={property.title} 
-                className="w-full h-full object-cover"
+            
+            {/* Status Selector moved below the thumbnail */}
+            {property.id && (
+              <StatusSelector 
+                propertyId={property.id} 
+                initialStatus={property.metadata?.status || property.status || "Draft"}
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                No image
-              </div>
             )}
           </div>
         </div>

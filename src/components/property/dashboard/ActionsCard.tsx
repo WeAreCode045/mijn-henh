@@ -21,8 +21,6 @@ interface ActionsCardProps {
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   onWebView?: (e: React.MouseEvent) => void;
-  handleSaveAgent?: (agentId: string) => Promise<void>;
-  agentId?: string;
 }
 
 export function ActionsCard({ 
@@ -37,11 +35,6 @@ export function ActionsCard({
   const { isAdmin } = useAuth();
   const [showEditHistory, setShowEditHistory] = useState(false);
   
-  // Handle PDF generation using the ActionButtons component
-  const onGeneratePDF = async () => {
-    // The actual implementation is in ActionButtons component
-  };
-
   // Prevent event propagation and default behavior for the history button
   const handleHistoryButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -107,7 +100,6 @@ export function ActionsCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button 
-                    onClick={onGeneratePDF} 
                     className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 hover:bg-gray-200 transition-colors"
                   >
                     <Image className="h-5 w-5" />
@@ -133,7 +125,7 @@ export function ActionsCard({
                     </a>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Virtual Tour</p>
+                    <p>Open Tour</p>
                   </TooltipContent>
                 </Tooltip>
               ) : (
@@ -160,7 +152,7 @@ export function ActionsCard({
                     </a>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>YouTube Video</p>
+                    <p>Watch Video</p>
                   </TooltipContent>
                 </Tooltip>
               ) : (
