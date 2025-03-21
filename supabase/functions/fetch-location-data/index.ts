@@ -106,8 +106,67 @@ async function fetchPlacesForCategory(lat, lng, category, apiKey) {
     radius = 3000; // Shopping malls can be further away
   }
 
-  // Prepare the places API URL
-  const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${category}&key=${apiKey}`;
+  // For entertainment category, we need to use specific types that are actually entertainment venues
+  let placeType = category;
+  
+  // Map entertainment to actual Google Places API types for entertainment venues
+  if (category === 'entertainment') {
+    const entertainmentTypes = [
+      'amusement_park',
+      'aquarium',
+      'art_gallery',
+      'bowling_alley',
+      'casino',
+      'movie_theater',
+      'museum',
+      'night_club',
+      'park',
+      'tourist_attraction',
+      'zoo'
+    ];
+    
+    // Fetch places for each entertainment type and combine results
+    let allPlaces = [];
+    for (const type of entertainmentTypes) {
+      const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${type}&key=${apiKey}`;
+      const placesResponse = await fetch(placesUrl);
+      const placesData = await placesResponse.json();
+      
+      if (placesData.status === 'OK' && placesData.results) {
+        allPlaces = [...allPlaces, ...placesData.results];
+      }
+    }
+    
+    // Process and return the places
+    const placesWithDistance = allPlaces.map(place => {
+      const placeLocation = place.geometry.location;
+      const distance = calculateDistance(lat, lng, placeLocation.lat, placeLocation.lng);
+      return {
+        ...place,
+        distance: parseFloat(distance.toFixed(1))
+      };
+    });
+    
+    // Remove duplicates (places might appear in multiple categories)
+    const uniquePlaces = Array.from(new Map(placesWithDistance.map(place => [place.place_id, place])).values());
+    
+    // Sort by rating (highest first) for entertainment
+    const sortedPlaces = uniquePlaces.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    
+    // Only return required data
+    return sortedPlaces.map(place => ({
+      place_id: place.place_id,
+      name: place.name,
+      vicinity: place.vicinity,
+      types: place.types,
+      rating: place.rating,
+      user_ratings_total: place.user_ratings_total,
+      distance: place.distance
+    }));
+  }
+  
+  // For non-entertainment categories, use the regular approach
+  const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${placeType}&key=${apiKey}`;
   
   const placesResponse = await fetch(placesUrl);
   const placesData = await placesResponse.json();
