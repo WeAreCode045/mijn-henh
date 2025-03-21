@@ -113,20 +113,21 @@ serve(async (req) => {
       try {
         // Make request to Places API v1
         const requestBody = {
-          includedTypes: includedTypes,
-          maxResultCount: maxResults,
-          rankPreference: "RATING",
-          locationRestriction: {
-            circle: {
-              center: {
-                latitude: lat,
-                longitude: lng
-              },
-              radius: radius
-            }
+           "includedTypes": [
+    includedTypes
+  ],
+  "maxResultCount": 10,
+  "locationRestriction": {
+    "circle": {
+      "center": {
+        "latitude": lat,
+        "longitude": lng
+      },
+      "radius": 5000
+    }
           }
         };
-        
+        {
         console.log(`Request body for ${categoryKey}:`, JSON.stringify(requestBody));
         
         const placesResponse = await fetch(
