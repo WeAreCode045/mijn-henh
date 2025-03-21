@@ -24,36 +24,27 @@ export default function Import() {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(e.target?.result as string, "application/xml");
         
-        // Extract the properties from XML
-        const properties = Array.from(xmlDoc.getElementsByTagName("property"));
+        // Navigate through Object>Result>RealEstateProperty structure
+        const realEstateProperties = xmlDoc.querySelectorAll("Object Result RealEstateProperty");
         
-        // Create a structured representation of the XML data
-        const parsedData = properties.map((prop, index) => {
-          const extractValue = (tagName: string) => {
-            const element = prop.getElementsByTagName(tagName)[0];
-            return element ? element.textContent : "";
-          };
+        if (realEstateProperties.length === 0) {
+          // Fallback: Try direct property elements if the structure doesn't match
+          const properties = xmlDoc.getElementsByTagName("property");
+          if (properties.length === 0) {
+            toast({
+              title: "No Properties Found",
+              description: "The XML file doesn't contain properties in the expected format.",
+              variant: "destructive",
+            });
+            setIsUploading(false);
+            return;
+          }
           
-          return {
-            id: index,
-            title: extractValue("title"),
-            price: extractValue("price"),
-            address: extractValue("address") || extractValue("location"),
-            bedrooms: extractValue("bedrooms") || extractValue("beds"),
-            bathrooms: extractValue("bathrooms") || extractValue("baths"),
-            description: extractValue("description"),
-            // Add other common property fields
-            originalXml: prop,
-          };
-        });
-        
-        setXmlData(parsedData);
-        setIsUploading(false);
-        
-        toast({
-          title: "XML Uploaded Successfully",
-          description: `Found ${parsedData.length} properties in the file.`,
-        });
+          processProperties(Array.from(properties));
+        } else {
+          // Process properties using the Object>Result>RealEstateProperty structure
+          processProperties(Array.from(realEstateProperties));
+        }
       };
       
       reader.readAsText(file);
@@ -66,6 +57,41 @@ export default function Import() {
       });
       setIsUploading(false);
     }
+  };
+
+  const processProperties = (properties: Element[]) => {
+    // Create a structured representation of the XML data
+    const parsedData = properties.map((prop, index) => {
+      const extractValue = (tagName: string) => {
+        const element = prop.getElementsByTagName(tagName)[0];
+        return element ? element.textContent : "";
+      };
+      
+      return {
+        id: index,
+        title: extractValue("title") || extractValue("Title"),
+        price: extractValue("price") || extractValue("Price"),
+        address: extractValue("address") || extractValue("Address") || extractValue("location") || extractValue("Location"),
+        bedrooms: extractValue("bedrooms") || extractValue("Bedrooms") || extractValue("beds") || extractValue("Beds"),
+        bathrooms: extractValue("bathrooms") || extractValue("Bathrooms") || extractValue("baths") || extractValue("Baths"),
+        description: extractValue("description") || extractValue("Description"),
+        sqft: extractValue("sqft") || extractValue("Sqft") || extractValue("size") || extractValue("Size"),
+        livingArea: extractValue("livingArea") || extractValue("LivingArea"),
+        buildYear: extractValue("buildYear") || extractValue("BuildYear") || extractValue("YearBuilt"),
+        garages: extractValue("garages") || extractValue("Garages"),
+        energyLabel: extractValue("energyLabel") || extractValue("EnergyLabel"),
+        // Add other common property fields
+        originalXml: prop,
+      };
+    });
+    
+    setXmlData(parsedData);
+    setIsUploading(false);
+    
+    toast({
+      title: "XML Uploaded Successfully",
+      description: `Found ${parsedData.length} properties in the file.`,
+    });
   };
 
   const handleContinueToMapping = () => {
