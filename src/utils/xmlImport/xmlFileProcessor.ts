@@ -1,4 +1,3 @@
-
 export const extractXmlValue = (property: Element, path: string): string => {
   try {
     // Split the path and navigate through the XML structure
@@ -59,7 +58,7 @@ export const processXmlProperties = (properties: Element[]) => {
     const energyClassPath = "ClimatControl/EnergyCertificate/EnergyClass";
     const propertyIdPath = "PropertyInfo/PublicReferenceNumber";
     const statusPath = "PropertyInfo/Status";
-    const typePath = "Type/PropertyTypes/PropertyType[3]";
+    const propertyTypePath = "Type/PropertyTypes/PropertyType[3]";
     
     // Extract data using the correct paths
     const address = extractXmlValue(prop, addressPath);
@@ -73,7 +72,7 @@ export const processXmlProperties = (properties: Element[]) => {
     const energyClass = extractXmlValue(prop, energyClassPath);
     const propertyId = extractXmlValue(prop, propertyIdPath);
     const status = extractXmlValue(prop, statusPath);
-    const propertyType = extractXmlValue(prop, typePath);
+    const propertyType = extractXmlValue(prop, propertyTypePath);
     
     // Extract attachments (images, floorplans, and videos)
     const attachments = prop.querySelectorAll("Attachments Attachment");
@@ -125,7 +124,7 @@ export const processXmlProperties = (properties: Element[]) => {
       energyLabel: energyClass || extractValue("energyLabel") || extractValue("EnergyLabel"),
       propertyId: propertyId || extractValue("id") || extractValue("ID") || extractValue("PublicReferenceNumber") || String(index),
       status: status || extractValue("status") || extractValue("Status"),
-      type: propertyType || extractValue("type") || extractValue("Type"),
+      propertyType: propertyType || extractValue("propertyType") || extractValue("PropertyType"),
       images: images,
       floorplans: floorplans,
       virtualTour: virtualTour,

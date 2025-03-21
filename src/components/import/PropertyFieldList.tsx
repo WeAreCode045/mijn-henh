@@ -31,11 +31,11 @@ export function PropertyFieldList({
     { id: "energyLabel", label: "Energy Label" },
     { id: "description", label: "Description" },
     { id: "location_description", label: "Location Description" },
-    { id: "object_id", label: "Property ID" }, // Added Property ID
-    { id: "virtualTourUrl", label: "Virtual Tour URL" }, // Added Virtual Tour URL
-    { id: "youtubeUrl", label: "YouTube URL" }, // Added YouTube URL
-    { id: "status", label: "Status" }, // Added Status
-    { id: "type", label: "Property Type" }, // Added Property Type
+    { id: "object_id", label: "Property ID" },
+    { id: "virtualTourUrl", label: "Virtual Tour URL" },
+    { id: "youtubeUrl", label: "YouTube URL" },
+    { id: "status", label: "Status" },
+    { id: "propertyType", label: "Property Type" }, // Changed from "type" to "propertyType"
   ];
 
   return (

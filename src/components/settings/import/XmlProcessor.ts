@@ -125,6 +125,11 @@ export const processXmlContent = async (xmlText: string) => {
           "PropertyDescription",
           "Details"
         ], property),
+        propertyType: findValue([
+          "Type/PropertyTypes/PropertyType",
+          "PropertyType",
+          "TypeOfProperty"
+        ], property), // Added propertyType field
         features: [],
         images,
         floorplans: [],
