@@ -13,6 +13,7 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { useGeneratePDF } from "@/hooks/useGeneratePDF";
+import { MediaViewModal } from "@/components/property/MediaViewModal";
 
 interface ActionsCardProps {
   propertyId: string;
@@ -37,6 +38,12 @@ export function ActionsCard({
   const [showEditHistory, setShowEditHistory] = useState(false);
   const { generatePDF, isGenerating } = useGeneratePDF();
   
+  // Media view modal states
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [mediaType, setMediaType] = useState<"virtualTour" | "youtube">("virtualTour");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaTitle, setMediaTitle] = useState("");
+  
   // Prevent event propagation and default behavior for the history button
   const handleHistoryButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,6 +55,32 @@ export function ActionsCard({
   const handleGeneratePDF = async () => {
     if (propertyData) {
       await generatePDF(propertyData);
+    }
+  };
+
+  // Handle opening virtual tour modal
+  const handleOpenVirtualTour = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (propertyData?.virtualTourUrl) {
+      setMediaType("virtualTour");
+      setMediaUrl(propertyData.virtualTourUrl);
+      setMediaTitle("Virtual Tour");
+      setShowMediaModal(true);
+    }
+  };
+
+  // Handle opening YouTube video modal
+  const handleOpenYoutubeVideo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (propertyData?.youtubeUrl) {
+      setMediaType("youtube");
+      setMediaUrl(propertyData.youtubeUrl);
+      setMediaTitle("Property Video");
+      setShowMediaModal(true);
     }
   };
 
@@ -123,57 +156,45 @@ export function ActionsCard({
             </TooltipProvider>
             
             <TooltipProvider>
-              {propertyData?.virtualTourUrl ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <a 
-                      href={propertyData.virtualTourUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex items-center justify-center rounded-md w-10 h-10 bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                    >
-                      <RotateCcw className="h-5 w-5" />
-                    </a>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Open Tour</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <button 
-                  disabled
-                  className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 text-gray-400 cursor-not-allowed"
-                >
-                  <RotateCcw className="h-5 w-5" />
-                </button>
-              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={handleOpenVirtualTour}
+                    disabled={!propertyData?.virtualTourUrl}
+                    className={`flex items-center justify-center rounded-md w-10 h-10 ${
+                      propertyData?.virtualTourUrl 
+                        ? "bg-blue-100 text-blue-600 hover:bg-blue-200" 
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    } transition-colors`}
+                  >
+                    <RotateCcw className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{propertyData?.virtualTourUrl ? "Open Tour" : "No Virtual Tour"}</p>
+                </TooltipContent>
+              </Tooltip>
             </TooltipProvider>
 
             <TooltipProvider>
-              {propertyData?.youtubeUrl ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <a 
-                      href={propertyData.youtubeUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex items-center justify-center rounded-md w-10 h-10 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                    >
-                      <Youtube className="h-5 w-5" />
-                    </a>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Watch Video</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <button 
-                  disabled
-                  className="flex items-center justify-center rounded-md w-10 h-10 bg-gray-100 text-gray-400 cursor-not-allowed"
-                >
-                  <Youtube className="h-5 w-5" />
-                </button>
-              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleOpenYoutubeVideo}
+                    disabled={!propertyData?.youtubeUrl}
+                    className={`flex items-center justify-center rounded-md w-10 h-10 ${
+                      propertyData?.youtubeUrl 
+                        ? "bg-red-100 text-red-600 hover:bg-red-200" 
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    } transition-colors`}
+                  >
+                    <Youtube className="h-5 w-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{propertyData?.youtubeUrl ? "Watch Video" : "No Video"}</p>
+                </TooltipContent>
+              </Tooltip>
             </TooltipProvider>
           </div>
         </div>
@@ -185,6 +206,15 @@ export function ActionsCard({
             onOpenChange={setShowEditHistory}
           />
         )}
+
+        {/* Media View Modal */}
+        <MediaViewModal
+          open={showMediaModal}
+          onOpenChange={setShowMediaModal}
+          url={mediaUrl}
+          title={mediaTitle}
+          type={mediaType}
+        />
       </CardContent>
     </Card>
   );
