@@ -3,12 +3,13 @@ import { useLocationData } from "./location/useLocationData";
 import { MapPreview } from "./location/MapPreview";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertyPlaceType } from "@/types/property";
-import type { Json } from "@/integrations/supabase/types";
 import { useToast } from "@/components/ui/use-toast";
 import { AddressInput } from "./location/AddressInput";
 import { NearbyPlaces } from "./location/NearbyPlaces";
 import { LocationEditor } from "./location/LocationEditor";
 import { useEffect, useRef } from "react";
+import { LocationProvider } from "./location/LocationContext";
+import { CoordinatesAutoFetch } from "./location/CoordinatesAutoFetch";
 
 interface PropertyLocationProps {
   id?: string;
@@ -35,56 +36,8 @@ export function PropertyLocation({
 }: PropertyLocationProps) {
   const { isLoading, fetchLocationData } = useLocationData();
   const { toast } = useToast();
-  const lastAddressRef = useRef(address);
-
-  // Auto-fetch coordinates when address changes
-  useEffect(() => {
-    // Only proceed if we have an ID and an address, and the address has changed
-    if (id && address && address !== lastAddressRef.current) {
-      lastAddressRef.current = address;
-      
-      // Simple auto-fetch just for coordinates
-      const fetchCoordinates = async () => {
-        try {
-          const { data: settings } = await supabase
-            .from('agency_settings')
-            .select('google_maps_api_key')
-            .single();
-
-          if (!settings?.google_maps_api_key) {
-            console.error("Google Maps API key not configured");
-            return;
-          }
-
-          const { data, error } = await supabase.functions.invoke('fetch-location-data', {
-            body: { 
-              address, 
-              apiKey: settings.google_maps_api_key,
-              propertyId: id,
-              coordinatesOnly: true 
-            }
-          });
-
-          if (error) throw error;
-
-          console.log('Coordinates auto-fetched for address update');
-        } catch (error) {
-          console.error('Error auto-fetching coordinates:', error);
-        }
-      };
-
-      // We're using a timeout to debounce the API call
-      const timer = setTimeout(() => {
-        fetchCoordinates();
-      }, 1500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [address, id]);
 
   const handleLocationFetch = async () => {
-    // This is the full location data fetch, including nearby places
-    // It's triggered by the "Fetch Location" button, not automatically
     const data = await fetchLocationData(address, id);
     if (data) {
       await onLocationFetch();
@@ -134,71 +87,88 @@ export function PropertyLocation({
     }
   };
 
+  // Create the context value
+  const locationContextValue = {
+    id,
+    address,
+    description,
+    location_description,
+    map_image,
+    nearby_places,
+    onChange,
+    onLocationFetch: handleLocationFetch,
+    onMapImageDelete: onMapImageDelete || (() => {}),
+    isLoading
+  };
+
   return (
-    <div className="space-y-6">
-      <AddressInput
-        address={address}
-        isLoading={isLoading}
-        disabled={!id}
-        hasNearbyPlaces={nearby_places.length > 0}
-        onChange={onChange}
-        onLocationFetch={handleLocationFetch}
-        onGenerateDescription={handleGenerateDescription}
-      />
-
-      {map_image && (
-        <MapPreview 
-          map_image={map_image} 
-          onDelete={onMapImageDelete ?? (() => {})} 
+    <LocationProvider value={locationContextValue}>
+      <div className="space-y-6">
+        <AddressInput
+          address={address}
+          isLoading={isLoading}
+          disabled={!id}
+          hasNearbyPlaces={nearby_places.length > 0}
+          onChange={onChange}
+          onLocationFetch={handleLocationFetch}
+          onGenerateDescription={handleGenerateDescription}
         />
-      )}
 
-      <LocationEditor
-        id={id}
-        location_description={location_description}
-        onChange={onChange}
-      />
+        {map_image && <MapPreview map_image={map_image} onDelete={onMapImageDelete ?? (() => {})} />}
 
-      <NearbyPlaces 
-        places={nearby_places} 
-        onPlaceDelete={async (e, placeId) => {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          if (!id) return;
+        <LocationEditor
+          id={id}
+          location_description={location_description}
+          onChange={onChange}
+        />
 
-          try {
-            const updatedPlaces = nearby_places
-              .filter(place => place.id !== placeId)
-              .map(place => ({
-                id: place.id,
-                name: place.name,
-                type: place.type,
-                vicinity: place.vicinity,
-                rating: place.rating,
-                user_ratings_total: place.user_ratings_total
-              })) as Json;
+        <NearbyPlaces 
+          places={nearby_places} 
+          onPlaceDelete={async (e, placeId) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!id) return;
 
-            const { error } = await supabase
-              .from('properties')
-              .update({ nearby_places: updatedPlaces })
-              .eq('id', id);
+            try {
+              const updatedPlaces = nearby_places
+                .filter(place => place.id !== placeId)
+                .map(place => ({
+                  id: place.id,
+                  name: place.name,
+                  type: place.type,
+                  vicinity: place.vicinity,
+                  rating: place.rating,
+                  user_ratings_total: place.user_ratings_total
+                })) as any;
 
-            if (error) throw error;
+              const { error } = await supabase
+                .from('properties')
+                .update({ nearby_places: updatedPlaces })
+                .eq('id', id);
 
-            await onLocationFetch();
-            toast({
-              description: "Voorziening verwijderd succesvol",
-            });
-          } catch (error) {
-            console.error('Error removing place:', error);
-            toast({
-              variant: "destructive",
-              description: "Kon voorziening niet verwijderen",
-            });
-          }
-        }} 
-      />
-    </div>
+              if (error) throw error;
+
+              await onLocationFetch();
+              toast({
+                description: "Voorziening verwijderd succesvol",
+              });
+            } catch (error) {
+              console.error('Error removing place:', error);
+              toast({
+                variant: "destructive",
+                description: "Kon voorziening niet verwijderen",
+              });
+            }
+          }} 
+        />
+
+        {/* Component to handle auto-fetching coordinates when address changes */}
+        <CoordinatesAutoFetch 
+          id={id} 
+          address={address} 
+        />
+      </div>
+    </LocationProvider>
   );
 }
