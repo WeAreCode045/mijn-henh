@@ -73,11 +73,6 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
             .eq('title', propertyData.title)
             .maybeSingle();
 
-          // Prepare featured image if available
-          if (images.length > 0) {
-            propertyData.featured_image = images[0];
-          }
-
           if (existingProperty) {
             // Update existing property
             const { error: updateError } = await supabase
@@ -91,23 +86,15 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
               continue;
             }
 
+            // Handle images for existing property
+            if (images.length > 0) {
+              // Handle the first image as the main image
+              await handlePropertyImages(images, existingProperty.id);
+            }
+
             // Handle floorplans for existing property
             if (floorplans.length > 0) {
-              // For floorplans, we need to use the from('property_images') table
-              // and set the is_floorplan flag to true
-              for (const floorplanUrl of floorplans) {
-                const { error: floorplanError } = await supabase
-                  .from('property_images')
-                  .insert({
-                    property_id: existingProperty.id,
-                    url: floorplanUrl,
-                    is_floorplan: true
-                  });
-
-                if (floorplanError) {
-                  console.error("Error adding floorplan:", floorplanError);
-                }
-              }
+              await handlePropertyFloorplans(floorplans, existingProperty.id);
             }
 
             updated++;
@@ -125,21 +112,14 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
               continue;
             }
 
+            // Handle images for new property
+            if (images.length > 0) {
+              await handlePropertyImages(images, newProperty.id);
+            }
+
             // Handle floorplans for new property
             if (floorplans.length > 0) {
-              for (const floorplanUrl of floorplans) {
-                const { error: floorplanError } = await supabase
-                  .from('property_images')
-                  .insert({
-                    property_id: newProperty.id,
-                    url: floorplanUrl,
-                    is_floorplan: true
-                  });
-
-                if (floorplanError) {
-                  console.error("Error adding floorplan:", floorplanError);
-                }
-              }
+              await handlePropertyFloorplans(floorplans, newProperty.id);
             }
 
             imported++;
@@ -171,6 +151,61 @@ export function usePropertyImport({ xmlData, fieldMappings }: {
       });
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  // Helper function to handle property images
+  const handlePropertyImages = async (images: string[], propertyId: string) => {
+    try {
+      // First clear existing images to avoid duplicates
+      await supabase
+        .from('property_images')
+        .delete()
+        .eq('property_id', propertyId)
+        .eq('type', 'image');
+
+      // Add all images
+      for (let i = 0; i < images.length; i++) {
+        const imageUrl = images[i];
+        await supabase
+          .from('property_images')
+          .insert({
+            property_id: propertyId,
+            url: imageUrl,
+            is_main: i === 0, // First image is the main image
+            type: 'image',
+            sort_order: i
+          });
+      }
+    } catch (error) {
+      console.error("Error handling property images:", error);
+    }
+  };
+
+  // Helper function to handle property floorplans
+  const handlePropertyFloorplans = async (floorplans: string[], propertyId: string) => {
+    try {
+      // First clear existing floorplans to avoid duplicates
+      await supabase
+        .from('property_images')
+        .delete()
+        .eq('property_id', propertyId)
+        .eq('type', 'floorplan');
+
+      // Add all floorplans
+      for (let i = 0; i < floorplans.length; i++) {
+        const floorplanUrl = floorplans[i];
+        await supabase
+          .from('property_images')
+          .insert({
+            property_id: propertyId,
+            url: floorplanUrl,
+            type: 'floorplan',
+            sort_order: i
+          });
+      }
+    } catch (error) {
+      console.error("Error handling property floorplans:", error);
     }
   };
 
