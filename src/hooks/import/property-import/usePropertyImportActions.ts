@@ -1,13 +1,14 @@
 
 import { usePropertyDataMapper } from "./usePropertyDataMapper";
-import { usePropertyImageHandler } from "./usePropertyImageHandler";
 import { usePropertyStorageService } from "./usePropertyStorageService";
-import { useState } from "react";
+import { useMediaReplacementHandler } from "./useMediaReplacementHandler";
+import { useExistingPropertyHandler } from "./useExistingPropertyHandler";
+import { useNewPropertyHandler } from "./useNewPropertyHandler";
 
 interface PropertyImportActionsProps {
   xmlData: any[];
   fieldMappings: Record<string, string>;
-  setIsImporting: (value: boolean) => void;
+  setIsImporting?: (value: boolean) => void;
   toast: any;
 }
 
@@ -17,59 +18,15 @@ export function usePropertyImportActions({
   toast
 }: PropertyImportActionsProps) {
   const { mapPropertyData } = usePropertyDataMapper();
-  const { handlePropertyImages, handlePropertyFloorplans, deleteExistingPropertyMedia } = usePropertyImageHandler();
-  const { storeProperty, checkExistingProperty, processImages } = usePropertyStorageService();
-  const [replaceMediaDialogOpen, setReplaceMediaDialogOpen] = useState(false);
-  const [currentImportItem, setCurrentImportItem] = useState<{
-    property: any,
-    propertyData: any,
-    existingProperty: any,
-    onComplete: (replaceMedia: boolean) => void
-  } | null>(null);
-
-  const processPropertyAfterMediaChoice = async (
-    property: any, 
-    propertyData: any, 
-    existingProperty: any, 
-    replaceMedia: boolean
-  ) => {
-    try {
-      // Update existing property
-      const success = await storeProperty(propertyData, existingProperty.id, 'update');
-      
-      if (!success) {
-        return false;
-      }
-
-      // Handle images for existing property
-      const images = property.images || [];
-      if (images.length > 0 && replaceMedia) {
-        // Delete existing media first
-        await deleteExistingPropertyMedia(existingProperty.id);
-        
-        // Download and upload the new images
-        const uploadedImageUrls = await processImages(images, existingProperty.id, 'photos');
-        
-        // Then add the new images
-        await handlePropertyImages(uploadedImageUrls, existingProperty.id);
-      }
-
-      // Handle floorplans for existing property
-      const floorplans = property.floorplans || [];
-      if (floorplans.length > 0 && replaceMedia) {
-        // Download and upload the new floorplans
-        const uploadedFloorplanUrls = await processImages(floorplans, existingProperty.id, 'floorplans');
-        
-        // Add them to the database
-        await handlePropertyFloorplans(uploadedFloorplanUrls, existingProperty.id);
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error processing property after media choice:", error);
-      return false;
-    }
-  };
+  const { checkExistingProperty } = usePropertyStorageService();
+  const { processExistingProperty } = useExistingPropertyHandler();
+  const { processNewProperty } = useNewPropertyHandler();
+  const { 
+    replaceMediaDialogOpen, 
+    setReplaceMediaDialogOpen, 
+    currentImportItem, 
+    handleMediaReplacement 
+  } = useMediaReplacementHandler();
 
   const importSelectedProperties = async (selectedProperties: number[]) => {
     try {
@@ -88,9 +45,9 @@ export function usePropertyImportActions({
           // Map XML fields to property fields using the fieldMappings
           const propertyData = mapPropertyData(property, fieldMappings);
           
-          // Get image and floorplan URLs from the XML data
-          const imageUrls = property.images || [];
-          const floorplanUrls = property.floorplans || [];
+          // Get object_id - use specific mapping or fallback to property.id
+          const objectId = propertyData.object_id || property.id || Math.random().toString(36).substring(2, 9);
+          propertyData.object_id = objectId;
           
           // Check for Virtual Tour URL
           if (property.virtualTour) {
@@ -102,87 +59,57 @@ export function usePropertyImportActions({
             propertyData.youtubeUrl = property.youtubeUrl;
           }
           
-          // Get object_id - use specific mapping or fallback to property.id
-          const objectId = propertyData.object_id || property.id || Math.random().toString(36).substring(2, 9);
-          propertyData.object_id = objectId;
-          
           // Check if property already exists
           const existingProperty = await checkExistingProperty(objectId, propertyData.title);
 
           if (existingProperty) {
             // If property exists and has media, ask user what to do
-            if ((imageUrls.length > 0 || floorplanUrls.length > 0)) {
-              await new Promise<void>((resolve) => {
-                setCurrentImportItem({
-                  property,
-                  propertyData,
-                  existingProperty,
-                  onComplete: async (replaceMedia) => {
-                    // Close dialog
-                    setReplaceMediaDialogOpen(false);
-                    
-                    // Process property with user's media choice
-                    const success = await processPropertyAfterMediaChoice(
-                      property, 
-                      propertyData, 
-                      existingProperty, 
-                      replaceMedia
-                    );
-                    
-                    if (success) {
-                      updated++;
-                      if (!replaceMedia) {
-                        skippedMedia++;
-                      }
-                    } else {
-                      errors++;
-                    }
-                    
-                    // Continue with next property
-                    resolve();
-                  }
-                });
-                setReplaceMediaDialogOpen(true);
-              });
+            const imageUrls = property.images || [];
+            const floorplanUrls = property.floorplans || [];
+            
+            if (imageUrls.length > 0 || floorplanUrls.length > 0) {
+              // Show dialog and wait for user decision
+              const replaceMedia = await handleMediaReplacement(property, propertyData, existingProperty);
+              
+              // Process property with user's media choice
+              const success = await processExistingProperty(
+                property, 
+                propertyData, 
+                existingProperty, 
+                replaceMedia
+              );
+              
+              if (success) {
+                updated++;
+                if (!replaceMedia) {
+                  skippedMedia++;
+                }
+              } else {
+                errors++;
+              }
             } else {
               // No media to replace, just update the property data
-              const success = await storeProperty(propertyData, existingProperty.id, 'update');
+              const success = await processExistingProperty(
+                property,
+                propertyData,
+                existingProperty,
+                false
+              );
               
-              if (!success) {
+              if (success) {
+                updated++;
+              } else {
                 errors++;
-                continue;
               }
-              
-              updated++;
             }
           } else {
             // Insert new property
-            const newPropertyId = await storeProperty(propertyData, null, 'insert');
-            
-            if (!newPropertyId) {
+            const success = await processNewProperty(property, propertyData);
+            if (success) {
+              imported++;
+            } else {
               errors++;
-              continue;
             }
-
-            // Handle images for new property
-            if (imageUrls.length > 0) {
-              // Download and upload all images
-              const uploadedImageUrls = await processImages(imageUrls, newPropertyId, 'photos');
-              
-              // Add them to the database
-              await handlePropertyImages(uploadedImageUrls, newPropertyId);
-            }
-
-            // Handle floorplans for new property
-            if (floorplanUrls.length > 0) {
-              // Download and upload all floorplans
-              const uploadedFloorplanUrls = await processImages(floorplanUrls, newPropertyId, 'floorplans');
-              
-              // Add them to the database
-              await handlePropertyFloorplans(uploadedFloorplanUrls, newPropertyId);
-            }
-
-            imported++;
           }
         } catch (error) {
           console.error("Error processing property:", error);
