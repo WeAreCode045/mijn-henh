@@ -107,30 +107,85 @@ export function useCategories() {
     
     // Categorize each place
     places.forEach(place => {
-      const type = place.type?.toLowerCase() || '';
+      // If the place already has a defined type that matches our categories, use it
+      if (place.type && categories.some(c => c.id === place.type)) {
+        result[place.type].push(place);
+        return;
+      }
       
-      if (type.includes('school') || type.includes('education') || type.includes('university') || 
-          type === 'preschool' || type === 'primary_school' || type === 'secondary_school') {
-        result['education'].push(place);
-      } else if (
-        type === 'zoo' || type === 'tourist_attraction' || type === 'park' || 
-        type === 'night_club' || type === 'movie_theater' || type === 'event_venue' || 
-        type === 'concert_hall' || type.includes('entertainment') || type.includes('amusement') || 
-        type.includes('aquarium') || type.includes('casino') || type.includes('gallery') || 
-        type.includes('museum')
-      ) {
-        result['entertainment'].push(place);
-      } else if (type === 'supermarket' || type === 'shopping_mall' || type.includes('shop') || type.includes('store')) {
-        result['shopping'].push(place);
-      } else if (
-        type === 'arena' || type === 'fitness_center' || type === 'golf_course' || 
-        type === 'gym' || type === 'sports_complex' || type === 'stadium' || 
-        type === 'swimming_pool' || type.includes('sport') || type.includes('fitness')
-      ) {
-        result['sports'].push(place);
-      } else if (type.includes('bus') || type.includes('train') || type.includes('transit') || type.includes('station')) {
-        result['transportation'].push(place);
+      // Check against types array if available
+      if (place.types && Array.isArray(place.types)) {
+        // Try to match with our defined subtypes first
+        const matchedType = place.types.find(t => 
+          categories.some(c => c.subtypes?.some(s => s.id === t))
+        );
+        
+        if (matchedType) {
+          // Find which category this subtype belongs to
+          for (const category of categories) {
+            if (category.subtypes?.some(s => s.id === matchedType)) {
+              result[category.id].push(place);
+              return;
+            }
+          }
+        }
+        
+        // If no subtype match, try to match by keywords in types
+        if (place.types.some(t => 
+          t.includes('school') || t.includes('education') || t.includes('university') || 
+          t === 'preschool' || t === 'primary_school' || t === 'secondary_school')) {
+          result['education'].push(place);
+        } else if (place.types.some(t =>
+          t === 'zoo' || t === 'tourist_attraction' || t === 'park' || 
+          t === 'night_club' || t === 'movie_theater' || t === 'event_venue' || 
+          t === 'concert_hall' || t.includes('entertainment') || t.includes('amusement') || 
+          t.includes('aquarium') || t.includes('casino') || t.includes('gallery') || 
+          t.includes('museum'))) {
+          result['entertainment'].push(place);
+        } else if (place.types.some(t => 
+          t === 'supermarket' || t === 'shopping_mall' || t.includes('shop') || t.includes('store'))) {
+          result['shopping'].push(place);
+        } else if (place.types.some(t =>
+          t === 'arena' || t === 'fitness_center' || t === 'golf_course' || 
+          t === 'gym' || t === 'sports_complex' || t === 'stadium' || 
+          t === 'swimming_pool' || t.includes('sport') || t.includes('fitness'))) {
+          result['sports'].push(place);
+        } else if (place.types.some(t => 
+          t.includes('bus') || t.includes('train') || t.includes('transit') || t.includes('station'))) {
+          result['transportation'].push(place);
+        } else {
+          result['other'].push(place);
+        }
+      } else if (place.type) {
+        // Fallback to using the place.type string if types array isn't available
+        const type = place.type.toLowerCase();
+        
+        if (type.includes('school') || type.includes('education') || type.includes('university') || 
+            type === 'preschool' || type === 'primary_school' || type === 'secondary_school') {
+          result['education'].push(place);
+        } else if (
+          type === 'zoo' || type === 'tourist_attraction' || type === 'park' || 
+          type === 'night_club' || type === 'movie_theater' || type === 'event_venue' || 
+          type === 'concert_hall' || type.includes('entertainment') || type.includes('amusement') || 
+          type.includes('aquarium') || type.includes('casino') || type.includes('gallery') || 
+          type.includes('museum')
+        ) {
+          result['entertainment'].push(place);
+        } else if (type === 'supermarket' || type === 'shopping_mall' || type.includes('shop') || type.includes('store')) {
+          result['shopping'].push(place);
+        } else if (
+          type === 'arena' || type === 'fitness_center' || type === 'golf_course' || 
+          type === 'gym' || type === 'sports_complex' || type === 'stadium' || 
+          type === 'swimming_pool' || type.includes('sport') || type.includes('fitness')
+        ) {
+          result['sports'].push(place);
+        } else if (type.includes('bus') || type.includes('train') || type.includes('transit') || type.includes('station')) {
+          result['transportation'].push(place);
+        } else {
+          result['other'].push(place);
+        }
       } else {
+        // If no type information available at all
         result['other'].push(place);
       }
     });

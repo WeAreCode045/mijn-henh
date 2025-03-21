@@ -28,9 +28,12 @@ export function usePlaceFetching({
     setCurrentCategory(typeToFetch);
     
     try {
+      console.log(`Fetching places for: ${typeToFetch}`);
       const results = await onFetchNearbyPlaces(typeToFetch);
       
       if (results && results[typeToFetch] && Array.isArray(results[typeToFetch])) {
+        console.log(`Got results for ${typeToFetch}:`, results[typeToFetch]);
+        
         // Make sure we're only showing places for the requested category
         const options: PlaceOption[] = results[typeToFetch].map((place: any) => ({
           id: place.place_id,
@@ -42,14 +45,13 @@ export function usePlaceFetching({
           maxSelections: getMaxSelections(typeToFetch)
         }));
         
-        // Sort by rating if it's entertainment
-        if (categoryId === 'entertainment') {
-          options.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        }
+        // Sort by rating if available
+        options.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         
         setPlacesForModal(options);
         setModalOpen(true);
       } else {
+        console.log('No results found or unexpected format:', results);
         toast({
           title: "No places found",
           description: `No ${typeToFetch.replace('_', ' ')} places found near this location.`,
@@ -73,7 +75,23 @@ export function usePlaceFetching({
     if (!onFetchNearbyPlaces) return;
     
     e.preventDefault();
-    await onFetchNearbyPlaces();
+    try {
+      setIsFetchingCategory(true);
+      await onFetchNearbyPlaces();
+      toast({
+        title: "Success",
+        description: "All nearby places fetched successfully",
+      });
+    } catch (error) {
+      console.error("Error fetching all places:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch all nearby places.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFetchingCategory(false);
+    }
   };
 
   return {
