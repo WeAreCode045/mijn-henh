@@ -54,31 +54,16 @@ export function NearbyPlacesWithTabs({
         </TabsList>
         
         <div className="mt-4">
-          {activeTab !== 'all' && (
+          {selectedPlacesToDelete.length > 0 && (
             <div className="mb-4">
-              <div className="flex justify-between items-center">
-                <Button 
-                  variant="outline"
-                  onClick={() => handleFetchCategory(activeTab)}
-                  disabled={isFetchingCategory}
-                >
-                  {isFetchingCategory && currentCategory === activeTab ? 
-                    'Fetching...' : 
-                    `Fetch All ${categories.find(c => c.id === activeTab)?.label || activeTab}`
-                  }
-                </Button>
-                
-                {selectedPlacesToDelete.length > 0 && (
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={handleBulkDelete}
-                    className="ml-auto"
-                  >
-                    Delete Selected ({selectedPlacesToDelete.length})
-                  </Button>
-                )}
-              </div>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={handleBulkDelete}
+                className="ml-auto"
+              >
+                Delete Selected ({selectedPlacesToDelete.length})
+              </Button>
             </div>
           )}
         </div>
