@@ -12,13 +12,13 @@ interface AgentSelectorProps {
 
 export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorProps) {
   const [agents, setAgents] = useState<{id: string, full_name: string}[]>([]);
-  const [currentAgentId, setCurrentAgentId] = useState(initialAgentId || "");
+  const [currentAgentId, setCurrentAgentId] = useState(initialAgentId || "no-agent");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (initialAgentId !== undefined) {
-      setCurrentAgentId(initialAgentId);
+      setCurrentAgentId(initialAgentId || "no-agent");
     }
   }, [initialAgentId]);
 
@@ -73,7 +73,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
     <div className="space-y-2">
       <Label htmlFor="agent-select">Assigned Agent</Label>
       <Select 
-        value={currentAgentId || 'no-agent'} 
+        value={currentAgentId} 
         onValueChange={handleAgentChange}
         disabled={isLoadingAgents}
       >

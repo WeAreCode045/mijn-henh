@@ -23,7 +23,7 @@ export function AgentSection({
   onSave, 
   isUpdating 
 }: AgentSectionProps) {
-  const [currentAgentId, setCurrentAgentId] = useState(agentId);
+  const [currentAgentId, setCurrentAgentId] = useState(agentId || "none");
   const [agents, setAgents] = useState<Agent[]>([]);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function AgentSection({
   }, []);
 
   const handleSave = () => {
-    onSave(currentAgentId);
+    onSave(currentAgentId === "none" ? "" : currentAgentId);
   };
 
   return (
@@ -65,7 +65,7 @@ export function AgentSection({
               <SelectValue placeholder="Select an agent" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {agents.map((agent) => (
                 <SelectItem key={agent.id} value={agent.id}>
                   {agent.full_name}

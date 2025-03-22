@@ -20,11 +20,11 @@ export default function Properties() {
   const { isAdmin } = useAuth();
   const { agents } = useAgentSelect();
   const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
-  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("all-agents");
 
   useEffect(() => {
     if (properties) {
-      if (selectedAgentId && selectedAgentId !== "") {
+      if (selectedAgentId && selectedAgentId !== "all-agents") {
         setFilteredProperties(properties.filter(p => p.agent_id === selectedAgentId));
       } else {
         setFilteredProperties(properties);
@@ -78,7 +78,7 @@ export default function Properties() {
                     <SelectValue placeholder="Filter by agent" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Agents</SelectItem>
+                    <SelectItem value="all-agents">All Agents</SelectItem>
                     {agents.map((agent) => (
                       <SelectItem key={agent.id} value={agent.id}>
                         {agent.full_name}

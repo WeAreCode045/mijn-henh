@@ -16,13 +16,14 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
       </CardHeader>
       <CardContent>
         <Select
-          value={selectedAgent}
+          value={selectedAgent || "none"}
           onValueChange={onAgentSelect}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an agent" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">No agent</SelectItem>
             {agents.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.full_name}
