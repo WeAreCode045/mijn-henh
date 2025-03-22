@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
@@ -33,13 +32,10 @@ interface ContentTabWrapperProps {
 export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
-  // Use the contentSubmit hook for handling the submit action
   const { onSubmit } = usePropertyContentSubmit(
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
-    // Pass the original onSubmit handler from props as the external handler
-    // This ensures we're not overriding any existing functionality
     handlers.onSubmit
   );
 
@@ -53,6 +49,14 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
     if (handlers.currentStep > 0) {
       handlers.handleStepClick(handlers.currentStep - 1);
     }
+  };
+
+  const adaptedRemoveFeature = (id: string) => {
+    handlers.onRemoveFeature(id);
+  };
+  
+  const adaptedUpdateFeature = (id: string, description: string) => {
+    handlers.onUpdateFeature(id, description);
   };
 
   return (
@@ -69,8 +73,8 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
         formData={formData}
         onFieldChange={handlers.onFieldChange}
         onAddFeature={handlers.onAddFeature}
-        onRemoveFeature={handlers.onRemoveFeature}
-        onUpdateFeature={handlers.onUpdateFeature}
+        onRemoveFeature={adaptedRemoveFeature}
+        onUpdateFeature={adaptedUpdateFeature}
         onAddArea={handlers.onAddArea}
         onRemoveArea={handlers.onRemoveArea}
         onUpdateArea={handlers.onUpdateArea}

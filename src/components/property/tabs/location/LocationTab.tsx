@@ -47,6 +47,11 @@ export function LocationTab({
   isGeneratingMap,
   isReadOnly = false
 }: LocationTabProps) {
+  // Handle address change
+  const handleAddressChange = (value: string) => {
+    onFieldChange("address", value);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -54,27 +59,30 @@ export function LocationTab({
           <CardTitle>Location Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Pass only the props that AddressInput expects */}
           <AddressInput 
             address={formState.address || ""}
-            onChange={(value) => onFieldChange("address", value)}
-            onFetchLocationData={onFetchLocationData}
-            isLoading={isLoadingLocationData}
+            onChange={handleAddressChange}
+            isLoading={isLoadingLocationData || false}
             isDisabled={isReadOnly}
+            onFetch={onFetchLocationData}
           />
           
+          {/* Pass only the props that MapPreview expects */}
           <MapPreview 
-            property={property}
-            onGenerateMap={onGenerateMap}
-            isGenerating={isGeneratingMap}
+            mapImage={property.map_image}
+            onGenerate={onGenerateMap}
+            isGenerating={isGeneratingMap || false}
             isDisabled={isReadOnly}
           />
           
+          {/* Pass only the props that NearbyPlaces expects */}
           <NearbyPlaces 
-            property={property}
-            formState={formState}
-            onRemovePlace={onRemoveNearbyPlace}
-            onFetchCategoryPlaces={onFetchCategoryPlaces}
-            onFetchNearbyCities={onFetchNearbyCities}
+            nearbyPlaces={formState.nearby_places || []}
+            nearbyCities={formState.nearby_cities || []}
+            onRemove={onRemoveNearbyPlace}
+            onFetchCategory={onFetchCategoryPlaces}
+            onFetchCities={onFetchNearbyCities}
             isDisabled={isReadOnly}
           />
         </CardContent>

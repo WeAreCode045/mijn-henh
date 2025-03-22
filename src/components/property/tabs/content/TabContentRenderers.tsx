@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
 import { DashboardTabContent } from './DashboardTabContent';
@@ -31,8 +30,27 @@ export class TabContentRenderers {
       );
     }
 
-    // Check if handleVirtualTourUpdate, handleYoutubeUrlUpdate, and handleFloorplanEmbedScriptUpdate exist
-    // in handlers, if not, create dummy functions
+    // Create adapter functions for type compatibility
+    const adaptedRemoveFeature = (id: string) => {
+      if (handlers.onRemoveFeature) {
+        handlers.onRemoveFeature(id);
+      }
+    };
+    
+    const adaptedUpdateFeature = (id: string, description: string) => {
+      if (handlers.onUpdateFeature) {
+        handlers.onUpdateFeature(id, description);
+      }
+    };
+
+    // Create adapter for place removal
+    const adaptedRemoveNearbyPlace = (index: number) => {
+      if (handlers.onRemoveNearbyPlace) {
+        handlers.onRemoveNearbyPlace(index);
+      }
+    };
+
+    // Check if handlers exist and create dummy functions if needed
     const virtualTourUpdate = handlers.handleVirtualTourUpdate || ((url: string) => {
       console.log("Virtual tour update not implemented", url);
     });
@@ -65,8 +83,8 @@ export class TabContentRenderers {
             formState={props.formState}
             onFieldChange={handlers.onFieldChange}
             onAddFeature={handlers.onAddFeature}
-            onRemoveFeature={(id) => handlers.onRemoveFeature(id)}
-            onUpdateFeature={(id, description) => handlers.onUpdateFeature(id, description)}
+            onRemoveFeature={adaptedRemoveFeature}
+            onUpdateFeature={adaptedUpdateFeature}
             currentStep={handlers.currentStep}
             handleStepClick={handlers.handleStepClick}
             onSubmit={() => handlers.setPendingChanges(true)}
@@ -104,13 +122,7 @@ export class TabContentRenderers {
             onFetchNearbyCities={handlers.onFetchNearbyCities}
             onGenerateLocationDescription={handlers.onGenerateLocationDescription}
             onGenerateMap={handlers.onGenerateMap}
-            onRemoveNearbyPlace={(placeId) => {
-              if (handlers.onRemoveNearbyPlace) {
-                // Convert the string ID to a number index if needed
-                const index = Number(placeId) || placeId;
-                handlers.onRemoveNearbyPlace(Number(index));
-              }
-            }}
+            onRemoveNearbyPlace={adaptedRemoveNearbyPlace}
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
             isReadOnly={isArchived}

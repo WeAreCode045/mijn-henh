@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -37,6 +36,7 @@ interface PropertyStepContentProps {
   isUploading?: boolean;
   onSubmit?: () => void; 
   isSaving?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function PropertyStepContent({
@@ -67,6 +67,7 @@ export function PropertyStepContent({
   isUploading,
   onSubmit,
   isSaving,
+  isReadOnly,
 }: PropertyStepContentProps) {
   const renderStep = () => {
     switch (currentStep) {

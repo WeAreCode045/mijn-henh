@@ -8,8 +8,8 @@ interface ContentTabContentProps {
   formState: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
-  onRemoveFeature: (index: number) => void;
-  onUpdateFeature: (index: number, value: string) => void;
+  onRemoveFeature: (id: string) => void;
+  onUpdateFeature: (id: string, description: string) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
   onSubmit: () => void;
@@ -28,14 +28,23 @@ export function ContentTabContent({
   onSubmit,
   isReadOnly = false
 }: ContentTabContentProps) {
+  // Create adapter functions to match the expected types in PropertyStepWizard
+  const adaptedRemoveFeature = (id: string) => {
+    onRemoveFeature(id);
+  };
+  
+  const adaptedUpdateFeature = (id: string, description: string) => {
+    onUpdateFeature(id, description);
+  };
+
   return (
     <PropertyStepWizard 
       property={property}
       formState={formState}
       onFieldChange={onFieldChange}
       onAddFeature={onAddFeature}
-      onRemoveFeature={onRemoveFeature}
-      onUpdateFeature={onUpdateFeature}
+      onRemoveFeature={adaptedRemoveFeature}
+      onUpdateFeature={adaptedUpdateFeature}
       currentStep={currentStep}
       handleStepClick={handleStepClick}
       onSubmit={onSubmit}

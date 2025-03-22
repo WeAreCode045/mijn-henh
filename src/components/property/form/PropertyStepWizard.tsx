@@ -40,13 +40,15 @@ export function PropertyStepWizard({
       
       <PropertyStepContent 
         formData={formState}
+        step={currentStep}
         onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}
         onUpdateFeature={onUpdateFeature}
         currentStep={currentStep}
         handleStepClick={handleStepClick}
-        onSubmit={onSubmit}
+        handleNext={() => handleStepClick(currentStep + 1)}
+        handlePrevious={() => handleStepClick(currentStep - 1)}
         isReadOnly={isReadOnly}
       />
     </div>

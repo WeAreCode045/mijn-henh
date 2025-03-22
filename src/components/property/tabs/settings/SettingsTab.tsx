@@ -29,6 +29,10 @@ export function SettingsTab({
   isUpdating,
   isReadOnly = false
 }: SettingsTabProps) {
+  // Extract the properties needed for each section
+  const propertyId = property.object_id || "";
+  const agentId = property.agent_id || "";
+
   return (
     <div className="space-y-6">
       <Card>
@@ -36,24 +40,26 @@ export function SettingsTab({
           <CardTitle>Property Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Pass only the props that PropertyIdSection expects */}
           <PropertyIdSection 
-            property={property} 
-            handleSaveObjectId={handleSaveObjectId}
+            objectId={propertyId}
+            onSave={handleSaveObjectId}
             isDisabled={isReadOnly}
           />
           
+          {/* Pass only the props that AgentSection expects */}
           <AgentSection 
-            property={property}
+            agentId={agentId}
             agentInfo={agentInfo}
-            handleSaveAgent={handleSaveAgent}
+            onSave={handleSaveAgent}
           />
         </CardContent>
       </Card>
       
-      {!isReadOnly && (
+      {!isReadOnly && onDelete && (
         <DangerZoneSection 
-          property={property}
           onDelete={onDelete}
+          propertyId={property.id}
         />
       )}
     </div>
