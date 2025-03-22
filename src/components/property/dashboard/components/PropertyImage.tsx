@@ -16,25 +16,26 @@ export function PropertyImage({ property }: PropertyImageProps) {
     const fetchPropertyImages = async () => {
       if (!property.id) return;
       
-      // Fetch the property's featured image or first image
-      const { data, error } = await supabase
-        .from('properties')
-        .select('featured_image, images')
-        .eq('id', property.id)
-        .single();
+      // Fetch property images from property_images table
+      const { data: imageData, error: imageError } = await supabase
+        .from('property_images')
+        .select('*')
+        .eq('property_id', property.id)
+        .order('sort_order', { ascending: true });
         
-      if (error) {
-        console.error("Error fetching property images:", error);
+      if (imageError) {
+        console.error("Error fetching property images:", imageError);
         return;
       }
       
-      if (data) {
-        if (data.featured_image) {
-          setMainImage(data.featured_image);
-        } else if (data.images && data.images.length > 0) {
-          // If no featured image, use the first image from the images array
-          const firstImage = data.images[0]?.url || null;
-          setMainImage(firstImage);
+      // Find the main image (is_main = true) or use the first image
+      if (imageData && imageData.length > 0) {
+        const mainImageData = imageData.find(img => img.is_main);
+        if (mainImageData) {
+          setMainImage(mainImageData.url);
+        } else {
+          // If no main image is set, use the first image
+          setMainImage(imageData[0].url);
         }
       }
     };

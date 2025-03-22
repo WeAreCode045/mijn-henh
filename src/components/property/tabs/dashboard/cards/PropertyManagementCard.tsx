@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { FileText, Globe, Youtube, RotateCcw, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MediaViewModal } from "@/components/property/MediaViewModal";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,26 +48,26 @@ export function PropertyManagementCard({
   }>({});
   
   // Load virtual tour and youtube URLs
-  useState(() => {
+  useEffect(() => {
     const fetchPropertyMedia = async () => {
       if (!propertyId) return;
       
       const { data, error } = await supabase
         .from('properties')
-        .select('virtual_tour_url, youtube_url')
+        .select('virtualTourUrl, youtubeUrl')
         .eq('id', propertyId)
         .single();
         
       if (!error && data) {
         setPropertyMedia({
-          virtualTourUrl: data.virtual_tour_url,
-          youtubeUrl: data.youtube_url
+          virtualTourUrl: data.virtualTourUrl,
+          youtubeUrl: data.youtubeUrl
         });
       }
     };
     
     fetchPropertyMedia();
-  });
+  }, [propertyId]);
   
   // Handle opening virtual tour modal
   const handleOpenVirtualTour = (e: React.MouseEvent) => {
