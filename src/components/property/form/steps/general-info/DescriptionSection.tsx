@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
-// Remove the direct import of the CSS file as it's causing issues
+// Import is in main.tsx instead
 import { useEffect } from "react";
 
 interface DescriptionSectionProps {
@@ -60,7 +60,7 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
         console.error("Error setting editor content:", error);
       }
     }
-  }, [formData.id, editor, formData.description]); // Add formData.description to dependency array
+  }, [formData.id, editor, formData.description]); // Include formData.description in the dependency array
 
   // Update formData.description when editor content changes
   useEffect(() => {
