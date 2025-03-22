@@ -55,6 +55,9 @@ export function usePropertyArchive() {
         description: `Property "${propertyTitle}" has been archived`,
       });
       
+      // Reload current page instead of navigating away
+      window.location.href = window.location.pathname;
+      
       return true;
     } catch (error) {
       console.error("Error archiving property:", error);
@@ -112,6 +115,9 @@ export function usePropertyArchive() {
         title: "Success",
         description: `Property "${propertyTitle}" has been unarchived`,
       });
+      
+      // Reload current page instead of navigating away
+      window.location.href = window.location.pathname;
       
       return true;
     } catch (error) {

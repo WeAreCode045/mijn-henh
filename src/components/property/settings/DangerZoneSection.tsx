@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface DangerZoneSectionProps {
   onDelete: () => Promise<void>;
@@ -11,13 +12,14 @@ interface DangerZoneSectionProps {
 
 export function DangerZoneSection({ onDelete }: DangerZoneSectionProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
   
   const handleDeleteClick = async () => {
     setIsDeleting(true);
     try {
       await onDelete();
-      // Note: The navigation after deletion is handled in the onDelete function
-      // which should navigate to the properties list page
+      // Navigate to properties list page
+      navigate('/properties');
     } finally {
       setIsDeleting(false);
     }

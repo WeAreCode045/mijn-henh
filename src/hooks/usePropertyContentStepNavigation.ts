@@ -71,7 +71,7 @@ export function usePropertyContentStepNavigation(
         console.log("Navigating to next step");
         if (externalHandleNext) {
           externalHandleNext();
-        } else if (currentStep < maxSteps) {
+        } else if (currentStep < maxSteps - 1) {
           setCurrentStep(currentStep + 1);
         }
         break;
@@ -79,26 +79,28 @@ export function usePropertyContentStepNavigation(
         console.log("Navigating to previous step");
         if (externalHandlePrevious) {
           externalHandlePrevious();
-        } else if (currentStep > 1) {
+        } else if (currentStep > 0) {
           setCurrentStep(currentStep - 1);
         }
         break;
     }
+
+    return true;
   };
 
   const handleStepClick = (step: number) => {
     console.log("Step clicked in PropertyContentTab:", step);
-    saveBeforeStepChange('step', step);
+    return saveBeforeStepChange('step', step);
   };
   
   const handleNext = () => {
     console.log("Next clicked in PropertyContentTab");
-    saveBeforeStepChange('next');
+    return saveBeforeStepChange('next');
   };
   
   const handlePrevious = () => {
     console.log("Previous clicked in PropertyContentTab");
-    saveBeforeStepChange('previous');
+    return saveBeforeStepChange('previous');
   };
 
   return {

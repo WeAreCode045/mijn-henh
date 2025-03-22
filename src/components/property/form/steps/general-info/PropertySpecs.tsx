@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface PropertySpecsProps {
   formData: PropertyFormData;
@@ -15,8 +16,16 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
     onFieldChange(field, value);
   };
   
+  const handleSwitchChange = (field: keyof PropertyFormData, checked: boolean) => {
+    onFieldChange(field, checked);
+  };
+  
   const propertyTypes = [
     "House", "Apartment", "Townhouse", "Condo", "Land", "Commercial"
+  ];
+  
+  const energyLabels = [
+    "A+++", "A++", "A+", "A", "B", "C", "D", "E", "F", "G"
   ];
 
   return (
@@ -131,15 +140,32 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             />
           </div>
           
-          {/* MLS ID */}
-          <div className="col-span-2">
-            <Label htmlFor="mls-id">MLS ID</Label>
-            <Input
-              id="mls-id"
-              value={formData.object_id || ""}
-              onChange={(e) => handleInputChange("object_id", e.target.value)}
-              placeholder="e.g. MLS12345"
+          {/* ENERGY LABEL */}
+          <div>
+            <Label htmlFor="energy-label">Energy Label</Label>
+            <Select
+              value={formData.energyLabel || ""}
+              onValueChange={(value) => handleInputChange("energyLabel", value)}
+            >
+              <SelectTrigger id="energy-label">
+                <SelectValue placeholder="Select energy label" />
+              </SelectTrigger>
+              <SelectContent>
+                {energyLabels.map((label) => (
+                  <SelectItem key={label} value={label}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* HAS GARDEN */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="hasGarden"
+              checked={formData.hasGarden || false}
+              onCheckedChange={(checked) => handleSwitchChange("hasGarden", checked)}
             />
+            <Label htmlFor="hasGarden">Has Garden</Label>
           </div>
         </div>
       </CardContent>

@@ -3,7 +3,6 @@ import { PropertyFormData } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
@@ -12,7 +11,7 @@ interface DescriptionSectionProps {
 }
 
 export function DescriptionSection({ formData, onFieldChange, setPendingChanges }: DescriptionSectionProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     onFieldChange(name as keyof PropertyFormData, value);
     if (setPendingChanges) {
@@ -28,12 +27,14 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="shortDescription">Short Description</Label>
-          <Input
+          <Textarea
             id="shortDescription"
             name="shortDescription"
             placeholder="Enter a brief summary of the property (displayed in listings)"
             value={formData.shortDescription || ''}
             onChange={handleChange}
+            rows={2}
+            className="resize-none"
           />
         </div>
 
@@ -45,7 +46,8 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
             placeholder="Enter a detailed description of the property"
             value={formData.description || ''}
             onChange={handleChange}
-            className="min-h-32"
+            className="min-h-[200px]"
+            rows={8}
           />
         </div>
       </CardContent>
