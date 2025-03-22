@@ -16,6 +16,8 @@ export function DangerZoneSection({ onDelete }: DangerZoneSectionProps) {
     setIsDeleting(true);
     try {
       await onDelete();
+      // Note: The navigation after deletion is handled in the onDelete function
+      // which should navigate to the properties list page
     } finally {
       setIsDeleting(false);
     }

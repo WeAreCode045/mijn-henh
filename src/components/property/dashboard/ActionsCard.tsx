@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
@@ -16,6 +15,7 @@ import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 import { MediaViewModal } from "@/components/property/MediaViewModal";
 import { usePropertyArchive } from "@/hooks/usePropertyArchive";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +48,7 @@ export function ActionsCard({
   onWebView
 }: ActionsCardProps) {
   const { isAdmin } = useAuth();
+  const location = useLocation();
   const [showEditHistory, setShowEditHistory] = useState(false);
   const { generatePDF, isGenerating } = useGeneratePDF();
   const { archiveProperty, unarchiveProperty, isArchiving } = usePropertyArchive();
@@ -106,8 +107,8 @@ export function ActionsCard({
       const success = await archiveProperty(propertyId);
       if (success) {
         setShowArchiveDialog(false);
-        // Reload the page to reflect the archived state
-        window.location.reload();
+        // Reload the current page instead of the entire application
+        window.location.href = location.pathname;
       }
     }
   };
@@ -118,8 +119,8 @@ export function ActionsCard({
       const success = await unarchiveProperty(propertyId);
       if (success) {
         setShowUnarchiveDialog(false);
-        // Reload the page to reflect the unarchived state
-        window.location.reload();
+        // Reload the current page instead of the entire application
+        window.location.href = location.pathname;
       }
     }
   };

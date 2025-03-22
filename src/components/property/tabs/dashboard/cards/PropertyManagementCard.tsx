@@ -16,6 +16,7 @@ import { MediaViewModal } from "@/components/property/MediaViewModal";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { supabase } from "@/integrations/supabase/client";
 import { EditHistoryModal } from "../../../dashboard/components/EditHistoryModal";
+import { useLocation } from "react-router-dom";
 
 interface PropertyManagementCardProps {
   propertyId: string;
@@ -40,6 +41,9 @@ export function PropertyManagementCard({
   createdAt,
   updatedAt
 }: PropertyManagementCardProps) {
+  // Get current location for page reloads
+  const location = useLocation();
+
   // Media view modal states
   const [showMediaModal, setShowMediaModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -132,8 +136,8 @@ export function PropertyManagementCard({
         
       if (error) throw error;
       
-      // Reload the page to reflect changes
-      window.location.reload();
+      // Reload the current page instead of the entire app
+      window.location.href = location.pathname;
     } catch (error) {
       console.error("Error toggling archive status:", error);
     }

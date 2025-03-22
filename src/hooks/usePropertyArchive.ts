@@ -1,29 +1,58 @@
 
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
+import { useNavigate } from "react-router-dom";
 
 export function usePropertyArchive() {
   const [isArchiving, setIsArchiving] = useState(false);
   const { toast } = useToast();
+  const { logPropertyChange } = usePropertyEditLogger();
   const navigate = useNavigate();
 
   const archiveProperty = async (propertyId: string): Promise<boolean> => {
-    if (!propertyId) return false;
-    
+    if (!propertyId) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     setIsArchiving(true);
     try {
+      // First get current property info for logging
+      const { data: propertyData, error: fetchError } = await supabase
+        .from('properties')
+        .select('title')
+        .eq('id', propertyId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      const propertyTitle = propertyData?.title || "Untitled property";
+      
+      // Update property to archived status
       const { error } = await supabase
         .from('properties')
         .update({ archived: true })
         .eq('id', propertyId);
-      
+
       if (error) throw error;
       
+      // Log the change
+      await logPropertyChange(
+        propertyId,
+        "status",
+        "Active",
+        "Archived"
+      );
+
       toast({
         title: "Success",
-        description: "Property has been archived",
+        description: `Property "${propertyTitle}" has been archived`,
       });
       
       return true;
@@ -41,20 +70,47 @@ export function usePropertyArchive() {
   };
 
   const unarchiveProperty = async (propertyId: string): Promise<boolean> => {
-    if (!propertyId) return false;
+    if (!propertyId) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      return false;
+    }
     
     setIsArchiving(true);
     try {
+      // First get current property info for logging
+      const { data: propertyData, error: fetchError } = await supabase
+        .from('properties')
+        .select('title')
+        .eq('id', propertyId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      const propertyTitle = propertyData?.title || "Untitled property";
+      
+      // Update property to unarchived status
       const { error } = await supabase
         .from('properties')
         .update({ archived: false })
         .eq('id', propertyId);
-      
+
       if (error) throw error;
       
+      // Log the change
+      await logPropertyChange(
+        propertyId,
+        "status",
+        "Archived",
+        "Active"
+      );
+
       toast({
         title: "Success",
-        description: "Property has been unarchived and can now be edited",
+        description: `Property "${propertyTitle}" has been unarchived`,
       });
       
       return true;
@@ -71,9 +127,5 @@ export function usePropertyArchive() {
     }
   };
 
-  return {
-    archiveProperty,
-    unarchiveProperty,
-    isArchiving
-  };
+  return { archiveProperty, unarchiveProperty, isArchiving };
 }
