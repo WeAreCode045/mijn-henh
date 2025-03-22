@@ -47,7 +47,11 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
             editor.insertBlocks([
               {
                 type: "paragraph",
-                content: [{ type: "text", text: line }]
+                content: line.trim() ? [{ 
+                  type: "text", 
+                  text: line,
+                  styles: {} // Add the required styles property (empty object)
+                }] : []
               }
             ], index === 0 ? "beginning" : "end");
           }
@@ -56,10 +60,12 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
         console.error("Error setting editor content:", error);
       }
     }
-  }, [formData.id]); // Only run when property ID changes
+  }, [formData.id, editor]); // Add editor to dependency array
 
   // Update formData.description when editor content changes
   useEffect(() => {
+    if (!editor) return; // Guard clause
+    
     const handleEditorChange = () => {
       try {
         // Extract text content from editor blocks
@@ -90,6 +96,7 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
     // Subscribe to editor changes
     const unsubscribe = editor.onEditorContentChange(handleEditorChange);
     
+    // Return the unsubscribe function, not call it directly
     return () => {
       unsubscribe();
     };
