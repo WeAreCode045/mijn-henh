@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
-import { AreaSortableImageGrid } from "./AreaSortableImageGrid";
 import { AreaCardHeader } from "./area/AreaCardHeader";
-import { AreaDescription } from "./area/AreaDescription";
+import { AreaDescriptionSection } from "./area/AreaDescriptionSection";
 import { AreaColumnsSelector } from "./area/AreaColumnsSelector";
-import { AreaImageActions } from "./area/AreaImageActions";
+import { AreaImageGridSection } from "./area/AreaImageGridSection";
 import { AreaImageSelectDialog } from "./area/AreaImageSelectDialog";
+import { AreaDescriptionGeneratorDialog } from "./area/AreaDescriptionGeneratorDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronDown, ChevronUp, Wand2 } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAreaImages } from "@/hooks/areas/useAreaImages";
+import { useAreaDescriptionGenerator } from "@/hooks/areas/useAreaDescriptionGenerator";
 
 interface AreaCardProps {
   area: PropertyArea;
@@ -26,16 +26,6 @@ interface AreaCardProps {
   onImagesSelect?: (id: string, imageIds: string[]) => void;
 }
 
-type AreaImage = {
-  id: string;
-  url: string;
-  area?: string | null;
-  property_id?: string;
-  created_at?: string;
-  type?: string;
-  sort_order?: number;
-};
-
 export function AreaCard({
   area,
   images,
@@ -47,51 +37,20 @@ export function AreaCard({
   onImagesSelect,
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
-  const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
-  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  const [keywordsForDescription, setKeywordsForDescription] = useState("");
-  const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const { toast } = useToast();
   
-  useEffect(() => {
-    const fetchAreaImages = async () => {
-      if (!area) {
-        setAreaImages([]);
-        return;
-      }
-      
-      if (propertyId) {
-        try {
-          const { data, error } = await supabase
-            .from('property_images')
-            .select('*')
-            .eq('property_id', propertyId)
-            .eq('area', area.id)
-            .order('sort_order', { ascending: true });
-            
-          if (error) {
-            console.error(`Error fetching images for area ${area.id} from property_images:`, error);
-          } else if (data && data.length > 0) {
-            console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
-            setAreaImages(data as PropertyImage[]);
-            return;
-          }
-        } catch (err) {
-          console.error(`Error in fetching area images from property_images:`, err);
-        }
-      }
-      
-      if (area.images && Array.isArray(area.images) && area.images.length > 0) {
-        console.log(`AreaCard ${area.id} - Using ${area.images.length} images from area.images:`, area.images);
-        setAreaImages(area.images as PropertyImage[]);
-      } else {
-        setAreaImages([]);
-      }
-    };
-    
-    fetchAreaImages();
-  }, [area, propertyId, area.images]);
+  // Use our extracted hooks
+  const { images: areaImages, setImages: setAreaImages } = useAreaImages(area.id, propertyId, area.images);
+  
+  const { 
+    isGenerating, 
+    keywordsForDescription, 
+    setKeywordsForDescription, 
+    isDialogOpen: isGenerateDialogOpen, 
+    setIsDialogOpen: setIsGenerateDialogOpen, 
+    generateDescription 
+  } = useAreaDescriptionGenerator(area.id, area.title);
 
   const handleUpdateTitle = (value: string) => {
     onUpdate(area.id, "title", value);
@@ -140,59 +99,17 @@ export function AreaCard({
     setAreaImages(reorderedImages);
   };
 
+  const handleGenerateDescription = async () => {
+    const generatedDescription = await generateDescription();
+    if (generatedDescription) {
+      handleUpdateDescription(generatedDescription);
+    }
+  };
+
   const toggleExpand = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsExpanded(!isExpanded);
-  };
-
-  const generateDescription = async () => {
-    if (!keywordsForDescription.trim()) {
-      toast({
-        title: "Missing keywords",
-        description: "Please enter at least one keyword to generate a description",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsGeneratingDescription(true);
-    
-    try {
-      const keywords = keywordsForDescription
-        .split('\n')
-        .map(k => k.trim())
-        .filter(k => k.length > 0);
-      
-      const { data, error } = await supabase.functions.invoke('generate-area-description', {
-        body: {
-          keywords: keywords,
-          areaName: area.title || area.name,
-        }
-      });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      if (data && data.description) {
-        handleUpdateDescription(data.description);
-        setIsGenerateDialogOpen(false);
-        toast({
-          title: "Description generated",
-          description: "The area description has been generated successfully",
-        });
-      }
-    } catch (err) {
-      console.error("Error generating description:", err);
-      toast({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to generate description",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingDescription(false);
-    }
   };
 
   return (
@@ -216,23 +133,12 @@ export function AreaCard({
 
       {isExpanded && (
         <CardContent className="space-y-4">
-          <div className="flex items-start gap-2">
-            <div className="flex-1">
-              <AreaDescription
-                description={area.description}
-                areaId={area.id}
-                onDescriptionChange={handleUpdateDescription}
-              />
-            </div>
-            <Button 
-              variant="outline" 
-              className="mt-6" 
-              onClick={() => setIsGenerateDialogOpen(true)}
-            >
-              <Wand2 className="mr-2 h-4 w-4" />
-              Generate
-            </Button>
-          </div>
+          <AreaDescriptionSection
+            description={area.description}
+            areaId={area.id}
+            onDescriptionChange={handleUpdateDescription}
+            onGenerateClick={() => setIsGenerateDialogOpen(true)}
+          />
           
           <AreaColumnsSelector
             columns={area.columns || 2}
@@ -240,22 +146,14 @@ export function AreaCard({
             onColumnsChange={handleUpdateColumns}
           />
 
-          <div>
-            <AreaImageActions
-              onSelectClick={() => setIsSelectDialogOpen(true)}
-            />
-            
-            <div className="mt-2">
-              <p className="text-sm font-medium mb-2">Selected Images ({areaImages.length}) - Drag to reorder</p>
-              <AreaSortableImageGrid
-                areaImages={areaImages}
-                areaId={area.id}
-                areaTitle={area.title}
-                onImageRemove={onImageRemove}
-                onImagesReorder={handleImagesReorder}
-              />
-            </div>
-          </div>
+          <AreaImageGridSection
+            areaId={area.id}
+            areaTitle={area.title}
+            areaImages={areaImages}
+            onSelectClick={() => setIsSelectDialogOpen(true)}
+            onImageRemove={onImageRemove}
+            onImagesReorder={handleImagesReorder}
+          />
         </CardContent>
       )}
       
@@ -268,47 +166,15 @@ export function AreaCard({
         onUpdate={handleUpdateImageIds}
       />
 
-      <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Generate Description for {area.title || "Area"}</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <Label htmlFor="area-keywords">Enter keywords (one per line)</Label>
-            <Textarea
-              id="area-keywords"
-              placeholder="spacious
-modern
-bright
-new appliances
-hardwood floors"
-              rows={6}
-              value={keywordsForDescription}
-              onChange={(e) => setKeywordsForDescription(e.target.value)}
-            />
-            
-            <div className="text-sm text-muted-foreground">
-              <p>Enter each keyword or phrase on a new line. The AI will use these to generate a compelling description.</p>
-            </div>
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsGenerateDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={generateDescription}
-              disabled={isGeneratingDescription || !keywordsForDescription.trim()}
-            >
-              {isGeneratingDescription ? "Generating..." : "Generate Description"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AreaDescriptionGeneratorDialog
+        open={isGenerateDialogOpen}
+        onOpenChange={setIsGenerateDialogOpen}
+        areaTitle={area.title}
+        keywords={keywordsForDescription}
+        onKeywordsChange={setKeywordsForDescription}
+        onGenerate={handleGenerateDescription}
+        isGenerating={isGenerating}
+      />
     </Card>
   );
 }

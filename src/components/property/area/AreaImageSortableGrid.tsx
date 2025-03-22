@@ -1,11 +1,11 @@
 
 import { PropertyImage } from "@/types/property";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface SortableImageItemProps {
   image: PropertyImage;
@@ -56,7 +56,7 @@ function SortableImageItem({ image, onRemove }: SortableImageItemProps) {
   );
 }
 
-interface AreaSortableImageGridProps {
+interface AreaImageSortableGridProps {
   areaImages: PropertyImage[];
   areaId: string;
   areaTitle: string;
@@ -64,13 +64,13 @@ interface AreaSortableImageGridProps {
   onImagesReorder: (areaId: string, reorderedImages: PropertyImage[]) => void;
 }
 
-export function AreaSortableImageGrid({ 
+export function AreaImageSortableGrid({ 
   areaImages = [], 
   areaId, 
   areaTitle, 
   onImageRemove, 
   onImagesReorder 
-}: AreaSortableImageGridProps) {
+}: AreaImageSortableGridProps) {
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   const [orderedImages, setOrderedImages] = useState<PropertyImage[]>([]);
   
