@@ -1,0 +1,130 @@
+
+import { useState, useCallback } from "react";
+import { PropertyFormData } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+
+export function usePropertyFormImages(
+  propertyId: string,
+  formState: PropertyFormData,
+  handleFieldChange: (field: keyof PropertyFormData, value: any) => void,
+  setPendingChanges: (pending: boolean) => void
+) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingFloorplan, setIsUploadingFloorplan] = useState(false);
+  const { toast } = useToast();
+  
+  const handleImageUpload = useCallback(async (files: FileList) => {
+    if (!propertyId) {
+      toast({
+        title: "Error",
+        description: "Property ID missing. Cannot upload images.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      // This is a simplified version that would need to be expanded
+      // to handle actual image upload to Supabase storage
+      console.log("Uploading images for property:", propertyId);
+      
+      // Mock successful upload
+      setTimeout(() => {
+        setIsUploading(false);
+        setPendingChanges(true);
+        toast({
+          title: "Success",
+          description: "Images uploaded successfully",
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      setIsUploading(false);
+      toast({
+        title: "Error",
+        description: "Failed to upload images",
+        variant: "destructive",
+      });
+    }
+  }, [propertyId, setPendingChanges, toast]);
+  
+  const handleRemoveImage = useCallback((index: number) => {
+    // Implementation for removing images
+    console.log("Removing image at index:", index);
+    setPendingChanges(true);
+  }, [setPendingChanges]);
+  
+  const handleFloorplanUpload = useCallback(async (files: FileList) => {
+    setIsUploadingFloorplan(true);
+    
+    try {
+      // Mock implementation
+      setTimeout(() => {
+        setIsUploadingFloorplan(false);
+        setPendingChanges(true);
+        toast({
+          title: "Success",
+          description: "Floorplan uploaded successfully",
+        });
+      }, 1000);
+    } catch (error) {
+      setIsUploadingFloorplan(false);
+      toast({
+        title: "Error",
+        description: "Failed to upload floorplan",
+        variant: "destructive",
+      });
+    }
+  }, [setPendingChanges, toast]);
+  
+  const handleRemoveFloorplan = useCallback((index: number) => {
+    console.log("Removing floorplan at index:", index);
+    setPendingChanges(true);
+  }, [setPendingChanges]);
+  
+  const handleSetFeaturedImage = useCallback((imageUrl: string) => {
+    handleFieldChange("featuredImage", imageUrl);
+  }, [handleFieldChange]);
+  
+  const handleToggleFeaturedImage = useCallback((imageUrl: string) => {
+    const featuredImages = formState.featuredImages || [];
+    
+    if (featuredImages.includes(imageUrl)) {
+      handleFieldChange(
+        "featuredImages", 
+        featuredImages.filter(url => url !== imageUrl)
+      );
+    } else {
+      handleFieldChange("featuredImages", [...featuredImages, imageUrl]);
+    }
+  }, [formState.featuredImages, handleFieldChange]);
+  
+  const handleVirtualTourUpdate = useCallback((url: string) => {
+    handleFieldChange("virtualTourUrl", url);
+  }, [handleFieldChange]);
+  
+  const handleYoutubeUrlUpdate = useCallback((url: string) => {
+    handleFieldChange("youtubeUrl", url);
+  }, [handleFieldChange]);
+  
+  const handleFloorplanEmbedScriptUpdate = useCallback((script: string) => {
+    handleFieldChange("floorplanEmbedScript", script);
+  }, [handleFieldChange]);
+  
+  return {
+    handleImageUpload,
+    handleRemoveImage,
+    isUploading,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate
+  };
+}

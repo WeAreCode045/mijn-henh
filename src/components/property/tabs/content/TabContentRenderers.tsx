@@ -51,11 +51,11 @@ export class TabContentRenderers {
             formState={props.formState}
             onFieldChange={handlers.onFieldChange}
             onAddFeature={handlers.onAddFeature}
-            onRemoveFeature={handlers.onRemoveFeature}
-            onUpdateFeature={handlers.onUpdateFeature}
+            onRemoveFeature={(index) => handlers.onRemoveFeature(index)}
+            onUpdateFeature={(index, value) => handlers.onUpdateFeature(index, value)}
             currentStep={handlers.currentStep}
             handleStepClick={handlers.handleStepClick}
-            onSubmit={handlers.setPendingChanges}
+            onSubmit={() => handlers.setPendingChanges(true)}
             isReadOnly={isArchived}
           />
         );

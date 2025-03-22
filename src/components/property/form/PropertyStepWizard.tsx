@@ -1,0 +1,54 @@
+
+import React from "react";
+import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyStepContent } from "./PropertyStepContent";
+import { FormStepNavigation } from "./FormStepNavigation";
+
+interface PropertyStepWizardProps {
+  property: PropertyData;
+  formState: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onAddFeature: () => void;
+  onRemoveFeature: (index: number) => void;
+  onUpdateFeature: (index: number, value: string) => void;
+  currentStep: number;
+  handleStepClick: (step: number) => void;
+  onSubmit: () => void;
+  isReadOnly?: boolean;
+}
+
+export function PropertyStepWizard({
+  property,
+  formState,
+  onFieldChange,
+  onAddFeature,
+  onRemoveFeature,
+  onUpdateFeature,
+  currentStep,
+  handleStepClick,
+  onSubmit,
+  isReadOnly = false
+}: PropertyStepWizardProps) {
+  return (
+    <div className="space-y-6">
+      <FormStepNavigation
+        currentStep={currentStep}
+        onStepClick={handleStepClick}
+        onSave={onSubmit}
+        isSaving={false}
+      />
+      
+      <PropertyStepContent 
+        formData={formState}
+        onFieldChange={onFieldChange}
+        onAddFeature={onAddFeature}
+        onRemoveFeature={onRemoveFeature}
+        onUpdateFeature={onUpdateFeature}
+        currentStep={currentStep}
+        handleStepClick={handleStepClick}
+        onSubmit={onSubmit}
+        isReadOnly={isReadOnly}
+      />
+    </div>
+  );
+}
