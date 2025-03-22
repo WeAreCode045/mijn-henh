@@ -21,7 +21,7 @@ export function useAreaImageSelect(
       // First update the area's images in the local state
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          console.log(`Updating area ${areaId} with selected images`);
+          console.log(`Updating area ${areaId} with ${selectedImages.length} selected images`);
           return {
             ...area,
             images: selectedImages,
@@ -73,7 +73,7 @@ export function useAreaImageSelect(
       
       toast({
         title: "Success",
-        description: "Area images updated",
+        description: `Area images updated (${selectedImages.length} images)`,
       });
       
     } catch (error) {

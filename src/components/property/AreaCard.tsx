@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyArea, PropertyImage } from "@/types/property";
@@ -55,7 +54,6 @@ export function AreaCard({
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const { toast } = useToast();
   
-  // Get area images based on area ID from property_images table
   useEffect(() => {
     const fetchAreaImages = async () => {
       if (!area) {
@@ -63,7 +61,6 @@ export function AreaCard({
         return;
       }
       
-      // If we have a propertyId, fetch images from property_images table
       if (propertyId) {
         try {
           const { data, error } = await supabase
@@ -80,15 +77,22 @@ export function AreaCard({
             setAreaImages(data as AreaImage[]);
             return;
           } else {
-            console.log(`AreaCard ${area.id} - No images found in property_images table`);
+            console.log(`AreaCard ${area.id} - No images found in property_images table, checking area.images`);
+            
+            if (area.images && Array.isArray(area.images) && area.images.length > 0) {
+              console.log(`AreaCard ${area.id} - Using ${area.images.length} images from area.images:`, area.images);
+              setAreaImages(area.images as AreaImage[]);
+              return;
+            }
+            
             setAreaImages([]);
           }
         } catch (err) {
           console.error(`Error in fetching area images from property_images:`, err);
         }
       } else {
-        // Use area.images directly if available
-        if (area.images && area.images.length > 0) {
+        if (area.images && Array.isArray(area.images) && area.images.length > 0) {
+          console.log(`AreaCard ${area.id} - Using ${area.images.length} images from area.images directly:`, area.images);
           setAreaImages(area.images as AreaImage[]);
         } else {
           setAreaImages([]);
@@ -97,7 +101,7 @@ export function AreaCard({
     };
     
     fetchAreaImages();
-  }, [area, propertyId]);
+  }, [area, propertyId, area.images]);
 
   const handleUpdateTitle = (value: string) => {
     onUpdate(area.id, "title", value);
@@ -114,14 +118,12 @@ export function AreaCard({
   const handleUpdateImageIds = (imageIds: string[]) => {
     console.log(`Updating area ${area.id} image IDs:`, imageIds);
     
-    // Additional callback for external handling if needed
     if (onImagesSelect) {
       onImagesSelect(area.id, imageIds);
     }
   };
 
   const handleImagesReorder = async (areaId: string, reorderedImages: PropertyImage[]) => {
-    // Update images with new sort order
     if (propertyId) {
       try {
         for (let i = 0; i < reorderedImages.length; i++) {
@@ -146,7 +148,6 @@ export function AreaCard({
       }
     }
     
-    // Update the local state with the new order
     setAreaImages(reorderedImages);
   };
 
@@ -169,13 +170,11 @@ export function AreaCard({
     setIsGeneratingDescription(true);
     
     try {
-      // Split keywords by newline
       const keywords = keywordsForDescription
         .split('\n')
         .map(k => k.trim())
         .filter(k => k.length > 0);
       
-      // Call the edge function
       const { data, error } = await supabase.functions.invoke('generate-area-description', {
         body: {
           keywords: keywords,
@@ -188,7 +187,6 @@ export function AreaCard({
       }
       
       if (data && data.description) {
-        // Update the area description
         handleUpdateDescription(data.description);
         setIsGenerateDialogOpen(false);
         toast({
@@ -281,7 +279,6 @@ export function AreaCard({
         onUpdate={handleUpdateImageIds}
       />
 
-      {/* Description Generator Dialog */}
       <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>

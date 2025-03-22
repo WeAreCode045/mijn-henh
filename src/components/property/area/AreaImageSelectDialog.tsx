@@ -28,11 +28,13 @@ export function AreaImageSelectDialog({
   // Update local selection when props change or dialog opens
   useEffect(() => {
     if (open) {
+      console.log("AreaImageSelectDialog opened with selectedImageIds:", selectedImageIds);
       setLocalSelection([...selectedImageIds]);
     }
   }, [selectedImageIds, open]);
 
   const toggleImageSelection = (imageId: string) => {
+    console.log(`Toggling selection for image ${imageId}`);
     setLocalSelection(current => {
       if (current.includes(imageId)) {
         // Remove from selection
@@ -46,6 +48,7 @@ export function AreaImageSelectDialog({
   
   const handleConfirm = () => {
     // Update parent component with the selection
+    console.log(`AreaImageSelectDialog confirming selection:`, localSelection);
     onUpdate(localSelection);
     onOpenChange(false);
   };
@@ -64,7 +67,7 @@ export function AreaImageSelectDialog({
         </DialogHeader>
         
         <div className="py-4">
-          <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto p-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto p-1">
             {images.map((image) => {
               const isSelected = localSelection.includes(image.id);
               return (
@@ -93,7 +96,7 @@ export function AreaImageSelectDialog({
           
           {images.length === 0 && (
             <div className="text-center py-10 text-gray-500">
-              <p>No images available. Upload images first.</p>
+              <p>No images available. Upload images first in the Media tab.</p>
             </div>
           )}
         </div>
@@ -103,7 +106,7 @@ export function AreaImageSelectDialog({
             Cancel
           </Button>
           <Button onClick={handleConfirm} type="button">
-            Confirm Selection
+            Confirm Selection ({localSelection.length} images)
           </Button>
         </div>
       </DialogContent>
