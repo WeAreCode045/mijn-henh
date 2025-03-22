@@ -1,5 +1,4 @@
-
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { MapPin, ShoppingBag, GraduationCap, Trees, Bus, Building, Dumbbell } from "lucide-react";
 
 export interface CategoryType {
@@ -135,40 +134,45 @@ export function useCategories() {
     return 5; // Default max selections
   };
 
-  // Group places by category
+  // Group places by category and limit to max selections per type
   const groupPlacesByCategory = (places: any[]) => {
     const grouped: Record<string, any[]> = {};
     
+    // Create a mapping of type to place
+    const placesByType: Record<string, any[]> = {};
+    
     places.forEach(place => {
-      // Try to categorize by type first
-      let categoryId = place.type;
+      const type = place.type;
       
-      // Check if the place type is a subtype, find its parent category
-      const parentCategory = findCategoryByType(place.type);
-      if (parentCategory) {
-        categoryId = parentCategory.id;
+      if (!placesByType[type]) {
+        placesByType[type] = [];
       }
       
-      // If we still don't have a category, check if any of the place's types
-      // match any of our category or subtype ids
-      if (!grouped[categoryId] && place.types && Array.isArray(place.types)) {
-        for (const type of place.types) {
-          const typeCategory = findCategoryByType(type);
-          if (typeCategory) {
-            categoryId = typeCategory.id;
-            break;
-          }
-        }
+      // Add to type-specific array
+      placesByType[type].push(place);
+    });
+    
+    // Now assign places to categories, keeping in mind the max selections per type
+    Object.entries(placesByType).forEach(([type, typePlaces]) => {
+      // Find the parent category for this type
+      let categoryId = type;
+      
+      // Check if this type belongs to a main category
+      const parentCategory = findCategoryByType(type);
+      if (parentCategory) {
+        categoryId = parentCategory.id;
       }
       
       if (!grouped[categoryId]) {
         grouped[categoryId] = [];
       }
       
-      // Only add the place if we haven't reached the max selections for this category
-      if (grouped[categoryId].length < getMaxSelections(categoryId)) {
-        grouped[categoryId].push(place);
-      }
+      // Only take up to maxSelections for this type
+      const maxForType = getMaxSelections(type);
+      const placesToAdd = typePlaces.slice(0, maxForType);
+      
+      // Add the places to the category
+      grouped[categoryId].push(...placesToAdd);
     });
     
     return grouped;

@@ -14,6 +14,7 @@ export interface PlaceOption {
   rating?: number;
   distance?: number;
   type: string;
+  types?: string[];
   maxSelections?: number;
 }
 
@@ -52,7 +53,11 @@ export function SelectPlacesModal({
     if (selectedPlaces.some(p => p.id === place.id)) {
       setSelectedPlaces(selectedPlaces.filter(p => p.id !== place.id));
     } else {
-      if (selectedPlaces.length < effectiveMaxSelections) {
+      // Count how many places of this type are already selected
+      const selectedOfThisType = selectedPlaces.filter(p => p.type === place.type).length;
+      
+      // Only allow selection if we haven't reached the max for this type
+      if (selectedOfThisType < effectiveMaxSelections) {
         setSelectedPlaces([...selectedPlaces, place]);
       }
     }
@@ -76,7 +81,7 @@ export function SelectPlacesModal({
         
         <div className="py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Select up to {effectiveMaxSelections} places to include (found {places.length} places).
+            Select up to {effectiveMaxSelections} places per type (found {places.length} places).
           </p>
           
           {isLoading ? (
@@ -88,49 +93,56 @@ export function SelectPlacesModal({
           ) : (
             <ScrollArea className="h-[300px] pr-4">
               <div className="space-y-2">
-                {places.map((place) => (
-                  <div 
-                    key={place.id} 
-                    className="flex items-start p-3 rounded-md border bg-white"
-                  >
-                    <Checkbox 
-                      id={`place-${place.id}`}
-                      className="mt-1"
-                      checked={selectedPlaces.some(p => p.id === place.id)}
-                      onCheckedChange={() => handleTogglePlace(place)}
-                      disabled={!selectedPlaces.some(p => p.id === place.id) && selectedPlaces.length >= effectiveMaxSelections}
-                    />
-                    <div className="ml-3 space-y-1 flex-1">
-                      <label 
-                        htmlFor={`place-${place.id}`}
-                        className="font-medium cursor-pointer"
-                      >
-                        {place.name}
-                      </label>
-                      
-                      {place.vicinity && (
-                        <p className="text-sm text-gray-500">{place.vicinity}</p>
-                      )}
-                      
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {place.distance !== undefined && (
-                          <Badge variant="outline" className="text-xs">
-                            {typeof place.distance === 'number' 
-                              ? `${place.distance.toFixed(1)} km` 
-                              : place.distance}
-                          </Badge>
+                {places.map((place) => {
+                  // Count how many places of this type are already selected
+                  const selectedOfThisType = selectedPlaces.filter(p => p.type === place.type).length;
+                  const isDisabled = !selectedPlaces.some(p => p.id === place.id) && 
+                                     selectedOfThisType >= effectiveMaxSelections;
+                  
+                  return (
+                    <div 
+                      key={place.id} 
+                      className="flex items-start p-3 rounded-md border bg-white"
+                    >
+                      <Checkbox 
+                        id={`place-${place.id}`}
+                        className="mt-1"
+                        checked={selectedPlaces.some(p => p.id === place.id)}
+                        onCheckedChange={() => handleTogglePlace(place)}
+                        disabled={isDisabled}
+                      />
+                      <div className="ml-3 space-y-1 flex-1">
+                        <label 
+                          htmlFor={`place-${place.id}`}
+                          className="font-medium cursor-pointer"
+                        >
+                          {place.name}
+                        </label>
+                        
+                        {place.vicinity && (
+                          <p className="text-sm text-gray-500">{place.vicinity}</p>
                         )}
                         
-                        {place.rating && (
-                          <Badge variant="outline" className="text-xs flex items-center gap-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            {place.rating.toFixed(1)}
-                          </Badge>
-                        )}
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {place.distance !== undefined && (
+                            <Badge variant="outline" className="text-xs">
+                              {typeof place.distance === 'number' 
+                                ? `${place.distance.toFixed(1)} km` 
+                                : place.distance}
+                            </Badge>
+                          )}
+                          
+                          {place.rating && (
+                            <Badge variant="outline" className="text-xs flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              {place.rating.toFixed(1)}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
           )}

@@ -16,7 +16,7 @@ interface NearbyPlacesWithTabsProps {
   togglePlaceSelection: (index: number, selected: boolean) => void;
   selectedPlacesToDelete: number[];
   handleBulkDelete: () => void;
-  handleFetchCategory: (categoryId: string, subtypeId?: string) => Promise<void>;
+  handleFetchCategory: (categoryId: string) => Promise<void>;
   isFetchingCategory: boolean;
   currentCategory: string;
 }
@@ -36,31 +36,6 @@ export function NearbyPlacesWithTabs({
   isFetchingCategory,
   currentCategory
 }: NearbyPlacesWithTabsProps) {
-  // Render subtypes for a category
-  const renderSubtypeButtons = (category: CategoryType) => {
-    if (!category.subtypes) return null;
-    
-    return (
-      <div className="flex flex-wrap gap-2 mt-3">
-        {category.subtypes.map(subtype => (
-          <Button 
-            key={subtype.id}
-            size="sm"
-            variant="outline"
-            onClick={() => handleFetchCategory(category.id, subtype.id)}
-            disabled={isFetchingCategory}
-            className="text-xs"
-          >
-            {isFetchingCategory && currentCategory === subtype.id ? 
-              'Fetching...' : 
-              `Fetch ${subtype.label} (max ${subtype.maxSelections})`
-            }
-          </Button>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-4">
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
@@ -104,9 +79,6 @@ export function NearbyPlacesWithTabs({
                   </Button>
                 )}
               </div>
-              
-              {/* Render subtype buttons if available */}
-              {renderSubtypeButtons(categories.find(c => c.id === activeTab) as CategoryType)}
             </div>
           )}
         </div>

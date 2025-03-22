@@ -19,29 +19,28 @@ export function usePlaceFetching({
   const [isFetchingCategory, setIsFetchingCategory] = useState(false);
   const { toast } = useToast();
 
-  // Function to handle fetching places by category or subtype
-  const handleFetchCategory = async (categoryId: string, subtypeId?: string) => {
+  // Function to handle fetching places by category
+  const handleFetchCategory = async (categoryId: string) => {
     if (!onFetchNearbyPlaces) return;
     
-    const typeToFetch = subtypeId || categoryId;
     setIsFetchingCategory(true);
-    setCurrentCategory(typeToFetch);
+    setCurrentCategory(categoryId);
     
     try {
-      console.log(`Fetching places for: ${typeToFetch}`);
-      const results = await onFetchNearbyPlaces(typeToFetch);
+      console.log(`Fetching places for: ${categoryId}`);
+      const results = await onFetchNearbyPlaces(categoryId);
       
-      if (results && results[typeToFetch] && Array.isArray(results[typeToFetch])) {
+      if (results && results[categoryId] && Array.isArray(results[categoryId])) {
         // Make sure we're only showing places for the requested category
-        const options: PlaceOption[] = results[typeToFetch].map((place: any) => ({
+        const options: PlaceOption[] = results[categoryId].map((place: any) => ({
           id: place.id,
           name: place.name,
           vicinity: place.vicinity,
           rating: place.rating,
           distance: place.distance,
-          type: typeToFetch,
+          type: place.type,
           types: place.types,
-          maxSelections: getMaxSelections(typeToFetch)
+          maxSelections: getMaxSelections(place.type)
         }));
         
         // Sort by rating
@@ -52,7 +51,7 @@ export function usePlaceFetching({
       } else {
         toast({
           title: "No places found",
-          description: `No ${typeToFetch.replace('_', ' ')} places found near this location.`,
+          description: `No ${categoryId.replace('_', ' ')} places found near this location.`,
           variant: "destructive"
         });
       }
