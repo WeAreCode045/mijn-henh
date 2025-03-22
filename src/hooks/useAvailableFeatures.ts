@@ -26,12 +26,12 @@ export function useAvailableFeatures() {
           // Fallback to default features
           setAvailableFeatures(getDefaultFeatures());
         } else if (data && data.length > 0) {
-          // Convert the data to PropertyFeature[] using a more explicit approach
-          // First cast to unknown, then to the desired type to avoid TypeScript errors
+          // Safely convert the data to PropertyFeature[]
+          // Use type assertion after checking the structure of the data
           const typedFeatures = data.map(item => ({
-            id: item.id as string,
-            description: item.description as string
-          })) as PropertyFeature[];
+            id: String(item.id),
+            description: String(item.description)
+          }));
           
           setAvailableFeatures(typedFeatures);
         } else {
