@@ -61,13 +61,13 @@ export interface PropertyCity {
 
 // Property agent
 export interface PropertyAgent {
-  full_name: string;
   id: string;
   name: string;
   email?: string;
   phone?: string;
   photoUrl?: string;
   address?: string;
+  full_name?: string;
 }
 
 // Property data interface

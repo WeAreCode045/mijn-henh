@@ -15,10 +15,6 @@ export interface PropertyFormData extends PropertyData {
   nearby_cities?: PropertyCity[];
   status?: string; // Added status property
   propertyType?: string; // Added propertyType property
-  metadata?: {
-    status?: string;
-    [key: string]: any;
-  };
 }
 
 // Property submit data
@@ -57,8 +53,4 @@ export interface PropertySubmitData {
   floorplanEmbedScript?: string;
   status?: string; // Added status property
   propertyType?: string; // Added propertyType property
-  metadata?: {
-    status?: string;
-    [key: string]: any;
-  }; // Added metadata property
 }

@@ -9,7 +9,8 @@ export type {
   PropertyCity,
   PropertyPlaceType,
   PropertyFormData,
-  PropertySubmitData
+  PropertySubmitData,
+  PropertyAgent
 } from './PropertyTypes';
 
 // Re-export types from PropertyDataTypes.ts that don't conflict

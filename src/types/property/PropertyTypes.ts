@@ -18,6 +18,18 @@ export interface PropertyArea {
   images: string[];
 }
 
+export interface PropertyAgent {
+    id: string;
+    full_name: string;
+    email: string;
+    phone: string;
+    photo_url: string;
+    name?: string; // Added for compatibility
+    photoUrl?: string; // For compatibility with PropertyAgent in property.d.ts
+    avatar_url?: string;
+    address?: string; // For compatibility with PropertyAgent in property.d.ts
+}
+
 export interface PropertyImage {
   id: string;
   url: string;
@@ -97,10 +109,6 @@ export interface PropertyFormData {
   updated_at?: string;
   status?: string; // Status property
   propertyType?: string; // Property type property
-  metadata?: {
-    status?: string;
-    [key: string]: any;
-  }; // Metadata property
 }
 
 export interface PropertySubmitData {
