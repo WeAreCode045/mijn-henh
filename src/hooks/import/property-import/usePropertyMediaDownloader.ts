@@ -11,36 +11,27 @@ export function usePropertyMediaDownloader() {
     try {
       console.log(`Downloading image from ${imageUrl} for property ${propertyId}`);
       
-      // Download the image
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to download image: ${response.statusText}`);
-      }
-      
-      // Get the file data and create a File object
-      const blob = await response.blob();
-      const filename = imageUrl.split('/').pop() || `image-${Date.now()}.jpg`;
-      const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
-      
-      // Generate a unique path for the file
-      const filePath = `properties/${propertyId}/${folderType}/${crypto.randomUUID()}-${filename}`;
-      
-      // Upload to Supabase storage
-      const { data, error } = await supabase.storage
-        .from('properties')
-        .upload(filePath, file);
+      // Call the Supabase Edge Function that handles image downloading and uploading
+      const { data, error } = await supabase.functions.invoke('download-image', {
+        body: {
+          imageUrl,
+          propertyId,
+          folder: folderType
+        }
+      });
       
       if (error) {
-        throw error;
+        console.error("Error calling download-image function:", error);
+        return null;
       }
       
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('properties')
-        .getPublicUrl(filePath);
+      if (!data || !data.publicUrl) {
+        console.error("No valid URL returned from download-image function");
+        return null;
+      }
       
-      console.log(`Successfully uploaded image to ${publicUrl}`);
-      return publicUrl;
+      console.log(`Successfully downloaded and uploaded image to ${data.publicUrl}`);
+      return data.publicUrl;
     } catch (error) {
       console.error("Error downloading and uploading image:", error);
       return null;
