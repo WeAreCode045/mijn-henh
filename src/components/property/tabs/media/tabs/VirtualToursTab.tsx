@@ -1,58 +1,51 @@
 
 import React, { useState } from "react";
 import { PropertyData } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 interface VirtualToursTabProps {
   property: PropertyData;
   setProperty: React.Dispatch<React.SetStateAction<PropertyData>>;
-  onVirtualTourSave?: (url: string) => Promise<void>;
-  onYoutubeUrlSave?: (url: string) => Promise<void>;
-  onFloorplanEmbedScriptSave?: (script: string) => Promise<void>;
-  isSaving?: boolean;
+  onVirtualTourSave?: (url: string) => void;
+  onYoutubeUrlSave?: (url: string) => void;
+  onFloorplanEmbedScriptSave?: (script: string) => void;
+  isSaving: boolean;
+  isReadOnly?: boolean;
 }
 
-export function VirtualToursTab({ 
-  property, 
+export function VirtualToursTab({
+  property,
   setProperty,
   onVirtualTourSave,
   onYoutubeUrlSave,
   onFloorplanEmbedScriptSave,
-  isSaving = false
+  isSaving,
+  isReadOnly = false
 }: VirtualToursTabProps) {
   const [virtualTourUrl, setVirtualTourUrl] = useState(property.virtualTourUrl || '');
   const [youtubeUrl, setYoutubeUrl] = useState(property.youtubeUrl || '');
   const [floorplanEmbedScript, setFloorplanEmbedScript] = useState(property.floorplanEmbedScript || '');
 
-  // Update state when property changes
-  React.useEffect(() => {
-    setVirtualTourUrl(property.virtualTourUrl || '');
-    setYoutubeUrl(property.youtubeUrl || '');
-    setFloorplanEmbedScript(property.floorplanEmbedScript || '');
-  }, [property]);
-
-  const handleVirtualTourSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveVirtualTour = () => {
     if (onVirtualTourSave) {
-      await onVirtualTourSave(virtualTourUrl);
+      onVirtualTourSave(virtualTourUrl);
     }
   };
 
-  const handleYoutubeUrlSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveYoutubeUrl = () => {
     if (onYoutubeUrlSave) {
-      await onYoutubeUrlSave(youtubeUrl);
+      onYoutubeUrlSave(youtubeUrl);
     }
   };
 
-  const handleFloorplanEmbedScriptSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveFloorplanEmbed = () => {
     if (onFloorplanEmbedScriptSave) {
-      await onFloorplanEmbedScriptSave(floorplanEmbedScript);
+      onFloorplanEmbedScriptSave(floorplanEmbedScript);
     }
   };
 
@@ -61,84 +54,92 @@ export function VirtualToursTab({
       {/* Virtual Tour URL Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Virtual Tour URL</CardTitle>
+          <CardTitle>Virtual Tour</CardTitle>
+          <CardDescription>
+            Add a virtual tour URL (Matterport, etc.)
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-2">
+          <div className="space-y-2">
             <Label htmlFor="virtualTourUrl">Virtual Tour URL</Label>
-            <div className="flex gap-2">
-              <Input 
-                id="virtualTourUrl" 
-                value={virtualTourUrl} 
-                onChange={(e) => setVirtualTourUrl(e.target.value)}
-                placeholder="https://example.com/virtual-tour"
-                className="flex-1"
-              />
-              <Button 
-                type="button" 
-                onClick={handleVirtualTourSave}
-                disabled={isSaving}
-              >
-                Save
-              </Button>
-            </div>
+            <Input
+              id="virtualTourUrl"
+              placeholder="https://my.matterport.com/show/?m=..."
+              value={virtualTourUrl}
+              onChange={(e) => setVirtualTourUrl(e.target.value)}
+              disabled={isReadOnly}
+            />
           </div>
         </CardContent>
+        <CardFooter>
+          <Button 
+            onClick={handleSaveVirtualTour} 
+            disabled={isSaving || isReadOnly}
+          >
+            Save Virtual Tour
+          </Button>
+        </CardFooter>
       </Card>
 
-      {/* YouTube URL Card */}
+      {/* YouTube Video Card */}
       <Card>
         <CardHeader>
-          <CardTitle>YouTube URL</CardTitle>
+          <CardTitle>YouTube Video</CardTitle>
+          <CardDescription>
+            Add a YouTube video URL for the property
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-2">
+          <div className="space-y-2">
             <Label htmlFor="youtubeUrl">YouTube URL</Label>
-            <div className="flex gap-2">
-              <Input 
-                id="youtubeUrl" 
-                value={youtubeUrl} 
-                onChange={(e) => setYoutubeUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
-                className="flex-1"
-              />
-              <Button 
-                type="button" 
-                onClick={handleYoutubeUrlSave}
-                disabled={isSaving}
-              >
-                Save
-              </Button>
-            </div>
+            <Input
+              id="youtubeUrl"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              disabled={isReadOnly}
+            />
           </div>
         </CardContent>
+        <CardFooter>
+          <Button 
+            onClick={handleSaveYoutubeUrl} 
+            disabled={isSaving || isReadOnly}
+          >
+            Save YouTube URL
+          </Button>
+        </CardFooter>
       </Card>
 
       {/* Floorplan Embed Script Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Floorplan Embed Script</CardTitle>
+          <CardTitle>Interactive Floorplan</CardTitle>
+          <CardDescription>
+            Add an embed script from a floorplan provider
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-2">
+          <div className="space-y-2">
             <Label htmlFor="floorplanEmbedScript">Embed Script</Label>
-            <Textarea 
-              id="floorplanEmbedScript" 
-              value={floorplanEmbedScript} 
+            <Textarea
+              id="floorplanEmbedScript"
+              placeholder="<iframe src=...>"
+              value={floorplanEmbedScript}
               onChange={(e) => setFloorplanEmbedScript(e.target.value)}
-              placeholder="<iframe src='...'></iframe>"
-              rows={5}
+              rows={6}
+              disabled={isReadOnly}
             />
-            <Button 
-              type="button" 
-              onClick={handleFloorplanEmbedScriptSave}
-              disabled={isSaving}
-              className="w-fit"
-            >
-              Save Script
-            </Button>
           </div>
         </CardContent>
+        <CardFooter>
+          <Button 
+            onClick={handleSaveFloorplanEmbed} 
+            disabled={isSaving || isReadOnly}
+          >
+            Save Embed Script
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );

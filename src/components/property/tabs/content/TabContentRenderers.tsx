@@ -97,8 +97,6 @@ export class TabContentRenderers {
         return (
           <MediaTabContent
             property={props.property}
-            formState={props.formState}
-            onFieldChange={handlers.onFieldChange}
             handleVirtualTourUpdate={virtualTourUpdate}
             handleYoutubeUrlUpdate={youtubeUrlUpdate}
             handleFloorplanEmbedScriptUpdate={floorplanEmbedScriptUpdate}

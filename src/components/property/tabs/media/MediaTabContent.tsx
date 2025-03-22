@@ -1,6 +1,6 @@
 
-import React from "react";
-import { PropertyData } from "@/types/property";
+import React, { useState, useEffect } from "react";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyImagesCard } from "./PropertyImagesCard";
 import { FloorplansTab } from "./tabs/FloorplansTab";
@@ -9,15 +9,26 @@ import { usePropertyMediaHandlers } from "@/hooks/property/usePropertyMediaHandl
 
 interface MediaTabContentProps {
   property: PropertyData;
+  formState?: PropertyFormData;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+  handleVirtualTourUpdate?: (url: string) => void;
+  handleYoutubeUrlUpdate?: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+  isReadOnly?: boolean;
   handlers?: {
-    handleVirtualTourUpdate?: (url: string) => void;
-    handleYoutubeUrlUpdate?: (url: string) => void;
-    handleFloorplanEmbedScriptUpdate?: (script: string) => void;
     setPendingChanges?: (pending: boolean) => void;
   };
 }
 
-export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
+export function MediaTabContent({ 
+  property, 
+  formState,
+  onFieldChange,
+  handleVirtualTourUpdate,
+  handleYoutubeUrlUpdate,
+  handleFloorplanEmbedScriptUpdate,
+  isReadOnly = false
+}: MediaTabContentProps) {
   const [activeTab, setActiveTab] = React.useState("images");
   const [localProperty, setLocalProperty] = React.useState<PropertyData>(property);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -36,7 +47,11 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleVirtualTourSave,
     handleYoutubeUrlSave,
     handleFloorplanEmbedScriptSave
-  } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
+  } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, {
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate
+  });
 
   return (
     <div className="space-y-6">
@@ -58,6 +73,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             onSetFeaturedImage={handleSetFeaturedImage}
             onToggleFeaturedImage={handleToggleFeaturedImage}
             propertyId={localProperty.id}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
         
@@ -67,6 +83,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             setProperty={setLocalProperty} 
             isSaving={isSaving}
             setIsSaving={setIsSaving}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
         
@@ -78,6 +95,7 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
             onYoutubeUrlSave={handleYoutubeUrlSave}
             onFloorplanEmbedScriptSave={handleFloorplanEmbedScriptSave}
             isSaving={isSaving}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
       </Tabs>
