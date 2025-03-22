@@ -66,11 +66,13 @@ export function PropertyDetailsCard({
     onSaveObjectId(currentObjectId);
   };
   
-  const handleToggleEdit = () => {
+  const handleToggleEdit = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission and page reload
     setIsEditing(!isEditing);
   };
   
-  const handleSaveDetails = async () => {
+  const handleSaveDetails = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission and page reload
     try {
       const { error } = await supabase
         .from('properties')
@@ -125,20 +127,6 @@ export function PropertyDetailsCard({
                     className="mt-1"
                   />
                 </div>
-                <Button onClick={handleSaveDetails}>
-                  Save Details
-                </Button>
-              </>
-            ) : (
-              <>
-                <div>
-                  <h3 className="text-lg font-semibold">{propertyTitle}</h3>
-                  <p className="text-muted-foreground">{propertyAddress || "No address specified"}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium">ID:</span>
-                  <p className="text-sm font-mono break-all">{id}</p>
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="object-id">Object ID</Label>
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -154,6 +142,24 @@ export function PropertyDetailsCard({
                       {isUpdating ? "Saving..." : "Save"}
                     </Button>
                   </div>
+                </div>
+                <Button onClick={handleSaveDetails}>
+                  Save Details
+                </Button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold">{propertyTitle}</h3>
+                  <p className="text-muted-foreground">{propertyAddress || "No address specified"}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium">ID:</span>
+                  <p className="text-sm font-mono break-all">{id}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium">Object ID:</span>
+                  <p className="text-sm break-all">{currentObjectId || "Not specified"}</p>
                 </div>
                 <div>
                   <span className="text-sm font-medium">API Endpoint:</span>
