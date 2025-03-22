@@ -16,25 +16,30 @@ export function usePropertyFormFields(
     handleFieldChange("features", [...features, newFeature]);
   }, [formState.features, handleFieldChange]);
   
-  const removeFeature = useCallback((index: number) => {
+  const removeFeature = useCallback((id: string) => {
     if (!formState.features) return;
     
     const updatedFeatures = [...formState.features];
-    updatedFeatures.splice(index, 1);
-    
-    handleFieldChange("features", updatedFeatures);
+    const index = updatedFeatures.findIndex(feature => feature.id === id);
+    if (index !== -1) {
+      updatedFeatures.splice(index, 1);
+      handleFieldChange("features", updatedFeatures);
+    }
   }, [formState.features, handleFieldChange]);
   
-  const updateFeature = useCallback((index: number, value: string) => {
+  const updateFeature = useCallback((id: string, description: string) => {
     if (!formState.features) return;
     
     const updatedFeatures = [...formState.features];
-    updatedFeatures[index] = {
-      ...updatedFeatures[index],
-      description: value
-    };
-    
-    handleFieldChange("features", updatedFeatures);
+    const index = updatedFeatures.findIndex(feature => feature.id === id);
+    if (index !== -1) {
+      updatedFeatures[index] = {
+        ...updatedFeatures[index],
+        description
+      };
+      
+      handleFieldChange("features", updatedFeatures);
+    }
   }, [formState.features, handleFieldChange]);
   
   return {

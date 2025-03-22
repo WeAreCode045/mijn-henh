@@ -9,8 +9,8 @@ interface PropertyStepWizardProps {
   formState: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
-  onRemoveFeature: (index: number) => void;
-  onUpdateFeature: (index: number, value: string) => void;
+  onRemoveFeature: (id: string) => void;
+  onUpdateFeature: (id: string, description: string) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
   onSubmit: () => void;

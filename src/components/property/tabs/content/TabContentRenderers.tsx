@@ -31,6 +31,20 @@ export class TabContentRenderers {
       );
     }
 
+    // Check if handleVirtualTourUpdate, handleYoutubeUrlUpdate, and handleFloorplanEmbedScriptUpdate exist
+    // in handlers, if not, create dummy functions
+    const virtualTourUpdate = handlers.handleVirtualTourUpdate || ((url: string) => {
+      console.log("Virtual tour update not implemented", url);
+    });
+    
+    const youtubeUrlUpdate = handlers.handleYoutubeUrlUpdate || ((url: string) => {
+      console.log("YouTube URL update not implemented", url);
+    });
+    
+    const floorplanEmbedScriptUpdate = handlers.handleFloorplanEmbedScriptUpdate || ((script: string) => {
+      console.log("Floorplan embed script update not implemented", script);
+    });
+
     // Render appropriate tab content based on active tab
     switch (activeTab) {
       case 'dashboard':
@@ -51,8 +65,8 @@ export class TabContentRenderers {
             formState={props.formState}
             onFieldChange={handlers.onFieldChange}
             onAddFeature={handlers.onAddFeature}
-            onRemoveFeature={(index) => handlers.onRemoveFeature(index)}
-            onUpdateFeature={(index, value) => handlers.onUpdateFeature(index, value)}
+            onRemoveFeature={(id) => handlers.onRemoveFeature(id)}
+            onUpdateFeature={(id, description) => handlers.onUpdateFeature(id, description)}
             currentStep={handlers.currentStep}
             handleStepClick={handlers.handleStepClick}
             onSubmit={() => handlers.setPendingChanges(true)}
@@ -66,9 +80,9 @@ export class TabContentRenderers {
             property={props.property}
             formState={props.formState}
             onFieldChange={handlers.onFieldChange}
-            handleVirtualTourUpdate={handlers.handleVirtualTourUpdate}
-            handleYoutubeUrlUpdate={handlers.handleYoutubeUrlUpdate}
-            handleFloorplanEmbedScriptUpdate={handlers.handleFloorplanEmbedScriptUpdate}
+            handleVirtualTourUpdate={virtualTourUpdate}
+            handleYoutubeUrlUpdate={youtubeUrlUpdate}
+            handleFloorplanEmbedScriptUpdate={floorplanEmbedScriptUpdate}
             isReadOnly={isArchived}
           />
         );
@@ -90,7 +104,13 @@ export class TabContentRenderers {
             onFetchNearbyCities={handlers.onFetchNearbyCities}
             onGenerateLocationDescription={handlers.onGenerateLocationDescription}
             onGenerateMap={handlers.onGenerateMap}
-            onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
+            onRemoveNearbyPlace={(placeId) => {
+              if (handlers.onRemoveNearbyPlace) {
+                // Convert the string ID to a number index if needed
+                const index = Number(placeId) || placeId;
+                handlers.onRemoveNearbyPlace(Number(index));
+              }
+            }}
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
             isReadOnly={isArchived}

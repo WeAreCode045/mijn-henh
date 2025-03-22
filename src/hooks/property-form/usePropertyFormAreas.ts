@@ -14,8 +14,12 @@ export function usePropertyFormAreas(
     const newArea: PropertyArea = {
       id: `area-${Date.now()}`,
       name: `Area ${areas.length + 1}`,
+      title: `Area ${areas.length + 1}`,
       description: "",
-      photos: []
+      images: [],
+      imageIds: [],
+      columns: 2,
+      size: ""
     };
     
     handleFieldChange("areas", [...areas, newArea]);
@@ -51,10 +55,16 @@ export function usePropertyFormAreas(
     if (!formState.areas) return;
     
     const updatedAreas = formState.areas.map(area => {
-      if (area.id === areaId && area.photos) {
+      if (area.id === areaId && area.images) {
         return {
           ...area,
-          photos: area.photos.filter(photo => photo.id !== imageId)
+          images: area.images.filter(image => {
+            if (typeof image === 'string') {
+              return image !== imageId;
+            }
+            return image.id !== imageId;
+          }),
+          imageIds: area.imageIds ? area.imageIds.filter(id => id !== imageId) : []
         };
       }
       return area;

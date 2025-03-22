@@ -30,6 +30,7 @@ export const initialFormData: PropertyFormData = {
   areaPhotos: [],
   status: 'Draft', // Default status is 'Draft'
   propertyType: '', // Default propertyType is empty string
+  archived: false, // Default archived status is false
   latitude: null,
   longitude: null,
   map_image: null,

@@ -109,9 +109,10 @@ export interface PropertyData {
   created_at?: string;
   updated_at?: string;
   status?: string; // Added status property
+  archived?: boolean; // Added archived property
   metadata?: {
     status?: string;
-    [key: string]: never;
+    [key: string]: any;
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
   // For backward compatibility - can be PropertyImage[] or string[]
@@ -161,9 +162,10 @@ export interface PropertySubmitData {
   featuredImages?: string[];
   floorplanEmbedScript?: string;
   status?: string; // Added status property
+  archived?: boolean; // Added archived property
   metadata?: {
     status?: string;
-    [key: string]: never;
+    [key: string]: any;
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
 }

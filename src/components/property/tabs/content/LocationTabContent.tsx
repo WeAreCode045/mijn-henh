@@ -8,19 +8,19 @@ interface LocationTabContentProps {
   formState: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddArea: () => void;
-  onRemoveArea: (index: number) => void;
-  onUpdateArea: (index: number, field: string, value: any) => void;
-  onAreaImageRemove: (areaIndex: number, imageIndex: number) => void;
-  onAreaImagesSelect: (areaIndex: number, files: FileList) => void;
-  onAreaImageUpload: (areaIndex: number, files: FileList) => void;
+  onRemoveArea: (id: string) => void;
+  onUpdateArea: (id: string, field: any, value: any) => void;
+  onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   onFetchLocationData: () => Promise<void>;
   onGenerateLocationDescription: () => Promise<void>;
   onGenerateMap: () => Promise<void>;
-  onRemoveNearbyPlace: (placeId: string) => void;
+  onRemoveNearbyPlace: (index: number) => void;
   isLoadingLocationData: boolean;
   isGeneratingMap: boolean;
   onFetchCategoryPlaces: (category: string) => Promise<any>;
-  onFetchNearbyCities: () => Promise<void>;
+  onFetchNearbyCities: () => Promise<any>;
   isReadOnly?: boolean;
 }
 
@@ -44,21 +44,29 @@ export function LocationTabContent({
   onFetchNearbyCities,
   isReadOnly = false
 }: LocationTabContentProps) {
+  // Create adapter functions to match the expected types in LocationTab
+  const adaptedRemoveArea = (id: string) => onRemoveArea(id);
+  const adaptedUpdateArea = (id: string, field: any, value: any) => onUpdateArea(id, field, value);
+  const adaptedAreaImageRemove = (areaId: string, imageId: string) => onAreaImageRemove(areaId, imageId);
+  const adaptedAreaImagesSelect = (areaId: string, imageIds: string[]) => onAreaImagesSelect(areaId, imageIds);
+  const adaptedAreaImageUpload = (areaId: string, files: FileList) => onAreaImageUpload(areaId, files);
+  const adaptedRemoveNearbyPlace = (index: number) => onRemoveNearbyPlace(index);
+
   return (
     <LocationTab 
       property={property}
       formState={formState}
       onFieldChange={onFieldChange}
       onAddArea={onAddArea}
-      onRemoveArea={onRemoveArea}
-      onUpdateArea={onUpdateArea}
-      onAreaImageRemove={onAreaImageRemove}
-      onAreaImagesSelect={onAreaImagesSelect}
-      onAreaImageUpload={onAreaImageUpload}
+      onRemoveArea={adaptedRemoveArea}
+      onUpdateArea={adaptedUpdateArea}
+      onAreaImageRemove={adaptedAreaImageRemove}
+      onAreaImagesSelect={adaptedAreaImagesSelect}
+      onAreaImageUpload={adaptedAreaImageUpload}
       onFetchLocationData={onFetchLocationData}
       onGenerateLocationDescription={onGenerateLocationDescription}
       onGenerateMap={onGenerateMap}
-      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      onRemoveNearbyPlace={adaptedRemoveNearbyPlace}
       isLoadingLocationData={isLoadingLocationData}
       isGeneratingMap={isGeneratingMap}
       onFetchCategoryPlaces={onFetchCategoryPlaces}
