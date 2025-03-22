@@ -48,8 +48,8 @@ export function SortableImageGrid({
   };
   
   const handleSetMain = (e: React.MouseEvent, imageUrl: string) => {
-    e.preventDefault(); // Prevent default browser behavior
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
     
     if (onSetFeaturedImage) {
       if (featuredImage === imageUrl) return;
@@ -59,8 +59,8 @@ export function SortableImageGrid({
   };
   
   const handleToggleFeatured = (e: React.MouseEvent, imageUrl: string) => {
-    e.preventDefault(); // Prevent default browser behavior
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
     
     if (!onToggleFeaturedImage) return;
     
