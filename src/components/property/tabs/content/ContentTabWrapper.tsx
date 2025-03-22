@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
@@ -73,11 +73,35 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
     }
   };
 
+  // Handle tab change with autosave
+  const handleTabChange = useCallback(async (step: number) => {
+    // Save changes before changing tab if there are pending changes
+    if (pendingChanges || (handlers.setPendingChanges && formData.id)) {
+      console.log("Auto-saving before tab change...");
+      try {
+        await onSubmit();
+        toast({
+          description: "Changes saved automatically",
+        });
+      } catch (error) {
+        console.error("Error saving before tab change:", error);
+        toast({
+          title: "Warning",
+          description: "There was an issue saving your changes",
+          variant: "destructive",
+        });
+      }
+    }
+    
+    // Now change the tab
+    handlers.handleStepClick(step);
+  }, [pendingChanges, formData.id, onSubmit, handlers, toast]);
+
   return (
     <div className="space-y-6">
       <ContentTabNavigation 
         currentStep={handlers.currentStep}
-        onStepClick={handlers.handleStepClick}
+        onStepClick={handleTabChange}
         lastSaved={lastSaved}
         onSave={onSubmit}
         isSaving={isSaving || handlers.isSaving || false}

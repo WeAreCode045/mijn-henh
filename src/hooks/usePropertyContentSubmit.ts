@@ -1,93 +1,55 @@
 
-import { useState } from "react";
+import { useState, useCallback } from 'react';
+import { PropertyFormData } from '@/types/property';
+import { usePropertyAutoSave } from '@/hooks/usePropertyAutoSave';
 import { useToast } from "@/components/ui/use-toast";
-import { PropertyFormData } from "@/types/property";
-import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 
 export function usePropertyContentSubmit(
   formData: PropertyFormData,
   setPendingChanges: (pending: boolean) => void,
   setLastSaved: (date: Date | null) => void,
-  externalOnSubmit?: () => void
+  onSubmitCallback?: () => void
 ) {
-  const { toast } = useToast();
-  const { handleSubmit } = usePropertyFormSubmit();
   const [isSaving, setIsSaving] = useState(false);
-
-  const onSubmit = async () => {
-    console.log("Submit clicked in PropertyContentTab");
-    if (!formData) {
-      console.error("No form data to save");
+  const { autosaveData } = usePropertyAutoSave();
+  const { toast } = useToast();
+  
+  const onSubmit = useCallback(async () => {
+    if (!formData.id) {
       toast({
         title: "Error",
-        description: "No data to save",
+        description: "No property ID found for saving",
         variant: "destructive",
       });
-      return;
+      return false;
     }
-    
+
     setIsSaving(true);
     
     try {
-      // If there's an external submit handler provided, use that
-      if (externalOnSubmit) {
-        console.log("Using external submit handler");
-        await externalOnSubmit();
-        setLastSaved(new Date());
-        setPendingChanges(false);
-        toast({
-          title: "Success",
-          description: "All changes have been saved",
-        });
-        return;
+      console.log("Saving content tab data...");
+      await autosaveData(formData);
+      setLastSaved(new Date());
+      setPendingChanges(false);
+      
+      // Call the original onSubmit if provided
+      if (onSubmitCallback) {
+        onSubmitCallback();
       }
       
-      // Final save when clicking submit
-      if (formData.id) {
-        try {
-          console.log("Submitting form data:", formData);
-          
-          // Create a form event to pass to handleSubmit
-          const formEvent = {} as React.FormEvent;
-          // Pass the current formData and set redirectAfterSave to false
-          const success = await handleSubmit(formEvent, formData, false);
-          
-          if (success) {
-            console.log("Save successful");
-            setLastSaved(new Date());
-            setPendingChanges(false);
-            toast({
-              title: "Success",
-              description: "All changes have been saved",
-            });
-          } else {
-            console.error("Save returned false");
-            toast({
-              title: "Error",
-              description: "Failed to save changes",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
-          console.error("Save error:", error);
-          toast({
-            title: "Error",
-            description: "Failed to save changes",
-            variant: "destructive",
-          });
-        }
-      } else {
-        console.error("No property ID found");
-        toast({
-          title: "Error",
-          description: "Property ID is missing",
-          variant: "destructive",
-        });
-      }
+      return true;
+    } catch (error) {
+      console.error("Error saving content tab data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save property content",
+        variant: "destructive",
+      });
+      return false;
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [formData, autosaveData, setLastSaved, setPendingChanges, onSubmitCallback, toast]);
 
   return { onSubmit, isSaving };
 }
