@@ -10,6 +10,8 @@ import { PropertyData } from "@/types/property";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { Submission } from "@/types/submission";
+import { Badge } from "@/components/ui/badge";
+import { PropertyCardActions } from "./PropertyCardActions";
 
 interface PropertyCardProps {
   property: PropertyData;
@@ -125,14 +127,27 @@ export const PropertyCard = ({
           )}
         </div>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-2">{property.title}</h3>
+        <div className="space-y-2">
+          <div className="flex justify-between items-start">
+            <h3 className="text-lg font-medium mb-1 line-clamp-2">{property.title}</h3>
+            {property.agent && (
+              <Badge variant="outline" className="ml-2 text-xs">
+                {property.agent.full_name}
+              </Badge>
+            )}
+          </div>
+          
           <p className="text-lg font-medium">{property.price}</p>
-          {unreadCount > 0 && (
-            <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-              {unreadCount} new {unreadCount === 1 ? 'message' : 'messages'}
-            </div>
-          )}
+          
+          <div className="mt-3">
+            <PropertyCardActions 
+              property={property}
+              settings={settings}
+              onDelete={onDelete}
+              unreadCount={unreadCount}
+              onShowSubmissions={() => setShowSubmissions(true)}
+            />
+          </div>
         </div>
       </Card>
 

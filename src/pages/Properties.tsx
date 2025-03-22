@@ -8,11 +8,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAgentSelect } from "@/hooks/useAgentSelect";
+import { useAuth } from "@/providers/AuthProvider";
+import { useState, useEffect } from "react";
 
 export default function Properties() {
   const navigate = useNavigate();
   const { properties, isLoading, handleDelete, refetch } = useProperties();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
+  const { agents } = useAgentSelect();
+  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+
+  useEffect(() => {
+    if (properties) {
+      if (selectedAgentId && selectedAgentId !== "") {
+        setFilteredProperties(properties.filter(p => p.agent_id === selectedAgentId));
+      } else {
+        setFilteredProperties(properties);
+      }
+    }
+  }, [properties, selectedAgentId]);
 
   const handleCreateNewProperty = async () => {
     try {
@@ -47,12 +65,34 @@ export default function Properties() {
   return (
     <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1600px] mx-auto">
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
           <h1 className="text-4xl font-bold text-estate-800">Woning Brochures</h1>
-          <Button onClick={handleCreateNewProperty}>
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Nieuwe Brochure
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            {isAdmin && (
+              <div className="w-full sm:w-56">
+                <Select
+                  value={selectedAgentId}
+                  onValueChange={setSelectedAgentId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Agents</SelectItem>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <Button onClick={handleCreateNewProperty} className="w-full sm:w-auto">
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Nieuwe Brochure
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -71,7 +111,7 @@ export default function Properties() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property: PropertyData) => (
+            {filteredProperties.map((property: PropertyData) => (
               <PropertyCard
                 key={property.id}
                 property={property}

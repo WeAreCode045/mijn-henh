@@ -2,13 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { 
-  ArrowUpRight, 
-  Pencil, 
-  Trash, 
-  Bell,
-  FileDown
+  LayoutDashboard, 
+  Edit, 
+  Image, 
+  MessageCircle
 } from "lucide-react";
-import { generatePropertyPDF } from "@/utils/pdfGenerator";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 
@@ -29,10 +27,6 @@ export const PropertyCardActions = ({
 }: PropertyCardActionsProps) => {
   const navigate = useNavigate();
 
-  const handleDownloadPDF = async () => {
-    await generatePropertyPDF(property, settings);
-  };
-
   return (
     <div className="flex gap-2">
       <Button 
@@ -40,56 +34,45 @@ export const PropertyCardActions = ({
         size="icon"
         onClick={(e) => {
           e.stopPropagation(); // Prevent card click propagation
-          navigate(`/property/${property.id}/webview`);
-        }}
-        title="Open Preview"
-      >
-        <ArrowUpRight className="h-4 w-4" />
-      </Button>
-      <Button 
-        variant="outline" 
-        size="icon"
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent card click propagation
           navigate(`/property/${property.id}/dashboard`);
         }}
-        title="Bewerk"
+        title="Dashboard"
       >
-        <Pencil className="h-4 w-4" />
+        <LayoutDashboard className="h-4 w-4" />
       </Button>
       <Button 
         variant="outline" 
         size="icon"
         onClick={(e) => {
           e.stopPropagation(); // Prevent card click propagation
-          handleDownloadPDF();
+          navigate(`/property/${property.id}/content`);
         }}
-        title="Download PDF"
+        title="Edit Content"
       >
-        <FileDown className="h-4 w-4" />
+        <Edit className="h-4 w-4" />
       </Button>
       <Button 
-        variant="destructive" 
+        variant="outline" 
         size="icon"
         onClick={(e) => {
           e.stopPropagation(); // Prevent card click propagation
-          onDelete(property.id);
+          navigate(`/property/${property.id}/media`);
         }}
-        title="Verwijder"
+        title="Media"
       >
-        <Trash className="h-4 w-4" />
+        <Image className="h-4 w-4" />
       </Button>
       <Button
         variant="outline"
         size="icon"
         onClick={(e) => {
           e.stopPropagation(); // Prevent card click propagation
-          onShowSubmissions();
+          navigate(`/property/${property.id}/communications`);
         }}
         className="relative"
-        title="Berichten"
+        title="Communications"
       >
-        <Bell className="h-4 w-4" />
+        <MessageCircle className="h-4 w-4" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
             {unreadCount}
