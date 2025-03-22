@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
@@ -6,6 +7,7 @@ import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyData } from "@/types/property";
 import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
+import { supabase } from "@/integrations/supabase/client";
 
 export function PropertyForm() {
   const { id } = useParams();

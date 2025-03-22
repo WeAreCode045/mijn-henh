@@ -1,8 +1,10 @@
+
 import { useNavigate } from "react-router-dom";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
 import { PropertyFormData } from "@/types/property";
 import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyFormContainerActions(
   formData: PropertyFormData | null,
