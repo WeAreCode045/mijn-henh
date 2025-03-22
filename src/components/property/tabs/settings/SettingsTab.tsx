@@ -45,13 +45,15 @@ export function SettingsTab({
             objectId={propertyId}
             onSave={handleSaveObjectId}
             isDisabled={isReadOnly}
+            isUpdating={isUpdating}
           />
           
           {/* Pass only the props that AgentSection expects */}
           <AgentSection 
             agentId={agentId}
-            agentInfo={agentInfo}
             onSave={handleSaveAgent}
+            isUpdating={isUpdating}
+            isDisabled={isReadOnly}
           />
         </CardContent>
       </Card>
@@ -59,7 +61,6 @@ export function SettingsTab({
       {!isReadOnly && onDelete && (
         <DangerZoneSection 
           onDelete={onDelete}
-          propertyId={property.id}
         />
       )}
     </div>

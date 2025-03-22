@@ -8,14 +8,16 @@ import { FileType, Save } from "lucide-react";
 
 interface PropertyIdSectionProps {
   objectId: string;
-  onSave: (objectId: string) => void;
-  isUpdating: boolean;
+  onSave: (objectId: string) => Promise<void>;
+  isDisabled?: boolean; // Added isDisabled prop
+  isUpdating?: boolean;
 }
 
 export function PropertyIdSection({ 
   objectId, 
   onSave, 
-  isUpdating 
+  isDisabled = false,
+  isUpdating = false
 }: PropertyIdSectionProps) {
   const [currentObjectId, setCurrentObjectId] = useState(objectId || "");
 
@@ -39,13 +41,14 @@ export function PropertyIdSection({
             value={currentObjectId}
             onChange={(e) => setCurrentObjectId(e.target.value)}
             placeholder="Enter object ID"
+            disabled={isDisabled}
           />
           <p className="text-xs text-muted-foreground">
             This ID is used as a reference in external systems
           </p>
         </div>
         
-        <Button onClick={handleSave} disabled={isUpdating}>
+        <Button onClick={handleSave} disabled={isUpdating || isDisabled}>
           <Save className="h-4 w-4 mr-2" />
           {isUpdating ? "Saving..." : "Save Settings"}
         </Button>

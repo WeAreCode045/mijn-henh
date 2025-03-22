@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { ChangeEvent } from "react";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddressInput } from "../../location/AddressInput";
@@ -47,9 +47,9 @@ export function LocationTab({
   isGeneratingMap,
   isReadOnly = false
 }: LocationTabProps) {
-  // Handle address change
-  const handleAddressChange = (value: string) => {
-    onFieldChange("address", value);
+  // Handle address change - updating to handle input event
+  const handleAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onFieldChange("address", e.target.value);
   };
 
   return (
@@ -70,7 +70,7 @@ export function LocationTab({
           
           {/* Pass only the props that MapPreview expects */}
           <MapPreview 
-            mapImage={property.map_image}
+            map_image={property.map_image}
             onGenerate={onGenerateMap}
             isGenerating={isGeneratingMap || false}
             isDisabled={isReadOnly}
@@ -78,8 +78,8 @@ export function LocationTab({
           
           {/* Pass only the props that NearbyPlaces expects */}
           <NearbyPlaces 
-            nearbyPlaces={formState.nearby_places || []}
-            nearbyCities={formState.nearby_cities || []}
+            places={formState.nearby_places || []}
+            cities={formState.nearby_cities || []}
             onRemove={onRemoveNearbyPlace}
             onFetchCategory={onFetchCategoryPlaces}
             onFetchCities={onFetchNearbyCities}

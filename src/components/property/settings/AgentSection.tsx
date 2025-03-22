@@ -14,14 +14,16 @@ interface Agent {
 
 interface AgentSectionProps {
   agentId: string;
-  onSave: (agentId: string) => void;
-  isUpdating: boolean;
+  onSave: (agentId: string) => Promise<void>;
+  isUpdating?: boolean;
+  isDisabled?: boolean;
 }
 
 export function AgentSection({ 
   agentId, 
   onSave, 
-  isUpdating 
+  isUpdating = false,
+  isDisabled = false
 }: AgentSectionProps) {
   const [currentAgentId, setCurrentAgentId] = useState(agentId || "none");
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -60,6 +62,7 @@ export function AgentSection({
           <Select 
             value={currentAgentId} 
             onValueChange={setCurrentAgentId}
+            disabled={isDisabled}
           >
             <SelectTrigger id="agent-select">
               <SelectValue placeholder="Select an agent" />
@@ -75,7 +78,7 @@ export function AgentSection({
           </Select>
         </div>
         
-        <Button onClick={handleSave} disabled={isUpdating}>
+        <Button onClick={handleSave} disabled={isUpdating || isDisabled}>
           <Save className="h-4 w-4 mr-2" />
           {isUpdating ? "Saving..." : "Assign Agent"}
         </Button>

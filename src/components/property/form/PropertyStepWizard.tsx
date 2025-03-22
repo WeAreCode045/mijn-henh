@@ -40,7 +40,7 @@ export function PropertyStepWizard({
       
       <PropertyStepContent 
         formData={formState}
-        step={currentStep}
+        step={currentStep} // Pass currentStep as step
         onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}

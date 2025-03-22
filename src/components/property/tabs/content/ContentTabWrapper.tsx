@@ -1,11 +1,13 @@
+
 import { useState } from 'react';
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
+  property: PropertyData; // Added property field
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
@@ -29,7 +31,7 @@ interface ContentTabWrapperProps {
   };
 }
 
-export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps) {
+export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
   const { onSubmit } = usePropertyContentSubmit(
@@ -70,28 +72,16 @@ export function ContentTabWrapper({ formData, handlers }: ContentTabWrapperProps
       />
       
       <ContentTabContent
-        formData={formData}
+        property={property} // Pass property data
+        formState={formData}
         onFieldChange={handlers.onFieldChange}
         onAddFeature={handlers.onAddFeature}
         onRemoveFeature={adaptedRemoveFeature}
         onUpdateFeature={adaptedUpdateFeature}
-        onAddArea={handlers.onAddArea}
-        onRemoveArea={handlers.onRemoveArea}
-        onUpdateArea={handlers.onUpdateArea}
-        onAreaImageRemove={handlers.onAreaImageRemove}
-        onAreaImagesSelect={handlers.onAreaImagesSelect}
-        handleAreaImageUpload={handlers.handleAreaImageUpload}
         currentStep={handlers.currentStep}
         handleStepClick={handlers.handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
-        onFetchLocationData={handlers.onFetchLocationData}
-        onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-        isLoadingLocationData={handlers.isLoadingLocationData}
-        setPendingChanges={handlers.setPendingChanges}
-        isUploading={handlers.isUploading}
         onSubmit={onSubmit}
-        isSaving={handlers.isSaving}
+        isReadOnly={false}
       />
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -10,6 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
+  step: number; // Added explicit step property
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature?: () => void;
   onRemoveFeature?: (id: string) => void;
@@ -41,6 +43,7 @@ interface PropertyStepContentProps {
 
 export function PropertyStepContent({
   formData,
+  step, // Use the step property
   onFieldChange,
   onAddFeature,
   onRemoveFeature,

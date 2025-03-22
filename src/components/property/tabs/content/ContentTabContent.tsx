@@ -4,8 +4,8 @@ import { PropertyData, PropertyFormData } from "@/types/property";
 import { PropertyStepWizard } from "../../form/PropertyStepWizard";
 
 interface ContentTabContentProps {
-  property: PropertyData;
-  formState: PropertyFormData;
+  property: PropertyData; // Changed from formState to property
+  formState: PropertyFormData; // Added this property
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
