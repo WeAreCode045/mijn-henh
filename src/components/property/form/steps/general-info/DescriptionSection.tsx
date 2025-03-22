@@ -96,10 +96,8 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
     // Subscribe to editor changes
     const unsubscribe = editor.onEditorContentChange(handleEditorChange);
     
-    // Return the unsubscribe function, not call it directly
-    return () => {
-      unsubscribe();
-    };
+    // Fix: Return the unsubscribe function directly, not as a function call
+    return unsubscribe;
   }, [editor, onFieldChange, setPendingChanges]);
 
   return (
