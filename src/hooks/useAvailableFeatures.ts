@@ -15,9 +15,8 @@ export function useAvailableFeatures() {
         setIsLoading(true);
         
         // Try to fetch from a property_features table if it exists
-        // Using 'from' as a string to bypass TypeScript checking
         const { data, error } = await supabase
-          .from('property_features' as any)
+          .from('property_features')
           .select('id, description')
           .order('description');
           
@@ -27,10 +26,10 @@ export function useAvailableFeatures() {
           setAvailableFeatures(getDefaultFeatures());
         } else if (data && data.length > 0) {
           // Safely convert the data to PropertyFeature[]
-          // Use type assertion after checking the structure of the data
-          const typedFeatures = data.map(item => ({
-            id: String(item.id),
-            description: String(item.description)
+          // First cast to unknown, then to a known structure
+          const typedFeatures = data.map((item: any) => ({
+            id: String(item.id || ''),
+            description: String(item.description || '')
           }));
           
           setAvailableFeatures(typedFeatures);
@@ -58,9 +57,8 @@ export function useAvailableFeatures() {
     
     try {
       // Try to save to database if the table exists
-      // Using 'from' as a string to bypass TypeScript checking
       const { error } = await supabase
-        .from('property_features' as any)
+        .from('property_features')
         .insert([{ id: newFeature.id, description: newFeature.description }]);
       
       if (error) {
@@ -92,9 +90,8 @@ export function useAvailableFeatures() {
     
     try {
       // Try to save to database if the table exists
-      // Using 'from' as a string to bypass TypeScript checking
       const { error } = await supabase
-        .from('property_features' as any)
+        .from('property_features')
         .insert(
           uniqueFeatures.map(f => ({ id: f.id, description: f.description }))
         );
