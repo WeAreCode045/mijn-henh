@@ -110,6 +110,7 @@ export function PropertyLocation({
           disabled={!id}
           hasNearbyPlaces={nearby_places.length > 0}
           onChange={onChange}
+          onFetch={handleLocationFetch}
           onLocationFetch={handleLocationFetch}
           onGenerateDescription={handleGenerateDescription}
         />

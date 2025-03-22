@@ -27,6 +27,7 @@ interface ContentTabContentProps {
   isUpdateMode?: boolean;
   onSubmit: () => void;
   isSaving?: boolean;
+  property?: any; // Add property as an optional prop
 }
 
 export function ContentTabContent({
@@ -52,7 +53,8 @@ export function ContentTabContent({
   isUploading,
   isUpdateMode = false,
   onSubmit,
-  isSaving
+  isSaving,
+  property
 }: ContentTabContentProps) {
   // Pass the handlers to the PropertyContentTab component
   const handlers = {
@@ -80,6 +82,10 @@ export function ContentTabContent({
   };
 
   return (
-    <PropertyContentTab formData={formData} handlers={handlers} />
+    <PropertyContentTab 
+      formData={formData} 
+      handlers={handlers} 
+      property={property || formData} // Use formData as a fallback if property is not provided
+    />
   );
 }
