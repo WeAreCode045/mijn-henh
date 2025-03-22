@@ -1,15 +1,9 @@
 
 import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
+import { PropertyData } from "@/types/property";
 
 interface DashboardTabContentProps {
-  id: string;
-  title: string;
-  objectId?: string;
-  agentId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  agentInfo?: { id: string; name: string } | null;
-  isUpdating: boolean;
+  property: PropertyData;
   onSave: () => void;
   onDelete: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
@@ -19,14 +13,7 @@ interface DashboardTabContentProps {
 }
 
 export function DashboardTabContent({
-  id,
-  title,
-  objectId,
-  agentId,
-  createdAt,
-  updatedAt,
-  agentInfo,
-  isUpdating,
+  property,
   onSave,
   onDelete,
   handleSaveObjectId,
@@ -36,14 +23,14 @@ export function DashboardTabContent({
 }: DashboardTabContentProps) {
   return (
     <PropertyDashboardTab
-      id={id}
-      title={title}
-      objectId={objectId}
-      agentId={agentId}
-      createdAt={createdAt}
-      updatedAt={updatedAt}
-      agentInfo={agentInfo}
-      isUpdating={isUpdating}
+      id={property.id}
+      title={property.title}
+      objectId={property.object_id}
+      agentId={property.agent_id}
+      createdAt={property.created_at}
+      updatedAt={property.updated_at}
+      agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : null}
+      isUpdating={false}
       onSave={onSave}
       onDelete={onDelete}
       handleSaveObjectId={handleSaveObjectId}

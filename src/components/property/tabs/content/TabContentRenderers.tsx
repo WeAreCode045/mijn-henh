@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
-import { DashboardTabContent } from '../wrapper/DashboardTabContent';
+import { DashboardTabContent } from './DashboardTabContent';
 import { ContentTabContent } from './ContentTabContent';
 import { MediaTabContent } from '../media/MediaTabContent';
 import { LocationTabContent } from './LocationTabContent';
@@ -74,6 +74,8 @@ export class TabContentRenderers {
             onSave={handlers.onSave}
             onWebView={handlers.handleWebView}
             handleSaveAgent={handlers.handleSaveAgent}
+            handleSaveObjectId={handlers.handleSaveObjectId}
+            handleGeneratePDF={handlers.handleGeneratePDF}
           />
         );
       case 'content':
