@@ -34,9 +34,22 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
         }
         
         if (data) {
-          // Use metadata.status if available, otherwise fall back to the status field
-          const status = data.metadata?.status || data.status || "Draft";
-          setPropertyStatus(status);
+          // Check if metadata exists and has a status property, otherwise use the status field
+          let statusValue = data.status || "Draft";
+          
+          // Handle the metadata object properly
+          if (data.metadata) {
+            // Check if metadata is a string, parse it if necessary
+            const metadataObj = typeof data.metadata === 'string' 
+              ? JSON.parse(data.metadata) 
+              : data.metadata;
+              
+            if (metadataObj && typeof metadataObj === 'object' && 'status' in metadataObj) {
+              statusValue = metadataObj.status;
+            }
+          }
+          
+          setPropertyStatus(statusValue);
         }
       };
       

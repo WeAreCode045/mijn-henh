@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentSelector } from "../../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../../dashboard/components/PropertyDates";
@@ -363,8 +362,8 @@ export function PropertyManagementCard({
       
       {/* Edit History Modal */}
       <EditHistoryModal
-        isOpen={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
+        open={showHistoryModal}
+        onOpenChange={setShowHistoryModal}
         propertyId={propertyId}
       />
     </div>

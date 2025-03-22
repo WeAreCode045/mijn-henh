@@ -52,7 +52,7 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
 
       console.log("Fetched logs:", data?.length || 0);
       setLogs(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching edit logs:", error);
       toast({
         title: "Error",
@@ -96,14 +96,8 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
     }
   };
 
-  // Add a proper dialog state change handler to ensure state is updated correctly
-  const handleOpenChange = (newOpenState: boolean) => {
-    console.log("Dialog open state changing to:", newOpenState);
-    onOpenChange(newOpenState);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
