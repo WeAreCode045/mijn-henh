@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
-import "@blocknote/react/style.css";
+// Remove the direct import of the CSS file as it's causing issues
 import { useEffect } from "react";
 
 interface DescriptionSectionProps {
