@@ -44,16 +44,21 @@ export function MediaTabContent({
     handleToggleFeaturedImage,
     handleRemoveImage,
     handleImageUpload,
-    handleVirtualTourSave,
-    handleYoutubeUrlSave,
-    handleFloorplanEmbedScriptSave,
+    handleVirtualTourUpdate: handleVirtualTourSave,
+    handleYoutubeUrlUpdate: handleYoutubeUrlSave,
+    handleFloorplanEmbedScriptUpdate: handleFloorplanEmbedScriptSave,
     handleFloorplanUpload,
     handleRemoveFloorplan,
     isUploadingFloorplan
-  } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, {
-    handleVirtualTourUpdate,
-    handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate
+  } = usePropertyMediaHandlers(property.id, property, (field, value) => {
+    setLocalProperty(prev => ({...prev, [field]: value}));
+    if (field === 'virtualTourUrl' && handleVirtualTourUpdate) {
+      handleVirtualTourUpdate(value);
+    } else if (field === 'youtubeUrl' && handleYoutubeUrlUpdate) {
+      handleYoutubeUrlUpdate(value);
+    } else if (field === 'floorplanEmbedScript' && handleFloorplanEmbedScriptUpdate) {
+      handleFloorplanEmbedScriptUpdate(value);
+    }
   });
 
   return (

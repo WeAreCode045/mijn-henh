@@ -1,6 +1,7 @@
 
 import React from "react";
 import { PropertyData } from "@/types/property";
+import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
 
 export interface DashboardTabContentProps {
   property: PropertyData;
@@ -18,9 +19,21 @@ export function DashboardTabContent({
   handleSaveAgent
 }: DashboardTabContentProps) {
   return (
-    <div className="space-y-6">
-      {/* Dashboard content */}
-      <p>Dashboard content for property: {property.title}</p>
-    </div>
+    <PropertyDashboardTab
+      id={property.id}
+      title={property.title}
+      objectId={property.object_id}
+      agentId={property.agent_id}
+      createdAt={property.created_at}
+      updatedAt={property.updated_at}
+      agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : null}
+      isUpdating={false}
+      onSave={onSave}
+      onDelete={onDelete}
+      handleSaveObjectId={async () => {}}
+      handleSaveAgent={handleSaveAgent}
+      handleGeneratePDF={() => {}}
+      handleWebView={onWebView}
+    />
   );
 }
