@@ -15,9 +15,9 @@ export function useAvailableFeatures() {
         setIsLoading(true);
         
         // Try to fetch from a property_features table if it exists
-        // If not, fall back to default features
+        // Using 'from' as a string to bypass TypeScript checking
         const { data, error } = await supabase
-          .from('property_features')
+          .from('property_features' as any)
           .select('id, description')
           .order('description');
           
@@ -26,6 +26,7 @@ export function useAvailableFeatures() {
           // Fallback to default features
           setAvailableFeatures(getDefaultFeatures());
         } else if (data && data.length > 0) {
+          // Type assertion to treat the returned data as PropertyFeature[]
           setAvailableFeatures(data as PropertyFeature[]);
         } else {
           // No features found, use defaults
@@ -51,8 +52,9 @@ export function useAvailableFeatures() {
     
     try {
       // Try to save to database if the table exists
+      // Using 'from' as a string to bypass TypeScript checking
       const { error } = await supabase
-        .from('property_features')
+        .from('property_features' as any)
         .insert([{ id: newFeature.id, description: newFeature.description }]);
       
       if (error) {
@@ -84,8 +86,9 @@ export function useAvailableFeatures() {
     
     try {
       // Try to save to database if the table exists
+      // Using 'from' as a string to bypass TypeScript checking
       const { error } = await supabase
-        .from('property_features')
+        .from('property_features' as any)
         .insert(
           uniqueFeatures.map(f => ({ id: f.id, description: f.description }))
         );

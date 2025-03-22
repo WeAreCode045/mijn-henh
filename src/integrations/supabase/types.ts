@@ -411,6 +411,24 @@ export type Database = {
           },
         ]
       }
+      property_features: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+        }
+        Relationships: []
+      }
       property_images: {
         Row: {
           area: string | null
