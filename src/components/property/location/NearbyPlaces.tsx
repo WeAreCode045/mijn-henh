@@ -3,15 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyNearbyPlace, PropertyCity } from "@/types/property";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, MapPin, Buildings } from "lucide-react";
+import { Trash2, Plus, MapPin, Building } from "lucide-react";
 
 interface NearbyPlacesProps {
-  places: PropertyNearbyPlace[];
-  cities?: PropertyCity[]; // Added cities prop
+  places?: PropertyNearbyPlace[];
+  cities?: PropertyCity[]; 
   onRemove?: (index: number) => void;
   onFetchCategory?: (category: string) => Promise<any>;
   onFetchCities?: () => Promise<any>;
   isDisabled?: boolean;
+  // Add support for the onPlaceDelete prop from PropertyLocation
+  onPlaceDelete?: (e: React.MouseEvent, placeId: string) => void;
 }
 
 export function NearbyPlaces({
@@ -20,7 +22,8 @@ export function NearbyPlaces({
   onRemove,
   onFetchCategory,
   onFetchCities,
-  isDisabled = false
+  isDisabled = false,
+  onPlaceDelete
 }: NearbyPlacesProps) {
   // Group places by type
   const groupedPlaces = places.reduce((acc, place) => {
@@ -59,7 +62,7 @@ export function NearbyPlaces({
                   onClick={onFetchCities}
                   disabled={isDisabled}
                 >
-                  <Buildings className="w-4 h-4 mr-2" />
+                  <Building className="w-4 h-4 mr-2" />
                   Steden Ophalen
                 </Button>
               )}
@@ -91,9 +94,18 @@ export function NearbyPlaces({
                           : place.distance}
                       </span>
                     )}
+                    {/* Support both onRemove and onPlaceDelete */}
                     {onRemove && !isDisabled && (
                       <button 
                         onClick={() => onRemove(index)} 
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                    {onPlaceDelete && !isDisabled && (
+                      <button 
+                        onClick={(e) => onPlaceDelete(e, place.id)} 
                         className="ml-1 hover:text-destructive"
                       >
                         <Trash2 className="h-3 w-3" />

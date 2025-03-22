@@ -2,12 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, MapPin, Trash2 } from "lucide-react";
-import Image from "next/image";
 
 interface MapPreviewProps {
   map_image: string | null;
   onDelete?: () => void;
-  onGenerate?: () => Promise<void>; // Added onGenerate prop
+  onGenerate?: () => Promise<void>; 
   isGenerating?: boolean;
   isDisabled?: boolean;
 }

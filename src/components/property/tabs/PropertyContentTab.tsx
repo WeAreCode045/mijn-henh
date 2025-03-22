@@ -5,7 +5,7 @@ import { ContentTabWrapper } from './content/ContentTabWrapper';
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
-  property: PropertyData; // Add the missing property prop
+  property: PropertyData; 
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;

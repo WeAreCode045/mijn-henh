@@ -7,11 +7,13 @@ import { Loader2, MapPin } from "lucide-react";
 interface AddressInputProps {
   address: string;
   isLoading: boolean;
-  disabled: boolean; // Renamed from isDisabled to disabled
+  disabled: boolean;
   hasNearbyPlaces?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onFetch: () => Promise<void>; // Renamed from onLocationFetch to onFetch
+  onFetch: () => Promise<void>;
   onGenerateDescription?: () => Promise<void>;
+  // Add support for the legacy onLocationFetch prop name
+  onLocationFetch?: () => Promise<void>;
 }
 
 export function AddressInput({
@@ -22,7 +24,11 @@ export function AddressInput({
   onChange,
   onFetch,
   onGenerateDescription,
+  onLocationFetch
 }: AddressInputProps) {
+  // Use onLocationFetch as fallback if onFetch is not provided
+  const handleFetch = onFetch || onLocationFetch;
+
   return (
     <div className="space-y-2">
       <Label htmlFor="address">Adres</Label>
@@ -36,7 +42,7 @@ export function AddressInput({
         />
         <Button 
           type="button" 
-          onClick={onFetch}
+          onClick={handleFetch}
           disabled={isLoading || disabled}
           className="whitespace-nowrap"
         >
