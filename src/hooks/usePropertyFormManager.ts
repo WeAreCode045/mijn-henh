@@ -4,7 +4,7 @@ import { PropertyFormData } from '@/types/property';
 import { usePropertyFormState } from '@/hooks/usePropertyFormState';
 import { usePropertyFeatures } from './property-form/usePropertyFeatures';
 import { usePropertyAreas } from './property-form/usePropertyAreas';
-import { usePropertyContent } from './property-form/usePropertyContent';
+import { usePropertyContent } from './usePropertyContent';
 import { usePropertyImages } from './property-form/usePropertyImages';
 import { usePropertySaveHandlers } from './property-form/usePropertySaveHandlers';
 
