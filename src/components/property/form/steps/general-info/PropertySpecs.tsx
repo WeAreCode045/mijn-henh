@@ -91,14 +91,14 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
           <div className="space-y-2">
             <Label htmlFor="energyLabel">Energy Label</Label>
             <Select 
-              value={formData.energyLabel || ''} 
+              value={formData.energyLabel || 'not_specified'} 
               onValueChange={(value) => handleChange('energyLabel', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select energy label" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Not specified</SelectItem>
+                <SelectItem value="not_specified">Not specified</SelectItem>
                 <SelectItem value="A+++">A+++</SelectItem>
                 <SelectItem value="A++">A++</SelectItem>
                 <SelectItem value="A+">A+</SelectItem>
