@@ -9,10 +9,11 @@ import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "../../dashboard/NotesCard";
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
-import { ActionButtons } from "../../dashboard/components/ActionButtons";
 import { AgentSelector } from "../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../dashboard/components/PropertyDates";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PropertyManagementCard } from "./cards/PropertyManagementCard";
+import { PropertyImage } from "../../dashboard/components/PropertyImage";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -48,7 +49,6 @@ export function PropertyDashboardTab({
   agentInfo
 }: PropertyDashboardTabProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [openSubmissionsDialog, setOpenSubmissionsDialog] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -100,14 +100,6 @@ export function PropertyDashboardTab({
     fetchSubmissions();
     fetchPropertyStatus();
   }, [id, toast]);
-
-  const handleOpenSubmissions = () => {
-    setOpenSubmissionsDialog(true);
-  };
-
-  const handleGeneratePDFClick = () => {
-    handleGeneratePDF();
-  };
 
   const handleToggleArchive = async () => {
     try {
@@ -162,22 +154,6 @@ export function PropertyDashboardTab({
         <h2 className="text-xl sm:text-2xl font-bold truncate">{title}</h2>
         <div className="flex gap-2">
           <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={handleOpenSubmissions}
-            title="Contact Submissions"
-          >
-            <Mailbox className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => {}}
-            title="History"
-          >
-            <History className="h-4 w-4" />
-          </Button>
-          <Button 
             variant={isArchived ? "default" : "outline"} 
             size="icon" 
             onClick={handleToggleArchive}
@@ -203,58 +179,36 @@ export function PropertyDashboardTab({
         </div>
       )}
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <PropertyDetailsCard
-          id={id}
-          objectId={objectId}
-          title={title}
-          createdAt={createdAt}
-          updatedAt={updatedAt}
-          apiEndpoint={`/api/properties/${id}`}
-          onSaveObjectId={handleSaveObjectId}
-          isUpdating={isUpdating}
-          onGeneratePDF={handleGeneratePDFClick}
-          onWebView={handleWebView}
-          onSave={onSave}
-          onDelete={onDelete}
-          formattedUpdateDate={formatDate(updatedAt)}
-          formattedCreateDate={formatDate(createdAt)}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        {/* Property Details Card - Takes up 2/3 of the width */}
+        <div className="lg:col-span-2">
+          <PropertyDetailsCard
+            id={id}
+            objectId={objectId}
+            title={title}
+            apiEndpoint={`/api/properties/${id}`}
+            createdAt={createdAt}
+            updatedAt={updatedAt}
+            onSaveObjectId={handleSaveObjectId}
+            isUpdating={isUpdating}
+            formattedCreateDate={formatDate(createdAt)}
+            formattedUpdateDate={formatDate(updatedAt)}
+            property={{id, title}}
+          />
+        </div>
         
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium">Property Management</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />
-              
-              <AgentSelector 
-                initialAgentId={agentId} 
-                onAgentChange={handleSaveAgent}
-              />
-              
-              {isMobile ? (
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  <ActionButtons
-                    propertyId={id}
-                    onDelete={onDelete}
-                    onWebView={handleWebView}
-                    onGeneratePDF={handleGeneratePDFClick}
-                    isCompact={true}
-                  />
-                </div>
-              ) : (
-                <ActionButtons
-                  propertyId={id}
-                  onDelete={onDelete}
-                  onWebView={handleWebView}
-                  onGeneratePDF={handleGeneratePDFClick}
-                  isCompact={false}
-                />
-              )}
-            </CardContent>
-          </Card>
+        {/* Property Management Card - Takes up 1/3 of the width */}
+        <div>
+          <PropertyManagementCard 
+            propertyId={id}
+            agentId={agentId}
+            handleSaveAgent={handleSaveAgent}
+            onGeneratePDF={handleGeneratePDF}
+            onWebView={handleWebView}
+            isArchived={isArchived}
+            createdAt={createdAt}
+            updatedAt={updatedAt}
+          />
         </div>
       </div>
       
