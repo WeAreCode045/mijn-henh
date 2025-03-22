@@ -61,6 +61,7 @@ export interface PropertyCity {
 
 // Property agent
 export interface PropertyAgent {
+  full_name: string;
   id: string;
   name: string;
   email?: string;
@@ -110,7 +111,7 @@ export interface PropertyData {
   status?: string; // Added status property
   metadata?: {
     status?: string;
-    [key: string]: any;
+    [key: string]: never;
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
   // For backward compatibility - can be PropertyImage[] or string[]
@@ -162,7 +163,7 @@ export interface PropertySubmitData {
   status?: string; // Added status property
   metadata?: {
     status?: string;
-    [key: string]: any;
+    [key: string]: never;
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
 }
