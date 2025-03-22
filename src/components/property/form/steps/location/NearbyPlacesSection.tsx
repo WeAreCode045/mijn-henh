@@ -89,7 +89,7 @@ export function NearbyPlacesSection({
         onSave={handleSavePlaces}
         category={currentCategory}
         isLoading={isFetchingCategory}
-        maxSelections={getMaxSelections(currentCategory)}
+        maxSelections={5}
       />
     </div>
   );

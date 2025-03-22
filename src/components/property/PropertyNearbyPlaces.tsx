@@ -19,7 +19,7 @@ export function PropertyNearbyPlaces({ places }: PropertyNearbyPlacesProps) {
   return (
     <div className="mt-6 space-y-4">
       <h3 className="font-medium text-lg">Nearby Places</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(placesByType).map(([type, places]) => (
           <div key={type} className="border rounded-lg p-4">
             <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>

@@ -111,7 +111,7 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
             {Object.keys(groupedPlaces).length > 0 ? (
               <div>
                 <h4 className="font-semibold mb-2">Nearby Places</h4>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {Object.entries(groupedPlaces).map(([category, places]) => (
                     <div key={category} className="space-y-1">
                       <h5 className="text-sm text-gray-500 font-medium capitalize">{category}</h5>

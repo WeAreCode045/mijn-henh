@@ -25,12 +25,13 @@ export function useCategories() {
       label: 'Education',
       icon: GraduationCap,
       color: 'bg-blue-100 text-blue-800',
+      maxSelections: 5,
       subtypes: [
-        { id: 'preschool', label: 'Preschool', maxSelections: 3 },
-        { id: 'primary_school', label: 'Primary School', maxSelections: 3 },
-        { id: 'school', label: 'School', maxSelections: 3 },
-        { id: 'secondary_school', label: 'Secondary School', maxSelections: 3 },
-        { id: 'university', label: 'University', maxSelections: 3 }
+        { id: 'preschool', label: 'Preschool', maxSelections: 5 },
+        { id: 'primary_school', label: 'Primary School', maxSelections: 5 },
+        { id: 'school', label: 'School', maxSelections: 5 },
+        { id: 'secondary_school', label: 'Secondary School', maxSelections: 5 },
+        { id: 'university', label: 'University', maxSelections: 5 }
       ]
     },
     {
@@ -38,7 +39,7 @@ export function useCategories() {
       label: 'Entertainment & Recreation',
       icon: Trees,
       color: 'bg-green-100 text-green-800',
-      maxSelections: 20,
+      maxSelections: 5,
       subtypes: [
         { id: 'zoo', label: 'Zoo', maxSelections: 5 },
         { id: 'tourist_attraction', label: 'Tourist Attraction', maxSelections: 5 },
@@ -54,9 +55,10 @@ export function useCategories() {
       label: 'Shopping',
       icon: ShoppingBag,
       color: 'bg-orange-100 text-orange-800',
+      maxSelections: 5,
       subtypes: [
-        { id: 'supermarket', label: 'Supermarket', maxSelections: 4 },
-        { id: 'shopping_mall', label: 'Shopping Mall', maxSelections: 3 }
+        { id: 'supermarket', label: 'Supermarket', maxSelections: 5 },
+        { id: 'shopping_mall', label: 'Shopping Mall', maxSelections: 5 }
       ]
     },
     {
@@ -64,14 +66,15 @@ export function useCategories() {
       label: 'Sports',
       icon: Dumbbell,
       color: 'bg-purple-100 text-purple-800',
+      maxSelections: 5,
       subtypes: [
-        { id: 'arena', label: 'Arena', maxSelections: 2 },
-        { id: 'fitness_center', label: 'Fitness Center', maxSelections: 2 },
-        { id: 'golf_course', label: 'Golf Course', maxSelections: 2 },
-        { id: 'gym', label: 'Gym', maxSelections: 2 },
-        { id: 'sports_complex', label: 'Sports Complex', maxSelections: 2 },
-        { id: 'stadium', label: 'Stadium', maxSelections: 2 },
-        { id: 'swimming_pool', label: 'Swimming Pool', maxSelections: 2 }
+        { id: 'arena', label: 'Arena', maxSelections: 5 },
+        { id: 'fitness_center', label: 'Fitness Center', maxSelections: 5 },
+        { id: 'golf_course', label: 'Golf Course', maxSelections: 5 },
+        { id: 'gym', label: 'Gym', maxSelections: 5 },
+        { id: 'sports_complex', label: 'Sports Complex', maxSelections: 5 },
+        { id: 'stadium', label: 'Stadium', maxSelections: 5 },
+        { id: 'swimming_pool', label: 'Swimming Pool', maxSelections: 5 }
       ]
     },
     {
@@ -162,7 +165,10 @@ export function useCategories() {
         grouped[categoryId] = [];
       }
       
-      grouped[categoryId].push(place);
+      // Only add the place if we haven't reached the max selections for this category
+      if (grouped[categoryId].length < getMaxSelections(categoryId)) {
+        grouped[categoryId].push(place);
+      }
     });
     
     return grouped;
