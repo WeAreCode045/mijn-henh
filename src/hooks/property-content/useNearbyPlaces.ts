@@ -20,7 +20,23 @@ export function useNearbyPlaces(
     };
   }, [formData, onFieldChange]);
 
+  // Function to fetch places by category
+  const fetchCategoryPlaces = useCallback(async (category: string) => {
+    console.log(`Fetching places for category: ${category}`);
+    // This would make an API call in a real implementation
+    return Promise.resolve([]);
+  }, []);
+
+  // Function to fetch nearby cities
+  const fetchNearbyCities = useCallback(async () => {
+    console.log("Fetching nearby cities");
+    // This would make an API call in a real implementation
+    return Promise.resolve([]);
+  }, []);
+
   return {
-    removeNearbyPlace
+    removeNearbyPlace,
+    fetchCategoryPlaces,
+    fetchNearbyCities
   };
 }

@@ -37,11 +37,11 @@ export function usePropertyFormManager(property: PropertyFormData) {
   // Hook for managing content and steps
   const { 
     fetchLocationData,
-    fetchCategoryPlaces,
-    fetchNearbyCities,
     generateLocationDescription,
     generateMapImage,
     removeNearbyPlace,
+    fetchCategoryPlaces,
+    fetchNearbyCities,
     isLoadingLocationData,
     isGeneratingMap,
     currentStep,

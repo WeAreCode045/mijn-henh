@@ -16,7 +16,11 @@ export function usePropertyContent(formData: PropertyFormData, onFieldChange: (f
   } = useLocationFunctions(formData, onFieldChange);
   
   // Nearby places management
-  const { removeNearbyPlace } = useNearbyPlaces(formData, onFieldChange);
+  const { 
+    removeNearbyPlace,
+    fetchCategoryPlaces,
+    fetchNearbyCities
+  } = useNearbyPlaces(formData, onFieldChange);
   
   // Step navigation
   const { 
@@ -46,6 +50,8 @@ export function usePropertyContent(formData: PropertyFormData, onFieldChange: (f
     
     // Nearby places functions
     removeNearbyPlace,
+    fetchCategoryPlaces,
+    fetchNearbyCities,
     
     // Step navigation
     currentStep,
