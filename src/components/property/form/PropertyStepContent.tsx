@@ -11,7 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
-  step: number; // Added explicit step property
+  step?: number; // Optional step property
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature?: () => void;
   onRemoveFeature?: (id: string) => void;
@@ -43,7 +43,6 @@ interface PropertyStepContentProps {
 
 export function PropertyStepContent({
   formData,
-  step, // Use the step property
   onFieldChange,
   onAddFeature,
   onRemoveFeature,
@@ -145,7 +144,7 @@ export function PropertyStepContent({
         <Button
           variant="outline"
           onClick={() => handlePrevious && handlePrevious()}
-          disabled={currentStep === 0}
+          disabled={currentStep === 0 || isReadOnly}
           type="button"
           className="flex items-center gap-2"
         >
@@ -153,15 +152,28 @@ export function PropertyStepContent({
           Previous
         </Button>
         
-        <Button
-          onClick={() => handleNext && handleNext()}
-          disabled={currentStep === 3}
-          type="button"
-          className="flex items-center gap-2"
-        >
-          Next
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex space-x-2">
+          {onSubmit && (
+            <Button
+              onClick={onSubmit}
+              disabled={isSaving || isReadOnly}
+              type="button"
+              variant="secondary"
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          )}
+          
+          <Button
+            onClick={() => handleNext && handleNext()}
+            disabled={currentStep === 3 || isReadOnly}
+            type="button"
+            className="flex items-center gap-2"
+          >
+            Next
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

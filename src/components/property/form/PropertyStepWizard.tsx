@@ -69,6 +69,11 @@ export function PropertyStepWizard({
   isReadOnly,
   hideNavigation = false
 }: PropertyStepWizardProps) {
+  if (!formState) {
+    console.error("No form state provided to PropertyStepWizard");
+    return <div>Loading...</div>;
+  }
+  
   return (
     <div className="space-y-6">
       {!hideNavigation && (
@@ -82,7 +87,6 @@ export function PropertyStepWizard({
       
       <PropertyStepContent 
         formData={formState}
-        step={currentStep}
         onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}

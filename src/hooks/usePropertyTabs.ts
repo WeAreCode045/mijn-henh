@@ -27,9 +27,14 @@ export function usePropertyTabs() {
   
   // Update the URL when tab changes
   const handleTabChange = (tab: string) => {
-    if (!id) return;
+    if (!id) {
+      console.warn("No property ID available for tab navigation");
+      return;
+    }
     
+    console.log(`Changing tab to: ${tab}`);
     setActiveTab(tab);
+    
     // Navigate to the correct route
     navigate(`/property/${id}/${tab}`);
   };
@@ -38,11 +43,13 @@ export function usePropertyTabs() {
   useEffect(() => {
     const currentTab = getTabFromPath(location.pathname);
     if (currentTab !== activeTab) {
+      console.log(`Syncing tab state from URL: ${currentTab}`);
       setActiveTab(currentTab);
     }
     
     // If there's no specific tab in the URL (just /property/id), redirect to dashboard
     if (id && (location.pathname === `/property/${id}` || location.pathname === `/property/${id}/`)) {
+      console.log("Redirecting to dashboard tab");
       navigate(`/property/${id}/dashboard`);
     }
   }, [location.pathname, activeTab, id, navigate]);
@@ -50,5 +57,6 @@ export function usePropertyTabs() {
   return {
     activeTab,
     setActiveTab: handleTabChange,
+    validTabs
   };
 }

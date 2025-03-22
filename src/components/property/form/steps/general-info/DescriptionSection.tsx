@@ -22,51 +22,68 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
     }
   };
 
-  // Initialize the editor with the description content
+  // Initialize the editor with default settings
   const editor = useBlockNote({
-    initialContent: formData.description 
-      ? undefined // Let BlockNote handle the initial content
-      : undefined,
+    initialContent: null, // Start with empty content
     defaultStyles: false,
   });
 
-  // Set initial content when component mounts
+  // Set initial content when component mounts or formData changes
   useEffect(() => {
     if (formData.description && editor) {
-      // Convert the description to editor content format
-      const content = formData.description.split('\n\n').map(paragraph => ({
-        type: "paragraph",
-        props: {},
-        content: paragraph ? [{ type: "text", text: paragraph }] : []
-      }));
-      
-      if (content.length > 0) {
-        editor.replaceBlocks(editor.topLevelBlocks, content);
+      try {
+        // Simple approach: set editor content based on the text
+        const lines = formData.description.split('\n\n');
+        
+        // Clear existing content
+        const allBlocks = editor.topLevelBlocks;
+        if (allBlocks.length > 0) {
+          editor.removeBlocks(allBlocks);
+        }
+        
+        // Add paragraphs for each line
+        lines.forEach((line, index) => {
+          if (line.trim() !== '') {
+            editor.insertBlocks([
+              {
+                type: "paragraph",
+                content: [{ type: "text", text: line }]
+              }
+            ], index === 0 ? "beginning" : "end");
+          }
+        });
+      } catch (error) {
+        console.error("Error setting editor content:", error);
       }
     }
-  }, []);
+  }, [formData.id]); // Only run when property ID changes
 
   // Update formData.description when editor content changes
   useEffect(() => {
     const handleEditorChange = () => {
-      // Extract text content from editor blocks
-      const textContent = editor.topLevelBlocks
-        .map(block => {
-          // Extract text from inline content
-          if (block.content) {
-            return block.content
-              .filter(item => item.type === 'text')
-              .map((item: any) => item.text || '')
-              .join('');
-          }
-          return '';
-        })
-        .filter(text => text.trim() !== '')
-        .join('\n\n');
-      
-      onFieldChange('description', textContent);
-      if (setPendingChanges) {
-        setPendingChanges(true);
+      try {
+        // Extract text content from editor blocks
+        const textContent = editor.topLevelBlocks
+          .map(block => {
+            // Extract text from inline content
+            if (block.content) {
+              const blockText = block.content
+                .filter(item => item.type === 'text')
+                .map(item => (item as any).text || '')
+                .join('');
+              return blockText;
+            }
+            return '';
+          })
+          .filter(text => text.trim() !== '')
+          .join('\n\n');
+        
+        onFieldChange('description', textContent);
+        if (setPendingChanges) {
+          setPendingChanges(true);
+        }
+      } catch (error) {
+        console.error("Error updating from editor:", error);
       }
     };
 
@@ -99,7 +116,7 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
 
         <div className="space-y-2">
           <Label htmlFor="description">Full Description</Label>
-          <div className="border rounded-md min-h-[300px]">
+          <div className="border rounded-md min-h-[400px]">
             <BlockNoteView editor={editor} theme="light" />
           </div>
         </div>

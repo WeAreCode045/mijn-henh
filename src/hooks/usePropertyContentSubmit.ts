@@ -16,6 +16,16 @@ export function usePropertyContentSubmit(
 
   const onSubmit = async () => {
     console.log("Submit clicked in PropertyContentTab");
+    if (!formData) {
+      console.error("No form data to save");
+      toast({
+        title: "Error",
+        description: "No data to save",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSaving(true);
     
     try {

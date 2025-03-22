@@ -4,7 +4,7 @@ import { Route, Routes, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PropertyLayout } from "./PropertyLayout";
 
-// Directly import instead of lazy-loading
+// Directly import instead of lazy-loading all components
 import Index from "../pages/Index";
 import Properties from "../pages/Properties";
 import PropertyFormPage from "../pages/PropertyFormPage";
