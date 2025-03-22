@@ -17,7 +17,7 @@ export function PropertyTabContents({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImagesSelect,
-  onAreaImageUpload, // This prop is used directly
+  onAreaImageUpload, 
   onFieldChange,
   onFetchLocationData,
   onFetchCategoryPlaces,
@@ -31,12 +31,12 @@ export function PropertyTabContents({
   onDelete,
   handleSaveObjectId,
   handleSaveAgent,
-  handleSaveTemplate, // Add this parameter
+  handleSaveTemplate,
   currentStep,
   handleStepClick,
   setPendingChanges,
   isSaving,
-  handleGeneratePDF, // Add missing props
+  handleGeneratePDF,
   handleWebView,
   handleImageUpload,
   handleRemoveImage,
@@ -50,14 +50,15 @@ export function PropertyTabContents({
   handleVirtualTourUpdate,
   handleYoutubeUrlUpdate,
   handleFloorplanEmbedScriptUpdate,
-  handleRemoveAreaPhoto
+  handleRemoveAreaPhoto,
+  isArchived
 }: PropertyTabContentsProps) {
   const handlers = {
     onSave,
     onDelete,
     handleSaveObjectId,
     handleSaveAgent,
-    handleSaveTemplate, // Include in handlers
+    handleSaveTemplate,
     onFieldChange,
     onAddFeature,
     onRemoveFeature,
@@ -67,7 +68,7 @@ export function PropertyTabContents({
     onUpdateArea,
     onAreaImageRemove,
     onAreaImagesSelect,
-    handleAreaImageUpload: onAreaImageUpload, // Pass the correct prop here
+    handleAreaImageUpload: onAreaImageUpload,
     onFetchLocationData,
     onFetchCategoryPlaces,
     onFetchNearbyCities,
@@ -80,7 +81,8 @@ export function PropertyTabContents({
     handleStepClick,
     setPendingChanges,
     isSaving: isSaving || false,
-    handleWebView // Add the handleWebView prop
+    handleWebView,
+    handleGeneratePDF
   };
 
   return TabContentRenderers.renderTabContent({
@@ -89,6 +91,7 @@ export function PropertyTabContents({
     formState,
     agentInfo,
     isUpdating,
+    isArchived,
     handlers
   });
 }

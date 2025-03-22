@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyData } from "@/types/property";
 import { PropertyDates } from "./components/PropertyDates";
-import { Trash, History, ScanEye, FileText, RotateCcw, Youtube } from "lucide-react";
+import { Trash, History, ScanEye, FileText, RotateCcw, Youtube, Archive, Clock } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { EditHistoryModal } from "./components/EditHistoryModal";
 import { 
@@ -14,6 +14,19 @@ import {
 } from "@/components/ui/tooltip";
 import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 import { MediaViewModal } from "@/components/property/MediaViewModal";
+import { usePropertyArchive } from "@/hooks/usePropertyArchive";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ActionsCardProps {
   propertyId?: string;  // Make propertyId optional
@@ -37,6 +50,9 @@ export function ActionsCard({
   const { isAdmin } = useAuth();
   const [showEditHistory, setShowEditHistory] = useState(false);
   const { generatePDF, isGenerating } = useGeneratePDF();
+  const { archiveProperty, unarchiveProperty, isArchiving } = usePropertyArchive();
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
   
   // Media view modal states
   const [showMediaModal, setShowMediaModal] = useState(false);
@@ -53,7 +69,7 @@ export function ActionsCard({
 
   // Handle PDF generation
   const handleGeneratePDF = async () => {
-    if (propertyData) {
+    if (propertyData && !propertyData.archived) {
       await generatePDF(propertyData);
     }
   };
@@ -84,8 +100,35 @@ export function ActionsCard({
     }
   };
 
+  // Handle archiving property
+  const handleArchiveProperty = async () => {
+    if (propertyId) {
+      const success = await archiveProperty(propertyId);
+      if (success) {
+        setShowArchiveDialog(false);
+        // Reload the page to reflect the archived state
+        window.location.reload();
+      }
+    }
+  };
+
+  // Handle unarchiving property
+  const handleUnarchiveProperty = async () => {
+    if (propertyId) {
+      const success = await unarchiveProperty(propertyId);
+      if (success) {
+        setShowUnarchiveDialog(false);
+        // Reload the page to reflect the unarchived state
+        window.location.reload();
+      }
+    }
+  };
+
   // Check if edit history button should be shown
   const showEditHistoryButton = isAdmin && propertyId;
+  
+  // Check if property is archived
+  const isArchived = propertyData?.archived || false;
 
   return (
     <Card className="md:col-span-1">
@@ -107,6 +150,7 @@ export function ActionsCard({
               onClick={onDelete} 
               className="flex items-center justify-center rounded-md w-8 h-8 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
               title="Delete property"
+              disabled={isArchived}
             >
               <Trash className="h-4 w-4" />
             </button>
@@ -114,6 +158,13 @@ export function ActionsCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isArchived && (
+          <div className="bg-amber-50 text-amber-800 p-3 rounded-md flex items-center gap-2 mb-4">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm font-medium">This property is archived</span>
+          </div>
+        )}
+        
         {propertyId && (
           <div className="text-xs text-muted-foreground font-mono">
             ID: {propertyId}
@@ -131,17 +182,24 @@ export function ActionsCard({
                   <button 
                     onClick={onWebView} 
                     className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                      propertyId 
+                      propertyId && !isArchived
                         ? "bg-gray-100 hover:bg-gray-200" 
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     } transition-colors`}
-                    disabled={!propertyId}
+                    disabled={!propertyId || isArchived}
                   >
                     <ScanEye className="h-5 w-5" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{propertyId ? "Web View" : "Save property first"}</p>
+                  <p>
+                    {!propertyId 
+                      ? "Save property first" 
+                      : isArchived 
+                        ? "Unarchive property first" 
+                        : "Web View"
+                    }
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -151,9 +209,9 @@ export function ActionsCard({
                 <TooltipTrigger asChild>
                   <button 
                     onClick={handleGeneratePDF}
-                    disabled={isGenerating || !propertyId} 
+                    disabled={isGenerating || !propertyId || isArchived} 
                     className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                      propertyId && !isGenerating 
+                      propertyId && !isGenerating && !isArchived
                         ? "bg-gray-100 hover:bg-gray-200"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     } transition-colors`}
@@ -162,7 +220,16 @@ export function ActionsCard({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isGenerating ? "Generating..." : (propertyId ? "Generate PDF" : "Save property first")}</p>
+                  <p>
+                    {isGenerating 
+                      ? "Generating..." 
+                      : !propertyId 
+                        ? "Save property first" 
+                        : isArchived 
+                          ? "Unarchive property first" 
+                          : "Generate PDF"
+                    }
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -172,9 +239,9 @@ export function ActionsCard({
                 <TooltipTrigger asChild>
                   <button 
                     onClick={handleOpenVirtualTour}
-                    disabled={!propertyData?.virtualTourUrl}
+                    disabled={!propertyData?.virtualTourUrl || isArchived}
                     className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                      propertyData?.virtualTourUrl 
+                      propertyData?.virtualTourUrl && !isArchived
                         ? "bg-blue-100 text-blue-600 hover:bg-blue-200" 
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     } transition-colors`}
@@ -183,7 +250,14 @@ export function ActionsCard({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{propertyData?.virtualTourUrl ? "Open Tour" : "No Virtual Tour"}</p>
+                  <p>
+                    {!propertyData?.virtualTourUrl 
+                      ? "No Virtual Tour" 
+                      : isArchived 
+                        ? "Unarchive property first" 
+                        : "Open Tour"
+                    }
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -193,9 +267,9 @@ export function ActionsCard({
                 <TooltipTrigger asChild>
                   <button
                     onClick={handleOpenYoutubeVideo}
-                    disabled={!propertyData?.youtubeUrl}
+                    disabled={!propertyData?.youtubeUrl || isArchived}
                     className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                      propertyData?.youtubeUrl 
+                      propertyData?.youtubeUrl && !isArchived
                         ? "bg-red-100 text-red-600 hover:bg-red-200" 
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     } transition-colors`}
@@ -204,12 +278,91 @@ export function ActionsCard({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{propertyData?.youtubeUrl ? "Watch Video" : "No Video"}</p>
+                  <p>
+                    {!propertyData?.youtubeUrl 
+                      ? "No Video" 
+                      : isArchived 
+                        ? "Unarchive property first" 
+                        : "Watch Video"
+                    }
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
         </div>
+        
+        {/* Archive/Unarchive Button */}
+        {propertyId && (
+          <div className="pt-4">
+            {isArchived ? (
+              <>
+                <AlertDialog open={showUnarchiveDialog} onOpenChange={setShowUnarchiveDialog}>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      disabled={isArchiving}
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Unarchive Property
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Unarchive this property?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will make the property editable again and enable all functionality.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleUnarchiveProperty}
+                        disabled={isArchiving}
+                      >
+                        {isArchiving ? "Unarchiving..." : "Unarchive"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            ) : (
+              <>
+                <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      disabled={isArchiving}
+                    >
+                      <Archive className="mr-2 h-4 w-4" />
+                      Archive Property
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Archive this property?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will prevent editing of the property and disable most functionality.
+                        You can unarchive the property later if needed.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleArchiveProperty}
+                        disabled={isArchiving}
+                      >
+                        {isArchiving ? "Archiving..." : "Archive"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+          </div>
+        )}
         
         {isAdmin && propertyId && (
           <EditHistoryModal

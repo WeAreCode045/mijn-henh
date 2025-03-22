@@ -9,6 +9,7 @@ interface PropertyTabActionsHandlerProps {
   propertyId: string;
   propertyData?: PropertyData;
   settings?: AgencySettings;
+  isArchived?: boolean;
   children: (props: {
     webViewOpen: boolean;
     setWebViewOpen: (open: boolean) => void;
@@ -21,6 +22,7 @@ export function PropertyTabActionsHandler({
   propertyId, 
   propertyData,
   settings,
+  isArchived = false,
   children 
 }: PropertyTabActionsHandlerProps) {
   const [webViewOpen, setWebViewOpen] = useState(false);
@@ -29,6 +31,14 @@ export function PropertyTabActionsHandler({
 
   // Web view functions - opens in new tab
   const handleOpenWebView = (e: React.MouseEvent) => {
+    if (isArchived) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      return false;
+    }
+    
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -39,6 +49,12 @@ export function PropertyTabActionsHandler({
   // PDF generation function
   const handleGeneratePDF = async () => {
     console.log('PropertyTabActionsHandler: handleGeneratePDF called');
+    
+    if (isArchived) {
+      console.log('Cannot generate PDF for archived property');
+      return;
+    }
+    
     if (propertyData) {
       await generatePDF(propertyData);
     } else {

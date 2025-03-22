@@ -1,151 +1,94 @@
 
-import { PropertyData, PropertyFormData, PropertyCity, PropertyNearbyPlace } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 
 export interface PropertyTabContentsProps {
   activeTab: string;
   property: PropertyData;
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
   isUpdating?: boolean;
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
-  onAddArea: () => void;
-  onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-  handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>; // Add this property
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onFetchLocationData: () => Promise<void>;
-  onFetchCategoryPlaces: (category: string) => Promise<any>;
-  onFetchNearbyCities: () => Promise<any>;
-  onGenerateLocationDescription: () => Promise<void>;
-  onGenerateMap: () => Promise<void>;
-  onRemoveNearbyPlace: (index: number) => void;
-  isLoadingLocationData: boolean;
-  isGeneratingMap: boolean;
+  isArchived?: boolean;
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveTemplate: (templateId: string) => Promise<void>;
-  currentStep: number;
-  handleStepClick: (step: number) => void;
-  setPendingChanges: (pending: boolean) => void;
-  isSaving?: boolean;
-  // Add the missing properties
-  handleGeneratePDF?: () => void;
-  handleWebView?: (e: React.MouseEvent) => void; // Updated to accept MouseEvent
-  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage?: (index: number) => void;
-  isUploading?: boolean;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
-  isUploadingFloorplan?: boolean;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
-  handleVirtualTourUpdate?: (url: string) => void;
-  handleYoutubeUrlUpdate?: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  onSubmit?: () => void;
-}
-
-export interface PropertyFormManagerChildrenProps {
-  formState: PropertyFormData;
-  handleFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  handleSaveObjectId: (objectId: string) => Promise<void>;
-  handleSaveAgent: (agentId: string) => Promise<void>;
-  handleSaveTemplate: (templateId: string) => Promise<void>;
-  addFeature: () => void;
-  removeFeature: (id: string) => void;
-  updateFeature: (id: string, description: string) => void;
-  addArea: () => void;
-  removeArea: (id: string) => void;
-  updateArea: (id: string, field: any, value: any) => void;
-  handleAreaImageRemove: (areaId: string, imageId: string) => void;
-  handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  handleGeneratePDF: () => void;
+  handleWebView: (e: React.MouseEvent) => void;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onAddFeature: () => void;
+  onRemoveFeature: (index: number) => void;
+  onUpdateFeature: (index: number, value: string) => void;
+  onAddArea: () => void;
+  onRemoveArea: (index: number) => void;
+  onUpdateArea: (index: number, field: string, value: any) => void;
+  onAreaImageRemove: (areaIndex: number, imageIndex: number) => void;
+  onAreaImagesSelect: (areaIndex: number, files: FileList) => void;
+  onAreaImageUpload: (areaIndex: number, files: FileList) => void;
   onFetchLocationData: () => Promise<void>;
-  onFetchCategoryPlaces: (category: string) => Promise<any>;
-  onFetchNearbyCities: () => Promise<any>;
   onGenerateLocationDescription: () => Promise<void>;
   onGenerateMap: () => Promise<void>;
-  onRemoveNearbyPlace: (index: number) => void;
+  onRemoveNearbyPlace: (placeId: string) => void;
   isLoadingLocationData: boolean;
   isGeneratingMap: boolean;
-  onSubmit: () => void;
+  onFetchCategoryPlaces: (category: string) => Promise<any>;
+  onFetchNearbyCities: () => Promise<void>;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage: (index: number) => void;
+  isUploading: boolean;
+  handleAreaPhotosUpload: (areaIndex: number, e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveAreaPhoto: (areaIndex: number, photoIndex: number) => void;
+  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveFloorplan: (index: number) => void;
+  isUploadingFloorplan: boolean;
+  handleSetFeaturedImage: (index: number) => void;
+  handleToggleFeaturedImage: (index: number) => void;
+  handleVirtualTourUpdate: (url: string) => void;
+  handleYoutubeUrlUpdate: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate: (script: string) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
-  lastSaved: Date | null;
-  isSaving: boolean;
-  setPendingChanges: (pending: boolean) => void;
-  // Define additional properties to satisfy the component requirements
-  propertyWithRequiredProps?: PropertyData;
-  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage?: (index: number) => void;
-  isUploading?: boolean;
-  handleAreaPhotosUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveAreaPhoto?: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan?: (index: number) => void;
-  isUploadingFloorplan?: boolean;
-  handleSetFeaturedImage?: (url: string | null) => void;
-  handleToggleFeaturedImage?: (url: string) => void;
-  handleVirtualTourUpdate?: (url: string) => void;
-  handleYoutubeUrlUpdate?: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
-  // These were duplicated, removing them:
-  // onAreaImageRemove?: (areaId: string, imageId: string) => void;
-  // onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
-  onAddFeature?: () => void;
-  onRemoveFeature?: (id: string) => void;
-  onUpdateFeature?: (id: string, description: string) => void;
-  onAddArea?: () => void;
-  onRemoveArea?: (id: string) => void;
-  onUpdateArea?: (id: string, field: any, value: any) => void;
-  images?: any[];
+  onSubmit: () => void;
+  setPendingChanges: (value: boolean) => void;
+  isSaving?: boolean;
 }
 
-export interface PropertyTabProps {
+export interface TabContentRenderProps {
   activeTab: string;
   property: PropertyData;
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
-  templateInfo?: { id: string; name: string } | null;
-  isUpdating: boolean;
+  isUpdating?: boolean;
+  isArchived?: boolean;
   handlers: {
     onSave?: () => void;
     onDelete?: () => Promise<void>;
     handleSaveObjectId: (objectId: string) => Promise<void>;
     handleSaveAgent: (agentId: string) => Promise<void>;
     handleSaveTemplate: (templateId: string) => Promise<void>;
+    handleGeneratePDF: () => void;
+    handleWebView: (e: React.MouseEvent) => void;
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
-    onRemoveFeature: (id: string) => void;
-    onUpdateFeature: (id: string, description: string) => void;
+    onRemoveFeature: (index: number) => void;
+    onUpdateFeature: (index: number, value: string) => void;
     onAddArea: () => void;
-    onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageRemove: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    onRemoveArea: (index: number) => void;
+    onUpdateArea: (index: number, field: string, value: any) => void;
+    onAreaImageRemove: (areaIndex: number, imageIndex: number) => void;
+    onAreaImagesSelect: (areaIndex: number, files: FileList) => void;
+    handleAreaImageUpload: (areaIndex: number, files: FileList) => void;
     onFetchLocationData: () => Promise<void>;
-    onFetchCategoryPlaces: (category: string) => Promise<any>;
-    onFetchNearbyCities: () => Promise<any>;
     onGenerateLocationDescription: () => Promise<void>;
     onGenerateMap: () => Promise<void>;
-    onRemoveNearbyPlace: (index: number) => void;
+    onRemoveNearbyPlace: (placeId: string) => void;
     isLoadingLocationData: boolean;
     isGeneratingMap: boolean;
+    onFetchCategoryPlaces: (category: string) => Promise<any>;
+    onFetchNearbyCities: () => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    setPendingChanges: (pending: boolean) => void;
-    isSaving: boolean;
-    handleWebView?: (e: React.MouseEvent) => void;  // Updated to accept MouseEvent
-  }
+    setPendingChanges: (value: boolean) => void;
+    isSaving?: boolean;
+  };
 }

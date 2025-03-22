@@ -1,71 +1,217 @@
 
-import { usePropertyFormManager } from "@/hooks/property-form/usePropertyFormManager";
-import { PropertyFormManagerProps } from "./types/PropertyFormManagerTypes";
+import { useState, useCallback, useEffect } from "react";
+import { usePropertyFormState } from "@/hooks/property-form/usePropertyFormState";
+import { usePropertyFormActions } from "@/hooks/property-form/usePropertyFormActions";
+import { usePropertyFormFields } from "@/hooks/property-form/usePropertyFormFields";
+import { usePropertyFormImages } from "@/hooks/property-form/usePropertyFormImages";
+import { usePropertyFormAreas } from "@/hooks/property-form/usePropertyFormAreas";
+import { usePropertyFormSteps } from "@/hooks/property-form/usePropertyFormSteps";
+import { usePropertyLocationData } from "@/hooks/property-form/usePropertyLocationData";
+import { PropertyData } from "@/types/property";
+import { useToast } from "@/components/ui/use-toast";
 
-export function PropertyFormManager({ property, children }: PropertyFormManagerProps) {
-  // Use the custom hook that combines all form-related functionality
-  const formManagerProps = usePropertyFormManager(property);
+interface PropertyFormManagerProps {
+  property: PropertyData;
+  isArchived?: boolean;
+  children: (props: any) => React.ReactNode;
+}
+
+export function PropertyFormManager({ 
+  property, 
+  isArchived = false,
+  children 
+}: PropertyFormManagerProps) {
+  const { toast } = useToast();
+  const [lastSaved, setLastSaved] = useState<Date | null>(
+    property.updated_at ? new Date(property.updated_at) : null
+  );
+  const [pendingChanges, setPendingChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
-  // Create props object that matches PropertyFormManagerChildrenProps structure
-  const childrenProps = {
-    formState: formManagerProps.formState,
-    handleFieldChange: formManagerProps.handleFieldChange,
-    handleSaveObjectId: formManagerProps.handleSaveObjectId,
-    handleSaveAgent: formManagerProps.handleSaveAgent,
-    addFeature: formManagerProps.onAddFeature,
-    removeFeature: formManagerProps.onRemoveFeature,
-    updateFeature: formManagerProps.onUpdateFeature,
-    addArea: formManagerProps.onAddArea,
-    removeArea: formManagerProps.onRemoveArea,
-    updateArea: formManagerProps.onUpdateArea,
-    handleAreaImageRemove: formManagerProps.onAreaImageRemove,
-    handleAreaImagesSelect: formManagerProps.onAreaImagesSelect,
-    handleAreaImageUpload: formManagerProps.handleAreaImageUpload,
-    onFetchLocationData: formManagerProps.onFetchLocationData,
-    onFetchCategoryPlaces: formManagerProps.onFetchCategoryPlaces,
-    onFetchNearbyCities: formManagerProps.onFetchNearbyCities,
-    onGenerateLocationDescription: formManagerProps.onGenerateLocationDescription,
-    onGenerateMap: formManagerProps.onGenerateMap,
-    onRemoveNearbyPlace: formManagerProps.onRemoveNearbyPlace,
-    isLoadingLocationData: formManagerProps.isLoadingLocationData,
-    isGeneratingMap: formManagerProps.isGeneratingMap,
-    onSubmit: formManagerProps.onSubmit,
-    currentStep: formManagerProps.currentStep,
-    handleStepClick: formManagerProps.handleStepClick,
-    lastSaved: formManagerProps.lastSaved,
-    isSaving: formManagerProps.isSaving,
-    setPendingChanges: formManagerProps.setPendingChanges,
-    // Add missing properties for compatibility
-    propertyWithRequiredProps: {
-      ...property,
-      id: property.id || '', // Ensure id is always at least an empty string
-    },
-    handleImageUpload: formManagerProps.handleImageUpload,
-    handleRemoveImage: formManagerProps.handleRemoveImage,
-    isUploading: formManagerProps.isUploading,
-    // Placeholder implementations for missing properties
-    handleAreaPhotosUpload: async () => {}, // Add stub implementation
-    handleRemoveAreaPhoto: () => {}, // Add stub implementation
-    handleFloorplanUpload: () => {}, // Add stub implementation
-    handleRemoveFloorplan: () => {}, // Add stub implementation
-    isUploadingFloorplan: false, // Add default value
-    handleSetFeaturedImage: () => {}, // Add stub implementation
-    handleToggleFeaturedImage: () => {}, // Add stub implementation
-    handleVirtualTourUpdate: () => {}, // Add stub implementation
-    handleYoutubeUrlUpdate: () => {}, // Add stub implementation
-    handleFloorplanEmbedScriptUpdate: () => {}, // Add stub implementation
-    // Add aliases for compatibility
-    onAddFeature: formManagerProps.onAddFeature,
-    onRemoveFeature: formManagerProps.onRemoveFeature,
-    onUpdateFeature: formManagerProps.onUpdateFeature,
-    onAddArea: formManagerProps.onAddArea,
-    onRemoveArea: formManagerProps.onRemoveArea,
-    onUpdateArea: formManagerProps.onUpdateArea,
-    onAreaImageRemove: formManagerProps.onAreaImageRemove,
-    onAreaImagesSelect: formManagerProps.onAreaImagesSelect,
-    images: formManagerProps.images || []
+  // Setup form state
+  const { formState, handleFieldChange } = usePropertyFormState(property, setPendingChanges);
+  
+  // Property form actions
+  const { 
+    handleSaveObjectId, 
+    handleSaveAgent, 
+    onSubmit 
+  } = usePropertyFormActions(
+    formState,
+    setPendingChanges,
+    setLastSaved
+  );
+  
+  // Property form fields
+  const { 
+    addFeature, 
+    removeFeature, 
+    updateFeature 
+  } = usePropertyFormFields(
+    formState, 
+    handleFieldChange
+  );
+  
+  // Property form images
+  const { 
+    handleImageUpload, 
+    handleRemoveImage, 
+    isUploading,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate,
+  } = usePropertyFormImages(
+    formState.id, 
+    formState, 
+    handleFieldChange, 
+    setPendingChanges
+  );
+  
+  // Property form areas
+  const { 
+    addArea, 
+    removeArea, 
+    updateArea,
+    handleAreaImageRemove,
+    handleAreaImagesSelect,
+    handleAreaImageUpload,
+    handleAreaPhotosUpload, 
+    handleRemoveAreaPhoto
+  } = usePropertyFormAreas(
+    formState, 
+    handleFieldChange, 
+    setPendingChanges
+  );
+  
+  // Property form steps
+  const { 
+    currentStep, 
+    handleStepClick 
+  } = usePropertyFormSteps();
+  
+  // Property form location data
+  const {
+    onFetchLocationData,
+    onGenerateLocationDescription,
+    onGenerateMap,
+    onRemoveNearbyPlace,
+    isLoadingLocationData,
+    isGeneratingMap,
+    onFetchCategoryPlaces,
+    onFetchNearbyCities
+  } = usePropertyLocationData(
+    formState,
+    handleFieldChange,
+    setPendingChanges
+  );
+
+  // Add property ID to formState if it doesn't exist
+  const propertyWithRequiredProps = {
+    ...formState,
+    id: formState.id || '',
   };
-  
-  // Pass all the props to the children render function
-  return children(childrenProps);
+
+  // Modification wrapper to handle archived status
+  const wrapMethod = useCallback((method: Function) => {
+    return (...args: any[]) => {
+      if (isArchived) {
+        toast({
+          title: "Action blocked",
+          description: "This property is archived. Unarchive it first to make changes.",
+          variant: "destructive",
+        });
+        return Promise.resolve();
+      }
+      return method(...args);
+    };
+  }, [isArchived, toast]);
+
+  // Wrap all modification methods when property is archived
+  const wrappedMethods = {
+    handleFieldChange: wrapMethod(handleFieldChange),
+    handleSaveObjectId: wrapMethod(handleSaveObjectId),
+    handleSaveAgent: isArchived ? handleSaveAgent : wrapMethod(handleSaveAgent), // Allow agent changes even when archived
+    addFeature: wrapMethod(addFeature),
+    removeFeature: wrapMethod(removeFeature),
+    updateFeature: wrapMethod(updateFeature),
+    addArea: wrapMethod(addArea),
+    removeArea: wrapMethod(removeArea),
+    updateArea: wrapMethod(updateArea),
+    handleAreaImageRemove: wrapMethod(handleAreaImageRemove),
+    handleAreaImagesSelect: wrapMethod(handleAreaImagesSelect),
+    handleAreaImageUpload: wrapMethod(handleAreaImageUpload),
+    handleImageUpload: wrapMethod(handleImageUpload),
+    handleRemoveImage: wrapMethod(handleRemoveImage),
+    handleAreaPhotosUpload: wrapMethod(handleAreaPhotosUpload),
+    handleRemoveAreaPhoto: wrapMethod(handleRemoveAreaPhoto),
+    handleFloorplanUpload: wrapMethod(handleFloorplanUpload),
+    handleRemoveFloorplan: wrapMethod(handleRemoveFloorplan),
+    handleSetFeaturedImage: wrapMethod(handleSetFeaturedImage),
+    handleToggleFeaturedImage: wrapMethod(handleToggleFeaturedImage),
+    handleVirtualTourUpdate: wrapMethod(handleVirtualTourUpdate),
+    handleYoutubeUrlUpdate: wrapMethod(handleYoutubeUrlUpdate),
+    handleFloorplanEmbedScriptUpdate: wrapMethod(handleFloorplanEmbedScriptUpdate),
+    onSubmit: wrapMethod(onSubmit),
+    onFetchLocationData: wrapMethod(onFetchLocationData),
+    onGenerateLocationDescription: wrapMethod(onGenerateLocationDescription),
+    onGenerateMap: wrapMethod(onGenerateMap),
+    onRemoveNearbyPlace: wrapMethod(onRemoveNearbyPlace),
+    onFetchCategoryPlaces: wrapMethod(onFetchCategoryPlaces),
+    onFetchNearbyCities: wrapMethod(onFetchNearbyCities),
+    setPendingChanges: wrapMethod(setPendingChanges),
+  };
+
+  // Use the original methods or the wrapped methods based on the archived status
+  const methods = isArchived ? wrappedMethods : {
+    handleFieldChange,
+    handleSaveObjectId,
+    handleSaveAgent,
+    addFeature,
+    removeFeature,
+    updateFeature,
+    addArea,
+    removeArea,
+    updateArea,
+    handleAreaImageRemove,
+    handleAreaImagesSelect,
+    handleAreaImageUpload,
+    handleImageUpload,
+    handleRemoveImage,
+    handleAreaPhotosUpload,
+    handleRemoveAreaPhoto,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate,
+    onSubmit,
+    onFetchLocationData,
+    onGenerateLocationDescription,
+    onGenerateMap,
+    onRemoveNearbyPlace,
+    onFetchCategoryPlaces,
+    onFetchNearbyCities,
+    setPendingChanges,
+  };
+
+  return children({
+    ...methods,
+    formState,
+    isUploading,
+    isUploadingFloorplan,
+    currentStep,
+    handleStepClick,
+    propertyWithRequiredProps,
+    lastSaved,
+    isSaving,
+    isLoadingLocationData,
+    isGeneratingMap,
+  });
 }

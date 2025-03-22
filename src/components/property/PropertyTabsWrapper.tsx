@@ -14,6 +14,7 @@ interface PropertyTabsWrapperProps {
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   agentInfo?: { id: string; name: string } | null;
+  isArchived?: boolean;
 }
 
 export function PropertyTabsWrapper({
@@ -21,10 +22,10 @@ export function PropertyTabsWrapper({
   settings,
   onSave,
   onDelete,
-  agentInfo
+  agentInfo,
+  isArchived = false
 }: PropertyTabsWrapperProps) {
   const { activeTab, setActiveTab } = usePropertyTabs();
-  console.log("PropertyTabsWrapper - Active tab:", activeTab);
   
   // Add a stub function for handleSaveTemplate
   const handleSaveTemplate = async (templateId: string) => {
@@ -34,9 +35,14 @@ export function PropertyTabsWrapper({
   
   return (
     <div className="space-y-6">
-      <PropertyTabActionsHandler propertyId={property.id} propertyData={property} settings={settings}>
+      <PropertyTabActionsHandler 
+        propertyId={property.id} 
+        propertyData={property} 
+        settings={settings}
+        isArchived={isArchived}
+      >
         {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={property}>
+          <PropertyFormManager property={property} isArchived={isArchived}>
             {({ 
               formState, 
               handleFieldChange,
@@ -136,6 +142,7 @@ export function PropertyTabsWrapper({
                       isGeneratingMap={isGeneratingMap}
                       onFetchCategoryPlaces={onFetchCategoryPlaces}
                       onFetchNearbyCities={onFetchNearbyCities}
+                      isArchived={isArchived}
                     />
                   </PropertyTabs>
                 </Tabs>

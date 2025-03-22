@@ -43,6 +43,7 @@ export interface PropertyData {
   created_at?: string;
   updated_at?: string;
   status?: string; // Property status field
+  archived?: boolean; // Property archived status
   metadata?: {
     status?: string;
     [key: string]: any;

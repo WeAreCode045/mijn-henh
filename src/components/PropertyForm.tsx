@@ -8,6 +8,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyData } from "@/types/property";
 import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Clock } from "lucide-react";
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -111,6 +113,16 @@ export function PropertyForm() {
 
   return (
     <div className="space-y-4">
+      {formData.archived && (
+        <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">
+          <Clock className="h-4 w-4" />
+          <AlertTitle>This property is archived</AlertTitle>
+          <AlertDescription>
+            Editing is disabled. You can still view the property but must unarchive it to make changes.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <form id="propertyForm">
         <PropertyTabsWrapper
           property={propertyData}
@@ -118,6 +130,7 @@ export function PropertyForm() {
           onSave={handleSave}
           onDelete={handleDelete}
           agentInfo={agentInfo}
+          isArchived={!!formData.archived}
         />
       </form>
     </div>

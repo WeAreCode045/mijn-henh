@@ -154,6 +154,7 @@ export type Database = {
         Row: {
           address: string | null
           agent_id: string | null
+          archived: boolean
           areaPhotos: string[] | null
           areas: Json[] | null
           bathrooms: string | null
@@ -191,6 +192,7 @@ export type Database = {
         Insert: {
           address?: string | null
           agent_id?: string | null
+          archived?: boolean
           areaPhotos?: string[] | null
           areas?: Json[] | null
           bathrooms?: string | null
@@ -228,6 +230,7 @@ export type Database = {
         Update: {
           address?: string | null
           agent_id?: string | null
+          archived?: boolean
           areaPhotos?: string[] | null
           areas?: Json[] | null
           bathrooms?: string | null
