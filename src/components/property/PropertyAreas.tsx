@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
-import { PropertyArea, PropertyImage } from "@/types/property";
+
 import { useEffect } from "react";
-import { AreaCard } from "./AreaCard";
+import { PropertyArea, PropertyImage } from "@/types/property";
 import { EmptyAreaMessage } from "./EmptyAreaMessage";
+import { PropertyAreasHeader } from "./area/PropertyAreasHeader";
+import { AreasList } from "./area/AreasList";
 
 interface PropertyAreasProps {
   areas: PropertyArea[];
@@ -42,51 +42,25 @@ export function PropertyAreas({
     });
   }, [areas, images, propertyId]);
 
-  const handleAddArea = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onAdd();
-  };
-
-  // Make sure all areas have images as arrays
-  const normalizedAreas = areas.map(area => ({
-    ...area,
-    images: Array.isArray(area.images) ? area.images : []
-  }));
+  // Check if areas exist and have valid content
+  const hasAreas = Array.isArray(areas) && areas.length > 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-estate-800">Property Areas</h2>
-        <Button 
-          onClick={handleAddArea} 
-          size="sm" 
-          className="flex items-center" 
-          type="button"
-        >
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Area
-        </Button>
-      </div>
+      <PropertyAreasHeader onAdd={onAdd} />
 
-      {!normalizedAreas || normalizedAreas.length === 0 ? (
+      {!hasAreas ? (
         <EmptyAreaMessage />
       ) : (
-        <div className="space-y-6">
-          {normalizedAreas.map((area, index) => (
-            <AreaCard
-              key={area.id}
-              area={area}
-              images={images}
-              propertyId={propertyId}
-              isFirstArea={index === 0}
-              onRemove={onRemove}
-              onUpdate={onUpdate}
-              onImageRemove={onImageRemove}
-              onImagesSelect={onImagesSelect}
-            />
-          ))}
-        </div>
+        <AreasList
+          areas={areas}
+          images={images}
+          propertyId={propertyId}
+          onRemove={onRemove}
+          onUpdate={onUpdate}
+          onImageRemove={onImageRemove}
+          onImagesSelect={onImagesSelect}
+        />
       )}
     </div>
   );
