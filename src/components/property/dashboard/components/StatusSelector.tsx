@@ -19,37 +19,41 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
   useEffect(() => {
     if (initialStatus) {
       setPropertyStatus(initialStatus);
-    } else {
+    } else if (propertyId) {
       // If no initialStatus is provided, fetch it from the database
       const fetchPropertyStatus = async () => {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('status, metadata')
-          .eq('id', propertyId)
-          .single();
-          
-        if (error) {
-          console.error("Error fetching property status:", error);
-          return;
-        }
-        
-        if (data) {
-          // Check if metadata exists and has a status property, otherwise use the status field
-          let statusValue = data.status || "Draft";
-          
-          // Handle the metadata object properly
-          if (data.metadata) {
-            // Check if metadata is a string, parse it if necessary
-            const metadataObj = typeof data.metadata === 'string' 
-              ? JSON.parse(data.metadata) 
-              : data.metadata;
-              
-            if (metadataObj && typeof metadataObj === 'object' && 'status' in metadataObj) {
-              statusValue = metadataObj.status;
-            }
+        try {
+          const { data, error } = await supabase
+            .from('properties')
+            .select('status, metadata')
+            .eq('id', propertyId)
+            .single();
+            
+          if (error) {
+            console.error("Error fetching property status:", error);
+            return;
           }
           
-          setPropertyStatus(statusValue);
+          if (data) {
+            // Check if metadata exists and has a status property, otherwise use the status field
+            let statusValue = data.status || "Draft";
+            
+            // Handle the metadata object properly
+            if (data.metadata) {
+              // Check if metadata is a string, parse it if necessary
+              const metadataObj = typeof data.metadata === 'string' 
+                ? JSON.parse(data.metadata) 
+                : data.metadata;
+                
+              if (metadataObj && typeof metadataObj === 'object' && 'status' in metadataObj) {
+                statusValue = metadataObj.status;
+              }
+            }
+            
+            setPropertyStatus(statusValue);
+          }
+        } catch (error) {
+          console.error("Error in fetchPropertyStatus:", error);
         }
       };
       

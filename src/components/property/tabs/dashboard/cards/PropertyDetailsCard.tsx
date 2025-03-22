@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Save, Pencil } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PropertyImage } from "../../../dashboard/components/PropertyImage";
 import { supabase } from "@/integrations/supabase/client";
+import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface PropertyDetailsCardProps {
   id: string;
@@ -43,9 +44,11 @@ export function PropertyDetailsCard({
   const [propertyTitle, setPropertyTitle] = useState(title);
   const [propertyAddress, setPropertyAddress] = useState("");
   const isMobile = useIsMobile();
+  const addressInputRef = useRef<HTMLInputElement>(null);
+  const { settings } = useAgencySettings();
   
   // Fetch property address when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchPropertyDetails = async () => {
       const { data, error } = await supabase
         .from('properties')
@@ -60,6 +63,54 @@ export function PropertyDetailsCard({
     
     fetchPropertyDetails();
   }, [id]);
+  
+  // Set up Google Places Autocomplete for address field when in edit mode
+  useEffect(() => {
+    // Only set up when in edit mode and the address input ref exists
+    if (!isEditing || !addressInputRef.current) return;
+    
+    const googleApiKey = settings?.googleMapsApiKey;
+    if (!googleApiKey) return;
+
+    // Load the Google Maps JavaScript API
+    const loadGoogleMapsScript = () => {
+      const scriptId = 'google-maps-script';
+      if (document.getElementById(scriptId)) return;
+
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = initializeAutocomplete;
+      document.head.appendChild(script);
+    };
+
+    const initializeAutocomplete = () => {
+      // Use window with type assertion to access the google object
+      if (!(window as GoogleMapsWindow).google || 
+          !(window as GoogleMapsWindow).google?.maps || 
+          !(window as GoogleMapsWindow).google?.maps?.places) {
+        console.error('Google Maps Places API not loaded');
+        return;
+      }
+
+      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
+        addressInputRef.current as HTMLInputElement,
+        { types: ['address'] }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.formatted_address) {
+          setPropertyAddress(place.formatted_address);
+        }
+      });
+    };
+
+    loadGoogleMapsScript();
+  }, [settings, isEditing]);
   
   const handleToggleEdit = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission and page reload
@@ -124,6 +175,7 @@ export function PropertyDetailsCard({
                     value={propertyAddress}
                     onChange={(e) => setPropertyAddress(e.target.value)}
                     className="mt-1"
+                    ref={addressInputRef}
                   />
                 </div>
                 <div className="space-y-2">
