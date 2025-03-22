@@ -3,6 +3,9 @@ import { PropertyFormData } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BlockNoteView, useBlockNote } from "@blocknote/react";
+import "@blocknote/react/style.css";
+import { useEffect } from "react";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
@@ -11,13 +14,44 @@ interface DescriptionSectionProps {
 }
 
 export function DescriptionSection({ formData, onFieldChange, setPendingChanges }: DescriptionSectionProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     onFieldChange(name as keyof PropertyFormData, value);
     if (setPendingChanges) {
       setPendingChanges(true);
     }
   };
+
+  // Initialize the editor with the description content
+  const editor = useBlockNote({
+    initialContent: formData.description 
+      ? [{ type: "paragraph", content: formData.description }] 
+      : [{ type: "paragraph", content: "" }],
+  });
+
+  // Update formData.description when editor content changes
+  useEffect(() => {
+    const handleEditorChange = () => {
+      const markdown = editor.topLevelBlocks.map(block => {
+        if (block.type === 'paragraph' && block.content) {
+          return block.content;
+        }
+        return '';
+      }).join('\n\n');
+      
+      onFieldChange('description', markdown);
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    };
+
+    // Subscribe to editor changes
+    const unsubscribe = editor.onEditorContentChange(handleEditorChange);
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [editor, onFieldChange, setPendingChanges]);
 
   return (
     <Card>
@@ -32,7 +66,7 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
             name="shortDescription"
             placeholder="Enter a brief summary of the property (displayed in listings)"
             value={formData.shortDescription || ''}
-            onChange={handleChange}
+            onChange={handleTextareaChange}
             rows={2}
             className="resize-none"
           />
@@ -40,15 +74,9 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
 
         <div className="space-y-2">
           <Label htmlFor="description">Full Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            placeholder="Enter a detailed description of the property"
-            value={formData.description || ''}
-            onChange={handleChange}
-            className="min-h-[200px]"
-            rows={8}
-          />
+          <div className="border rounded-md min-h-[300px]">
+            <BlockNoteView editor={editor} theme="light" />
+          </div>
         </div>
       </CardContent>
     </Card>

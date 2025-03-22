@@ -21,7 +21,13 @@ export function usePropertyContentSubmit(
     try {
       // If there's an external submit handler provided, use that
       if (externalOnSubmit) {
-        externalOnSubmit();
+        await externalOnSubmit();
+        setLastSaved(new Date());
+        setPendingChanges(false);
+        toast({
+          title: "Success",
+          description: "All changes have been saved",
+        });
         return;
       }
       

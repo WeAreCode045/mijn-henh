@@ -4,6 +4,8 @@ import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -21,6 +23,8 @@ interface ContentTabWrapperProps {
     handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
+    handleNext?: () => void;
+    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
@@ -34,7 +38,7 @@ interface ContentTabWrapperProps {
 export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
-  const { onSubmit } = usePropertyContentSubmit(
+  const { onSubmit, isSaving } = usePropertyContentSubmit(
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
@@ -42,14 +46,14 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
   );
 
   const handleNext = () => {
-    if (handlers.currentStep < 3) {
-      handlers.handleStepClick(handlers.currentStep + 1);
+    if (handlers.currentStep < 3 && handlers.handleNext) {
+      handlers.handleNext();
     }
   };
 
   const handlePrevious = () => {
-    if (handlers.currentStep > 0) {
-      handlers.handleStepClick(handlers.currentStep - 1);
+    if (handlers.currentStep > 0 && handlers.handlePrevious) {
+      handlers.handlePrevious();
     }
   };
 
@@ -84,6 +88,30 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         isReadOnly={false}
         hideNavigation={true} // Add this prop to hide the navigation in ContentTabContent
       />
+      
+      {/* Add Next/Previous buttons at this level */}
+      <div className="flex justify-between mt-6">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={handlers.currentStep === 0}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Previous
+        </Button>
+        
+        <Button
+          onClick={handleNext}
+          disabled={handlers.currentStep === 3}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          Next
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

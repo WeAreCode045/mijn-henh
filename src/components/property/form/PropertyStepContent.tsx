@@ -144,10 +144,7 @@ export function PropertyStepContent({
       <div className="flex justify-between mt-6">
         <Button
           variant="outline"
-          onClick={(e) => {
-            e.preventDefault();
-            if (handlePrevious) handlePrevious();
-          }}
+          onClick={() => handlePrevious && handlePrevious()}
           disabled={currentStep === 0}
           type="button"
           className="flex items-center gap-2"
@@ -157,10 +154,7 @@ export function PropertyStepContent({
         </Button>
         
         <Button
-          onClick={(e) => {
-            e.preventDefault();
-            if (handleNext) handleNext();
-          }}
+          onClick={() => handleNext && handleNext()}
           disabled={currentStep === 3}
           type="button"
           className="flex items-center gap-2"

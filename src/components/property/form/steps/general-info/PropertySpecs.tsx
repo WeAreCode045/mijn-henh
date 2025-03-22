@@ -53,17 +53,6 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             </Select>
           </div>
           
-          {/* PRICE */}
-          <div>
-            <Label htmlFor="price">Price</Label>
-            <Input
-              id="price"
-              value={formData.price || ""}
-              onChange={(e) => handleInputChange("price", e.target.value)}
-              placeholder="e.g. $500,000"
-            />
-          </div>
-          
           {/* BEDS */}
           <div>
             <Label htmlFor="beds">Beds</Label>
