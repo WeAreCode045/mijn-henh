@@ -26,10 +26,9 @@ export function useAvailableFeatures() {
           setAvailableFeatures(getDefaultFeatures());
         } else if (data && data.length > 0) {
           // Safely convert the data to PropertyFeature[]
-          // First cast to unknown, then to a known structure
           const typedFeatures = data.map((item: any) => ({
-            id: String(item.id || ''),
-            description: String(item.description || '')
+            id: String(item?.id || ''),
+            description: String(item?.description || '')
           }));
           
           setAvailableFeatures(typedFeatures);

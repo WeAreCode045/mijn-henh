@@ -24,7 +24,8 @@ export function useAreaImageSelect(
           console.log(`Updating area ${areaId} with selected images`);
           return {
             ...area,
-            images: selectedImages
+            images: selectedImages,
+            imageIds: imageIds
           };
         }
         return area;
@@ -52,16 +53,19 @@ export function useAreaImageSelect(
           throw clearError;
         }
         
-        // Now set the area for each selected image
-        for (const imageId of imageIds) {
+        // Now set the area for each selected image with default sort order
+        for (let i = 0; i < imageIds.length; i++) {
           const { error } = await supabase
             .from('property_images')
-            .update({ area: areaId })
-            .eq('id', imageId)
+            .update({ 
+              area: areaId,
+              sort_order: i 
+            })
+            .eq('id', imageIds[i])
             .eq('property_id', formData.id);
             
           if (error) {
-            console.error(`Error updating area for image ${imageId}:`, error);
+            console.error(`Error updating area for image ${imageIds[i]}:`, error);
             throw error;
           }
         }

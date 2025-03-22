@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { PropertyImage } from "@/types/property";
 import { Check } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface AreaImageSelectDialogProps {
   open: boolean;
@@ -21,30 +22,37 @@ export function AreaImageSelectDialog({
   selectedImageIds,
   onUpdate,
 }: AreaImageSelectDialogProps) {
-  const toggleImageSelection = (imageId: string, e?: React.MouseEvent) => {
-    // Prevent default actions if event is provided
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  // Local state to manage selection during dialog interaction
+  const [localSelection, setLocalSelection] = useState<string[]>([]);
+  
+  // Update local selection when props change or dialog opens
+  useEffect(() => {
+    if (open) {
+      setLocalSelection([...selectedImageIds]);
     }
-    
-    const currentSelection = [...selectedImageIds];
-    
-    if (currentSelection.includes(imageId)) {
-      // Remove from selection
-      const newSelection = currentSelection.filter(id => id !== imageId);
-      onUpdate(newSelection);
-    } else {
-      // Add to selection
-      onUpdate([...currentSelection, imageId]);
-    }
+  }, [selectedImageIds, open]);
+
+  const toggleImageSelection = (imageId: string) => {
+    setLocalSelection(current => {
+      if (current.includes(imageId)) {
+        // Remove from selection
+        return current.filter(id => id !== imageId);
+      } else {
+        // Add to selection
+        return [...current, imageId];
+      }
+    });
   };
   
-  const handleButtonClick = (e: React.MouseEvent) => {
-    // Prevent default actions
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const handleConfirm = () => {
+    // Update parent component with the selection
+    onUpdate(localSelection);
+    onOpenChange(false);
+  };
+  
+  const handleCancel = () => {
+    // Reset to original selection and close dialog
+    setLocalSelection([...selectedImageIds]);
     onOpenChange(false);
   };
   
@@ -58,7 +66,7 @@ export function AreaImageSelectDialog({
         <div className="py-4">
           <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto p-1">
             {images.map((image) => {
-              const isSelected = selectedImageIds.includes(image.id);
+              const isSelected = localSelection.includes(image.id);
               return (
                 <div
                   key={image.id}
@@ -66,7 +74,7 @@ export function AreaImageSelectDialog({
                     relative cursor-pointer border rounded-md overflow-hidden
                     ${isSelected ? "ring-2 ring-primary" : "hover:opacity-80"}
                   `}
-                  onClick={(e) => toggleImageSelection(image.id, e)}
+                  onClick={() => toggleImageSelection(image.id)}
                 >
                   <img
                     src={image.url}
@@ -91,11 +99,11 @@ export function AreaImageSelectDialog({
         </div>
         
         <div className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" onClick={handleButtonClick} type="button">
+          <Button variant="outline" onClick={handleCancel} type="button">
             Cancel
           </Button>
-          <Button onClick={handleButtonClick} type="button">
-            Done
+          <Button onClick={handleConfirm} type="button">
+            Confirm Selection
           </Button>
         </div>
       </DialogContent>
