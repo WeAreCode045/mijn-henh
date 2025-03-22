@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -19,15 +18,15 @@ export interface PropertyArea {
 }
 
 export interface PropertyAgent {
-    id: string;
-    full_name: string;
-    email: string;
-    phone: string;
-    photo_url: string;
-    name?: string; // Added for compatibility
-    photoUrl?: string; // For compatibility with PropertyAgent in property.d.ts
-    avatar_url?: string;
-    address?: string; // For compatibility with PropertyAgent in property.d.ts
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  photo_url: string;
+  name?: string; // Added for compatibility
+  photoUrl?: string; // For compatibility with PropertyAgent in property.d.ts
+  avatar_url?: string;
+  address?: string; // For compatibility with PropertyAgent in property.d.ts
 }
 
 export interface PropertyImage {
