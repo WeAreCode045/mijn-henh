@@ -14,9 +14,9 @@ interface ContentTabNavigationProps {
 
 const steps = [
   { id: 0, label: "General" },
-  { id: 1, label: "Features" },
-  { id: 2, label: "Areas" },
-  { id: 3, label: "Location" }
+  { id: 1, label: "Location" },
+  { id: 2, label: "Features" },
+  { id: 3, label: "Areas" }
 ];
 
 export function ContentTabNavigation({ 
