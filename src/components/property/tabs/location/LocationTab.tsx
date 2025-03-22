@@ -64,14 +64,14 @@ export function LocationTab({
             address={formState.address || ""}
             onChange={handleAddressChange}
             isLoading={isLoadingLocationData || false}
-            isDisabled={isReadOnly}
+            disabled={isReadOnly} // Changed from isDisabled to disabled
             onFetch={onFetchLocationData}
           />
           
           {/* Pass only the props that MapPreview expects */}
           <MapPreview 
             map_image={property.map_image}
-            onGenerate={onGenerateMap}
+            onGenerate={onGenerateMap} // Ensure the component accepts this prop
             isGenerating={isGeneratingMap || false}
             isDisabled={isReadOnly}
           />
@@ -79,7 +79,7 @@ export function LocationTab({
           {/* Pass only the props that NearbyPlaces expects */}
           <NearbyPlaces 
             places={formState.nearby_places || []}
-            cities={formState.nearby_cities || []}
+            cities={formState.nearby_cities || []} // Ensure the component accepts this prop
             onRemove={onRemoveNearbyPlace}
             onFetchCategory={onFetchCategoryPlaces}
             onFetchCities={onFetchNearbyCities}

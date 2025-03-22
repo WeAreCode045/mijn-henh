@@ -1,97 +1,136 @@
 
 import { Button } from "@/components/ui/button";
-import { Bus } from "lucide-react";
-import { Trash2 } from "lucide-react";
-import type { PropertyPlaceType } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PropertyNearbyPlace, PropertyCity } from "@/types/property";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Plus, MapPin, Buildings } from "lucide-react";
 
 interface NearbyPlacesProps {
-  places: PropertyPlaceType[];
-  onPlaceDelete: (e: React.MouseEvent, placeId: string) => Promise<void>;
+  places: PropertyNearbyPlace[];
+  cities?: PropertyCity[]; // Added cities prop
+  onRemove?: (index: number) => void;
+  onFetchCategory?: (category: string) => Promise<any>;
+  onFetchCities?: () => Promise<any>;
+  isDisabled?: boolean;
 }
 
-export function NearbyPlaces({ places, onPlaceDelete }: NearbyPlacesProps) {
-  const placesByType = places.reduce((acc: Record<string, PropertyPlaceType[]>, place) => {
-    let type = place.type;
-    if (['bus_station', 'train_station', 'transit_station'].includes(place.type)) {
-      type = 'public_transport';
-    }
+export function NearbyPlaces({
+  places = [],
+  cities = [],
+  onRemove,
+  onFetchCategory,
+  onFetchCities,
+  isDisabled = false
+}: NearbyPlacesProps) {
+  // Group places by type
+  const groupedPlaces = places.reduce((acc, place) => {
+    const type = place.type || 'other';
     if (!acc[type]) {
       acc[type] = [];
     }
     acc[type].push(place);
     return acc;
-  }, {});
+  }, {} as Record<string, PropertyNearbyPlace[]>);
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'public_transport':
-        return <Bus className="w-4 h-4" />;
-      default:
-        return null;
-    }
-  };
-
-  const formatPlaceType = (type: string) => {
-    const typeTranslations: Record<string, string> = {
-      'public_transport': 'Openbaar Vervoer',
-      'supermarket': 'Supermarkt',
-      'school': 'School',
-      'park': 'Park',
-      'shopping_mall': 'Winkelcentrum'
-    };
-    return typeTranslations[type] || type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  };
-
-  if (Object.entries(placesByType).length === 0) {
-    return null;
-  }
+  const placeTypes = Object.keys(groupedPlaces);
 
   return (
     <div className="space-y-4">
-      <h3 className="font-medium text-lg">Nabijgelegen Voorzieningen</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(placesByType).map(([type, places]) => (
-          <div key={type} className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 capitalize flex items-center gap-2">
-              {getTypeIcon(type)}
-              {formatPlaceType(type)}
-            </h4>
-            <ul className="space-y-2">
-              {places.map((place) => (
-                <li key={place.id} className="text-sm">
-                  <div className="flex items-start justify-between group">
-                    <div>
-                      <span className="font-medium">{place.name}</span>
-                      {place.rating && (
-                        <span className="text-yellow-500 ml-2">★ {place.rating}</span>
-                      )}
-                      {place.vicinity && (
-                        <p className="text-gray-500 text-xs mt-1">{place.vicinity}</p>
-                      )}
-                      {place.distance && (
-                        <p className="text-gray-400 text-xs">
-                          {typeof place.distance === 'number' 
-                            ? `${place.distance} km` 
-                            : place.distance}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => onPlaceDelete(e, place.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-xl">Voorzieningen in de buurt</CardTitle>
+            <div className="flex gap-2">
+              {onFetchCategory && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onFetchCategory('all')}
+                  disabled={isDisabled}
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Voorzieningen Ophalen
+                </Button>
+              )}
+              {onFetchCities && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={onFetchCities}
+                  disabled={isDisabled}
+                >
+                  <Buildings className="w-4 h-4 mr-2" />
+                  Steden Ophalen
+                </Button>
+              )}
+            </div>
           </div>
-        ))}
-      </div>
+        </CardHeader>
+        <CardContent>
+          {places.length === 0 && (
+            <p className="text-muted-foreground text-center py-4">
+              Geen voorzieningen gevonden. Klik op "Voorzieningen Ophalen" om te beginnen.
+            </p>
+          )}
+          
+          {placeTypes.map(type => (
+            <div key={type} className="mb-4 last:mb-0">
+              <h3 className="font-medium mb-2 capitalize">{type}</h3>
+              <div className="flex flex-wrap gap-2">
+                {groupedPlaces[type].map((place, index) => (
+                  <Badge 
+                    key={place.id} 
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {place.name}
+                    {place.distance && (
+                      <span className="text-xs opacity-70 ml-1">
+                        {typeof place.distance === 'number' 
+                          ? `${place.distance.toFixed(1)} km` 
+                          : place.distance}
+                      </span>
+                    )}
+                    {onRemove && !isDisabled && (
+                      <button 
+                        onClick={() => onRemove(index)} 
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Display nearby cities if available */}
+          {cities && cities.length > 0 && (
+            <div className="mt-4">
+              <h3 className="font-medium mb-2">Nabijgelegen steden</h3>
+              <div className="flex flex-wrap gap-2">
+                {cities.map((city, index) => (
+                  <Badge 
+                    key={city.id || index} 
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {city.name}
+                    {city.distance && (
+                      <span className="text-xs opacity-70 ml-1">
+                        {typeof city.distance === 'number' 
+                          ? `${city.distance.toFixed(1)} km` 
+                          : city.distance}
+                      </span>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

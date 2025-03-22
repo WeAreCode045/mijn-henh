@@ -65,6 +65,7 @@ export function PropertyContentForm({
         <CardContent>
           <PropertyStepContent
             formData={formData}
+            step={currentStep}
             onFieldChange={onFieldChange}
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}

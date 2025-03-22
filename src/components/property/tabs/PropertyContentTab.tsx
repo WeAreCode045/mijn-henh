@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabWrapper } from './content/ContentTabWrapper';
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
+  property: PropertyData; // Add the missing property prop
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
@@ -28,10 +29,11 @@ interface PropertyContentTabProps {
   };
 }
 
-export function PropertyContentTab({ formData, handlers }: PropertyContentTabProps) {
+export function PropertyContentTab({ formData, property, handlers }: PropertyContentTabProps) {
   return (
     <ContentTabWrapper 
-      formData={formData} 
+      formData={formData}
+      property={property} 
       handlers={handlers} 
     />
   );

@@ -7,20 +7,20 @@ import { Loader2, MapPin } from "lucide-react";
 interface AddressInputProps {
   address: string;
   isLoading: boolean;
-  disabled: boolean;
-  hasNearbyPlaces: boolean;
+  disabled: boolean; // Renamed from isDisabled to disabled
+  hasNearbyPlaces?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onLocationFetch: () => Promise<void>;
-  onGenerateDescription: () => Promise<void>;
+  onFetch: () => Promise<void>; // Renamed from onLocationFetch to onFetch
+  onGenerateDescription?: () => Promise<void>;
 }
 
 export function AddressInput({
   address,
   isLoading,
   disabled,
-  hasNearbyPlaces,
+  hasNearbyPlaces = false,
   onChange,
-  onLocationFetch,
+  onFetch,
   onGenerateDescription,
 }: AddressInputProps) {
   return (
@@ -36,7 +36,7 @@ export function AddressInput({
         />
         <Button 
           type="button" 
-          onClick={onLocationFetch}
+          onClick={onFetch}
           disabled={isLoading || disabled}
           className="whitespace-nowrap"
         >
@@ -47,14 +47,16 @@ export function AddressInput({
           )}
           Locatie Ophalen
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onGenerateDescription}
-          disabled={!address || !hasNearbyPlaces}
-        >
-          Beschrijving Genereren
-        </Button>
+        {onGenerateDescription && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onGenerateDescription}
+            disabled={!address || !hasNearbyPlaces || disabled}
+          >
+            Beschrijving Genereren
+          </Button>
+        )}
       </div>
     </div>
   );
