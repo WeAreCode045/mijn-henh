@@ -34,7 +34,6 @@ export function NearbyPlaces({ places, onPlaceDelete }: NearbyPlacesProps) {
   const formatPlaceType = (type: string) => {
     const typeTranslations: Record<string, string> = {
       'public_transport': 'Openbaar Vervoer',
-      'restaurant': 'Restaurant',
       'supermarket': 'Supermarkt',
       'school': 'School',
       'park': 'Park',

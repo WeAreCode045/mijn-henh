@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from "react";
-import { MapPin, ShoppingBag, GraduationCap, Trees, Utensils, Bus, Building, Dumbbell } from "lucide-react";
+import { MapPin, ShoppingBag, GraduationCap, Trees, Bus, Building, Dumbbell } from "lucide-react";
 
 export interface CategoryType {
   id: string;
@@ -73,13 +73,6 @@ export function useCategories() {
         { id: 'stadium', label: 'Stadium', maxSelections: 2 },
         { id: 'swimming_pool', label: 'Swimming Pool', maxSelections: 2 }
       ]
-    },
-    {
-      id: 'restaurants',
-      label: 'Restaurants',
-      icon: Utensils,
-      color: 'bg-red-100 text-red-800',
-      maxSelections: 5
     },
     {
       id: 'transport',
