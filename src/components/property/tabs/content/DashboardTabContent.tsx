@@ -9,6 +9,8 @@ export interface DashboardTabContentProps {
   onSave: () => void;
   onWebView: (e: React.MouseEvent) => void;
   handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
+  handleGeneratePDF: () => void;
 }
 
 export function DashboardTabContent({
@@ -16,7 +18,9 @@ export function DashboardTabContent({
   onDelete,
   onSave,
   onWebView,
-  handleSaveAgent
+  handleSaveAgent,
+  handleSaveObjectId,
+  handleGeneratePDF
 }: DashboardTabContentProps) {
   return (
     <PropertyDashboardTab
@@ -30,9 +34,9 @@ export function DashboardTabContent({
       isUpdating={false}
       onSave={onSave}
       onDelete={onDelete}
-      handleSaveObjectId={async () => {}}
+      handleSaveObjectId={handleSaveObjectId}
       handleSaveAgent={handleSaveAgent}
-      handleGeneratePDF={() => {}}
+      handleGeneratePDF={handleGeneratePDF}
       handleWebView={onWebView}
     />
   );
