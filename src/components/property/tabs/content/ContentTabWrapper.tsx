@@ -6,6 +6,7 @@ import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -37,21 +38,49 @@ interface ContentTabWrapperProps {
 
 export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [pendingChanges, setPendingChanges] = useState<boolean>(false);
+  const { toast } = useToast();
   
   const { onSubmit, isSaving } = usePropertyContentSubmit(
     formData,
-    handlers.setPendingChanges || (() => {}),
+    handlers.setPendingChanges || setPendingChanges,
     setLastSaved,
     handlers.onSubmit
   );
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    if (pendingChanges) {
+      try {
+        await onSubmit();
+      } catch (error) {
+        console.error("Error saving before navigation:", error);
+        toast({
+          title: "Warning",
+          description: "There was an issue saving your changes",
+          variant: "destructive",
+        });
+      }
+    }
+    
     if (handlers.currentStep < 3 && handlers.handleNext) {
       handlers.handleNext();
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
+    if (pendingChanges) {
+      try {
+        await onSubmit();
+      } catch (error) {
+        console.error("Error saving before navigation:", error);
+        toast({
+          title: "Warning", 
+          description: "There was an issue saving your changes",
+          variant: "destructive",
+        });
+      }
+    }
+    
     if (handlers.currentStep > 0 && handlers.handlePrevious) {
       handlers.handlePrevious();
     }
@@ -59,10 +88,29 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
 
   const adaptedRemoveFeature = (id: string) => {
     handlers.onRemoveFeature(id);
+    if (handlers.setPendingChanges) {
+      handlers.setPendingChanges(true);
+    } else {
+      setPendingChanges(true);
+    }
   };
   
   const adaptedUpdateFeature = (id: string, description: string) => {
     handlers.onUpdateFeature(id, description);
+    if (handlers.setPendingChanges) {
+      handlers.setPendingChanges(true);
+    } else {
+      setPendingChanges(true);
+    }
+  };
+  
+  const adaptedFieldChange = (field: keyof PropertyFormData, value: any) => {
+    handlers.onFieldChange(field, value);
+    if (handlers.setPendingChanges) {
+      handlers.setPendingChanges(true);
+    } else {
+      setPendingChanges(true);
+    }
   };
 
   return (
@@ -72,13 +120,13 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         onStepClick={handlers.handleStepClick}
         lastSaved={lastSaved}
         onSave={onSubmit}
-        isSaving={handlers.isSaving || false}
+        isSaving={isSaving || handlers.isSaving || false}
       />
       
       <ContentTabContent
         property={property} 
         formState={formData}
-        onFieldChange={handlers.onFieldChange}
+        onFieldChange={adaptedFieldChange}
         onAddFeature={handlers.onAddFeature}
         onRemoveFeature={adaptedRemoveFeature}
         onUpdateFeature={adaptedUpdateFeature}
@@ -94,7 +142,7 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         <Button
           variant="outline"
           onClick={handlePrevious}
-          disabled={handlers.currentStep === 0}
+          disabled={handlers.currentStep === 0 || isSaving || handlers.isSaving}
           type="button"
           className="flex items-center gap-2"
         >
@@ -103,8 +151,17 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         </Button>
         
         <Button
+          onClick={onSubmit}
+          type="button"
+          disabled={isSaving || handlers.isSaving}
+          className="ml-auto mr-2"
+        >
+          {isSaving || handlers.isSaving ? "Saving..." : "Save"}
+        </Button>
+        
+        <Button
           onClick={handleNext}
-          disabled={handlers.currentStep === 3}
+          disabled={handlers.currentStep === 3 || isSaving || handlers.isSaving}
           type="button"
           className="flex items-center gap-2"
         >

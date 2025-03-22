@@ -21,6 +21,7 @@ export function usePropertyContentSubmit(
     try {
       // If there's an external submit handler provided, use that
       if (externalOnSubmit) {
+        console.log("Using external submit handler");
         await externalOnSubmit();
         setLastSaved(new Date());
         setPendingChanges(false);
@@ -31,32 +32,47 @@ export function usePropertyContentSubmit(
         return;
       }
       
-      console.log("Form submitted in PropertyContentTab");
-      
       // Final save when clicking submit
       if (formData.id) {
         try {
+          console.log("Submitting form data:", formData);
+          
           // Create a form event to pass to handleSubmit
           const formEvent = {} as React.FormEvent;
           // Pass the current formData and set redirectAfterSave to false
           const success = await handleSubmit(formEvent, formData, false);
           
           if (success) {
+            console.log("Save successful");
             setLastSaved(new Date());
             setPendingChanges(false);
             toast({
               title: "Success",
               description: "All changes have been saved",
             });
+          } else {
+            console.error("Save returned false");
+            toast({
+              title: "Error",
+              description: "Failed to save changes",
+              variant: "destructive",
+            });
           }
         } catch (error) {
-          console.error("Final save failed:", error);
+          console.error("Save error:", error);
           toast({
             title: "Error",
-            description: "Failed to save all changes",
+            description: "Failed to save changes",
             variant: "destructive",
           });
         }
+      } else {
+        console.error("No property ID found");
+        toast({
+          title: "Error",
+          description: "Property ID is missing",
+          variant: "destructive",
+        });
       }
     } finally {
       setIsSaving(false);

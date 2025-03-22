@@ -25,21 +25,46 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
   // Initialize the editor with the description content
   const editor = useBlockNote({
     initialContent: formData.description 
-      ? [{ type: "paragraph", content: formData.description }] 
-      : [{ type: "paragraph", content: "" }],
+      ? undefined // Let BlockNote handle the initial content
+      : undefined,
+    defaultStyles: false,
   });
+
+  // Set initial content when component mounts
+  useEffect(() => {
+    if (formData.description && editor) {
+      // Convert the description to editor content format
+      const content = formData.description.split('\n\n').map(paragraph => ({
+        type: "paragraph",
+        props: {},
+        content: paragraph ? [{ type: "text", text: paragraph }] : []
+      }));
+      
+      if (content.length > 0) {
+        editor.replaceBlocks(editor.topLevelBlocks, content);
+      }
+    }
+  }, []);
 
   // Update formData.description when editor content changes
   useEffect(() => {
     const handleEditorChange = () => {
-      const markdown = editor.topLevelBlocks.map(block => {
-        if (block.type === 'paragraph' && block.content) {
-          return block.content;
-        }
-        return '';
-      }).join('\n\n');
+      // Extract text content from editor blocks
+      const textContent = editor.topLevelBlocks
+        .map(block => {
+          // Extract text from inline content
+          if (block.content) {
+            return block.content
+              .filter(item => item.type === 'text')
+              .map((item: any) => item.text || '')
+              .join('');
+          }
+          return '';
+        })
+        .filter(text => text.trim() !== '')
+        .join('\n\n');
       
-      onFieldChange('description', markdown);
+      onFieldChange('description', textContent);
       if (setPendingChanges) {
         setPendingChanges(true);
       }
