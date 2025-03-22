@@ -89,14 +89,14 @@ export function PropertyDetailsCard({
 
     const initializeAutocomplete = () => {
       // Use window with type assertion to access the google object
-      if (!(window as GoogleMapsWindow).google || 
-          !(window as GoogleMapsWindow).google?.maps || 
-          !(window as GoogleMapsWindow).google?.maps?.places) {
+      if (!(window as any).google || 
+          !(window as any).google?.maps || 
+          !(window as any).google?.maps?.places) {
         console.error('Google Maps Places API not loaded');
         return;
       }
 
-      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
+      const autocomplete = new (window as any).google.maps.places.Autocomplete(
         addressInputRef.current as HTMLInputElement,
         { types: ['address'] }
       );
@@ -114,11 +114,14 @@ export function PropertyDetailsCard({
   
   const handleToggleEdit = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission and page reload
+    e.stopPropagation(); // Stop event propagation
     setIsEditing(!isEditing);
   };
   
   const handleSaveDetails = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission and page reload
+    e.stopPropagation(); // Stop event propagation
+    
     try {
       const { error } = await supabase
         .from('properties')
@@ -134,7 +137,7 @@ export function PropertyDetailsCard({
       setIsEditing(false);
       // If the object ID has changed, notify the parent component
       if (currentObjectId !== objectId) {
-        onSaveObjectId(currentObjectId);
+        await onSaveObjectId(currentObjectId);
       }
     } catch (error) {
       console.error("Error saving property details:", error);
@@ -149,6 +152,7 @@ export function PropertyDetailsCard({
           variant="ghost"
           size="sm"
           onClick={handleToggleEdit}
+          type="button"
         >
           <Pencil className="h-4 w-4 mr-2" />
           {isEditing ? "Cancel" : "Edit"}
@@ -188,7 +192,7 @@ export function PropertyDetailsCard({
                     className="sm:flex-1"
                   />
                 </div>
-                <Button onClick={handleSaveDetails} disabled={isUpdating}>
+                <Button onClick={handleSaveDetails} disabled={isUpdating} type="button">
                   {isUpdating ? "Saving..." : "Save Details"}
                 </Button>
               </>

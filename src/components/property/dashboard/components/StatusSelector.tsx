@@ -123,6 +123,7 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
       <Select 
         value={propertyStatus} 
         onValueChange={handleStatusChange}
+        defaultValue={propertyStatus}
       >
         <SelectTrigger id="property-status" className="w-full">
           <SelectValue placeholder="Select status">

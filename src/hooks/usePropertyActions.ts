@@ -1,15 +1,19 @@
 
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { generatePropertyPDF } from "@/utils/pdfGenerator";
 import { PropertyData } from "@/types/property";
-import { AgencySettings } from "@/types/agency";
 
 export function usePropertyActions(propertyId: string) {
   const navigate = useNavigate();
   const [showWebView, setShowWebView] = useState(false);
 
-  const handleGeneratePDF = useCallback(() => {
+  const handleGeneratePDF = useCallback((e?: React.MouseEvent) => {
+    // Prevent default form submission if event is provided
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     console.log("Generate PDF for property:", propertyId);
     // The implementation will be provided by the actual PDF generator
   }, [propertyId]);
@@ -18,7 +22,7 @@ export function usePropertyActions(propertyId: string) {
     // Prevent default form submission if event is provided
     if (e) {
       e.preventDefault();
-      e.stopPropagation(); // Also stop propagation to prevent any parent handlers
+      e.stopPropagation();
     }
     
     // Open in a new tab with simplified URL structure

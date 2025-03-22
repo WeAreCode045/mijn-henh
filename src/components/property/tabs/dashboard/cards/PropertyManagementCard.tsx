@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentSelector } from "../../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../../dashboard/components/PropertyDates";
@@ -99,7 +100,10 @@ export function PropertyManagementCard({
   };
   
   // Handle share property
-  const handleShareProperty = () => {
+  const handleShareProperty = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     const url = `${window.location.origin}/property/${propertyId}`;
     
     if (navigator.share) {
@@ -114,7 +118,10 @@ export function PropertyManagementCard({
   };
 
   // Handle toggle archive
-  const handleToggleArchive = async () => {
+  const handleToggleArchive = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     try {
       const newArchivedStatus = !isArchived;
       
@@ -134,7 +141,15 @@ export function PropertyManagementCard({
 
   const handleOpenHistory = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setShowHistoryModal(true);
+  };
+
+  // Handle PDF generation with stopPropagation
+  const handleGeneratePDF = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onGeneratePDF();
   };
 
   return (
@@ -150,6 +165,7 @@ export function PropertyManagementCard({
                     variant={isArchived ? "default" : "outline"} 
                     size="icon" 
                     onClick={handleToggleArchive}
+                    type="button"
                   >
                     <Archive className="h-4 w-4" />
                   </Button>
@@ -167,6 +183,7 @@ export function PropertyManagementCard({
                     variant="outline" 
                     size="icon" 
                     onClick={handleOpenHistory}
+                    type="button"
                   >
                     <History className="h-4 w-4" />
                   </Button>
@@ -183,7 +200,12 @@ export function PropertyManagementCard({
                   <Button 
                     variant="destructive" 
                     size="icon" 
-                    onClick={onDelete}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                    type="button"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -224,6 +246,7 @@ export function PropertyManagementCard({
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       } transition-colors`}
                       disabled={isArchived}
+                      type="button"
                     >
                       <Globe className="h-5 w-5" />
                     </button>
@@ -243,13 +266,14 @@ export function PropertyManagementCard({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
-                      onClick={onGeneratePDF}
+                      onClick={handleGeneratePDF}
                       disabled={isArchived} 
                       className={`flex items-center justify-center rounded-md w-10 h-10 ${
                         !isArchived
                           ? "bg-gray-100 hover:bg-gray-200"
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       } transition-colors`}
+                      type="button"
                     >
                       <FileText className="h-5 w-5" />
                     </button>
@@ -276,6 +300,7 @@ export function PropertyManagementCard({
                           ? "bg-blue-100 text-blue-600 hover:bg-blue-200" 
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       } transition-colors`}
+                      type="button"
                     >
                       <RotateCcw className="h-5 w-5" />
                     </button>
@@ -304,6 +329,7 @@ export function PropertyManagementCard({
                           ? "bg-red-100 text-red-600 hover:bg-red-200" 
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       } transition-colors`}
+                      type="button"
                     >
                       <Youtube className="h-5 w-5" />
                     </button>
@@ -332,6 +358,7 @@ export function PropertyManagementCard({
                           ? "bg-gray-100 hover:bg-gray-200" 
                           : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       } transition-colors`}
+                      type="button"
                     >
                       <Share2 className="h-5 w-5" />
                     </button>
