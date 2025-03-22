@@ -3,6 +3,7 @@ import { PropertyFormData } from "@/types/property";
 import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { DescriptionSection } from "./DescriptionSection";
+import { FeaturesStep } from "../FeaturesStep";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
@@ -11,6 +12,9 @@ interface GeneralInfoStepProps {
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
   setPendingChanges?: (pending: boolean) => void;
+  onAddFeature?: () => void;
+  onRemoveFeature?: (id: string) => void;
+  onUpdateFeature?: (id: string, description: string) => void;
 }
 
 export function GeneralInfoStep({
@@ -19,7 +23,10 @@ export function GeneralInfoStep({
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
   isUploading,
-  setPendingChanges
+  setPendingChanges,
+  onAddFeature,
+  onRemoveFeature,
+  onUpdateFeature
 }: GeneralInfoStepProps) {
   const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
     onFieldChange(field, value);
@@ -35,7 +42,8 @@ export function GeneralInfoStep({
         <div className="lg:col-span-2">
           <DescriptionSection 
             formData={formData}
-            onFieldChange={handleFieldChange} 
+            onFieldChange={handleFieldChange}
+            setPendingChanges={setPendingChanges}
           />
         </div>
         
@@ -43,10 +51,26 @@ export function GeneralInfoStep({
         <div className="lg:col-span-1">
           <PropertySpecs 
             formData={formData} 
-            onFieldChange={handleFieldChange} 
+            onFieldChange={handleFieldChange}
+            setPendingChanges={setPendingChanges}
           />
         </div>
       </div>
+
+      {/* Features Section */}
+      {onAddFeature && onRemoveFeature && onUpdateFeature && (
+        <div className="mt-6">
+          <FeaturesStep
+            formData={formData}
+            onAddFeature={onAddFeature}
+            onRemoveFeature={onRemoveFeature}
+            onUpdateFeature={onUpdateFeature}
+            onFieldChange={onFieldChange}
+            setPendingChanges={setPendingChanges}
+            showHeader={false}
+          />
+        </div>
+      )}
     </div>
   );
 }

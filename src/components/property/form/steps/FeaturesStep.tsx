@@ -13,6 +13,7 @@ interface FeaturesStepProps {
   onUpdateFeature: (id: string, description: string) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   setPendingChanges?: (pending: boolean) => void;
+  showHeader?: boolean; // Make header optional
 }
 
 export function FeaturesStep({
@@ -21,7 +22,8 @@ export function FeaturesStep({
   onRemoveFeature,
   onUpdateFeature,
   onFieldChange,
-  setPendingChanges
+  setPendingChanges,
+  showHeader = true // Default to showing the header
 }: FeaturesStepProps) {
   console.log("FeaturesStep rendering with features:", formData.features);
   
@@ -77,10 +79,14 @@ export function FeaturesStep({
   
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4">Property Features</h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        Add all the distinctive features that make this property stand out.
-      </p>
+      {showHeader && (
+        <>
+          <h2 className="text-xl font-semibold mb-4">Property Features</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Add all the distinctive features that make this property stand out.
+          </p>
+        </>
+      )}
       
       <Tabs defaultValue="list">
         <TabsList className="mb-4">

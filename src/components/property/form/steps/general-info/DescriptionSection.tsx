@@ -3,11 +3,6 @@ import { PropertyFormData } from "@/types/property";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BlockNoteView, useBlockNote } from "@blocknote/react";
-import { useEffect } from "react";
-
-// Import CSS correctly with the full path
-import "@blocknote/core/style.css";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
@@ -23,84 +18,6 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
       setPendingChanges(true);
     }
   };
-
-  // Initialize the editor with default settings
-  const editor = useBlockNote({
-    initialContent: null, // Start with empty content
-    defaultStyles: false,
-  });
-
-  // Set initial content when component mounts or formData changes
-  useEffect(() => {
-    if (formData.description && editor) {
-      try {
-        // Simple approach: set editor content based on the text
-        const lines = formData.description.split('\n\n');
-        
-        // Clear existing content
-        const allBlocks = editor.topLevelBlocks;
-        if (allBlocks.length > 0) {
-          editor.removeBlocks(allBlocks);
-        }
-        
-        // Add paragraphs for each line
-        lines.forEach((line, index) => {
-          if (line.trim() !== '') {
-            editor.insertBlocks([
-              {
-                type: "paragraph",
-                content: line.trim() ? [{ 
-                  type: "text", 
-                  text: line,
-                  styles: {} // Add the required styles property (empty object)
-                }] : []
-              }
-            ], index === 0 ? "beginning" : "end");
-          }
-        });
-      } catch (error) {
-        console.error("Error setting editor content:", error);
-      }
-    }
-  }, [formData.id, editor, formData.description]); // Include formData.description in the dependency array
-
-  // Update formData.description when editor content changes
-  useEffect(() => {
-    if (!editor) return; // Guard clause
-    
-    const handleEditorChange = () => {
-      try {
-        // Extract text content from editor blocks
-        const textContent = editor.topLevelBlocks
-          .map(block => {
-            // Extract text from inline content
-            if (block.content) {
-              const blockText = block.content
-                .filter(item => item.type === 'text')
-                .map(item => (item as any).text || '')
-                .join('');
-              return blockText;
-            }
-            return '';
-          })
-          .filter(text => text.trim() !== '')
-          .join('\n\n');
-        
-        onFieldChange('description', textContent);
-        if (setPendingChanges) {
-          setPendingChanges(true);
-        }
-      } catch (error) {
-        console.error("Error updating from editor:", error);
-      }
-    };
-
-    // Subscribe to editor changes
-    const unsubscribe = editor.onEditorContentChange(handleEditorChange);
-    
-    // Return the unsubscribe function directly
-    return unsubscribe;
-  }, [editor, onFieldChange, setPendingChanges]);
 
   return (
     <Card>
@@ -123,9 +40,15 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
 
         <div className="space-y-2">
           <Label htmlFor="description">Full Description</Label>
-          <div className="border rounded-md min-h-[400px]">
-            <BlockNoteView editor={editor} theme="light" />
-          </div>
+          <Textarea
+            id="description"
+            name="description"
+            placeholder="Enter a detailed description of the property"
+            value={formData.description || ''}
+            onChange={handleTextareaChange}
+            rows={10}
+            className="resize-vertical"
+          />
         </div>
       </CardContent>
     </Card>

@@ -16,8 +16,6 @@ import {
   faBolt
 } from '@fortawesome/free-solid-svg-icons';
 
-// Note: BlockNote CSS is now imported directly in the DescriptionSection component
-
 library.add(
   faMapMarker,
   faPhone,

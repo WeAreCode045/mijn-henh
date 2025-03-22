@@ -79,6 +79,9 @@ export function PropertyStepContent({
             formData={formData}
             onFieldChange={onFieldChange}
             setPendingChanges={setPendingChanges}
+            onAddFeature={onAddFeature}
+            onRemoveFeature={onRemoveFeature}
+            onUpdateFeature={onUpdateFeature}
           />
         );
       case 1:
@@ -127,12 +130,22 @@ export function PropertyStepContent({
     }
   };
 
+  // Ensure the save button properly triggers the onSubmit function
+  const handleSave = () => {
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+    if (onSubmit) {
+      onSubmit();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <FormStepNavigation
         currentStep={currentStep}
         onStepClick={handleStepClick}
-        onSave={onSubmit}
+        onSave={handleSave}
         isSaving={isSaving}
       />
       <div className="mt-6">
@@ -153,16 +166,14 @@ export function PropertyStepContent({
         </Button>
         
         <div className="flex space-x-2">
-          {onSubmit && (
-            <Button
-              onClick={onSubmit}
-              disabled={isSaving || isReadOnly}
-              type="button"
-              variant="secondary"
-            >
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          )}
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || isReadOnly}
+            type="button"
+            variant="secondary"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
           
           <Button
             onClick={() => handleNext && handleNext()}
