@@ -6,4 +6,5 @@ export interface PropertyAgent {
   phone?: string;
   photo_url?: string;
   name?: string; // Adding for compatibility
+  avatar_url?: string;
 }
