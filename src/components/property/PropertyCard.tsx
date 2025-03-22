@@ -108,6 +108,9 @@ export const PropertyCard = ({
   const displayImage = property.featuredImage || 
                       (property.images?.length > 0 ? property.images[0].url : '/placeholder.svg');
 
+  // Get the agent name safely (handle both full_name and name properties)
+  const agentName = property.agent ? (property.agent.full_name || property.agent.name || 'Unnamed Agent') : null;
+
   return (
     <>
       <Card key={property.id} className="p-6 space-y-6 relative group cursor-pointer hover:shadow-lg transition-shadow" onClick={handleCardClick}>
@@ -130,9 +133,9 @@ export const PropertyCard = ({
         <div className="space-y-2">
           <div className="flex justify-between items-start">
             <h3 className="text-lg font-medium mb-1 line-clamp-2">{property.title}</h3>
-            {property.agent && (
+            {agentName && (
               <Badge variant="outline" className="ml-2 text-xs">
-                {property.agent.full_name}
+                {agentName}
               </Badge>
             )}
           </div>

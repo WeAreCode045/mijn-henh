@@ -5,4 +5,5 @@ export interface PropertyAgent {
   email?: string;
   phone?: string;
   photo_url?: string;
+  name?: string; // Adding for compatibility
 }
