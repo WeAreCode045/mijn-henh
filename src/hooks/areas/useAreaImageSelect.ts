@@ -9,14 +9,13 @@ export function useAreaImageSelect(
 ) {
   const { toast } = useToast();
 
-  // Select images for an area from existing property images
   const handleAreaImagesSelect = async (areaId: string, imageIds: string[]) => {
     console.log(`Selecting images for area ${areaId}:`, imageIds);
     
     try {
       // Get the selected images objects
       const selectedImages = formData.images.filter(img => imageIds.includes(img.id));
-      console.log(`Found ${selectedImages.length} images to assign to area ${areaId}`);
+      console.log(`Found ${selectedImages.length} images to assign to area ${areaId}`, selectedImages);
       
       // First update the area's images in the local state
       const updatedAreas = formData.areas.map(area => {

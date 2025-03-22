@@ -47,7 +47,7 @@ export function AreaCard({
   onImagesSelect,
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
-  const [areaImages, setAreaImages] = useState<AreaImage[]>([]);
+  const [areaImages, setAreaImages] = useState<PropertyImage[]>([]);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [keywordsForDescription, setKeywordsForDescription] = useState("");
@@ -74,29 +74,19 @@ export function AreaCard({
             console.error(`Error fetching images for area ${area.id} from property_images:`, error);
           } else if (data && data.length > 0) {
             console.log(`AreaCard ${area.id} - Found ${data.length} images from property_images table:`, data);
-            setAreaImages(data as AreaImage[]);
+            setAreaImages(data as PropertyImage[]);
             return;
-          } else {
-            console.log(`AreaCard ${area.id} - No images found in property_images table, checking area.images`);
-            
-            if (area.images && Array.isArray(area.images) && area.images.length > 0) {
-              console.log(`AreaCard ${area.id} - Using ${area.images.length} images from area.images:`, area.images);
-              setAreaImages(area.images as AreaImage[]);
-              return;
-            }
-            
-            setAreaImages([]);
           }
         } catch (err) {
           console.error(`Error in fetching area images from property_images:`, err);
         }
+      }
+      
+      if (area.images && Array.isArray(area.images) && area.images.length > 0) {
+        console.log(`AreaCard ${area.id} - Using ${area.images.length} images from area.images:`, area.images);
+        setAreaImages(area.images as PropertyImage[]);
       } else {
-        if (area.images && Array.isArray(area.images) && area.images.length > 0) {
-          console.log(`AreaCard ${area.id} - Using ${area.images.length} images from area.images directly:`, area.images);
-          setAreaImages(area.images as AreaImage[]);
-        } else {
-          setAreaImages([]);
-        }
+        setAreaImages([]);
       }
     };
     
@@ -117,7 +107,6 @@ export function AreaCard({
 
   const handleUpdateImageIds = (imageIds: string[]) => {
     console.log(`Updating area ${area.id} image IDs:`, imageIds);
-    
     if (onImagesSelect) {
       onImagesSelect(area.id, imageIds);
     }
