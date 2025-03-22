@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyImage } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyImagesCard } from "./PropertyImagesCard";
 import { FloorplansTab } from "./tabs/FloorplansTab";
@@ -46,7 +46,10 @@ export function MediaTabContent({
     handleImageUpload,
     handleVirtualTourSave,
     handleYoutubeUrlSave,
-    handleFloorplanEmbedScriptSave
+    handleFloorplanEmbedScriptSave,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, {
     handleVirtualTourUpdate,
     handleYoutubeUrlUpdate,
@@ -83,6 +86,10 @@ export function MediaTabContent({
             setProperty={setLocalProperty} 
             isSaving={isSaving}
             setIsSaving={setIsSaving}
+            onFloorplanUpload={handleFloorplanUpload}
+            onRemoveFloorplan={handleRemoveFloorplan}
+            isUploadingFloorplan={isUploadingFloorplan}
+            onFloorplanEmbedScriptSave={handleFloorplanEmbedScriptSave}
             isReadOnly={isReadOnly}
           />
         </TabsContent>
@@ -93,7 +100,6 @@ export function MediaTabContent({
             setProperty={setLocalProperty}
             onVirtualTourSave={handleVirtualTourSave}
             onYoutubeUrlSave={handleYoutubeUrlSave}
-            onFloorplanEmbedScriptSave={handleFloorplanEmbedScriptSave}
             isSaving={isSaving}
             isReadOnly={isReadOnly}
           />

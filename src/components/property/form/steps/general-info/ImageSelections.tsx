@@ -113,7 +113,7 @@ export function ImageSelections({
                 </div>
               ))}
               
-              {/* Empty slots or add button */}
+              {/* Empty slots */}
               {Array.from({ length: Math.min(4 - featuredImages.length, 4) }).map((_, index) => (
                 <div key={`empty-${index}`} className="h-full">
                   {index === 0 && canAddMoreFeaturedImages ? (

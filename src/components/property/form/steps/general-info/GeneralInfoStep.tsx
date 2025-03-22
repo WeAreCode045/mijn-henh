@@ -3,7 +3,6 @@ import { PropertyFormData } from "@/types/property";
 import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { DescriptionSection } from "./DescriptionSection";
-import { ImageSelections } from "./ImageSelections";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
@@ -22,34 +21,6 @@ export function GeneralInfoStep({
   isUploading,
   setPendingChanges
 }: GeneralInfoStepProps) {
-  const handleFeaturedImageSelect = (url: string | null) => {
-    console.log("Featured image selected in GeneralInfoStep:", url);
-    if (handleSetFeaturedImage) {
-      handleSetFeaturedImage(url);
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
-    }
-  };
-
-  const handleFeaturedImageToggle = (url: string) => {
-    console.log("Featured image toggled in GeneralInfoStep:", url);
-    if (handleToggleFeaturedImage) {
-      handleToggleFeaturedImage(url);
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
-    }
-  };
-
-  // Convert images to PropertyImage[] format
-  const propertyImages = formData.images?.map(img => {
-    if (typeof img === 'string') {
-      return { url: img, id: img }; // Use URL as ID if string
-    }
-    return img;
-  }) || [];
-
   const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
     onFieldChange(field, value);
     if (setPendingChanges) {
@@ -59,28 +30,23 @@ export function GeneralInfoStep({
 
   return (
     <div className="space-y-6">
-      {/* 1. Property Description */}
-      <DescriptionSection 
-        formData={formData}
-        onFieldChange={handleFieldChange} 
-      />
-      
-      {/* 2. Key Information */}
-      <PropertySpecs 
-        formData={formData} 
-        onFieldChange={handleFieldChange} 
-      />
-
-      {/* 3. Image Selections */}
-      {formData.images && formData.images.length > 0 && (
-        <ImageSelections
-          images={propertyImages}
-          featuredImage={formData.featuredImage || null}
-          featuredImages={formData.featuredImages || []}
-          onFeaturedImageSelect={handleFeaturedImageSelect}
-          onFeaturedImageToggle={handleFeaturedImageToggle}
-        />
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 1. Property Description (2/3 width) */}
+        <div className="lg:col-span-2">
+          <DescriptionSection 
+            formData={formData}
+            onFieldChange={handleFieldChange} 
+          />
+        </div>
+        
+        {/* 2. Key Information (1/3 width) */}
+        <div className="lg:col-span-1">
+          <PropertySpecs 
+            formData={formData} 
+            onFieldChange={handleFieldChange} 
+          />
+        </div>
+      </div>
     </div>
   );
 }

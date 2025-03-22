@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
-import { DashboardTabContent } from './DashboardTabContent';
+import { DashboardTabContent } from '../wrapper/DashboardTabContent';
 import { ContentTabContent } from './ContentTabContent';
 import { MediaTabContent } from '../media/MediaTabContent';
 import { LocationTabContent } from './LocationTabContent';
@@ -90,6 +90,7 @@ export class TabContentRenderers {
             handleStepClick={handlers.handleStepClick}
             onSubmit={() => handlers.setPendingChanges(true)}
             isReadOnly={isArchived}
+            hideNavigation={true}
           />
         );
       case 'media':

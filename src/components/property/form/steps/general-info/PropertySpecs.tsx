@@ -1,9 +1,9 @@
 
-import React from "react";
 import { PropertyFormData } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PropertySpecsProps {
   formData: PropertyFormData;
@@ -11,84 +11,134 @@ interface PropertySpecsProps {
 }
 
 export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
-  const handleChange = (field: keyof PropertyFormData, value: string) => {
+  const handleInputChange = (field: keyof PropertyFormData, value: any) => {
     onFieldChange(field, value);
   };
+  
+  const propertyTypes = [
+    "House", "Apartment", "Townhouse", "Condo", "Land", "Commercial"
+  ];
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">Key Information</CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="space-y-2">
-            <Label htmlFor="buildYear">Build Year</Label>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+          {/* TYPE */}
+          <div className="col-span-2">
+            <Label htmlFor="property-type">Type</Label>
+            <Select
+              value={formData.type || ""}
+              onValueChange={(value) => handleInputChange("type", value)}
+            >
+              <SelectTrigger id="property-type">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {propertyTypes.map((type) => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* PRICE */}
+          <div>
+            <Label htmlFor="price">Price</Label>
             <Input
-              id="buildYear"
-              type="text"
-              value={formData.buildYear || ''}
-              onChange={(e) => handleChange('buildYear', e.target.value)}
-              placeholder="Build Year"
-              className="mt-1 p-2"
+              id="price"
+              value={formData.price || ""}
+              onChange={(e) => handleInputChange("price", e.target.value)}
+              placeholder="e.g. $500,000"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="sqft">Lot Size (m²)</Label>
+          
+          {/* BEDS */}
+          <div>
+            <Label htmlFor="beds">Beds</Label>
             <Input
-              id="sqft"
-              type="text"
-              value={formData.sqft || ''}
-              onChange={(e) => handleChange('sqft', e.target.value)}
-              placeholder="Lot Size"
-              className="mt-1 p-2"
+              id="beds"
+              type="number"
+              min="0"
+              value={formData.beds || ""}
+              onChange={(e) => handleInputChange("beds", e.target.value)}
+              placeholder="e.g. 3"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="livingArea">Living Area (m²)</Label>
+          
+          {/* BATHS */}
+          <div>
+            <Label htmlFor="baths">Baths</Label>
             <Input
-              id="livingArea"
-              type="text"
-              value={formData.livingArea || ''}
-              onChange={(e) => handleChange('livingArea', e.target.value)}
-              placeholder="Living Area"
-              className="mt-1 p-2"
+              id="baths"
+              type="number"
+              min="0"
+              step="0.5"
+              value={formData.baths || ""}
+              onChange={(e) => handleInputChange("baths", e.target.value)}
+              placeholder="e.g. 2"
             />
           </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="bedrooms">Bedrooms</Label>
+          
+          {/* GARAGES */}
+          <div>
+            <Label htmlFor="garages">Garages</Label>
             <Input
-              id="bedrooms"
-              type="text"
-              value={formData.bedrooms || ''}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
-              placeholder="Bedrooms"
-              className="mt-1 p-2"
+              id="garages"
+              type="number"
+              min="0"
+              value={formData.garages || ""}
+              onChange={(e) => handleInputChange("garages", e.target.value)}
+              placeholder="e.g. 1"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="bathrooms">Bathrooms</Label>
+          
+          {/* SIZE */}
+          <div>
+            <Label htmlFor="size">Size (sq ft)</Label>
             <Input
-              id="bathrooms"
-              type="text"
-              value={formData.bathrooms || ''}
-              onChange={(e) => handleChange('bathrooms', e.target.value)}
-              placeholder="Bathrooms"
-              className="mt-1 p-2"
+              id="size"
+              value={formData.size || ""}
+              onChange={(e) => handleInputChange("size", e.target.value)}
+              placeholder="e.g. 1,500"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="energyLabel">Energy Class</Label>
+          
+          {/* LOT SIZE */}
+          <div>
+            <Label htmlFor="lot-size">Lot Size</Label>
             <Input
-              id="energyLabel"
-              type="text"
-              value={formData.energyLabel || ''}
-              onChange={(e) => handleChange('energyLabel', e.target.value)}
-              placeholder="Energy Class"
-              className="mt-1 p-2"
+              id="lot-size"
+              value={formData.lot_size || ""}
+              onChange={(e) => handleInputChange("lot_size", e.target.value)}
+              placeholder="e.g. 0.25 acres"
+            />
+          </div>
+          
+          {/* YEAR BUILT */}
+          <div>
+            <Label htmlFor="year-built">Year Built</Label>
+            <Input
+              id="year-built"
+              type="number"
+              min="1800"
+              max={new Date().getFullYear()}
+              value={formData.year_built || ""}
+              onChange={(e) => handleInputChange("year_built", e.target.value)}
+              placeholder="e.g. 2005"
+            />
+          </div>
+          
+          {/* MLS ID */}
+          <div className="col-span-2">
+            <Label htmlFor="mls-id">MLS ID</Label>
+            <Input
+              id="mls-id"
+              value={formData.mls_id || ""}
+              onChange={(e) => handleInputChange("mls_id", e.target.value)}
+              placeholder="e.g. MLS12345"
             />
           </div>
         </div>

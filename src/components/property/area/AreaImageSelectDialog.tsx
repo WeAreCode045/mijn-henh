@@ -59,6 +59,15 @@ export function AreaImageSelectDialog({
     onOpenChange(false);
   };
   
+  // Debug output to check image URLs and IDs
+  useEffect(() => {
+    if (open) {
+      console.log("Available images:", images);
+      console.log("Selected image IDs:", selectedImageIds);
+      console.log("Local selection:", localSelection);
+    }
+  }, [open, images, selectedImageIds, localSelection]);
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -89,6 +98,9 @@ export function AreaImageSelectDialog({
                       <Check className="h-3 w-3" />
                     </div>
                   )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 truncate">
+                    ID: {image.id.slice(0, 8)}...
+                  </div>
                 </div>
               );
             })}

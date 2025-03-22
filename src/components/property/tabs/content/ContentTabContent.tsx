@@ -14,6 +14,7 @@ interface ContentTabContentProps {
   handleStepClick: (step: number) => void;
   onSubmit: () => void;
   isReadOnly?: boolean;
+  hideNavigation?: boolean; // Add this prop to hide navigation
 }
 
 export function ContentTabContent({ 
@@ -26,7 +27,8 @@ export function ContentTabContent({
   currentStep,
   handleStepClick,
   onSubmit,
-  isReadOnly = false
+  isReadOnly = false,
+  hideNavigation = false
 }: ContentTabContentProps) {
   // Create adapter functions to match the expected types in PropertyStepWizard
   const adaptedRemoveFeature = (id: string) => {
@@ -49,6 +51,7 @@ export function ContentTabContent({
       handleStepClick={handleStepClick}
       onSubmit={onSubmit}
       isReadOnly={isReadOnly}
+      hideNavigation={hideNavigation}
     />
   );
 }

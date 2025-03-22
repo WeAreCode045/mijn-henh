@@ -72,7 +72,7 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
       />
       
       <ContentTabContent
-        property={property} // Pass property data
+        property={property} 
         formState={formData}
         onFieldChange={handlers.onFieldChange}
         onAddFeature={handlers.onAddFeature}
@@ -82,6 +82,7 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         handleStepClick={handlers.handleStepClick}
         onSubmit={onSubmit}
         isReadOnly={false}
+        hideNavigation={true} // Add this prop to hide the navigation in ContentTabContent
       />
     </div>
   );
