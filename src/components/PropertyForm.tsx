@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyData } from "@/types/property";
+import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
 
 export function PropertyForm() {
   const { id } = useParams();
@@ -15,8 +14,8 @@ export function PropertyForm() {
   const { toast } = useToast();
   const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { deleteProperty } = usePropertyDeletion();
 
-  // Set document title based on property title
   useEffect(() => {
     if (formData?.title) {
       document.title = formData.title;
@@ -31,7 +30,6 @@ export function PropertyForm() {
 
   useEffect(() => {
     if (formData?.agent_id) {
-      // Fetch agent info
       const fetchAgentInfo = async () => {
         try {
           const { data } = await supabase
@@ -53,7 +51,6 @@ export function PropertyForm() {
   }, [formData?.agent_id]);
 
   const handleSave = () => {
-    // Refresh the form data
     if (id) {
       toast({
         description: "Property data refreshed",
@@ -74,13 +71,11 @@ export function PropertyForm() {
     try {
       setIsDeleting(true);
       
-      // Delete the property from the database
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
+      const success = await deleteProperty(id);
+      
+      if (!success) {
+        throw new Error("Property deletion failed");
+      }
       
       toast({
         title: "Success",
@@ -107,10 +102,9 @@ export function PropertyForm() {
     </div>;
   }
 
-  // Ensure formData has an id property by casting it to PropertyData
   const propertyData: PropertyData = {
     ...formData,
-    id: formData.id || '', // Provide empty string as fallback if id is missing
+    id: formData.id || '',
   };
 
   return (

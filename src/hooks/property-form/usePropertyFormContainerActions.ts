@@ -1,9 +1,8 @@
-
 import { useNavigate } from "react-router-dom";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
-import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
+import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
 
 export function usePropertyFormContainerActions(
   formData: PropertyFormData | null,
@@ -16,33 +15,24 @@ export function usePropertyFormContainerActions(
 ) {
   const navigate = useNavigate();
   const { handleSubmit } = usePropertyFormSubmit();
+  const { deleteProperty } = usePropertyDeletion();
   
   const { handleImageUpload, handleRemoveImage, images } = usePropertyImages(
     formData, 
     setFormData
   );
 
-  const deleteProperty = async () => {
+  const deletePropertyHandler = async () => {
     if (!formData?.id) return;
     
     try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', formData.id);
-        
-      if (error) throw error;
-      
-      navigate('/properties');
-      toast({
-        title: "Success",
-        description: "Property deleted successfully",
-      });
+      await deleteProperty(formData.id);
+      // Navigation is handled inside deleteProperty
     } catch (error) {
-      console.error("Error deleting property:", error);
+      console.error("Error in deletePropertyHandler:", error);
       toast({
         title: "Error",
-        description: "Failed to delete property",
+        description: "Failed to delete property completely",
         variant: "destructive",
       });
     }
@@ -126,7 +116,7 @@ export function usePropertyFormContainerActions(
   };
 
   return {
-    deleteProperty,
+    deleteProperty: deletePropertyHandler,
     saveProperty,
     handleAgentChange,
     handleImageUpload,
