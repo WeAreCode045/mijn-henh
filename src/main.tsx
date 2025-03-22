@@ -16,8 +16,8 @@ import {
   faBolt
 } from '@fortawesome/free-solid-svg-icons';
 
-// Import the BlockNote CSS globally to ensure it's available throughout the app
-import "@blocknote/react/style.css";
+// We're having issues with the BlockNote CSS import, so let's try an alternative approach
+// Instead of importing the CSS directly, we'll load it in the component that uses it
 
 library.add(
   faMapMarker,

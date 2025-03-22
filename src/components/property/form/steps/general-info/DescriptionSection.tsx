@@ -4,8 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
-// Import is in main.tsx instead
 import { useEffect } from "react";
+
+// Import CSS directly in this component
+import "@blocknote/react/style.css";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
