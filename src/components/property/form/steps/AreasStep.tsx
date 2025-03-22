@@ -25,6 +25,35 @@ export function AreasStep({
   setPendingChanges,
   isUploading
 }: AreasStepProps) {
+  // Function to handle generated areas from AI
+  const handleAreasGenerated = (newAreas: PropertyArea[]) => {
+    // If there are existing areas, we'll append the new ones
+    const updatedAreas = [...(formData.areas || []), ...newAreas];
+    
+    // Update form data with the new areas
+    if (setPendingChanges) setPendingChanges(true);
+    
+    // Replace all areas with our updated list
+    newAreas.forEach(area => {
+      onAddArea();
+    });
+    
+    // Update each area with the generated content
+    updatedAreas.forEach((area, index) => {
+      if (index >= (formData.areas?.length || 0)) {
+        const newIndex = index - (formData.areas?.length || 0);
+        const newAreaId = formData.areas?.[formData.areas.length - newAreas.length + newIndex]?.id;
+        
+        if (newAreaId) {
+          onUpdateArea(newAreaId, 'title', area.title);
+          onUpdateArea(newAreaId, 'name', area.name);
+          onUpdateArea(newAreaId, 'size', area.size);
+          onUpdateArea(newAreaId, 'description', area.description);
+        }
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Property Areas</h2>
@@ -36,12 +65,14 @@ export function AreasStep({
         areas={formData.areas || []}
         images={formData.images || []}
         propertyId={formData.id || ''}
+        formData={formData}
         onAdd={onAddArea}
         onRemove={onRemoveArea}
         onUpdate={onUpdateArea}
         onImageRemove={onAreaImageRemove}
         onImagesSelect={onAreaImagesSelect}
         onImageUpload={onAreaImageUpload}
+        onAreasGenerated={handleAreasGenerated}
         isUploading={isUploading}
       />
     </div>

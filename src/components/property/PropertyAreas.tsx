@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { PropertyArea, PropertyImage } from "@/types/property";
+import { PropertyArea, PropertyImage, PropertyFormData } from "@/types/property";
 import { EmptyAreaMessage } from "./EmptyAreaMessage";
 import { PropertyAreasHeader } from "./area/PropertyAreasHeader";
 import { AreasList } from "./area/AreasList";
@@ -9,12 +9,14 @@ interface PropertyAreasProps {
   areas: PropertyArea[];
   images: PropertyImage[];
   propertyId: string;
+  formData?: PropertyFormData;
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: any, value: any) => void;
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesSelect: (areaId: string, imageIds: string[]) => void;
   onImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  onAreasGenerated?: (areas: PropertyArea[]) => void;
   isUploading?: boolean;
 }
 
@@ -22,12 +24,14 @@ export function PropertyAreas({
   areas = [],
   images = [],
   propertyId,
+  formData,
   onAdd,
   onRemove,
   onUpdate,
   onImageRemove,
   onImagesSelect,
   onImageUpload,
+  onAreasGenerated,
   isUploading,
 }: PropertyAreasProps) {
   useEffect(() => {
@@ -45,9 +49,19 @@ export function PropertyAreas({
   // Check if areas exist and have valid content
   const hasAreas = Array.isArray(areas) && areas.length > 0;
 
+  const handleAreasGenerated = (newAreas: PropertyArea[]) => {
+    if (onAreasGenerated) {
+      onAreasGenerated(newAreas);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <PropertyAreasHeader onAdd={onAdd} />
+      <PropertyAreasHeader 
+        onAdd={onAdd} 
+        propertyData={formData}
+        onAreasGenerated={handleAreasGenerated}
+      />
 
       {!hasAreas ? (
         <EmptyAreaMessage />

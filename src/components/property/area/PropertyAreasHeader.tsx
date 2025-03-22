@@ -1,30 +1,37 @@
 
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Plus } from "lucide-react";
+import { GenerateAreasButton } from "./GenerateAreasButton";
+import { PropertyFormData } from "@/types/property";
 
 interface PropertyAreasHeaderProps {
   onAdd: () => void;
+  propertyData?: PropertyFormData;
+  onAreasGenerated?: (newAreas: any[]) => void;
 }
 
-export function PropertyAreasHeader({ onAdd }: PropertyAreasHeaderProps) {
-  const handleAddArea = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onAdd();
-  };
-
+export function PropertyAreasHeader({ 
+  onAdd, 
+  propertyData,
+  onAreasGenerated 
+}: PropertyAreasHeaderProps) {
   return (
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl font-bold text-estate-800">Property Areas</h2>
-      <Button 
-        onClick={handleAddArea} 
-        size="sm" 
-        className="flex items-center" 
-        type="button"
-      >
-        <PlusCircle className="h-4 w-4 mr-2" />
-        Add Area
-      </Button>
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-semibold">Property Areas</h3>
+      
+      <div className="flex gap-2">
+        {propertyData && onAreasGenerated && (
+          <GenerateAreasButton 
+            propertyData={propertyData} 
+            onAreasGenerated={onAreasGenerated} 
+          />
+        )}
+        
+        <Button onClick={onAdd} size="sm">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Area
+        </Button>
+      </div>
     </div>
   );
 }
