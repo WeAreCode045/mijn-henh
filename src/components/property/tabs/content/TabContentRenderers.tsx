@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
 import { DashboardTabContent } from './DashboardTabContent';
 import { ContentTabContent } from './ContentTabContent';
-import { MediaTabContent } from './MediaTabContent';
+import { MediaTabContent } from '../media/MediaTabContent';
 import { LocationTabContent } from './LocationTabContent';
 import { SettingsTabContent } from './SettingsTabContent';
 import { Button } from '@/components/ui/button';
