@@ -60,7 +60,7 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
         console.error("Error setting editor content:", error);
       }
     }
-  }, [formData.id, editor]); // Add editor to dependency array
+  }, [formData.id, editor, formData.description]); // Add formData.description to dependency array
 
   // Update formData.description when editor content changes
   useEffect(() => {
@@ -96,7 +96,7 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
     // Subscribe to editor changes
     const unsubscribe = editor.onEditorContentChange(handleEditorChange);
     
-    // Fix: Return the unsubscribe function directly, not as a function call
+    // Return the unsubscribe function directly
     return unsubscribe;
   }, [editor, onFieldChange, setPendingChanges]);
 
