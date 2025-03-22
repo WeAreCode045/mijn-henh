@@ -30,8 +30,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           <div className="col-span-2">
             <Label htmlFor="property-type">Type</Label>
             <Select
-              value={formData.type || ""}
-              onValueChange={(value) => handleInputChange("type", value)}
+              value={formData.propertyType || ""}
+              onValueChange={(value) => handleInputChange("propertyType", value)}
             >
               <SelectTrigger id="property-type">
                 <SelectValue placeholder="Select type" />
@@ -62,8 +62,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
               id="beds"
               type="number"
               min="0"
-              value={formData.beds || ""}
-              onChange={(e) => handleInputChange("beds", e.target.value)}
+              value={formData.bedrooms || ""}
+              onChange={(e) => handleInputChange("bedrooms", e.target.value)}
               placeholder="e.g. 3"
             />
           </div>
@@ -76,8 +76,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
               type="number"
               min="0"
               step="0.5"
-              value={formData.baths || ""}
-              onChange={(e) => handleInputChange("baths", e.target.value)}
+              value={formData.bathrooms || ""}
+              onChange={(e) => handleInputChange("bathrooms", e.target.value)}
               placeholder="e.g. 2"
             />
           </div>
@@ -100,8 +100,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Label htmlFor="size">Size (sq ft)</Label>
             <Input
               id="size"
-              value={formData.size || ""}
-              onChange={(e) => handleInputChange("size", e.target.value)}
+              value={formData.sqft || ""}
+              onChange={(e) => handleInputChange("sqft", e.target.value)}
               placeholder="e.g. 1,500"
             />
           </div>
@@ -111,8 +111,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Label htmlFor="lot-size">Lot Size</Label>
             <Input
               id="lot-size"
-              value={formData.lot_size || ""}
-              onChange={(e) => handleInputChange("lot_size", e.target.value)}
+              value={formData.livingArea || ""}
+              onChange={(e) => handleInputChange("livingArea", e.target.value)}
               placeholder="e.g. 0.25 acres"
             />
           </div>
@@ -125,8 +125,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
               type="number"
               min="1800"
               max={new Date().getFullYear()}
-              value={formData.year_built || ""}
-              onChange={(e) => handleInputChange("year_built", e.target.value)}
+              value={formData.buildYear || ""}
+              onChange={(e) => handleInputChange("buildYear", e.target.value)}
               placeholder="e.g. 2005"
             />
           </div>
@@ -136,8 +136,8 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
             <Label htmlFor="mls-id">MLS ID</Label>
             <Input
               id="mls-id"
-              value={formData.mls_id || ""}
-              onChange={(e) => handleInputChange("mls_id", e.target.value)}
+              value={formData.object_id || ""}
+              onChange={(e) => handleInputChange("object_id", e.target.value)}
               placeholder="e.g. MLS12345"
             />
           </div>

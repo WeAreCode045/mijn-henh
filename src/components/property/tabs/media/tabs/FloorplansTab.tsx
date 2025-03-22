@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyImage } from "@/types/property";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,14 @@ export function FloorplansTab({
     }
   };
 
+  // Helper function to safely get URL from either string or PropertyImage
+  const getImageUrl = (image: PropertyImage | string): string => {
+    if (typeof image === 'string') {
+      return image;
+    }
+    return image.url;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -67,10 +75,10 @@ export function FloorplansTab({
                 <div className="mt-6">
                   <h3 className="text-sm font-medium mb-3">Uploaded Floorplans</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {property.floorplans.map((url, index) => (
+                    {property.floorplans.map((floorplan, index) => (
                       <div key={index} className="relative group">
                         <img
-                          src={url}
+                          src={getImageUrl(floorplan)}
                           alt={`Floorplan ${index + 1}`}
                           className="w-full h-36 object-contain border rounded-md p-2"
                         />
