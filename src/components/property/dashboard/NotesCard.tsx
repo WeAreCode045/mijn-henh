@@ -39,7 +39,7 @@ export function NotesCard({ propertyId }: NotesCardProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-3 flex flex-row justify-between items-center">
+      <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-medium">Notes</CardTitle>
         <Button 
           onClick={handleAddButtonClick} 
@@ -58,7 +58,7 @@ export function NotesCard({ propertyId }: NotesCardProps) {
             <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : notes.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
+          <div className="text-center py-4 text-muted-foreground">
             <p>No notes yet</p>
             <Button 
               variant="outline" 
@@ -71,15 +71,15 @@ export function NotesCard({ propertyId }: NotesCardProps) {
             </Button>
           </div>
         ) : (
-          <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
             {notes.map((note) => (
               <div 
                 key={note.id} 
-                className="p-3 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                className="p-2 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                 onClick={() => handleNoteClick(note)}
               >
-                <h3 className="font-medium truncate">{note.title}</h3>
-                <p className="text-sm text-muted-foreground truncate">{note.content}</p>
+                <h3 className="font-medium text-sm truncate">{note.title}</h3>
+                <p className="text-xs text-muted-foreground truncate">{note.content}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {formatDate(note.created_at)}
                 </p>

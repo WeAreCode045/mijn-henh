@@ -10,11 +10,12 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { FileText, Globe, Youtube, RotateCcw, Share2 } from "lucide-react";
+import { FileText, Globe, Youtube, RotateCcw, Share2, Archive, Trash, History } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MediaViewModal } from "@/components/property/MediaViewModal";
 import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { supabase } from "@/integrations/supabase/client";
+import { EditHistoryModal } from "../../../dashboard/components/EditHistoryModal";
 
 interface PropertyManagementCardProps {
   propertyId: string;
@@ -22,6 +23,7 @@ interface PropertyManagementCardProps {
   handleSaveAgent: (agentId: string) => Promise<void>;
   onGeneratePDF: () => void;
   onWebView: (e: React.MouseEvent) => void;
+  onDelete: () => Promise<void>;
   isArchived: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -33,12 +35,14 @@ export function PropertyManagementCard({
   handleSaveAgent, 
   onGeneratePDF,
   onWebView,
+  onDelete,
   isArchived,
   createdAt,
   updatedAt
 }: PropertyManagementCardProps) {
   // Media view modal states
   const [showMediaModal, setShowMediaModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [mediaType, setMediaType] = useState<"virtualTour" | "youtube">("virtualTour");
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaTitle, setMediaTitle] = useState("");
@@ -110,11 +114,87 @@ export function PropertyManagementCard({
     }
   };
 
+  // Handle toggle archive
+  const handleToggleArchive = async () => {
+    try {
+      const newArchivedStatus = !isArchived;
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ archived: newArchivedStatus })
+        .eq('id', propertyId);
+        
+      if (error) throw error;
+      
+      // Reload the page to reflect changes
+      window.location.reload();
+    } catch (error) {
+      console.error("Error toggling archive status:", error);
+    }
+  };
+
+  const handleOpenHistory = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowHistoryModal(true);
+  };
+
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 flex flex-row justify-between items-center">
           <CardTitle className="text-lg font-medium">Property Management</CardTitle>
+          <div className="flex space-x-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant={isArchived ? "default" : "outline"} 
+                    size="icon" 
+                    onClick={handleToggleArchive}
+                  >
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isArchived ? "Unarchive Property" : "Archive Property"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={handleOpenHistory}
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit History</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    onClick={onDelete}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete Property</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />
@@ -125,7 +205,6 @@ export function PropertyManagementCard({
           />
           
           <div className="mt-2">
-            <p className="font-semibold mb-2">Property Status</p>
             <StatusSelector 
               propertyId={propertyId} 
               initialStatus={""} 
@@ -280,6 +359,13 @@ export function PropertyManagementCard({
         url={mediaUrl}
         title={mediaTitle}
         type={mediaType}
+      />
+      
+      {/* Edit History Modal */}
+      <EditHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        propertyId={propertyId}
       />
     </div>
   );

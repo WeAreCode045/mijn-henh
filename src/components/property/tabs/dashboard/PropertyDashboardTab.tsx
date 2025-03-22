@@ -1,19 +1,14 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Archive, Clock, History, Mailbox, Trash } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Submission } from "@/types/submission";
 import { ActivityCard } from "./cards/ActivityCard";
 import { NotesCard } from "../../dashboard/NotesCard";
 import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
-import { AgentSelector } from "../../dashboard/components/AgentSelector";
-import { PropertyDates } from "../../dashboard/components/PropertyDates";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { PropertyManagementCard } from "./cards/PropertyManagementCard";
-import { PropertyImage } from "../../dashboard/components/PropertyImage";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { AgendaCard } from "../../dashboard/AgendaCard";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -101,35 +96,6 @@ export function PropertyDashboardTab({
     fetchPropertyStatus();
   }, [id, toast]);
 
-  const handleToggleArchive = async () => {
-    try {
-      const newArchivedStatus = !isArchived;
-      
-      const { error } = await supabase
-        .from('properties')
-        .update({ archived: newArchivedStatus })
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      setIsArchived(newArchivedStatus);
-      
-      toast({
-        title: newArchivedStatus ? "Property Archived" : "Property Unarchived",
-        description: newArchivedStatus 
-          ? "The property has been archived. Editing is now disabled." 
-          : "The property has been unarchived. You can now edit it again."
-      });
-    } catch (error) {
-      console.error("Error toggling archive status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update archive status",
-        variant: "destructive"
-      });
-    }
-  };
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     
@@ -150,31 +116,8 @@ export function PropertyDashboardTab({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-2">
-        <h2 className="text-xl sm:text-2xl font-bold truncate">{title}</h2>
-        <div className="flex gap-2">
-          <Button 
-            variant={isArchived ? "default" : "outline"} 
-            size="icon" 
-            onClick={handleToggleArchive}
-            title={isArchived ? "Unarchive Property" : "Archive Property"}
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="destructive" 
-            size="icon" 
-            onClick={onDelete}
-            title="Delete Property"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
       {isArchived && (
         <div className="bg-amber-50 text-amber-800 border border-amber-200 rounded-md p-3 flex items-center gap-2">
-          <Clock className="h-4 w-4" />
           <span>This property is archived. Editing is disabled until you unarchive it.</span>
         </div>
       )}
@@ -205,6 +148,7 @@ export function PropertyDashboardTab({
             handleSaveAgent={handleSaveAgent}
             onGeneratePDF={handleGeneratePDF}
             onWebView={handleWebView}
+            onDelete={onDelete}
             isArchived={isArchived}
             createdAt={createdAt}
             updatedAt={updatedAt}
@@ -214,6 +158,10 @@ export function PropertyDashboardTab({
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <ActivityCard />
+        <AgendaCard propertyId={id} />
+      </div>
+      
+      <div>
         <NotesCard propertyId={id} />
       </div>
     </div>

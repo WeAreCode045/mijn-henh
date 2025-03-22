@@ -19,8 +19,30 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
   useEffect(() => {
     if (initialStatus) {
       setPropertyStatus(initialStatus);
+    } else {
+      // If no initialStatus is provided, fetch it from the database
+      const fetchPropertyStatus = async () => {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('status, metadata')
+          .eq('id', propertyId)
+          .single();
+          
+        if (error) {
+          console.error("Error fetching property status:", error);
+          return;
+        }
+        
+        if (data) {
+          // Use metadata.status if available, otherwise fall back to the status field
+          const status = data.metadata?.status || data.status || "Draft";
+          setPropertyStatus(status);
+        }
+      };
+      
+      fetchPropertyStatus();
     }
-  }, [initialStatus]);
+  }, [initialStatus, propertyId]);
 
   const handleStatusChange = async (status: string) => {
     try {
@@ -86,7 +108,9 @@ export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSe
         onValueChange={handleStatusChange}
       >
         <SelectTrigger id="property-status" className="w-full">
-          <SelectValue placeholder="Select status" />
+          <SelectValue placeholder="Select status">
+            {propertyStatus}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="Draft">Draft</SelectItem>

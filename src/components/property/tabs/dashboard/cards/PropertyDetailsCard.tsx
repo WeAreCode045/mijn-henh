@@ -61,11 +61,6 @@ export function PropertyDetailsCard({
     fetchPropertyDetails();
   }, [id]);
   
-  const handleSaveObjectIdClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    onSaveObjectId(currentObjectId);
-  };
-  
   const handleToggleEdit = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission and page reload
     setIsEditing(!isEditing);
@@ -78,14 +73,18 @@ export function PropertyDetailsCard({
         .from('properties')
         .update({
           title: propertyTitle,
-          address: propertyAddress
+          address: propertyAddress,
+          object_id: currentObjectId // Include object_id in the same update
         })
         .eq('id', id);
         
       if (error) throw error;
       
       setIsEditing(false);
-      // You might want to update the main title display here or reload the page
+      // If the object ID has changed, notify the parent component
+      if (currentObjectId !== objectId) {
+        onSaveObjectId(currentObjectId);
+      }
     } catch (error) {
       console.error("Error saving property details:", error);
     }
@@ -129,22 +128,16 @@ export function PropertyDetailsCard({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="object-id">Object ID</Label>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Input
-                      id="object-id"
-                      value={currentObjectId}
-                      onChange={(e) => setCurrentObjectId(e.target.value)}
-                      placeholder="Enter object ID"
-                      className="sm:flex-1"
-                    />
-                    <Button onClick={handleSaveObjectIdClick} disabled={isUpdating} size={isMobile ? "sm" : "default"}>
-                      <Save className="h-4 w-4 mr-2" />
-                      {isUpdating ? "Saving..." : "Save"}
-                    </Button>
-                  </div>
+                  <Input
+                    id="object-id"
+                    value={currentObjectId}
+                    onChange={(e) => setCurrentObjectId(e.target.value)}
+                    placeholder="Enter object ID"
+                    className="sm:flex-1"
+                  />
                 </div>
-                <Button onClick={handleSaveDetails}>
-                  Save Details
+                <Button onClick={handleSaveDetails} disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save Details"}
                 </Button>
               </>
             ) : (
