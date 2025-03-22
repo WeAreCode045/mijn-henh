@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
 import { useEffect } from "react";
 
-// Import CSS directly in this component
-import "@blocknote/react/style.css";
+// Import CSS correctly with the full path
+import "@blocknote/core/style.css";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
