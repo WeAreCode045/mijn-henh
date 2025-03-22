@@ -38,6 +38,18 @@ export function MediaTabContent({ property, handlers }: MediaTabContentProps) {
     handleFloorplanEmbedScriptSave
   } = usePropertyMediaHandlers(localProperty, setLocalProperty, setIsSaving, handlers);
 
+  // Add debug logs to verify data is available
+  console.log("MediaTabContent rendered with:", {
+    propertyId: localProperty.id,
+    imageCount: localProperty.images?.length || 0,
+    featuredImage: localProperty.featuredImage,
+    featuredImages: localProperty.featuredImages,
+    handlers: {
+      handleSetFeaturedImage: !!handleSetFeaturedImage,
+      handleToggleFeaturedImage: !!handleToggleFeaturedImage
+    }
+  });
+
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
