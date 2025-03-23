@@ -1,16 +1,19 @@
-
 import React, { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MapPin, Loader2 } from "lucide-react";
 import { EditButton } from "@/components/property/content/EditButton";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { NearbyPlaces } from "@/components/property/location/NearbyPlaces";
 import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
+import { SelectPlacesModal } from "@/components/property/form/steps/location/components/SelectPlacesModal";
+import { PlaceOption } from "@/components/property/form/steps/location/components/SelectPlacesModal";
+import { SelectCitiesModal } from "@/components/property/form/steps/location/components/SelectCitiesModal";
 
 interface LocationPageProps {
   formData: PropertyFormData;
@@ -39,11 +42,19 @@ export function LocationPage({
   const [isEditingLocationDesc, setIsEditingLocationDesc] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [locationDescription, setLocationDescription] = useState(formData.location_description || '');
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState("");
+  const [placesForModal, setPlacesForModal] = useState<PlaceOption[]>([]);
+  const [isFetchingCategory, setIsFetchingCategory] = useState(false);
+  
+  const [citiesModalOpen, setCitiesModalOpen] = useState(false);
+  const [citiesForModal, setCitiesForModal] = useState<any[]>([]);
+  const [isFetchingCities, setIsFetchingCities] = useState(false);
 
   const generateDescription = async () => {
     if (onGenerateLocationDescription) {
       await onGenerateLocationDescription();
-      // Update local state after generation
       setLocationDescription(formData.location_description || '');
     }
   };
@@ -62,7 +73,6 @@ export function LocationPage({
         
       if (error) throw error;
       
-      // Update parent state
       onFieldChange('location_description', locationDescription);
       if (setPendingChanges) setPendingChanges(false);
       
@@ -88,7 +98,6 @@ export function LocationPage({
     if (!formData.id) return;
     
     try {
-      // Prepare the data for update
       const nearbyPlacesJson = preparePropertiesForJsonField(formData.nearby_places || []);
       const nearbyCitiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
       
@@ -108,8 +117,6 @@ export function LocationPage({
         title: "Updated",
         description: "Nearby places and cities updated successfully",
       });
-      
-      // Changed: Remove the boolean return to match Promise<void> type
     } catch (error) {
       console.error("Error updating nearby places:", error);
       toast({
@@ -120,10 +127,128 @@ export function LocationPage({
       throw error;
     }
   };
+  
+  const handleFetchCategoryPlaces = async (category: string) => {
+    if (!onFetchCategoryPlaces || !formData.address) {
+      toast({
+        title: "Error",
+        description: "Address is required to fetch nearby places",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsFetchingCategory(true);
+    setCurrentCategory(category);
+    
+    try {
+      const results = await onFetchCategoryPlaces(category);
+      
+      if (results && results[category] && Array.isArray(results[category])) {
+        const options: PlaceOption[] = results[category].map((place: any) => ({
+          id: place.id,
+          name: place.name,
+          vicinity: place.vicinity,
+          rating: place.rating,
+          distance: place.distance,
+          type: place.type || category,
+          maxSelections: 5
+        }));
+        
+        setPlacesForModal(options);
+        setModalOpen(true);
+      } else {
+        toast({
+          title: "No places found",
+          description: `No ${category.replace('_', ' ')} places found near this location.`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching places:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby places.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFetchingCategory(false);
+    }
+  };
+  
+  const handleFetchCities = async () => {
+    if (!onFetchNearbyCities || !formData.address) {
+      toast({
+        title: "Error",
+        description: "Address is required to fetch nearby cities",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsFetchingCities(true);
+    
+    try {
+      const results = await onFetchNearbyCities();
+      
+      if (results && results.cities && Array.isArray(results.cities)) {
+        setCitiesForModal(results.cities);
+        setCitiesModalOpen(true);
+      } else {
+        toast({
+          title: "No cities found",
+          description: "No nearby cities found for this location.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby cities.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFetchingCities(false);
+    }
+  };
+  
+  const handleSavePlaces = async (selectedPlaces: PlaceOption[]) => {
+    if (!formData.nearby_places) return;
+    
+    const newPlaces = selectedPlaces.map(place => ({
+      id: place.id,
+      name: place.name,
+      vicinity: place.vicinity,
+      rating: place.rating,
+      distance: place.distance || 0,
+      type: place.type,
+      visible_in_webview: true
+    }));
+    
+    const existingPlaces = formData.nearby_places.filter(
+      place => !newPlaces.some(newPlace => newPlace.id === place.id)
+    );
+    
+    const updatedPlaces = [...existingPlaces, ...newPlaces];
+    onFieldChange('nearby_places', updatedPlaces);
+    
+    await saveNearbyPlaces();
+  };
+  
+  const handleSaveCities = async (selectedCities: any[]) => {
+    const citiesToSave = selectedCities.map(city => ({
+      ...city,
+      visible_in_webview: true
+    }));
+    
+    onFieldChange('nearby_cities', citiesToSave);
+    
+    await saveNearbyPlaces();
+  };
 
   return (
     <div className="space-y-6">
-      {/* Location Description */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-lg font-medium">Location Description</CardTitle>
@@ -186,14 +311,105 @@ export function LocationPage({
         </CardContent>
       </Card>
 
-      {/* Nearby Places */}
-      <NearbyPlaces 
-        places={formData.nearby_places || []}
-        cities={formData.nearby_cities || []}
-        onFetchCategory={onFetchCategoryPlaces}
-        onFetchCities={onFetchNearbyCities}
-        isDisabled={isLoadingLocationData || !formData.address}
-        onSave={saveNearbyPlaces}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-medium">Nearby Places</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFetchCategoryPlaces('restaurant')}
+              disabled={isLoadingLocationData || !formData.address || isFetchingCategory}
+            >
+              Fetch Restaurants
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFetchCategoryPlaces('store')}
+              disabled={isLoadingLocationData || !formData.address || isFetchingCategory}
+            >
+              Fetch Stores
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFetchCategoryPlaces('school')}
+              disabled={isLoadingLocationData || !formData.address || isFetchingCategory}
+            >
+              Fetch Schools
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <NearbyPlaces 
+            places={formData.nearby_places || []}
+            cities={formData.nearby_cities || []}
+            isDisabled={isLoadingLocationData || !formData.address}
+            onSave={saveNearbyPlaces}
+          />
+          
+          <div className="mt-4">
+            <Label className="mb-2 block">Nearby Cities</Label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleFetchCities}
+              disabled={isLoadingLocationData || !formData.address || isFetchingCities}
+              className="mt-2"
+            >
+              {isFetchingCities ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Fetching Cities...
+                </>
+              ) : (
+                <>
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Fetch Nearby Cities
+                </>
+              )}
+            </Button>
+            
+            {formData.nearby_cities && formData.nearby_cities.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {formData.nearby_cities.map((city, index) => (
+                  <Badge 
+                    key={city.id || index} 
+                    variant="secondary"
+                  >
+                    {city.name}
+                    {city.distance && (
+                      <span className="text-xs opacity-70 ml-1">
+                        {typeof city.distance === 'number' 
+                          ? `${city.distance.toFixed(1)} km` 
+                          : city.distance}
+                      </span>
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      <SelectPlacesModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        places={placesForModal}
+        onSave={handleSavePlaces}
+        category={currentCategory}
+        isLoading={isFetchingCategory}
+        maxSelections={5}
+      />
+      
+      <SelectCitiesModal
+        isOpen={citiesModalOpen}
+        onClose={() => setCitiesModalOpen(false)}
+        cities={citiesForModal}
+        onSave={handleSaveCities}
+        isLoading={isFetchingCities}
       />
     </div>
   );

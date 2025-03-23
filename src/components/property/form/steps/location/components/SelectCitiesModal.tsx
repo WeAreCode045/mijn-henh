@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { MapPin } from "lucide-react";
-import { useState } from "react";
-import { PropertyCity } from "@/types/property";
+import { useState, useEffect } from "react";
+
+interface City {
+  id: string;
+  name: string;
+  distance?: number;
+}
 
 interface SelectCitiesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cities: PropertyCity[];
-  onSave: (selectedCities: PropertyCity[]) => void;
+  cities: City[];
+  onSave: (selectedCities: City[]) => void;
   isLoading?: boolean;
-  maxSelections?: number;
 }
 
 export function SelectCitiesModal({
@@ -22,18 +25,22 @@ export function SelectCitiesModal({
   onClose,
   cities = [],
   onSave,
-  isLoading = false,
-  maxSelections = 5
+  isLoading = false
 }: SelectCitiesModalProps) {
-  const [selectedCities, setSelectedCities] = useState<PropertyCity[]>([]);
+  const [selectedCities, setSelectedCities] = useState<City[]>([]);
 
-  const handleToggleCity = (city: PropertyCity) => {
+  // Reset selections when modal is opened with new cities
+  useEffect(() => {
+    if (isOpen && cities.length > 0) {
+      setSelectedCities([]);
+    }
+  }, [isOpen, cities]);
+
+  const handleToggleCity = (city: City) => {
     if (selectedCities.some(c => c.id === city.id)) {
       setSelectedCities(selectedCities.filter(c => c.id !== city.id));
     } else {
-      if (selectedCities.length < maxSelections) {
-        setSelectedCities([...selectedCities, city]);
-      }
+      setSelectedCities([...selectedCities, city]);
     }
   };
 
@@ -51,7 +58,7 @@ export function SelectCitiesModal({
         
         <div className="py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Select up to {maxSelections} cities to include (found {cities.length} cities).
+            Select cities to display as nearby to this property (found {cities.length} cities).
           </p>
           
           {isLoading ? (
@@ -59,7 +66,7 @@ export function SelectCitiesModal({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : cities.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">No nearby cities found</p>
+            <p className="text-center py-8 text-muted-foreground">No cities found near this location</p>
           ) : (
             <ScrollArea className="h-[300px] pr-4">
               <div className="space-y-2">
@@ -73,7 +80,6 @@ export function SelectCitiesModal({
                       className="mt-1"
                       checked={selectedCities.some(c => c.id === city.id)}
                       onCheckedChange={() => handleToggleCity(city)}
-                      disabled={!selectedCities.some(c => c.id === city.id) && selectedCities.length >= maxSelections}
                     />
                     <div className="ml-3 space-y-1 flex-1">
                       <label 
@@ -83,16 +89,13 @@ export function SelectCitiesModal({
                         {city.name}
                       </label>
                       
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {city.distance !== undefined && (
-                          <Badge variant="outline" className="text-xs flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {typeof city.distance === 'number' 
-                              ? `${city.distance.toFixed(1)} km` 
-                              : city.distance}
-                          </Badge>
-                        )}
-                      </div>
+                      {city.distance !== undefined && (
+                        <Badge variant="outline" className="text-xs">
+                          {typeof city.distance === 'number' 
+                            ? `${city.distance.toFixed(1)} km` 
+                            : city.distance}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 ))}

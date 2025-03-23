@@ -2,14 +2,13 @@
 import React, { useState } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { EditButton } from "@/components/property/content/EditButton";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { EditButton } from "@/components/property/content/EditButton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface GeneralPageProps {
   formData: PropertyFormData;
@@ -17,43 +16,91 @@ interface GeneralPageProps {
   setPendingChanges?: (pending: boolean) => void;
 }
 
-export function GeneralPage({
-  formData,
+export function GeneralPage({ 
+  formData, 
   onFieldChange,
   setPendingChanges
 }: GeneralPageProps) {
   const { toast } = useToast();
+  const [isEditingGeneral, setIsEditingGeneral] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [isEditingSpecs, setIsEditingSpecs] = useState(false);
-  const [isSavingDescription, setIsSavingDescription] = useState(false);
-  const [isSavingSpecs, setIsSavingSpecs] = useState(false);
-  
-  // Local form state
-  const [description, setDescription] = useState(formData.description || '');
-  const [shortDescription, setShortDescription] = useState(formData.shortDescription || '');
-  const [propertyType, setPropertyType] = useState(formData.propertyType || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [title, setTitle] = useState(formData.title || '');
+  const [price, setPrice] = useState(formData.price || '');
+  const [address, setAddress] = useState(formData.address || '');
   const [bedrooms, setBedrooms] = useState(formData.bedrooms || '');
   const [bathrooms, setBathrooms] = useState(formData.bathrooms || '');
   const [sqft, setSqft] = useState(formData.sqft || '');
-  const [price, setPrice] = useState(formData.price || '');
-  const [isFeatured, setIsFeatured] = useState(!!formData.metadata?.featured);
+  const [livingArea, setLivingArea] = useState(formData.livingArea || '');
+  const [buildYear, setBuildYear] = useState(formData.buildYear || '');
+  const [garages, setGarages] = useState(formData.garages || '');
+  const [energyLabel, setEnergyLabel] = useState(formData.energyLabel || '');
+  const [description, setDescription] = useState(formData.description || '');
   
-  // Property types
-  const propertyTypes = [
-    "House", "Apartment", "Townhouse", "Condo", "Land", "Commercial"
-  ];
-
-  // Save description changes
-  const saveDescription = async () => {
+  const saveGeneralInfo = async () => {
     if (!formData.id) return;
     
-    setIsSavingDescription(true);
+    setIsSaving(true);
     try {
       const { error } = await supabase
         .from('properties')
         .update({ 
-          description: description,
-          shortDescription: shortDescription
+          title,
+          price,
+          address,
+          bedrooms,
+          bathrooms,
+          sqft,
+          livingArea,
+          buildYear,
+          garages,
+          energyLabel
+        })
+        .eq('id', formData.id);
+        
+      if (error) throw error;
+      
+      // Update parent state
+      onFieldChange('title', title);
+      onFieldChange('price', price);
+      onFieldChange('address', address);
+      onFieldChange('bedrooms', bedrooms);
+      onFieldChange('bathrooms', bathrooms);
+      onFieldChange('sqft', sqft);
+      onFieldChange('livingArea', livingArea);
+      onFieldChange('buildYear', buildYear);
+      onFieldChange('garages', garages);
+      onFieldChange('energyLabel', energyLabel);
+      
+      if (setPendingChanges) setPendingChanges(false);
+      
+      toast({
+        title: "Updated",
+        description: "General information updated successfully",
+      });
+      
+      setIsEditingGeneral(false);
+    } catch (error) {
+      console.error("Error updating general information:", error);
+      toast({
+        title: "Error",
+        description: "Could not update general information",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const saveDescription = async () => {
+    if (!formData.id) return;
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ 
+          description
         })
         .eq('id', formData.id);
         
@@ -61,7 +108,6 @@ export function GeneralPage({
       
       // Update parent state
       onFieldChange('description', description);
-      onFieldChange('shortDescription', shortDescription);
       if (setPendingChanges) setPendingChanges(false);
       
       toast({
@@ -78,65 +124,194 @@ export function GeneralPage({
         variant: "destructive",
       });
     } finally {
-      setIsSavingDescription(false);
+      setIsSaving(false);
     }
   };
   
-  // Save specs changes
-  const saveSpecs = async () => {
-    if (!formData.id) return;
-    
-    setIsSavingSpecs(true);
-    try {
-      // Create a copy of the current metadata or initialize an empty object
-      const updatedMetadata = { ...(formData.metadata || {}) };
-      // Add the featured flag to metadata
-      updatedMetadata.featured = isFeatured;
-      
-      const { error } = await supabase
-        .from('properties')
-        .update({ 
-          propertyType: propertyType,
-          bedrooms: bedrooms,
-          bathrooms: bathrooms,
-          sqft: sqft,
-          price: price,
-          metadata: updatedMetadata
-        })
-        .eq('id', formData.id);
-        
-      if (error) throw error;
-      
-      // Update parent state
-      onFieldChange('propertyType', propertyType);
-      onFieldChange('bedrooms', bedrooms);
-      onFieldChange('bathrooms', bathrooms);
-      onFieldChange('sqft', sqft);
-      onFieldChange('price', price);
-      onFieldChange('metadata', updatedMetadata);
-      if (setPendingChanges) setPendingChanges(false);
-      
-      toast({
-        title: "Updated",
-        description: "Property specifications updated successfully",
-      });
-      
-      setIsEditingSpecs(false);
-    } catch (error) {
-      console.error("Error updating specs:", error);
-      toast({
-        title: "Error",
-        description: "Could not update property specifications",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingSpecs(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Description Section */}
+      {/* General Information */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-lg font-medium">General Information</CardTitle>
+          <EditButton
+            isEditing={isEditingGeneral}
+            onToggle={() => setIsEditingGeneral(!isEditingGeneral)}
+            onSave={saveGeneralInfo}
+            isSaving={isSaving && isEditingGeneral}
+          />
+        </CardHeader>
+        <CardContent>
+          {isEditingGeneral ? (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter property title"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="price">Price</Label>
+                  <Input
+                    id="price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Enter price"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter address"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="bedrooms">Bedrooms</Label>
+                  <Input
+                    id="bedrooms"
+                    type="number"
+                    value={bedrooms}
+                    onChange={(e) => setBedrooms(e.target.value)}
+                    placeholder="Number of bedrooms"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="bathrooms">Bathrooms</Label>
+                  <Input
+                    id="bathrooms"
+                    type="number"
+                    value={bathrooms}
+                    onChange={(e) => setBathrooms(e.target.value)}
+                    placeholder="Number of bathrooms"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="garages">Garages</Label>
+                  <Input
+                    id="garages"
+                    type="number"
+                    value={garages}
+                    onChange={(e) => setGarages(e.target.value)}
+                    placeholder="Number of garages"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="sqft">Total Area (sqft)</Label>
+                  <Input
+                    id="sqft"
+                    type="number"
+                    value={sqft}
+                    onChange={(e) => setSqft(e.target.value)}
+                    placeholder="Total square footage"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="livingArea">Living Area (sqft)</Label>
+                  <Input
+                    id="livingArea"
+                    type="number"
+                    value={livingArea}
+                    onChange={(e) => setLivingArea(e.target.value)}
+                    placeholder="Living area square footage"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="buildYear">Build Year</Label>
+                  <Input
+                    id="buildYear"
+                    value={buildYear}
+                    onChange={(e) => setBuildYear(e.target.value)}
+                    placeholder="Year built"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="energyLabel">Energy Label</Label>
+                <Select 
+                  value={energyLabel}
+                  onValueChange={(value) => setEnergyLabel(value)}
+                >
+                  <SelectTrigger id="energyLabel">
+                    <SelectValue placeholder="Select energy label" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="A++">A++</SelectItem>
+                    <SelectItem value="A+">A+</SelectItem>
+                    <SelectItem value="A">A</SelectItem>
+                    <SelectItem value="B">B</SelectItem>
+                    <SelectItem value="C">C</SelectItem>
+                    <SelectItem value="D">D</SelectItem>
+                    <SelectItem value="E">E</SelectItem>
+                    <SelectItem value="F">F</SelectItem>
+                    <SelectItem value="G">G</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium mb-2">Title</h3>
+                <p>{formData.title || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Price</h3>
+                <p>{formData.price || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Address</h3>
+                <p>{formData.address || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Bedrooms</h3>
+                <p>{formData.bedrooms || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Bathrooms</h3>
+                <p>{formData.bathrooms || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Garages</h3>
+                <p>{formData.garages || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Total Area (sqft)</h3>
+                <p>{formData.sqft || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Living Area (sqft)</h3>
+                <p>{formData.livingArea || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Build Year</h3>
+                <p>{formData.buildYear || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Energy Label</h3>
+                <p>{formData.energyLabel || "Not specified"}</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Description */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-lg font-medium">Description</CardTitle>
@@ -144,171 +319,24 @@ export function GeneralPage({
             isEditing={isEditingDescription}
             onToggle={() => setIsEditingDescription(!isEditingDescription)}
             onSave={saveDescription}
-            isSaving={isSavingDescription}
-          />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isEditingDescription ? (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="shortDescription">Short Description</Label>
-                <Textarea
-                  id="shortDescription"
-                  name="shortDescription"
-                  placeholder="Enter a brief summary of the property (displayed in listings)"
-                  value={shortDescription}
-                  onChange={(e) => setShortDescription(e.target.value)}
-                  rows={2}
-                  className="resize-none"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Full Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Enter a detailed description of the property"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="min-h-[200px]"
-                  rows={8}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              {shortDescription ? (
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Short Description</h3>
-                  <p>{shortDescription}</p>
-                </div>
-              ) : null}
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Full Description</h3>
-                <div className="whitespace-pre-wrap">{description || 'No description added yet.'}</div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Key Information Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-lg font-medium">Key Information</CardTitle>
-          <EditButton
-            isEditing={isEditingSpecs}
-            onToggle={() => setIsEditingSpecs(!isEditingSpecs)}
-            onSave={saveSpecs}
-            isSaving={isSavingSpecs}
+            isSaving={isSaving && isEditingDescription}
           />
         </CardHeader>
         <CardContent>
-          {isEditingSpecs ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label htmlFor="property-type">Type</Label>
-                <Select
-                  value={propertyType}
-                  onValueChange={setPropertyType}
-                >
-                  <SelectTrigger id="property-type">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {propertyTypes.map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="bedrooms">Bedrooms</Label>
-                <Input 
-                  id="bedrooms" 
-                  type="number" 
-                  value={bedrooms}
-                  onChange={(e) => setBedrooms(e.target.value)}
-                  min="0"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="bathrooms">Bathrooms</Label>
-                <Input 
-                  id="bathrooms" 
-                  type="number" 
-                  value={bathrooms}
-                  onChange={(e) => setBathrooms(e.target.value)}
-                  min="0"
-                  step="0.5"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="sqft">Area (m²)</Label>
-                <Input 
-                  id="sqft" 
-                  type="number" 
-                  value={sqft}
-                  onChange={(e) => setSqft(e.target.value)}
-                  min="0"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="price">Price</Label>
-                <Input 
-                  id="price" 
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="€ 0"
-                />
-              </div>
-              
-              <div className="col-span-2 flex items-center space-x-2 pt-2">
-                <Switch 
-                  id="featured" 
-                  checked={isFeatured}
-                  onCheckedChange={setIsFeatured}
-                />
-                <Label htmlFor="featured">Featured Property</Label>
-              </div>
-            </div>
+          {isEditingDescription ? (
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter property description"
+              rows={10}
+            />
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Type</h3>
-                <p>{propertyType || 'Not specified'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Price</h3>
-                <p>{price || 'Not specified'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Bedrooms</h3>
-                <p>{bedrooms || '0'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Bathrooms</h3>
-                <p>{bathrooms || '0'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Area</h3>
-                <p>{sqft ? `${sqft} m²` : 'Not specified'}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Featured</h3>
-                <p>{isFeatured ? 'Yes' : 'No'}</p>
-              </div>
+            <div>
+              {description ? (
+                <p className="whitespace-pre-wrap">{description}</p>
+              ) : (
+                <p className="text-muted-foreground italic">No description added yet.</p>
+              )}
             </div>
           )}
         </CardContent>
