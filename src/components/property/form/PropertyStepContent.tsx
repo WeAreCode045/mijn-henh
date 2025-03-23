@@ -74,6 +74,7 @@ export function PropertyStepContent({
   console.log("PropertyStepContent rendering with currentStep:", currentStep);
   console.log("FormData structure:", Object.keys(formData).join(", "));
   console.log("onFieldChange is defined:", !!onFieldChange);
+  console.log("isReadOnly value:", isReadOnly);
   
   // Define fallback handlers to prevent runtime errors
   const safeOnFieldChange = (field: keyof PropertyFormData, value: any) => {
@@ -103,7 +104,6 @@ export function PropertyStepContent({
             formData={formData}
             onFieldChange={safeOnFieldChange}
             setPendingChanges={safeSetPendingChanges}
-            isReadOnly={isReadOnly}
           />
         );
       case 1:
@@ -120,7 +120,6 @@ export function PropertyStepContent({
             isLoadingLocationData={isLoadingLocationData}
             isGeneratingMap={isGeneratingMap}
             setPendingChanges={safeSetPendingChanges}
-            isReadOnly={isReadOnly}
           />
         );
       case 2:
@@ -132,7 +131,6 @@ export function PropertyStepContent({
             onUpdateFeature={onUpdateFeature}
             onFieldChange={safeOnFieldChange}
             setPendingChanges={safeSetPendingChanges}
-            isReadOnly={isReadOnly}
           />
         );
       case 3:
@@ -147,7 +145,6 @@ export function PropertyStepContent({
             onAreaImageUpload={onAreaImageUpload}
             setPendingChanges={safeSetPendingChanges}
             isUploading={isUploading}
-            isReadOnly={isReadOnly}
           />
         );
       default:

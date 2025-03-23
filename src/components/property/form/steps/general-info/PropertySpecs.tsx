@@ -3,120 +3,79 @@ import { PropertyFormData } from "@/types/property";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PropertySpecsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  isReadOnly?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
 
-export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: PropertySpecsProps) {
-  const handleChange = (field: keyof PropertyFormData, value: string) => {
-    console.log(`PropertySpecs change: ${String(field)} = ${value}`);
-    onFieldChange(field, value);
+export function PropertySpecs({ 
+  formData, 
+  onFieldChange,
+  isReadOnly = false,
+  setPendingChanges
+}: PropertySpecsProps) {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isReadOnly) return;
+    
+    const { name, value } = e.target;
+    console.log(`PropertySpecs: Changing ${name} to ${value}`);
+    onFieldChange(name as keyof PropertyFormData, value);
     if (setPendingChanges) {
       setPendingChanges(true);
     }
   };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    handleChange(id as keyof PropertyFormData, value);
-  };
-
+  
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Property Specifications</CardTitle>
+        <CardTitle className="text-lg font-medium">Specifications</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Price Field - Added this field */}
-        <div className="space-y-2">
-          <Label htmlFor="price">Price</Label>
-          <Input
-            id="price"
-            value={formData.price || ''}
-            onChange={handleInputChange}
-            placeholder="Enter price"
-          />
-        </div>
-      
-        <div className="grid grid-cols-2 gap-4">
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="bedrooms">Bedrooms</Label>
             <Input
               id="bedrooms"
+              name="bedrooms"
+              type="number"
+              placeholder="Bedrooms"
               value={formData.bedrooms || ''}
-              onChange={handleInputChange}
-              placeholder="No. of bedrooms"
+              onChange={handleChange}
+              min={0}
+              readOnly={isReadOnly}
             />
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="bathrooms">Bathrooms</Label>
             <Input
               id="bathrooms"
+              name="bathrooms"
+              type="number"
+              placeholder="Bathrooms"
               value={formData.bathrooms || ''}
-              onChange={handleInputChange}
-              placeholder="No. of bathrooms"
+              onChange={handleChange}
+              min={0}
+              readOnly={isReadOnly}
             />
           </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
+          
           <div className="space-y-2">
-            <Label htmlFor="sqft">Plot Area (m²)</Label>
+            <Label htmlFor="area">Total Area (m²)</Label>
             <Input
-              id="sqft"
-              value={formData.sqft || ''}
-              onChange={handleInputChange}
-              placeholder="Plot area"
+              id="area"
+              name="area"
+              type="number"
+              placeholder="Total Area"
+              value={formData.area || ''}
+              onChange={handleChange}
+              min={0}
+              readOnly={isReadOnly}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="livingArea">Living Area (m²)</Label>
-            <Input
-              id="livingArea"
-              value={formData.livingArea || ''}
-              onChange={handleInputChange}
-              placeholder="Living area"
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="buildYear">Build Year</Label>
-            <Input
-              id="buildYear"
-              value={formData.buildYear || ''}
-              onChange={handleInputChange}
-              placeholder="Year built"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="energyLabel">Energy Label</Label>
-            <Select 
-              value={formData.energyLabel || 'not_specified'} 
-              onValueChange={(value) => handleChange('energyLabel', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select energy label" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="not_specified">Not specified</SelectItem>
-                <SelectItem value="A+++">A+++</SelectItem>
-                <SelectItem value="A++">A++</SelectItem>
-                <SelectItem value="A+">A+</SelectItem>
-                <SelectItem value="A">A</SelectItem>
-                <SelectItem value="B">B</SelectItem>
-                <SelectItem value="C">C</SelectItem>
-                <SelectItem value="D">D</SelectItem>
-                <SelectItem value="E">E</SelectItem>
-                <SelectItem value="F">F</SelectItem>
-                <SelectItem value="G">G</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
       </CardContent>

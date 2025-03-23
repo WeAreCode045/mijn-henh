@@ -71,6 +71,7 @@ export function PropertyStepWizard({
 }: PropertyStepWizardProps) {
   console.log("PropertyStepWizard rendering with current step:", currentStep);
   console.log("PropertyStepWizard onFieldChange is defined:", !!onFieldChange);
+  console.log("PropertyStepWizard isReadOnly:", isReadOnly);
   
   if (!formState) {
     console.error("No form state provided to PropertyStepWizard");

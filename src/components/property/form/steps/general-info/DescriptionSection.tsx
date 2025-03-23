@@ -1,29 +1,38 @@
 
 import { PropertyFormData } from "@/types/property";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  isReadOnly?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
 
-export function DescriptionSection({ formData, onFieldChange, setPendingChanges }: DescriptionSectionProps) {
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+export function DescriptionSection({ 
+  formData, 
+  onFieldChange,
+  isReadOnly = false,
+  setPendingChanges
+}: DescriptionSectionProps) {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (isReadOnly) return;
+    
     const { name, value } = e.target;
-    console.log(`Textarea change: ${name} = ${value}`);
+    console.log(`DescriptionSection: Changing ${name} to: `, value);
     onFieldChange(name as keyof PropertyFormData, value);
     if (setPendingChanges) {
       setPendingChanges(true);
     }
   };
-
+  
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Description</CardTitle>
+        <CardTitle className="text-lg font-medium">Property Description</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -31,24 +40,24 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
           <Textarea
             id="shortDescription"
             name="shortDescription"
-            placeholder="Enter a brief summary of the property (displayed in listings)"
+            placeholder="Provide a short description for this property"
             value={formData.shortDescription || ''}
-            onChange={handleTextareaChange}
-            rows={2}
-            className="resize-none"
+            onChange={handleChange}
+            className="min-h-[80px]"
+            readOnly={isReadOnly}
           />
         </div>
-
+        
         <div className="space-y-2">
           <Label htmlFor="description">Full Description</Label>
           <Textarea
             id="description"
             name="description"
-            placeholder="Enter a detailed description of the property"
+            placeholder="Provide a detailed description for this property"
             value={formData.description || ''}
-            onChange={handleTextareaChange}
-            rows={10}
-            className="resize-vertical"
+            onChange={handleChange}
+            className="min-h-[160px]"
+            readOnly={isReadOnly}
           />
         </div>
       </CardContent>

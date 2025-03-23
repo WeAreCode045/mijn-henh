@@ -14,6 +14,7 @@ interface FeaturesStepProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   setPendingChanges?: (pending: boolean) => void;
   showHeader?: boolean; // Make header optional
+  isReadOnly?: boolean;
 }
 
 export function FeaturesStep({
@@ -23,13 +24,15 @@ export function FeaturesStep({
   onUpdateFeature,
   onFieldChange,
   setPendingChanges,
-  showHeader = true // Default to showing the header
+  showHeader = true, // Default to showing the header
+  isReadOnly = false
 }: FeaturesStepProps) {
   console.log("FeaturesStep rendering with features:", formData.features);
   
   const { availableFeatures, isLoading, addFeature, addMultipleFeatures } = useAvailableFeatures();
   
   const handleFeatureChange = (id: string, description: string) => {
+    if (isReadOnly) return;
     onUpdateFeature(id, description);
     if (setPendingChanges) {
       setPendingChanges(true);
@@ -37,6 +40,7 @@ export function FeaturesStep({
   };
   
   const handleAddFeature = (feature: PropertyFeature) => {
+    if (isReadOnly) return;
     // If we already have this feature, don't add it again
     if (formData.features.some(f => f.id === feature.id)) {
       return;
@@ -53,6 +57,7 @@ export function FeaturesStep({
   };
   
   const handleRemoveSelectedFeature = (id: string) => {
+    if (isReadOnly) return;
     if (onFieldChange) {
       const updatedFeatures = formData.features.filter(feature => feature.id !== id);
       onFieldChange('features', updatedFeatures);
@@ -63,6 +68,7 @@ export function FeaturesStep({
   };
   
   const handleAddMultipleFeatures = (newFeatures: PropertyFeature[]) => {
+    if (isReadOnly) return;
     // Add multiple features at once
     if (onFieldChange) {
       // First, add the new features to the available features list
@@ -98,18 +104,21 @@ export function FeaturesStep({
           <PropertyFeatures
             features={formData.features || []} // Ensure we always pass an array
             onAdd={() => {
+              if (isReadOnly) return;
               onAddFeature();
               if (setPendingChanges) {
                 setPendingChanges(true);
               }
             }}
             onRemove={(id) => {
+              if (isReadOnly) return;
               onRemoveFeature(id);
               if (setPendingChanges) {
                 setPendingChanges(true);
               }
             }}
             onUpdate={handleFeatureChange}
+            isReadOnly={isReadOnly}
           />
         </TabsContent>
         
@@ -126,6 +135,7 @@ export function FeaturesStep({
               onAddFeature={handleAddFeature}
               onRemoveFeature={handleRemoveSelectedFeature}
               onAddMultipleFeatures={handleAddMultipleFeatures}
+              isReadOnly={isReadOnly}
             />
           )}
         </TabsContent>

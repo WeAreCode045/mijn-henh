@@ -1,146 +1,152 @@
 
-import React, { useRef, useEffect } from "react";
-import { Label } from "@/components/ui/label";
+import { PropertyFormData } from "@/types/property";
 import { Input } from "@/components/ui/input";
-import type { PropertyFormData } from "@/types/property";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { useToast } from "@/components/ui/use-toast";
-import { useLocationCoordinates } from "@/hooks/location/useLocationCoordinates";
-import { useState } from "react";
 
 interface BasicDetailsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  isReadOnly?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
-export function BasicDetails({ formData, onFieldChange }: BasicDetailsProps) {
-  const { settings } = useAgencySettings();
-  const { toast } = useToast();
-  const addressInputRef = useRef<HTMLInputElement>(null);
-  const [isLoadingCoordinates, setIsLoadingCoordinates] = useState(false);
-  const { fetchLocationData } = useLocationCoordinates(formData, onFieldChange, setIsLoadingCoordinates, toast);
-
-  const handleChange = (field: keyof PropertyFormData, value: string) => {
-    console.log(`BasicDetails - ${field} changed to:`, value);
-    onFieldChange(field, value);
-
-    // When the address is updated, automatically fetch coordinates only
-    if (field === 'address' && value && formData.id) {
-      // Add slight delay to allow for typing to complete
-      const timer = setTimeout(() => {
-        console.log("Auto-fetching coordinates for address:", value);
-        fetchLocationData();
-      }, 1500);
-      
-      return () => clearTimeout(timer);
+export function BasicDetails({ 
+  formData, 
+  onFieldChange,
+  isReadOnly = false,
+  setPendingChanges
+}: BasicDetailsProps) {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isReadOnly) return;
+    const { name, value } = e.target;
+    console.log(`BasicDetails: Changing ${name} to ${value}`);
+    onFieldChange(name as keyof PropertyFormData, value);
+    if (setPendingChanges) {
+      setPendingChanges(true);
     }
   };
-
-  // Set up Google Places Autocomplete for address field
-  useEffect(() => {
-    const googleApiKey = settings?.googleMapsApiKey;
-    if (!googleApiKey || !addressInputRef.current) return;
-
-    // Load the Google Maps JavaScript API
-    const loadGoogleMapsScript = () => {
-      const scriptId = 'google-maps-script';
-      if (document.getElementById(scriptId)) return;
-
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      
-      script.onload = initializeAutocomplete;
-      document.head.appendChild(script);
-    };
-
-    const initializeAutocomplete = () => {
-      // Use window with type assertion to access the google object
-      if (!(window as GoogleMapsWindow).google || 
-          !(window as GoogleMapsWindow).google?.maps || 
-          !(window as GoogleMapsWindow).google?.maps?.places) {
-        console.error('Google Maps Places API not loaded');
-        return;
-      }
-
-      const autocomplete = new (window as GoogleMapsWindow).google!.maps!.places!.Autocomplete(
-        addressInputRef.current as HTMLInputElement,
-        { types: ['address'] }
-      );
-
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place.formatted_address) {
-          handleChange('address', place.formatted_address);
-          
-          // Autocomplete also gives us the coordinates directly
-          if (place.geometry?.location) {
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
-            console.log("Got coordinates from Places API:", lat, lng);
-            onFieldChange('latitude', lat);
-            onFieldChange('longitude', lng);
-          }
-        }
-      });
-    };
-
-    loadGoogleMapsScript();
-  }, [settings, onFieldChange]);
-
+  
+  const handleSelectChange = (field: string, value: string) => {
+    if (isReadOnly) return;
+    console.log(`BasicDetails: Changing ${field} to ${value}`);
+    onFieldChange(field as keyof PropertyFormData, value);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+  };
+  
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-medium">Property Details</CardTitle>
+        <CardTitle className="text-lg font-medium">Basic Details</CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Property Title</Label>
+          <Input
+            id="title"
+            name="title"
+            placeholder="Property Title"
+            value={formData.title || ''}
+            onChange={handleChange}
+            readOnly={isReadOnly}
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              type="text"
-              value={formData.title || ''}
-              onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="Title"
-              className="mt-1 p-2"
-            />
+            <Label htmlFor="status">Status</Label>
+            <Select 
+              defaultValue={formData.status || 'for_sale'} 
+              onValueChange={(value) => handleSelectChange('status', value)}
+              disabled={isReadOnly}
+            >
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="for_sale">For Sale</SelectItem>
+                <SelectItem value="for_rent">For Rent</SelectItem>
+                <SelectItem value="sold">Sold</SelectItem>
+                <SelectItem value="rented">Rented</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="off_market">Off Market</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="price">Price</Label>
             <Input
               id="price"
-              type="text"
-              value={formData.price || ''}
-              onChange={(e) => handleChange('price', e.target.value)}
+              name="price"
+              type="number"
               placeholder="Price"
-              className="mt-1 p-2"
+              value={formData.price || ''}
+              onChange={handleChange}
+              readOnly={isReadOnly}
             />
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="propertyType">Property Type</Label>
+            <Select 
+              defaultValue={formData.propertyType || 'house'} 
+              onValueChange={(value) => handleSelectChange('propertyType', value)}
+              disabled={isReadOnly}
+            >
+              <SelectTrigger id="propertyType">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="house">House</SelectItem>
+                <SelectItem value="apartment">Apartment</SelectItem>
+                <SelectItem value="condo">Condo</SelectItem>
+                <SelectItem value="townhouse">Townhouse</SelectItem>
+                <SelectItem value="land">Land</SelectItem>
+                <SelectItem value="commercial">Commercial</SelectItem>
+                <SelectItem value="industrial">Industrial</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="address">Address</Label>
             <Input
               id="address"
-              type="text"
-              value={formData.address || ''}
-              onChange={(e) => handleChange('address', e.target.value)}
+              name="address"
               placeholder="Address"
-              className="mt-1 p-2"
-              ref={addressInputRef}
+              value={formData.address || ''}
+              onChange={handleChange}
+              readOnly={isReadOnly}
             />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="object_id">Object ID</Label>
+            <Label htmlFor="city">City</Label>
             <Input
-              id="object_id"
-              type="text"
-              value={formData.object_id || ''}
-              onChange={(e) => handleChange('object_id', e.target.value)}
-              placeholder="Object ID"
-              className="mt-1 p-2"
+              id="city"
+              name="city"
+              placeholder="City"
+              value={formData.city || ''}
+              onChange={handleChange}
+              readOnly={isReadOnly}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="zipCode">ZIP / Postal Code</Label>
+            <Input
+              id="zipCode"
+              name="zipCode"
+              placeholder="ZIP Code"
+              value={formData.zipCode || ''}
+              onChange={handleChange}
+              readOnly={isReadOnly}
             />
           </div>
         </div>
