@@ -9,6 +9,7 @@ import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
 import { PropertyManagementCard } from "./cards/PropertyManagementCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AgendaCard } from "../../dashboard/AgendaCard";
+import { formatDate as formatDateUtil } from "@/utils/dateUtils";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -104,22 +105,10 @@ export function PropertyDashboardTab({
     fetchPropertyStatus();
   }, [id, toast]);
 
+  // Helper function for formatting dates - using the imported utility
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
-    
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
+    return formatDateUtil(dateString);
   };
 
   return (
@@ -174,23 +163,4 @@ export function PropertyDashboardTab({
       </div>
     </div>
   );
-  
-  // Helper function for formatting dates
-  function formatDate(dateString?: string) {
-    if (!dateString) return "N/A";
-    
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(date);
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
-  }
 }
