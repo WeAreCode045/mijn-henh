@@ -110,7 +110,6 @@ export function PropertyTabsWrapper({
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
-                      handleSave={onSubmit}
                       handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
                       handleWebView={handleOpenWebView}

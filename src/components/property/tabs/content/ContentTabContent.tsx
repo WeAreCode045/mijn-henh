@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
-import { PropertyStepWizard } from '../../form/PropertyStepWizard';
+import { PropertyContentTab } from '../PropertyContentTab';
 
 interface ContentTabContentProps {
   property: PropertyData;
@@ -10,11 +10,26 @@ interface ContentTabContentProps {
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
   onUpdateFeature: (id: string, description: string) => void;
+  onAddArea?: () => void;
+  onRemoveArea?: (id: string) => void;
+  onUpdateArea?: (id: string, field: any, value: any) => void;
+  onAreaImageRemove?: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
+  handleNext?: () => void;
+  handlePrevious?: () => void;
+  onFetchLocationData?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
+  isUploading?: boolean;
+  isUpdateMode?: boolean;
   onSubmit: () => void;
-  isReadOnly?: boolean;
+  isSaving?: boolean;
   hideNavigation?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function ContentTabContent({
@@ -24,27 +39,67 @@ export function ContentTabContent({
   onAddFeature,
   onRemoveFeature,
   onUpdateFeature,
+  onAddArea,
+  onRemoveArea,
+  onUpdateArea,
+  onAreaImageRemove,
+  onAreaImagesSelect,
+  handleAreaImageUpload,
   currentStep,
   handleStepClick,
+  handleNext,
+  handlePrevious,
+  onFetchLocationData,
+  onRemoveNearbyPlace,
+  isLoadingLocationData,
+  setPendingChanges,
+  isUploading,
+  isUpdateMode = false,
   onSubmit,
-  isReadOnly = false,
-  hideNavigation = false
+  isSaving,
+  hideNavigation = false,
+  isReadOnly = false
 }: ContentTabContentProps) {
+  // Create a combined handler to ensure onSubmit is called properly
+  const handleSubmit = () => {
+    console.log("ContentTabContent - handleSubmit called");
+    if (onSubmit) {
+      onSubmit();
+    }
+  };
+
+  // Pass all handlers to the PropertyContentTab component
+  const handlers = {
+    onFieldChange,
+    onAddFeature,
+    onRemoveFeature,
+    onUpdateFeature,
+    onAddArea,
+    onRemoveArea,
+    onUpdateArea,
+    onAreaImageRemove,
+    onAreaImagesSelect,
+    handleAreaImageUpload,
+    currentStep,
+    handleStepClick,
+    handleNext,
+    handlePrevious,
+    onFetchLocationData,
+    onRemoveNearbyPlace,
+    isLoadingLocationData,
+    setPendingChanges,
+    isUploading,
+    onSubmit: handleSubmit,
+    isSaving
+  };
+
   return (
-    <div className="mt-4">
-      <PropertyStepWizard
-        property={property}
-        formState={formState}
-        onFieldChange={onFieldChange}
-        onAddFeature={onAddFeature}
-        onRemoveFeature={onRemoveFeature}
-        onUpdateFeature={onUpdateFeature}
-        currentStep={currentStep}
-        handleStepClick={handleStepClick}
-        onSubmit={onSubmit}
-        isReadOnly={isReadOnly}
-        hideNavigation={hideNavigation}
-      />
-    </div>
+    <PropertyContentTab 
+      formData={formState} 
+      handlers={handlers} 
+      property={property}
+      hideNavigation={hideNavigation}
+      isReadOnly={isReadOnly}
+    />
   );
 }

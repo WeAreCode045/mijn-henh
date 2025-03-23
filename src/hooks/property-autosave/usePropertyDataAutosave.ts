@@ -26,6 +26,11 @@ export function usePropertyDataAutosave() {
         .eq('id', formData.id)
         .single();
       
+      // Prepare the features to be saved as JSON
+      const featuresJson = Array.isArray(formData.features) 
+        ? JSON.stringify(formData.features)
+        : formData.features;
+      
       const submitData = {
         title: formData.title,
         price: formData.price,
@@ -41,7 +46,7 @@ export function usePropertyDataAutosave() {
         description: formData.description,
         shortDescription: formData.shortDescription,
         location_description: formData.location_description,
-        features: JSON.stringify(formData.features),
+        features: featuresJson,
         latitude: formData.latitude,
         longitude: formData.longitude,
         object_id: formData.object_id,
@@ -52,6 +57,7 @@ export function usePropertyDataAutosave() {
       };
       
       console.log('Auto-saving property data...', formData);
+      console.log('Submit data for database:', submitData);
 
       // Don't include updated_at to let Supabase update it automatically
       const { error, data: updatedData } = await supabase

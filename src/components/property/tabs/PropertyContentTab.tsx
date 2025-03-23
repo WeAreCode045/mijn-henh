@@ -6,17 +6,19 @@ import { ContentTabWrapper } from './content/ContentTabWrapper';
 interface PropertyContentTabProps {
   formData: PropertyFormData;
   property: PropertyData; 
+  hideNavigation?: boolean;
+  isReadOnly?: boolean;
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;
     onUpdateFeature: (id: string, description: string) => void;
-    onAddArea: () => void;
-    onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageRemove: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    onAddArea?: () => void;
+    onRemoveArea?: (id: string) => void;
+    onUpdateArea?: (id: string, field: any, value: any) => void;
+    onAreaImageRemove?: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
     onFetchLocationData?: () => Promise<void>;
@@ -29,12 +31,29 @@ interface PropertyContentTabProps {
   };
 }
 
-export function PropertyContentTab({ formData, property, handlers }: PropertyContentTabProps) {
+export function PropertyContentTab({ 
+  formData, 
+  property, 
+  handlers, 
+  hideNavigation = false,
+  isReadOnly = false
+}: PropertyContentTabProps) {
+  // Ensure the onSubmit handler is properly logged
+  const enhancedHandlers = {
+    ...handlers,
+    onSubmit: () => {
+      console.log("PropertyContentTab - onSubmit called");
+      handlers.onSubmit();
+    }
+  };
+
   return (
     <ContentTabWrapper 
       formData={formData}
       property={property} 
-      handlers={handlers} 
+      handlers={enhancedHandlers}
+      hideNavigation={hideNavigation}
+      isReadOnly={isReadOnly}
     />
   );
 }

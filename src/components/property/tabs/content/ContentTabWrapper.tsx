@@ -9,18 +9,20 @@ import { format } from "date-fns";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
-  property: PropertyData; // Added property field
+  property: PropertyData;
+  hideNavigation?: boolean;
+  isReadOnly?: boolean;
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;
     onUpdateFeature: (id: string, description: string) => void;
-    onAddArea: () => void;
-    onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageRemove: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    onAddArea?: () => void;
+    onRemoveArea?: (id: string) => void;
+    onUpdateArea?: (id: string, field: any, value: any) => void;
+    onAreaImageRemove?: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
     handleNext?: () => void;
@@ -35,33 +37,66 @@ interface ContentTabWrapperProps {
   };
 }
 
-export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
+export function ContentTabWrapper({ 
+  formData, 
+  property, 
+  handlers, 
+  hideNavigation = false,
+  isReadOnly = false
+}: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [pendingChanges, setPendingChanges] = useState<boolean>(false);
   const { toast } = useToast();
   
-  const { onSubmit, isSaving } = usePropertyContentSubmit(
-    formData,
-    handlers.setPendingChanges || setPendingChanges,
-    setLastSaved,
-    handlers.onSubmit
-  );
+  // We'll use the handlers.onSubmit but wrap it to perform additional tasks
+  const handleSubmit = async () => {
+    console.log("ContentTabWrapper - handleSubmit called");
+    try {
+      // Call the original onSubmit handler
+      handlers.onSubmit();
+      
+      // Update local state
+      setLastSaved(new Date());
+      if (handlers.setPendingChanges) {
+        handlers.setPendingChanges(false);
+      } else {
+        setPendingChanges(false);
+      }
+      
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Property saved successfully",
+      });
+    } catch (error) {
+      console.error("Error during ContentTabWrapper save:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save property",
+        variant: "destructive",
+      });
+    }
+  };
 
   const adaptedRemoveFeature = (id: string) => {
-    handlers.onRemoveFeature(id);
-    if (handlers.setPendingChanges) {
-      handlers.setPendingChanges(true);
-    } else {
-      setPendingChanges(true);
+    if (handlers.onRemoveFeature) {
+      handlers.onRemoveFeature(id);
+      if (handlers.setPendingChanges) {
+        handlers.setPendingChanges(true);
+      } else {
+        setPendingChanges(true);
+      }
     }
   };
   
   const adaptedUpdateFeature = (id: string, description: string) => {
-    handlers.onUpdateFeature(id, description);
-    if (handlers.setPendingChanges) {
-      handlers.setPendingChanges(true);
-    } else {
-      setPendingChanges(true);
+    if (handlers.onUpdateFeature) {
+      handlers.onUpdateFeature(id, description);
+      if (handlers.setPendingChanges) {
+        handlers.setPendingChanges(true);
+      } else {
+        setPendingChanges(true);
+      }
     }
   };
   
@@ -80,10 +115,7 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
     if (pendingChanges || (handlers.setPendingChanges && formData.id)) {
       console.log("Auto-saving before tab change...");
       try {
-        await onSubmit();
-        toast({
-          description: "Changes saved automatically",
-        });
+        await handleSubmit();
       } catch (error) {
         console.error("Error saving before tab change:", error);
         toast({
@@ -96,17 +128,19 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
     
     // Now change the tab
     handlers.handleStepClick(step);
-  }, [pendingChanges, formData.id, onSubmit, handlers, toast]);
+  }, [pendingChanges, formData.id, handlers, toast]);
 
   return (
     <div className="space-y-6">
-      <ContentTabNavigation 
-        currentStep={handlers.currentStep}
-        onStepClick={handleTabChange}
-        lastSaved={lastSaved}
-        onSave={onSubmit}
-        isSaving={isSaving || handlers.isSaving || false}
-      />
+      {!hideNavigation && (
+        <ContentTabNavigation 
+          currentStep={handlers.currentStep}
+          onStepClick={handleTabChange}
+          lastSaved={lastSaved}
+          onSave={handleSubmit}
+          isSaving={handlers.isSaving || false}
+        />
+      )}
       
       <ContentTabContent
         property={property} 
@@ -117,9 +151,9 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         onUpdateFeature={adaptedUpdateFeature}
         currentStep={handlers.currentStep}
         handleStepClick={handlers.handleStepClick}
-        onSubmit={onSubmit}
-        isReadOnly={false}
-        hideNavigation={true}
+        onSubmit={handleSubmit}
+        isReadOnly={isReadOnly}
+        hideNavigation={hideNavigation}
       />
     </div>
   );

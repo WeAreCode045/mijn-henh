@@ -27,8 +27,9 @@ export function usePropertyContentSubmit(
     setIsSaving(true);
     
     try {
-      console.log("Saving content tab data...");
+      console.log("Saving content tab data...", formData);
       await autosaveData(formData);
+      console.log("Content tab data saved successfully");
       setLastSaved(new Date());
       setPendingChanges(false);
       
@@ -36,6 +37,11 @@ export function usePropertyContentSubmit(
       if (onSubmitCallback) {
         onSubmitCallback();
       }
+      
+      toast({
+        title: "Success",
+        description: "Property content saved successfully",
+      });
       
       return true;
     } catch (error) {
