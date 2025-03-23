@@ -51,6 +51,9 @@ export class TabContentRenderers {
       }
     };
 
+    // Create an adapter for handleWebView that doesn't require the event parameter
+    const handleWebViewAdapter = handlers.handleWebView ? () => handlers.handleWebView({} as React.MouseEvent) : undefined;
+
     // Check if handlers exist and create dummy functions if needed
     const virtualTourUpdate = handlers.handleVirtualTourUpdate || ((url: string) => {
       console.log("Virtual tour update not implemented", url);
@@ -63,9 +66,6 @@ export class TabContentRenderers {
     const floorplanEmbedScriptUpdate = handlers.handleFloorplanEmbedScriptUpdate || ((script: string) => {
       console.log("Floorplan embed script update not implemented", script);
     });
-  
-    // Create a handler adapter for handleWebView to match the function signature
-    const handleWebViewAdapter = handlers.handleWebView ? () => handlers.handleWebView({} as React.MouseEvent) : undefined;
 
     // Render appropriate tab content based on active tab
     switch (activeTab) {

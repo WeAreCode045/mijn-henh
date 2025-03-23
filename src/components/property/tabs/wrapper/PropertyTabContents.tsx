@@ -115,6 +115,9 @@ export function PropertyTabContents({
           agentInfo={agentInfo}
           onAssignAgent={handleSaveAgent}
           onEditObjectId={handleSaveObjectId}
+          // Use adaptors for the functions that don't match interfaces
+          onGeneratePDF={handleGeneratePDF}
+          onWebView={handleWebView}
         />
       </TabsContent>
       

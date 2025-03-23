@@ -35,6 +35,7 @@ export function PropertyTabsWrapper({
     return Promise.resolve();
   };
   
+  // Create an adapter function that doesn't require the event parameter
   const handleOpenWebView = () => {
     setIsWebViewOpen(true);
   };
@@ -111,6 +112,7 @@ export function PropertyTabsWrapper({
                       handleSaveAgent={handleSaveAgent}
                       handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
+                      // This is where we're fixing the function signature - we're now using the version that doesn't require event parameters
                       handleWebView={handleOpenWebView}
                       onFieldChange={handleFieldChange}
                       onAddFeature={addFeature}
