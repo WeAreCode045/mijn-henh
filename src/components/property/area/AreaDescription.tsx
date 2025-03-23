@@ -6,12 +6,14 @@ interface AreaDescriptionProps {
   description: string;
   areaId: string;
   onDescriptionChange: (value: string) => void;
+  isReadOnly?: boolean;
 }
 
 export function AreaDescription({ 
   description, 
   areaId, 
-  onDescriptionChange 
+  onDescriptionChange,
+  isReadOnly = false
 }: AreaDescriptionProps) {
   return (
     <div>
@@ -22,6 +24,7 @@ export function AreaDescription({
         onChange={(e) => onDescriptionChange(e.target.value)}
         placeholder="Describe this area..."
         rows={4}
+        disabled={isReadOnly}
       />
     </div>
   );

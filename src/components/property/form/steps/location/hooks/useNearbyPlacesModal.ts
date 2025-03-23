@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { PlaceOption } from "../components/SelectPlacesModal";
 
 export function useNearbyPlacesModal({
@@ -26,13 +26,13 @@ export function useNearbyPlacesModal({
       place => place.type !== currentCategory
     );
     
-    // Combine with the new selected places
+    // Combine with the new selected places - ensure they match PropertyNearbyPlace
     const combinedPlaces = [
       ...existingPlaces,
       ...selectedPlaces.map(place => ({
         ...place,
         visible_in_webview: true // Set all new places to be visible by default
-      }))
+      })) as PropertyNearbyPlace[]
     ];
     
     // Update the form data

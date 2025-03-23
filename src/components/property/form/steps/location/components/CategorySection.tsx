@@ -14,6 +14,7 @@ interface CategorySectionProps {
   selectionMode?: boolean;
   getCategoryColor?: (type: string) => string;
   getCategoryIcon?: (type: string) => React.ReactNode;
+  isReadOnly?: boolean;
 }
 
 export function CategorySection({
@@ -26,7 +27,8 @@ export function CategorySection({
   isVisible,
   selectionMode = false,
   getCategoryColor,
-  getCategoryIcon
+  getCategoryIcon,
+  isReadOnly = false
 }: CategorySectionProps) {
   return (
     <Card>
@@ -58,6 +60,7 @@ export function CategorySection({
               selectionMode={selectionMode}
               getCategoryColor={getCategoryColor}
               getCategoryIcon={getCategoryIcon}
+              isReadOnly={isReadOnly}
             />
           ))}
         </div>

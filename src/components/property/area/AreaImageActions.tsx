@@ -1,34 +1,27 @@
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Edit } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 
 interface AreaImageActionsProps {
   onSelectClick: () => void;
+  isReadOnly?: boolean;
 }
 
 export function AreaImageActions({ 
-  onSelectClick
+  onSelectClick,
+  isReadOnly = false
 }: AreaImageActionsProps) {
   return (
-    <div className="flex justify-between items-center mb-2">
-      <Label>Images</Label>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onSelectClick();
-          }}
-          className="flex items-center"
-          type="button"
-        >
-          <Edit className="mr-1 h-3 w-3" />
-          Select Images
-        </Button>
-      </div>
+    <div className="flex justify-end">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onSelectClick}
+        disabled={isReadOnly}
+      >
+        <ImagePlus className="mr-2 h-4 w-4" />
+        Select Images
+      </Button>
     </div>
   );
 }
