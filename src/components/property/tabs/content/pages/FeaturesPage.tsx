@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyFeature } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { EditButton } from "@/components/property/content/EditButton";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
+import { Json } from "@/integrations/supabase/types";
 
 interface FeaturesPageProps {
   formData: PropertyFormData;
@@ -30,7 +31,7 @@ export function FeaturesPage({
   const { toast } = useToast();
   const [isEditingFeatures, setIsEditingFeatures] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editableFeatures, setEditableFeatures] = useState([...(formData.features || [])]);
+  const [editableFeatures, setEditableFeatures] = useState<PropertyFeature[]>([...(formData.features || [])]);
 
   const addFeature = () => {
     setEditableFeatures([
@@ -59,7 +60,7 @@ export function FeaturesPage({
       const { error } = await supabase
         .from('properties')
         .update({ 
-          features: editableFeatures
+          features: editableFeatures as unknown as Json
         })
         .eq('id', formData.id);
         

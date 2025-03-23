@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash, Upload, Edit, Save } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/components/ui/use-toast";
@@ -17,8 +16,8 @@ interface AreasPageProps {
   onAddArea: () => void;
   onRemoveArea: (id: string) => void;
   onUpdateArea: (id: string, field: string, value: any) => void;
-  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   onAreaImageRemove: (areaId: string, imageId: string) => void;
+  onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   isUploading?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -29,8 +28,8 @@ export function AreasPage({
   onAddArea,
   onRemoveArea,
   onUpdateArea,
-  onAreaImageUpload,
   onAreaImageRemove,
+  onAreaImageUpload,
   isUploading = false,
   setPendingChanges
 }: AreasPageProps) {

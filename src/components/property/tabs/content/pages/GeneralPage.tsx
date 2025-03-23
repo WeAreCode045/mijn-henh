@@ -32,11 +32,11 @@ export function GeneralPage({
   const [description, setDescription] = useState(formData.description || '');
   const [shortDescription, setShortDescription] = useState(formData.shortDescription || '');
   const [propertyType, setPropertyType] = useState(formData.propertyType || '');
-  const [bedrooms, setBedrooms] = useState(formData.bedrooms || 0);
-  const [bathrooms, setBathrooms] = useState(formData.bathrooms || 0);
-  const [area, setArea] = useState(formData.area || 0);
+  const [bedrooms, setBedrooms] = useState(formData.bedrooms || '');
+  const [bathrooms, setBathrooms] = useState(formData.bathrooms || '');
+  const [sqft, setSqft] = useState(formData.sqft || '');
   const [price, setPrice] = useState(formData.price || '');
-  const [featured, setFeatured] = useState(formData.featured || false);
+  const [isFeatured, setIsFeatured] = useState(!!formData.metadata?.featured);
   
   // Property types
   const propertyTypes = [
@@ -88,15 +88,20 @@ export function GeneralPage({
     
     setIsSavingSpecs(true);
     try {
+      // Create a copy of the current metadata or initialize an empty object
+      const updatedMetadata = { ...(formData.metadata || {}) };
+      // Add the featured flag to metadata
+      updatedMetadata.featured = isFeatured;
+      
       const { error } = await supabase
         .from('properties')
         .update({ 
           propertyType: propertyType,
           bedrooms: bedrooms,
           bathrooms: bathrooms,
-          area: area,
+          sqft: sqft,
           price: price,
-          featured: featured
+          metadata: updatedMetadata
         })
         .eq('id', formData.id);
         
@@ -106,9 +111,9 @@ export function GeneralPage({
       onFieldChange('propertyType', propertyType);
       onFieldChange('bedrooms', bedrooms);
       onFieldChange('bathrooms', bathrooms);
-      onFieldChange('area', area);
+      onFieldChange('sqft', sqft);
       onFieldChange('price', price);
-      onFieldChange('featured', featured);
+      onFieldChange('metadata', updatedMetadata);
       if (setPendingChanges) setPendingChanges(false);
       
       toast({
@@ -226,7 +231,7 @@ export function GeneralPage({
                   id="bedrooms" 
                   type="number" 
                   value={bedrooms}
-                  onChange={(e) => setBedrooms(Number(e.target.value))}
+                  onChange={(e) => setBedrooms(e.target.value)}
                   min="0"
                 />
               </div>
@@ -237,19 +242,19 @@ export function GeneralPage({
                   id="bathrooms" 
                   type="number" 
                   value={bathrooms}
-                  onChange={(e) => setBathrooms(Number(e.target.value))}
+                  onChange={(e) => setBathrooms(e.target.value)}
                   min="0"
                   step="0.5"
                 />
               </div>
               
               <div>
-                <Label htmlFor="area">Area (m²)</Label>
+                <Label htmlFor="sqft">Area (m²)</Label>
                 <Input 
-                  id="area" 
+                  id="sqft" 
                   type="number" 
-                  value={area}
-                  onChange={(e) => setArea(Number(e.target.value))}
+                  value={sqft}
+                  onChange={(e) => setSqft(e.target.value)}
                   min="0"
                 />
               </div>
@@ -267,8 +272,8 @@ export function GeneralPage({
               <div className="col-span-2 flex items-center space-x-2 pt-2">
                 <Switch 
                   id="featured" 
-                  checked={featured}
-                  onCheckedChange={setFeatured}
+                  checked={isFeatured}
+                  onCheckedChange={setIsFeatured}
                 />
                 <Label htmlFor="featured">Featured Property</Label>
               </div>
@@ -297,12 +302,12 @@ export function GeneralPage({
               
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Area</h3>
-                <p>{area ? `${area} m²` : 'Not specified'}</p>
+                <p>{sqft ? `${sqft} m²` : 'Not specified'}</p>
               </div>
               
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground">Featured</h3>
-                <p>{featured ? 'Yes' : 'No'}</p>
+                <p>{isFeatured ? 'Yes' : 'No'}</p>
               </div>
             </div>
           )}
