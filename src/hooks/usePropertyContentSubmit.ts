@@ -15,7 +15,8 @@ export function usePropertyContentSubmit(
   const { toast } = useToast();
   
   const onSubmit = useCallback(async () => {
-    if (!formData.id) {
+    // Check if property ID exists and is a valid UUID
+    if (!formData.id || formData.id.trim() === '') {
       toast({
         title: "Error",
         description: "No property ID found for saving",

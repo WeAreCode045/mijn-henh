@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useFetchSubmissions } from '../communications/hooks/useFetchSubmissions';
+import { useFetchSubmissions } from '@/hooks/useFetchSubmissions';
 import { useMarkAsRead } from '@/hooks/useMarkAsRead';
 import { useSendResponse } from '@/hooks/useSendResponse';
 import { SubmissionsList } from '../communications/SubmissionsList';
@@ -13,7 +13,9 @@ interface CommunicationsTabContentProps {
 }
 
 export function CommunicationsTabContent({ propertyId }: CommunicationsTabContentProps) {
-  const { submissions, isLoading, refetch } = useFetchSubmissions(propertyId);
+  // Only proceed with valid propertyId
+  const validPropertyId = propertyId || '';
+  const { submissions, isLoading, refetch } = useFetchSubmissions(validPropertyId);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const { profile } = useAuth();
   
@@ -25,7 +27,7 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
   const { sendResponse, isSending } = useSendResponse({
     submissionId: selectedSubmission?.id || '',
     agentId: profile?.id || '',
-    propertyId: propertyId,
+    propertyId: validPropertyId,
     onSuccess: refetch
   });
   
