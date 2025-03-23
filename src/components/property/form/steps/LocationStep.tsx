@@ -61,7 +61,7 @@ export function LocationStep({
               formData={formData}
               onRemoveNearbyPlace={onRemoveNearbyPlace}
               onFieldChange={onFieldChange}
-              onFetchNearbyPlaces={onFetchCategoryPlaces}
+              onFetchCategoryPlaces={onFetchCategoryPlaces}
               isLoadingNearbyPlaces={isLoadingLocationData}
             />
             

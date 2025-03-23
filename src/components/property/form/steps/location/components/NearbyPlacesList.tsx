@@ -12,24 +12,24 @@ interface NearbyPlacesListProps {
 
 export function NearbyPlacesList({ places, onRemovePlace }: NearbyPlacesListProps) {
   // Group places by type
-  const groupedPlaces = places.reduce((acc: Record<string, PropertyNearbyPlace[]>, place, index) => {
+  const groupedPlaces = places.reduce((acc: Record<string, { place: PropertyNearbyPlace, index: number }[]>, place, index) => {
     const type = place.type || 'other';
     if (!acc[type]) {
       acc[type] = [];
     }
-    // Add the index to each place to help with removal
-    acc[type].push({ ...place, index });
+    // Store the original index with each place
+    acc[type].push({ place, index });
     return acc;
   }, {});
 
   return (
     <div className="space-y-4">
-      {Object.entries(groupedPlaces).map(([type, placesOfType]) => (
+      {Object.entries(groupedPlaces).map(([type, placesWithIndex]) => (
         <Card key={type}>
           <CardContent className="pt-6">
             <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>
             <div className="flex flex-wrap gap-2">
-              {placesOfType.map((place, categoryIndex) => (
+              {placesWithIndex.map(({ place, index }, categoryIndex) => (
                 <Badge 
                   key={`${place.id || categoryIndex}`} 
                   variant="secondary"
@@ -48,8 +48,8 @@ export function NearbyPlacesList({ places, onRemovePlace }: NearbyPlacesListProp
                       onClick={(e) => {
                         e.preventDefault(); // Prevent form submission
                         e.stopPropagation(); // Prevent event bubbling
-                        if (onRemovePlace && typeof place.index === 'number') {
-                          onRemovePlace(place.index);
+                        if (onRemovePlace) {
+                          onRemovePlace(index);
                         }
                       }}
                       className="ml-1 p-1 rounded-full hover:bg-muted hover:text-destructive"
