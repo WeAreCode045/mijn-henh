@@ -6,7 +6,7 @@ import { PropertyModeButtons } from "./PropertyModeButtons";
 import { PropertyContentTab } from '../content/PropertyContentTab';
 import { MediaTabContent } from '../media/MediaTabContent';
 import { DashboardTabContent } from '../content/DashboardTabContent';
-import { CommunicationsTabContent } from '../wrapper/CommunicationsTabContent';
+import { CommunicationsTabContent } from './CommunicationsTabContent';
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -21,7 +21,7 @@ interface PropertyTabContentsProps {
   handleSaveAgent?: (agentId: string) => Promise<void>;
   handleSaveTemplate?: (templateId: string) => Promise<void>;
   handleGeneratePDF?: () => void;
-  handleWebView?: () => void;
+  handleWebView?: () => void; // Updated to not require an event parameter
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;

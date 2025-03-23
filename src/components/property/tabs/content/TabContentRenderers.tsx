@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
 import { DashboardTabContent } from './DashboardTabContent';
@@ -63,6 +62,9 @@ export class TabContentRenderers {
     const floorplanEmbedScriptUpdate = handlers.handleFloorplanEmbedScriptUpdate || ((script: string) => {
       console.log("Floorplan embed script update not implemented", script);
     });
+  
+    // Create a handler adapter for handleWebView to match the function signature
+    const handleWebViewAdapter = handlers.handleWebView ? () => handlers.handleWebView({} as React.MouseEvent) : undefined;
 
     // Render appropriate tab content based on active tab
     switch (activeTab) {
@@ -72,7 +74,7 @@ export class TabContentRenderers {
             property={props.property}
             onDelete={handlers.onDelete}
             onSave={handlers.onSave}
-            onWebView={handlers.handleWebView}
+            onWebView={handleWebViewAdapter}
             handleSaveAgent={handlers.handleSaveAgent}
             handleSaveObjectId={handlers.handleSaveObjectId}
             handleGeneratePDF={handlers.handleGeneratePDF}

@@ -1,4 +1,3 @@
-
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -33,6 +32,10 @@ export function PropertyTabsWrapper({
     return Promise.resolve();
   };
   
+  const handleOpenWebView = () => {
+    setWebViewOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <PropertyTabActionsHandler 

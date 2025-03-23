@@ -1,35 +1,40 @@
 
-import { PropertyFormData } from '@/types/property';
+import React from 'react';
+import { PropertyFormData, PropertyData } from "@/types/property";
+import { ContentTabWrapper } from './ContentTabWrapper';
 
-export interface PropertyContentTabProps {
+interface PropertyContentTabProps {
   formData: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
-  onAddArea: () => void;
-  onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: string, value: any) => void;
-  onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-  currentStep: number;
-  handleStepClick: (step: number) => void;
-  onFetchLocationData?: () => Promise<void>;
-  onRemoveNearbyPlace?: (index: number) => void;
-  isLoadingLocationData?: boolean;
-  setPendingChanges?: (pending: boolean) => void;
-  isUpdateMode?: boolean;
-  isUploading?: boolean;
-  onSubmit: () => void;
-  isSaving?: boolean;
+  property: PropertyData;
+  handlers: {
+    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+    onAddFeature: () => void;
+    onRemoveFeature: (id: string) => void;
+    onUpdateFeature: (id: string, description: string) => void;
+    onAddArea: () => void;
+    onRemoveArea: (id: string) => void;
+    onUpdateArea: (id: string, field: any, value: any) => void;
+    onAreaImageRemove: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    currentStep: number;
+    handleStepClick: (step: number) => void;
+    onFetchLocationData?: () => Promise<void>;
+    onRemoveNearbyPlace?: (index: number) => void;
+    isLoadingLocationData?: boolean;
+    setPendingChanges?: (pending: boolean) => void;
+    isUploading?: boolean;
+    onSubmit: () => void;
+    isSaving?: boolean;
+  };
 }
 
-export function PropertyContentTab(props: PropertyContentTabProps) {
+export function PropertyContentTab({ formData, property, handlers }: PropertyContentTabProps) {
   return (
-    <div className="mt-4">
-      {/* Content implementation goes here */}
-      <p>Property Content Tab</p>
-    </div>
+    <ContentTabWrapper 
+      formData={formData}
+      property={property} 
+      handlers={handlers} 
+    />
   );
 }

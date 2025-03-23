@@ -53,6 +53,30 @@ export function DashboardTabContent({
     }
   };
 
+  // Function to safely format price
+  const formatPrice = (price: string | number | undefined): string => {
+    if (price === undefined || price === null || price === '') {
+      return 'No price';
+    }
+    
+    try {
+      // Convert string to number if needed
+      const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+      if (isNaN(numericPrice)) {
+        return 'No price';
+      }
+      
+      return new Intl.NumberFormat('nl-NL', { 
+        style: 'currency', 
+        currency: 'EUR',
+        maximumFractionDigits: 0
+      }).format(numericPrice);
+    } catch (error) {
+      console.error('Error formatting price:', error);
+      return 'No price';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Property Dashboard</h2>
@@ -203,7 +227,7 @@ export function DashboardTabContent({
               </div>
               <div>
                 <div className="text-sm font-medium text-gray-500">Type</div>
-                <div>{property.property_type || 'Not specified'}</div>
+                <div>{property.propertyType || 'Not specified'}</div>
               </div>
               <div>
                 <div className="text-sm font-medium text-gray-500">Status</div>
@@ -215,16 +239,7 @@ export function DashboardTabContent({
               </div>
               <div>
                 <div className="text-sm font-medium text-gray-500">Price</div>
-                <div>
-                  {property.price 
-                    ? new Intl.NumberFormat('nl-NL', { 
-                        style: 'currency', 
-                        currency: 'EUR',
-                        maximumFractionDigits: 0
-                      }).format(property.price)
-                    : 'No price'
-                  }
-                </div>
+                <div>{formatPrice(property.price)}</div>
               </div>
             </div>
           </CardContent>
