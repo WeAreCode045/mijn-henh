@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { PropertyContentTab } from '../PropertyContentTab';
 
@@ -32,7 +32,8 @@ interface ContentTabContentProps {
   isReadOnly?: boolean;
 }
 
-export function ContentTabContent({
+// Using memo to prevent unnecessary re-renders
+export const ContentTabContent = memo(function ContentTabContent({
   property,
   formState,
   onFieldChange,
@@ -102,4 +103,4 @@ export function ContentTabContent({
       isReadOnly={isReadOnly}
     />
   );
-}
+});

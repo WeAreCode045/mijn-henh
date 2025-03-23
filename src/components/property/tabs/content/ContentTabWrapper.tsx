@@ -1,11 +1,12 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -37,7 +38,8 @@ interface ContentTabWrapperProps {
   };
 }
 
-export function ContentTabWrapper({ 
+// Using memo to prevent unnecessary re-renders
+export const ContentTabWrapper = memo(function ContentTabWrapper({ 
   formData, 
   property, 
   handlers, 
@@ -46,12 +48,16 @@ export function ContentTabWrapper({
 }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [pendingChanges, setPendingChanges] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { toast } = useToast();
   
   // We'll use the handlers.onSubmit but wrap it to perform additional tasks
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     console.log("ContentTabWrapper - handleSubmit called");
+    
     try {
+      setIsSubmitting(true);
+      
       // Call the original onSubmit handler
       handlers.onSubmit();
       
@@ -75,10 +81,12 @@ export function ContentTabWrapper({
         description: "Failed to save property",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [handlers, toast]);
 
-  const adaptedRemoveFeature = (id: string) => {
+  const adaptedRemoveFeature = useCallback((id: string) => {
     if (handlers.onRemoveFeature) {
       handlers.onRemoveFeature(id);
       if (handlers.setPendingChanges) {
@@ -87,9 +95,9 @@ export function ContentTabWrapper({
         setPendingChanges(true);
       }
     }
-  };
+  }, [handlers]);
   
-  const adaptedUpdateFeature = (id: string, description: string) => {
+  const adaptedUpdateFeature = useCallback((id: string, description: string) => {
     if (handlers.onUpdateFeature) {
       handlers.onUpdateFeature(id, description);
       if (handlers.setPendingChanges) {
@@ -98,16 +106,16 @@ export function ContentTabWrapper({
         setPendingChanges(true);
       }
     }
-  };
+  }, [handlers]);
   
-  const adaptedFieldChange = (field: keyof PropertyFormData, value: any) => {
+  const adaptedFieldChange = useCallback((field: keyof PropertyFormData, value: any) => {
     handlers.onFieldChange(field, value);
     if (handlers.setPendingChanges) {
       handlers.setPendingChanges(true);
     } else {
       setPendingChanges(true);
     }
-  };
+  }, [handlers]);
 
   // Handle tab change with autosave
   const handleTabChange = useCallback(async (step: number) => {
@@ -128,7 +136,16 @@ export function ContentTabWrapper({
     
     // Now change the tab
     handlers.handleStepClick(step);
-  }, [pendingChanges, formData.id, handlers, toast]);
+  }, [pendingChanges, formData.id, handlers, handleSubmit, toast]);
+
+  if (handlers.isSaving || isSubmitting) {
+    return (
+      <div className="flex justify-center items-center my-8">
+        <Spinner className="h-8 w-8 text-primary" />
+        <span className="ml-3 text-lg text-primary">Saving changes...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -154,7 +171,18 @@ export function ContentTabWrapper({
         onSubmit={handleSubmit}
         isReadOnly={isReadOnly}
         hideNavigation={hideNavigation}
+        // Pass through all other needed handlers
+        onAddArea={handlers.onAddArea}
+        onRemoveArea={handlers.onRemoveArea}
+        onUpdateArea={handlers.onUpdateArea}
+        onAreaImageRemove={handlers.onAreaImageRemove}
+        onAreaImagesSelect={handlers.onAreaImagesSelect}
+        handleAreaImageUpload={handlers.handleAreaImageUpload}
+        onFetchLocationData={handlers.onFetchLocationData}
+        onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
+        isLoadingLocationData={handlers.isLoadingLocationData}
+        isUploading={handlers.isUploading}
       />
     </div>
   );
-}
+});

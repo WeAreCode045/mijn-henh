@@ -1,7 +1,7 @@
 
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image, Home, MessageCircle } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyTabsProps {
@@ -11,7 +11,8 @@ interface PropertyTabsProps {
   children: ReactNode;
 }
 
-export function PropertyTabs({ 
+// Using memo to prevent unnecessary re-renders
+export const PropertyTabs = memo(function PropertyTabs({ 
   activeTab, 
   handleTabChange, 
   propertyId,
@@ -59,6 +60,7 @@ export function PropertyTabs({
   }, [propertyId]);
 
   const handleTabButtonClick = (tabValue: string) => {
+    if (tabValue === activeTab) return; // Don't trigger if already on this tab
     console.log(`Tab clicked: ${tabValue}, current activeTab: ${activeTab}`);
     handleTabChange(tabValue);
   };
@@ -108,4 +110,4 @@ export function PropertyTabs({
       {children}
     </>
   );
-}
+});

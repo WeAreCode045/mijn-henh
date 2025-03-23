@@ -25,19 +25,19 @@ export function usePropertyTabs() {
   // Get the initial active tab from the URL
   const [activeTab, setActiveTab] = useState<string>(getTabFromPath(location.pathname));
   
-  // Update the URL when tab changes
+  // Update the URL when tab changes - optimized with useCallback to prevent unnecessary rerenders
   const handleTabChange = useCallback((tab: string) => {
     if (!id) {
       console.warn("No property ID available for tab navigation");
       return;
     }
     
-    console.log(`Changing tab to: ${tab}`);
     // First update the state
     setActiveTab(tab);
     
     // Then navigate to the correct route
-    navigate(`/property/${id}/${tab}`);
+    // Using replace instead of push to avoid history buildup for tab changes
+    navigate(`/property/${id}/${tab}`, { replace: true });
   }, [id, navigate]);
   
   // Sync with URL path changes
@@ -51,7 +51,7 @@ export function usePropertyTabs() {
     // If there's no specific tab in the URL (just /property/id), redirect to dashboard
     if (id && (location.pathname === `/property/${id}` || location.pathname === `/property/${id}/`)) {
       console.log("Redirecting to dashboard tab");
-      navigate(`/property/${id}/dashboard`);
+      navigate(`/property/${id}/dashboard`, { replace: true });
     }
   }, [location.pathname, activeTab, id, navigate]);
   
