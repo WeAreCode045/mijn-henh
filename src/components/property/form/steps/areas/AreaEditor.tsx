@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PropertyArea } from "@/types/property";
+import { Area } from "@/types/property";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AreaImagesUpload } from "./AreaImagesUpload";
 
 interface AreaEditorProps {
-  area: PropertyArea;
+  area: Area;
   onUpdate: (field: string, value: any) => void;
   onAreaImageRemove?: (imageId: string) => void;
   onAreaImageUpload?: (files: FileList) => Promise<void>;

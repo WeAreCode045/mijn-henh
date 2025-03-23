@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyArea } from "@/types/property";
+import { Area } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { AreaEditor } from "./AreaEditor";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
 interface AreasListProps {
-  areas: PropertyArea[];
+  areas: Area[];
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: string, value: any) => void;
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
