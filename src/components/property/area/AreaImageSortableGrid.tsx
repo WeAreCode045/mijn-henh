@@ -10,9 +10,10 @@ import { useState, useEffect } from "react";
 interface SortableImageItemProps {
   image: PropertyImage;
   onRemove: () => void;
+  isReadOnly?: boolean;
 }
 
-function SortableImageItem({ image, onRemove }: SortableImageItemProps) {
+function SortableImageItem({ image, onRemove, isReadOnly = false }: SortableImageItemProps) {
   const {
     attributes,
     listeners,
@@ -24,15 +25,14 @@ function SortableImageItem({ image, onRemove }: SortableImageItemProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: 'grab',
+    cursor: isReadOnly ? 'default' : 'grab',
   };
 
   return (
     <div 
       ref={setNodeRef} 
       style={style} 
-      {...attributes} 
-      {...listeners}
+      {...(isReadOnly ? {} : {...attributes, ...listeners})}
       className="relative group"
     >
       <img
@@ -40,18 +40,21 @@ function SortableImageItem({ image, onRemove }: SortableImageItemProps) {
         alt={`Area image ${image.id}`}
         className="w-full h-32 object-cover rounded-md"
       />
-      <Button
-        type="button"
-        variant="destructive"
-        size="icon"
-        className="absolute -top-2 -right-2 h-6 w-6 opacity-100 shadow-sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-      >
-        <X className="h-3 w-3" />
-      </Button>
+      {!isReadOnly && (
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="absolute -top-2 -right-2 h-6 w-6 opacity-100 shadow-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          disabled={isReadOnly}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
     </div>
   );
 }
@@ -62,6 +65,7 @@ interface AreaImageSortableGridProps {
   areaTitle: string;
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesReorder: (areaId: string, reorderedImages: PropertyImage[]) => void;
+  isReadOnly?: boolean;
 }
 
 export function AreaImageSortableGrid({ 
@@ -69,7 +73,8 @@ export function AreaImageSortableGrid({
   areaId, 
   areaTitle, 
   onImageRemove, 
-  onImagesReorder 
+  onImagesReorder,
+  isReadOnly = false
 }: AreaImageSortableGridProps) {
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   const [orderedImages, setOrderedImages] = useState<PropertyImage[]>([]);
@@ -102,6 +107,8 @@ export function AreaImageSortableGrid({
   const validAreaImages = orderedImages.filter(image => !imageLoadErrors[image.id]);
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (isReadOnly) return;
+    
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
@@ -143,6 +150,7 @@ export function AreaImageSortableGrid({
               key={image.id}
               image={image}
               onRemove={() => onImageRemove(areaId, image.id)}
+              isReadOnly={isReadOnly}
             />
           ))}
         </SortableContext>

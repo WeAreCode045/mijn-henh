@@ -24,6 +24,7 @@ interface AreaCardProps {
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (id: string, imageIds: string[]) => void;
+  isReadOnly?: boolean;
 }
 
 export function AreaCard({
@@ -35,6 +36,7 @@ export function AreaCard({
   onUpdate,
   onImageRemove,
   onImagesSelect,
+  isReadOnly = false
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
@@ -119,6 +121,7 @@ export function AreaCard({
         areaId={area.id}
         onTitleChange={handleUpdateTitle}
         onRemove={() => onRemove(area.id)}
+        isReadOnly={isReadOnly}
       >
         <Button 
           variant="ghost" 
@@ -138,12 +141,14 @@ export function AreaCard({
             areaId={area.id}
             onDescriptionChange={handleUpdateDescription}
             onGenerateClick={() => setIsGenerateDialogOpen(true)}
+            isReadOnly={isReadOnly}
           />
           
           <AreaColumnsSelector
             columns={area.columns || 2}
             areaId={area.id}
             onColumnsChange={handleUpdateColumns}
+            isReadOnly={isReadOnly}
           />
 
           <AreaImageGridSection
@@ -153,6 +158,7 @@ export function AreaCard({
             onSelectClick={() => setIsSelectDialogOpen(true)}
             onImageRemove={onImageRemove}
             onImagesReorder={handleImagesReorder}
+            isReadOnly={isReadOnly}
           />
         </CardContent>
       )}
