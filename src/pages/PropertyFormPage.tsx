@@ -13,13 +13,13 @@ export default function PropertyFormPage() {
     if (formData?.title) {
       document.title = formData.title;
     } else {
-      document.title = id ? "Edit Property" : "New Property";
+      document.title = "Property";
     }
     
     return () => {
       document.title = "Brochure Generator";
     };
-  }, [formData?.title, id]);
+  }, [formData?.title]);
 
   return (
     <div className="bg-estate-50 min-h-screen">

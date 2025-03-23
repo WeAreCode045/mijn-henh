@@ -1,76 +1,63 @@
 
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { steps } from "../../form/formSteps";
-import { Check, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Save } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface ContentTabNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
-  onSave?: (e: React.MouseEvent) => void;
-  isSaving?: boolean;
-  lastSaved?: Date | null;
+  lastSaved: Date | null;
+  onSave: () => void;
+  isSaving: boolean;
 }
 
-export function ContentTabNavigation({
-  currentStep,
-  onStepClick,
-  onSave,
-  isSaving = false,
-  lastSaved = null,
-}: ContentTabNavigationProps) {
-  const handleStepClick = (e: React.MouseEvent, step: number) => {
-    e.preventDefault(); // Prevent form submission
-    onStepClick(step);
-  };
+const steps = [
+  { id: 0, label: "General" },
+  { id: 1, label: "Features" },
+  { id: 2, label: "Areas" },
+  { id: 3, label: "Location" }
+];
 
+export function ContentTabNavigation({ 
+  currentStep, 
+  onStepClick, 
+  lastSaved,
+  onSave,
+  isSaving
+}: ContentTabNavigationProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
-        <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between">
+      <Tabs 
+        value={currentStep.toString()} 
+        onValueChange={(value) => onStepClick(parseInt(value))}
+        className="w-full"
+      >
+        <TabsList className="grid grid-cols-4 w-full">
           {steps.map((step) => (
-            <Button
-              key={step.id}
-              variant={currentStep === step.id ? "default" : "outline"}
-              size="sm"
-              onClick={(e) => handleStepClick(e, step.id)}
-              type="button" 
-              className="flex items-center gap-1"
-            >
-              {step.icon}
-              <span>{step.title}</span>
-            </Button>
+            <TabsTrigger key={step.id} value={step.id.toString()}>
+              {step.label}
+            </TabsTrigger>
           ))}
-        </div>
-        
-        {onSave && (
-          <div className="flex items-center gap-2">
-            {lastSaved && (
-              <span className="text-xs text-muted-foreground">
-                Last saved: {format(lastSaved, "HH:mm:ss")}
-              </span>
-            )}
-            <Button
-              type="button"
-              onClick={onSave}
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Save</span>
-                </>
-              )}
-            </Button>
-          </div>
+        </TabsList>
+      </Tabs>
+      
+      <div className="flex items-center gap-2 ml-4">
+        {lastSaved && (
+          <span className="text-xs text-muted-foreground">
+            Saved {formatDistanceToNow(lastSaved, { addSuffix: true })}
+          </span>
         )}
+        
+        <Button 
+          size="sm" 
+          onClick={onSave}
+          disabled={isSaving}
+          variant="outline"
+        >
+          <Save className="mr-1 h-4 w-4" />
+          Save
+        </Button>
       </div>
     </div>
   );

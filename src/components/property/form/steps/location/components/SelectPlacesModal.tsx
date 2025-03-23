@@ -1,15 +1,22 @@
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
-import { PropertyNearbyPlace } from "@/types/property";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
+import { useState, useEffect } from "react";
 
-// Define a type that's compatible with PropertyNearbyPlace but has optional distance
-export type PlaceOption = Omit<PropertyNearbyPlace, 'distance'> & { 
-  distance?: string | number 
-};
+export interface PlaceOption {
+  id: string;
+  name: string;
+  vicinity?: string;
+  rating?: number;
+  distance?: number;
+  type: string;
+  types?: string[];
+  maxSelections?: number;
+}
 
 interface SelectPlacesModalProps {
   isOpen: boolean;
@@ -24,102 +31,130 @@ interface SelectPlacesModalProps {
 export function SelectPlacesModal({
   isOpen,
   onClose,
-  places,
+  places = [],
   onSave,
   category,
   isLoading = false,
   maxSelections = 5
 }: SelectPlacesModalProps) {
   const [selectedPlaces, setSelectedPlaces] = useState<PlaceOption[]>([]);
+  
+  // Get the effective max selections (from first place if available, or prop)
+  const effectiveMaxSelections = places[0]?.maxSelections || maxSelections;
 
-  const handleTogglePlace = (place: PlaceOption, isSelected: boolean) => {
-    if (isSelected) {
-      setSelectedPlaces(prev => [...prev, place]);
+  // Reset selections when modal is opened with new places
+  useEffect(() => {
+    if (isOpen && places.length > 0) {
+      setSelectedPlaces([]);
+    }
+  }, [isOpen, places]);
+
+  const handleTogglePlace = (place: PlaceOption) => {
+    if (selectedPlaces.some(p => p.id === place.id)) {
+      setSelectedPlaces(selectedPlaces.filter(p => p.id !== place.id));
     } else {
-      setSelectedPlaces(prev => prev.filter(p => p.id !== place.id));
+      // Count how many places of this type are already selected
+      const selectedOfThisType = selectedPlaces.filter(p => p.type === place.type).length;
+      
+      // Only allow selection if we haven't reached the max for this type
+      if (selectedOfThisType < effectiveMaxSelections) {
+        setSelectedPlaces([...selectedPlaces, place]);
+      }
     }
   };
 
   const handleSave = () => {
     onSave(selectedPlaces);
-    setSelectedPlaces([]);
     onClose();
   };
 
-  const handleClose = () => {
-    setSelectedPlaces([]);
-    onClose();
+  const formatCategory = (cat: string) => {
+    return cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            Select {category} Places
-            {maxSelections && <span className="text-sm font-normal ml-2">(Select up to {maxSelections})</span>}
-          </DialogTitle>
+          <DialogTitle>Select {formatCategory(category)}</DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
+          <p className="text-sm text-muted-foreground mb-4">
+            Select up to {effectiveMaxSelections} places per type (found {places.length} places).
+          </p>
+          
           {isLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : places.length > 0 ? (
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
-              {places.map((place) => (
-                <div key={place.id} className="flex items-start space-x-3 p-2 rounded border">
-                  <Checkbox 
-                    id={`place-${place.id}`}
-                    checked={selectedPlaces.some(p => p.id === place.id)}
-                    onCheckedChange={(checked) => {
-                      handleTogglePlace(place, checked === true);
-                    }}
-                    disabled={selectedPlaces.length >= maxSelections && !selectedPlaces.some(p => p.id === place.id)}
-                  />
-                  <div className="flex-1">
-                    <label 
-                      htmlFor={`place-${place.id}`}
-                      className="text-sm font-medium cursor-pointer"
-                    >
-                      {place.name}
-                    </label>
-                    {place.vicinity && (
-                      <p className="text-xs text-gray-500">{place.vicinity}</p>
-                    )}
-                    <div className="flex items-center mt-1 space-x-2">
-                      {place.distance !== undefined && (
-                        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
-                          {typeof place.distance === 'number' 
-                            ? `${place.distance.toFixed(1)} km` 
-                            : place.distance}
-                        </span>
-                      )}
-                      {place.rating !== undefined && place.rating > 0 && (
-                        <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-full">
-                          ★ {place.rating.toFixed(1)} ({place.user_ratings_total})
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          ) : places.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground">No places found for this category</p>
           ) : (
-            <p className="text-center py-8 text-gray-500">No places found in this category</p>
+            <ScrollArea className="h-[300px] pr-4">
+              <div className="space-y-2">
+                {places.map((place) => {
+                  // Count how many places of this type are already selected
+                  const selectedOfThisType = selectedPlaces.filter(p => p.type === place.type).length;
+                  const isDisabled = !selectedPlaces.some(p => p.id === place.id) && 
+                                     selectedOfThisType >= effectiveMaxSelections;
+                  
+                  return (
+                    <div 
+                      key={place.id} 
+                      className="flex items-start p-3 rounded-md border bg-white"
+                    >
+                      <Checkbox 
+                        id={`place-${place.id}`}
+                        className="mt-1"
+                        checked={selectedPlaces.some(p => p.id === place.id)}
+                        onCheckedChange={() => handleTogglePlace(place)}
+                        disabled={isDisabled}
+                      />
+                      <div className="ml-3 space-y-1 flex-1">
+                        <label 
+                          htmlFor={`place-${place.id}`}
+                          className="font-medium cursor-pointer"
+                        >
+                          {place.name}
+                        </label>
+                        
+                        {place.vicinity && (
+                          <p className="text-sm text-gray-500">{place.vicinity}</p>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {place.distance !== undefined && (
+                            <Badge variant="outline" className="text-xs">
+                              {typeof place.distance === 'number' 
+                                ? `${place.distance.toFixed(1)} km` 
+                                : place.distance}
+                            </Badge>
+                          )}
+                          
+                          {place.rating && (
+                            <Badge variant="outline" className="text-xs flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              {place.rating.toFixed(1)}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
           )}
         </div>
         
-        <DialogFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSave} 
             disabled={selectedPlaces.length === 0}
           >
-            Add {selectedPlaces.length} place{selectedPlaces.length !== 1 && 's'}
+            Save {selectedPlaces.length} places
           </Button>
         </DialogFooter>
       </DialogContent>

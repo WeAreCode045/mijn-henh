@@ -10,14 +10,12 @@ export function useNearbyPlacesSection({
   formData,
   onFieldChange,
   onFetchNearbyPlaces,
-  isLoadingNearbyPlaces,
-  isReadOnly = false
+  isLoadingNearbyPlaces
 }: {
   formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onFetchNearbyPlaces?: (category?: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
-  isReadOnly?: boolean;
 }) {
   const nearbyPlaces = formData.nearby_places || [];
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -34,7 +32,7 @@ export function useNearbyPlacesSection({
     placesForModal, 
     setPlacesForModal, 
     handleSavePlaces 
-  } = useNearbyPlacesModal({ formData, onFieldChange, isReadOnly });
+  } = useNearbyPlacesModal({ formData, onFieldChange });
   
   // Use the place selection hook
   const { 
@@ -42,7 +40,7 @@ export function useNearbyPlacesSection({
     togglePlaceVisibility, 
     togglePlaceSelection, 
     handleBulkDelete 
-  } = usePlaceSelection({ formData, onFieldChange, isReadOnly });
+  } = usePlaceSelection({ formData, onFieldChange });
   
   // Use the place fetching hook
   const { 
@@ -54,8 +52,7 @@ export function useNearbyPlacesSection({
     setPlacesForModal, 
     setModalOpen, 
     setCurrentCategory,
-    getMaxSelections,
-    isReadOnly
+    getMaxSelections
   });
   
   // Create the placesByCategory object using the helper from useCategories
@@ -74,7 +71,6 @@ export function useNearbyPlacesSection({
     categories,
     placesByCategory,
     isLoadingNearbyPlaces,
-    isReadOnly,
     handleFetchCategory,
     handleSavePlaces,
     togglePlaceVisibility,

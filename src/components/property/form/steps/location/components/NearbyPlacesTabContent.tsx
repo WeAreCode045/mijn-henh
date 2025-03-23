@@ -1,10 +1,10 @@
 
-import { PropertyNearbyPlace } from "@/types/property";
+import { AlertCircle } from "lucide-react";
 import { CategorySection } from "./CategorySection";
-import { CategoryFilters } from "./CategoryFilters";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { PropertyNearbyPlace } from "@/types/property";
+import { useCategories } from "../hooks/useCategories";
 
 interface NearbyPlacesTabContentProps {
   tabId: string;
@@ -14,10 +14,7 @@ interface NearbyPlacesTabContentProps {
   toggleVisibility: (index: number, visible: boolean) => void;
   toggleSelection: (index: number, selected: boolean) => void;
   selectedIndices: number[];
-  selectionMode?: boolean;
-  getCategoryColor?: (type: string) => string;
-  getCategoryIcon?: (type: string) => React.ReactNode;
-  isReadOnly?: boolean;
+  selectionMode: boolean;
 }
 
 export function NearbyPlacesTabContent({
@@ -28,66 +25,41 @@ export function NearbyPlacesTabContent({
   toggleVisibility,
   toggleSelection,
   selectedIndices,
-  selectionMode = false,
-  getCategoryColor,
-  getCategoryIcon,
-  isReadOnly = false
+  selectionMode
 }: NearbyPlacesTabContentProps) {
-  const [filterType, setFilterType] = useState<"all" | "visible" | "hidden">("all");
+  const { getCategoryColor, getCategoryIcon } = useCategories();
   
-  const filteredPlaces = places.filter(place => {
-    if (filterType === "all") return true;
-    if (filterType === "visible") return place.visible_in_webview === true;
-    if (filterType === "hidden") return place.visible_in_webview === false;
-    return true;
-  });
-  
-  const isVisible = (place: PropertyNearbyPlace): boolean => {
-    return place.visible_in_webview === true;
-  };
+  if (places && places.length > 0) {
+    return (
+      <CategorySection
+        key={tabId}
+        category={category}
+        places={places}
+        onRemovePlace={onRemovePlace}
+        toggleVisibility={toggleVisibility}
+        toggleSelection={toggleSelection}
+        selectedIndices={selectedIndices}
+        isVisible={(place) => !!place.visible_in_webview}
+        selectionMode={selectionMode}
+        getCategoryColor={getCategoryColor}
+        getCategoryIcon={(placeType) => {
+          const Icon = getCategoryIcon(placeType);
+          return Icon ? <Icon className="h-4 w-4" /> : null;
+        }}
+      />
+    );
+  }
   
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <CategoryFilters 
-          filterType={filterType} 
-          setFilterType={setFilterType} 
-          isReadOnly={isReadOnly}
-        />
-        
-        {selectionMode && selectedIndices.length > 0 && !isReadOnly && (
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            className="flex items-center"
-            onClick={() => {}}
-            disabled={isReadOnly}
-          >
-            <Trash2 className="h-4 w-4 mr-1" /> Delete Selected
-          </Button>
-        )}
-      </div>
-      
-      {filteredPlaces.length > 0 ? (
-        <CategorySection
-          key={category}
-          category={category}
-          places={filteredPlaces}
-          onRemovePlace={onRemovePlace}
-          toggleVisibility={toggleVisibility}
-          toggleSelection={toggleSelection}
-          selectedIndices={selectedIndices}
-          isVisible={isVisible}
-          selectionMode={selectionMode}
-          getCategoryColor={getCategoryColor}
-          getCategoryIcon={getCategoryIcon}
-          isReadOnly={isReadOnly}
-        />
-      ) : (
-        <div className="text-center py-8 bg-gray-50 rounded-md text-gray-500">
-          No {filterType !== "all" ? filterType : ""} places found in this category
-        </div>
-      )}
-    </div>
+    <Card>
+      <CardContent className="pt-6">
+        <Alert variant="default" className="bg-amber-50">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription>
+            No {category.toLowerCase()} found near this property. Use the "Fetch" button above to search for places in this category.
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
   );
 }

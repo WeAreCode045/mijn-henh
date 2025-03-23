@@ -11,15 +11,13 @@ interface LocationDescriptionSectionProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onGenerateDescription?: () => Promise<void>;
   isGeneratingDescription?: boolean;
-  isReadOnly?: boolean;
 }
 
 export function LocationDescriptionSection({
   formData,
   onFieldChange,
   onGenerateDescription,
-  isGeneratingDescription = false,
-  isReadOnly = false
+  isGeneratingDescription = false
 }: LocationDescriptionSectionProps) {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (onFieldChange) {

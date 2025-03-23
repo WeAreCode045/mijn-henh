@@ -12,7 +12,6 @@ interface AreasStepProps {
   onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  isReadOnly?: boolean;
 }
 
 export function AreasStep({
@@ -24,13 +23,10 @@ export function AreasStep({
   onAreaImagesSelect,
   onAreaImageUpload,
   setPendingChanges,
-  isUploading,
-  isReadOnly = false
+  isUploading
 }: AreasStepProps) {
   // Function to handle generated areas from AI
   const handleAreasGenerated = (newAreas: PropertyArea[]) => {
-    if (isReadOnly) return;
-    
     // If there are existing areas, we'll append the new ones
     const updatedAreas = [...(formData.areas || []), ...newAreas];
     
@@ -78,7 +74,6 @@ export function AreasStep({
         onImageUpload={onAreaImageUpload}
         onAreasGenerated={handleAreasGenerated}
         isUploading={isUploading}
-        isReadOnly={isReadOnly}
       />
     </div>
   );

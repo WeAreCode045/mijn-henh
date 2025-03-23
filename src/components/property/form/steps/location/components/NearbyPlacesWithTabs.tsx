@@ -19,7 +19,6 @@ interface NearbyPlacesWithTabsProps {
   handleFetchCategory: (categoryId: string) => Promise<void>;
   isFetchingCategory: boolean;
   currentCategory: string;
-  isReadOnly?: boolean;
 }
 
 export function NearbyPlacesWithTabs({
@@ -35,8 +34,7 @@ export function NearbyPlacesWithTabs({
   handleBulkDelete,
   handleFetchCategory,
   isFetchingCategory,
-  currentCategory,
-  isReadOnly = false
+  currentCategory
 }: NearbyPlacesWithTabsProps) {
   return (
     <div className="space-y-4">
@@ -56,7 +54,7 @@ export function NearbyPlacesWithTabs({
         </TabsList>
         
         <div className="mt-4">
-          {selectedPlacesToDelete.length > 0 && !isReadOnly && (
+          {selectedPlacesToDelete.length > 0 && (
             <div className="mb-4">
               <Button 
                 variant="destructive" 
@@ -81,7 +79,6 @@ export function NearbyPlacesWithTabs({
               toggleSelection={togglePlaceSelection}
               selectedIndices={selectedPlacesToDelete}
               selectionMode={selectedPlacesToDelete.length > 0}
-              isReadOnly={isReadOnly}
             />
           ) : (
             <p className="text-center py-4 text-muted-foreground">No places found</p>
@@ -99,7 +96,6 @@ export function NearbyPlacesWithTabs({
               toggleSelection={togglePlaceSelection}
               selectedIndices={selectedPlacesToDelete}
               selectionMode={selectedPlacesToDelete.length > 0}
-              isReadOnly={isReadOnly}
             />
           </TabsContent>
         ))}

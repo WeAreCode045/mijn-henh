@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,7 +39,7 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (propertyId && propertyId.trim() !== '') {
+      if (propertyId) {
         query = query.eq('property_id', propertyId);
       } 
       else if (!isAdmin && profile?.id) {

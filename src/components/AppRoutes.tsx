@@ -1,19 +1,19 @@
 
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { Route, Routes, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PropertyLayout } from "./PropertyLayout";
 
-// Directly import instead of lazy-loading all components
-import Index from "../pages/Index";
-import Properties from "../pages/Properties";
-import PropertyFormPage from "../pages/PropertyFormPage";
-import Settings from "../pages/Settings";
-import NotFound from "../pages/NotFound";
-import Auth from "../pages/Auth";
-import { PropertyWebView } from "./property/PropertyWebView";
-import Users from "../pages/Users";
-import Import from "../pages/Import";
+// Lazy-loaded components
+const Index = lazy(() => import("../pages/Index"));
+const Properties = lazy(() => import("../pages/Properties"));
+const PropertyFormPage = lazy(() => import("../pages/PropertyFormPage"));
+const Settings = lazy(() => import("../pages/Settings"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+const Auth = lazy(() => import("../pages/Auth"));
+const PropertyWebView = lazy(() => import("./property/PropertyWebView").then(module => ({ default: module.PropertyWebView })));
+const Users = lazy(() => import("../pages/Users"));
+const Import = lazy(() => import("../pages/Import"));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">

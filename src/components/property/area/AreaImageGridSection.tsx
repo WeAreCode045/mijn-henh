@@ -11,7 +11,6 @@ interface AreaImageGridSectionProps {
   onSelectClick: () => void;
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesReorder: (areaId: string, reorderedImages: PropertyImage[]) => void;
-  isReadOnly?: boolean;
 }
 
 export function AreaImageGridSection({
@@ -20,15 +19,11 @@ export function AreaImageGridSection({
   areaImages,
   onSelectClick,
   onImageRemove,
-  onImagesReorder,
-  isReadOnly = false
+  onImagesReorder
 }: AreaImageGridSectionProps) {
   return (
     <div>
-      <AreaImageActions 
-        onSelectClick={onSelectClick} 
-        isReadOnly={isReadOnly}
-      />
+      <AreaImageActions onSelectClick={onSelectClick} />
       
       <div className="mt-2">
         <p className="text-sm font-medium mb-2">Selected Images ({areaImages.length}) - Drag to reorder</p>
@@ -38,7 +33,6 @@ export function AreaImageGridSection({
           areaTitle={areaTitle}
           onImageRemove={onImageRemove}
           onImagesReorder={onImagesReorder}
-          isReadOnly={isReadOnly}
         />
       </div>
     </div>

@@ -12,7 +12,6 @@ interface NearbyPlacesSectionProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onFetchNearbyPlaces?: (category?: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
-  isReadOnly?: boolean;
 }
 
 export function NearbyPlacesSection({ 
@@ -20,8 +19,7 @@ export function NearbyPlacesSection({
   onRemovePlace,
   onFieldChange,
   onFetchNearbyPlaces,
-  isLoadingNearbyPlaces = false,
-  isReadOnly = false
+  isLoadingNearbyPlaces = false
 }: NearbyPlacesSectionProps) {
   const {
     nearbyPlaces,
@@ -46,8 +44,7 @@ export function NearbyPlacesSection({
     formData,
     onFieldChange,
     onFetchNearbyPlaces,
-    isLoadingNearbyPlaces,
-    isReadOnly
+    isLoadingNearbyPlaces
   });
 
   return (
@@ -56,7 +53,7 @@ export function NearbyPlacesSection({
         title="Nearby Places"
         onFetchAllPlaces={handleFetchAllPlaces}
         isLoading={isLoadingNearbyPlaces || false}
-        isDisabled={!formData.address || isReadOnly}
+        isDisabled={!formData.address}
       />
       
       {nearbyPlaces.length > 0 ? (
@@ -74,7 +71,6 @@ export function NearbyPlacesSection({
           handleFetchCategory={handleFetchCategory}
           isFetchingCategory={isFetchingCategory}
           currentCategory={currentCategory}
-          isReadOnly={isReadOnly}
         />
       ) : (
         <NearbyPlacesEmptyState
@@ -83,18 +79,17 @@ export function NearbyPlacesSection({
           isFetchingCategory={isFetchingCategory}
           currentCategory={currentCategory}
           formDataAddress={formData.address}
-          isReadOnly={isReadOnly}
         />
       )}
       
       <SelectPlacesModal
-        isOpen={modalOpen && !isReadOnly}
+        isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         places={placesForModal}
         onSave={handleSavePlaces}
         category={currentCategory}
         isLoading={isFetchingCategory}
-        maxSelections={getMaxSelections(currentCategory)}
+        maxSelections={5}
       />
     </div>
   );

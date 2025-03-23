@@ -8,15 +8,13 @@ interface AreaDescriptionSectionProps {
   areaId: string;
   onDescriptionChange: (value: string) => void;
   onGenerateClick: () => void;
-  isReadOnly?: boolean;
 }
 
 export function AreaDescriptionSection({
   description,
   areaId,
   onDescriptionChange,
-  onGenerateClick,
-  isReadOnly = false
+  onGenerateClick
 }: AreaDescriptionSectionProps) {
   return (
     <div className="flex items-start gap-2">
@@ -31,7 +29,6 @@ export function AreaDescriptionSection({
         variant="outline" 
         className="mt-6" 
         onClick={onGenerateClick}
-        disabled={isReadOnly}
       >
         <Wand2 className="mr-2 h-4 w-4" />
         Generate

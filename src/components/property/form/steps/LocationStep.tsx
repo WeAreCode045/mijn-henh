@@ -19,7 +19,6 @@ interface LocationStepProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   handleMapImageDelete?: () => Promise<void>;
-  isReadOnly?: boolean;
 }
 
 export function LocationStep({
@@ -34,8 +33,7 @@ export function LocationStep({
   setPendingChanges,
   handleMapImageDelete,
   onGenerateMap,
-  isGeneratingMap = false,
-  isReadOnly = false
+  isGeneratingMap = false
 }: LocationStepProps) {
   return (
     <div className="space-y-4">
@@ -50,7 +48,6 @@ export function LocationStep({
               onFieldChange={onFieldChange}
               onGenerateDescription={onGenerateLocationDescription}
               isGeneratingDescription={isLoadingLocationData}
-              isReadOnly={isReadOnly}
             />
             
             <MapPreviewSection 
@@ -58,7 +55,6 @@ export function LocationStep({
               onDeleteMapImage={handleMapImageDelete}
               onGenerateMap={onGenerateMap}
               isGeneratingMap={isGeneratingMap}
-              isReadOnly={isReadOnly}
             />
             
             <NearbyPlacesSection 
@@ -67,7 +63,6 @@ export function LocationStep({
               onFieldChange={onFieldChange}
               onFetchNearbyPlaces={onFetchCategoryPlaces}
               isLoadingNearbyPlaces={isLoadingLocationData}
-              isReadOnly={isReadOnly}
             />
             
             <NearbyCitiesSection 
@@ -76,7 +71,6 @@ export function LocationStep({
               onFetchNearbyCities={onFetchNearbyCities}
               isLoadingLocationData={isLoadingLocationData}
               onFieldChange={onFieldChange}
-              isReadOnly={isReadOnly}
             />
           </div>
         </CardContent>

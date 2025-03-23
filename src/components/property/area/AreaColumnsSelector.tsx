@@ -12,14 +12,12 @@ interface AreaColumnsSelectorProps {
   columns: number;
   areaId: string;
   onColumnsChange: (columns: number) => void;
-  isReadOnly?: boolean;
 }
 
 export function AreaColumnsSelector({ 
   columns, 
   areaId, 
-  onColumnsChange,
-  isReadOnly = false
+  onColumnsChange 
 }: AreaColumnsSelectorProps) {
   return (
     <div>
@@ -27,7 +25,6 @@ export function AreaColumnsSelector({
       <Select
         value={columns.toString()}
         onValueChange={(value) => onColumnsChange(parseInt(value))}
-        disabled={isReadOnly}
       >
         <SelectTrigger 
           id={`columns-${areaId}`}

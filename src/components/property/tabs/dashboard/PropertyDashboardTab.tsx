@@ -9,7 +9,6 @@ import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
 import { PropertyManagementCard } from "./cards/PropertyManagementCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AgendaCard } from "../../dashboard/AgendaCard";
-import { formatDate as formatDateUtil } from "@/utils/dateUtils";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -18,12 +17,12 @@ interface PropertyDashboardTabProps {
   agentId?: string;
   createdAt?: string;
   updatedAt?: string;
-  onSave?: () => void;
-  onDelete?: () => Promise<void>;
-  handleGeneratePDF?: () => void;
-  handleWebView?: (e: React.MouseEvent) => void;
-  handleSaveAgent?: (agentId: string) => Promise<void>;
-  handleSaveObjectId?: (objectId: string) => Promise<void>;
+  onSave: () => void;
+  onDelete: () => Promise<void>;
+  handleGeneratePDF: () => void;
+  handleWebView: (e: React.MouseEvent) => void;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
 }
@@ -50,9 +49,6 @@ export function PropertyDashboardTab({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Only fetch submissions if we have a valid id
-    if (!id || id.trim() === '') return;
-    
     const fetchSubmissions = async () => {
       const { data, error } = await supabase
         .from('property_contact_submissions')
@@ -60,7 +56,6 @@ export function PropertyDashboardTab({
         .eq('property_id', id);
 
       if (error) {
-        console.error('Error fetching submissions:', error);
         toast({
           title: "Error fetching submissions",
           description: error.message,
@@ -86,17 +81,13 @@ export function PropertyDashboardTab({
 
     // Fetch property status to check if archived
     const fetchPropertyStatus = async () => {
-      if (!id || id.trim() === '') return;
-      
       const { data, error } = await supabase
         .from('properties')
         .select('archived')
         .eq('id', id)
         .single();
         
-      if (error) {
-        console.error('Error fetching property status:', error);
-      } else if (data) {
+      if (!error && data) {
         setIsArchived(!!data.archived);
       }
     };
@@ -105,10 +96,22 @@ export function PropertyDashboardTab({
     fetchPropertyStatus();
   }, [id, toast]);
 
-  // Helper function for formatting dates - using the imported utility
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
-    return formatDateUtil(dateString);
+    
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
   };
 
   return (

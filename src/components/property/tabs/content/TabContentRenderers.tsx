@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
-import { PropertyDashboardTab } from '../dashboard/PropertyDashboardTab';
+import { DashboardTabContent } from './DashboardTabContent';
 import { ContentTabContent } from './ContentTabContent';
 import { MediaTabContent } from '../media/MediaTabContent';
 import { LocationTabContent } from './LocationTabContent';
@@ -51,9 +51,6 @@ export class TabContentRenderers {
       }
     };
 
-    // Create an adapter for handleWebView that doesn't require the event parameter
-    const handleWebViewAdapter = handlers.handleWebView ? () => handlers.handleWebView({} as React.MouseEvent) : undefined;
-
     // Check if handlers exist and create dummy functions if needed
     const virtualTourUpdate = handlers.handleVirtualTourUpdate || ((url: string) => {
       console.log("Virtual tour update not implemented", url);
@@ -71,21 +68,14 @@ export class TabContentRenderers {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <PropertyDashboardTab
-            id={props.property.id}
-            objectId={props.property.object_id}
-            title={props.property.title}
-            agentId={props.property.agent_id}
-            createdAt={props.property.created_at}
-            updatedAt={props.property.updated_at}
-            onSave={handlers.onSave}
+          <DashboardTabContent
+            property={props.property}
             onDelete={handlers.onDelete}
-            handleWebView={handleWebViewAdapter}
+            onSave={handlers.onSave}
+            onWebView={handlers.handleWebView}
             handleSaveAgent={handlers.handleSaveAgent}
             handleSaveObjectId={handlers.handleSaveObjectId}
             handleGeneratePDF={handlers.handleGeneratePDF}
-            isUpdating={props.isUpdating}
-            agentInfo={props.agentInfo}
           />
         );
       case 'content':
@@ -110,8 +100,6 @@ export class TabContentRenderers {
         return (
           <MediaTabContent
             property={props.property}
-            formState={props.formState}
-            onFieldChange={handlers.onFieldChange}
             handleVirtualTourUpdate={virtualTourUpdate}
             handleYoutubeUrlUpdate={youtubeUrlUpdate}
             handleFloorplanEmbedScriptUpdate={floorplanEmbedScriptUpdate}

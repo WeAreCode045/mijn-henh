@@ -34,7 +34,7 @@ interface PropertyStepWizardProps {
   onSubmit?: () => void; 
   isSaving?: boolean;
   isReadOnly?: boolean;
-  hideNavigation?: boolean;
+  hideNavigation?: boolean; // Add this prop to hide navigation
 }
 
 export function PropertyStepWizard({
@@ -69,14 +69,6 @@ export function PropertyStepWizard({
   isReadOnly,
   hideNavigation = false
 }: PropertyStepWizardProps) {
-  console.log("PropertyStepWizard rendering with current step:", currentStep);
-  console.log("PropertyStepWizard onFieldChange is defined:", !!onFieldChange);
-  
-  if (!formState) {
-    console.error("No form state provided to PropertyStepWizard");
-    return <div>Loading...</div>;
-  }
-  
   return (
     <div className="space-y-6">
       {!hideNavigation && (

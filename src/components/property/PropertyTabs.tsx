@@ -1,5 +1,4 @@
 
-import { memo, useCallback } from "react";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image, Home, MessageCircle } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
@@ -12,8 +11,7 @@ interface PropertyTabsProps {
   children: ReactNode;
 }
 
-// Using memo to prevent unnecessary re-renders
-export const PropertyTabs = memo(function PropertyTabs({ 
+export function PropertyTabs({ 
   activeTab, 
   handleTabChange, 
   propertyId,
@@ -60,19 +58,13 @@ export const PropertyTabs = memo(function PropertyTabs({
     };
   }, [propertyId]);
 
-  // Use a dedicated handler for tab clicks that includes debouncing logic
-  const handleTabButtonClick = useCallback((tabValue: string) => {
-    if (tabValue === activeTab) return; // Don't trigger if already on this tab
-    console.log(`Tab clicked: ${tabValue}, current activeTab: ${activeTab}`);
-    handleTabChange(tabValue);
-  }, [activeTab, handleTabChange]);
-
   return (
     <>
       <TabsList className="grid grid-cols-4 mb-8">
         <TabsTrigger 
           value="dashboard" 
-          onClick={() => handleTabButtonClick('dashboard')}
+          onClick={() => handleTabChange('dashboard')}
+          className="flex items-center gap-2"
           data-state={activeTab === 'dashboard' ? 'active' : ''}
         >
           <Home className="h-4 w-4" />
@@ -80,7 +72,8 @@ export const PropertyTabs = memo(function PropertyTabs({
         </TabsTrigger>
         <TabsTrigger 
           value="content" 
-          onClick={() => handleTabButtonClick('content')}
+          onClick={() => handleTabChange('content')}
+          className="flex items-center gap-2"
           data-state={activeTab === 'content' ? 'active' : ''}
         >
           <FileText className="h-4 w-4" />
@@ -88,7 +81,8 @@ export const PropertyTabs = memo(function PropertyTabs({
         </TabsTrigger>
         <TabsTrigger 
           value="media" 
-          onClick={() => handleTabButtonClick('media')}
+          onClick={() => handleTabChange('media')}
+          className="flex items-center gap-2"
           data-state={activeTab === 'media' ? 'active' : ''}
         >
           <Image className="h-4 w-4" />
@@ -96,9 +90,9 @@ export const PropertyTabs = memo(function PropertyTabs({
         </TabsTrigger>
         <TabsTrigger 
           value="communications" 
-          onClick={() => handleTabButtonClick('communications')}
+          onClick={() => handleTabChange('communications')}
+          className="flex items-center gap-2 relative"
           data-state={activeTab === 'communications' ? 'active' : ''}
-          className="relative"
         >
           <MessageCircle className="h-4 w-4" />
           <span>Communications</span>
@@ -112,4 +106,4 @@ export const PropertyTabs = memo(function PropertyTabs({
       {children}
     </>
   );
-});
+}

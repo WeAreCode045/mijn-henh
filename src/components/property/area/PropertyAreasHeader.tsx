@@ -8,28 +8,26 @@ interface PropertyAreasHeaderProps {
   onAdd: () => void;
   propertyData?: PropertyFormData;
   onAreasGenerated?: (newAreas: any[]) => void;
-  isReadOnly?: boolean;
 }
 
 export function PropertyAreasHeader({ 
   onAdd, 
   propertyData,
-  onAreasGenerated,
-  isReadOnly = false
+  onAreasGenerated 
 }: PropertyAreasHeaderProps) {
   return (
     <div className="flex justify-between items-center mb-4">
       <h3 className="text-lg font-semibold">Property Areas</h3>
       
       <div className="flex gap-2">
-        {propertyData && onAreasGenerated && !isReadOnly && (
+        {propertyData && onAreasGenerated && (
           <GenerateAreasButton 
             propertyData={propertyData} 
             onAreasGenerated={onAreasGenerated} 
           />
         )}
         
-        <Button onClick={onAdd} size="sm" disabled={isReadOnly}>
+        <Button onClick={onAdd} size="sm">
           <Plus className="h-4 w-4 mr-1" />
           Add Area
         </Button>

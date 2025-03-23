@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -10,7 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
-  step?: number;
+  step: number; // Added explicit step property
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature?: () => void;
   onRemoveFeature?: (id: string) => void;
@@ -42,6 +43,7 @@ interface PropertyStepContentProps {
 
 export function PropertyStepContent({
   formData,
+  step, // Use the step property
   onFieldChange,
   onAddFeature,
   onRemoveFeature,
@@ -70,22 +72,14 @@ export function PropertyStepContent({
   isSaving,
   isReadOnly,
 }: PropertyStepContentProps) {
-  console.log("PropertyStepContent rendering with currentStep:", currentStep);
-  console.log("FormData structure:", Object.keys(formData).join(", "));
-  console.log("onFieldChange is defined:", !!onFieldChange);
-  
-  // Render the appropriate step based on currentStep
   const renderStep = () => {
     switch (currentStep) {
       case 0:
         return (
           <GeneralInfoStep
             formData={formData}
-            onFieldChange={onFieldChange || ((field, value) => {
-              console.warn(`No onFieldChange handler provided for ${String(field)}`);
-            })}
+            onFieldChange={onFieldChange}
             setPendingChanges={setPendingChanges}
-            isReadOnly={isReadOnly || false}
           />
         );
       case 1:
@@ -102,7 +96,6 @@ export function PropertyStepContent({
             isLoadingLocationData={isLoadingLocationData}
             isGeneratingMap={isGeneratingMap}
             setPendingChanges={setPendingChanges}
-            isReadOnly={false}
           />
         );
       case 2:
@@ -114,7 +107,6 @@ export function PropertyStepContent({
             onUpdateFeature={onUpdateFeature}
             onFieldChange={onFieldChange}
             setPendingChanges={setPendingChanges}
-            isReadOnly={false}
           />
         );
       case 3:
@@ -129,44 +121,10 @@ export function PropertyStepContent({
             onAreaImageUpload={onAreaImageUpload}
             setPendingChanges={setPendingChanges}
             isUploading={isUploading}
-            isReadOnly={false}
           />
         );
       default:
         return <div>Unknown step</div>;
-    }
-  };
-
-  // Handle save button click
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    console.log("Save button clicked");
-    if (onSubmit) {
-      onSubmit();
-    } else {
-      console.warn("onSubmit not provided to PropertyStepContent");
-    }
-  };
-
-  // Handle previous button click
-  const handlePrev = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    console.log("Previous button clicked");
-    if (handlePrevious) {
-      handlePrevious();
-    } else {
-      console.warn("handlePrevious not provided to PropertyStepContent");
-    }
-  };
-
-  // Handle next button click
-  const handleNextStep = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    console.log("Next button clicked");
-    if (handleNext) {
-      handleNext();
-    } else {
-      console.warn("handleNext not provided to PropertyStepContent");
     }
   };
 
@@ -175,7 +133,7 @@ export function PropertyStepContent({
       <FormStepNavigation
         currentStep={currentStep}
         onStepClick={handleStepClick}
-        onSave={handleSave}
+        onSave={onSubmit}
         isSaving={isSaving}
       />
       <div className="mt-6">
@@ -186,7 +144,10 @@ export function PropertyStepContent({
       <div className="flex justify-between mt-6">
         <Button
           variant="outline"
-          onClick={handlePrev}
+          onClick={(e) => {
+            e.preventDefault();
+            if (handlePrevious) handlePrevious();
+          }}
           disabled={currentStep === 0}
           type="button"
           className="flex items-center gap-2"
@@ -195,26 +156,18 @@ export function PropertyStepContent({
           Previous
         </Button>
         
-        <div className="flex space-x-2">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            type="button"
-            variant="secondary"
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-          
-          <Button
-            onClick={handleNextStep}
-            disabled={currentStep === 3}
-            type="button"
-            className="flex items-center gap-2"
-          >
-            Next
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            if (handleNext) handleNext();
+          }}
+          disabled={currentStep === 3}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          Next
+          <ArrowRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

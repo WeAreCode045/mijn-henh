@@ -13,8 +13,6 @@ interface FeaturesStepProps {
   onUpdateFeature: (id: string, description: string) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   setPendingChanges?: (pending: boolean) => void;
-  showHeader?: boolean; // Make header optional
-  isReadOnly?: boolean;
 }
 
 export function FeaturesStep({
@@ -23,16 +21,13 @@ export function FeaturesStep({
   onRemoveFeature,
   onUpdateFeature,
   onFieldChange,
-  setPendingChanges,
-  showHeader = true, // Default to showing the header
-  isReadOnly = false
+  setPendingChanges
 }: FeaturesStepProps) {
   console.log("FeaturesStep rendering with features:", formData.features);
   
   const { availableFeatures, isLoading, addFeature, addMultipleFeatures } = useAvailableFeatures();
   
   const handleFeatureChange = (id: string, description: string) => {
-    if (isReadOnly) return;
     onUpdateFeature(id, description);
     if (setPendingChanges) {
       setPendingChanges(true);
@@ -40,7 +35,6 @@ export function FeaturesStep({
   };
   
   const handleAddFeature = (feature: PropertyFeature) => {
-    if (isReadOnly) return;
     // If we already have this feature, don't add it again
     if (formData.features.some(f => f.id === feature.id)) {
       return;
@@ -57,7 +51,6 @@ export function FeaturesStep({
   };
   
   const handleRemoveSelectedFeature = (id: string) => {
-    if (isReadOnly) return;
     if (onFieldChange) {
       const updatedFeatures = formData.features.filter(feature => feature.id !== id);
       onFieldChange('features', updatedFeatures);
@@ -68,7 +61,6 @@ export function FeaturesStep({
   };
   
   const handleAddMultipleFeatures = (newFeatures: PropertyFeature[]) => {
-    if (isReadOnly) return;
     // Add multiple features at once
     if (onFieldChange) {
       // First, add the new features to the available features list
@@ -85,14 +77,10 @@ export function FeaturesStep({
   
   return (
     <div className="space-y-6">
-      {showHeader && (
-        <>
-          <h2 className="text-xl font-semibold mb-4">Property Features</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Add all the distinctive features that make this property stand out.
-          </p>
-        </>
-      )}
+      <h2 className="text-xl font-semibold mb-4">Property Features</h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Add all the distinctive features that make this property stand out.
+      </p>
       
       <Tabs defaultValue="list">
         <TabsList className="mb-4">
@@ -104,21 +92,18 @@ export function FeaturesStep({
           <PropertyFeatures
             features={formData.features || []} // Ensure we always pass an array
             onAdd={() => {
-              if (isReadOnly) return;
               onAddFeature();
               if (setPendingChanges) {
                 setPendingChanges(true);
               }
             }}
             onRemove={(id) => {
-              if (isReadOnly) return;
               onRemoveFeature(id);
               if (setPendingChanges) {
                 setPendingChanges(true);
               }
             }}
             onUpdate={handleFeatureChange}
-            isReadOnly={isReadOnly}
           />
         </TabsContent>
         
@@ -135,7 +120,6 @@ export function FeaturesStep({
               onAddFeature={handleAddFeature}
               onRemoveFeature={handleRemoveSelectedFeature}
               onAddMultipleFeatures={handleAddMultipleFeatures}
-              isReadOnly={isReadOnly}
             />
           )}
         </TabsContent>

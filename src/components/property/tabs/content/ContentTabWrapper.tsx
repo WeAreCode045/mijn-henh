@@ -1,29 +1,26 @@
 
-import { useState, useCallback, memo } from 'react';
+import { useState } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
+import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
-import { useToast } from "@/components/ui/use-toast";
+import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
-  property: PropertyData;
-  hideNavigation?: boolean;
-  isReadOnly?: boolean;
+  property: PropertyData; // Added property field
   handlers: {
-    onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;
     onUpdateFeature: (id: string, description: string) => void;
-    onAddArea?: () => void;
-    onRemoveArea?: (id: string) => void;
-    onUpdateArea?: (id: string, field: any, value: any) => void;
-    onAreaImageRemove?: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
-    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
+    onAddArea: () => void;
+    onRemoveArea: (id: string) => void;
+    onUpdateArea: (id: string, field: any, value: any) => void;
+    onAreaImageRemove: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
+    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    handleNext?: () => void;
-    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
@@ -34,109 +31,59 @@ interface ContentTabWrapperProps {
   };
 }
 
-// Using memo to prevent unnecessary re-renders
-export const ContentTabWrapper = memo(function ContentTabWrapper({ 
-  formData, 
-  property, 
-  handlers, 
-  hideNavigation = false,
-  isReadOnly = false
-}: ContentTabWrapperProps) {
+export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [pendingChanges, setPendingChanges] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { toast } = useToast();
   
-  console.log("ContentTabWrapper - formData:", Object.keys(formData));
-  console.log("ContentTabWrapper - handlers.onFieldChange is defined:", !!handlers.onFieldChange);
+  const { onSubmit } = usePropertyContentSubmit(
+    formData,
+    handlers.setPendingChanges || (() => {}),
+    setLastSaved,
+    handlers.onSubmit
+  );
+
+  const handleNext = () => {
+    if (handlers.currentStep < 3) {
+      handlers.handleStepClick(handlers.currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (handlers.currentStep > 0) {
+      handlers.handleStepClick(handlers.currentStep - 1);
+    }
+  };
+
+  const adaptedRemoveFeature = (id: string) => {
+    handlers.onRemoveFeature(id);
+  };
   
-  // We'll use the handlers.onSubmit but wrap it to perform additional tasks
-  const handleSubmit = useCallback(() => {
-    console.log("ContentTabWrapper - handleSubmit called");
-    
-    try {
-      setIsSubmitting(true);
-      
-      // Call the original onSubmit handler
-      if (handlers.onSubmit) {
-        handlers.onSubmit();
-      } else {
-        console.warn("onSubmit handler is not defined");
-      }
-      
-      // Update local state
-      setLastSaved(new Date());
-      if (handlers.setPendingChanges) {
-        handlers.setPendingChanges(false);
-      } else {
-        setPendingChanges(false);
-      }
-      
-      // Show success toast
-      toast({
-        title: "Success",
-        description: "Property saved successfully",
-      });
-    } catch (error) {
-      console.error("Error during ContentTabWrapper save:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [handlers, toast]);
-
-  console.log("ContentTabWrapper rendering with currentStep:", handlers.currentStep);
-
-  const handleFieldChange = useCallback((field: keyof PropertyFormData, value: any) => {
-    console.log(`ContentTabWrapper - handleFieldChange: ${String(field)} = `, value);
-    if (handlers.onFieldChange) {
-      handlers.onFieldChange(field, value);
-    } else {
-      console.warn("onFieldChange handler is not defined in ContentTabWrapper");
-    }
-  }, [handlers]);
-
-  // Use local state for setPendingChanges if handler's version not available
-  const handleSetPendingChanges = useCallback((value: boolean) => {
-    console.log(`ContentTabWrapper - setPendingChanges: ${value}`);
-    if (handlers.setPendingChanges) {
-      handlers.setPendingChanges(value);
-    } else {
-      setPendingChanges(value);
-    }
-  }, [handlers]);
+  const adaptedUpdateFeature = (id: string, description: string) => {
+    handlers.onUpdateFeature(id, description);
+  };
 
   return (
-    <ContentTabContent
-      property={property}
-      formState={formData}
-      onFieldChange={handleFieldChange}
-      onAddFeature={handlers.onAddFeature}
-      onRemoveFeature={handlers.onRemoveFeature}
-      onUpdateFeature={handlers.onUpdateFeature}
-      onAddArea={handlers.onAddArea}
-      onRemoveArea={handlers.onRemoveArea}
-      onUpdateArea={handlers.onUpdateArea}
-      onAreaImageRemove={handlers.onAreaImageRemove}
-      onAreaImagesSelect={handlers.onAreaImagesSelect}
-      handleAreaImageUpload={handlers.handleAreaImageUpload}
-      currentStep={handlers.currentStep}
-      handleStepClick={handlers.handleStepClick}
-      handleNext={handlers.handleNext}
-      handlePrevious={handlers.handlePrevious}
-      onFetchLocationData={handlers.onFetchLocationData}
-      onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-      isLoadingLocationData={handlers.isLoadingLocationData}
-      setPendingChanges={handleSetPendingChanges}
-      isUploading={handlers.isUploading}
-      onSubmit={handleSubmit}
-      isSaving={isSubmitting || handlers.isSaving}
-      hideNavigation={hideNavigation}
-      isReadOnly={isReadOnly}
-    />
+    <div className="space-y-6">
+      <ContentTabNavigation 
+        currentStep={handlers.currentStep}
+        onStepClick={handlers.handleStepClick}
+        lastSaved={lastSaved}
+        onSave={onSubmit}
+        isSaving={handlers.isSaving || false}
+      />
+      
+      <ContentTabContent
+        property={property} 
+        formState={formData}
+        onFieldChange={handlers.onFieldChange}
+        onAddFeature={handlers.onAddFeature}
+        onRemoveFeature={adaptedRemoveFeature}
+        onUpdateFeature={adaptedUpdateFeature}
+        currentStep={handlers.currentStep}
+        handleStepClick={handlers.handleStepClick}
+        onSubmit={onSubmit}
+        isReadOnly={false}
+        hideNavigation={true} // Add this prop to hide the navigation in ContentTabContent
+      />
+    </div>
   );
-});
+}

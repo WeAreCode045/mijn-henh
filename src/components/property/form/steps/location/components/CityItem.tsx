@@ -9,15 +9,13 @@ interface CityItemProps {
   index: number;
   onVisibilityChange: (index: number, visible: boolean) => void;
   isVisible: boolean;
-  isReadOnly?: boolean;
 }
 
 export function CityItem({ 
   city, 
   index,
   onVisibilityChange,
-  isVisible,
-  isReadOnly = false
+  isVisible
 }: CityItemProps) {
   return (
     <div className="flex items-start justify-between bg-gray-50 p-3 rounded-md">
@@ -26,11 +24,8 @@ export function CityItem({
           id={`city-${index}`}
           checked={isVisible}
           onCheckedChange={(checked) => {
-            if (!isReadOnly) {
-              onVisibilityChange(index, checked === true);
-            }
+            onVisibilityChange(index, checked === true);
           }}
-          disabled={isReadOnly}
         />
         <div>
           <div className="font-medium">{city.name}</div>

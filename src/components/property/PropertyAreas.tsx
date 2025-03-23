@@ -18,7 +18,6 @@ interface PropertyAreasProps {
   onImageUpload: (areaId: string, files: FileList) => Promise<void>;
   onAreasGenerated?: (areas: PropertyArea[]) => void;
   isUploading?: boolean;
-  isReadOnly?: boolean;
 }
 
 export function PropertyAreas({
@@ -34,7 +33,6 @@ export function PropertyAreas({
   onImageUpload,
   onAreasGenerated,
   isUploading,
-  isReadOnly = false,
 }: PropertyAreasProps) {
   useEffect(() => {
     console.log("PropertyAreas - Current areas:", areas);
@@ -63,7 +61,6 @@ export function PropertyAreas({
         onAdd={onAdd} 
         propertyData={formData}
         onAreasGenerated={handleAreasGenerated}
-        isReadOnly={isReadOnly}
       />
 
       {!hasAreas ? (
@@ -77,7 +74,6 @@ export function PropertyAreas({
           onUpdate={onUpdate}
           onImageRemove={onImageRemove}
           onImagesSelect={onImagesSelect}
-          isReadOnly={isReadOnly}
         />
       )}
     </div>

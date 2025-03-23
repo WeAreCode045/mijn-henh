@@ -7,7 +7,7 @@ import { Check, Loader2 } from "lucide-react";
 interface FormStepNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
-  onSave?: (e: React.MouseEvent) => void;
+  onSave?: () => void;
   isSaving?: boolean;
 }
 
@@ -17,11 +17,6 @@ export function FormStepNavigation({
   onSave,
   isSaving = false,
 }: FormStepNavigationProps) {
-  const handleStepClick = (e: React.MouseEvent, stepId: number) => {
-    e.preventDefault(); // Prevent form submission
-    onStepClick(stepId);
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
@@ -31,8 +26,11 @@ export function FormStepNavigation({
               key={step.id}
               variant={currentStep === step.id ? "default" : "outline"}
               size="sm"
-              onClick={(e) => handleStepClick(e, step.id)}
-              type="button" 
+              onClick={(e) => {
+                e.preventDefault(); // Prevent default form submission behavior
+                onStepClick(step.id);
+              }}
+              type="button" // Explicitly set as button type to prevent form submission
               className="flex items-center gap-1"
             >
               {step.icon}
@@ -45,7 +43,10 @@ export function FormStepNavigation({
           <div>
             <Button
               type="button"
-              onClick={onSave}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent default form submission behavior
+                onSave();
+              }}
               disabled={isSaving}
               className="flex items-center gap-2"
             >

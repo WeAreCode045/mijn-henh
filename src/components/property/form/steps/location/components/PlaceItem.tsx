@@ -18,7 +18,6 @@ interface PlaceItemProps {
   selectionMode?: boolean;
   getCategoryColor?: (type: string) => string;
   getCategoryIcon?: (type: string) => React.ReactNode;
-  isReadOnly?: boolean;
 }
 
 export function PlaceItem({ 
@@ -33,8 +32,7 @@ export function PlaceItem({
   isSelected = false,
   selectionMode = false,
   getCategoryColor,
-  getCategoryIcon,
-  isReadOnly = false
+  getCategoryIcon
 }: PlaceItemProps) {
   const categoryColor = getCategoryColor ? getCategoryColor(place.type || '') : "";
   
@@ -46,22 +44,18 @@ export function PlaceItem({
             id={`place-select-${originalIndex}`}
             checked={isSelected}
             onCheckedChange={(checked) => {
-              if (onSelectionChange && !isReadOnly) {
+              if (onSelectionChange) {
                 onSelectionChange(originalIndex, checked === true);
               }
             }}
-            disabled={isReadOnly}
           />
         ) : (
           <Checkbox 
             id={`place-${originalIndex}`}
             checked={visible}
             onCheckedChange={(checked) => {
-              if (!isReadOnly) {
-                onVisibilityChange(originalIndex, checked === true);
-              }
+              onVisibilityChange(originalIndex, checked === true);
             }}
-            disabled={isReadOnly}
           />
         )}
         <div>
@@ -97,13 +91,12 @@ export function PlaceItem({
           </div>
         </div>
       </div>
-      {onRemove && !selectionMode && !isReadOnly && (
+      {onRemove && !selectionMode && (
         <Button 
           variant="ghost" 
           size="icon" 
           className="h-6 w-6 rounded-full text-gray-500 hover:text-red-500"
           onClick={() => onRemove(originalIndex)}
-          disabled={isReadOnly}
         >
           <X className="h-4 w-4" />
         </Button>

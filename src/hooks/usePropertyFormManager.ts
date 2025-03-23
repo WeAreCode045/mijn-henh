@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { usePropertyFormState } from '@/hooks/usePropertyFormState';
-import { usePropertyFeatures } from './usePropertyFeatures';
-import { usePropertyAreas } from './usePropertyAreas';
-import { usePropertyContent } from './usePropertyContent';
-import { usePropertyImages } from './usePropertyImages';
-import { usePropertySaveHandlers } from './usePropertySaveHandlers';
+import { usePropertyFeatures } from './property-form/usePropertyFeatures';
+import { usePropertyAreas } from './property-form/usePropertyAreas';
+import { usePropertyContent } from './property-form/usePropertyContent';
+import { usePropertyImages } from './property-form/usePropertyImages';
+import { usePropertySaveHandlers } from './property-form/usePropertySaveHandlers';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);

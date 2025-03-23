@@ -17,7 +17,7 @@ export function usePropertyFormSubmitHandler() {
   const { fetchCurrentPropertyData, logChanges } = usePropertyChangesLogger();
   const { handleExistingPropertySave } = usePropertyAfterSaveActions();
 
-  const handleSubmit = async (e: React.FormEvent | null, formData: PropertyFormData, shouldRedirect = false) => {
+  const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData, shouldRedirect = false) => {
     if (e && e.preventDefault) {
       e.preventDefault();
     }

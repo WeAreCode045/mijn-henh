@@ -9,9 +9,8 @@ interface AreaCardHeaderProps {
   title: string;
   areaId: string;
   onTitleChange: (value: string) => void;
-  onRemove: (id: string) => void; // Changed from () => void to match usage
+  onRemove: () => void;
   children?: ReactNode;
-  isReadOnly?: boolean; // Add isReadOnly prop
 }
 
 export function AreaCardHeader({ 
@@ -19,15 +18,12 @@ export function AreaCardHeader({
   areaId, 
   onTitleChange, 
   onRemove,
-  children,
-  isReadOnly = false // Default to false
+  children
 }: AreaCardHeaderProps) {
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isReadOnly) {
-      onRemove(areaId); // Pass areaId to onRemove
-    }
+    onRemove();
   };
 
   return (
@@ -39,7 +35,6 @@ export function AreaCardHeader({
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="Area Title"
             className="text-xl font-bold"
-            disabled={isReadOnly}
           />
         </CardTitle>
         <div className="flex items-center gap-2">
@@ -50,7 +45,6 @@ export function AreaCardHeader({
             onClick={handleRemove}
             className="text-red-500 hover:text-red-700 hover:bg-red-50"
             type="button"
-            disabled={isReadOnly}
           >
             <Trash className="h-4 w-4" />
           </Button>
