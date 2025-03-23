@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { ContentRouter } from './ContentRouter';
 import { usePropertyContentStepNavigation } from '@/hooks/usePropertyContentStepNavigation';
+import { useParams } from 'react-router-dom';
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -44,6 +45,7 @@ export function ContentTabWrapper({
 }: ContentTabWrapperProps) {
   const [pendingChanges, setPendingChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const { step: stepSlug } = useParams<{ step: string }>();
   
   // Create a centralized navigation handler
   const { 

@@ -33,6 +33,12 @@ function PropertyDashboardRedirect() {
   return <Navigate to={`/property/${id}/dashboard`} replace />;
 }
 
+// This component handles the redirect to the default content tab
+function PropertyContentRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/property/${id}/content/general`} replace />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -115,7 +121,15 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Content tab routes */}
       <Route path="/property/:id/content" element={
+        <ProtectedRoute>
+          <PropertyContentRedirect />
+        </ProtectedRoute>
+      } />
+      
+      {/* Content step routes */}
+      <Route path="/property/:id/content/:step" element={
         <ProtectedRoute>
           <PropertyLayout>
             <PropertyFormPage />

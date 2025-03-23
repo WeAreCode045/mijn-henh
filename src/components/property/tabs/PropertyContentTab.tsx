@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabWrapper } from './content/ContentTabWrapper';
+import { useParams } from 'react-router-dom';
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
@@ -24,13 +25,32 @@ interface PropertyContentTabProps {
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
     setPendingChanges?: (pending: boolean) => void;
+    isUpdateMode?: boolean;
     isUploading?: boolean;
     onSubmit: () => void;
     isSaving?: boolean;
   };
 }
 
+// Map from URL step slugs to step numbers
+const stepSlugMap: Record<string, number> = {
+  'general': 0,
+  'location': 1,
+  'features': 2,
+  'areas': 3
+};
+
 export function PropertyContentTab({ formData, property, handlers }: PropertyContentTabProps) {
+  // Get the current step from the URL
+  const { step: stepSlug } = useParams<{ step: string }>();
+  
+  // Update step based on URL when component mounts or URL changes
+  useEffect(() => {
+    if (stepSlug && stepSlugMap[stepSlug] !== undefined && handlers.currentStep !== stepSlugMap[stepSlug]) {
+      handlers.handleStepClick(stepSlugMap[stepSlug]);
+    }
+  }, [stepSlug, handlers]);
+
   // Ensure all necessary props are passed to ContentTabWrapper
   const completeHandlers = {
     ...handlers,

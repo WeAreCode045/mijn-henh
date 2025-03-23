@@ -7,6 +7,7 @@ import { LocationPage } from "./pages/LocationPage";
 import { FeaturesPage } from "./pages/FeaturesPage";
 import { AreasPage } from "./pages/AreasPage";
 import { Card, CardContent } from "@/components/ui/card";
+import { useParams, useNavigate } from "react-router-dom";
 
 interface ContentRouterProps {
   formData: PropertyFormData;
@@ -36,16 +37,32 @@ interface ContentRouterProps {
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
     onSubmit: () => void;
-    isSaving: boolean; // This is now required
+    isSaving: boolean; // This is required
   };
 }
+
+// Available content step slugs
+const contentStepSlugs = ['general', 'location', 'features', 'areas'];
 
 export function ContentRouter({ 
   formData, 
   currentStep, 
   handlers 
 }: ContentRouterProps) {
-  // Remove any old global save handlers, as we're now using per-section saving
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // Handle step navigation via URLs
+  const handleStepNavigation = (step: number) => {
+    // First call the original handler to ensure data is saved
+    handlers.handleStepClick(step);
+    
+    // Then update the URL to reflect the current step
+    if (id) {
+      const stepSlug = contentStepSlugs[step];
+      navigate(`/property/${id}/content/${stepSlug}`);
+    }
+  };
 
   const renderContent = () => {
     switch (currentStep) {
@@ -102,7 +119,9 @@ export function ContentRouter({
     <div className="space-y-6">
       <ContentTabNavigation
         currentStep={currentStep}
-        onStepClick={handlers.handleStepClick}
+        onStepClick={handleStepNavigation}
+        contentStepSlugs={contentStepSlugs}
+        propertyId={id}
       />
       <Card>
         <CardContent className="pt-6">
