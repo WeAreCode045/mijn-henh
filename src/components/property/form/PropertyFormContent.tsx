@@ -1,4 +1,3 @@
-
 // Import for FeaturesStep component
 import React from 'react';
 import { 
@@ -266,17 +265,20 @@ export function PropertyFormContent({
     }
   };
 
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    // Set pending changes to true when user saves
+    setPendingChanges(true);
+    onSubmit();
+  };
+
   return (
     <div className="space-y-6">
       <div>{renderStepContent()}</div>
       <div className="flex justify-end">
         <Button
-          type="button"
-          onClick={() => {
-            // Set pending changes to true when user saves
-            setPendingChanges(true);
-            onSubmit();
-          }}
+          type="button" // Explicitly set as button type to prevent form submission
+          onClick={handleSaveClick}
           disabled={isSaving}
         >
           {isSaving ? (

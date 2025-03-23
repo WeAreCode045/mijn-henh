@@ -38,16 +38,18 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
-    handlers.onSubmit
+    handlers.onSubmit // Pass the onSubmit from handlers
   );
 
-  const handleNext = () => {
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (handlers.currentStep < 3) {
       handlers.handleStepClick(handlers.currentStep + 1);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (handlers.currentStep > 0) {
       handlers.handleStepClick(handlers.currentStep - 1);
     }

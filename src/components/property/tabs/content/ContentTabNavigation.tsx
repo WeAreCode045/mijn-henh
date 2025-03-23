@@ -26,6 +26,11 @@ export function ContentTabNavigation({
   onSave,
   isSaving
 }: ContentTabNavigationProps) {
+  const handleSaveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent default form submission
+    onSave();
+  };
+
   return (
     <div className="flex items-center justify-between">
       <Tabs 
@@ -51,9 +56,10 @@ export function ContentTabNavigation({
         
         <Button 
           size="sm" 
-          onClick={onSave}
+          onClick={handleSaveClick}
           disabled={isSaving}
           variant="outline"
+          type="button"
         >
           <Save className="mr-1 h-4 w-4" />
           Save

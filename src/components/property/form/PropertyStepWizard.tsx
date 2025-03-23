@@ -1,7 +1,6 @@
 
 import React from "react";
-import { PropertyData, PropertyFormData } from "@/types/property";
-import { PropertyStepNavigator } from "./PropertyStepNavigator";
+import { PropertyFormData, PropertyData } from "@/types/property";
 import { PropertyStepContent } from "./PropertyStepContent";
 
 interface PropertyStepWizardProps {
@@ -31,10 +30,10 @@ interface PropertyStepWizardProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: () => void; 
+  onSubmit?: () => void;
   isSaving?: boolean;
   isReadOnly?: boolean;
-  hideNavigation?: boolean; // Add this prop to hide navigation
+  hideNavigation?: boolean;
 }
 
 export function PropertyStepWizard({
@@ -66,21 +65,28 @@ export function PropertyStepWizard({
   isUploading,
   onSubmit,
   isSaving,
-  isReadOnly,
+  isReadOnly = false,
   hideNavigation = false
 }: PropertyStepWizardProps) {
+  
+  // Create wrapper functions that prevent default form submission
+  const handleNextWithPrevent = handleNext 
+    ? (e: React.MouseEvent) => {
+        e.preventDefault();
+        handleNext();
+      }
+    : undefined;
+    
+  const handlePreviousWithPrevent = handlePrevious
+    ? (e: React.MouseEvent) => {
+        e.preventDefault();
+        handlePrevious();
+      }
+    : undefined;
+
   return (
     <div className="space-y-6">
-      {!hideNavigation && (
-        <PropertyStepNavigator 
-          currentStep={currentStep} 
-          onStepClick={handleStepClick}
-          onSave={onSubmit}
-          isSaving={isSaving}
-        />
-      )}
-      
-      <PropertyStepContent 
+      <PropertyStepContent
         formData={formState}
         step={currentStep}
         onFieldChange={onFieldChange}
@@ -95,8 +101,8 @@ export function PropertyStepWizard({
         onAreaImageUpload={onAreaImageUpload}
         currentStep={currentStep}
         handleStepClick={handleStepClick}
-        handleNext={handleNext}
-        handlePrevious={handlePrevious}
+        handleNext={handleNextWithPrevent}
+        handlePrevious={handlePreviousWithPrevent}
         onFetchLocationData={onFetchLocationData}
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         onFetchNearbyCities={onFetchNearbyCities}

@@ -128,6 +128,16 @@ export function PropertyStepContent({
     }
   };
 
+  const handlePreviousClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    if (handlePrevious) handlePrevious();
+  };
+
+  const handleNextClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    if (handleNext) handleNext();
+  };
+
   return (
     <div className="space-y-6">
       <FormStepNavigation
@@ -144,12 +154,9 @@ export function PropertyStepContent({
       <div className="flex justify-between mt-6">
         <Button
           variant="outline"
-          onClick={(e) => {
-            e.preventDefault();
-            if (handlePrevious) handlePrevious();
-          }}
+          onClick={handlePreviousClick}
           disabled={currentStep === 0}
-          type="button"
+          type="button" // Explicitly set as button type
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -157,12 +164,9 @@ export function PropertyStepContent({
         </Button>
         
         <Button
-          onClick={(e) => {
-            e.preventDefault();
-            if (handleNext) handleNext();
-          }}
+          onClick={handleNextClick}
           disabled={currentStep === 3}
-          type="button"
+          type="button" // Explicitly set as button type
           className="flex items-center gap-2"
         >
           Next
