@@ -73,7 +73,9 @@ export function ContentTabWrapper({
       if (handlers.setPendingChanges) {
         handlers.setPendingChanges(value);
       }
-    }
+    },
+    // Ensure isSaving is not undefined for ContentRouter
+    isSaving: handlers.isSaving || false
   };
 
   return (

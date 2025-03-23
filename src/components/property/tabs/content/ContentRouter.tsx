@@ -23,6 +23,8 @@ interface ContentRouterProps {
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     handleStepClick: (step: number) => void;
+    handleNext?: () => void;
+    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
     onFetchCategoryPlaces?: (category: string) => Promise<any>;
     onFetchNearbyCities?: () => Promise<any>;
@@ -34,7 +36,7 @@ interface ContentRouterProps {
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
     onSubmit: () => void;
-    isSaving: boolean;
+    isSaving: boolean; // This is now required
   };
 }
 
