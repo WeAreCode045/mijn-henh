@@ -9,6 +9,7 @@ interface NearbyPlacesEmptyStateProps {
   isFetchingCategory: boolean;
   currentCategory: string;
   formDataAddress?: string;
+  isReadOnly?: boolean;
 }
 
 export function NearbyPlacesEmptyState({
@@ -16,7 +17,8 @@ export function NearbyPlacesEmptyState({
   handleFetchCategory,
   isFetchingCategory,
   currentCategory,
-  formDataAddress
+  formDataAddress,
+  isReadOnly = false
 }: NearbyPlacesEmptyStateProps) {
   return (
     <div className="space-y-6">
@@ -38,7 +40,7 @@ export function NearbyPlacesEmptyState({
                 size="sm"
                 className="w-full mt-2"
                 onClick={() => handleFetchCategory(category.id)}
-                disabled={isFetchingCategory || !formDataAddress}
+                disabled={isFetchingCategory || !formDataAddress || isReadOnly}
               >
                 {isFetchingCategory && currentCategory === category.id ? 
                   'Fetching...' : 
@@ -54,7 +56,7 @@ export function NearbyPlacesEmptyState({
                       size="sm"
                       variant="secondary"
                       onClick={() => handleFetchCategory(category.id, subtype.id)}
-                      disabled={isFetchingCategory || !formDataAddress}
+                      disabled={isFetchingCategory || !formDataAddress || isReadOnly}
                       className="text-xs mt-1"
                     >
                       {isFetchingCategory && currentCategory === subtype.id ?

@@ -1,78 +1,62 @@
 
 import { useState } from "react";
-import { PlaceOption } from "../components/SelectPlacesModal";
-import { useToast } from "@/components/ui/use-toast";
 
 export function usePlaceFetching({
   onFetchNearbyPlaces,
   setPlacesForModal,
   setModalOpen,
   setCurrentCategory,
-  getMaxSelections
+  getMaxSelections,
+  isReadOnly = false
 }: {
   onFetchNearbyPlaces?: (category?: string) => Promise<any>;
-  setPlacesForModal: (places: PlaceOption[]) => void;
+  setPlacesForModal: (places: any[]) => void;
   setModalOpen: (open: boolean) => void;
   setCurrentCategory: (category: string) => void;
-  getMaxSelections: (typeId: string) => number;
+  getMaxSelections: (categoryId: string) => number;
+  isReadOnly?: boolean;
 }) {
   const [isFetchingCategory, setIsFetchingCategory] = useState(false);
-  const { toast } = useToast();
 
-  // Function to handle fetching places by category
-  const handleFetchCategory = async (categoryId: string) => {
-    if (!onFetchNearbyPlaces) return;
+  const handleFetchCategory = async (categoryId: string, subtypeId?: string) => {
+    if (isReadOnly || !onFetchNearbyPlaces) return Promise.resolve();
     
+    console.log(`Fetching places for category: ${categoryId}${subtypeId ? `, subtype: ${subtypeId}` : ''}`);
     setIsFetchingCategory(true);
-    setCurrentCategory(categoryId);
+    setCurrentCategory(subtypeId || categoryId);
     
     try {
-      console.log(`Fetching places for: ${categoryId}`);
-      const results = await onFetchNearbyPlaces(categoryId);
+      // Call the API function with the category
+      const response = await onFetchNearbyPlaces(subtypeId || categoryId);
       
-      if (results && results[categoryId] && Array.isArray(results[categoryId])) {
-        // Make sure we're only showing places for the requested category
-        const options: PlaceOption[] = results[categoryId].map((place: any) => ({
-          id: place.id,
-          name: place.name,
-          vicinity: place.vicinity,
-          rating: place.rating,
-          distance: place.distance,
-          type: place.type,
-          types: place.types,
-          maxSelections: getMaxSelections(place.type)
-        }));
+      if (response && response.places) {
+        const maxSelection = getMaxSelections(categoryId);
+        const places = response.places.slice(0, maxSelection * 2); // Fetch double the max to give more options
         
-        // Sort by rating
-        options.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        // Set the places for the modal
+        setPlacesForModal(places);
         
-        setPlacesForModal(options);
+        // Open the modal to select places
         setModalOpen(true);
-      } else {
-        toast({
-          title: "No places found",
-          description: `No ${categoryId.replace('_', ' ')} places found near this location.`,
-          variant: "destructive"
-        });
       }
     } catch (error) {
-      console.error("Error fetching places:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch nearby places.",
-        variant: "destructive"
-      });
+      console.error("Error fetching places for category:", error);
     } finally {
       setIsFetchingCategory(false);
     }
   };
 
-  // Function to handle fetching all places - triggered by button click
-  const handleFetchAllPlaces = async (e: React.MouseEvent) => {
-    if (!onFetchNearbyPlaces) return;
+  const handleFetchAllPlaces = async () => {
+    if (isReadOnly || !onFetchNearbyPlaces) return;
     
-    e.preventDefault();
-    await onFetchNearbyPlaces();
+    // This would fetch places for all categories
+    console.log("Fetching places for all categories");
+    
+    try {
+      await onFetchNearbyPlaces();
+    } catch (error) {
+      console.error("Error fetching all nearby places:", error);
+    }
   };
 
   return {

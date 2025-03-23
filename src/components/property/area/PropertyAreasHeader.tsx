@@ -22,7 +22,7 @@ export function PropertyAreasHeader({
       <h3 className="text-lg font-semibold">Property Areas</h3>
       
       <div className="flex gap-2">
-        {propertyData && onAreasGenerated && (
+        {propertyData && onAreasGenerated && !isReadOnly && (
           <GenerateAreasButton 
             propertyData={propertyData} 
             onAreasGenerated={onAreasGenerated} 
