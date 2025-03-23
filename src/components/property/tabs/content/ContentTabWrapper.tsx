@@ -86,103 +86,34 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
     }
   }, [handlers, toast]);
 
-  const adaptedRemoveFeature = useCallback((id: string) => {
-    if (handlers.onRemoveFeature) {
-      handlers.onRemoveFeature(id);
-      if (handlers.setPendingChanges) {
-        handlers.setPendingChanges(true);
-      } else {
-        setPendingChanges(true);
-      }
-    }
-  }, [handlers]);
-  
-  const adaptedUpdateFeature = useCallback((id: string, description: string) => {
-    if (handlers.onUpdateFeature) {
-      handlers.onUpdateFeature(id, description);
-      if (handlers.setPendingChanges) {
-        handlers.setPendingChanges(true);
-      } else {
-        setPendingChanges(true);
-      }
-    }
-  }, [handlers]);
-  
-  const adaptedFieldChange = useCallback((field: keyof PropertyFormData, value: any) => {
-    handlers.onFieldChange(field, value);
-    if (handlers.setPendingChanges) {
-      handlers.setPendingChanges(true);
-    } else {
-      setPendingChanges(true);
-    }
-  }, [handlers]);
-
-  // Handle tab change with autosave
-  const handleTabChange = useCallback(async (step: number) => {
-    // Save changes before changing tab if there are pending changes
-    if (pendingChanges || (handlers.setPendingChanges && formData.id)) {
-      console.log("Auto-saving before tab change...");
-      try {
-        await handleSubmit();
-      } catch (error) {
-        console.error("Error saving before tab change:", error);
-        toast({
-          title: "Warning",
-          description: "There was an issue saving your changes",
-          variant: "destructive",
-        });
-      }
-    }
-    
-    // Now change the tab
-    handlers.handleStepClick(step);
-  }, [pendingChanges, formData.id, handlers, handleSubmit, toast]);
-
-  if (handlers.isSaving || isSubmitting) {
-    return (
-      <div className="flex justify-center items-center my-8">
-        <Spinner className="h-8 w-8 text-primary" />
-        <span className="ml-3 text-lg text-primary">Saving changes...</span>
-      </div>
-    );
-  }
-
+  // Simply pass through the component tree to render content
   return (
-    <div className="space-y-6">
-      {!hideNavigation && (
-        <ContentTabNavigation 
-          currentStep={handlers.currentStep}
-          onStepClick={handleTabChange}
-          lastSaved={lastSaved}
-          onSave={handleSubmit}
-          isSaving={handlers.isSaving || false}
-        />
-      )}
-      
-      <ContentTabContent
-        property={property} 
-        formState={formData}
-        onFieldChange={adaptedFieldChange}
-        onAddFeature={handlers.onAddFeature}
-        onRemoveFeature={adaptedRemoveFeature}
-        onUpdateFeature={adaptedUpdateFeature}
-        currentStep={handlers.currentStep}
-        handleStepClick={handlers.handleStepClick}
-        onSubmit={handleSubmit}
-        isReadOnly={isReadOnly}
-        hideNavigation={hideNavigation}
-        // Pass through all other needed handlers
-        onAddArea={handlers.onAddArea}
-        onRemoveArea={handlers.onRemoveArea}
-        onUpdateArea={handlers.onUpdateArea}
-        onAreaImageRemove={handlers.onAreaImageRemove}
-        onAreaImagesSelect={handlers.onAreaImagesSelect}
-        handleAreaImageUpload={handlers.handleAreaImageUpload}
-        onFetchLocationData={handlers.onFetchLocationData}
-        onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
-        isLoadingLocationData={handlers.isLoadingLocationData}
-        isUploading={handlers.isUploading}
-      />
-    </div>
+    <ContentTabContent
+      property={property}
+      formState={formData}
+      onFieldChange={handlers.onFieldChange}
+      onAddFeature={handlers.onAddFeature}
+      onRemoveFeature={handlers.onRemoveFeature}
+      onUpdateFeature={handlers.onUpdateFeature}
+      onAddArea={handlers.onAddArea}
+      onRemoveArea={handlers.onRemoveArea}
+      onUpdateArea={handlers.onUpdateArea}
+      onAreaImageRemove={handlers.onAreaImageRemove}
+      onAreaImagesSelect={handlers.onAreaImagesSelect}
+      handleAreaImageUpload={handlers.handleAreaImageUpload}
+      currentStep={handlers.currentStep}
+      handleStepClick={handlers.handleStepClick}
+      handleNext={handlers.handleNext}
+      handlePrevious={handlers.handlePrevious}
+      onFetchLocationData={handlers.onFetchLocationData}
+      onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
+      isLoadingLocationData={handlers.isLoadingLocationData}
+      setPendingChanges={handlers.setPendingChanges || setPendingChanges}
+      isUploading={handlers.isUploading}
+      onSubmit={handleSubmit}
+      isSaving={isSubmitting || handlers.isSaving}
+      hideNavigation={hideNavigation}
+      isReadOnly={isReadOnly}
+    />
   );
 });

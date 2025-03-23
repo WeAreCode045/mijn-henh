@@ -71,14 +71,19 @@ export function PropertyStepContent({
   isSaving,
   isReadOnly,
 }: PropertyStepContentProps) {
+  // Make sure we have all necessary handlers before rendering steps
   const renderStep = () => {
+    // Define fallback handlers to prevent runtime errors
+    const safeSetPendingChanges = setPendingChanges || (() => {});
+    const safeOnFieldChange = onFieldChange || (() => {});
+    
     switch (currentStep) {
       case 0:
         return (
           <GeneralInfoStep
             formData={formData}
-            onFieldChange={onFieldChange}
-            setPendingChanges={setPendingChanges}
+            onFieldChange={safeOnFieldChange}
+            setPendingChanges={safeSetPendingChanges}
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}
@@ -88,7 +93,7 @@ export function PropertyStepContent({
         return (
           <LocationStep
             formData={formData}
-            onFieldChange={onFieldChange}
+            onFieldChange={safeOnFieldChange}
             onFetchLocationData={onFetchLocationData}
             onFetchCategoryPlaces={onFetchCategoryPlaces}
             onFetchNearbyCities={onFetchNearbyCities}
@@ -97,7 +102,7 @@ export function PropertyStepContent({
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
             isGeneratingMap={isGeneratingMap}
-            setPendingChanges={setPendingChanges}
+            setPendingChanges={safeSetPendingChanges}
           />
         );
       case 2:
@@ -107,8 +112,8 @@ export function PropertyStepContent({
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}
-            onFieldChange={onFieldChange}
-            setPendingChanges={setPendingChanges}
+            onFieldChange={safeOnFieldChange}
+            setPendingChanges={safeSetPendingChanges}
           />
         );
       case 3:
@@ -121,7 +126,7 @@ export function PropertyStepContent({
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
             onAreaImageUpload={onAreaImageUpload}
-            setPendingChanges={setPendingChanges}
+            setPendingChanges={safeSetPendingChanges}
             isUploading={isUploading}
           />
         );

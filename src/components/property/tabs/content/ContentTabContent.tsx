@@ -62,7 +62,7 @@ export const ContentTabContent = memo(function ContentTabContent({
   isReadOnly = false
 }: ContentTabContentProps) {
   
-  // Simplify by directly using PropertyStepWizard with properly memoized props
+  // Use the handlers directly rather than relying on intermediate PropertyStepWizard
   return (
     <PropertyStepWizard
       property={property}
