@@ -35,7 +35,6 @@ export function GeneralInfoStep({
   const [showAdvanced, setShowAdvanced] = useState(false);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (isReadOnly) return;
     const { name, value } = e.target;
     onFieldChange(name as keyof PropertyFormData, value);
     if (setPendingChanges) {
@@ -44,7 +43,6 @@ export function GeneralInfoStep({
   };
   
   const handleSwitchChange = (name: string, checked: boolean) => {
-    if (isReadOnly) return;
     onFieldChange(name as keyof PropertyFormData, checked);
     if (setPendingChanges) {
       setPendingChanges(true);
@@ -52,7 +50,6 @@ export function GeneralInfoStep({
   };
 
   const handleFeaturedImageSelect = (url: string | null) => {
-    if (isReadOnly) return;
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
       if (setPendingChanges) {
@@ -62,7 +59,6 @@ export function GeneralInfoStep({
   };
 
   const handleFeaturedImageToggle = (url: string) => {
-    if (isReadOnly) return;
     if (handleToggleFeaturedImage) {
       handleToggleFeaturedImage(url);
       if (setPendingChanges) {
@@ -77,7 +73,7 @@ export function GeneralInfoStep({
       <BasicDetails 
         formData={formData}
         onFieldChange={onFieldChange}
-        isReadOnly={isReadOnly}
+        isReadOnly={false}
         setPendingChanges={setPendingChanges}
       />
       
@@ -85,7 +81,7 @@ export function GeneralInfoStep({
       <PropertySpecs 
         formData={formData} 
         onFieldChange={onFieldChange}
-        isReadOnly={isReadOnly}
+        isReadOnly={false}
         setPendingChanges={setPendingChanges}
       />
       
@@ -93,7 +89,7 @@ export function GeneralInfoStep({
       <DescriptionSection 
         formData={formData}
         onFieldChange={onFieldChange}
-        isReadOnly={isReadOnly}
+        isReadOnly={false}
         setPendingChanges={setPendingChanges}
       />
       
@@ -103,7 +99,6 @@ export function GeneralInfoStep({
         variant="outline"
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="w-full"
-        disabled={isReadOnly}
       >
         {showAdvanced ? "Hide" : "Show"} Advanced Fields
       </Button>
@@ -124,7 +119,6 @@ export function GeneralInfoStep({
                   placeholder="Living Area"
                   value={formData.livingArea || ''}
                   onChange={handleInputChange}
-                  readOnly={isReadOnly}
                 />
               </div>
               
@@ -136,7 +130,6 @@ export function GeneralInfoStep({
                   placeholder="Build Year"
                   value={formData.buildYear || ''}
                   onChange={handleInputChange}
-                  readOnly={isReadOnly}
                 />
               </div>
               
@@ -148,7 +141,6 @@ export function GeneralInfoStep({
                   placeholder="Garages"
                   value={formData.garages || ''}
                   onChange={handleInputChange}
-                  readOnly={isReadOnly}
                 />
               </div>
               
@@ -160,7 +152,6 @@ export function GeneralInfoStep({
                   placeholder="Energy Label"
                   value={formData.energyLabel || ''}
                   onChange={handleInputChange}
-                  readOnly={isReadOnly}
                 />
               </div>
             </div>
@@ -173,7 +164,6 @@ export function GeneralInfoStep({
                   id="hasGarden"
                   checked={formData.hasGarden || false}
                   onCheckedChange={(checked) => handleSwitchChange('hasGarden', checked)}
-                  disabled={isReadOnly}
                 />
                 <Label htmlFor="hasGarden">Has Garden</Label>
               </div>
@@ -191,7 +181,7 @@ export function GeneralInfoStep({
           onFeaturedImageSelect={handleFeaturedImageSelect}
           onFeaturedImageToggle={handleFeaturedImageToggle}
           maxFeaturedImages={4}
-          isReadOnly={isReadOnly}
+          isReadOnly={false}
         />
       )}
     </div>

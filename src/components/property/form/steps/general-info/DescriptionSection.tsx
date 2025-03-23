@@ -19,11 +19,10 @@ export function DescriptionSection({
 }: DescriptionSectionProps) {
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (isReadOnly) return;
-    
     const { name, value } = e.target;
     console.log(`DescriptionSection: Changing ${name} to: `, value);
     onFieldChange(name as keyof PropertyFormData, value);
+    
     if (setPendingChanges) {
       setPendingChanges(true);
     }
@@ -44,7 +43,6 @@ export function DescriptionSection({
             value={formData.shortDescription || ''}
             onChange={handleChange}
             className="min-h-[80px]"
-            readOnly={isReadOnly}
           />
         </div>
         
@@ -57,7 +55,6 @@ export function DescriptionSection({
             value={formData.description || ''}
             onChange={handleChange}
             className="min-h-[160px]"
-            readOnly={isReadOnly}
           />
         </div>
       </CardContent>

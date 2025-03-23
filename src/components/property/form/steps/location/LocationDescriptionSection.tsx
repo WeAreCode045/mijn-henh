@@ -22,8 +22,9 @@ export function LocationDescriptionSection({
   isReadOnly = false
 }: LocationDescriptionSectionProps) {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (isReadOnly || !onFieldChange) return;
-    onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
+    if (onFieldChange) {
+      onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
+    }
   };
 
   return (
@@ -33,7 +34,7 @@ export function LocationDescriptionSection({
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label htmlFor="location_description">Location Description</Label>
-              {onGenerateDescription && !isReadOnly && (
+              {onGenerateDescription && (
                 <Button
                   type="button"
                   variant="outline"
@@ -66,7 +67,6 @@ export function LocationDescriptionSection({
               onChange={handleChange}
               placeholder="Describe the property location and surroundings"
               rows={6}
-              disabled={isReadOnly}
             />
           </div>
         </div>

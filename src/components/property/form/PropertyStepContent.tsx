@@ -74,26 +74,6 @@ export function PropertyStepContent({
   console.log("PropertyStepContent rendering with currentStep:", currentStep);
   console.log("FormData structure:", Object.keys(formData).join(", "));
   console.log("onFieldChange is defined:", !!onFieldChange);
-  console.log("isReadOnly value:", isReadOnly);
-  
-  // Define fallback handlers to prevent runtime errors
-  const safeOnFieldChange = (field: keyof PropertyFormData, value: any) => {
-    console.log(`PropertyStepContent safeOnFieldChange called: ${String(field)} = `, value);
-    if (onFieldChange) {
-      onFieldChange(field, value);
-    } else {
-      console.warn(`Fallback onFieldChange called with: ${String(field)}`, value);
-    }
-  };
-  
-  const safeSetPendingChanges = (value: boolean) => {
-    console.log(`PropertyStepContent setPendingChanges called: ${value}`);
-    if (setPendingChanges) {
-      setPendingChanges(value);
-    } else {
-      console.warn("Fallback setPendingChanges called");
-    }
-  };
   
   // Render the appropriate step based on currentStep
   const renderStep = () => {
@@ -102,15 +82,16 @@ export function PropertyStepContent({
         return (
           <GeneralInfoStep
             formData={formData}
-            onFieldChange={safeOnFieldChange}
-            setPendingChanges={safeSetPendingChanges}
+            onFieldChange={onFieldChange}
+            setPendingChanges={setPendingChanges}
+            isReadOnly={false}
           />
         );
       case 1:
         return (
           <LocationStep
             formData={formData}
-            onFieldChange={safeOnFieldChange}
+            onFieldChange={onFieldChange}
             onFetchLocationData={onFetchLocationData}
             onFetchCategoryPlaces={onFetchCategoryPlaces}
             onFetchNearbyCities={onFetchNearbyCities}
@@ -119,7 +100,8 @@ export function PropertyStepContent({
             onRemoveNearbyPlace={onRemoveNearbyPlace}
             isLoadingLocationData={isLoadingLocationData}
             isGeneratingMap={isGeneratingMap}
-            setPendingChanges={safeSetPendingChanges}
+            setPendingChanges={setPendingChanges}
+            isReadOnly={false}
           />
         );
       case 2:
@@ -129,8 +111,9 @@ export function PropertyStepContent({
             onAddFeature={onAddFeature}
             onRemoveFeature={onRemoveFeature}
             onUpdateFeature={onUpdateFeature}
-            onFieldChange={safeOnFieldChange}
-            setPendingChanges={safeSetPendingChanges}
+            onFieldChange={onFieldChange}
+            setPendingChanges={setPendingChanges}
+            isReadOnly={false}
           />
         );
       case 3:
@@ -143,8 +126,9 @@ export function PropertyStepContent({
             onAreaImageRemove={onAreaImageRemove}
             onAreaImagesSelect={onAreaImagesSelect}
             onAreaImageUpload={onAreaImageUpload}
-            setPendingChanges={safeSetPendingChanges}
+            setPendingChanges={setPendingChanges}
             isUploading={isUploading}
+            isReadOnly={false}
           />
         );
       default:
@@ -202,7 +186,7 @@ export function PropertyStepContent({
         <Button
           variant="outline"
           onClick={handlePrev}
-          disabled={currentStep === 0 || isReadOnly}
+          disabled={currentStep === 0}
           type="button"
           className="flex items-center gap-2"
         >
@@ -213,7 +197,7 @@ export function PropertyStepContent({
         <div className="flex space-x-2">
           <Button
             onClick={handleSave}
-            disabled={isSaving || isReadOnly}
+            disabled={isSaving}
             type="button"
             variant="secondary"
           >
@@ -222,7 +206,7 @@ export function PropertyStepContent({
           
           <Button
             onClick={handleNextStep}
-            disabled={currentStep === 3 || isReadOnly}
+            disabled={currentStep === 3}
             type="button"
             className="flex items-center gap-2"
           >

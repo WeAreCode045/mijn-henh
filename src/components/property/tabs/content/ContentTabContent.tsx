@@ -91,7 +91,7 @@ export const ContentTabContent = memo(function ContentTabContent({
       isUploading={isUploading}
       onSubmit={onSubmit}
       isSaving={isSaving}
-      isReadOnly={isReadOnly}
+      isReadOnly={false}
       hideNavigation={hideNavigation}
     />
   );

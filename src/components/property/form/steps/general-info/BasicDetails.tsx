@@ -20,7 +20,6 @@ export function BasicDetails({
 }: BasicDetailsProps) {
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isReadOnly) return;
     const { name, value } = e.target;
     console.log(`BasicDetails: Changing ${name} to ${value}`);
     onFieldChange(name as keyof PropertyFormData, value);
@@ -30,7 +29,6 @@ export function BasicDetails({
   };
   
   const handleSelectChange = (field: string, value: string) => {
-    if (isReadOnly) return;
     console.log(`BasicDetails: Changing ${field} to ${value}`);
     onFieldChange(field as keyof PropertyFormData, value);
     if (setPendingChanges) {
@@ -52,7 +50,6 @@ export function BasicDetails({
             placeholder="Property Title"
             value={formData.title || ''}
             onChange={handleChange}
-            readOnly={isReadOnly}
           />
         </div>
         
@@ -62,7 +59,6 @@ export function BasicDetails({
             <Select 
               defaultValue={formData.status || 'for_sale'} 
               onValueChange={(value) => handleSelectChange('status', value)}
-              disabled={isReadOnly}
             >
               <SelectTrigger id="status">
                 <SelectValue placeholder="Select status" />
@@ -87,7 +83,6 @@ export function BasicDetails({
               placeholder="Price"
               value={formData.price || ''}
               onChange={handleChange}
-              readOnly={isReadOnly}
             />
           </div>
           
@@ -96,7 +91,6 @@ export function BasicDetails({
             <Select 
               defaultValue={formData.propertyType || 'house'} 
               onValueChange={(value) => handleSelectChange('propertyType', value)}
-              disabled={isReadOnly}
             >
               <SelectTrigger id="propertyType">
                 <SelectValue placeholder="Select type" />
@@ -122,7 +116,6 @@ export function BasicDetails({
               placeholder="Address"
               value={formData.address || ''}
               onChange={handleChange}
-              readOnly={isReadOnly}
             />
           </div>
         </div>

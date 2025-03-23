@@ -71,22 +71,11 @@ export function PropertyStepWizard({
 }: PropertyStepWizardProps) {
   console.log("PropertyStepWizard rendering with current step:", currentStep);
   console.log("PropertyStepWizard onFieldChange is defined:", !!onFieldChange);
-  console.log("PropertyStepWizard isReadOnly:", isReadOnly);
   
   if (!formState) {
     console.error("No form state provided to PropertyStepWizard");
     return <div>Loading...</div>;
   }
-  
-  // Safe handler for field changes
-  const handleSafeFieldChange = (field: keyof PropertyFormData, value: any) => {
-    console.log(`PropertyStepWizard handleFieldChange: ${String(field)} = `, value);
-    if (onFieldChange) {
-      onFieldChange(field, value);
-    } else {
-      console.warn("onFieldChange is not defined in PropertyStepWizard");
-    }
-  };
   
   return (
     <div className="space-y-6">
@@ -102,7 +91,7 @@ export function PropertyStepWizard({
       <PropertyStepContent 
         formData={formState}
         step={currentStep}
-        onFieldChange={handleSafeFieldChange}
+        onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}
         onUpdateFeature={onUpdateFeature}
@@ -128,7 +117,7 @@ export function PropertyStepWizard({
         isUploading={isUploading}
         onSubmit={onSubmit}
         isSaving={isSaving}
-        isReadOnly={isReadOnly}
+        isReadOnly={false}
       />
     </div>
   );

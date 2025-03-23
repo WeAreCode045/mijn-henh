@@ -19,8 +19,6 @@ export function PropertySpecs({
 }: PropertySpecsProps) {
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isReadOnly) return;
-    
     const { name, value } = e.target;
     console.log(`PropertySpecs: Changing ${name} to ${value}`);
     onFieldChange(name as keyof PropertyFormData, value);
@@ -46,7 +44,6 @@ export function PropertySpecs({
               value={formData.bedrooms || ''}
               onChange={handleChange}
               min={0}
-              readOnly={isReadOnly}
             />
           </div>
           
@@ -60,7 +57,6 @@ export function PropertySpecs({
               value={formData.bathrooms || ''}
               onChange={handleChange}
               min={0}
-              readOnly={isReadOnly}
             />
           </div>
           
@@ -74,7 +70,6 @@ export function PropertySpecs({
               value={formData.sqft || ''}
               onChange={handleChange}
               min={0}
-              readOnly={isReadOnly}
             />
           </div>
         </div>
