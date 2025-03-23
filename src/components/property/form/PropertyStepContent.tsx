@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -24,8 +23,8 @@ interface PropertyStepContentProps {
   onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   currentStep: number;
   handleStepClick: (step: number) => void;
-  handleNext?: () => void;
-  handlePrevious?: () => void;
+  handleNext?: () => void;  // Changed to match function signature with no parameters
+  handlePrevious?: () => void;  // Changed to match function signature with no parameters
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onFetchNearbyCities?: () => Promise<any>;
@@ -159,7 +158,7 @@ export function PropertyStepContent({
       <div className="flex justify-between mt-6">
         <Button
           variant="outline"
-          onClick={handlePreviousClick}
+          onClick={handlePreviousClick}  // Now this function handles the event
           disabled={currentStep === 0}
           type="button" // Explicitly set as button type
           className="flex items-center gap-2"
@@ -169,7 +168,7 @@ export function PropertyStepContent({
         </Button>
         
         <Button
-          onClick={handleNextClick}
+          onClick={handleNextClick}  // Now this function handles the event
           disabled={currentStep === 3}
           type="button" // Explicitly set as button type
           className="flex items-center gap-2"
