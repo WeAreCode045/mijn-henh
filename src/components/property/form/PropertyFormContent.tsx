@@ -237,8 +237,8 @@ export function PropertyFormContent({
   setPendingChanges
 }: PropertyFormManagerChildrenProps) {
 
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
+  // Modified to remove the event parameter and make the signature match what is expected
+  const handleSaveClick = () => {
     console.log("Save button clicked in PropertyFormContent");
     // Set pending changes to true when user saves
     if (setPendingChanges) setPendingChanges(true);
