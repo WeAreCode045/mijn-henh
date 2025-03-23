@@ -125,30 +125,6 @@ export function BasicDetails({
               readOnly={isReadOnly}
             />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
-              id="city"
-              name="city"
-              placeholder="City"
-              value={formData.city || ''}
-              onChange={handleChange}
-              readOnly={isReadOnly}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="zipCode">ZIP / Postal Code</Label>
-            <Input
-              id="zipCode"
-              name="zipCode"
-              placeholder="ZIP Code"
-              value={formData.zipCode || ''}
-              onChange={handleChange}
-              readOnly={isReadOnly}
-            />
-          </div>
         </div>
       </CardContent>
     </Card>

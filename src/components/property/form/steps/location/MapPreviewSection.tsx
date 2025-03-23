@@ -10,19 +10,21 @@ interface MapPreviewSectionProps {
   onDeleteMapImage?: () => Promise<void>;
   onGenerateMap?: () => Promise<void>;
   isGeneratingMap?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function MapPreviewSection({ 
   formData,
   onDeleteMapImage,
   onGenerateMap,
-  isGeneratingMap = false
+  isGeneratingMap = false,
+  isReadOnly = false
 }: MapPreviewSectionProps) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <Label>Map Preview</Label>
-        {onGenerateMap && (
+        {onGenerateMap && !isReadOnly && (
           <Button
             variant="outline"
             size="sm"
@@ -60,7 +62,9 @@ export function MapPreviewSection({
       ) : (
         <div className="bg-gray-100 border rounded-md p-8 text-center text-gray-500">
           <p>No map image available.</p>
-          <p className="text-sm mt-1">Generate a map image using the button above.</p>
+          {!isReadOnly && (
+            <p className="text-sm mt-1">Generate a map image using the button above.</p>
+          )}
         </div>
       )}
     </div>

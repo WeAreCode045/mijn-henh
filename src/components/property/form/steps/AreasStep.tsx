@@ -29,6 +29,8 @@ export function AreasStep({
 }: AreasStepProps) {
   // Function to handle generated areas from AI
   const handleAreasGenerated = (newAreas: PropertyArea[]) => {
+    if (isReadOnly) return;
+    
     // If there are existing areas, we'll append the new ones
     const updatedAreas = [...(formData.areas || []), ...newAreas];
     

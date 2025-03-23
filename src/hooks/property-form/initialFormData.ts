@@ -36,4 +36,7 @@ export const initialFormData: PropertyFormData = {
   map_image: null,
   object_id: '',
   agent_id: '',
+  floorplanEmbedScript: '',
+  virtualTourUrl: '',
+  youtubeUrl: '',
 };

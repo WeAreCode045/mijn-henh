@@ -65,13 +65,13 @@ export function PropertySpecs({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="area">Total Area (m²)</Label>
+            <Label htmlFor="sqft">Total Area (m²)</Label>
             <Input
-              id="area"
-              name="area"
+              id="sqft"
+              name="sqft"
               type="number"
               placeholder="Total Area"
-              value={formData.area || ''}
+              value={formData.sqft || ''}
               onChange={handleChange}
               min={0}
               readOnly={isReadOnly}

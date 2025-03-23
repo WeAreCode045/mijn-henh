@@ -84,7 +84,7 @@ export function ImageSelections({
                   >
                     <img 
                       src={image.url} 
-                      alt={image.alt || 'Property'} 
+                      alt={`Property image ${image.id}`} 
                       className="object-cover w-full h-full"
                     />
                     {!isReadOnly && (
