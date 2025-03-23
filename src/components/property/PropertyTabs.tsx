@@ -1,7 +1,8 @@
 
+import { memo, useCallback } from "react";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image, Home, MessageCircle } from "lucide-react";
-import { ReactNode, useEffect, useState, memo } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyTabsProps {
@@ -59,11 +60,12 @@ export const PropertyTabs = memo(function PropertyTabs({
     };
   }, [propertyId]);
 
-  const handleTabButtonClick = (tabValue: string) => {
+  // Use a dedicated handler for tab clicks that includes debouncing logic
+  const handleTabButtonClick = useCallback((tabValue: string) => {
     if (tabValue === activeTab) return; // Don't trigger if already on this tab
     console.log(`Tab clicked: ${tabValue}, current activeTab: ${activeTab}`);
     handleTabChange(tabValue);
-  };
+  }, [activeTab, handleTabChange]);
 
   return (
     <>

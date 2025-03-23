@@ -8,10 +8,10 @@ import { PropertyTabActionsHandler } from "./tabs/wrapper/PropertyTabActionsHand
 import { PropertyWebViewDialog } from "./tabs/wrapper/PropertyWebViewDialog";
 import { Tabs } from "@/components/ui/tabs";
 import { useWebViewOpenState } from "@/hooks/useWebViewOpenState";
-import React, { Suspense, lazy, useState, useEffect } from "react";
+import React, { Suspense, lazy, useState, useEffect, useMemo } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
-// Lazy-load tab contents to improve performance
+// Using lazy loading for all tab content components to reduce initial load time
 const LazyPropertyContentTab = lazy(() => 
   import("./tabs/PropertyContentTab").then(module => ({ default: module.PropertyContentTab }))
 );
@@ -40,9 +40,10 @@ export function PropertyTabsWrapper({
   // Track tab changes to show loading state
   useEffect(() => {
     setIsTabLoading(true);
+    // Use a short timeout to allow React to process tab change
     const timer = setTimeout(() => {
       setIsTabLoading(false);
-    }, 100); // Short timeout to allow React to process tab change
+    }, 300); // Slightly longer timeout to ensure components are ready
     
     return () => clearTimeout(timer);
   }, [activeTab]);
@@ -66,137 +67,65 @@ export function PropertyTabsWrapper({
     </div>
   );
 
+  // Memoize the tab navigation to prevent rerenders
+  const tabsElement = useMemo(() => (
+    <Tabs 
+      defaultValue={activeTab} 
+      value={activeTab} 
+      onValueChange={setActiveTab}
+    >
+      <PropertyTabs 
+        activeTab={activeTab} 
+        handleTabChange={setActiveTab}
+        propertyId={property.id}
+      >
+        <Suspense fallback={renderTabLoader()}>
+          {!isTabLoading ? (
+            <PropertyTabActionsHandler 
+              propertyId={property.id} 
+              propertyData={property} 
+              settings={settings}
+              isArchived={isArchived}
+            >
+              {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
+                <PropertyFormManager property={property} isArchived={isArchived}>
+                  {(formManagerProps) => (
+                    <PropertyTabContents
+                      activeTab={activeTab}
+                      property={formManagerProps.propertyWithRequiredProps}
+                      formState={formManagerProps.formState}
+                      agentInfo={agentInfo}
+                      isUpdating={false}
+                      onSave={onSave}
+                      onDelete={onDelete}
+                      handleSaveTemplate={handleSaveTemplate}
+                      handleGeneratePDF={handleGeneratePDF}
+                      handleWebView={handleOpenWebView}
+                      isArchived={isArchived}
+                      {...formManagerProps}
+                    />
+                  )}
+                </PropertyFormManager>
+              )}
+            </PropertyTabActionsHandler>
+          ) : (
+            renderTabLoader()
+          )}
+        </Suspense>
+      </PropertyTabs>
+    </Tabs>
+  ), [activeTab, property, settings, isArchived, agentInfo, onSave, onDelete, setActiveTab, isTabLoading]);
+
   return (
     <div className="space-y-6">
-      <PropertyTabActionsHandler 
-        propertyId={property.id} 
-        propertyData={property} 
-        settings={settings}
-        isArchived={isArchived}
-      >
-        {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={property} isArchived={isArchived}>
-            {({ 
-              formState, 
-              handleFieldChange,
-              handleSaveObjectId,
-              handleSaveAgent,
-              addFeature,
-              removeFeature,
-              updateFeature,
-              addArea,
-              removeArea,
-              updateArea,
-              handleAreaImageRemove,
-              handleAreaImagesSelect,
-              handleAreaImageUpload,
-              handleImageUpload,
-              handleRemoveImage,
-              isUploading,
-              handleAreaPhotosUpload,
-              handleRemoveAreaPhoto,
-              handleFloorplanUpload,
-              handleRemoveFloorplan,
-              isUploadingFloorplan,
-              handleSetFeaturedImage,
-              handleToggleFeaturedImage,
-              handleVirtualTourUpdate,
-              handleYoutubeUrlUpdate,
-              handleFloorplanEmbedScriptUpdate,
-              onSubmit,
-              currentStep,
-              handleStepClick,
-              propertyWithRequiredProps,
-              lastSaved,
-              isSaving,
-              setPendingChanges,
-              onFetchLocationData,
-              onGenerateLocationDescription,
-              onGenerateMap,
-              onRemoveNearbyPlace,
-              isLoadingLocationData,
-              isGeneratingMap,
-              onFetchCategoryPlaces,
-              onFetchNearbyCities
-            }) => (
-              <>
-                <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-                  <PropertyTabs 
-                    activeTab={activeTab} 
-                    handleTabChange={setActiveTab}
-                    propertyId={property.id}
-                  >
-                    <Suspense fallback={renderTabLoader()}>
-                      {!isTabLoading ? (
-                        <PropertyTabContents
-                          activeTab={activeTab}
-                          property={propertyWithRequiredProps}
-                          formState={formState}
-                          agentInfo={agentInfo}
-                          isUpdating={false}
-                          onSave={onSave}
-                          onDelete={onDelete}
-                          handleSaveObjectId={handleSaveObjectId}
-                          handleSaveAgent={handleSaveAgent}
-                          handleSaveTemplate={handleSaveTemplate}
-                          handleGeneratePDF={handleGeneratePDF}
-                          handleWebView={handleOpenWebView}
-                          onFieldChange={handleFieldChange}
-                          onAddFeature={addFeature}
-                          onRemoveFeature={removeFeature}
-                          onUpdateFeature={updateFeature}
-                          onAddArea={addArea}
-                          onRemoveArea={removeArea}
-                          onUpdateArea={updateArea}
-                          onAreaImageRemove={handleAreaImageRemove}
-                          onAreaImagesSelect={handleAreaImagesSelect}
-                          onAreaImageUpload={handleAreaImageUpload}
-                          handleImageUpload={handleImageUpload}
-                          handleRemoveImage={handleRemoveImage}
-                          isUploading={isUploading}
-                          handleAreaPhotosUpload={handleAreaPhotosUpload}
-                          handleFloorplanUpload={handleFloorplanUpload}
-                          handleRemoveFloorplan={handleRemoveFloorplan}
-                          isUploadingFloorplan={isUploadingFloorplan}
-                          handleSetFeaturedImage={handleSetFeaturedImage}
-                          handleToggleFeaturedImage={handleToggleFeaturedImage}
-                          handleVirtualTourUpdate={handleVirtualTourUpdate}
-                          handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
-                          handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
-                          currentStep={currentStep}
-                          handleStepClick={handleStepClick}
-                          onSubmit={onSubmit}
-                          handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-                          setPendingChanges={setPendingChanges}
-                          isSaving={isSaving}
-                          onFetchLocationData={onFetchLocationData}
-                          onGenerateLocationDescription={onGenerateLocationDescription}
-                          onGenerateMap={onGenerateMap}
-                          onRemoveNearbyPlace={onRemoveNearbyPlace}
-                          isLoadingLocationData={isLoadingLocationData}
-                          isGeneratingMap={isGeneratingMap}
-                          onFetchCategoryPlaces={onFetchCategoryPlaces}
-                          onFetchNearbyCities={onFetchNearbyCities}
-                          isArchived={isArchived}
-                        />
-                      ) : (
-                        renderTabLoader()
-                      )}
-                    </Suspense>
-                  </PropertyTabs>
-                </Tabs>
-
-                {/* WebView Dialog */}
-                <PropertyWebViewDialog
-                  propertyData={propertyWithRequiredProps}
-                  isOpen={webViewOpen}
-                  onOpenChange={setWebViewOpen}
-                />
-              </>
-            )}
-          </PropertyFormManager>
-        )}
-      </PropertyTabActionsHandler>
+      {tabsElement}
+      
+      {/* WebView Dialog */}
+      <PropertyWebViewDialog
+        propertyData={property}
+        isOpen={isWebViewOpen}
+        onOpenChange={setIsWebViewOpen}
+      />
     </div>
   );
 }

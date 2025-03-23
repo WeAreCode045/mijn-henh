@@ -1,7 +1,7 @@
 
 import React, { memo } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
-import { PropertyContentTab } from '../PropertyContentTab';
+import { PropertyStepWizard } from '../../form/PropertyStepWizard';
 
 interface ContentTabContentProps {
   property: PropertyData;
@@ -61,46 +61,35 @@ export const ContentTabContent = memo(function ContentTabContent({
   hideNavigation = false,
   isReadOnly = false
 }: ContentTabContentProps) {
-  // Create a combined handler to ensure onSubmit is called properly
-  const handleSubmit = () => {
-    console.log("ContentTabContent - handleSubmit called");
-    if (onSubmit) {
-      onSubmit();
-    }
-  };
-
-  // Pass all handlers to the PropertyContentTab component
-  const handlers = {
-    onFieldChange,
-    onAddFeature,
-    onRemoveFeature,
-    onUpdateFeature,
-    onAddArea,
-    onRemoveArea,
-    onUpdateArea,
-    onAreaImageRemove,
-    onAreaImagesSelect,
-    handleAreaImageUpload,
-    currentStep,
-    handleStepClick,
-    handleNext,
-    handlePrevious,
-    onFetchLocationData,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    setPendingChanges,
-    isUploading,
-    onSubmit: handleSubmit,
-    isSaving
-  };
-
+  
+  // Simplify by directly using PropertyStepWizard with properly memoized props
   return (
-    <PropertyContentTab 
-      formData={formState} 
-      handlers={handlers} 
+    <PropertyStepWizard
       property={property}
-      hideNavigation={hideNavigation}
+      formState={formState}
+      onFieldChange={onFieldChange}
+      onAddFeature={onAddFeature}
+      onRemoveFeature={onRemoveFeature}
+      onUpdateFeature={onUpdateFeature}
+      onAddArea={onAddArea}
+      onRemoveArea={onRemoveArea}
+      onUpdateArea={onUpdateArea}
+      onAreaImageRemove={onAreaImageRemove}
+      onAreaImagesSelect={onAreaImagesSelect}
+      onAreaImageUpload={handleAreaImageUpload}
+      currentStep={currentStep}
+      handleStepClick={handleStepClick}
+      handleNext={handleNext}
+      handlePrevious={handlePrevious}
+      onFetchLocationData={onFetchLocationData}
+      onRemoveNearbyPlace={onRemoveNearbyPlace}
+      isLoadingLocationData={isLoadingLocationData}
+      setPendingChanges={setPendingChanges}
+      isUploading={isUploading}
+      onSubmit={onSubmit}
+      isSaving={isSaving}
       isReadOnly={isReadOnly}
+      hideNavigation={hideNavigation}
     />
   );
 });

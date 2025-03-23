@@ -1,11 +1,12 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 export function usePropertyTabs() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const navigationInProgress = useRef(false);
   
   // Valid tab values and their corresponding paths
   const validTabs = ['dashboard', 'content', 'media', 'communications'];
@@ -27,10 +28,12 @@ export function usePropertyTabs() {
   
   // Update the URL when tab changes - optimized with useCallback to prevent unnecessary rerenders
   const handleTabChange = useCallback((tab: string) => {
-    if (!id) {
-      console.warn("No property ID available for tab navigation");
+    if (!id || navigationInProgress.current || tab === activeTab) {
       return;
     }
+    
+    navigationInProgress.current = true;
+    console.log(`Tab change requested: ${tab}`);
     
     // First update the state
     setActiveTab(tab);
@@ -38,12 +41,17 @@ export function usePropertyTabs() {
     // Then navigate to the correct route
     // Using replace instead of push to avoid history buildup for tab changes
     navigate(`/property/${id}/${tab}`, { replace: true });
-  }, [id, navigate]);
+    
+    // Reset the navigation lock after a short delay
+    setTimeout(() => {
+      navigationInProgress.current = false;
+    }, 300);
+  }, [id, navigate, activeTab]);
   
   // Sync with URL path changes
   useEffect(() => {
     const currentTab = getTabFromPath(location.pathname);
-    if (currentTab !== activeTab) {
+    if (currentTab !== activeTab && !navigationInProgress.current) {
       console.log(`Syncing tab state from URL: ${currentTab}`);
       setActiveTab(currentTab);
     }
