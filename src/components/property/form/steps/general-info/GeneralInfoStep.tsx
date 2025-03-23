@@ -7,10 +7,10 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { BasicDetails } from "./general-info/BasicDetails";
-import { DescriptionSection } from "./general-info/DescriptionSection";
-import { PropertySpecs } from "./general-info/PropertySpecs";
-import { ImageSelections } from "./general-info/ImageSelections";
+import { BasicDetails } from "./BasicDetails";
+import { DescriptionSection } from "./DescriptionSection";
+import { PropertySpecs } from "./PropertySpecs";
+import { ImageSelections } from "./ImageSelections";
 import { useState } from "react";
 
 interface GeneralInfoStepProps {
