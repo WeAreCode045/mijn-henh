@@ -1,12 +1,12 @@
 
 import React from "react";
 import { PropertyFormData } from "@/types/property";
-import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
+import { ContentTabNavigation } from "./ContentTabNavigation";
 import { GeneralPage } from "./pages/GeneralPage";
 import { LocationPage } from "./pages/LocationPage";
 import { FeaturesPage } from "./pages/FeaturesPage";
 import { AreasPage } from "./pages/AreasPage";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ContentRouterProps {
   formData: PropertyFormData;
@@ -50,8 +50,6 @@ export function ContentRouter({
           <GeneralPage
             formData={formData}
             onFieldChange={handlers.onFieldChange}
-            onSubmit={handlers.onSubmit}
-            isSaving={handlers.isSaving}
             setPendingChanges={handlers.setPendingChanges}
           />
         );
@@ -61,15 +59,8 @@ export function ContentRouter({
             formData={formData}
             onFieldChange={handlers.onFieldChange}
             onFetchLocationData={handlers.onFetchLocationData}
-            onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
-            onFetchNearbyCities={handlers.onFetchNearbyCities}
             onGenerateLocationDescription={handlers.onGenerateLocationDescription}
-            onGenerateMap={handlers.onGenerateMap}
-            onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
             isLoadingLocationData={handlers.isLoadingLocationData}
-            isGeneratingMap={handlers.isGeneratingMap}
-            onSubmit={handlers.onSubmit}
-            isSaving={handlers.isSaving}
             setPendingChanges={handlers.setPendingChanges}
           />
         );
@@ -81,8 +72,6 @@ export function ContentRouter({
             onAddFeature={handlers.onAddFeature}
             onRemoveFeature={handlers.onRemoveFeature}
             onUpdateFeature={handlers.onUpdateFeature}
-            onSubmit={handlers.onSubmit}
-            isSaving={handlers.isSaving}
             setPendingChanges={handlers.setPendingChanges}
           />
         );
@@ -95,10 +84,7 @@ export function ContentRouter({
             onRemoveArea={handlers.onRemoveArea}
             onUpdateArea={handlers.onUpdateArea}
             onAreaImageRemove={handlers.onAreaImageRemove}
-            onAreaImagesSelect={handlers.onAreaImagesSelect}
             onAreaImageUpload={handlers.onAreaImageUpload}
-            onSubmit={handlers.onSubmit}
-            isSaving={handlers.isSaving}
             isUploading={handlers.isUploading}
             setPendingChanges={handlers.setPendingChanges}
           />
@@ -110,17 +96,12 @@ export function ContentRouter({
 
   return (
     <div className="space-y-6">
-      <FormStepNavigation
+      <ContentTabNavigation
         currentStep={currentStep}
         onStepClick={handlers.handleStepClick}
-        onSave={handlers.onSubmit}
-        isSaving={handlers.isSaving}
       />
       <Card>
-        <CardHeader>
-          <CardTitle>Property Content</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {renderContent()}
         </CardContent>
       </Card>
