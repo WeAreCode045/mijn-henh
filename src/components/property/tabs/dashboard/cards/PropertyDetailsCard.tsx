@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +46,6 @@ export function PropertyDetailsCard({
   const addressInputRef = useRef<HTMLInputElement>(null);
   const { settings } = useAgencySettings();
   
-  // Fetch property address when component mounts
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       const { data, error } = await supabase
@@ -64,15 +62,12 @@ export function PropertyDetailsCard({
     fetchPropertyDetails();
   }, [id]);
   
-  // Set up Google Places Autocomplete for address field when in edit mode
   useEffect(() => {
-    // Only set up when in edit mode and the address input ref exists
     if (!isEditing || !addressInputRef.current) return;
     
     const googleApiKey = settings?.googleMapsApiKey;
     if (!googleApiKey) return;
 
-    // Load the Google Maps JavaScript API
     const loadGoogleMapsScript = () => {
       const scriptId = 'google-maps-script';
       if (document.getElementById(scriptId)) return;
@@ -88,7 +83,6 @@ export function PropertyDetailsCard({
     };
 
     const initializeAutocomplete = () => {
-      // Use window with type assertion to access the google object
       if (!(window as any).google || 
           !(window as any).google?.maps || 
           !(window as any).google?.maps?.places) {
@@ -113,14 +107,14 @@ export function PropertyDetailsCard({
   }, [settings, isEditing]);
   
   const handleToggleEdit = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission and page reload
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
     setIsEditing(!isEditing);
   };
   
   const handleSaveDetails = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission and page reload
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
     
     try {
       const { error } = await supabase
@@ -128,14 +122,13 @@ export function PropertyDetailsCard({
         .update({
           title: propertyTitle,
           address: propertyAddress,
-          object_id: currentObjectId // Include object_id in the same update
+          object_id: currentObjectId
         })
         .eq('id', id);
         
       if (error) throw error;
       
       setIsEditing(false);
-      // If the object ID has changed, notify the parent component
       if (currentObjectId !== objectId) {
         await onSaveObjectId(currentObjectId);
       }

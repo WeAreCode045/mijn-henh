@@ -1,6 +1,5 @@
 
 import { PropertyFormData } from "@/types/property";
-import { useState } from "react";
 import { PropertySpecs } from "./PropertySpecs";
 import { DescriptionSection } from "./DescriptionSection";
 
