@@ -17,12 +17,12 @@ interface PropertyDashboardTabProps {
   agentId?: string;
   createdAt?: string;
   updatedAt?: string;
-  onSave: () => void;
-  onDelete: () => Promise<void>;
-  handleGeneratePDF: () => void;
-  handleWebView: (e: React.MouseEvent) => void;
-  handleSaveAgent: (agentId: string) => Promise<void>;
-  handleSaveObjectId: (objectId: string) => Promise<void>;
+  onSave?: () => void;
+  onDelete?: () => Promise<void>;
+  handleGeneratePDF?: () => void;
+  handleWebView?: (e: React.MouseEvent) => void; // Updated type definition
+  handleSaveAgent?: (agentId: string) => Promise<void>;
+  handleSaveObjectId?: (objectId: string) => Promise<void>;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
 }

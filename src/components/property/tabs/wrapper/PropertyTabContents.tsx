@@ -21,7 +21,7 @@ interface PropertyTabContentsProps {
   handleSaveAgent?: (agentId: string) => Promise<void>;
   handleSaveTemplate?: (templateId: string) => Promise<void>;
   handleGeneratePDF?: () => void;
-  handleWebView?: () => void; // Updated to not require an event parameter
+  handleWebView?: (e: React.MouseEvent) => void; // Updated type definition
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;
@@ -119,9 +119,9 @@ export function PropertyTabContents({
           onSave={onSave}
           onDelete={onDelete}
           handleWebView={handleWebView}
+          handleGeneratePDF={handleGeneratePDF}
           handleSaveAgent={handleSaveAgent}
           handleSaveObjectId={handleSaveObjectId}
-          handleGeneratePDF={handleGeneratePDF}
           isUpdating={isUpdating}
           agentInfo={agentInfo}
         />

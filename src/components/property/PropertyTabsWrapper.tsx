@@ -36,7 +36,7 @@ export function PropertyTabsWrapper({
   };
   
   // Create an adapter function that doesn't require the event parameter
-  const handleOpenWebView = () => {
+  const handleOpenWebView = (e: React.MouseEvent) => {
     setIsWebViewOpen(true);
   };
 
