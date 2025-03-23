@@ -96,7 +96,7 @@ export default function Properties() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="space-y-4">
                 <Skeleton className="h-48 w-full rounded-lg" />
@@ -110,7 +110,7 @@ export default function Properties() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredProperties.map((property: PropertyData) => (
               <PropertyCard
                 key={property.id}
