@@ -43,6 +43,8 @@ export function ContentRouter({
   currentStep, 
   handlers 
 }: ContentRouterProps) {
+  // Remove any old global save handlers, as we're now using per-section saving
+
   const renderContent = () => {
     switch (currentStep) {
       case 0:

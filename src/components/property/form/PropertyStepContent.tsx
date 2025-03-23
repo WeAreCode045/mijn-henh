@@ -39,6 +39,7 @@ interface PropertyStepContentProps {
   onSubmit?: () => void; 
   isSaving?: boolean;
   isReadOnly?: boolean;
+  hideNavigation?: boolean; // Add property to hide navigation if needed
 }
 
 export function PropertyStepContent({
@@ -71,6 +72,7 @@ export function PropertyStepContent({
   onSubmit,
   isSaving,
   isReadOnly,
+  hideNavigation = false,
 }: PropertyStepContentProps) {
   const renderStep = () => {
     switch (currentStep) {
@@ -146,39 +148,44 @@ export function PropertyStepContent({
 
   return (
     <div className="space-y-6">
-      <FormStepNavigation
-        currentStep={currentStep}
-        onStepClick={handleStepClick}
-        onSave={handleSubmit}
-        isSaving={isSaving}
-      />
+      {!hideNavigation && (
+        <FormStepNavigation
+          currentStep={currentStep}
+          onStepClick={handleStepClick}
+          onSave={handleSubmit}
+          isSaving={isSaving}
+        />
+      )}
+      
       <div className="mt-6">
         {renderStep()}
       </div>
       
-      {/* Navigation Buttons */}
-      <div className="flex justify-between mt-6">
-        <Button
-          variant="outline"
-          onClick={handlePreviousClick}
-          disabled={currentStep === 0}
-          type="button" // Explicitly set as button type
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Previous
-        </Button>
-        
-        <Button
-          onClick={handleNextClick}
-          disabled={currentStep === 3}
-          type="button" // Explicitly set as button type
-          className="flex items-center gap-2"
-        >
-          Next
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      </div>
+      {/* Navigation Buttons - only show if navigation isn't hidden */}
+      {!hideNavigation && (
+        <div className="flex justify-between mt-6">
+          <Button
+            variant="outline"
+            onClick={handlePreviousClick}
+            disabled={currentStep === 0}
+            type="button" // Explicitly set as button type
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          
+          <Button
+            onClick={handleNextClick}
+            disabled={currentStep === 3}
+            type="button" // Explicitly set as button type
+            className="flex items-center gap-2"
+          >
+            Next
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
