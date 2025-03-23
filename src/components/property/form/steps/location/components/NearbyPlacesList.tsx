@@ -1,80 +1,65 @@
 
 import React from 'react';
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-
-interface NearbyPlace {
-  name: string;
-  vicinity?: string;
-  distance?: string | number;
-  types?: string[];
-  icon?: string;
-}
+import { PropertyNearbyPlace } from "@/types/property";
+import { Trash2 } from "lucide-react";
 
 interface NearbyPlacesListProps {
-  places: NearbyPlace[];
+  places: PropertyNearbyPlace[];
   onRemovePlace?: (index: number) => void;
 }
 
 export function NearbyPlacesList({ places, onRemovePlace }: NearbyPlacesListProps) {
-  const getCategoryIcon = (types: string[] = []) => {
-    // Map place types to emojis
-    if (types.includes('restaurant')) return '🍽️';
-    if (types.includes('cafe')) return '☕';
-    if (types.includes('bar')) return '🍻';
-    if (types.includes('supermarket')) return '🛒';
-    if (types.includes('school')) return '🏫';
-    if (types.includes('park')) return '🌳';
-    if (types.includes('gym')) return '💪';
-    if (types.includes('hospital')) return '🏥';
-    if (types.includes('pharmacy')) return '💊';
-    if (types.includes('bank')) return '🏦';
-    if (types.includes('shopping_mall')) return '🛍️';
-    if (types.includes('store')) return '🏪';
-    if (types.includes('subway_station') || types.includes('train_station')) return '🚆';
-    if (types.includes('bus_station')) return '🚌';
-    return '📍';
-  };
+  // Group places by type
+  const groupedPlaces = places.reduce((acc: Record<string, PropertyNearbyPlace[]>, place, index) => {
+    const type = place.type || 'other';
+    if (!acc[type]) {
+      acc[type] = [];
+    }
+    // Add the index to each place to help with removal
+    acc[type].push({ ...place, index });
+    return acc;
+  }, {});
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {places.map((place, index) => (
-        <Card key={index} className="relative overflow-hidden shadow-sm">
-          {onRemovePlace && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-2 right-2 p-1 h-auto w-auto text-muted-foreground hover:text-destructive"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent form submission
-                onRemovePlace(index);
-              }}
-              type="button"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          <CardContent className="pt-4">
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">
-                {place.icon ? (
-                  <img src={place.icon} alt="Place icon" className="w-6 h-6" />
-                ) : (
-                  <span>{getCategoryIcon(place.types)}</span>
-                )}
-              </div>
-              <div>
-                <h4 className="font-medium">{place.name}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{place.vicinity}</p>
-                {place.distance && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {typeof place.distance === 'number' 
-                      ? `${place.distance.toFixed(1)} km away` 
-                      : place.distance}
-                  </p>
-                )}
-              </div>
+    <div className="space-y-4">
+      {Object.entries(groupedPlaces).map(([type, placesOfType]) => (
+        <Card key={type}>
+          <CardContent className="pt-6">
+            <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>
+            <div className="flex flex-wrap gap-2">
+              {placesOfType.map((place, categoryIndex) => (
+                <Badge 
+                  key={`${place.id || categoryIndex}`} 
+                  variant="secondary"
+                  className="flex items-center gap-1 pr-1"
+                >
+                  <span>{place.name}</span>
+                  {place.distance && (
+                    <span className="text-xs opacity-70 ml-1">
+                      {typeof place.distance === 'number' 
+                        ? `${place.distance.toFixed(1)} km` 
+                        : place.distance}
+                    </span>
+                  )}
+                  {onRemovePlace && (
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent form submission
+                        e.stopPropagation(); // Prevent event bubbling
+                        if (onRemovePlace && typeof place.index === 'number') {
+                          onRemovePlace(place.index);
+                        }
+                      }}
+                      className="ml-1 p-1 rounded-full hover:bg-muted hover:text-destructive"
+                      type="button" // Explicitly set as button type
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
+                </Badge>
+              ))}
             </div>
           </CardContent>
         </Card>

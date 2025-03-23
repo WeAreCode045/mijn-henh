@@ -14,7 +14,7 @@ interface NearbyPlacesSectionProps {
   onFetchLocationData?: () => Promise<void>;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onRemoveNearbyPlace?: (index: number) => void;
-  isLoadingLocationData?: boolean;
+  isLoadingNearbyPlaces?: boolean;
 }
 
 export function NearbyPlacesSection({
@@ -23,7 +23,7 @@ export function NearbyPlacesSection({
   onFetchLocationData,
   onFieldChange,
   onRemoveNearbyPlace,
-  isLoadingLocationData
+  isLoadingNearbyPlaces
 }: NearbyPlacesSectionProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingCategory, setIsLoadingCategory] = useState(false);
@@ -62,10 +62,10 @@ export function NearbyPlacesSection({
               onFetchLocationData();
             }
           }}
-          disabled={isLoadingLocationData || isLoadingCategory || !formData.address}
+          disabled={isLoadingNearbyPlaces || isLoadingCategory || !formData.address}
           className="flex gap-2 items-center"
         >
-          {isLoadingLocationData || isLoadingCategory ? (
+          {isLoadingNearbyPlaces || isLoadingCategory ? (
             <>
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               Fetching...
