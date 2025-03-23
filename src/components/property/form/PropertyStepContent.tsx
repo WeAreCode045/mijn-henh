@@ -76,13 +76,23 @@ export function PropertyStepContent({
   console.log("onFieldChange is defined:", !!onFieldChange);
   
   // Define fallback handlers to prevent runtime errors
-  const safeOnFieldChange = onFieldChange || ((field, value) => {
-    console.log("Fallback onFieldChange called with:", field, value);
-  });
+  const safeOnFieldChange = (field: keyof PropertyFormData, value: any) => {
+    console.log(`PropertyStepContent safeOnFieldChange called: ${String(field)} = `, value);
+    if (onFieldChange) {
+      onFieldChange(field, value);
+    } else {
+      console.warn(`Fallback onFieldChange called with: ${String(field)}`, value);
+    }
+  };
   
-  const safeSetPendingChanges = setPendingChanges || (() => {
-    console.log("Fallback setPendingChanges called");
-  });
+  const safeSetPendingChanges = (value: boolean) => {
+    console.log(`PropertyStepContent setPendingChanges called: ${value}`);
+    if (setPendingChanges) {
+      setPendingChanges(value);
+    } else {
+      console.warn("Fallback setPendingChanges called");
+    }
+  };
   
   // Render the appropriate step based on currentStep
   const renderStep = () => {
@@ -93,9 +103,7 @@ export function PropertyStepContent({
             formData={formData}
             onFieldChange={safeOnFieldChange}
             setPendingChanges={safeSetPendingChanges}
-            onAddFeature={onAddFeature}
-            onRemoveFeature={onRemoveFeature}
-            onUpdateFeature={onUpdateFeature}
+            isReadOnly={isReadOnly}
           />
         );
       case 1:
@@ -112,6 +120,7 @@ export function PropertyStepContent({
             isLoadingLocationData={isLoadingLocationData}
             isGeneratingMap={isGeneratingMap}
             setPendingChanges={safeSetPendingChanges}
+            isReadOnly={isReadOnly}
           />
         );
       case 2:
@@ -123,6 +132,7 @@ export function PropertyStepContent({
             onUpdateFeature={onUpdateFeature}
             onFieldChange={safeOnFieldChange}
             setPendingChanges={safeSetPendingChanges}
+            isReadOnly={isReadOnly}
           />
         );
       case 3:
@@ -137,6 +147,7 @@ export function PropertyStepContent({
             onAreaImageUpload={onAreaImageUpload}
             setPendingChanges={safeSetPendingChanges}
             isUploading={isUploading}
+            isReadOnly={isReadOnly}
           />
         );
       default:
@@ -147,24 +158,33 @@ export function PropertyStepContent({
   // Handle save button click
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
+    console.log("Save button clicked");
     if (onSubmit) {
       onSubmit();
+    } else {
+      console.warn("onSubmit not provided to PropertyStepContent");
     }
   };
 
   // Handle previous button click
   const handlePrev = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
+    console.log("Previous button clicked");
     if (handlePrevious) {
       handlePrevious();
+    } else {
+      console.warn("handlePrevious not provided to PropertyStepContent");
     }
   };
 
   // Handle next button click
   const handleNextStep = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
+    console.log("Next button clicked");
     if (handleNext) {
       handleNext();
+    } else {
+      console.warn("handleNext not provided to PropertyStepContent");
     }
   };
 

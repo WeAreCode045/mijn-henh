@@ -38,9 +38,17 @@ export function PropertyContentTab({
   hideNavigation = false,
   isReadOnly = false
 }: PropertyContentTabProps) {
+  // Log to monitor handlers being passed
+  console.log("PropertyContentTab - handlers provided:", Object.keys(handlers).join(", "));
+  console.log("PropertyContentTab - onFieldChange is defined:", !!handlers.onFieldChange);
+  
   // Ensure the onSubmit handler is properly logged
   const enhancedHandlers = {
     ...handlers,
+    onFieldChange: (field: keyof PropertyFormData, value: any) => {
+      console.log(`PropertyContentTab - onFieldChange: ${String(field)} = `, value);
+      handlers.onFieldChange(field, value);
+    },
     onSubmit: () => {
       console.log("PropertyContentTab - onSubmit called");
       handlers.onSubmit();

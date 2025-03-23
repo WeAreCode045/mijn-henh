@@ -58,7 +58,11 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
       setIsSubmitting(true);
       
       // Call the original onSubmit handler
-      handlers.onSubmit();
+      if (handlers.onSubmit) {
+        handlers.onSubmit();
+      } else {
+        console.warn("onSubmit handler is not defined");
+      }
       
       // Update local state
       setLastSaved(new Date());
@@ -89,7 +93,11 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
 
   const handleFieldChange = useCallback((field: keyof PropertyFormData, value: any) => {
     console.log(`ContentTabWrapper - handleFieldChange: ${String(field)} = `, value);
-    handlers.onFieldChange(field, value);
+    if (handlers.onFieldChange) {
+      handlers.onFieldChange(field, value);
+    } else {
+      console.warn("onFieldChange handler is not defined");
+    }
   }, [handlers]);
 
   return (

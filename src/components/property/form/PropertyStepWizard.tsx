@@ -77,6 +77,16 @@ export function PropertyStepWizard({
     return <div>Loading...</div>;
   }
   
+  // Safe handler for field changes
+  const handleSafeFieldChange = (field: keyof PropertyFormData, value: any) => {
+    console.log(`PropertyStepWizard handleFieldChange: ${String(field)} = `, value);
+    if (onFieldChange) {
+      onFieldChange(field, value);
+    } else {
+      console.warn("onFieldChange is not defined in PropertyStepWizard");
+    }
+  };
+  
   return (
     <div className="space-y-6">
       {!hideNavigation && (
@@ -91,7 +101,7 @@ export function PropertyStepWizard({
       <PropertyStepContent 
         formData={formState}
         step={currentStep}
-        onFieldChange={onFieldChange}
+        onFieldChange={handleSafeFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}
         onUpdateFeature={onUpdateFeature}
