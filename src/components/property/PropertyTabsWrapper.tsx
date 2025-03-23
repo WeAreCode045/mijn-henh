@@ -113,7 +113,7 @@ export function PropertyTabsWrapper({
                       handleSave={onSubmit}
                       handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
-                      handleWebView={handleOpenWebView}
+                      handleWebView={handleOpenWebView} {/* Using the adapter function here */}
                       onFieldChange={handleFieldChange}
                       onAddFeature={addFeature}
                       onRemoveFeature={removeFeature}

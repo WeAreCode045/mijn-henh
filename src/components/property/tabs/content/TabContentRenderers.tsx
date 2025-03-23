@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
-import { DashboardTabContent } from './DashboardTabContent';
+import { PropertyDashboardTab } from '../dashboard/PropertyDashboardTab';
 import { ContentTabContent } from './ContentTabContent';
 import { MediaTabContent } from '../media/MediaTabContent';
 import { LocationTabContent } from './LocationTabContent';
@@ -71,13 +71,20 @@ export class TabContentRenderers {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <DashboardTabContent
-            property={props.property}
+          <PropertyDashboardTab
+            id={props.property.id}
+            objectId={props.property.object_id}
+            title={props.property.title}
+            agentId={props.property.agent_id}
+            createdAt={props.property.created_at}
+            updatedAt={props.property.updated_at}
+            onSave={handlers.onSave}
             onDelete={handlers.onDelete}
-            onWebView={handleWebViewAdapter}
+            handleWebView={handleWebViewAdapter}
             handleSaveAgent={handlers.handleSaveAgent}
             handleSaveObjectId={handlers.handleSaveObjectId}
             handleGeneratePDF={handlers.handleGeneratePDF}
+            isUpdating={props.isUpdating}
             agentInfo={props.agentInfo}
           />
         );

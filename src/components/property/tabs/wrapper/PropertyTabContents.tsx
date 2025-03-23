@@ -5,7 +5,7 @@ import { PropertyData, PropertyFormData } from "@/types/property";
 import { PropertyModeButtons } from "./PropertyModeButtons";
 import { ContentTabContent } from '../content/ContentTabContent';
 import { MediaTabContent } from '../media/MediaTabContent';
-import { DashboardTabContent } from '../dashboard/PropertyDashboardTab';
+import { PropertyDashboardTab } from '../dashboard/PropertyDashboardTab';
 import { CommunicationsTabContent } from './CommunicationsTabContent';
 
 interface PropertyTabContentsProps {
@@ -109,7 +109,7 @@ export function PropertyTabContents({
   return (
     <>
       <TabsContent value="dashboard" className="space-y-8">
-        <DashboardTabContent 
+        <PropertyDashboardTab 
           id={property.id}
           objectId={property.object_id}
           title={property.title}
