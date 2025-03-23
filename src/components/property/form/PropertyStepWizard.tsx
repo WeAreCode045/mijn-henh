@@ -22,7 +22,7 @@ interface PropertyStepWizardProps {
   handlePrevious?: () => void;
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
-  onFetchNearbyCities?: () => Promise<any>;
+  onFetchNearbyCities?: () => Promise<void>;
   onGenerateLocationDescription?: () => Promise<void>;
   onGenerateMap?: () => Promise<void>;
   onRemoveNearbyPlace?: (index: number) => void;
@@ -69,21 +69,10 @@ export function PropertyStepWizard({
   hideNavigation = false
 }: PropertyStepWizardProps) {
   
-  // Create wrapper functions that prevent default form submission
-  const handleNextWithPrevent = handleNext 
-    ? (e: React.MouseEvent) => {
-        e.preventDefault();
-        handleNext();
-      }
-    : undefined;
-    
-  const handlePreviousWithPrevent = handlePrevious
-    ? (e: React.MouseEvent) => {
-        e.preventDefault();
-        handlePrevious();
-      }
-    : undefined;
-
+  // Create wrapper functions that match the expected signatures
+  // Changed to directly use the original functions instead of creating new ones with e.preventDefault()
+  // Since the child component expects functions without parameters
+  
   return (
     <div className="space-y-6">
       <PropertyStepContent
@@ -101,8 +90,8 @@ export function PropertyStepWizard({
         onAreaImageUpload={onAreaImageUpload}
         currentStep={currentStep}
         handleStepClick={handleStepClick}
-        handleNext={handleNextWithPrevent}
-        handlePrevious={handlePreviousWithPrevent}
+        handleNext={handleNext}
+        handlePrevious={handlePrevious}
         onFetchLocationData={onFetchLocationData}
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         onFetchNearbyCities={onFetchNearbyCities}

@@ -129,12 +129,12 @@ export function PropertyStepContent({
   };
 
   const handlePreviousClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault(); // Prevent default form submission behavior
     if (handlePrevious) handlePrevious();
   };
 
   const handleNextClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault(); // Prevent default form submission behavior
     if (handleNext) handleNext();
   };
 
