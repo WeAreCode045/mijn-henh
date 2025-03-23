@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 export function usePropertyTabs() {
@@ -23,21 +23,22 @@ export function usePropertyTabs() {
   };
   
   // Get the initial active tab from the URL
-  const [activeTab, setActiveTab] = useState(getTabFromPath(location.pathname));
+  const [activeTab, setActiveTab] = useState<string>(getTabFromPath(location.pathname));
   
   // Update the URL when tab changes
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = useCallback((tab: string) => {
     if (!id) {
       console.warn("No property ID available for tab navigation");
       return;
     }
     
     console.log(`Changing tab to: ${tab}`);
+    // First update the state
     setActiveTab(tab);
     
-    // Navigate to the correct route
+    // Then navigate to the correct route
     navigate(`/property/${id}/${tab}`);
-  };
+  }, [id, navigate]);
   
   // Sync with URL path changes
   useEffect(() => {

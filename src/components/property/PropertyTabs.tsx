@@ -58,13 +58,17 @@ export function PropertyTabs({
     };
   }, [propertyId]);
 
+  const handleTabButtonClick = (tabValue: string) => {
+    console.log(`Tab clicked: ${tabValue}, current activeTab: ${activeTab}`);
+    handleTabChange(tabValue);
+  };
+
   return (
     <>
       <TabsList className="grid grid-cols-4 mb-8">
         <TabsTrigger 
           value="dashboard" 
-          onClick={() => handleTabChange('dashboard')}
-          className="flex items-center gap-2"
+          onClick={() => handleTabButtonClick('dashboard')}
           data-state={activeTab === 'dashboard' ? 'active' : ''}
         >
           <Home className="h-4 w-4" />
@@ -72,8 +76,7 @@ export function PropertyTabs({
         </TabsTrigger>
         <TabsTrigger 
           value="content" 
-          onClick={() => handleTabChange('content')}
-          className="flex items-center gap-2"
+          onClick={() => handleTabButtonClick('content')}
           data-state={activeTab === 'content' ? 'active' : ''}
         >
           <FileText className="h-4 w-4" />
@@ -81,8 +84,7 @@ export function PropertyTabs({
         </TabsTrigger>
         <TabsTrigger 
           value="media" 
-          onClick={() => handleTabChange('media')}
-          className="flex items-center gap-2"
+          onClick={() => handleTabButtonClick('media')}
           data-state={activeTab === 'media' ? 'active' : ''}
         >
           <Image className="h-4 w-4" />
@@ -90,9 +92,9 @@ export function PropertyTabs({
         </TabsTrigger>
         <TabsTrigger 
           value="communications" 
-          onClick={() => handleTabChange('communications')}
-          className="flex items-center gap-2 relative"
+          onClick={() => handleTabButtonClick('communications')}
           data-state={activeTab === 'communications' ? 'active' : ''}
+          className="relative"
         >
           <MessageCircle className="h-4 w-4" />
           <span>Communications</span>

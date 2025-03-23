@@ -94,7 +94,7 @@ export function PropertyTabsWrapper({
               onFetchNearbyCities
             }) => (
               <>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
                   <PropertyTabs 
                     activeTab={activeTab} 
                     handleTabChange={setActiveTab}
