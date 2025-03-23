@@ -10,6 +10,7 @@ interface SaveButtonProps {
 export function SaveButton({ handleSaveAllFields, isSaving }: SaveButtonProps) {
   const handleSaveClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    console.log("Save button clicked in SaveButton component");
     handleSaveAllFields();
   };
 

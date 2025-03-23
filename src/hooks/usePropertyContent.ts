@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { usePropertyAutoSave } from '@/hooks/usePropertyAutoSave';
 
 export function usePropertyContent(formData: PropertyFormData, onFieldChange: (field: keyof PropertyFormData, value: any) => void) {
   const [isLoadingLocationData, setIsLoadingLocationData] = useState(false);
@@ -12,6 +12,7 @@ export function usePropertyContent(formData: PropertyFormData, onFieldChange: (f
   const [isSaving, setIsSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState(false);
   const { toast } = useToast();
+  const { autosaveData } = usePropertyAutoSave();
 
   // Function to fetch location data using Google Maps API
   const fetchLocationData = useCallback(async () => {
@@ -190,20 +191,36 @@ export function usePropertyContent(formData: PropertyFormData, onFieldChange: (f
     };
   }, [formData, onFieldChange]);
 
-  // Handle form submission
+  // Handle form submission with improved error handling and feedback
   const onSubmit = useCallback(async () => {
-    setIsSaving(true);
-    try {
-      // Simulate API call to save the property
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setLastSaved(new Date());
-      setPendingChanges(false);
-      
+    console.log("onSubmit called in usePropertyContent");
+    
+    if (!formData.id) {
       toast({
-        title: "Success",
-        description: "Property saved successfully",
+        title: "Error",
+        description: "Property ID is missing. Cannot save.",
+        variant: "destructive",
       });
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      // Use the autosaveData function to save all property data
+      const success = await autosaveData(formData);
+      
+      if (success) {
+        setLastSaved(new Date());
+        setPendingChanges(false);
+        
+        toast({
+          title: "Success",
+          description: "Property saved successfully",
+        });
+      } else {
+        throw new Error("Failed to save property");
+      }
     } catch (error) {
       console.error("Error saving property:", error);
       toast({
@@ -214,7 +231,7 @@ export function usePropertyContent(formData: PropertyFormData, onFieldChange: (f
     } finally {
       setIsSaving(false);
     }
-  }, [toast]);
+  }, [autosaveData, formData, toast]);
 
   // Handle step navigation
   const handleStepClick = useCallback((step: number) => {

@@ -4,6 +4,8 @@ import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -34,7 +36,7 @@ interface ContentTabWrapperProps {
 export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
-  const { onSubmit } = usePropertyContentSubmit(
+  const { onSubmit, isSaving } = usePropertyContentSubmit(
     formData,
     handlers.setPendingChanges || (() => {}),
     setLastSaved,
@@ -43,22 +45,46 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
 
   const handleSubmit = useCallback((e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    console.log("Submit triggered in ContentTabWrapper");
     onSubmit();
   }, [onSubmit]);
 
   const handleNext = useCallback((e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (handlers.currentStep < 3) {
-      handlers.handleStepClick(handlers.currentStep + 1);
+      // Save current step before moving to next
+      handleSubmit();
+      setTimeout(() => {
+        handlers.handleStepClick(handlers.currentStep + 1);
+      }, 300);
     }
-  }, [handlers]);
+  }, [handleSubmit, handlers]);
 
   const handlePrevious = useCallback((e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (handlers.currentStep > 0) {
-      handlers.handleStepClick(handlers.currentStep - 1);
+      // Save current step before moving to previous
+      handleSubmit();
+      setTimeout(() => {
+        handlers.handleStepClick(handlers.currentStep - 1);
+      }, 300);
     }
-  }, [handlers]);
+  }, [handleSubmit, handlers]);
+
+  const renderSectionSaveButton = () => {
+    return (
+      <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={isSaving || handlers.isSaving}
+        size="sm"
+        className="mt-4 flex items-center gap-2"
+      >
+        <Save className="h-4 w-4" />
+        Save This Section
+      </Button>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -67,7 +93,7 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         onStepClick={handlers.handleStepClick}
         lastSaved={lastSaved}
         onSave={handleSubmit}
-        isSaving={handlers.isSaving || false}
+        isSaving={isSaving || handlers.isSaving || false}
       />
       
       <ContentTabContent
@@ -83,6 +109,29 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         isReadOnly={false}
         hideNavigation={true} // Add this prop to hide the navigation in ContentTabContent
       />
+
+      <div className="flex justify-between mt-6">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={handlers.currentStep === 0 || isSaving || handlers.isSaving}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          Previous
+        </Button>
+        
+        {renderSectionSaveButton()}
+        
+        <Button
+          onClick={handleNext}
+          disabled={handlers.currentStep === 3 || isSaving || handlers.isSaving}
+          type="button"
+          className="flex items-center gap-2"
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }

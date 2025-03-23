@@ -1,7 +1,7 @@
-
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyFormAreas(
   formState: PropertyFormData,
@@ -10,8 +10,10 @@ export function usePropertyFormAreas(
 ) {
   const [isUploading, setIsUploading] = useState(false);
   const { autosaveField } = usePropertyAutoSave();
+  const { toast } = useToast();
   
   const addArea = useCallback(() => {
+    console.log("Adding area...");
     const areas = formState.areas || [];
     const newArea: PropertyArea = {
       id: `area-${Date.now()}`,
@@ -30,10 +32,30 @@ export function usePropertyFormAreas(
     
     // Auto-save the change if we have an ID
     if (formState.id) {
+      toast({
+        title: "Adding area...",
+        description: "Saving new area to database",
+      });
+      
       autosaveField(formState.id, "areas", updatedAreas)
-        .catch(error => console.error("Error auto-saving areas:", error));
+        .then(success => {
+          if (success) {
+            toast({
+              title: "Success",
+              description: "New area added and saved",
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Error auto-saving areas:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save new area",
+            variant: "destructive",
+          });
+        });
     }
-  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
   const removeArea = useCallback((areaId: string) => {
     if (!formState.areas) return;
@@ -44,10 +66,30 @@ export function usePropertyFormAreas(
     
     // Auto-save the change if we have an ID
     if (formState.id) {
+      toast({
+        title: "Removing area...",
+        description: "Saving changes to database",
+      });
+      
       autosaveField(formState.id, "areas", updatedAreas)
-        .catch(error => console.error("Error auto-saving areas:", error));
+        .then(success => {
+          if (success) {
+            toast({
+              title: "Success",
+              description: "Area removed successfully",
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Error auto-saving areas:", error);
+          toast({
+            title: "Error",
+            description: "Failed to remove area",
+            variant: "destructive",
+          });
+        });
     }
-  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
   const updateArea = useCallback((areaId: string, field: keyof PropertyArea, value: any) => {
     if (!formState.areas) return;

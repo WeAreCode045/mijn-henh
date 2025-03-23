@@ -39,6 +39,13 @@ export function ContentTabContent({
     onUpdateFeature(id, description);
   };
 
+  // Explicit handler for onSubmit to ensure it's called properly
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    console.log("Submit triggered in ContentTabContent");
+    onSubmit();
+  };
+
   return (
     <PropertyStepWizard 
       property={property}
@@ -49,7 +56,7 @@ export function ContentTabContent({
       onUpdateFeature={adaptedUpdateFeature}
       currentStep={currentStep}
       handleStepClick={handleStepClick}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       isReadOnly={isReadOnly}
       hideNavigation={hideNavigation}
     />

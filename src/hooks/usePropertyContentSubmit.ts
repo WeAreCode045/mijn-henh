@@ -15,41 +15,41 @@ export function usePropertyContentSubmit(
   const [isSaving, setIsSaving] = useState(false);
 
   const onSubmit = async () => {
-    console.log("Submit clicked in PropertyContentTab");
+    console.log("Submit called in usePropertyContentSubmit");
     setIsSaving(true);
     
     try {
       // If there's an external submit handler provided, use that
       if (externalOnSubmit) {
+        console.log("Using external onSubmit handler");
         externalOnSubmit();
-        return;
-      }
-      
-      console.log("Form submitted in PropertyContentTab");
-      
-      // Final save when clicking submit
-      if (formData.id) {
-        try {
-          // Create a form event to pass to handleSubmit
-          const formEvent = {} as React.FormEvent;
-          // Pass the current formData and set redirectAfterSave to false
-          const success = await handleSubmit(formEvent, formData, false);
-          
-          if (success) {
-            setLastSaved(new Date());
-            setPendingChanges(false);
+      } else {
+        console.log("Using default submit handler");
+        
+        // Final save when clicking submit
+        if (formData.id) {
+          try {
+            // Create a form event to pass to handleSubmit
+            const formEvent = {} as React.FormEvent;
+            // Pass the current formData and set redirectAfterSave to false
+            const success = await handleSubmit(formEvent, formData, false);
+            
+            if (success) {
+              setLastSaved(new Date());
+              setPendingChanges(false);
+              toast({
+                title: "Success",
+                description: "All changes have been saved",
+              });
+            }
+          } catch (error) {
+            console.error("Final save failed:", error);
             toast({
-              title: "Success",
-              description: "All changes have been saved",
+              title: "Error",
+              description: "Failed to save all changes",
+              variant: "destructive",
             });
           }
-        } catch (error) {
-          console.error("Final save failed:", error);
-          toast({
-            title: "Error",
-            description: "Failed to save all changes",
-            variant: "destructive",
-          });
         }
       }
     } finally {

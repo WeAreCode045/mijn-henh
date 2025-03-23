@@ -1,4 +1,3 @@
-// Import for FeaturesStep component
 import React from 'react';
 import { 
   PropertyFormManagerChildrenProps 
@@ -29,13 +28,17 @@ interface FeaturesProps {
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, description: string) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
 }
 
 function Features({
-  features = [], // Add default empty array
+  features = [],
   onAdd,
   onRemove,
   onUpdate,
+  onSave,
+  isSaving = false,
 }: FeaturesProps) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -58,10 +61,24 @@ function Features({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Label>Features</Label>
-        <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Add Feature
-        </Button>
+        <div className="flex gap-2">
+          {onSave && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={onSave}
+              disabled={isSaving}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Features
+            </Button>
+          )}
+          <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Add Feature
+          </Button>
+        </div>
       </div>
       {features.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">
@@ -96,6 +113,8 @@ interface AreasProps {
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: string, value: any) => void;
   onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  onSave?: () => void;
+  isSaving?: boolean;
 }
 
 function Areas({
@@ -103,7 +122,9 @@ function Areas({
   onAdd,
   onRemove,
   onUpdate,
-  onAreaImageUpload
+  onAreaImageUpload,
+  onSave,
+  isSaving = false
 }: AreasProps) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -127,10 +148,24 @@ function Areas({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Label>Areas</Label>
-        <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Add Area
-        </Button>
+        <div className="flex gap-2">
+          {onSave && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={onSave}
+              disabled={isSaving}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Areas
+            </Button>
+          )}
+          <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Add Area
+          </Button>
+        </div>
       </div>
       {areas.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">
@@ -201,6 +236,14 @@ export function PropertyFormContent({
   setPendingChanges
 }: PropertyFormManagerChildrenProps) {
 
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default form submission
+    console.log("Save button clicked in PropertyFormContent");
+    // Set pending changes to true when user saves
+    if (setPendingChanges) setPendingChanges(true);
+    onSubmit();
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -220,6 +263,16 @@ export function PropertyFormContent({
               value={formState.price}
               onChange={(e) => handleFieldChange('price', e.target.value)}
             />
+            <Button
+              type="button"
+              onClick={handleSaveClick}
+              disabled={isSaving}
+              className="mt-4 flex items-center gap-2"
+              size="sm"
+            >
+              <Save className="w-4 h-4" />
+              Save Basic Info
+            </Button>
           </div>
         );
       case 1:
@@ -239,6 +292,16 @@ export function PropertyFormContent({
               value={formState.description}
               onChange={(e) => handleFieldChange('description', e.target.value)}
             />
+            <Button
+              type="button"
+              onClick={handleSaveClick}
+              disabled={isSaving}
+              className="mt-4 flex items-center gap-2"
+              size="sm"
+            >
+              <Save className="w-4 h-4" />
+              Save Location
+            </Button>
           </div>
         );
       case 2:
@@ -248,6 +311,8 @@ export function PropertyFormContent({
             onAdd={addFeature}
             onRemove={removeFeature}
             onUpdate={updateFeature}
+            onSave={handleSaveClick}
+            isSaving={isSaving}
           />
         );
       case 3:
@@ -258,6 +323,8 @@ export function PropertyFormContent({
             onRemove={removeArea}
             onUpdate={updateArea}
             onAreaImageUpload={handleAreaImageUpload}
+            onSave={handleSaveClick}
+            isSaving={isSaving}
           />
         );
       default:
@@ -265,21 +332,15 @@ export function PropertyFormContent({
     }
   };
 
-  const handleSaveClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default form submission
-    // Set pending changes to true when user saves
-    setPendingChanges(true);
-    onSubmit();
-  };
-
   return (
     <div className="space-y-6">
       <div>{renderStepContent()}</div>
       <div className="flex justify-end">
         <Button
-          type="button" // Explicitly set as button type to prevent form submission
+          type="button"
           onClick={handleSaveClick}
           disabled={isSaving}
+          className="flex items-center gap-2"
         >
           {isSaving ? (
             <>
@@ -289,7 +350,7 @@ export function PropertyFormContent({
           ) : (
             <>
               <Save className="w-4 h-4 mr-2" />
-              Save Changes
+              Save All Changes
             </>
           )}
         </Button>
