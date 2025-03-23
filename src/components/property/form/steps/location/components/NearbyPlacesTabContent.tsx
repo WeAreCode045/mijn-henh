@@ -15,6 +15,7 @@ interface NearbyPlacesTabContentProps {
   toggleSelection: (index: number, selected: boolean) => void;
   selectedIndices: number[];
   selectionMode: boolean;
+  isReadOnly?: boolean;
 }
 
 export function NearbyPlacesTabContent({
@@ -25,7 +26,8 @@ export function NearbyPlacesTabContent({
   toggleVisibility,
   toggleSelection,
   selectedIndices,
-  selectionMode
+  selectionMode,
+  isReadOnly = false
 }: NearbyPlacesTabContentProps) {
   const { getCategoryColor, getCategoryIcon } = useCategories();
   
@@ -46,6 +48,7 @@ export function NearbyPlacesTabContent({
           const Icon = getCategoryIcon(placeType);
           return Icon ? <Icon className="h-4 w-4" /> : null;
         }}
+        isReadOnly={isReadOnly}
       />
     );
   }

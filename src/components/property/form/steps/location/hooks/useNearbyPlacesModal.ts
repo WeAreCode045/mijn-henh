@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
+import { PlaceOption } from "../components/SelectPlacesModal";
 
 export function useNearbyPlacesModal({
   formData,
@@ -13,9 +14,9 @@ export function useNearbyPlacesModal({
 }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('');
-  const [placesForModal, setPlacesForModal] = useState<PropertyNearbyPlace[]>([]);
+  const [placesForModal, setPlacesForModal] = useState<PlaceOption[]>([]);
 
-  const handleSavePlaces = (selectedPlaces: PropertyNearbyPlace[]) => {
+  const handleSavePlaces = (selectedPlaces: PlaceOption[]) => {
     if (isReadOnly || !onFieldChange) return;
     
     console.log(`Saving ${selectedPlaces.length} places for category: ${currentCategory}`);
