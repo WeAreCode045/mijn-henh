@@ -131,12 +131,27 @@ export function PropertyStepContent({
   };
 
   // Ensure the save button properly triggers the onSubmit function
-  const handleSave = () => {
+  const handleSave = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     if (setPendingChanges) {
       setPendingChanges(true);
     }
     if (onSubmit) {
       onSubmit();
+    }
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    if (handlePrevious) {
+      handlePrevious();
+    }
+  };
+
+  const handleNextStep = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    if (handleNext) {
+      handleNext();
     }
   };
 
@@ -156,7 +171,7 @@ export function PropertyStepContent({
       <div className="flex justify-between mt-6">
         <Button
           variant="outline"
-          onClick={() => handlePrevious && handlePrevious()}
+          onClick={handlePrev}
           disabled={currentStep === 0 || isReadOnly}
           type="button"
           className="flex items-center gap-2"
@@ -176,7 +191,7 @@ export function PropertyStepContent({
           </Button>
           
           <Button
-            onClick={() => handleNext && handleNext()}
+            onClick={handleNextStep}
             disabled={currentStep === 3 || isReadOnly}
             type="button"
             className="flex items-center gap-2"

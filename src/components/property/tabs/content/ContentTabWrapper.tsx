@@ -5,6 +5,7 @@ import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
 import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;

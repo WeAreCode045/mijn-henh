@@ -17,6 +17,16 @@ export function FormStepNavigation({
   onSave,
   isSaving = false,
 }: FormStepNavigationProps) {
+  const handleStepClick = (e: React.MouseEvent, stepId: number) => {
+    e.preventDefault(); // Prevent form submission
+    onStepClick(stepId);
+  };
+
+  const handleSave = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    if (onSave) onSave();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2">
@@ -26,11 +36,8 @@ export function FormStepNavigation({
               key={step.id}
               variant={currentStep === step.id ? "default" : "outline"}
               size="sm"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent default form submission behavior
-                onStepClick(step.id);
-              }}
-              type="button" // Explicitly set as button type to prevent form submission
+              onClick={(e) => handleStepClick(e, step.id)}
+              type="button" 
               className="flex items-center gap-1"
             >
               {step.icon}
@@ -43,10 +50,7 @@ export function FormStepNavigation({
           <div>
             <Button
               type="button"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent default form submission behavior
-                onSave();
-              }}
+              onClick={handleSave}
               disabled={isSaving}
               className="flex items-center gap-2"
             >
