@@ -8,7 +8,7 @@ import { format } from "date-fns";
 interface ContentTabNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
-  onSave?: () => void;
+  onSave?: (e: React.MouseEvent) => void;
   isSaving?: boolean;
   lastSaved?: Date | null;
 }
@@ -23,11 +23,6 @@ export function ContentTabNavigation({
   const handleStepClick = (e: React.MouseEvent, step: number) => {
     e.preventDefault(); // Prevent form submission
     onStepClick(step);
-  };
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    if (onSave) onSave();
   };
 
   return (
@@ -58,7 +53,7 @@ export function ContentTabNavigation({
             )}
             <Button
               type="button"
-              onClick={handleSave}
+              onClick={onSave}
               disabled={isSaving}
               className="flex items-center gap-2"
             >

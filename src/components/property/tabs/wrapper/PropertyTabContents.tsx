@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { TabsContent } from "@/components/ui/tabs";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { PropertyModeButtons } from "./PropertyModeButtons";
-import { PropertyContentTab } from '../PropertyContentTab';
-import { PropertyMediaTab } from '../PropertyMediaTab';
-import { PropertyDashboardTab } from '../PropertyDashboardTab';
-import { PropertyCommunicationsTab } from '../PropertyCommunicationsTab';
+import { PropertyContentTab } from '../content/ContentTabContent';
+import { MediaTabContent } from '../media/MediaTabContent';
+import { DashboardTabContent } from '../content/DashboardTabContent';
+import { PropertyCommunicationsTab } from '../content/CommunicationsTabContent';
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -13,6 +14,7 @@ interface PropertyTabContentsProps {
   formState: PropertyFormData;
   agentInfo?: { id: string; name: string } | null;
   isUpdating: boolean;
+  isArchived?: boolean;
   onSave?: () => void;
   onDelete?: () => Promise<void>;
   handleSaveObjectId?: (objectId: string) => Promise<void>;
@@ -44,6 +46,18 @@ interface PropertyTabContentsProps {
   handleFloorplanEmbedScriptUpdate: (script: string) => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
+  onSubmit?: () => void;
+  handleRemoveAreaPhoto?: (areaId: string, photoId: string) => void;
+  setPendingChanges?: (value: boolean) => void;
+  isSaving?: boolean;
+  onFetchLocationData?: () => Promise<void>;
+  onGenerateLocationDescription?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
+  isGeneratingMap?: boolean;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchNearbyCities?: () => Promise<void>;
 }
 
 export function PropertyTabContents({
@@ -52,6 +66,7 @@ export function PropertyTabContents({
   formState,
   agentInfo,
   isUpdating,
+  isArchived = false,
   onSave,
   onDelete,
   handleSaveObjectId,
@@ -82,7 +97,9 @@ export function PropertyTabContents({
   handleYoutubeUrlUpdate,
   handleFloorplanEmbedScriptUpdate,
   currentStep,
-  handleStepClick
+  handleStepClick,
+  onSubmit,
+  setPendingChanges
 }: PropertyTabContentsProps) {
   const handleModeButtonClick = (e: React.MouseEvent, action: () => void) => {
     e.preventDefault(); // Prevent form submission
@@ -92,8 +109,8 @@ export function PropertyTabContents({
   return (
     <>
       <TabsContent value="dashboard" className="space-y-8">
-        <PropertyDashboardTab 
-          propertyData={property}
+        <DashboardTabContent 
+          property={property}
           onGeneratePDF={handleGeneratePDF}
           onWebView={handleWebView}
           onEditObjectId={handleSaveObjectId}
@@ -122,7 +139,7 @@ export function PropertyTabContents({
             onUpdateArea,
             onAreaImageRemove,
             onAreaImagesSelect,
-            handleAreaImageUpload,
+            handleAreaImageUpload: onAreaImageUpload,
             currentStep,
             handleStepClick,
             isUploading,
@@ -138,21 +155,14 @@ export function PropertyTabContents({
           onDelete={onDelete}
           onHandleClick={handleModeButtonClick}
         />
-        <PropertyMediaTab 
+        <MediaTabContent 
           property={property}
           formState={formState}
           onFieldChange={onFieldChange}
-          handleImageUpload={handleImageUpload}
-          handleRemoveImage={handleRemoveImage}
-          isUploading={isUploading}
-          handleFloorplanUpload={handleFloorplanUpload}
-          handleRemoveFloorplan={handleRemoveFloorplan}
-          isUploadingFloorplan={isUploadingFloorplan}
-          handleSetFeaturedImage={handleSetFeaturedImage}
-          handleToggleFeaturedImage={handleToggleFeaturedImage}
           handleVirtualTourUpdate={handleVirtualTourUpdate}
           handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
           handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
+          isReadOnly={isArchived}
         />
       </TabsContent>
       

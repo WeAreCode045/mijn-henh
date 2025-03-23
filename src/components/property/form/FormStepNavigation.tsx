@@ -7,7 +7,7 @@ import { Check, Loader2 } from "lucide-react";
 interface FormStepNavigationProps {
   currentStep: number;
   onStepClick: (step: number) => void;
-  onSave?: () => void;
+  onSave?: (e: React.MouseEvent) => void;
   isSaving?: boolean;
 }
 
@@ -20,11 +20,6 @@ export function FormStepNavigation({
   const handleStepClick = (e: React.MouseEvent, stepId: number) => {
     e.preventDefault(); // Prevent form submission
     onStepClick(stepId);
-  };
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
-    if (onSave) onSave();
   };
 
   return (
@@ -50,7 +45,7 @@ export function FormStepNavigation({
           <div>
             <Button
               type="button"
-              onClick={handleSave}
+              onClick={onSave}
               disabled={isSaving}
               className="flex items-center gap-2"
             >

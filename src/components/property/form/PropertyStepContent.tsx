@@ -36,7 +36,7 @@ interface PropertyStepContentProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: () => void; 
+  onSubmit?: (e: React.MouseEvent) => void; 
   isSaving?: boolean;
   isReadOnly?: boolean;
 }
@@ -137,7 +137,7 @@ export function PropertyStepContent({
       setPendingChanges(true);
     }
     if (onSubmit) {
-      onSubmit();
+      onSubmit(e);
     }
   };
 
