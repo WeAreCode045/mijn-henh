@@ -17,7 +17,10 @@ export function EditButton({
   isSaving = false,
   size = "sm"
 }: EditButtonProps) {
-  const handleAction = () => {
+  const handleAction = (e: React.MouseEvent) => {
+    // Prevent default to avoid page reload
+    e.preventDefault();
+    
     if (isEditing && onSave) {
       onSave();
     } else {

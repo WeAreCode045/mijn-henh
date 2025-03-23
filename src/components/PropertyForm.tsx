@@ -100,6 +100,12 @@ export function PropertyForm() {
     }
   };
 
+  // Prevent form submissions from reloading the page
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Main property form submission prevented");
+  };
+
   if (isLoading || !formData) {
     return <div className="p-4 flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
@@ -123,7 +129,7 @@ export function PropertyForm() {
         </Alert>
       )}
       
-      <form id="propertyForm">
+      <form id="propertyForm" onSubmit={handleFormSubmit}>
         <PropertyTabsWrapper
           property={propertyData}
           settings={settings}

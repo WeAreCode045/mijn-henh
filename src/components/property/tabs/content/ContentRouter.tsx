@@ -74,6 +74,12 @@ export function ContentRouter({
     }
   };
 
+  // Prevent default form submission behavior
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form submit prevented");
+  };
+
   const renderContent = () => {
     console.log("Rendering content for step:", currentStep, "and slug:", stepSlug);
     
@@ -135,11 +141,13 @@ export function ContentRouter({
         contentStepSlugs={contentStepSlugs}
         propertyId={id}
       />
-      <Card>
-        <CardContent className="pt-6">
-          {renderContent()}
-        </CardContent>
-      </Card>
+      <form onSubmit={handleFormSubmit}>
+        <Card>
+          <CardContent className="pt-6">
+            {renderContent()}
+          </CardContent>
+        </Card>
+      </form>
     </div>
   );
 }
