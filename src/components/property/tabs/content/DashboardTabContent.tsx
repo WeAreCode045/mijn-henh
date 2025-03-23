@@ -27,6 +27,9 @@ interface DashboardTabContentProps {
   onEditObjectId?: (objectId: string) => Promise<void>;
   onAssignAgent?: (agentId: string) => Promise<void>;
   agentInfo?: { id: string; name: string } | null;
+  handleSaveObjectId?: (objectId: string) => Promise<void>;
+  handleSaveAgent?: (agentId: string) => Promise<void>;
+  handleGeneratePDF?: () => void;
 }
 
 export function DashboardTabContent({ 
@@ -36,20 +39,35 @@ export function DashboardTabContent({
   onWebView,
   onEditObjectId,
   onAssignAgent,
-  agentInfo
+  agentInfo,
+  handleSaveObjectId,
+  handleSaveAgent,
+  handleGeneratePDF
 }: DashboardTabContentProps) {
   const [objectId, setObjectId] = useState(property.object_id || '');
   const [agentId, setAgentId] = useState(agentInfo?.id || '');
   
-  const handleSaveObjectId = async () => {
-    if (onEditObjectId) {
+  const handleSaveObjectIdWrapper = async () => {
+    if (handleSaveObjectId) {
+      await handleSaveObjectId(objectId);
+    } else if (onEditObjectId) {
       await onEditObjectId(objectId);
     }
   };
   
-  const handleSaveAgent = async () => {
-    if (onAssignAgent) {
+  const handleSaveAgentWrapper = async () => {
+    if (handleSaveAgent) {
+      await handleSaveAgent(agentId);
+    } else if (onAssignAgent) {
       await onAssignAgent(agentId);
+    }
+  };
+
+  const handleGeneratePDFWrapper = () => {
+    if (handleGeneratePDF) {
+      handleGeneratePDF();
+    } else if (onGeneratePDF) {
+      onGeneratePDF();
     }
   };
 
@@ -86,12 +104,12 @@ export function DashboardTabContent({
           <CardContent className="pt-6">
             <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              {onGeneratePDF && (
+              {(handleGeneratePDF || onGeneratePDF) && (
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
                   type="button"
-                  onClick={onGeneratePDF}
+                  onClick={handleGeneratePDFWrapper}
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   Generate PDF
@@ -110,7 +128,7 @@ export function DashboardTabContent({
                 </Button>
               )}
               
-              {onEditObjectId && (
+              {(handleSaveObjectId || onEditObjectId) && (
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full justify-start" type="button">
@@ -140,13 +158,13 @@ export function DashboardTabContent({
                       <DialogClose asChild>
                         <Button type="button" variant="secondary">Cancel</Button>
                       </DialogClose>
-                      <Button type="button" onClick={handleSaveObjectId}>Save</Button>
+                      <Button type="button" onClick={handleSaveObjectIdWrapper}>Save</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               )}
               
-              {onAssignAgent && (
+              {(handleSaveAgent || onAssignAgent) && (
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full justify-start" type="button">
@@ -181,7 +199,7 @@ export function DashboardTabContent({
                       <DialogClose asChild>
                         <Button type="button" variant="secondary">Cancel</Button>
                       </DialogClose>
-                      <Button type="button" onClick={handleSaveAgent}>Save</Button>
+                      <Button type="button" onClick={handleSaveAgentWrapper}>Save</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

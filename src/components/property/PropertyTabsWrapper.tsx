@@ -1,3 +1,4 @@
+
 import { PropertyTabs } from "./PropertyTabs";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { PropertyData } from "@/types/property";
@@ -6,6 +7,7 @@ import { PropertyFormManager } from "./tabs/wrapper/PropertyFormManager";
 import { PropertyTabActionsHandler } from "./tabs/wrapper/PropertyTabActionsHandler";
 import { PropertyWebViewDialog } from "./tabs/wrapper/PropertyWebViewDialog";
 import { Tabs } from "@/components/ui/tabs";
+import { useWebViewOpenState } from "@/hooks/useWebViewOpenState";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -25,6 +27,7 @@ export function PropertyTabsWrapper({
   isArchived = false
 }: PropertyTabsWrapperProps) {
   const { activeTab, setActiveTab } = usePropertyTabs();
+  const { isWebViewOpen, setIsWebViewOpen } = useWebViewOpenState();
   
   // Add a stub function for handleSaveTemplate
   const handleSaveTemplate = async (templateId: string) => {
@@ -33,7 +36,7 @@ export function PropertyTabsWrapper({
   };
   
   const handleOpenWebView = () => {
-    setWebViewOpen(true);
+    setIsWebViewOpen(true);
   };
 
   return (

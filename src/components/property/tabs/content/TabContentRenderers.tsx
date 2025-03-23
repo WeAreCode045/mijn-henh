@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
 import { DashboardTabContent } from './DashboardTabContent';
@@ -73,11 +74,11 @@ export class TabContentRenderers {
           <DashboardTabContent
             property={props.property}
             onDelete={handlers.onDelete}
-            onSave={handlers.onSave}
             onWebView={handleWebViewAdapter}
             handleSaveAgent={handlers.handleSaveAgent}
             handleSaveObjectId={handlers.handleSaveObjectId}
             handleGeneratePDF={handlers.handleGeneratePDF}
+            agentInfo={props.agentInfo}
           />
         );
       case 'content':
@@ -102,6 +103,8 @@ export class TabContentRenderers {
         return (
           <MediaTabContent
             property={props.property}
+            formState={props.formState}
+            onFieldChange={handlers.onFieldChange}
             handleVirtualTourUpdate={virtualTourUpdate}
             handleYoutubeUrlUpdate={youtubeUrlUpdate}
             handleFloorplanEmbedScriptUpdate={floorplanEmbedScriptUpdate}
