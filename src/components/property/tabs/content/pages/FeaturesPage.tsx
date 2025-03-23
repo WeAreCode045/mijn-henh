@@ -61,7 +61,8 @@ export function FeaturesPage({
     // Add multiple features at once
     // First, add the new features to the available features list
     newFeatures.forEach(feature => {
-      addToAvailableFeatures(feature);
+      // Fix: Pass the description string instead of the whole feature object
+      addToAvailableFeatures(feature.description);
     });
     
     // Then add them to the property
