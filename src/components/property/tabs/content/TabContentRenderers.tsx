@@ -93,7 +93,7 @@ export class TabContentRenderers {
               onUpdateArea: handlers.onUpdateArea,
               onAreaImageRemove: handlers.onAreaImageRemove,
               onAreaImagesSelect: handlers.onAreaImagesSelect,
-              onAreaImageUpload: handlers.handleAreaPhotosUpload || (() => Promise.resolve()),
+              onAreaImageUpload: handlers.handleAreaImageUpload || (() => Promise.resolve()),
               currentStep: handlers.currentStep || 0,
               handleStepClick: handlers.handleStepClick || (() => {}),
               handleNext: undefined,
@@ -130,7 +130,7 @@ export class TabContentRenderers {
               onUpdateArea: handlers.onUpdateArea,
               onAreaImageRemove: handlers.onAreaImageRemove,
               onAreaImagesSelect: handlers.onAreaImagesSelect,
-              onAreaImageUpload: handlers.handleAreaPhotosUpload || (() => Promise.resolve()),
+              onAreaImageUpload: handlers.handleAreaImageUpload || (() => Promise.resolve()),
               currentStep: 1, // Force location step (index 1)
               handleStepClick: handlers.handleStepClick || (() => {}),
               handleNext: undefined,
