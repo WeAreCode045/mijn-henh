@@ -19,20 +19,10 @@ interface ContentTabWrapperProps {
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    onFetchLocationData?: () => Promise<void>;
-    onFetchCategoryPlaces?: (category: string) => Promise<any>;
-    onFetchNearbyCities?: () => Promise<void>;
-    onGenerateLocationDescription?: () => Promise<void>;
-    onGenerateMap?: () => Promise<void>;
-    onRemoveNearbyPlace?: (index: number) => void;
-    isLoadingLocationData?: boolean;
-    isGeneratingMap?: boolean;
-    setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
-    onSubmit: () => void;
-    isSaving: boolean;
   };
 }
 
@@ -62,6 +52,8 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
   const completeHandlers = useMemo(() => ({
     ...handlers,
     ...contentHooks,
+    // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
+    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
     // Override currentStep with our memoized value
     currentStep: currentStep
   }), [handlers, contentHooks, currentStep]);
