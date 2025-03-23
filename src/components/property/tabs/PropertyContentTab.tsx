@@ -59,7 +59,9 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
   const completeHandlers = {
     ...handlers,
     // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
-    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload
+    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
+    // Ensure isSaving is always provided (non-optional)
+    isSaving: handlers.isSaving || false
   };
 
   return (
