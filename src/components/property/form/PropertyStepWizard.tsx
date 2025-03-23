@@ -34,7 +34,7 @@ interface PropertyStepWizardProps {
   onSubmit?: () => void; 
   isSaving?: boolean;
   isReadOnly?: boolean;
-  hideNavigation?: boolean; // Add this prop to hide navigation
+  hideNavigation?: boolean;
 }
 
 export function PropertyStepWizard({
@@ -87,6 +87,7 @@ export function PropertyStepWizard({
       
       <PropertyStepContent 
         formData={formState}
+        step={currentStep}
         onFieldChange={onFieldChange}
         onAddFeature={onAddFeature}
         onRemoveFeature={onRemoveFeature}

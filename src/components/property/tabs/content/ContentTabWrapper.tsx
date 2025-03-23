@@ -1,12 +1,9 @@
 
 import { useState, useCallback, memo } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
-import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
-import { usePropertyContentSubmit } from "@/hooks/usePropertyContentSubmit";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
-import { Spinner } from "@/components/ui/spinner";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -86,7 +83,8 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
     }
   }, [handlers, toast]);
 
-  // Simply pass through the component tree to render content
+  console.log("ContentTabWrapper rendering with currentStep:", handlers.currentStep);
+
   return (
     <ContentTabContent
       property={property}

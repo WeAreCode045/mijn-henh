@@ -11,7 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface PropertyStepContentProps {
   formData: PropertyFormData;
-  step?: number; // Optional step property
+  step?: number;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onAddFeature?: () => void;
   onRemoveFeature?: (id: string) => void;
