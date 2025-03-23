@@ -100,6 +100,16 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
     }
   }, [handlers]);
 
+  // Use local state for setPendingChanges if handler's version not available
+  const handleSetPendingChanges = useCallback((value: boolean) => {
+    console.log(`ContentTabWrapper - setPendingChanges: ${value}`);
+    if (handlers.setPendingChanges) {
+      handlers.setPendingChanges(value);
+    } else {
+      setPendingChanges(value);
+    }
+  }, [handlers]);
+
   return (
     <ContentTabContent
       property={property}
@@ -121,7 +131,7 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
       onFetchLocationData={handlers.onFetchLocationData}
       onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
       isLoadingLocationData={handlers.isLoadingLocationData}
-      setPendingChanges={handlers.setPendingChanges || setPendingChanges}
+      setPendingChanges={handleSetPendingChanges}
       isUploading={handlers.isUploading}
       onSubmit={handleSubmit}
       isSaving={isSubmitting || handlers.isSaving}

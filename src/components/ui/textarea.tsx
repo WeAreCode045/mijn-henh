@@ -8,7 +8,6 @@ export interface TextareaProps
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, ...props }, ref) => {
-    // Remove any special handling of readOnly, let it pass through normally
     return (
       <textarea
         className={cn(

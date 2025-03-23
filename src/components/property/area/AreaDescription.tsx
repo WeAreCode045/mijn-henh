@@ -15,13 +15,19 @@ export function AreaDescription({
   onDescriptionChange,
   isReadOnly = false
 }: AreaDescriptionProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (!isReadOnly) {
+      onDescriptionChange(e.target.value);
+    }
+  };
+
   return (
     <div>
       <Label htmlFor={`description-${areaId}`}>Description</Label>
       <Textarea
         id={`description-${areaId}`}
         value={description}
-        onChange={(e) => onDescriptionChange(e.target.value)}
+        onChange={handleChange}
         placeholder="Describe this area..."
         rows={4}
         disabled={isReadOnly}

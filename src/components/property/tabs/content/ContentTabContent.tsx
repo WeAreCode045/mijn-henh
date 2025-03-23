@@ -66,30 +66,11 @@ export const ContentTabContent = memo(function ContentTabContent({
   console.log("ContentTabContent onFieldChange is defined:", !!onFieldChange);
   console.log("FormState has keys:", Object.keys(formState).join(", "));
   
-  // We need this check to prevent passing undefined handlers down
-  const handleSafeFieldChange = (field: keyof PropertyFormData, value: any) => {
-    console.log(`ContentTabContent handleSafeFieldChange: ${String(field)} = `, value);
-    if (onFieldChange) {
-      onFieldChange(field, value);
-    } else {
-      console.warn("onFieldChange is not defined in ContentTabContent");
-    }
-  };
-  
-  const handleSafeSetPendingChanges = (pending: boolean) => {
-    console.log("ContentTabContent setPendingChanges:", pending);
-    if (setPendingChanges) {
-      setPendingChanges(pending);
-    } else {
-      console.warn("setPendingChanges is not defined in ContentTabContent");
-    }
-  };
-  
   return (
     <PropertyStepWizard
       property={property}
       formState={formState}
-      onFieldChange={handleSafeFieldChange}
+      onFieldChange={onFieldChange}
       onAddFeature={onAddFeature}
       onRemoveFeature={onRemoveFeature}
       onUpdateFeature={onUpdateFeature}
@@ -106,7 +87,7 @@ export const ContentTabContent = memo(function ContentTabContent({
       onFetchLocationData={onFetchLocationData}
       onRemoveNearbyPlace={onRemoveNearbyPlace}
       isLoadingLocationData={isLoadingLocationData}
-      setPendingChanges={handleSafeSetPendingChanges}
+      setPendingChanges={setPendingChanges}
       isUploading={isUploading}
       onSubmit={onSubmit}
       isSaving={isSaving}

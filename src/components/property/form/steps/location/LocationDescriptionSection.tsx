@@ -66,7 +66,7 @@ export function LocationDescriptionSection({
               onChange={handleChange}
               placeholder="Describe the property location and surroundings"
               rows={6}
-              readOnly={isReadOnly}
+              disabled={isReadOnly}
             />
           </div>
         </div>
