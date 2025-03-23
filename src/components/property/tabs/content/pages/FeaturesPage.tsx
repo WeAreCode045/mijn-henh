@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
 import { Json } from "@/integrations/supabase/types";
+import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 interface FeaturesPageProps {
   formData: PropertyFormData;
@@ -57,10 +58,13 @@ export function FeaturesPage({
     
     setIsSaving(true);
     try {
+      // Convert PropertyFeature[] to Json using the preparePropertiesForJsonField utility
+      const featuresJson = preparePropertiesForJsonField(editableFeatures);
+      
       const { error } = await supabase
         .from('properties')
         .update({ 
-          features: editableFeatures as unknown as Json
+          features: featuresJson
         })
         .eq('id', formData.id);
         

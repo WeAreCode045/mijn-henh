@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,8 @@ import { Plus, Trash, Upload, Edit, Save } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
+import { prepareAreasForFormSubmission } from "@/hooks/property-form/preparePropertyData";
 
 interface AreasPageProps {
   formData: PropertyFormData;
@@ -72,10 +75,13 @@ export function AreasPage({
         area.id === areaId ? updatedArea : area
       ) || [];
       
+      // Transform PropertyArea[] to Json[] using the prepareAreasForFormSubmission utility
+      const areasForSubmission = prepareAreasForFormSubmission(updatedAreas);
+      
       const { error } = await supabase
         .from('properties')
         .update({ 
-          areas: updatedAreas
+          areas: areasForSubmission
         })
         .eq('id', formData.id);
         
