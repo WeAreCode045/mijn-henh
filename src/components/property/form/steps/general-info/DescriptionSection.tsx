@@ -13,6 +13,7 @@ interface DescriptionSectionProps {
 export function DescriptionSection({ formData, onFieldChange, setPendingChanges }: DescriptionSectionProps) {
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log(`Textarea change: ${name} = ${value}`);
     onFieldChange(name as keyof PropertyFormData, value);
     if (setPendingChanges) {
       setPendingChanges(true);

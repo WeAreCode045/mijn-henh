@@ -3,7 +3,6 @@ import { useState, useCallback, memo } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabContent } from './ContentTabContent';
 import { useToast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;

@@ -13,10 +13,16 @@ interface PropertySpecsProps {
 
 export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: PropertySpecsProps) {
   const handleChange = (field: keyof PropertyFormData, value: string) => {
+    console.log(`PropertySpecs change: ${String(field)} = ${value}`);
     onFieldChange(field, value);
     if (setPendingChanges) {
       setPendingChanges(true);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    handleChange(id as keyof PropertyFormData, value);
   };
 
   return (
@@ -31,7 +37,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
           <Input
             id="price"
             value={formData.price || ''}
-            onChange={(e) => handleChange('price', e.target.value)}
+            onChange={handleInputChange}
             placeholder="Enter price"
           />
         </div>
@@ -42,7 +48,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Input
               id="bedrooms"
               value={formData.bedrooms || ''}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
+              onChange={handleInputChange}
               placeholder="No. of bedrooms"
             />
           </div>
@@ -51,7 +57,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Input
               id="bathrooms"
               value={formData.bathrooms || ''}
-              onChange={(e) => handleChange('bathrooms', e.target.value)}
+              onChange={handleInputChange}
               placeholder="No. of bathrooms"
             />
           </div>
@@ -63,7 +69,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Input
               id="sqft"
               value={formData.sqft || ''}
-              onChange={(e) => handleChange('sqft', e.target.value)}
+              onChange={handleInputChange}
               placeholder="Plot area"
             />
           </div>
@@ -72,7 +78,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Input
               id="livingArea"
               value={formData.livingArea || ''}
-              onChange={(e) => handleChange('livingArea', e.target.value)}
+              onChange={handleInputChange}
               placeholder="Living area"
             />
           </div>
@@ -84,7 +90,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Input
               id="buildYear"
               value={formData.buildYear || ''}
-              onChange={(e) => handleChange('buildYear', e.target.value)}
+              onChange={handleInputChange}
               placeholder="Year built"
             />
           </div>

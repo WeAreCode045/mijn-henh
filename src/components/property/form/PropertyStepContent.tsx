@@ -36,7 +36,7 @@ interface PropertyStepContentProps {
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
   isUploading?: boolean;
-  onSubmit?: (e: React.MouseEvent) => void; 
+  onSubmit?: () => void; 
   isSaving?: boolean;
   isReadOnly?: boolean;
 }
@@ -137,17 +137,15 @@ export function PropertyStepContent({
     }
   };
 
-  // Ensure the save button properly triggers the onSubmit function
+  // Handle save button click
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
     if (onSubmit) {
-      onSubmit(e);
+      onSubmit();
     }
   };
 
+  // Handle previous button click
   const handlePrev = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
     if (handlePrevious) {
@@ -155,6 +153,7 @@ export function PropertyStepContent({
     }
   };
 
+  // Handle next button click
   const handleNextStep = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent form submission
     if (handleNext) {

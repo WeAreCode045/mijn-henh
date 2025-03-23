@@ -114,7 +114,7 @@ export function PropertyStepWizard({
         isGeneratingMap={isGeneratingMap}
         setPendingChanges={setPendingChanges}
         isUploading={isUploading}
-        onSubmit={onSubmit ? (e) => onSubmit() : undefined}
+        onSubmit={onSubmit}
         isSaving={isSaving}
         isReadOnly={isReadOnly}
       />
