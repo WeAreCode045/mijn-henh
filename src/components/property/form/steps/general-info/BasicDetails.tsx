@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface BasicDetailsProps {
   formData: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   isReadOnly?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -22,17 +22,25 @@ export function BasicDetails({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(`BasicDetails: Changing ${name} to ${value}`);
-    onFieldChange(name as keyof PropertyFormData, value);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    if (onFieldChange) {
+      onFieldChange(name as keyof PropertyFormData, value);
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    } else {
+      console.warn("BasicDetails: onFieldChange is not defined");
     }
   };
   
   const handleSelectChange = (field: string, value: string) => {
     console.log(`BasicDetails: Changing ${field} to ${value}`);
-    onFieldChange(field as keyof PropertyFormData, value);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    if (onFieldChange) {
+      onFieldChange(field as keyof PropertyFormData, value);
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    } else {
+      console.warn("BasicDetails: onFieldChange is not defined for select change");
     }
   };
   
@@ -57,7 +65,7 @@ export function BasicDetails({
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select 
-              defaultValue={formData.status || 'for_sale'} 
+              value={formData.status || 'for_sale'} 
               onValueChange={(value) => handleSelectChange('status', value)}
             >
               <SelectTrigger id="status">
@@ -89,7 +97,7 @@ export function BasicDetails({
           <div className="space-y-2">
             <Label htmlFor="propertyType">Property Type</Label>
             <Select 
-              defaultValue={formData.propertyType || 'house'} 
+              value={formData.propertyType || 'house'} 
               onValueChange={(value) => handleSelectChange('propertyType', value)}
             >
               <SelectTrigger id="propertyType">

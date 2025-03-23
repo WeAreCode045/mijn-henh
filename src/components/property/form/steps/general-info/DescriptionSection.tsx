@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface DescriptionSectionProps {
   formData: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   isReadOnly?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -21,10 +21,14 @@ export function DescriptionSection({
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     console.log(`DescriptionSection: Changing ${name} to: `, value);
-    onFieldChange(name as keyof PropertyFormData, value);
-    
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    if (onFieldChange) {
+      onFieldChange(name as keyof PropertyFormData, value);
+      
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    } else {
+      console.warn("DescriptionSection: onFieldChange is not defined");
     }
   };
   

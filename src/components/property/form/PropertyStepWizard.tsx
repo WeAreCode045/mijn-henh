@@ -117,7 +117,7 @@ export function PropertyStepWizard({
         isUploading={isUploading}
         onSubmit={onSubmit}
         isSaving={isSaving}
-        isReadOnly={false}
+        isReadOnly={isReadOnly}
       />
     </div>
   );

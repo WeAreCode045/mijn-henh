@@ -6,10 +6,10 @@ import { PropertyStepWizard } from '../../form/PropertyStepWizard';
 interface ContentTabContentProps {
   property: PropertyData;
   formState: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+  onAddFeature?: () => void;
+  onRemoveFeature?: (id: string) => void;
+  onUpdateFeature?: (id: string, description: string) => void;
   onAddArea?: () => void;
   onRemoveArea?: (id: string) => void;
   onUpdateArea?: (id: string, field: any, value: any) => void;
@@ -91,7 +91,7 @@ export const ContentTabContent = memo(function ContentTabContent({
       isUploading={isUploading}
       onSubmit={onSubmit}
       isSaving={isSaving}
-      isReadOnly={false}
+      isReadOnly={isReadOnly}
       hideNavigation={hideNavigation}
     />
   );

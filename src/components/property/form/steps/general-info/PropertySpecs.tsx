@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PropertySpecsProps {
   formData: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   isReadOnly?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -21,9 +21,13 @@ export function PropertySpecs({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(`PropertySpecs: Changing ${name} to ${value}`);
-    onFieldChange(name as keyof PropertyFormData, value);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    if (onFieldChange) {
+      onFieldChange(name as keyof PropertyFormData, value);
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    } else {
+      console.warn("PropertySpecs: onFieldChange is not defined");
     }
   };
   

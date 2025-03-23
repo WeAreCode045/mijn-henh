@@ -10,7 +10,7 @@ interface ContentTabWrapperProps {
   hideNavigation?: boolean;
   isReadOnly?: boolean;
   handlers: {
-    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+    onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
     onRemoveFeature: (id: string) => void;
     onUpdateFeature: (id: string, description: string) => void;
@@ -96,7 +96,7 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
     if (handlers.onFieldChange) {
       handlers.onFieldChange(field, value);
     } else {
-      console.warn("onFieldChange handler is not defined");
+      console.warn("onFieldChange handler is not defined in ContentTabWrapper");
     }
   }, [handlers]);
 
