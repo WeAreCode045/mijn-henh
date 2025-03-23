@@ -250,7 +250,7 @@ export function GeneralPage({
                     <SelectValue placeholder="Select energy label" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="A++">A++</SelectItem>
                     <SelectItem value="A+">A+</SelectItem>
                     <SelectItem value="A">A</SelectItem>

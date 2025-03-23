@@ -144,13 +144,14 @@ export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
           <div>
             <Label htmlFor="energy-label">Energy Label</Label>
             <Select
-              value={formData.energyLabel || ""}
+              value={formData.energyLabel || "none"}
               onValueChange={(value) => handleInputChange("energyLabel", value)}
             >
               <SelectTrigger id="energy-label">
                 <SelectValue placeholder="Select energy label" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 {energyLabels.map((label) => (
                   <SelectItem key={label} value={label}>{label}</SelectItem>
                 ))}
