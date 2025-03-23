@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
 import { GeneralPage } from "./pages/GeneralPage";
@@ -49,19 +49,23 @@ export function ContentRouter({
   currentStep, 
   handlers 
 }: ContentRouterProps) {
-  const { id } = useParams();
+  const { id, step: stepSlug } = useParams();
   const navigate = useNavigate();
+
+  // Sync URL with current step if they don't match
+  useEffect(() => {
+    if (id && stepSlug) {
+      const stepIndex = contentStepSlugs.indexOf(stepSlug);
+      if (stepIndex !== -1 && stepIndex !== currentStep) {
+        handlers.handleStepClick(stepIndex);
+      }
+    }
+  }, [stepSlug, currentStep, id, handlers]);
 
   // Handle step navigation via URLs
   const handleStepNavigation = (step: number) => {
     // First call the original handler to ensure data is saved
     handlers.handleStepClick(step);
-    
-    // Then update the URL to reflect the current step
-    if (id) {
-      const stepSlug = contentStepSlugs[step];
-      navigate(`/property/${id}/content/${stepSlug}`);
-    }
   };
 
   const renderContent = () => {

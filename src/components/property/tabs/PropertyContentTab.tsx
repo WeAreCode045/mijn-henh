@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabWrapper } from './content/ContentTabWrapper';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
@@ -18,7 +18,7 @@ interface PropertyContentTabProps {
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-    handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
     onFetchLocationData?: () => Promise<void>;
@@ -42,14 +42,18 @@ const stepSlugMap: Record<string, number> = {
 
 export function PropertyContentTab({ formData, property, handlers }: PropertyContentTabProps) {
   // Get the current step from the URL
-  const { step: stepSlug } = useParams<{ step: string }>();
+  const { step: stepSlug, id } = useParams<{ step: string; id: string }>();
+  const navigate = useNavigate();
   
   // Update step based on URL when component mounts or URL changes
   useEffect(() => {
     if (stepSlug && stepSlugMap[stepSlug] !== undefined && handlers.currentStep !== stepSlugMap[stepSlug]) {
       handlers.handleStepClick(stepSlugMap[stepSlug]);
+    } else if (id && !stepSlug) {
+      // If we're at /property/:id/content without a step, redirect to /property/:id/content/general
+      navigate(`/property/${id}/content/general`);
     }
-  }, [stepSlug, handlers]);
+  }, [stepSlug, handlers, id, navigate, handlers.currentStep]);
 
   // Ensure all necessary props are passed to ContentTabWrapper
   const completeHandlers = {

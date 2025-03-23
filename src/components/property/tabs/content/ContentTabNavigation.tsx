@@ -1,7 +1,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Book, Home, Map, LayoutGrid } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface ContentTabNavigationProps {
   currentStep: number;
@@ -23,8 +23,18 @@ export function ContentTabNavigation({
   contentStepSlugs,
   propertyId
 }: ContentTabNavigationProps) {
+  const navigate = useNavigate();
+
   // If using URL-based navigation (propertyId is provided)
-  if (propertyId && contentStepSlugs) {
+  if (propertyId) {
+    const handleTabClick = (step: number) => {
+      // Update the step first
+      onStepClick(step);
+      // Then navigate to the correct URL
+      const slug = steps[step].slug;
+      navigate(`/property/${propertyId}/content/${slug}`);
+    };
+
     return (
       <Tabs 
         value={currentStep.toString()} 
@@ -36,18 +46,10 @@ export function ContentTabNavigation({
               key={step.id} 
               value={step.id.toString()} 
               className="flex items-center justify-center"
-              asChild
+              onClick={() => handleTabClick(step.id)}
             >
-              <Link 
-                to={`/property/${propertyId}/content/${step.slug}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onStepClick(step.id);
-                }}
-              >
-                {step.icon}
-                {step.label}
-              </Link>
+              {step.icon}
+              {step.label}
             </TabsTrigger>
           ))}
         </TabsList>
