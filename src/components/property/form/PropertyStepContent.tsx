@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -127,6 +128,7 @@ export function PropertyStepContent({
     }
   };
 
+  // Internal handlers for navigation that call the props only when they exist
   const handlePreviousClick = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent default form submission behavior
     if (handlePrevious) handlePrevious();
@@ -158,7 +160,7 @@ export function PropertyStepContent({
       <div className="flex justify-between mt-6">
         <Button
           variant="outline"
-          onClick={handlePreviousClick}  // Now this function handles the event
+          onClick={handlePreviousClick}
           disabled={currentStep === 0}
           type="button" // Explicitly set as button type
           className="flex items-center gap-2"
@@ -168,7 +170,7 @@ export function PropertyStepContent({
         </Button>
         
         <Button
-          onClick={handleNextClick}  // Now this function handles the event
+          onClick={handleNextClick}
           disabled={currentStep === 3}
           type="button" // Explicitly set as button type
           className="flex items-center gap-2"
