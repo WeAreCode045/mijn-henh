@@ -69,6 +69,8 @@ export function PropertyStepWizard({
   isReadOnly,
   hideNavigation = false
 }: PropertyStepWizardProps) {
+  console.log("PropertyStepWizard rendering with current step:", currentStep);
+  
   if (!formState) {
     console.error("No form state provided to PropertyStepWizard");
     return <div>Loading...</div>;
@@ -112,7 +114,7 @@ export function PropertyStepWizard({
         isGeneratingMap={isGeneratingMap}
         setPendingChanges={setPendingChanges}
         isUploading={isUploading}
-        onSubmit={onSubmit}
+        onSubmit={onSubmit ? (e) => onSubmit() : undefined}
         isSaving={isSaving}
         isReadOnly={isReadOnly}
       />

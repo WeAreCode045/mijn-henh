@@ -49,7 +49,7 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
   const { toast } = useToast();
   
   // We'll use the handlers.onSubmit but wrap it to perform additional tasks
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     console.log("ContentTabWrapper - handleSubmit called");
     
     try {

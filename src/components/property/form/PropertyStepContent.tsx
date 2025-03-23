@@ -71,6 +71,8 @@ export function PropertyStepContent({
   isSaving,
   isReadOnly,
 }: PropertyStepContentProps) {
+  console.log("PropertyStepContent rendering, activeStep:", currentStep);
+  
   // Make sure we have all necessary handlers before rendering steps
   const renderStep = () => {
     // Define fallback handlers to prevent runtime errors
