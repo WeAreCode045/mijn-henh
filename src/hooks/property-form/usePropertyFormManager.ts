@@ -10,18 +10,20 @@ import { usePropertySaveHandlers } from './usePropertySaveHandlers';
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
+  const [pendingChanges, setPendingChanges] = useState(false);
   
   // Hook for handling form state
   const { 
-    onFieldChange 
-  } = usePropertyFormState(formState, setFormState);
+    formState: formStateFromHook, 
+    handleFieldChange 
+  } = usePropertyFormState(formState, setPendingChanges);
   
   // Hook for managing features
   const { 
     addFeature, 
     removeFeature, 
     updateFeature 
-  } = usePropertyFeatures(formState, onFieldChange);
+  } = usePropertyFeatures(formState, handleFieldChange);
   
   // Hook for managing areas
   const { 
@@ -32,7 +34,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleAreaImagesSelect,
     handleAreaImageUpload,
     isUploading
-  } = usePropertyAreas(formState, onFieldChange);
+  } = usePropertyAreas(formState, handleFieldChange);
   
   // Hook for managing content and steps
   const { 
@@ -50,26 +52,26 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handlePrevious,
     lastSaved,
     isSaving,
-    setPendingChanges,
+    setPendingChanges: setContentPendingChanges,
     onSubmit
-  } = usePropertyContent(formState, onFieldChange);
+  } = usePropertyContent(formState, handleFieldChange);
   
   // Hook for managing images
   const {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyImages(formState, onFieldChange);
+  } = usePropertyImages(formState, handleFieldChange);
   
   // Hook for property save handlers
   const {
     handleSaveObjectId,
     handleSaveAgent
-  } = usePropertySaveHandlers(formState, onFieldChange);
+  } = usePropertySaveHandlers(formState, handleFieldChange);
   
   return {
     formState,
-    handleFieldChange: onFieldChange,
+    handleFieldChange,
     
     // Feature methods
     onAddFeature: addFeature,
