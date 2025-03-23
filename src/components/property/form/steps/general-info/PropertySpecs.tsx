@@ -23,11 +23,12 @@ export function PropertySpecs({
     console.log(`PropertySpecs: Changing ${name} to ${value}`);
     if (onFieldChange) {
       onFieldChange(name as keyof PropertyFormData, value);
+      
       if (setPendingChanges) {
         setPendingChanges(true);
       }
     } else {
-      console.warn("PropertySpecs: onFieldChange is not defined");
+      console.warn(`PropertySpecs: onFieldChange is not defined for field: ${name}`);
     }
   };
   

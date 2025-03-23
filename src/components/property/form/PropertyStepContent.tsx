@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { FormStepNavigation } from "@/components/property/form/FormStepNavigation";
@@ -82,9 +81,11 @@ export function PropertyStepContent({
         return (
           <GeneralInfoStep
             formData={formData}
-            onFieldChange={onFieldChange}
+            onFieldChange={onFieldChange || ((field, value) => {
+              console.warn(`No onFieldChange handler provided for ${String(field)}`);
+            })}
             setPendingChanges={setPendingChanges}
-            isReadOnly={false}
+            isReadOnly={isReadOnly || false}
           />
         );
       case 1:

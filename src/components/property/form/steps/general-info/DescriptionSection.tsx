@@ -28,7 +28,7 @@ export function DescriptionSection({
         setPendingChanges(true);
       }
     } else {
-      console.warn("DescriptionSection: onFieldChange is not defined");
+      console.warn(`DescriptionSection: onFieldChange is not defined for field: ${name}`);
     }
   };
   

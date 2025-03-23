@@ -7,15 +7,15 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { BasicDetails } from "./BasicDetails";
-import { DescriptionSection } from "./DescriptionSection";
-import { PropertySpecs } from "./PropertySpecs";
-import { ImageSelections } from "./ImageSelections";
+import { BasicDetails } from "./general-info/BasicDetails";
+import { DescriptionSection } from "./general-info/DescriptionSection";
+import { PropertySpecs } from "./general-info/PropertySpecs";
+import { ImageSelections } from "./general-info/ImageSelections";
 import { useState } from "react";
 
 interface GeneralInfoStepProps {
   formData: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
@@ -36,34 +36,30 @@ export function GeneralInfoStep({
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    onFieldChange(name as keyof PropertyFormData, value);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    if (onFieldChange) {
+      onFieldChange(name as keyof PropertyFormData, value);
+    } else {
+      console.warn(`GeneralInfoStep: onFieldChange is not defined for field: ${name}`);
     }
   };
   
   const handleSwitchChange = (name: string, checked: boolean) => {
-    onFieldChange(name as keyof PropertyFormData, checked);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    if (onFieldChange) {
+      onFieldChange(name as keyof PropertyFormData, checked);
+    } else {
+      console.warn(`GeneralInfoStep: onFieldChange is not defined for switch: ${name}`);
     }
   };
 
   const handleFeaturedImageSelect = (url: string | null) => {
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
     }
   };
 
   const handleFeaturedImageToggle = (url: string) => {
     if (handleToggleFeaturedImage) {
       handleToggleFeaturedImage(url);
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
     }
   };
 
@@ -73,7 +69,7 @@ export function GeneralInfoStep({
       <BasicDetails 
         formData={formData}
         onFieldChange={onFieldChange}
-        isReadOnly={false}
+        isReadOnly={isReadOnly}
         setPendingChanges={setPendingChanges}
       />
       
@@ -81,7 +77,7 @@ export function GeneralInfoStep({
       <PropertySpecs 
         formData={formData} 
         onFieldChange={onFieldChange}
-        isReadOnly={false}
+        isReadOnly={isReadOnly}
         setPendingChanges={setPendingChanges}
       />
       
@@ -89,7 +85,7 @@ export function GeneralInfoStep({
       <DescriptionSection 
         formData={formData}
         onFieldChange={onFieldChange}
-        isReadOnly={false}
+        isReadOnly={isReadOnly}
         setPendingChanges={setPendingChanges}
       />
       
@@ -99,6 +95,7 @@ export function GeneralInfoStep({
         variant="outline"
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="w-full"
+        disabled={isReadOnly}
       >
         {showAdvanced ? "Hide" : "Show"} Advanced Fields
       </Button>
@@ -119,6 +116,7 @@ export function GeneralInfoStep({
                   placeholder="Living Area"
                   value={formData.livingArea || ''}
                   onChange={handleInputChange}
+                  disabled={isReadOnly}
                 />
               </div>
               
@@ -130,6 +128,7 @@ export function GeneralInfoStep({
                   placeholder="Build Year"
                   value={formData.buildYear || ''}
                   onChange={handleInputChange}
+                  disabled={isReadOnly}
                 />
               </div>
               
@@ -141,6 +140,7 @@ export function GeneralInfoStep({
                   placeholder="Garages"
                   value={formData.garages || ''}
                   onChange={handleInputChange}
+                  disabled={isReadOnly}
                 />
               </div>
               
@@ -152,6 +152,7 @@ export function GeneralInfoStep({
                   placeholder="Energy Label"
                   value={formData.energyLabel || ''}
                   onChange={handleInputChange}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -164,6 +165,7 @@ export function GeneralInfoStep({
                   id="hasGarden"
                   checked={formData.hasGarden || false}
                   onCheckedChange={(checked) => handleSwitchChange('hasGarden', checked)}
+                  disabled={isReadOnly}
                 />
                 <Label htmlFor="hasGarden">Has Garden</Label>
               </div>
@@ -181,7 +183,7 @@ export function GeneralInfoStep({
           onFeaturedImageSelect={handleFeaturedImageSelect}
           onFeaturedImageToggle={handleFeaturedImageToggle}
           maxFeaturedImages={4}
-          isReadOnly={false}
+          isReadOnly={isReadOnly}
         />
       )}
     </div>
