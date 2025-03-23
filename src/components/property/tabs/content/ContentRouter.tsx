@@ -78,9 +78,12 @@ export function ContentRouter({
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Form submit prevented in ContentRouter");
   };
 
   const renderContent = () => {
+    console.log("Rendering content for step:", currentStep, "and slug:", stepSlug);
+    
     switch (currentStep) {
       case 0:
         return (

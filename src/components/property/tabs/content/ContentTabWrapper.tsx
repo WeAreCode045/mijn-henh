@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect, useMemo } from "react";
-import { PropertyFormData, PropertyData } from "@/types/property";
-import { ContentRouter } from "./ContentRouter";
-import { usePropertyContent } from "@/hooks/usePropertyContent";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { PropertyData, PropertyFormData } from "@/types/property";
+import { ContentRouter } from './ContentRouter';
+import { usePropertyContentStepNavigation } from '@/hooks/usePropertyContentStepNavigation';
+import { useParams } from 'react-router-dom';
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
-  property: PropertyData; 
+  property: PropertyData;
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature: () => void;
@@ -19,50 +19,74 @@ interface ContentTabWrapperProps {
     onAreaImageRemove: (areaId: string, imageId: string) => void;
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-    handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
+    handleNext?: () => void;
+    handlePrevious?: () => void;
+    onFetchLocationData?: () => Promise<void>;
+    onFetchCategoryPlaces?: (category: string) => Promise<any>;
+    onFetchNearbyCities?: () => Promise<any>;
+    onGenerateLocationDescription?: () => Promise<void>;
+    onGenerateMap?: () => Promise<void>;
+    onRemoveNearbyPlace?: (index: number) => void;
+    isLoadingLocationData?: boolean;
+    isGeneratingMap?: boolean;
+    setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
+    onSubmit: () => void;
+    isSaving?: boolean;
   };
 }
 
-// Map from URL step slugs to step numbers
-const stepSlugMap: Record<string, number> = {
-  'general': 0,
-  'location': 1,
-  'features': 2,
-  'areas': 3
-};
-
-export function ContentTabWrapper({ formData, property, handlers }: ContentTabWrapperProps) {
+export function ContentTabWrapper({ 
+  formData,
+  property,
+  handlers
+}: ContentTabWrapperProps) {
+  const [pendingChanges, setPendingChanges] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { step: stepSlug } = useParams<{ step: string }>();
   
-  // Get functionality from usePropertyContent hook
-  const contentHooks = usePropertyContent(formData, handlers.onFieldChange);
-  
-  // Memoize the step to prevent unnecessary renders
-  const currentStep = useMemo(() => {
-    if (stepSlug && stepSlugMap[stepSlug] !== undefined) {
-      return stepSlugMap[stepSlug];
-    }
-    return handlers.currentStep;
-  }, [stepSlug, handlers.currentStep]);
+  // Create a centralized navigation handler
+  const { 
+    handleStepClick: internalHandleStepClick,
+    handleNext,
+    handlePrevious
+  } = usePropertyContentStepNavigation(
+    formData,
+    handlers.currentStep,
+    handlers.handleStepClick,
+    pendingChanges,
+    setPendingChanges,
+    setLastSaved,
+    handlers.handleStepClick,
+    handlers.handleNext,
+    handlers.handlePrevious
+  );
 
-  // Ensure all necessary props are passed to ContentRouter
-  const completeHandlers = useMemo(() => ({
+  // Create a complete bundle of all handlers needed for content routing
+  const contentHandlers = {
     ...handlers,
-    ...contentHooks,
-    // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
-    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
-    // Override currentStep with our memoized value
-    currentStep: currentStep
-  }), [handlers, contentHooks, currentStep]);
+    handleStepClick: internalHandleStepClick,
+    handleNext,
+    handlePrevious,
+    setPendingChanges: (value: boolean) => {
+      setPendingChanges(value);
+      if (handlers.setPendingChanges) {
+        handlers.setPendingChanges(value);
+      }
+    },
+    // Ensure isSaving is not undefined for ContentRouter
+    isSaving: handlers.isSaving || false
+  };
+
+  console.log("ContentTabWrapper - Current step:", handlers.currentStep, "Step slug:", stepSlug);
 
   return (
     <ContentRouter 
       formData={formData}
-      currentStep={currentStep}
-      handlers={completeHandlers} 
+      currentStep={handlers.currentStep}
+      handlers={contentHandlers}
     />
   );
 }

@@ -2,7 +2,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
-import { debounce } from "lodash";
 
 export function usePropertyFormState(
   formState: PropertyFormData, 
@@ -11,11 +10,13 @@ export function usePropertyFormState(
   const { autosaveField, setPendingChanges } = usePropertyAutoSave();
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   
-  // Type-safe field change handler with debounce
+  // Type-safe field change handler
   const handleFieldChange = useCallback(<K extends keyof PropertyFormData>(
     field: K, 
     value: PropertyFormData[K]
   ) => {
+    console.log(`Field changed: ${String(field)} = `, value);
+    
     // Update local state immediately
     setFormState(prevState => ({
       ...prevState,
