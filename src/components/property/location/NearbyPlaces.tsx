@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyNearbyPlace, PropertyCity } from "@/types/property";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, MapPin, Building } from "lucide-react";
+import { EditButton } from "@/components/property/content/EditButton";
+import { useState } from "react";
 
 interface NearbyPlacesProps {
   places?: PropertyNearbyPlace[];
@@ -12,8 +14,8 @@ interface NearbyPlacesProps {
   onFetchCategory?: (category: string) => Promise<any>;
   onFetchCities?: () => Promise<any>;
   isDisabled?: boolean;
-  // Add support for the onPlaceDelete prop from PropertyLocation
   onPlaceDelete?: (e: React.MouseEvent, placeId: string) => void;
+  onSave?: () => Promise<void>;
 }
 
 export function NearbyPlaces({
@@ -23,8 +25,12 @@ export function NearbyPlaces({
   onFetchCategory,
   onFetchCities,
   isDisabled = false,
-  onPlaceDelete
+  onPlaceDelete,
+  onSave
 }: NearbyPlacesProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   // Group places by type
   const groupedPlaces = places.reduce((acc, place) => {
     const type = place.type || 'other';
@@ -37,6 +43,22 @@ export function NearbyPlaces({
 
   const placeTypes = Object.keys(groupedPlaces);
 
+  const handleSave = async () => {
+    if (onSave) {
+      setIsSaving(true);
+      try {
+        await onSave();
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Error saving nearby places:", error);
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      setIsEditing(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -44,35 +66,45 @@ export function NearbyPlaces({
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl">Voorzieningen in de buurt</CardTitle>
             <div className="flex gap-2">
-              {onFetchCategory && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onFetchCategory('all')}
-                  disabled={isDisabled}
-                >
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Voorzieningen Ophalen
-                </Button>
-              )}
-              {onFetchCities && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={onFetchCities}
-                  disabled={isDisabled}
-                >
-                  <Building className="w-4 h-4 mr-2" />
-                  Steden Ophalen
-                </Button>
-              )}
+              {isEditing ? (
+                <>
+                  {onFetchCategory && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onFetchCategory('all')}
+                      disabled={isDisabled}
+                    >
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Voorzieningen Ophalen
+                    </Button>
+                  )}
+                  {onFetchCities && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={onFetchCities}
+                      disabled={isDisabled}
+                    >
+                      <Building className="w-4 h-4 mr-2" />
+                      Steden Ophalen
+                    </Button>
+                  )}
+                </>
+              ) : null}
+              <EditButton
+                isEditing={isEditing}
+                onToggle={() => setIsEditing(!isEditing)}
+                onSave={handleSave}
+                isSaving={isSaving}
+              />
             </div>
           </div>
         </CardHeader>
         <CardContent>
           {places.length === 0 && (
             <p className="text-muted-foreground text-center py-4">
-              Geen voorzieningen gevonden. Klik op "Voorzieningen Ophalen" om te beginnen.
+              Geen voorzieningen gevonden. {isEditing ? "Klik op \"Voorzieningen Ophalen\" om te beginnen." : ""}
             </p>
           )}
           
@@ -94,22 +126,26 @@ export function NearbyPlaces({
                           : place.distance}
                       </span>
                     )}
-                    {/* Support both onRemove and onPlaceDelete */}
-                    {onRemove && !isDisabled && (
-                      <button 
-                        onClick={() => onRemove(index)} 
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                    {onPlaceDelete && !isDisabled && (
-                      <button 
-                        onClick={(e) => onPlaceDelete(e, place.id)} 
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+                    {/* Only show delete buttons in edit mode */}
+                    {isEditing && (
+                      <>
+                        {onRemove && !isDisabled && (
+                          <button 
+                            onClick={() => onRemove(index)} 
+                            className="ml-1 hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                        {onPlaceDelete && !isDisabled && (
+                          <button 
+                            onClick={(e) => onPlaceDelete(e, place.id)} 
+                            className="ml-1 hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </>
                     )}
                   </Badge>
                 ))}

@@ -10,6 +10,7 @@ import { EditButton } from "@/components/property/content/EditButton";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { NearbyPlaces } from "@/components/property/location/NearbyPlaces";
+import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 interface LocationPageProps {
   formData: PropertyFormData;
@@ -83,6 +84,43 @@ export function LocationPage({
     }
   };
 
+  const saveNearbyPlaces = async () => {
+    if (!formData.id) return;
+    
+    try {
+      // Prepare the data for update
+      const nearbyPlacesJson = preparePropertiesForJsonField(formData.nearby_places || []);
+      const nearbyCitiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ 
+          nearby_places: nearbyPlacesJson,
+          nearby_cities: nearbyCitiesJson
+        })
+        .eq('id', formData.id);
+        
+      if (error) throw error;
+      
+      if (setPendingChanges) setPendingChanges(false);
+      
+      toast({
+        title: "Updated",
+        description: "Nearby places and cities updated successfully",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error updating nearby places:", error);
+      toast({
+        title: "Error",
+        description: "Could not update nearby places",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Location Description */}
@@ -149,15 +187,14 @@ export function LocationPage({
       </Card>
 
       {/* Nearby Places */}
-      {formData.nearby_places && (
-        <NearbyPlaces 
-          places={formData.nearby_places || []}
-          cities={formData.nearby_cities || []}
-          onFetchCategory={onFetchCategoryPlaces}
-          onFetchCities={onFetchNearbyCities}
-          isDisabled={isLoadingLocationData || !formData.address}
-        />
-      )}
+      <NearbyPlaces 
+        places={formData.nearby_places || []}
+        cities={formData.nearby_cities || []}
+        onFetchCategory={onFetchCategoryPlaces}
+        onFetchCities={onFetchNearbyCities}
+        isDisabled={isLoadingLocationData || !formData.address}
+        onSave={saveNearbyPlaces}
+      />
     </div>
   );
 }
