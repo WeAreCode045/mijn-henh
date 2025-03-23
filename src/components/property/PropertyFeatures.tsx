@@ -11,6 +11,7 @@ interface PropertyFeaturesProps {
   onAdd: () => void;
   onRemove: (id: string) => void;
   onUpdate: (id: string, description: string) => void;
+  isReadOnly?: boolean;
 }
 
 export function PropertyFeatures({
@@ -18,6 +19,7 @@ export function PropertyFeatures({
   onAdd,
   onRemove,
   onUpdate,
+  isReadOnly = false
 }: PropertyFeaturesProps) {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ export function PropertyFeatures({
     <div className="p-6 bg-white rounded-lg border space-y-4">
       <div className="flex items-center justify-between">
         <Label>Features</Label>
-        <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
+        <Button type="button" variant="outline" size="sm" onClick={handleAdd} disabled={isReadOnly}>
           <PlusCircle className="w-4 h-4 mr-2" />
           Add Feature
         </Button>
@@ -56,12 +58,14 @@ export function PropertyFeatures({
               value={feature.description}
               onChange={(e) => handleUpdate(feature.id, e.target.value)}
               placeholder="Enter feature"
+              readOnly={isReadOnly}
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={(e) => handleRemove(e, feature.id)}
+              disabled={isReadOnly}
             >
               <MinusCircle className="w-4 h-4 text-destructive" />
             </Button>

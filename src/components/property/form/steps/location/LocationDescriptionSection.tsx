@@ -11,18 +11,19 @@ interface LocationDescriptionSectionProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onGenerateDescription?: () => Promise<void>;
   isGeneratingDescription?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function LocationDescriptionSection({
   formData,
   onFieldChange,
   onGenerateDescription,
-  isGeneratingDescription = false
+  isGeneratingDescription = false,
+  isReadOnly = false
 }: LocationDescriptionSectionProps) {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onFieldChange) {
-      onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
-    }
+    if (isReadOnly || !onFieldChange) return;
+    onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
   };
 
   return (
@@ -32,7 +33,7 @@ export function LocationDescriptionSection({
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label htmlFor="location_description">Location Description</Label>
-              {onGenerateDescription && (
+              {onGenerateDescription && !isReadOnly && (
                 <Button
                   type="button"
                   variant="outline"
@@ -65,6 +66,7 @@ export function LocationDescriptionSection({
               onChange={handleChange}
               placeholder="Describe the property location and surroundings"
               rows={6}
+              readOnly={isReadOnly}
             />
           </div>
         </div>

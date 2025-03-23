@@ -13,6 +13,7 @@ interface FeatureSelectorProps {
   onAddFeature: (feature: PropertyFeature) => void;
   onRemoveFeature: (id: string) => void;
   onAddMultipleFeatures: (features: PropertyFeature[]) => void;
+  isReadOnly?: boolean;
 }
 
 export function FeatureSelector({
@@ -20,7 +21,8 @@ export function FeatureSelector({
   selectedFeatures,
   onAddFeature,
   onRemoveFeature,
-  onAddMultipleFeatures
+  onAddMultipleFeatures,
+  isReadOnly = false
 }: FeatureSelectorProps) {
   const [newFeaturesText, setNewFeaturesText] = useState<string>("");
 
@@ -31,6 +33,8 @@ export function FeatureSelector({
 
   // Toggle a feature selection
   const handleFeatureToggle = (id: string, checked: boolean) => {
+    if (isReadOnly) return;
+    
     const feature = availableFeatures.find(f => f.id === id);
     if (!feature) return;
 
@@ -43,7 +47,7 @@ export function FeatureSelector({
 
   // Handle adding multiple features from textarea
   const handleAddMultipleFeatures = () => {
-    if (!newFeaturesText.trim()) return;
+    if (isReadOnly || !newFeaturesText.trim()) return;
     
     const featureLines = newFeaturesText.split('\n').filter(line => line.trim() !== '');
     const newFeatures = featureLines.map(description => ({
@@ -66,6 +70,7 @@ export function FeatureSelector({
                 id={`feature-${feature.id}`}
                 checked={isFeatureSelected(feature.id)}
                 onCheckedChange={(checked) => handleFeatureToggle(feature.id, checked === true)}
+                disabled={isReadOnly}
               />
               <label
                 htmlFor={`feature-${feature.id}`}
@@ -88,11 +93,12 @@ export function FeatureSelector({
           value={newFeaturesText}
           onChange={(e) => setNewFeaturesText(e.target.value)}
           className="min-h-[100px]"
+          readOnly={isReadOnly}
         />
         <Button 
           type="button" 
           onClick={handleAddMultipleFeatures}
-          disabled={!newFeaturesText.trim()}
+          disabled={isReadOnly || !newFeaturesText.trim()}
           className="flex items-center"
         >
           <PlusCircle className="mr-2 h-4 w-4" />

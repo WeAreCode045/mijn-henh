@@ -14,6 +14,7 @@ interface NearbyCitiesSectionProps {
   onFetchNearbyCities?: () => Promise<any>;
   isLoadingLocationData?: boolean;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+  isReadOnly?: boolean;
 }
 
 export function NearbyCitiesSection({ 
@@ -21,7 +22,8 @@ export function NearbyCitiesSection({
   onFetchLocationData,
   onFetchNearbyCities,
   isLoadingLocationData,
-  onFieldChange
+  onFieldChange,
+  isReadOnly = false
 }: NearbyCitiesSectionProps) {
   const nearbyCities = formData.nearby_cities || [];
   const [modalOpen, setModalOpen] = useState(false);
@@ -29,7 +31,7 @@ export function NearbyCitiesSection({
   const [isFetchingCities, setIsFetchingCities] = useState(false);
 
   const toggleCityVisibility = (cityIndex: number, visible: boolean) => {
-    if (!onFieldChange || !formData.nearby_cities) return;
+    if (isReadOnly || !onFieldChange || !formData.nearby_cities) return;
     
     const updatedCities = formData.nearby_cities.map((city, idx) => 
       idx === cityIndex ? { ...city, visible_in_webview: visible } : city
@@ -39,7 +41,7 @@ export function NearbyCitiesSection({
   };
 
   const handleFetchCities = async () => {
-    if (!onFetchNearbyCities) return;
+    if (isReadOnly || !onFetchNearbyCities) return;
     
     setIsFetchingCities(true);
     
@@ -57,7 +59,7 @@ export function NearbyCitiesSection({
   };
 
   const handleSaveCities = (selectedCities: any[]) => {
-    if (!onFieldChange) return;
+    if (isReadOnly || !onFieldChange) return;
     
     // Make sure all cities have visible_in_webview set
     const citiesToSave = selectedCities.map(city => ({
@@ -78,7 +80,7 @@ export function NearbyCitiesSection({
           variant="outline"
           size="sm"
           onClick={onFetchNearbyCities ? handleFetchCities : onFetchLocationData}
-          disabled={isLoadingLocationData || isFetchingCities || !formData.address}
+          disabled={isLoadingLocationData || isFetchingCities || !formData.address || isReadOnly}
           className="flex gap-2 items-center"
         >
           {isLoadingLocationData || isFetchingCities ? (
@@ -100,6 +102,7 @@ export function NearbyCitiesSection({
           cities={nearbyCities}
           toggleVisibility={toggleCityVisibility}
           isVisible={(city) => !!city.visible_in_webview}
+          isReadOnly={isReadOnly}
         />
       ) : (
         <Card>
@@ -116,7 +119,7 @@ export function NearbyCitiesSection({
       
       {/* Modal for selecting cities */}
       <SelectCitiesModal
-        isOpen={modalOpen}
+        isOpen={modalOpen && !isReadOnly}
         onClose={() => setModalOpen(false)}
         cities={citiesForModal}
         onSave={handleSaveCities}

@@ -10,6 +10,7 @@ interface AreasListProps {
   onUpdate: (id: string, field: any, value: any) => void;
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesSelect: (areaId: string, imageIds: string[]) => void;
+  isReadOnly?: boolean;
 }
 
 export function AreasList({
@@ -20,6 +21,7 @@ export function AreasList({
   onUpdate,
   onImageRemove,
   onImagesSelect,
+  isReadOnly = false
 }: AreasListProps) {
   // Make sure all areas have images as arrays
   const normalizedAreas = areas.map(area => ({
@@ -40,6 +42,7 @@ export function AreasList({
           onUpdate={onUpdate}
           onImageRemove={onImageRemove}
           onImagesSelect={onImagesSelect}
+          isReadOnly={isReadOnly}
         />
       ))}
     </div>

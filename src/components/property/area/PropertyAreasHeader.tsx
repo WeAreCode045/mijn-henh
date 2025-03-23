@@ -8,12 +8,14 @@ interface PropertyAreasHeaderProps {
   onAdd: () => void;
   propertyData?: PropertyFormData;
   onAreasGenerated?: (newAreas: any[]) => void;
+  isReadOnly?: boolean;
 }
 
 export function PropertyAreasHeader({ 
   onAdd, 
   propertyData,
-  onAreasGenerated 
+  onAreasGenerated,
+  isReadOnly = false
 }: PropertyAreasHeaderProps) {
   return (
     <div className="flex justify-between items-center mb-4">
@@ -27,7 +29,7 @@ export function PropertyAreasHeader({
           />
         )}
         
-        <Button onClick={onAdd} size="sm">
+        <Button onClick={onAdd} size="sm" disabled={isReadOnly}>
           <Plus className="h-4 w-4 mr-1" />
           Add Area
         </Button>

@@ -12,6 +12,7 @@ interface NearbyPlacesSectionProps {
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onFetchNearbyPlaces?: (category?: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function NearbyPlacesSection({ 
@@ -19,7 +20,8 @@ export function NearbyPlacesSection({
   onRemovePlace,
   onFieldChange,
   onFetchNearbyPlaces,
-  isLoadingNearbyPlaces = false
+  isLoadingNearbyPlaces = false,
+  isReadOnly = false
 }: NearbyPlacesSectionProps) {
   const {
     nearbyPlaces,
@@ -44,7 +46,8 @@ export function NearbyPlacesSection({
     formData,
     onFieldChange,
     onFetchNearbyPlaces,
-    isLoadingNearbyPlaces
+    isLoadingNearbyPlaces,
+    isReadOnly
   });
 
   return (
@@ -53,7 +56,7 @@ export function NearbyPlacesSection({
         title="Nearby Places"
         onFetchAllPlaces={handleFetchAllPlaces}
         isLoading={isLoadingNearbyPlaces || false}
-        isDisabled={!formData.address}
+        isDisabled={!formData.address || isReadOnly}
       />
       
       {nearbyPlaces.length > 0 ? (
@@ -71,6 +74,7 @@ export function NearbyPlacesSection({
           handleFetchCategory={handleFetchCategory}
           isFetchingCategory={isFetchingCategory}
           currentCategory={currentCategory}
+          isReadOnly={isReadOnly}
         />
       ) : (
         <NearbyPlacesEmptyState
@@ -79,11 +83,12 @@ export function NearbyPlacesSection({
           isFetchingCategory={isFetchingCategory}
           currentCategory={currentCategory}
           formDataAddress={formData.address}
+          isReadOnly={isReadOnly}
         />
       )}
       
       <SelectPlacesModal
-        isOpen={modalOpen}
+        isOpen={modalOpen && !isReadOnly}
         onClose={() => setModalOpen(false)}
         places={placesForModal}
         onSave={handleSavePlaces}
