@@ -46,8 +46,12 @@ export function PropertyTitleSection({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={toggleEditMode}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent form submission
+              toggleEditMode();
+            }}
             title="Edit Property Information"
+            type="button" // Explicitly set as button type
           >
             <Pencil className="h-4 w-4" />
           </Button>

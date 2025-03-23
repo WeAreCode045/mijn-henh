@@ -38,7 +38,9 @@ export function NearbyCitiesSection({
     onFieldChange('nearby_cities', updatedCities);
   };
 
-  const handleFetchCities = async () => {
+  const handleFetchCities = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    
     if (!onFetchNearbyCities) return;
     
     setIsFetchingCities(true);
@@ -77,7 +79,10 @@ export function NearbyCitiesSection({
           type="button"
           variant="outline"
           size="sm"
-          onClick={onFetchNearbyCities ? handleFetchCities : onFetchLocationData}
+          onClick={onFetchNearbyCities ? handleFetchCities : (e) => {
+            e.preventDefault(); // Prevent form submission
+            onFetchLocationData && onFetchLocationData();
+          }}
           disabled={isLoadingLocationData || isFetchingCities || !formData.address}
           className="flex gap-2 items-center"
         >

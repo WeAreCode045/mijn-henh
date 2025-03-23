@@ -1,95 +1,108 @@
 
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, MapPin } from "lucide-react";
 import { PropertyFormData } from "@/types/property";
-import { useNearbyPlacesSection } from "./hooks/useNearbyPlacesSection";
-import { NearbyPlacesHeader } from "./components/NearbyPlacesHeader";
-import { NearbyPlacesWithTabs } from "./components/NearbyPlacesWithTabs";
-import { NearbyPlacesEmptyState } from "./components/NearbyPlacesEmptyState";
-import { SelectPlacesModal } from "./components/SelectPlacesModal";
+import { NearbyPlacesList } from './components/NearbyPlacesList';
+import { SelectCategoryModal } from './components/SelectCategoryModal';
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
-  onRemovePlace?: (index: number) => void;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchLocationData?: () => Promise<void>;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
-  onFetchNearbyPlaces?: (category?: string) => Promise<any>;
-  isLoadingNearbyPlaces?: boolean;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
 }
 
-export function NearbyPlacesSection({ 
+export function NearbyPlacesSection({
   formData,
-  onRemovePlace,
+  onFetchCategoryPlaces,
+  onFetchLocationData,
   onFieldChange,
-  onFetchNearbyPlaces,
-  isLoadingNearbyPlaces = false
+  onRemoveNearbyPlace,
+  isLoadingLocationData
 }: NearbyPlacesSectionProps) {
-  const {
-    nearbyPlaces,
-    activeTab,
-    setActiveTab,
-    modalOpen,
-    setModalOpen,
-    currentCategory,
-    placesForModal,
-    isFetchingCategory,
-    selectedPlacesToDelete,
-    categories,
-    placesByCategory,
-    handleFetchCategory,
-    handleSavePlaces,
-    togglePlaceVisibility,
-    togglePlaceSelection,
-    handleBulkDelete,
-    handleFetchAllPlaces,
-    getMaxSelections
-  } = useNearbyPlacesSection({
-    formData,
-    onFieldChange,
-    onFetchNearbyPlaces,
-    isLoadingNearbyPlaces
-  });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isLoadingCategory, setIsLoadingCategory] = useState(false);
+  
+  const nearbyPlaces = formData.nearby_places || [];
+  
+  const handleSelectCategory = async (category: string) => {
+    if (!onFetchCategoryPlaces) return;
+    
+    setIsLoadingCategory(true);
+    
+    try {
+      const results = await onFetchCategoryPlaces(category);
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Error fetching category places:", error);
+    } finally {
+      setIsLoadingCategory(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <NearbyPlacesHeader 
-        title="Nearby Places"
-        onFetchAllPlaces={handleFetchAllPlaces}
-        isLoading={isLoadingNearbyPlaces || false}
-        isDisabled={!formData.address}
-      />
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Nearby Places</h3>
+        
+        <Button 
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.preventDefault(); // Prevent form submission
+            if (onFetchCategoryPlaces) {
+              setModalOpen(true);
+            } else if (onFetchLocationData) {
+              onFetchLocationData();
+            }
+          }}
+          disabled={isLoadingLocationData || isLoadingCategory || !formData.address}
+          className="flex gap-2 items-center"
+        >
+          {isLoadingLocationData || isLoadingCategory ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              Fetching...
+            </>
+          ) : (
+            <>
+              <MapPin className="h-4 w-4" />
+              Fetch Places
+            </>
+          )}
+        </Button>
+      </div>
       
       {nearbyPlaces.length > 0 ? (
-        <NearbyPlacesWithTabs
-          nearbyPlaces={nearbyPlaces}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          categories={categories}
-          placesByCategory={placesByCategory}
-          onRemovePlace={onRemovePlace}
-          togglePlaceVisibility={togglePlaceVisibility}
-          togglePlaceSelection={togglePlaceSelection}
-          selectedPlacesToDelete={selectedPlacesToDelete}
-          handleBulkDelete={handleBulkDelete}
-          handleFetchCategory={handleFetchCategory}
-          isFetchingCategory={isFetchingCategory}
-          currentCategory={currentCategory}
+        <NearbyPlacesList 
+          places={nearbyPlaces} 
+          onRemovePlace={onRemoveNearbyPlace}
         />
       ) : (
-        <NearbyPlacesEmptyState
-          categories={categories}
-          handleFetchCategory={handleFetchCategory}
-          isFetchingCategory={isFetchingCategory}
-          currentCategory={currentCategory}
-          formDataAddress={formData.address}
-        />
+        <Card>
+          <CardContent className="pt-6">
+            <Alert variant="default" className="bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription>
+                No nearby places data available. Use the "Fetch Places" button to discover places near this property.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
       )}
       
-      <SelectPlacesModal
+      {/* Category selection modal */}
+      <SelectCategoryModal 
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        places={placesForModal}
-        onSave={handleSavePlaces}
-        category={currentCategory}
-        isLoading={isFetchingCategory}
-        maxSelections={5}
+        onSelectCategory={handleSelectCategory}
+        isLoading={isLoadingCategory}
       />
     </div>
   );
