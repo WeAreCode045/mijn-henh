@@ -13,6 +13,15 @@ interface CommunicationsTabContentProps {
 }
 
 export function CommunicationsTabContent({ propertyId }: CommunicationsTabContentProps) {
+  // Handle empty or invalid propertyId
+  if (!propertyId || propertyId.trim() === '') {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-muted-foreground">Property ID is required to display communications.</p>
+      </div>
+    );
+  }
+
   const { submissions, isLoading, refetch } = useFetchSubmissions(propertyId);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const { profile } = useAuth();
@@ -25,7 +34,7 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
   const { sendResponse, isSending } = useSendResponse({
     submissionId: selectedSubmission?.id || '',
     agentId: profile?.id || '',
-    propertyId: propertyId, // Add the missing propertyId property
+    propertyId: propertyId,
     onSuccess: refetch
   });
   

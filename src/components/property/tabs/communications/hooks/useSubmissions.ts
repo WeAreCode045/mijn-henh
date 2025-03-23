@@ -9,6 +9,14 @@ export function useSubmissions(propertyId: string) {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchSubmissions = useCallback(async () => {
+    // Check if propertyId exists and is not empty
+    if (!propertyId || propertyId.trim() === '') {
+      console.log('useSubmissions: No valid propertyId provided, skipping fetch');
+      setSubmissions([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const { data, error } = await supabase

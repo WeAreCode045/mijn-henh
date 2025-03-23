@@ -8,7 +8,13 @@ export function useFetchSubmissions(propertyId?: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSubmissions = useCallback(async () => {
-    if (!propertyId) return;
+    // Check if propertyId exists and is not empty
+    if (!propertyId || propertyId.trim() === '') {
+      console.log('useFetchSubmissions: No valid propertyId provided, skipping fetch');
+      setSubmissions([]);
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
