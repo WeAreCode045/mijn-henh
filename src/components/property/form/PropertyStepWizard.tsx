@@ -70,6 +70,7 @@ export function PropertyStepWizard({
   hideNavigation = false
 }: PropertyStepWizardProps) {
   console.log("PropertyStepWizard rendering with current step:", currentStep);
+  console.log("PropertyStepWizard onFieldChange is defined:", !!onFieldChange);
   
   if (!formState) {
     console.error("No form state provided to PropertyStepWizard");

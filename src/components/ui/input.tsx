@@ -1,9 +1,16 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
+    // Ensure props don't accidentally include readOnly unless explicitly set
+    const finalProps = { ...props };
+    if (finalProps.readOnly === undefined) {
+      finalProps.readOnly = false;
+    }
+    
     return (
       <input
         type={type}
@@ -12,7 +19,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
-        {...props}
+        {...finalProps}
       />
     )
   }

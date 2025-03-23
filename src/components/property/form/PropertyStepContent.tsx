@@ -71,14 +71,21 @@ export function PropertyStepContent({
   isSaving,
   isReadOnly,
 }: PropertyStepContentProps) {
-  console.log("PropertyStepContent rendering, activeStep:", currentStep);
+  console.log("PropertyStepContent rendering with currentStep:", currentStep);
+  console.log("FormData structure:", Object.keys(formData).join(", "));
+  console.log("onFieldChange is defined:", !!onFieldChange);
   
-  // Make sure we have all necessary handlers before rendering steps
+  // Define fallback handlers to prevent runtime errors
+  const safeOnFieldChange = onFieldChange || ((field, value) => {
+    console.log("Fallback onFieldChange called with:", field, value);
+  });
+  
+  const safeSetPendingChanges = setPendingChanges || (() => {
+    console.log("Fallback setPendingChanges called");
+  });
+  
+  // Render the appropriate step based on currentStep
   const renderStep = () => {
-    // Define fallback handlers to prevent runtime errors
-    const safeSetPendingChanges = setPendingChanges || (() => {});
-    const safeOnFieldChange = onFieldChange || (() => {});
-    
     switch (currentStep) {
       case 0:
         return (

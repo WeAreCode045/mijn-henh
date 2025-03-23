@@ -47,6 +47,9 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { toast } = useToast();
   
+  console.log("ContentTabWrapper - formData:", Object.keys(formData));
+  console.log("ContentTabWrapper - handlers.onFieldChange is defined:", !!handlers.onFieldChange);
+  
   // We'll use the handlers.onSubmit but wrap it to perform additional tasks
   const handleSubmit = useCallback(() => {
     console.log("ContentTabWrapper - handleSubmit called");
@@ -84,11 +87,16 @@ export const ContentTabWrapper = memo(function ContentTabWrapper({
 
   console.log("ContentTabWrapper rendering with currentStep:", handlers.currentStep);
 
+  const handleFieldChange = useCallback((field: keyof PropertyFormData, value: any) => {
+    console.log(`ContentTabWrapper - handleFieldChange: ${String(field)} = `, value);
+    handlers.onFieldChange(field, value);
+  }, [handlers]);
+
   return (
     <ContentTabContent
       property={property}
       formState={formData}
-      onFieldChange={handlers.onFieldChange}
+      onFieldChange={handleFieldChange}
       onAddFeature={handlers.onAddFeature}
       onRemoveFeature={handlers.onRemoveFeature}
       onUpdateFeature={handlers.onUpdateFeature}

@@ -63,6 +63,8 @@ export const ContentTabContent = memo(function ContentTabContent({
 }: ContentTabContentProps) {
   
   console.log("ContentTabContent rendering, step:", currentStep);
+  console.log("ContentTabContent onFieldChange is defined:", !!onFieldChange);
+  console.log("FormState has keys:", Object.keys(formState).join(", "));
   
   return (
     <PropertyStepWizard
