@@ -14,7 +14,7 @@ interface PropertyFeaturesProps {
 }
 
 export function PropertyFeatures({
-  features = [], // Add default empty array
+  features = [],
   onAdd,
   onRemove,
   onUpdate,
@@ -37,7 +37,7 @@ export function PropertyFeatures({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="p-6 bg-white rounded-lg border space-y-4">
       <div className="flex items-center justify-between">
         <Label>Features</Label>
         <Button type="button" variant="outline" size="sm" onClick={handleAdd}>

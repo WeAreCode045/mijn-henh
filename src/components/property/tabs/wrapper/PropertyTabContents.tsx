@@ -3,9 +3,9 @@ import React from 'react';
 import { TabsContent } from "@/components/ui/tabs";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { PropertyModeButtons } from "./PropertyModeButtons";
-import { PropertyContentTab } from '../content/PropertyContentTab';
+import { ContentTabContent } from '../content/ContentTabContent';
 import { MediaTabContent } from '../media/MediaTabContent';
-import { DashboardTabContent } from '../content/DashboardTabContent';
+import { DashboardTabContent } from '../dashboard/PropertyDashboardTab';
 import { CommunicationsTabContent } from './CommunicationsTabContent';
 
 interface PropertyTabContentsProps {
@@ -110,43 +110,36 @@ export function PropertyTabContents({
     <>
       <TabsContent value="dashboard" className="space-y-8">
         <DashboardTabContent 
-          property={property}
+          id={property.id}
+          objectId={property.object_id}
+          title={property.title}
+          agentId={property.agent_id}
+          createdAt={property.created_at}
+          updatedAt={property.updated_at}
+          onSave={onSave}
           onDelete={onDelete}
+          handleWebView={handleWebView}
+          handleSaveAgent={handleSaveAgent}
+          handleSaveObjectId={handleSaveObjectId}
+          handleGeneratePDF={handleGeneratePDF}
+          isUpdating={isUpdating}
           agentInfo={agentInfo}
-          onAssignAgent={handleSaveAgent}
-          onEditObjectId={handleSaveObjectId}
-          // Use adaptors for the functions that don't match interfaces
-          onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebView}
         />
       </TabsContent>
       
       <TabsContent value="content" className="space-y-8">
-        <PropertyModeButtons 
-          onSave={onSave}
-          onDelete={onDelete}
-          onHandleClick={handleModeButtonClick}
-        />
-        <PropertyContentTab 
-          formData={formState}
+        <ContentTabContent
           property={property}
-          handlers={{
-            onFieldChange,
-            onAddFeature,
-            onRemoveFeature,
-            onUpdateFeature,
-            onAddArea,
-            onRemoveArea,
-            onUpdateArea,
-            onAreaImageRemove,
-            onAreaImagesSelect,
-            handleAreaImageUpload: onAreaImageUpload,
-            currentStep,
-            handleStepClick,
-            isUploading,
-            onSubmit: onSave || (() => {}),
-            isSaving: isUpdating,
-          }}
+          formState={formState}
+          onFieldChange={onFieldChange}
+          onAddFeature={onAddFeature}
+          onRemoveFeature={onRemoveFeature}
+          onUpdateFeature={onUpdateFeature}
+          currentStep={currentStep}
+          handleStepClick={handleStepClick}
+          onSubmit={onSave || (() => {})}
+          isReadOnly={isArchived}
+          hideNavigation={true}
         />
       </TabsContent>
       

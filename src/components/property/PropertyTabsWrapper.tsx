@@ -110,9 +110,9 @@ export function PropertyTabsWrapper({
                       onDelete={onDelete}
                       handleSaveObjectId={handleSaveObjectId}
                       handleSaveAgent={handleSaveAgent}
+                      handleSave={onSubmit}
                       handleSaveTemplate={handleSaveTemplate}
                       handleGeneratePDF={handleGeneratePDF}
-                      // This is where we're fixing the function signature - we're now using the version that doesn't require event parameters
                       handleWebView={handleOpenWebView}
                       onFieldChange={handleFieldChange}
                       onAddFeature={addFeature}
