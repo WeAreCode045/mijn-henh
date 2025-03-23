@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { usePropertyImportActions } from "./usePropertyImportActions";
@@ -27,6 +28,7 @@ export function usePropertyImport({
     toast
   });
 
+  // Toggle selection of a single property
   const togglePropertySelection = (id: number) => {
     setSelectedProperties(prevSelected => {
       if (prevSelected.includes(id)) {
@@ -37,6 +39,7 @@ export function usePropertyImport({
     });
   };
 
+  // Toggle selection of all properties
   const selectAllProperties = () => {
     if (selectedProperties.length === xmlData.length) {
       setSelectedProperties([]);
@@ -45,6 +48,7 @@ export function usePropertyImport({
     }
   };
 
+  // Import the selected properties
   const importProperties = async () => {
     if (selectedProperties.length === 0) {
       toast({

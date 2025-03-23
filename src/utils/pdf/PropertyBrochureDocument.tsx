@@ -9,10 +9,6 @@ interface PropertyBrochureDocumentProps {
 }
 
 export const PropertyBrochureDocument = ({ property, settings }: PropertyBrochureDocumentProps) => {
-  // Placeholder for the rebuilt PDF functionality
-  return (
-    <Document>
-      {/* PDF content will be rebuilt later */}
-    </Document>
-  );
+  // Empty component as PDF functionality will be rebuilt differently
+  return <Document />;
 };

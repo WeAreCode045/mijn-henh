@@ -9,18 +9,6 @@ interface FeaturedImageSectionProps {
 export function FeaturedImageSection({ 
   formData 
 }: FeaturedImageSectionProps) {
-  return (
-    <div>
-      <Card className="h-full">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-md">Featured Image Functionality Removed</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-muted-foreground text-sm p-4 text-center">
-            The featured image functionality has been removed.
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  // This component is now empty as the functionality has been moved elsewhere
+  return null;
 }
