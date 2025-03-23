@@ -18,8 +18,9 @@ export function EditButton({
   size = "sm"
 }: EditButtonProps) {
   const handleAction = (e: React.MouseEvent) => {
-    // Prevent default to avoid page reload
+    // Prevent default to avoid page reload and stop propagation to parent forms
     e.preventDefault();
+    e.stopPropagation();
     
     if (isEditing && onSave) {
       onSave();
@@ -35,6 +36,7 @@ export function EditButton({
       onClick={handleAction}
       disabled={isSaving}
       className="flex items-center gap-2"
+      type="button" // Explicitly set as button type to avoid form submission
     >
       {isEditing ? (
         <>

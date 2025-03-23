@@ -77,7 +77,8 @@ export function ContentRouter({
   // Prevent default form submission behavior
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submit prevented");
+    e.stopPropagation();
+    console.log("Form submit prevented in ContentRouter");
   };
 
   const renderContent = () => {
@@ -98,8 +99,12 @@ export function ContentRouter({
             formData={formData}
             onFieldChange={handlers.onFieldChange}
             onFetchLocationData={handlers.onFetchLocationData}
+            onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
+            onFetchNearbyCities={handlers.onFetchNearbyCities}
             onGenerateLocationDescription={handlers.onGenerateLocationDescription}
+            onGenerateMap={handlers.onGenerateMap}
             isLoadingLocationData={handlers.isLoadingLocationData}
+            isGeneratingMap={handlers.isGeneratingMap}
             setPendingChanges={handlers.setPendingChanges}
           />
         );

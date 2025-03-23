@@ -64,12 +64,6 @@ export function ContentTabWrapper({
     handlers.handlePrevious
   );
 
-  // Prevent the default submit behavior
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submission prevented in ContentTabWrapper");
-  };
-
   // Create a complete bundle of all handlers needed for content routing
   const contentHandlers = {
     ...handlers,
@@ -89,12 +83,10 @@ export function ContentTabWrapper({
   console.log("ContentTabWrapper - Current step:", handlers.currentStep, "Step slug:", stepSlug);
 
   return (
-    <form onSubmit={handleFormSubmit}>
-      <ContentRouter 
-        formData={formData}
-        currentStep={handlers.currentStep}
-        handlers={contentHandlers}
-      />
-    </form>
+    <ContentRouter 
+      formData={formData}
+      currentStep={handlers.currentStep}
+      handlers={contentHandlers}
+    />
   );
 }

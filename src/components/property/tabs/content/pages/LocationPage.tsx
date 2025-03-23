@@ -9,13 +9,18 @@ import { MapPin, Loader2 } from "lucide-react";
 import { EditButton } from "@/components/property/content/EditButton";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { NearbyPlaces } from "@/components/property/location/NearbyPlaces";
 
 interface LocationPageProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchLocationData?: () => Promise<void>;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchNearbyCities?: () => Promise<any>;
   onGenerateLocationDescription?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
   isLoadingLocationData?: boolean;
+  isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
 
@@ -23,6 +28,8 @@ export function LocationPage({
   formData,
   onFieldChange,
   onFetchLocationData,
+  onFetchCategoryPlaces,
+  onFetchNearbyCities,
   onGenerateLocationDescription,
   isLoadingLocationData = false,
   setPendingChanges
@@ -140,6 +147,17 @@ export function LocationPage({
           )}
         </CardContent>
       </Card>
+
+      {/* Nearby Places */}
+      {formData.nearby_places && (
+        <NearbyPlaces 
+          places={formData.nearby_places || []}
+          cities={formData.nearby_cities || []}
+          onFetchCategory={onFetchCategoryPlaces}
+          onFetchCities={onFetchNearbyCities}
+          isDisabled={isLoadingLocationData || !formData.address}
+        />
+      )}
     </div>
   );
 }
