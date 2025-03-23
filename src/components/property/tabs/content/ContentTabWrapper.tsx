@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabNavigation } from './ContentTabNavigation';
 import { ContentTabContent } from './ContentTabContent';
@@ -41,27 +41,24 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
     handlers.onSubmit // Pass the onSubmit from handlers
   );
 
-  const handleNext = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback((e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    onSubmit();
+  }, [onSubmit]);
+
+  const handleNext = useCallback((e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (handlers.currentStep < 3) {
       handlers.handleStepClick(handlers.currentStep + 1);
     }
-  };
+  }, [handlers]);
 
-  const handlePrevious = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handlePrevious = useCallback((e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (handlers.currentStep > 0) {
       handlers.handleStepClick(handlers.currentStep - 1);
     }
-  };
-
-  const adaptedRemoveFeature = (id: string) => {
-    handlers.onRemoveFeature(id);
-  };
-  
-  const adaptedUpdateFeature = (id: string, description: string) => {
-    handlers.onUpdateFeature(id, description);
-  };
+  }, [handlers]);
 
   return (
     <div className="space-y-6">
@@ -69,7 +66,7 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         currentStep={handlers.currentStep}
         onStepClick={handlers.handleStepClick}
         lastSaved={lastSaved}
-        onSave={onSubmit}
+        onSave={handleSubmit}
         isSaving={handlers.isSaving || false}
       />
       
@@ -78,11 +75,11 @@ export function ContentTabWrapper({ formData, property, handlers }: ContentTabWr
         formState={formData}
         onFieldChange={handlers.onFieldChange}
         onAddFeature={handlers.onAddFeature}
-        onRemoveFeature={adaptedRemoveFeature}
-        onUpdateFeature={adaptedUpdateFeature}
+        onRemoveFeature={handlers.onRemoveFeature}
+        onUpdateFeature={handlers.onUpdateFeature}
         currentStep={handlers.currentStep}
         handleStepClick={handlers.handleStepClick}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
         isReadOnly={false}
         hideNavigation={true} // Add this prop to hide the navigation in ContentTabContent
       />

@@ -138,12 +138,17 @@ export function PropertyStepContent({
     if (handleNext) handleNext();
   };
 
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (onSubmit) onSubmit();
+  };
+
   return (
     <div className="space-y-6">
       <FormStepNavigation
         currentStep={currentStep}
         onStepClick={handleStepClick}
-        onSave={onSubmit}
+        onSave={handleSubmit}
         isSaving={isSaving}
       />
       <div className="mt-6">

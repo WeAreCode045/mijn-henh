@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 
 export function usePropertyFormAreas(
   formState: PropertyFormData,
@@ -8,6 +9,7 @@ export function usePropertyFormAreas(
   setPendingChanges: (pending: boolean) => void
 ) {
   const [isUploading, setIsUploading] = useState(false);
+  const { autosaveField } = usePropertyAutoSave();
   
   const addArea = useCallback(() => {
     const areas = formState.areas || [];
@@ -22,9 +24,16 @@ export function usePropertyFormAreas(
       size: ""
     };
     
-    handleFieldChange("areas", [...areas, newArea]);
+    const updatedAreas = [...areas, newArea];
+    handleFieldChange("areas", updatedAreas);
     setPendingChanges(true);
-  }, [formState.areas, handleFieldChange, setPendingChanges]);
+    
+    // Auto-save the change if we have an ID
+    if (formState.id) {
+      autosaveField(formState.id, "areas", updatedAreas)
+        .catch(error => console.error("Error auto-saving areas:", error));
+    }
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
   
   const removeArea = useCallback((areaId: string) => {
     if (!formState.areas) return;
@@ -32,7 +41,13 @@ export function usePropertyFormAreas(
     const updatedAreas = formState.areas.filter(area => area.id !== areaId);
     handleFieldChange("areas", updatedAreas);
     setPendingChanges(true);
-  }, [formState.areas, handleFieldChange, setPendingChanges]);
+    
+    // Auto-save the change if we have an ID
+    if (formState.id) {
+      autosaveField(formState.id, "areas", updatedAreas)
+        .catch(error => console.error("Error auto-saving areas:", error));
+    }
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
   
   const updateArea = useCallback((areaId: string, field: keyof PropertyArea, value: any) => {
     if (!formState.areas) return;
@@ -49,7 +64,13 @@ export function usePropertyFormAreas(
     
     handleFieldChange("areas", updatedAreas);
     setPendingChanges(true);
-  }, [formState.areas, handleFieldChange, setPendingChanges]);
+    
+    // Auto-save the change if we have an ID
+    if (formState.id) {
+      autosaveField(formState.id, "areas", updatedAreas)
+        .catch(error => console.error("Error auto-saving areas:", error));
+    }
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
   
   const handleAreaImageRemove = useCallback((areaId: string, imageId: string) => {
     if (!formState.areas) return;
@@ -72,7 +93,13 @@ export function usePropertyFormAreas(
     
     handleFieldChange("areas", updatedAreas);
     setPendingChanges(true);
-  }, [formState.areas, handleFieldChange, setPendingChanges]);
+    
+    // Auto-save the change if we have an ID
+    if (formState.id) {
+      autosaveField(formState.id, "areas", updatedAreas)
+        .catch(error => console.error("Error auto-saving areas:", error));
+    }
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
   
   const handleAreaImagesSelect = useCallback((areaId: string, imageIds: string[]) => {
     if (!formState.areas) return;
@@ -88,7 +115,7 @@ export function usePropertyFormAreas(
     setIsUploading(true);
     
     try {
-      // Mock implementation
+      // Implementation for uploading images for an area
       console.log("Uploading images for area:", areaId);
       
       setTimeout(() => {
