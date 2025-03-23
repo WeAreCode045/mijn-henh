@@ -1,109 +1,85 @@
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, MapPin } from "lucide-react";
-import { PropertyFormData } from "@/types/property";
-import { NearbyPlacesList } from './components/NearbyPlacesList';
-import { SelectCategoryModal } from './components/SelectCategoryModal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NearbyPlacesList } from "./components/NearbyPlacesList";
+import { NearbyPlacesSearch } from "./components/NearbyPlacesSearch";
+import { Loader2 } from "lucide-react";
 
-interface NearbyPlacesSectionProps {
+export interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
+  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
-  onFetchLocationData?: () => Promise<void>;
-  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
-  onRemoveNearbyPlace?: (index: number) => void;
   isLoadingNearbyPlaces?: boolean;
 }
 
 export function NearbyPlacesSection({
   formData,
-  onFetchCategoryPlaces,
-  onFetchLocationData,
   onFieldChange,
-  onRemoveNearbyPlace,
-  isLoadingNearbyPlaces
+  onFetchCategoryPlaces,
+  isLoadingNearbyPlaces = false
 }: NearbyPlacesSectionProps) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isLoadingCategory, setIsLoadingCategory] = useState(false);
+  const [activeTab, setActiveTab] = useState("view");
   
-  const nearbyPlaces = formData.nearby_places || [];
+  const handleRemovePlace = (index: number) => {
+    // Find the place with this index in the nearby_places array
+    if (!formData.nearby_places) return;
+    
+    const updatedPlaces = formData.nearby_places.filter((_, i) => i !== index);
+    onFieldChange('nearby_places', updatedPlaces);
+  };
   
-  const handleSelectCategory = async (category: string) => {
+  const fetchPlaces = async (category: string) => {
     if (!onFetchCategoryPlaces) return;
     
-    setIsLoadingCategory(true);
-    
     try {
-      const results = await onFetchCategoryPlaces(category);
-      setModalOpen(false);
+      const result = await onFetchCategoryPlaces(category);
+      return result;
     } catch (error) {
-      console.error("Error fetching category places:", error);
-    } finally {
-      setIsLoadingCategory(false);
+      console.error("Error fetching places:", error);
+      return null;
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Nearby Places</h3>
-        
-        <Button 
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            if (onFetchCategoryPlaces) {
-              setModalOpen(true);
-            } else if (onFetchLocationData) {
-              onFetchLocationData();
-            }
-          }}
-          disabled={isLoadingNearbyPlaces || isLoadingCategory || !formData.address}
-          className="flex gap-2 items-center"
-        >
-          {isLoadingNearbyPlaces || isLoadingCategory ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              Fetching...
-            </>
-          ) : (
-            <>
-              <MapPin className="h-4 w-4" />
-              Fetch Places
-            </>
-          )}
-        </Button>
-      </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle>Nearby Places</CardTitle>
+      </CardHeader>
       
-      {nearbyPlaces.length > 0 ? (
-        <NearbyPlacesList 
-          places={nearbyPlaces} 
-          onRemovePlace={onRemoveNearbyPlace}
-        />
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <Alert variant="default" className="bg-amber-50">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertDescription>
-                No nearby places data available. Use the "Fetch Places" button to discover places near this property.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Category selection modal */}
-      <SelectCategoryModal 
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSelectCategory={handleSelectCategory}
-        isLoading={isLoadingCategory}
-      />
-    </div>
+      <CardContent>
+        <Tabs defaultValue="view" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="view">View Places</TabsTrigger>
+            <TabsTrigger value="search">Find Places</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="view">
+            {isLoadingNearbyPlaces ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Loading places...</span>
+              </div>
+            ) : (
+              <NearbyPlacesList 
+                places={formData.nearby_places || []} 
+                onRemove={handleRemovePlace}
+              />
+            )}
+          </TabsContent>
+          
+          <TabsContent value="search">
+            <NearbyPlacesSearch 
+              formData={formData}
+              onFieldChange={onFieldChange}
+              onFetchPlaces={fetchPlaces}
+              isLoading={isLoadingNearbyPlaces}
+            />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

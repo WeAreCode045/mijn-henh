@@ -9,15 +9,22 @@ import { Switch } from "@/components/ui/switch";
 interface PropertySpecsProps {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
-export function PropertySpecs({ formData, onFieldChange }: PropertySpecsProps) {
+export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: PropertySpecsProps) {
   const handleInputChange = (field: keyof PropertyFormData, value: any) => {
     onFieldChange(field, value);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
   const handleSwitchChange = (field: keyof PropertyFormData, checked: boolean) => {
     onFieldChange(field, checked);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
   const propertyTypes = [
