@@ -47,6 +47,7 @@ export function DescriptionSection({
             value={formData.shortDescription || ''}
             onChange={handleChange}
             className="min-h-[80px]"
+            disabled={isReadOnly}
           />
         </div>
         
@@ -59,6 +60,7 @@ export function DescriptionSection({
             value={formData.description || ''}
             onChange={handleChange}
             className="min-h-[160px]"
+            disabled={isReadOnly}
           />
         </div>
       </CardContent>

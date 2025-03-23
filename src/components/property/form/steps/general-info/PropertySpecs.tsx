@@ -48,6 +48,7 @@ export function PropertySpecs({
               value={formData.bedrooms || ''}
               onChange={handleChange}
               min={0}
+              disabled={isReadOnly}
             />
           </div>
           
@@ -61,6 +62,7 @@ export function PropertySpecs({
               value={formData.bathrooms || ''}
               onChange={handleChange}
               min={0}
+              disabled={isReadOnly}
             />
           </div>
           
@@ -74,6 +76,7 @@ export function PropertySpecs({
               value={formData.sqft || ''}
               onChange={handleChange}
               min={0}
+              disabled={isReadOnly}
             />
           </div>
         </div>

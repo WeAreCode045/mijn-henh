@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabWrapper } from './content/ContentTabWrapper';
 
@@ -42,28 +42,17 @@ export function PropertyContentTab({
   console.log("PropertyContentTab - handlers provided:", Object.keys(handlers).join(", "));
   console.log("PropertyContentTab - onFieldChange is defined:", !!handlers.onFieldChange);
   
-  // Create a dummy handler if it's missing
-  if (!handlers.onFieldChange) {
-    console.warn("PropertyContentTab - onFieldChange is not defined, creating a dummy handler");
-    handlers = {
-      ...handlers,
-      onFieldChange: (field: keyof PropertyFormData, value: any) => {
-        console.log(`DUMMY HANDLER - Field change requested but no handler available: ${String(field)} = `, value);
-      }
-    };
-  }
-  
-  // Ensure the onSubmit handler is properly logged
+  // Create a safe version of the handlers with a dummy onFieldChange if needed
   const enhancedHandlers = {
     ...handlers,
-    onFieldChange: (field: keyof PropertyFormData, value: any) => {
+    onFieldChange: useCallback((field: keyof PropertyFormData, value: any) => {
       console.log(`PropertyContentTab - onFieldChange: ${String(field)} = `, value);
       if (handlers.onFieldChange) {
         handlers.onFieldChange(field, value);
       } else {
         console.warn(`PropertyContentTab - No onFieldChange handler for field: ${String(field)}`);
       }
-    },
+    }, [handlers.onFieldChange]),
     onSubmit: () => {
       console.log("PropertyContentTab - onSubmit called");
       handlers.onSubmit();

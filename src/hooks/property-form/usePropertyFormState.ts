@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from "react";
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 
 export function usePropertyFormState(
   initialData: PropertyData,
@@ -9,6 +9,7 @@ export function usePropertyFormState(
   const [formState, setFormState] = useState<PropertyFormData>(initialData);
   
   const handleFieldChange = useCallback((field: keyof PropertyFormData, value: any) => {
+    console.log(`usePropertyFormState - handleFieldChange: ${String(field)} =`, value);
     setFormState(prev => ({
       ...prev,
       [field]: value
@@ -19,6 +20,7 @@ export function usePropertyFormState(
   
   return {
     formState,
-    handleFieldChange
+    handleFieldChange,
+    setFormState
   };
 }
