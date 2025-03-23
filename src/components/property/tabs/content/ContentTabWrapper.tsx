@@ -80,6 +80,8 @@ export function ContentTabWrapper({
     isSaving: handlers.isSaving || false
   };
 
+  console.log("ContentTabWrapper - Current step:", handlers.currentStep, "Step slug:", stepSlug);
+
   return (
     <ContentRouter 
       formData={formData}

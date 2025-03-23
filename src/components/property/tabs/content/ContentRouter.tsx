@@ -66,9 +66,17 @@ export function ContentRouter({
   const handleStepNavigation = (step: number) => {
     // First call the original handler to ensure data is saved
     handlers.handleStepClick(step);
+    
+    // Navigate to the corresponding URL if needed
+    if (id) {
+      const targetSlug = contentStepSlugs[step];
+      navigate(`/property/${id}/content/${targetSlug}`);
+    }
   };
 
   const renderContent = () => {
+    console.log("Rendering content for step:", currentStep, "and slug:", stepSlug);
+    
     switch (currentStep) {
       case 0:
         return (

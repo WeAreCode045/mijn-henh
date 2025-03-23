@@ -78,7 +78,9 @@ export function AppRoutes() {
       <Route path="/" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <Index />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Index />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -86,7 +88,9 @@ export function AppRoutes() {
       <Route path="/properties" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <Properties />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Properties />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -94,7 +98,9 @@ export function AppRoutes() {
       <Route path="/import" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <Import />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Import />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -102,7 +108,9 @@ export function AppRoutes() {
       <Route path="/property/new" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <PropertyFormPage />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PropertyFormPage />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -116,7 +124,9 @@ export function AppRoutes() {
       <Route path="/property/:id/dashboard" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <PropertyFormPage />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PropertyFormPage />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -132,7 +142,9 @@ export function AppRoutes() {
       <Route path="/property/:id/content/:step" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <PropertyFormPage />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PropertyFormPage />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -140,7 +152,9 @@ export function AppRoutes() {
       <Route path="/property/:id/media" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <PropertyFormPage />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PropertyFormPage />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -148,7 +162,9 @@ export function AppRoutes() {
       <Route path="/property/:id/communications" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <PropertyFormPage />
+            <Suspense fallback={<LoadingSpinner />}>
+              <PropertyFormPage />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -162,7 +178,9 @@ export function AppRoutes() {
       <Route path="/settings" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <Settings />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Settings />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
@@ -170,7 +188,9 @@ export function AppRoutes() {
       <Route path="/users" element={
         <ProtectedRoute>
           <PropertyLayout>
-            <Users />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Users />
+            </Suspense>
           </PropertyLayout>
         </ProtectedRoute>
       } />
