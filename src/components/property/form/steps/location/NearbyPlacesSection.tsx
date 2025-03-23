@@ -1,9 +1,10 @@
+
 import { PropertyFormData } from "@/types/property";
 import { useNearbyPlacesSection } from "./hooks/useNearbyPlacesSection";
 import { NearbyPlacesHeader } from "./components/NearbyPlacesHeader";
 import { NearbyPlacesWithTabs } from "./components/NearbyPlacesWithTabs";
 import { NearbyPlacesEmptyState } from "./components/NearbyPlacesEmptyState";
-import { SelectPlacesModal } from "../components/SelectPlacesModal";
+import { SelectPlacesModal } from "./components/SelectPlacesModal";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
