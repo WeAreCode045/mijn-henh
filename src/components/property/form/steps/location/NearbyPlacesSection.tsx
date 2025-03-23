@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,18 +12,24 @@ export interface NearbyPlacesSectionProps {
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
+  onRemoveNearbyPlace?: (index: number) => void;
 }
 
 export function NearbyPlacesSection({
   formData,
   onFieldChange,
   onFetchCategoryPlaces,
-  isLoadingNearbyPlaces = false
+  isLoadingNearbyPlaces = false,
+  onRemoveNearbyPlace
 }: NearbyPlacesSectionProps) {
   const [activeTab, setActiveTab] = useState("view");
   
   const handleRemovePlace = (index: number) => {
-    // Find the place with this index in the nearby_places array
+    if (onRemoveNearbyPlace) {
+      onRemoveNearbyPlace(index);
+      return;
+    }
+    
     if (!formData.nearby_places) return;
     
     const updatedPlaces = formData.nearby_places.filter((_, i) => i !== index);

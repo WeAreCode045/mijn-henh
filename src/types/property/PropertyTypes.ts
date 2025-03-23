@@ -1,3 +1,4 @@
+
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -16,6 +17,9 @@ export interface PropertyArea {
   size: string;
   images: string[];
 }
+
+// Alias Area to PropertyArea for backward compatibility
+export type Area = PropertyArea;
 
 export interface PropertyAgent {
   id: string;
@@ -36,6 +40,8 @@ export interface PropertyImage {
   is_main?: boolean;
   is_featured_image?: boolean;
   area?: string;
+  property_id?: string;
+  type?: string;
 }
 
 export interface PropertyFloorplan {
@@ -90,6 +96,7 @@ export interface PropertyFormData {
   featuredImages: string[];
   areas: PropertyArea[];
   map_image: string | null;
+  map_image_url?: string; // Added for compatibility
   nearby_places: PropertyNearbyPlace[];
   nearby_cities?: PropertyCity[];
   latitude: number | null;

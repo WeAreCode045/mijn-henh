@@ -34,8 +34,8 @@ export function MapSection({
     }
   };
   
-  // Render map image if available
-  const mapImageUrl = formData.map_image_url;
+  // Use map_image instead of map_image_url
+  const mapImageUrl = formData.map_image;
   
   return (
     <Card>
