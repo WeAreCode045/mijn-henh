@@ -3,10 +3,10 @@ import React from 'react';
 import { TabsContent } from "@/components/ui/tabs";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { PropertyModeButtons } from "./PropertyModeButtons";
-import { PropertyContentTab } from '../content/ContentTabContent';
+import { PropertyContentTab } from '../content/PropertyContentTab';
 import { MediaTabContent } from '../media/MediaTabContent';
 import { DashboardTabContent } from '../content/DashboardTabContent';
-import { PropertyCommunicationsTab } from '../content/CommunicationsTabContent';
+import { CommunicationsTabContent } from '../wrapper/CommunicationsTabContent';
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -111,12 +111,10 @@ export function PropertyTabContents({
       <TabsContent value="dashboard" className="space-y-8">
         <DashboardTabContent 
           property={property}
-          onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebView}
-          onEditObjectId={handleSaveObjectId}
-          onAssignAgent={handleSaveAgent}
-          agentInfo={agentInfo}
           onDelete={onDelete}
+          agentInfo={agentInfo}
+          onAssignAgent={handleSaveAgent}
+          onEditObjectId={handleSaveObjectId}
         />
       </TabsContent>
       
@@ -167,7 +165,7 @@ export function PropertyTabContents({
       </TabsContent>
       
       <TabsContent value="communications" className="space-y-8">
-        <PropertyCommunicationsTab propertyId={property.id} />
+        <CommunicationsTabContent propertyId={property.id} />
       </TabsContent>
     </>
   );

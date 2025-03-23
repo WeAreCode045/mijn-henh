@@ -25,7 +25,7 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
   const { sendResponse, isSending } = useSendResponse({
     submissionId: selectedSubmission?.id || '',
     agentId: profile?.id || '',
-    propertyId: propertyId, // Add the missing propertyId property
+    propertyId: propertyId,
     onSuccess: refetch
   });
   
