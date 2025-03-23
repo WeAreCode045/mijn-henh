@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { PropertyFormData } from '@/types/property';
-import { usePropertyFormState } from '@/hooks/usePropertyFormState';
+import { usePropertyFormState } from '@/hooks/property-form/usePropertyFormState';
 import { usePropertyFeatures } from './usePropertyFeatures';
 import { usePropertyAreas } from './usePropertyAreas';
 import { usePropertyContent } from '../usePropertyContent';

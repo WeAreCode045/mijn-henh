@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { PropertyFormData } from "@/types/property";
 
 export function usePropertyFormState(
-  initialData: PropertyData,
+  initialData: PropertyFormData,
   setPendingChanges: (pending: boolean) => void
 ) {
   const [formState, setFormState] = useState<PropertyFormData>(initialData);
