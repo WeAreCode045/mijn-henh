@@ -91,6 +91,8 @@ export function ContentRouter({
             formData={formData}
             onFieldChange={handlers.onFieldChange}
             setPendingChanges={handlers.setPendingChanges}
+            onSubmit={handlers.onSubmit}
+            isSaving={handlers.isSaving}
           />
         );
       case 1:
@@ -106,6 +108,8 @@ export function ContentRouter({
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
             setPendingChanges={handlers.setPendingChanges}
+            onSubmit={handlers.onSubmit}
+            isSaving={handlers.isSaving}
           />
         );
       case 2:
@@ -117,13 +121,14 @@ export function ContentRouter({
             onRemoveFeature={handlers.onRemoveFeature}
             onUpdateFeature={handlers.onUpdateFeature}
             setPendingChanges={handlers.setPendingChanges}
+            onSubmit={handlers.onSubmit}
+            isSaving={handlers.isSaving}
           />
         );
       case 3:
         return (
           <AreasPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
             onAddArea={handlers.onAddArea}
             onRemoveArea={handlers.onRemoveArea}
             onUpdateArea={handlers.onUpdateArea}
@@ -131,6 +136,8 @@ export function ContentRouter({
             onAreaImageUpload={handlers.onAreaImageUpload}
             isUploading={handlers.isUploading}
             setPendingChanges={handlers.setPendingChanges}
+            onSubmit={handlers.onSubmit}
+            isSaving={handlers.isSaving}
           />
         );
       default:
@@ -139,19 +146,13 @@ export function ContentRouter({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <ContentTabNavigation
         currentStep={currentStep}
         onStepClick={handleStepNavigation}
-        contentStepSlugs={contentStepSlugs}
-        propertyId={id}
       />
       <form onSubmit={handleFormSubmit}>
-        <Card>
-          <CardContent className="pt-6">
-            {renderContent()}
-          </CardContent>
-        </Card>
+        {renderContent()}
       </form>
     </div>
   );

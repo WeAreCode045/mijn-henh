@@ -1,13 +1,12 @@
 
-import React, { useState } from "react";
-import { PropertyFormData, PropertyFeature } from "@/types/property";
+import React from "react";
+import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyFeatures } from "@/components/property/PropertyFeatures";
-import { FeatureSelector } from "@/components/property/features/FeatureSelector";
-import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
-import { v4 as uuidv4 } from 'uuid';
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Trash2, PlusCircle } from "lucide-react";
+import { ContentSaveButton } from "@/components/property/form/steps/common/ContentSaveButton";
 
 interface FeaturesPageProps {
   formData: PropertyFormData;
@@ -16,6 +15,8 @@ interface FeaturesPageProps {
   onRemoveFeature: (id: string) => void;
   onUpdateFeature: (id: string, description: string) => void;
   setPendingChanges?: (pending: boolean) => void;
+  onSubmit?: () => void;
+  isSaving?: boolean;
 }
 
 export function FeaturesPage({
@@ -24,104 +25,78 @@ export function FeaturesPage({
   onAddFeature,
   onRemoveFeature,
   onUpdateFeature,
-  setPendingChanges
+  setPendingChanges,
+  onSubmit,
+  isSaving = false
 }: FeaturesPageProps) {
-  const [activeTab, setActiveTab] = useState<string>("manual");
-  const { availableFeatures, isLoading, addFeature: addToAvailableFeatures } = useAvailableFeatures();
   
-  const handleFeatureChange = (id: string, description: string) => {
+  const handleChange = () => {
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+  };
+  
+  const handleFeatureAdd = () => {
+    onAddFeature();
+    handleChange();
+  };
+  
+  const handleFeatureRemove = (id: string) => {
+    onRemoveFeature(id);
+    handleChange();
+  };
+  
+  const handleFeatureUpdate = (id: string, description: string) => {
     onUpdateFeature(id, description);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
+    handleChange();
   };
-  
-  const handleAddFeature = (feature: PropertyFeature) => {
-    // If we already have this feature, don't add it again
-    if (formData.features?.some(f => f.id === feature.id)) {
-      return;
-    }
-    
-    const updatedFeatures = [...(formData.features || []), feature];
-    onFieldChange('features', updatedFeatures);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
-  };
-  
-  const handleRemoveSelectedFeature = (id: string) => {
-    const updatedFeatures = formData.features?.filter(feature => feature.id !== id) || [];
-    onFieldChange('features', updatedFeatures);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
-  };
-  
-  const handleAddMultipleFeatures = (newFeatures: PropertyFeature[]) => {
-    // Add multiple features at once
-    // First, add the new features to the available features list
-    newFeatures.forEach(feature => {
-      // Fix: Pass the description string instead of the whole feature object
-      addToAvailableFeatures(feature.description);
-    });
-    
-    // Then add them to the property
-    const updatedFeatures = [...(formData.features || []), ...newFeatures];
-    onFieldChange('features', updatedFeatures);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+
+  const handleSave = () => {
+    if (onSubmit) {
+      onSubmit();
     }
   };
   
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>Property Features</CardTitle>
+          <Button variant="outline" size="sm" onClick={handleFeatureAdd}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Feature
+          </Button>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="manual" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-              <TabsTrigger value="select">Select Features</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="manual">
-              <PropertyFeatures
-                features={formData.features || []}
-                onAdd={() => {
-                  onAddFeature();
-                  if (setPendingChanges) {
-                    setPendingChanges(true);
-                  }
-                }}
-                onRemove={(id) => {
-                  onRemoveFeature(id);
-                  if (setPendingChanges) {
-                    setPendingChanges(true);
-                  }
-                }}
-                onUpdate={handleFeatureChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="select">
-              {isLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-muted-foreground">Loading features...</span>
+          {formData.features && formData.features.length > 0 ? (
+            <div className="space-y-3">
+              {formData.features.map((feature) => (
+                <div key={feature.id} className="flex gap-2">
+                  <Input
+                    value={feature.description || ''}
+                    onChange={(e) => handleFeatureUpdate(feature.id, e.target.value)}
+                    placeholder="Enter feature"
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => handleFeatureRemove(feature.id)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-              ) : (
-                <FeatureSelector
-                  availableFeatures={availableFeatures}
-                  selectedFeatures={formData.features || []}
-                  onAddFeature={handleAddFeature}
-                  onRemoveFeature={handleRemoveSelectedFeature}
-                  onAddMultipleFeatures={handleAddMultipleFeatures}
-                />
-              )}
-            </TabsContent>
-          </Tabs>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No features added yet. Click the "Add Feature" button to add property features.</p>
+            </div>
+          )}
+
+          <div className="flex justify-end mt-6">
+            <ContentSaveButton onSave={handleSave} isSaving={isSaving} />
+          </div>
         </CardContent>
       </Card>
     </div>
