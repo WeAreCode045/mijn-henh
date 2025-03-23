@@ -5,11 +5,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
+import { PropertyCity } from "@/types/property";
 
-interface City {
-  id: string;
-  name: string;
-  distance?: number;
+// Updated interface to be compatible with PropertyCity
+interface City extends PropertyCity {
+  // Adding any additional properties needed by the modal but not in PropertyCity
 }
 
 interface SelectCitiesModalProps {

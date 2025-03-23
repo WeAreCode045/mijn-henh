@@ -1,5 +1,5 @@
 
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyCity } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { CitiesListSection } from "./components/CitiesListSection";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export function NearbyCitiesSection({
 }: NearbyCitiesSectionProps) {
   const nearbyCities = formData.nearby_cities || [];
   const [modalOpen, setModalOpen] = useState(false);
-  const [citiesForModal, setCitiesForModal] = useState(nearbyCities);
+  const [citiesForModal, setCitiesForModal] = useState<PropertyCity[]>(nearbyCities);
   const [isFetchingCities, setIsFetchingCities] = useState(false);
 
   const toggleCityVisibility = (cityIndex: number, visible: boolean) => {
@@ -56,7 +56,7 @@ export function NearbyCitiesSection({
     }
   };
 
-  const handleSaveCities = (selectedCities: any[]) => {
+  const handleSaveCities = (selectedCities: PropertyCity[]) => {
     if (!onFieldChange) return;
     
     // Make sure all cities have visible_in_webview set
