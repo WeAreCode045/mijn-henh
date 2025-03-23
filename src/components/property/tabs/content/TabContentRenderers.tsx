@@ -2,9 +2,8 @@
 import React from 'react';
 import { TabContentRenderProps } from '../wrapper/types/PropertyTabTypes';
 import { DashboardTabContent } from './DashboardTabContent';
-import { ContentTabContent } from './ContentTabContent';
+import { ContentTabWrapper } from './ContentTabWrapper';
 import { MediaTabContent } from '../media/MediaTabContent';
-import { LocationTabContent } from './LocationTabContent';
 import { SettingsTabContent } from './SettingsTabContent';
 import { Button } from '@/components/ui/button';
 import { Unlock } from 'lucide-react';
@@ -81,18 +80,27 @@ export class TabContentRenderers {
       case 'content':
         // For archived properties, pass isReadOnly=true to the content tab
         return (
-          <ContentTabContent
+          <ContentTabWrapper
+            formData={props.formState}
             property={props.property}
-            formState={props.formState}
-            onFieldChange={handlers.onFieldChange}
-            onAddFeature={handlers.onAddFeature}
-            onRemoveFeature={adaptedRemoveFeature}
-            onUpdateFeature={adaptedUpdateFeature}
-            currentStep={handlers.currentStep}
-            handleStepClick={handlers.handleStepClick}
-            onSubmit={() => handlers.setPendingChanges(true)}
-            isReadOnly={isArchived}
-            hideNavigation={true}
+            handlers={{
+              onFieldChange: handlers.onFieldChange,
+              onAddFeature: handlers.onAddFeature,
+              onRemoveFeature: adaptedRemoveFeature,
+              onUpdateFeature: adaptedUpdateFeature,
+              onAddArea: handlers.onAddArea,
+              onRemoveArea: handlers.onRemoveArea,
+              onUpdateArea: handlers.onUpdateArea,
+              onAreaImageRemove: handlers.onAreaImageRemove,
+              onAreaImagesSelect: handlers.onAreaImagesSelect,
+              onAreaImageUpload: handlers.handleAreaPhotosUpload || (() => Promise.resolve()),
+              currentStep: handlers.currentStep || 0,
+              handleStepClick: handlers.handleStepClick || (() => {}),
+              handleNext: undefined,
+              handlePrevious: undefined,
+              onSubmit: () => handlers.setPendingChanges && handlers.setPendingChanges(true),
+              isSaving: handlers.isSaving || false,
+            }}
           />
         );
       case 'media':
@@ -107,27 +115,37 @@ export class TabContentRenderers {
           />
         );
       case 'location':
-        // For archived properties, pass isReadOnly=true to the location tab
+        // Use the ContentTabWrapper with the location step for the location tab
         return (
-          <LocationTabContent
+          <ContentTabWrapper
+            formData={props.formState}
             property={props.property}
-            formState={props.formState}
-            onFieldChange={handlers.onFieldChange}
-            onAddArea={handlers.onAddArea}
-            onRemoveArea={handlers.onRemoveArea}
-            onUpdateArea={handlers.onUpdateArea}
-            onAreaImageRemove={handlers.onAreaImageRemove}
-            onAreaImagesSelect={handlers.onAreaImagesSelect}
-            onAreaImageUpload={handlers.handleAreaImageUpload}
-            onFetchLocationData={handlers.onFetchLocationData}
-            onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
-            onFetchNearbyCities={handlers.onFetchNearbyCities}
-            onGenerateLocationDescription={handlers.onGenerateLocationDescription}
-            onGenerateMap={handlers.onGenerateMap}
-            onRemoveNearbyPlace={adaptedRemoveNearbyPlace}
-            isLoadingLocationData={handlers.isLoadingLocationData}
-            isGeneratingMap={handlers.isGeneratingMap}
-            isReadOnly={isArchived}
+            handlers={{
+              onFieldChange: handlers.onFieldChange,
+              onAddFeature: handlers.onAddFeature,
+              onRemoveFeature: adaptedRemoveFeature,
+              onUpdateFeature: adaptedUpdateFeature,
+              onAddArea: handlers.onAddArea,
+              onRemoveArea: handlers.onRemoveArea,
+              onUpdateArea: handlers.onUpdateArea,
+              onAreaImageRemove: handlers.onAreaImageRemove,
+              onAreaImagesSelect: handlers.onAreaImagesSelect,
+              onAreaImageUpload: handlers.handleAreaPhotosUpload || (() => Promise.resolve()),
+              currentStep: 1, // Force location step (index 1)
+              handleStepClick: handlers.handleStepClick || (() => {}),
+              handleNext: undefined,
+              handlePrevious: undefined,
+              onFetchLocationData: handlers.onFetchLocationData,
+              onFetchCategoryPlaces: handlers.onFetchCategoryPlaces,
+              onFetchNearbyCities: handlers.onFetchNearbyCities,
+              onGenerateLocationDescription: handlers.onGenerateLocationDescription,
+              onGenerateMap: handlers.onGenerateMap,
+              onRemoveNearbyPlace: adaptedRemoveNearbyPlace,
+              isLoadingLocationData: handlers.isLoadingLocationData,
+              isGeneratingMap: handlers.isGeneratingMap,
+              onSubmit: () => handlers.setPendingChanges && handlers.setPendingChanges(true),
+              isSaving: handlers.isSaving || false,
+            }}
           />
         );
       case 'settings':
