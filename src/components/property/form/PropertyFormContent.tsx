@@ -1,3 +1,4 @@
+
 import React from "react";
 import { 
   PropertyFormManagerChildrenProps 
@@ -330,18 +331,6 @@ export function PropertyFormContent({
       default:
         return <div>Unknown step</div>;
     }
-  };
-
-  const handlePreviousClick = () => {
-    if (handlePrevious) handlePrevious();
-  };
-
-  const handleNextClick = () => {
-    if (handleNext) handleNext();
-  };
-
-  const handleSubmit = () => {
-    if (onSubmit) onSubmit();
   };
 
   return (
