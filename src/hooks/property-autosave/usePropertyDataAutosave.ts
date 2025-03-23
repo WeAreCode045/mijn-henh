@@ -5,11 +5,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 import { preparePropertiesForJsonField } from "./preparePropertyData";
+import { usePropertyFloorplanSaver } from "./usePropertyFloorplanSaver";
 
 export function usePropertyDataAutosave() {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { logPropertyChanges } = usePropertyEditLogger();
+  const { handleFloorplans } = usePropertyFloorplanSaver();
 
   const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
     if (!formData.id) return false;
@@ -70,7 +72,7 @@ export function usePropertyDataAutosave() {
         await logPropertyChanges(formData.id, currentPropertyData, submitData);
       }
       
-      // Handle floorplans if needed
+      // Handle floorplans using the separate utility
       if (formData.floorplans && formData.floorplans.length > 0) {
         await handleFloorplans(formData);
       }
@@ -86,33 +88,6 @@ export function usePropertyDataAutosave() {
       return false;
     } finally {
       setIsSaving(false);
-    }
-  };
-  
-  const handleFloorplans = async (formData: PropertyFormData) => {
-    try {
-      const { data: existingFloorplans } = await supabase
-        .from('property_images')
-        .select('id, url')
-        .eq('property_id', formData.id)
-        .eq('type', 'floorplan');
-        
-      const existingUrls = existingFloorplans?.map(f => f.url) || [];
-      
-      for (const floorplan of formData.floorplans) {
-        const floorplanUrl = typeof floorplan === 'string' ? floorplan : floorplan.url;
-        if (!floorplanUrl || existingUrls.includes(floorplanUrl)) continue;
-        
-        await supabase
-          .from('property_images')
-          .insert({
-            property_id: formData.id,
-            url: floorplanUrl,
-            type: 'floorplan'
-          });
-      }
-    } catch (error) {
-      console.error('Error updating floorplans:', error);
     }
   };
 

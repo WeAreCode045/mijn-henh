@@ -28,16 +28,15 @@ export const prepareFieldForSubmission = <K extends keyof PropertyFormData>(
   field: K, 
   value: PropertyFormData[K]
 ): any => {
-  let fieldValue = value;
-  
   // Special handling for specific field types
   if (field === 'features' && Array.isArray(value)) {
-    fieldValue = JSON.stringify(value);
+    return JSON.stringify(value);
   } else if (field === 'areas' && Array.isArray(value)) {
-    fieldValue = prepareAreasForFormSubmission(value as any);
+    return prepareAreasForFormSubmission(value as any);
   } else if ((field === 'nearby_places' || field === 'nearby_cities') && Array.isArray(value)) {
-    fieldValue = preparePropertiesForJsonField(value as any);
+    return preparePropertiesForJsonField(value as any);
   }
   
-  return fieldValue;
+  // Return the value as is for other fields
+  return value;
 };
