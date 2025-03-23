@@ -84,7 +84,7 @@ export function LocationPage({
     }
   };
 
-  const saveNearbyPlaces = async () => {
+  const saveNearbyPlaces = async (): Promise<void> => {
     if (!formData.id) return;
     
     try {
@@ -109,7 +109,7 @@ export function LocationPage({
         description: "Nearby places and cities updated successfully",
       });
       
-      return true;
+      // Changed: Remove the boolean return to match Promise<void> type
     } catch (error) {
       console.error("Error updating nearby places:", error);
       toast({
