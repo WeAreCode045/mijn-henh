@@ -66,7 +66,9 @@ export function useNearbyPlaces(
         propertyId: formData.id,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        radius: 5000  // 5km radius
+        radius: 5000,  // 5km radius
+        supabaseUrl: supabase.supabaseUrl,
+        supabaseKey: supabase.supabaseKey
       };
       
       console.log("Calling nearby-places Edge Function with data:", {
@@ -75,7 +77,8 @@ export function useNearbyPlaces(
         latitude: formData.latitude,
         longitude: formData.longitude,
         propertyId: formData.id,
-        // Don't log the API key for security reasons
+        radius: 5000,
+        // Don't log the API key or supabase credentials for security reasons
       });
       
       const { data, error } = await supabase.functions.invoke('nearby-places', {
@@ -86,6 +89,8 @@ export function useNearbyPlaces(
         console.error("Edge function error:", error);
         throw error;
       }
+      
+      console.log("Edge function response:", data);
       
       if (data) {
         console.log(`Places data received for category ${category}:`, data);
@@ -118,7 +123,7 @@ export function useNearbyPlaces(
       console.error(`Error fetching ${category} places:`, error);
       toast({
         title: "Error",
-        description: `Failed to fetch ${category} places`,
+        description: `Failed to fetch ${category} places: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
       return null;

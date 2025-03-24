@@ -1,142 +1,125 @@
 
-import React, { useState } from "react";
-import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { 
-  School, 
-  Coffee, 
-  ShoppingBag, 
-  Train, 
-  Hospital, 
-  MapPin, 
-  Dumbbell
-} from "lucide-react";
+import { PropertyFormData } from "@/types/property";
+import { useCategories } from "../hooks/useCategories";
+import { useState } from "react";
+import { SelectCategoryModal } from "./SelectCategoryModal";
+import { SearchIcon, Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PlacesSearchTabProps {
   formData: PropertyFormData;
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  onFetchPlaces: (category: string) => Promise<any>;
-  isLoading: boolean;
-  onSearchClick: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
+  onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+  onFetchPlaces?: (category: string) => Promise<any>;
+  isLoading?: boolean;
+  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }
 
 export function PlacesSearchTab({
   formData,
   onFieldChange,
   onFetchPlaces,
-  isLoading,
+  isLoading = false,
   onSearchClick
 }: PlacesSearchTabProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-
-  // Category definitions
-  const categories = [
-    { id: "education", name: "Education", icon: School, description: "Schools, universities and educational institutions" },
-    { id: "entertainment", name: "Entertainment", icon: Coffee, description: "Restaurants, cafes, bars and entertainment venues" },
-    { id: "shopping", name: "Shopping", icon: ShoppingBag, description: "Supermarkets, shopping centers and retail" },
-    { id: "transportation", name: "Transportation", icon: Train, description: "Train stations, bus stops and transit" },
-    { id: "healthcare", name: "Healthcare", icon: Hospital, description: "Hospitals, clinics and healthcare providers" },
-    { id: "sports", name: "Sports", icon: Dumbbell, description: "Gyms, sports facilities and recreation" },
-    { id: "all", name: "All Places", icon: MapPin, description: "Search for all types of places nearby" }
-  ];
-
-  return (
-    <div className="space-y-6">
-      <p className="text-muted-foreground">
-        Search for places near this property by category. Results will be shown in a selection dialog.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((category) => (
-          <CategoryCard
-            key={category.id}
-            category={category}
-            isSelected={selectedCategory === category.id}
-            onClick={() => setSelectedCategory(category.id)}
-            onSearch={(e) => {
-              // Prevent event propagation to avoid the card click handler
-              e.stopPropagation();
-              // Call the search handler with the category
-              onSearchClick(e, category.id);
-            }}
-            isLoading={isLoading && selectedCategory === category.id}
-            disabled={!formData.latitude || !formData.longitude}
-          />
-        ))}
-      </div>
-      
-      {(!formData.latitude || !formData.longitude) && (
-        <div className="text-center p-4 bg-muted rounded-md mt-4">
-          <p className="text-muted-foreground">
-            Please ensure the property has coordinates (latitude/longitude) to enable place search.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface CategoryCardProps {
-  category: {
-    id: string;
-    name: string;
-    icon: React.FC<any>;
-    description: string;
-  };
-  isSelected: boolean;
-  onClick: () => void;
-  onSearch: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  isLoading: boolean;
-  disabled?: boolean;
-}
-
-function CategoryCard({ 
-  category, 
-  isSelected, 
-  onClick, 
-  onSearch, 
-  isLoading,
-  disabled = false
-}: CategoryCardProps) {
-  const Icon = category.icon;
+  const { getCategories } = useCategories();
+  const [selectCategoryOpen, setSelectCategoryOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
+  const categories = getCategories();
+  
+  const handleCategorySelect = async (category: string) => {
+    console.log("Selected category:", category);
+    setSelectedCategory(category);
+    setSelectCategoryOpen(false);
+    
+    if (!formData.latitude || !formData.longitude) {
+      setError("Property coordinates are required. Please set coordinates first.");
+      return;
+    }
+    
+    // Clear any previous errors
+    setError(null);
+    setSearching(true);
+    
+    try {
+      if (onSearchClick) {
+        console.log("Using provided search handler for category:", category);
+        await onSearchClick(new MouseEvent('click') as any, category);
+      } else if (onFetchPlaces) {
+        console.log("Using default fetch handler for category:", category);
+        await onFetchPlaces(category);
+      } else {
+        console.warn("No search or fetch handler provided");
+      }
+    } catch (e) {
+      console.error("Error searching for places:", e);
+      setError("Failed to fetch places. Please try again.");
+    } finally {
+      setSearching(false);
+    }
+  };
+  
+  const handleSearchButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
+    if (!formData.latitude || !formData.longitude) {
+      setError("Property coordinates are required. Please set coordinates first.");
+      return;
+    }
+    
+    setSelectCategoryOpen(true);
+  };
+
+  const isDisabled = isLoading || searching || !formData.latitude || !formData.longitude;
+
   return (
-    <Card 
-      className={`cursor-pointer transition-all ${
-        isSelected ? 'border-primary ring-1 ring-primary' : ''
-      }`}
-      onClick={onClick}
-    >
-      <CardContent className="p-4 flex flex-col items-start">
-        <div className="flex items-start justify-between w-full">
-          <div className="flex items-center gap-2 mb-2">
-            <Icon className="h-5 w-5 text-primary" />
-            <h3 className="font-medium">{category.name}</h3>
-          </div>
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="grid place-items-center py-8">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">
+            Search for nearby places by category to enhance the property listing with
+            local amenities and points of interest.
+          </p>
+          
           <Button
-            variant="outline"
-            size="sm"
-            disabled={isLoading || disabled}
-            onClick={onSearch}
-            className="ml-auto"
-            type="button" // Explicitly set as button type to avoid form submission
+            size="lg"
+            className="gap-2"
+            onClick={handleSearchButtonClick}
+            disabled={isDisabled}
+            type="button"
           >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Searching...
-              </>
+            {isLoading || searching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              'Search'
+              <SearchIcon className="h-4 w-4" />
             )}
+            {isLoading || searching ? "Searching..." : "Search Nearby Places"}
           </Button>
+          
+          {!formData.latitude || !formData.longitude ? (
+            <p className="text-sm text-yellow-600">
+              Property coordinates are required. Please set coordinates first.
+            </p>
+          ) : null}
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
-      </CardContent>
-    </Card>
+      </div>
+
+      <SelectCategoryModal
+        isOpen={selectCategoryOpen}
+        onClose={() => setSelectCategoryOpen(false)}
+        categories={categories}
+        onSelect={handleCategorySelect}
+      />
+    </div>
   );
 }

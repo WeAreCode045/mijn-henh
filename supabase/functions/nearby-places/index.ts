@@ -3,16 +3,45 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from './constants.ts'
 import { geocodeAddress } from './geocoding.ts'
 import { fetchPlacesFromAPI } from './places-api.ts'
-import { updatePropertyWithPlaces } from './database.ts'
+import { updatePropertyWithPlaces } from './utils.ts'
 import { categoryConfigs } from './constants.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.29.0'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { address, apiKey, category, latitude, longitude, radius = 5000, propertyId } = await req.json()
+    console.log(`Nearby places function called with method: ${req.method}`);
+    
+    const requestData = await req.json();
+    console.log("Request received with data:", {
+      address: requestData.address,
+      hasApiKey: !!requestData.apiKey,
+      category: requestData.category,
+      hasCoordinates: !!(requestData.latitude && requestData.longitude),
+      radius: requestData.radius || 5000,
+      propertyId: requestData.propertyId
+    });
+    
+    const { 
+      address, 
+      apiKey, 
+      category, 
+      latitude, 
+      longitude, 
+      radius = 5000, 
+      propertyId,
+      supabaseUrl, 
+      supabaseKey 
+    } = requestData;
     
     if (!apiKey) {
       throw new Error('API key is required')
@@ -23,6 +52,7 @@ serve(async (req) => {
     let lng = longitude;
     
     if (!lat || !lng) {
+      console.log(`Geocoding address: ${address}`);
       const coordinates = await geocodeAddress(address, apiKey);
       lat = coordinates.lat;
       lng = coordinates.lng;
@@ -40,6 +70,7 @@ serve(async (req) => {
         categoriesToFetch = [category];
       } else {
         // For custom categories or types, we handle this in the fetchPlacesFromAPI function
+        console.log(`Fetching only custom category/type: ${category}`);
         categoriesToFetch = [category];
       }
     }
@@ -52,6 +83,7 @@ serve(async (req) => {
       
       try {
         const places = await fetchPlacesFromAPI(categoryKey, lat, lng, apiKey, radius);
+        console.log(`Retrieved ${places.length} places for category ${categoryKey}`);
         results[categoryKey] = places;
         
         // Also add to specific type keys for backward compatibility
@@ -62,6 +94,7 @@ serve(async (req) => {
               p.type === type || (p.types && p.types.includes(type))
             );
             if (placesOfType.length > 0) {
+              console.log(`Adding ${placesOfType.length} places of specific type ${type}`);
               results[type] = placesOfType;
             }
           }
@@ -73,17 +106,29 @@ serve(async (req) => {
     }
 
     // Update the property with the new data if propertyId is provided and this is a full fetch
-    if (propertyId && !category) {
+    if (propertyId && !category && supabaseUrl && supabaseKey) {
       // Flatten all results into a single array
       const allPlaces = Object.values(results).flat();
+      console.log(`Total places retrieved across all categories: ${allPlaces.length}`);
       
       try {
-        await updatePropertyWithPlaces(propertyId, lat, lng, allPlaces);
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        await updatePropertyWithPlaces(supabase, propertyId, lat, lng, allPlaces);
       } catch (error) {
         console.error('Error updating property:', error);
         // Continue anyway to return the results to the client
       }
     }
+
+    // Count total places found
+    let totalPlaces = 0;
+    for (const categoryPlaces of Object.values(results)) {
+      if (Array.isArray(categoryPlaces)) {
+        totalPlaces += categoryPlaces.length;
+      }
+    }
+    
+    console.log(`Returning ${totalPlaces} total places across ${Object.keys(results).length} categories/types`);
 
     return new Response(
       JSON.stringify(results),
@@ -95,7 +140,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in nearby-places function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
