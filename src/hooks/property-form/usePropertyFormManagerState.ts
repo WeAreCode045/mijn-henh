@@ -151,7 +151,7 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     isGeneratingMap,
     onFetchCategoryPlaces,
     onFetchNearbyCities,
-    // Make sure images is included in the return
+    // Include the images property in the returned object
     images
   };
 }

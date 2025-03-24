@@ -114,6 +114,9 @@ export function usePropertyFormImages(
     handleFieldChange("floorplanEmbedScript", script);
   }, [handleFieldChange]);
   
+  // Add the images property to the returned object
+  const images = Array.isArray(formState.images) ? formState.images : [];
+  
   return {
     handleImageUpload,
     handleRemoveImage,
@@ -125,6 +128,8 @@ export function usePropertyFormImages(
     handleToggleFeaturedImage,
     handleVirtualTourUpdate,
     handleYoutubeUrlUpdate,
-    handleFloorplanEmbedScriptUpdate
+    handleFloorplanEmbedScriptUpdate,
+    // Export the images array
+    images
   };
 }
