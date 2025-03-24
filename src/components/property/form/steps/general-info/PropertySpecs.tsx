@@ -56,8 +56,9 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
     // Save the change to the database
     await saveToDatabase(field, value);
     
-    // Only show toast for property type changes
-    if (field === 'propertyType') {
+    // Only show toast for property type changes and limit success message frequency
+    if (field === 'propertyType' && value !== initialPropertyType) {
+      setInitialPropertyType(value);
       toast({
         title: "Success",
         description: "Property type updated",
@@ -103,7 +104,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               </SelectTrigger>
               <SelectContent>
                 {propertyTypes.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                  <SelectItem key={type.toLowerCase()} value={type.toLowerCase()}>{type}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

@@ -54,6 +54,7 @@ export function ContentRouter({
   const { toast } = useToast();
   const [hasPendingChanges, setHasPendingChanges] = React.useState(false);
   const [lastFormState, setLastFormState] = React.useState<PropertyFormData | null>(null);
+  const [previousStep, setPreviousStep] = React.useState<number | null>(null);
 
   // Track form changes
   useEffect(() => {
@@ -64,6 +65,14 @@ export function ContentRouter({
     // Update the last form state
     setLastFormState(formData);
   }, [formData, lastFormState]);
+
+  // Save changes when current step changes (navigating between tabs)
+  useEffect(() => {
+    if (previousStep !== null && previousStep !== currentStep && hasPendingChanges) {
+      saveChanges();
+    }
+    setPreviousStep(currentStep);
+  }, [currentStep]);
 
   // Save changes when navigating away
   const saveChanges = async () => {
