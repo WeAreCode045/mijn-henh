@@ -1,8 +1,10 @@
 
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyData } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
+  isArchived?: boolean;
   children: (props: PropertyFormManagerChildrenProps) => React.ReactNode;
 }
 
@@ -50,9 +52,6 @@ export interface PropertyFormManagerChildrenProps {
   handleVirtualTourUpdate: (url: string) => void;
   handleYoutubeUrlUpdate: (url: string) => void;
   handleFloorplanEmbedScriptUpdate: (script: string) => void;
-  // For media components
-  onFeatureImageToggle?: (url: string) => void;
-  onSetMainImage?: (url: string) => void;
   // Aliases for backward compatibility
   onAddFeature: () => void;
   onRemoveFeature: (id: string) => void;

@@ -96,8 +96,6 @@ export class TabContentRenderers {
               onAreaImageUpload: handlers.handleAreaImageUpload || (() => Promise.resolve()),
               currentStep: handlers.currentStep || 0,
               handleStepClick: handlers.handleStepClick || (() => {}),
-              handleNext: undefined,
-              handlePrevious: undefined,
               onSubmit: () => handlers.setPendingChanges && handlers.setPendingChanges(true),
               isSaving: handlers.isSaving || false,
             }}
@@ -133,8 +131,6 @@ export class TabContentRenderers {
               onAreaImageUpload: handlers.handleAreaImageUpload || (() => Promise.resolve()),
               currentStep: 1, // Force location step (index 1)
               handleStepClick: handlers.handleStepClick || (() => {}),
-              handleNext: undefined,
-              handlePrevious: undefined,
               onFetchLocationData: handlers.onFetchLocationData,
               onFetchCategoryPlaces: handlers.onFetchCategoryPlaces,
               onFetchNearbyCities: handlers.onFetchNearbyCities,

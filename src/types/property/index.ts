@@ -15,3 +15,7 @@ export type {
 
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export type { PropertyData } from './PropertyDataTypes';
+
+// Add Area as an alias to PropertyArea for backward compatibility
+import { PropertyArea } from './PropertyTypes';
+export type Area = PropertyArea;
