@@ -9,9 +9,9 @@ export interface PropertyNearbyPlace {
   rating?: number | null;
   user_ratings_total?: number;
   type: PropertyPlaceType | string;
-  types?: string[];
+  propertyTypes?: string[]; // Renamed from 'types' to 'propertyTypes' to avoid conflicts
   visible_in_webview?: boolean;
   latitude?: number;
   longitude?: number;
-  category?: string; // Added category field to track which category a place belongs to
+  category?: string; // Category field to track which category a place belongs to
 }

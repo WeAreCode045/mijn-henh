@@ -1,3 +1,6 @@
+
+// Only updating the parts that need to change - the transformedPlace creation in both places
+
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -142,7 +145,7 @@ export function useNearbyPlaces(
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: categoryName,
-          types: place.types || [],
+          propertyTypes: place.types || [], // Renamed from 'types' to 'propertyTypes'
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
@@ -240,7 +243,7 @@ export function useNearbyPlaces(
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: matchedType, // Use the specific matched type
-          types: place.types || [],
+          propertyTypes: place.types || [], // Renamed from 'types' to 'propertyTypes'
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
