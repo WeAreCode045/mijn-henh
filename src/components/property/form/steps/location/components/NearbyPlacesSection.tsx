@@ -14,6 +14,7 @@ export interface NearbyPlacesSectionProps {
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
   onRemoveNearbyPlace?: (index: number) => void;
+  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => void;
 }
 
 export function NearbyPlacesSection({
@@ -21,7 +22,8 @@ export function NearbyPlacesSection({
   onFieldChange,
   onFetchCategoryPlaces,
   isLoadingNearbyPlaces = false,
-  onRemoveNearbyPlace
+  onRemoveNearbyPlace,
+  onSearchClick
 }: NearbyPlacesSectionProps) {
   const {
     activeTab,
@@ -38,7 +40,8 @@ export function NearbyPlacesSection({
     formData,
     onFieldChange,
     onFetchCategoryPlaces,
-    onRemoveNearbyPlace
+    onRemoveNearbyPlace,
+    onSearchClick
   });
 
   return (

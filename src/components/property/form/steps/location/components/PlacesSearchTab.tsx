@@ -54,11 +54,25 @@ export function PlacesSearchTab({
             category={category}
             isSelected={selectedCategory === category.id}
             onClick={() => setSelectedCategory(category.id)}
-            onSearch={(e) => onSearchClick(e, category.id)}
+            onSearch={(e) => {
+              // Prevent event propagation to avoid the card click handler
+              e.stopPropagation();
+              // Call the search handler with the category
+              onSearchClick(e, category.id);
+            }}
             isLoading={isLoading && selectedCategory === category.id}
+            disabled={!formData.latitude || !formData.longitude}
           />
         ))}
       </div>
+      
+      {(!formData.latitude || !formData.longitude) && (
+        <div className="text-center p-4 bg-muted rounded-md mt-4">
+          <p className="text-muted-foreground">
+            Please ensure the property has coordinates (latitude/longitude) to enable place search.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -74,9 +88,17 @@ interface CategoryCardProps {
   onClick: () => void;
   onSearch: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
-function CategoryCard({ category, isSelected, onClick, onSearch, isLoading }: CategoryCardProps) {
+function CategoryCard({ 
+  category, 
+  isSelected, 
+  onClick, 
+  onSearch, 
+  isLoading,
+  disabled = false
+}: CategoryCardProps) {
   const Icon = category.icon;
   
   return (
@@ -95,9 +117,10 @@ function CategoryCard({ category, isSelected, onClick, onSearch, isLoading }: Ca
           <Button
             variant="outline"
             size="sm"
-            disabled={isLoading}
+            disabled={isLoading || disabled}
             onClick={onSearch}
             className="ml-auto"
+            type="button"
           >
             {isLoading ? (
               <>

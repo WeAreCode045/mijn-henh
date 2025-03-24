@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,12 +6,14 @@ export function useNearbyPlacesSection({
   formData,
   onFieldChange,
   onFetchCategoryPlaces,
-  onRemoveNearbyPlace
+  onRemoveNearbyPlace,
+  onSearchClick
 }: {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onRemoveNearbyPlace?: (index: number) => void;
+  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => void;
 }) {
   const [activeTab, setActiveTab] = useState("view");
   const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
@@ -91,13 +92,17 @@ export function useNearbyPlacesSection({
   // Function to handle search button click
   const handleSearchClick = useCallback(async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
     console.log("Search handler called for category:", category);
-    e.preventDefault(); // Prevent form submission
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault();
+    e.stopPropagation();
     
-    if (onFetchCategoryPlaces) {
+    if (onSearchClick) {
+      // Use the parent component's search handler if provided
+      await onSearchClick(e, category);
+    } else if (onFetchCategoryPlaces) {
+      // Otherwise use the default fetch logic
       await fetchPlaces(category);
     }
-  }, [fetchPlaces, onFetchCategoryPlaces]);
+  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick]);
   
   // Function to save selected places to the property
   const handleSavePlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {

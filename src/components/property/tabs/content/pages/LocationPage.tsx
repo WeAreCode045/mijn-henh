@@ -92,6 +92,15 @@ export function LocationPage({
     };
   }, []);
 
+  const handleCategorySearch = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (onFetchCategoryPlaces) {
+      await onFetchCategoryPlaces(category);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -156,6 +165,7 @@ export function LocationPage({
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         isLoadingNearbyPlaces={isLoadingLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
+        onSearchClick={handleCategorySearch}
       />
     </div>
   );

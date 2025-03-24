@@ -35,6 +35,15 @@ export function LocationStep({
   onGenerateMap,
   isGeneratingMap = false
 }: LocationStepProps) {
+  const handleCategorySearch = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (onFetchCategoryPlaces) {
+      await onFetchCategoryPlaces(category);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card className="bg-white shadow-sm">
@@ -63,6 +72,7 @@ export function LocationStep({
               onFieldChange={onFieldChange}
               onFetchCategoryPlaces={onFetchCategoryPlaces}
               isLoadingNearbyPlaces={isLoadingLocationData}
+              onSearchClick={handleCategorySearch}
             />
             
             <NearbyCitiesSection 
