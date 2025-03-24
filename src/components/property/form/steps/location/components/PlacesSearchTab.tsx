@@ -120,6 +120,7 @@ export function PlacesSearchTab({
       return null;
     } finally {
       setLocalIsLoading(false);
+      setShowModal(false); // Close modal after selection
     }
   };
 

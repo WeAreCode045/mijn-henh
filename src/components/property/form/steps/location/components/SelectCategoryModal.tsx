@@ -1,9 +1,13 @@
 
-import React, { useState } from 'react';
+import { useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  Coffee, Utensils, School, Building, Stethoscope, 
+  ShoppingCart, Bus, Park, Bank, Building2, Landmark 
+} from "lucide-react";
 
 interface SelectCategoryModalProps {
   isOpen: boolean;
@@ -12,129 +16,104 @@ interface SelectCategoryModalProps {
   isLoading?: boolean;
 }
 
-export function SelectCategoryModal({ 
-  isOpen, 
-  onClose, 
-  onSelect, 
-  isLoading = false 
+type CategoryOption = {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+};
+
+export function SelectCategoryModal({
+  isOpen,
+  onClose,
+  onSelect,
+  isLoading = false
 }: SelectCategoryModalProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeTab, setActiveTab] = useState("popular");
   const { toast } = useToast();
-
-  const categories = [
-    { id: "restaurant", name: "Restaurants", icon: "🍽️" },
-    { id: "cafe", name: "Cafes", icon: "☕" },
-    { id: "bar", name: "Bars", icon: "🍻" },
-    { id: "supermarket", name: "Supermarkets", icon: "🛒" },
-    { id: "school", name: "Schools", icon: "🏫" },
-    { id: "park", name: "Parks", icon: "🌳" },
-    { id: "gym", name: "Gyms", icon: "💪" },
-    { id: "hospital", name: "Hospitals", icon: "🏥" },
-    { id: "pharmacy", name: "Pharmacies", icon: "💊" },
-    { id: "bank", name: "Banks", icon: "🏦" },
-    { id: "shopping_mall", name: "Shopping Centers", icon: "🛍️" },
-    { id: "subway_station", name: "Metro Stations", icon: "🚇" },
-    { id: "train_station", name: "Train Stations", icon: "🚆" },
-    { id: "bus_station", name: "Bus Stations", icon: "🚌" },
-    { id: "airport", name: "Airports", icon: "✈️" }
+  
+  const popularCategories: CategoryOption[] = [
+    { id: "restaurant", label: "Restaurants", icon: <Utensils className="h-4 w-4" /> },
+    { id: "cafe", label: "Cafes", icon: <Coffee className="h-4 w-4" /> },
+    { id: "school", label: "Schools", icon: <School className="h-4 w-4" /> },
+    { id: "supermarket", label: "Supermarkets", icon: <ShoppingCart className="h-4 w-4" /> },
+    { id: "hospital", label: "Hospitals", icon: <Stethoscope className="h-4 w-4" /> },
+    { id: "park", label: "Parks", icon: <Park className="h-4 w-4" /> }
   ];
-
-  const handleSelectCategory = async (category: string) => {
-    if (isLoading || isProcessing) return;
-    
+  
+  const moreCategories: CategoryOption[] = [
+    { id: "bank", label: "Banks", icon: <Bank className="h-4 w-4" /> },
+    { id: "shopping_mall", label: "Shopping Malls", icon: <ShoppingCart className="h-4 w-4" /> },
+    { id: "library", label: "Libraries", icon: <Building2 className="h-4 w-4" /> },
+    { id: "transit_station", label: "Transit Stations", icon: <Bus className="h-4 w-4" /> },
+    { id: "gym", label: "Gyms", icon: <Building className="h-4 w-4" /> },
+    { id: "tourist_attraction", label: "Tourist Attractions", icon: <Landmark className="h-4 w-4" /> }
+  ];
+  
+  const handleSelectCategory = useCallback(async (category: string) => {
+    console.log("SelectCategoryModal: Selected category:", category);
     setSelectedCategory(category);
-    setIsProcessing(true);
+    
+    // Start API request
+    console.log(`SelectCategoryModal: Starting API request for category: ${category}`);
     
     try {
-      console.log(`SelectCategoryModal: Starting API request for category: ${category}`);
-      
-      // Make the API call but don't close the modal yet
       const result = await onSelect(category);
       console.log(`SelectCategoryModal: API request completed for ${category}:`, result);
       
-      // Check if we got results
-      if (result) {
-        // Check if the result has the category property with places
-        if (result[category] && result[category].length > 0) {
-          console.log(`SelectCategoryModal: Results found for category: ${category}, places count:`, result[category].length);
-          toast({
-            title: "Places found",
-            description: `Found ${result[category].length} ${category} places nearby.`
-          });
-          // Close modal only after successful results
-          onClose();
-        } else {
-          console.log(`SelectCategoryModal: No valid results found for category: ${category}`, result);
-          toast({
-            title: "No places found",
-            description: `No ${category.replace('_', ' ')} places found near this location.`,
-            variant: "destructive"
-          });
-          // Keep modal open
-        }
-      } else {
+      if (!result) {
         console.log(`SelectCategoryModal: No results returned for category: ${category}`);
-        toast({
-          title: "Error",
-          description: "Failed to fetch nearby places",
-          variant: "destructive"
-        });
+        // The toast will be handled by the parent component
+      } else {
+        onClose();
       }
     } catch (error) {
-      console.error(`SelectCategoryModal: Error fetching places for category ${category}:`, error);
+      console.error(`SelectCategoryModal: Error fetching ${category}:`, error);
       toast({
         title: "Error",
-        description: "Failed to fetch nearby places",
+        description: `Failed to load ${category} places`,
         variant: "destructive"
       });
     } finally {
-      setIsProcessing(false);
+      setSelectedCategory(null);
     }
-  };
-
-  const handleDialogChange = (open: boolean) => {
-    // Only allow closing if not processing a request
-    if (!open && !isProcessing) {
-      onClose();
-    }
-  };
+  }, [onSelect, onClose, toast]);
+  
+  const categories = activeTab === "popular" ? popularCategories : moreCategories;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Select a Category</DialogTitle>
+          <DialogTitle>Find Nearby Places</DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
-          <p className="text-sm text-muted-foreground mb-4">
-            Choose a category to find places near this property
-          </p>
+        <Tabs defaultValue="popular" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="popular">Popular</TabsTrigger>
+            <TabsTrigger value="more">More</TabsTrigger>
+          </TabsList>
           
-          {isLoading || isProcessing ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              {selectedCategory && <p className="ml-2">Loading {selectedCategory} places...</p>}
-            </div>
-          ) : (
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {categories.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant="outline"
-                    className="justify-start h-auto py-3 px-4 text-left"
-                    onClick={() => handleSelectCategory(category.id)}
-                  >
-                    <span className="mr-2 text-lg">{category.icon}</span>
-                    <span>{category.name}</span>
-                  </Button>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant="outline"
+                className={`flex items-center justify-start gap-2 h-auto py-3 ${
+                  selectedCategory === category.id ? 'border-primary' : ''
+                }`}
+                onClick={() => handleSelectCategory(category.id)}
+                disabled={isLoading || selectedCategory !== null}
+              >
+                {category.icon}
+                <span>{category.label}</span>
+                {selectedCategory === category.id && (
+                  <span className="ml-auto text-xs animate-pulse">Loading...</span>
+                )}
+              </Button>
+            ))}
+          </div>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

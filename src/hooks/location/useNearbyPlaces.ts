@@ -64,32 +64,52 @@ export function useNearbyPlaces(
         return null;
       }
       
-      // Make direct API call to Google Places API
-      const radius = 5000; // 5km radius
-      const placesApiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${formData.latitude},${formData.longitude}&radius=${radius}&type=${category}&key=${apiKey}`;
+      // Use the category provided or default to "restaurant" for debugging
+      const includedType = category || "restaurant";
       
-      // Use a CORS proxy for client-side requests to Google's API
-      // Note: In production, you might need a proper CORS proxy or a small serverless function
-      const corsProxyUrl = `https://cors-anywhere.herokuapp.com/${placesApiUrl}`;
+      // Prepare the request body with the exact structure specified
+      const requestBody = {
+        includedTypes: [includedType],
+        maxResultCount: 10,
+        locationRestriction: {
+          circle: {
+            center: {
+              latitude: formData.latitude,
+              longitude: formData.longitude
+            },
+            radius: 5000
+          }
+        }
+      };
+      
+      console.log("useNearbyPlaces: Places API request body:", JSON.stringify(requestBody));
+      
+      // Make direct API call to Google Places API v2
+      const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
       
       console.log("useNearbyPlaces: Calling Google Places API directly");
       
-      const response = await fetch(corsProxyUrl, {
+      const response = await fetch(placesApiUrl, {
+        method: 'POST',
         headers: {
-          'Origin': window.location.origin,
-        }
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types,places.location'
+        },
+        body: JSON.stringify(requestBody)
       });
       
       if (!response.ok) {
-        console.error(`useNearbyPlaces: Places API returned status ${response.status}`);
-        throw new Error(`Places API returned status ${response.status}`);
+        const errorText = await response.text();
+        console.error(`useNearbyPlaces: Places API returned status ${response.status}`, errorText);
+        throw new Error(`Places API returned error: ${errorText}`);
       }
       
       const placesData = await response.json();
       
-      console.log("useNearbyPlaces: Places API response:", placesData);
+      console.log("useNearbyPlaces: Places API raw response:", placesData);
       
-      if (!placesData.results || !Array.isArray(placesData.results)) {
+      if (!placesData.places || !Array.isArray(placesData.places)) {
         console.log("useNearbyPlaces: No results found from Places API");
         toast({
           title: "No places found",
@@ -101,18 +121,18 @@ export function useNearbyPlaces(
       }
       
       // Transform the response to match our expected format
-      const transformedPlaces = placesData.results.map((place: any) => ({
-        id: place.place_id,
-        name: place.name,
-        vicinity: place.vicinity,
+      const transformedPlaces = placesData.places.map((place: any) => ({
+        id: place.id,
+        name: place.displayName?.text || place.name || "Unknown place",
+        vicinity: place.formattedAddress || "",
         rating: place.rating || null,
-        user_ratings_total: place.user_ratings_total || 0,
+        user_ratings_total: place.userRatingCount || 0,
         type: category,
         types: place.types || [],
         visible_in_webview: true,
         distance: null, // We could calculate this if needed
-        latitude: place.geometry?.location?.lat || null,
-        longitude: place.geometry?.location?.lng || null
+        latitude: place.location?.latitude || null,
+        longitude: place.location?.longitude || null
       }));
       
       console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for category ${category}`);
