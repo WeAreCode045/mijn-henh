@@ -1,12 +1,13 @@
 
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Search, Star, MapPin, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyNearbyPlace } from "@/types/property";
 import { useToast } from "@/components/ui/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SelectCategoryModalProps {
   isOpen: boolean;
@@ -27,6 +28,15 @@ export function SelectCategoryModal({
   const [isSearching, setIsSearching] = useState(false);
   const [selectedPlaces, setSelectedPlaces] = useState<PropertyNearbyPlace[]>([]);
   const { toast } = useToast();
+
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchResults([]);
+      setSearchPerformed(false);
+      setSelectedPlaces([]);
+    }
+  }, [isOpen]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +78,10 @@ export function SelectCategoryModal({
         return;
       }
       
-      // Call onSelect to get the latitude and longitude from the parent component
+      // Call onSelect to trigger the parent component's search logic
       await onSelect(category);
       
-      // For now, we'll just close the modal since the actual search is handled by onSelect
-      // We'll implement the actual search in a later step
+      // Don't close the modal, we'll show results here
     } catch (error) {
       console.error("Error searching places:", error);
       toast({
@@ -84,6 +93,15 @@ export function SelectCategoryModal({
       setIsSearching(false);
     }
   };
+
+  // Get search results from useNearbyPlacesSearch hook via props
+  useEffect(() => {
+    if (isLoading) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+  }, [isLoading]);
 
   const togglePlaceSelection = (place: PropertyNearbyPlace) => {
     setSelectedPlaces(prev => {
@@ -129,14 +147,14 @@ export function SelectCategoryModal({
             </Button>
           </div>
           
-          {isSearching && (
+          {(isSearching || isLoading) && (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
               <p>Searching for {category} places...</p>
             </div>
           )}
           
-          {!isSearching && searchPerformed && searchResults.length === 0 && (
+          {!isSearching && !isLoading && searchPerformed && searchResults.length === 0 && (
             <p className="text-center text-muted-foreground py-4">
               No places found for this category. Try another category or check your location settings.
             </p>
@@ -180,7 +198,7 @@ export function SelectCategoryModal({
                 ))}
               </div>
               
-              <div className="flex justify-end space-x-2">
+              <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
@@ -202,7 +220,7 @@ export function SelectCategoryModal({
                 >
                   Add {selectedPlaces.length} Selected
                 </Button>
-              </div>
+              </DialogFooter>
             </div>
           )}
         </form>

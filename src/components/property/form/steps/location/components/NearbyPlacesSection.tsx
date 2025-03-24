@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +9,8 @@ import { MapPin, Star, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useNearbyPlaces } from "@/hooks/location/useNearbyPlaces";
+import { useNearbyPlacesSearch } from "@/hooks/location/useNearbyPlacesSearch";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -31,8 +32,8 @@ export function NearbyPlacesSection({
   const [activeTab, setActiveTab] = useState("view");
   const [selectedPlaces, setSelectedPlaces] = useState<PropertyNearbyPlace[]>([]);
   const [showResultsModal, setShowResultsModal] = useState(false);
+  const { toast } = useToast();
 
-  // Use our hook if custom props aren't provided
   const {
     fetchPlaces: hookFetchPlaces,
     removePlaceAtIndex: hookRemovePlaceAtIndex,
@@ -46,11 +47,27 @@ export function NearbyPlacesSection({
     searchResults: [],
     isLoading: false 
   };
+  
+  const {
+    results: searchHookResults,
+    isSearching: isSearchHookLoading
+  } = useNearbyPlacesSearch({
+    latitude: formData.latitude, 
+    longitude: formData.longitude
+  });
+  
+  useEffect(() => {
+    if (searchHookResults.length > 0) {
+      setSelectedPlaces([]);
+      setShowResultsModal(true);
+    }
+  }, [searchHookResults]);
 
-  // Use either the provided functions or the hook's functions
   const fetchPlaces = onFetchCategoryPlaces || hookFetchPlaces;
   const removePlaceAtIndex = onRemoveNearbyPlace || hookRemovePlaceAtIndex;
-  const isLoading = isLoadingNearbyPlaces || hookIsLoading;
+  const isLoading = isLoadingNearbyPlaces || hookIsLoading || isSearchHookLoading;
+  
+  const allSearchResults = searchResults.length > 0 ? searchResults : searchHookResults;
 
   const handlePlaceClick = (place: PropertyNearbyPlace) => {
     setSelectedPlaces(prev => {
@@ -63,9 +80,28 @@ export function NearbyPlacesSection({
 
   const handleSaveSelectedPlaces = () => {
     if (saveSelectedPlaces) {
-      saveSelectedPlaces(selectedPlaces);
+      const savedPlaces = saveSelectedPlaces(selectedPlaces);
       setShowResultsModal(false);
       setSelectedPlaces([]);
+      toast({
+        title: "Success",
+        description: `Added ${selectedPlaces.length} places to the property`
+      });
+    } else if (onFieldChange) {
+      const existingPlaces = formData.nearby_places || [];
+      const newPlaces = selectedPlaces.filter(newPlace => 
+        !existingPlaces.some(existingPlace => existingPlace.id === newPlace.id)
+      );
+      const combinedPlaces = [...existingPlaces, ...newPlaces];
+      
+      onFieldChange('nearby_places', combinedPlaces);
+      setShowResultsModal(false);
+      setSelectedPlaces([]);
+      
+      toast({
+        title: "Success",
+        description: `Added ${newPlaces.length} places to the property`
+      });
     }
   };
 
@@ -149,7 +185,6 @@ export function NearbyPlacesSection({
           </TabsContent>
         </Tabs>
 
-        {/* Results Selection Modal */}
         <Dialog open={showResultsModal} onOpenChange={setShowResultsModal}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -158,7 +193,7 @@ export function NearbyPlacesSection({
             
             <ScrollArea className="max-h-[400px] pr-4">
               <div className="space-y-2">
-                {searchResults.map((place) => (
+                {allSearchResults.map((place) => (
                   <div 
                     key={place.id} 
                     className={`p-3 border rounded-md cursor-pointer transition-colors ${
