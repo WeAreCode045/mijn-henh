@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyNearbyPlace } from "@/types/property";
@@ -136,7 +135,7 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: matchedType, // Use the specific matched type
-          types: place.types || [],
+          types: place.types || [],  // This is now valid with our updated interface
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
