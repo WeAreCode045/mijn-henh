@@ -1,7 +1,6 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { usePropertyAutoSave } from "@/hooks/property-autosave";
 
 export function usePropertyFormState(
   formState: PropertyFormData, 

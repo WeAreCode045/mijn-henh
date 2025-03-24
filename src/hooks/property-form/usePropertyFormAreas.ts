@@ -1,6 +1,7 @@
+
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { usePropertyAutoSave } from "@/hooks/property-autosave";
 import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyFormAreas(

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { usePropertyAutoSave } from "@/hooks/property-autosave";
 import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyContentAutoSave(
