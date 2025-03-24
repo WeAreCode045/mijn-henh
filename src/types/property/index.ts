@@ -5,14 +5,18 @@ export type {
   PropertyArea,
   PropertyImage,
   PropertyFloorplan,
-  PropertyNearbyPlace,
   PropertyCity,
-  PropertyPlaceType,
   PropertyFormData,
   PropertySubmitData,
   PropertyAgent,
   Area
 } from './PropertyTypes';
+
+// Re-export types from PropertyPlaceTypes.ts
+export type {
+  PropertyPlaceType,
+  PropertyNearbyPlace
+} from './PropertyPlaceTypes';
 
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export type { PropertyData } from './PropertyDataTypes';

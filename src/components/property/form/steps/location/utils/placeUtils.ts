@@ -1,5 +1,5 @@
 
-import { PropertyNearbyPlace } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 
 /**
  * Groups places by their category for display purposes
