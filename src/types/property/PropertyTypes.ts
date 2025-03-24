@@ -1,3 +1,4 @@
+
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -62,9 +63,9 @@ export interface PropertyNearbyPlace {
   types?: string[];
   visible_in_webview?: boolean;
   distance?: number | string;
-  latitude?: number;
-  longitude?: number;
-  category?: string; // Add category property
+  latitude?: number | null;
+  longitude?: number | null;
+  category?: string; // Explicitly add category property
 }
 
 export interface PropertyCity {
