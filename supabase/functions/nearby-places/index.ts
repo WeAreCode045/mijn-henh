@@ -36,6 +36,16 @@ serve(async (req) => {
       console.log(`API Key received: ${requestData.apiKey.substring(0, 5)}...${requestData.apiKey.substring(requestData.apiKey.length - 5)}`);
     } else {
       console.error("ERROR: No API key provided in request");
+      return new Response(
+        JSON.stringify({ error: 'API key is required' }),
+        { 
+          status: 400,
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     }
     
     const { 
@@ -61,9 +71,23 @@ serve(async (req) => {
     
     if (!lat || !lng) {
       console.log(`Geocoding address: ${address}`);
-      const coordinates = await geocodeAddress(address, apiKey);
-      lat = coordinates.lat;
-      lng = coordinates.lng;
+      try {
+        const coordinates = await geocodeAddress(address, apiKey);
+        lat = coordinates.lat;
+        lng = coordinates.lng;
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        return new Response(
+          JSON.stringify({ error: 'Failed to geocode address' }),
+          { 
+            status: 400,
+            headers: { 
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
     }
 
     console.log(`Using coordinates: ${lat}, ${lng}`);
@@ -90,6 +114,9 @@ serve(async (req) => {
       console.log(`Fetching places for category ${categoryKey}`);
       
       try {
+        const apiURL = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${categoryKey}&key=${apiKey}`;
+        console.log(`API Request URL (partially redacted): https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${categoryKey}&key=API_KEY_REDACTED`);
+        
         const places = await fetchPlacesFromAPI(categoryKey, lat, lng, apiKey, radius);
         console.log(`Retrieved ${places.length} places for category ${categoryKey}`);
         results[categoryKey] = places;

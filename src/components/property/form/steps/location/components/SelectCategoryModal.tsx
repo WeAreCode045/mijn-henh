@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface SelectCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (category: string) => void;
+  onSelect: (category: string) => Promise<any>;
   isLoading?: boolean;
 }
 
@@ -17,6 +16,9 @@ export function SelectCategoryModal({
   onSelect, 
   isLoading = false 
 }: SelectCategoryModalProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const categories = [
     { id: "restaurant", name: "Restaurants", icon: "🍽️" },
     { id: "cafe", name: "Cafes", icon: "☕" },
@@ -35,14 +37,40 @@ export function SelectCategoryModal({
     { id: "airport", name: "Airports", icon: "✈️" }
   ];
 
-  const handleSelectCategory = (category: string) => {
-    if (!isLoading) {
-      onSelect(category);
+  const handleSelectCategory = async (category: string) => {
+    if (isLoading || isProcessing) return;
+    
+    setSelectedCategory(category);
+    setIsProcessing(true);
+    
+    try {
+      console.log(`Starting API request for category: ${category}`);
+      const result = await onSelect(category);
+      console.log(`API request completed for ${category}:`, result);
+      
+      // Only close the modal if we got results or if explicitly handling empty results
+      if (result && (Object.keys(result).length > 0 || result[category]?.length > 0)) {
+        onClose();
+      } else {
+        console.log(`No results found for category: ${category}`);
+        // Keep modal open if no results
+        setIsProcessing(false);
+      }
+    } catch (error) {
+      console.error(`Error fetching places for category ${category}:`, error);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDialogChange = (open: boolean) => {
+    // Only allow closing if not processing a request
+    if (!open && !isProcessing) {
+      onClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Select a Category</DialogTitle>
@@ -53,9 +81,10 @@ export function SelectCategoryModal({
             Choose a category to find places near this property
           </p>
           
-          {isLoading ? (
+          {isLoading || isProcessing ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              {selectedCategory && <p className="ml-2">Loading {selectedCategory} places...</p>}
             </div>
           ) : (
             <ScrollArea className="h-[300px] pr-4">

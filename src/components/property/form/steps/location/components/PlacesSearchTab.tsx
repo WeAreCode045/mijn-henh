@@ -4,6 +4,7 @@ import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { SelectCategoryModal } from "./SelectCategoryModal";
 import { useCategories } from "../hooks/useCategories";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PlacesSearchTabProps {
   formData: PropertyFormData;
@@ -22,10 +23,16 @@ export function PlacesSearchTab({
 }: PlacesSearchTabProps) {
   const [showModal, setShowModal] = useState(false);
   const { categories } = useCategories();
+  const { toast } = useToast();
 
   const handleOpenModal = () => {
     if (!formData.latitude || !formData.longitude) {
       console.error("Cannot open modal: missing coordinates");
+      toast({
+        title: "Error",
+        description: "Property coordinates are required to search for places",
+        variant: "destructive"
+      });
       return;
     }
     setShowModal(true);
@@ -34,21 +41,50 @@ export function PlacesSearchTab({
   const handleCategorySelect = async (category: string) => {
     console.log("Selected category:", category);
     
-    if (onSearchClick) {
-      console.log("Using provided search handler for category:", category);
-      // Use the parent component's click handler
-      const dummyEvent = { preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent<HTMLButtonElement>;
-      await onSearchClick(dummyEvent, category);
-    } else if (onFetchPlaces) {
-      console.log("Using provided fetch handler for category:", category);
-      // Use the provided fetch handler directly
-      await onFetchPlaces(category);
-    } else {
-      console.error("No fetch handler provided for category:", category);
+    try {
+      let result = null;
+      
+      if (onSearchClick) {
+        console.log("Using provided search handler for category:", category);
+        // Use the parent component's click handler
+        const dummyEvent = { preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent<HTMLButtonElement>;
+        result = await onSearchClick(dummyEvent, category);
+        console.log("Search handler returned result:", result);
+      } else if (onFetchPlaces) {
+        console.log("Using provided fetch handler for category:", category);
+        // Use the provided fetch handler directly
+        result = await onFetchPlaces(category);
+        console.log("Fetch handler returned result:", result);
+      } else {
+        console.error("No fetch handler provided for category:", category);
+        toast({
+          title: "Error",
+          description: "No handler available to fetch places",
+          variant: "destructive"
+        });
+        return null;
+      }
+      
+      if (!result || (result[category] && result[category].length === 0)) {
+        console.log(`No places found for category: ${category}`);
+        toast({
+          title: "No places found",
+          description: `No ${category.replace('_', ' ')} places found near this location.`,
+          variant: "destructive"
+        });
+        return null;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("Error fetching places:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby places",
+        variant: "destructive"
+      });
+      return null;
     }
-    
-    // Close the modal regardless of the result
-    setShowModal(false);
   };
 
   const hasCoordinates = !!(formData.latitude && formData.longitude);

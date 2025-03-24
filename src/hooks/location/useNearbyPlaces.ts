@@ -41,6 +41,17 @@ export function useNearbyPlaces(
       const apiKey = settingsData?.google_maps_api_key;
       console.log("Using API key from settings:", apiKey ? "API key found" : "No API key found");
       
+      if (!apiKey) {
+        console.error("No Google Maps API key found in settings");
+        toast({
+          title: "Missing API Key",
+          description: "Please set a Google Maps API key in your agency settings",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return null;
+      }
+      
       // Call the nearby-places edge function
       console.log("Calling Supabase Edge Function: nearby-places with payload:", {
         category,
@@ -76,6 +87,7 @@ export function useNearbyPlaces(
           description: `No ${category} places found near this location.`,
           variant: "default"
         });
+        setIsLoading(false);
         return null;
       }
       
@@ -85,6 +97,16 @@ export function useNearbyPlaces(
         const newPlaces = data[category] as PropertyNearbyPlace[];
         
         console.log(`Found ${newPlaces.length} places for category ${category}`);
+        
+        if (newPlaces.length === 0) {
+          toast({
+            title: "No places found",
+            description: `No ${category} places found near this location.`,
+            variant: "default"
+          });
+          setIsLoading(false);
+          return null;
+        }
         
         // Combine existing and new places, avoiding duplicates by ID
         const combinedPlaces = [
