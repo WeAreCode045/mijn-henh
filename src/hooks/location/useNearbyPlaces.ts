@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -142,7 +143,7 @@ export function useNearbyPlaces(
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: categoryName,
-          propertyTypes: place.types || [], // Use propertyTypes for the renamed property
+          propertyTypes: place.types || [], // Store all types
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
@@ -240,7 +241,7 @@ export function useNearbyPlaces(
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: matchedType, // Use the specific matched type
-          propertyTypes: place.types || [], // Use propertyTypes for the renamed property
+          propertyTypes: place.types || [], // Store all types
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,

@@ -65,7 +65,7 @@ export interface PropertyNearbyPlace {
   distance?: number | string;
   latitude?: number;
   longitude?: number;
-  category?: string; // Category field to match PropertyPlaceTypes.ts
+  category?: string; // Added category field to match PropertyPlaceTypes.ts
 }
 
 export interface PropertyCity {
