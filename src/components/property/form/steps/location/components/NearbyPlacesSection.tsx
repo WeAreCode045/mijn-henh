@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +31,6 @@ export function NearbyPlacesSection({
   const [selectedPlaces, setSelectedPlaces] = useState<PropertyNearbyPlace[]>([]);
   const [showResultsModal, setShowResultsModal] = useState(false);
 
-  // Use our hook if custom props aren't provided
   const {
     fetchPlaces: hookFetchPlaces,
     removePlaceAtIndex: hookRemovePlaceAtIndex,
@@ -47,7 +45,6 @@ export function NearbyPlacesSection({
     isLoading: false 
   };
 
-  // Use either the provided functions or the hook's functions
   const fetchPlaces = onFetchCategoryPlaces || hookFetchPlaces;
   const removePlaceAtIndex = onRemoveNearbyPlace || hookRemovePlaceAtIndex;
   const isLoading = isLoadingNearbyPlaces || hookIsLoading;
@@ -68,6 +65,19 @@ export function NearbyPlacesSection({
       setSelectedPlaces([]);
     }
   };
+
+  const handleSearchResults = useCallback((places: PropertyNearbyPlace[]) => {
+    if (places && places.length > 0) {
+      setSelectedPlaces([]);
+      setShowResultsModal(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchResults && searchResults.length > 0) {
+      handleSearchResults(searchResults);
+    }
+  }, [searchResults, handleSearchResults]);
 
   return (
     <Card>
@@ -149,7 +159,6 @@ export function NearbyPlacesSection({
           </TabsContent>
         </Tabs>
 
-        {/* Results Selection Modal */}
         <Dialog open={showResultsModal} onOpenChange={setShowResultsModal}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>

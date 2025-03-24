@@ -6,6 +6,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { SelectCategoryModal } from "./SelectCategoryModal";
 import { Loader2 } from "lucide-react";
 
+// Category definitions with their included types
+const categoryConfig = {
+  "Food & Drinks": ["restaurant", "bar", "cafe"],
+  "Nightlife & Entertainment": ["casino", "concert_hall", "event_venue", "night_club", "movie_theater"],
+  "Education": ["school", "university", "library", "preschool", "primary_school", "secondary_school"],
+  "Sports": ["gym", "arena", "fitness_center", "golf_course", "ski_resort", "sports_club", "sports_complex", "stadium", "swimming_pool"],
+  "Shopping": ["supermarket", "shopping_mall"]
+};
+
 interface PlacesSearchTabProps {
   formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
@@ -60,12 +69,25 @@ export function PlacesSearchTab({
     setShowModal(true);
   };
 
-  const handleSelectCategory = async (category: string) => {
+  const handleSelectCategory = async (categoryName: string) => {
     if (!onFetchPlaces) return;
-    
+
     try {
       setLocalIsLoading(true);
-      await onFetchPlaces(category);
+      console.log(`Fetching places for category: ${categoryName}`);
+      
+      // Get the types for this category
+      const types = categoryConfig[categoryName as keyof typeof categoryConfig];
+      
+      if (!types || types.length === 0) {
+        throw new Error(`No types found for category: ${categoryName}`);
+      }
+      
+      // Use the category name to fetch (the hook will handle parsing the types)
+      await onFetchPlaces(categoryName);
+      
+      // Close the modal after fetch is complete
+      setShowModal(false);
     } catch (error) {
       console.error("Error fetching places:", error);
       toast({

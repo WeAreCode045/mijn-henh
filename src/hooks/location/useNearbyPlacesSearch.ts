@@ -4,6 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { PropertyNearbyPlace } from "@/types/property";
 import { useToast } from "@/components/ui/use-toast";
 
+// Category definitions with their included types
+const categoryConfig = {
+  "Food & Drinks": ["restaurant", "bar", "cafe"],
+  "Nightlife & Entertainment": ["casino", "concert_hall", "event_venue", "night_club", "movie_theater"],
+  "Education": ["school", "university", "library", "preschool", "primary_school", "secondary_school"],
+  "Sports": ["gym", "arena", "fitness_center", "golf_course", "ski_resort", "sports_club", "sports_complex", "stadium", "swimming_pool"],
+  "Shopping": ["supermarket", "shopping_mall"]
+};
+
 interface UseNearbyPlacesSearchProps {
   latitude?: number | null;
   longitude?: number | null;
@@ -14,7 +23,7 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
   const [results, setResults] = useState<PropertyNearbyPlace[]>([]);
   const { toast } = useToast();
 
-  const searchPlaces = useCallback(async (category: string): Promise<PropertyNearbyPlace[]> => {
+  const searchPlaces = useCallback(async (categoryName: string): Promise<PropertyNearbyPlace[]> => {
     if (!latitude || !longitude) {
       toast({
         title: "Error",
@@ -51,10 +60,23 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         return [];
       }
 
-      // Prepare request body for Google Places API
+      // Get the types for this category
+      const types = categoryConfig[categoryName as keyof typeof categoryConfig] || [];
+      
+      if (!types.length) {
+        console.error(`No types found for category: ${categoryName}`);
+        return [];
+      }
+      
+      console.log(`Searching for category ${categoryName} with types:`, types);
+
+      // Search for each type in the category
+      const allResults: PropertyNearbyPlace[] = [];
+      
+      // Make a single request with the first type, but we'll label results with the category name
       const requestBody = {
-        includedTypes: [category],
-        maxResultCount: 10,
+        includedTypes: types,
+        maxResultCount: 20, // More results since we're combining categories
         locationRestriction: {
           circle: {
             center: {
@@ -94,14 +116,14 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         return [];
       }
 
-      // Transform the places data
+      // Transform the places data and add them to our results
       const transformedPlaces: PropertyNearbyPlace[] = data.places.map((place: any) => ({
         id: place.id,
         name: place.displayName?.text || "Unknown Place",
         vicinity: place.formattedAddress || "",
         rating: place.rating || null,
         user_ratings_total: place.userRatingCount || 0,
-        type: category,
+        type: categoryName, // Use the category name for display purposes
         types: place.types || [],
         visible_in_webview: true,
         distance: null,
@@ -109,7 +131,7 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         longitude: place.location?.longitude || null
       }));
 
-      console.log(`Found ${transformedPlaces.length} places for category:`, category);
+      console.log(`Found ${transformedPlaces.length} places for category: ${categoryName}`);
 
       // Update state with results
       setResults(transformedPlaces);
