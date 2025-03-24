@@ -69,15 +69,18 @@ export function useNearbyPlacesSection({
             title: "Success",
             description: `Found ${places.length} nearby places`,
           });
+          
+          return places;
         } else {
           toast({
             title: "Info",
             description: "No nearby places found in this category",
           });
+          return [];
         }
       }
       
-      return result;
+      return null;
     } catch (error) {
       console.error("Error fetching places:", error);
       toast({
@@ -100,9 +103,14 @@ export function useNearbyPlacesSection({
       await onSearchClick(e, category);
     } else if (onFetchCategoryPlaces) {
       // Otherwise use the default fetch logic
-      await fetchPlaces(category);
+      const places = await fetchPlaces(category);
+      
+      // If places were found and the modal isn't already showing, show it
+      if (places && places.length > 0 && !showSelectionModal) {
+        setShowSelectionModal(true);
+      }
     }
-  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick]);
+  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick, showSelectionModal]);
   
   // Function to save selected places to the property
   const handleSavePlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {

@@ -40,8 +40,10 @@ export function LocationStep({
     e.stopPropagation();
     
     if (onFetchCategoryPlaces) {
-      await onFetchCategoryPlaces(category);
+      // Make the actual API call through the passed function
+      return await onFetchCategoryPlaces(category);
     }
+    return null;
   };
 
   return (

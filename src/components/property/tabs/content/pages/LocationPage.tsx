@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { MapSection } from "@/components/property/form/steps/location/MapSection";
 import { NearbyPlacesSection } from "@/components/property/form/steps/location/components/NearbyPlacesSection";
 import { useToast } from "@/components/ui/use-toast";
@@ -97,8 +96,10 @@ export function LocationPage({
     e.stopPropagation();
     
     if (onFetchCategoryPlaces) {
-      await onFetchCategoryPlaces(category);
+      // Make the actual API call and return the results
+      return await onFetchCategoryPlaces(category);
     }
+    return null;
   };
 
   return (
