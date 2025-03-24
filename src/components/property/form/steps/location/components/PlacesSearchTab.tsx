@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
-import { SelectCategoryModal } from "./SelectCategoryModal";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 interface PlacesSearchTabProps {
   formData: PropertyFormData;
@@ -11,6 +12,37 @@ interface PlacesSearchTabProps {
   onFetchPlaces?: (category: string) => Promise<any>;
   isLoading?: boolean;
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
+}
+
+// A simple temporary modal component until we rebuild the feature
+function BasicPlacesModal({
+  isOpen,
+  onClose,
+  isLoading
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  isLoading: boolean;
+}) {
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Places Search</DialogTitle>
+        </DialogHeader>
+        <div className="p-6 flex flex-col items-center">
+          {isLoading ? (
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <p>Loading places...</p>
+            </div>
+          ) : (
+            <p className="text-center">Nearby places functionality is being rebuilt.</p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function PlacesSearchTab({
@@ -59,71 +91,6 @@ export function PlacesSearchTab({
     setShowModal(true);
   };
 
-  const handleCategorySelect = async (category: string) => {
-    console.log("PlacesSearchTab: Selected category:", category);
-    
-    // Validate property ID before proceeding
-    if (!formData.id) {
-      console.error("Cannot fetch places: Missing property ID");
-      toast({
-        title: "Error",
-        description: "Please save the property first before searching for places",
-        variant: "destructive"
-      });
-      return null;
-    }
-    
-    setLocalIsLoading(true);
-    
-    try {
-      let result = null;
-      
-      if (onSearchClick) {
-        console.log("PlacesSearchTab: Using provided search handler for category:", category);
-        // Use the parent component's click handler
-        const dummyEvent = { preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent<HTMLButtonElement>;
-        result = await onSearchClick(dummyEvent, category);
-        console.log("PlacesSearchTab: Search handler returned result:", result);
-      } else if (onFetchPlaces) {
-        console.log("PlacesSearchTab: Using provided fetch handler for category:", category);
-        // Use the provided fetch handler directly
-        result = await onFetchPlaces(category);
-        console.log("PlacesSearchTab: Fetch handler returned result:", result);
-      } else {
-        console.error("PlacesSearchTab: No fetch handler provided for category:", category);
-        toast({
-          title: "Error",
-          description: "No handler available to fetch places",
-          variant: "destructive"
-        });
-        return null;
-      }
-      
-      if (!result || (result[category] && result[category].length === 0)) {
-        console.log(`PlacesSearchTab: No places found for category: ${category}`);
-        toast({
-          title: "No places found",
-          description: `No ${category.replace('_', ' ')} places found near this location.`,
-          variant: "destructive"
-        });
-        return null;
-      }
-      
-      return result;
-    } catch (error) {
-      console.error("PlacesSearchTab: Error fetching places:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch nearby places",
-        variant: "destructive"
-      });
-      return null;
-    } finally {
-      setLocalIsLoading(false);
-      setShowModal(false); // Close modal after selection
-    }
-  };
-
   const hasCoordinates = !!(formData.latitude && formData.longitude);
   const hasPropertyId = !!formData.id;
   const canSearch = hasCoordinates && hasPropertyId;
@@ -156,10 +123,9 @@ export function PlacesSearchTab({
         </p>
       )}
       
-      <SelectCategoryModal
+      <BasicPlacesModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        onSelect={handleCategorySelect}
         isLoading={combinedIsLoading}
       />
     </div>
