@@ -2,7 +2,7 @@
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPreviewSection } from "./location/MapPreviewSection";
-import { NearbyPlacesSection } from "./location/NearbyPlacesSection";
+import { NearbyPlacesSection } from "./location/components/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
 import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
 

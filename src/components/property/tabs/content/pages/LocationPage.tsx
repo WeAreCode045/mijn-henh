@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MapSection } from "@/components/property/form/steps/location/MapSection";
-import { NearbyPlacesSection } from "@/components/property/form/steps/location/NearbyPlacesSection";
+import { NearbyPlacesSection } from "@/components/property/form/steps/location/components/NearbyPlacesSection";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
