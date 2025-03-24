@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
 
@@ -16,7 +16,16 @@ export function useLocationCoordinates(
         description: "Please enter an address first",
         variant: "destructive",
       });
-      return;
+      return null;
+    }
+    
+    if (!formData.id) {
+      toast({
+        title: "Error", 
+        description: "Please save the property first before fetching location data",
+        variant: "destructive",
+      });
+      return null;
     }
     
     setIsLoading(true);
@@ -43,6 +52,11 @@ export function useLocationCoordinates(
           description: "Location coordinates fetched successfully",
         });
         
+        // Also trigger map generation immediately after coordinates are fetched
+        if (data.latitude && data.longitude) {
+          generateMapWithCoordinates(data.latitude, data.longitude);
+        }
+        
         return data;
       }
     } catch (error) {
@@ -56,6 +70,54 @@ export function useLocationCoordinates(
       setIsLoading(false);
     }
   }, [formData.address, formData.id, onFieldChange, toast, setIsLoading]);
+  
+  // New function to generate map with coordinates
+  const generateMapWithCoordinates = async (latitude: number, longitude: number) => {
+    try {
+      const { data: settings } = await supabase
+        .from('agency_settings')
+        .select('google_maps_api_key')
+        .single();
+      
+      if (!settings?.google_maps_api_key) {
+        throw new Error("Google Maps API key not configured");
+      }
+      
+      const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${latitude},${longitude}&key=${settings.google_maps_api_key}`;
+      
+      onFieldChange('map_image', mapImageUrl);
+      
+      if (formData.id) {
+        await supabase
+          .from('properties')
+          .update({ map_image: mapImageUrl })
+          .eq('id', formData.id);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Map image generated automatically",
+      });
+    } catch (error) {
+      console.error("Error generating map image:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate map image",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Automatically fetch coordinates when address changes and has a value
+  useEffect(() => {
+    if (formData.address && formData.id) {
+      const timer = setTimeout(() => {
+        fetchLocationData();
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [formData.address, formData.id]);
   
   return { fetchLocationData };
 }

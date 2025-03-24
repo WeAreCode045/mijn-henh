@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,11 +41,21 @@ export function NearbyPlacesSection({
     if (!onFetchCategoryPlaces) return;
     
     try {
-      const result = await onFetchCategoryPlaces(category);
-      return result;
+      // Prevent default button behavior
+      return await onFetchCategoryPlaces(category);
     } catch (error) {
       console.error("Error fetching places:", error);
       return null;
+    }
+  };
+
+  // Function to handle search button click
+  const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event propagation
+    
+    if (onFetchCategoryPlaces) {
+      await fetchPlaces(category);
     }
   };
 
@@ -81,6 +92,7 @@ export function NearbyPlacesSection({
               onFieldChange={onFieldChange}
               onFetchPlaces={fetchPlaces}
               isLoading={isLoadingNearbyPlaces}
+              onSearchClick={handleSearchClick} // Pass the handler to prevent default
             />
           </TabsContent>
         </Tabs>

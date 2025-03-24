@@ -1,4 +1,3 @@
-
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MapSection } from "@/components/property/form/steps/location/MapSection";
 import { NearbyPlacesSection } from "@/components/property/form/steps/location/NearbyPlacesSection";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LocationPageProps {
   formData: PropertyFormData;
@@ -41,64 +42,115 @@ export function LocationPage({
     }
   };
 
+  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleBlur = async (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (!formData.id) return;
+      
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ location_description: formData.location_description })
+          .eq('id', formData.id);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Saved",
+          description: "Location description updated successfully",
+        });
+        
+        if (setPendingChanges) {
+          setPendingChanges(false);
+        }
+      } catch (error) {
+        console.error("Error saving location description:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save location description",
+          variant: "destructive",
+        });
+      }
+    }, 2000);
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
-      {/* Map Section */}
-      <MapSection 
-        formData={formData}
-        onFieldChange={onFieldChange}
-        onFetchLocationData={onFetchLocationData}
-        onGenerateMap={onGenerateMap}
-        isLoadingLocationData={isLoadingLocationData}
-        isGeneratingMap={isGeneratingMap}
-        setPendingChanges={setPendingChanges}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Location Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-6">
+            <div className="col-span-2 space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="location_description">Location Description</Label>
+                  
+                  {onGenerateLocationDescription && (
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        if (onGenerateLocationDescription) {
+                          onGenerateLocationDescription();
+                        }
+                      }}
+                      disabled={isLoadingLocationData}
+                    >
+                      {isLoadingLocationData ? 'Generating...' : 'Generate Description'}
+                    </Button>
+                  )}
+                </div>
+                
+                <Textarea
+                  id="location_description"
+                  name="location_description"
+                  value={formData.location_description || ''}
+                  onChange={handleLocationDescriptionChange}
+                  onBlur={handleBlur}
+                  placeholder="Describe the location and surrounding area..."
+                  className="min-h-[300px]"
+                />
+              </div>
+            </div>
+            
+            <div className="col-span-1">
+              <MapSection 
+                formData={formData}
+                onFieldChange={onFieldChange}
+                onFetchLocationData={onFetchLocationData}
+                onGenerateMap={onGenerateMap}
+                isLoadingLocationData={isLoadingLocationData}
+                isGeneratingMap={isGeneratingMap}
+                setPendingChanges={setPendingChanges}
+                hideControls={true}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
-      {/* Nearby Places */}
       <NearbyPlacesSection 
         formData={formData}
         onFieldChange={onFieldChange}
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         isLoadingNearbyPlaces={isLoadingLocationData}
       />
-      
-      {/* Location Description */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Location Description</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="location_description">Description</Label>
-              
-              {onGenerateLocationDescription && (
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    if (onGenerateLocationDescription) {
-                      onGenerateLocationDescription();
-                    }
-                  }}
-                  disabled={isLoadingLocationData}
-                >
-                  {isLoadingLocationData ? 'Generating...' : 'Generate Description'}
-                </Button>
-              )}
-            </div>
-            
-            <Textarea
-              id="location_description"
-              value={formData.location_description || ''}
-              onChange={handleLocationDescriptionChange}
-              placeholder="Describe the location and surrounding area..."
-              className="min-h-[150px]"
-            />
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
