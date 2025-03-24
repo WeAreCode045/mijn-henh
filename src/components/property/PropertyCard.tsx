@@ -120,6 +120,11 @@ export const PropertyCard = ({
             alt={property.title}
             className="w-full h-48 object-cover rounded-lg"
           />
+          {agentName && (
+              <Badge variant="outline" className="absolute top-2 right-5 ml-2 text-xs bg-white">
+                {agentName}
+              </Badge>
+          )}
           {webViewUrl && (
             <PropertyQROverlay
               webViewUrl={webViewUrl}
@@ -131,17 +136,13 @@ export const PropertyCard = ({
         </div>
 
         <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <h3 className="text-lg font-medium mb-1 line-clamp-2">{property.title}</h3>
-            {agentName && (
-              <Badge variant="outline" className="ml-2 text-xs">
-                {agentName}
-              </Badge>
-            )}
+          <div className="flex justify-stretch items-start">
+            <h3 className="text-sm/4 font-bold mb-1 line-clamp-2">{property.title}</h3>
           </div>
-          
-          <p className="text-lg font-medium">{property.price}</p>
-          
+          <div className="flex justify-start items-start gap-y-5">
+
+          <p className="text-sm font-bold">€{property.price},-</p>
+            </div>
           <div className="mt-3">
             <PropertyCardActions 
               property={property}

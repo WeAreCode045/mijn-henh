@@ -66,7 +66,7 @@ export default function Properties() {
     <div className="min-h-screen bg-estate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1600px] mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
-          <h1 className="text-4xl font-bold text-estate-800">Woning Brochures</h1>
+          <h1 className="text-4xl font-bold text-estate-800">Property Overview</h1>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             {isAdmin && (
               <div className="w-full sm:w-56">
@@ -90,7 +90,7 @@ export default function Properties() {
             )}
             <Button onClick={handleCreateNewProperty} className="w-full sm:w-auto">
               <PlusCircle className="w-4 h-4 mr-2" />
-              Nieuwe Brochure
+              Add New Property
             </Button>
           </div>
         </div>

@@ -82,8 +82,7 @@ export function ContentRouter({
   };
 
   const renderContent = () => {
-    console.log("Rendering content for step:", currentStep, "and slug:", stepSlug);
-    
+
     switch (currentStep) {
       case 0:
         return (

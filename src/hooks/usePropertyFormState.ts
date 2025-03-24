@@ -15,8 +15,6 @@ export function usePropertyFormState(
     field: K, 
     value: PropertyFormData[K]
   ) => {
-    console.log(`Field changed: ${String(field)} = `, value);
-    
     // Update local state immediately
     setFormState(prevState => ({
       ...prevState,
