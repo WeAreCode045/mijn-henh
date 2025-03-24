@@ -120,7 +120,7 @@ function CategoryCard({
             disabled={isLoading || disabled}
             onClick={onSearch}
             className="ml-auto"
-            type="button"
+            type="button" // Explicitly set as button type to avoid form submission
           >
             {isLoading ? (
               <>

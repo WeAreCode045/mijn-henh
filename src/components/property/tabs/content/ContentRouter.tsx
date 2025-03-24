@@ -223,13 +223,15 @@ export function ContentRouter({
         contentStepSlugs={contentStepSlugs}
         propertyId={id}
       />
-      <form onSubmit={handleFormSubmit}>
+      
+      {/* Changed from form to div to avoid nested form elements */}
+      <div className="space-y-6" onSubmit={handleFormSubmit}>
         <Card>
           <CardContent className="pt-6">
             {renderContent()}
           </CardContent>
         </Card>
-      </form>
+      </div>
     </div>
   );
 }
