@@ -68,7 +68,7 @@ export const PropertyCard = ({
     const { data } = await supabase
       .from('property_contact_submissions')
       .select('*')
-      .eq('property_id', property.id)
+      .eq(property.id)
       .order('created_at', { ascending: false });
 
     if (data) {
