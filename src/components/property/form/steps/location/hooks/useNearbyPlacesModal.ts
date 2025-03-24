@@ -56,11 +56,12 @@ export function useNearbyPlacesModal({
       // Update form state
       onFieldChange('nearby_places', updatedPlaces);
       
-      // Save to database
+      // Save to database - convert to Json format for Supabase
       console.log("Saving places to database:", updatedPlaces);
+      const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: updatedPlaces })
+        .update({ nearby_places: jsonPlaces })
         .eq('id', formData.id);
           
       if (error) {

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +15,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface PlaceOption extends PropertyNearbyPlace {
   maxSelections?: number;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface SelectPlacesModalProps {
@@ -35,7 +36,6 @@ export function SelectPlacesModal({
 
   console.log("SelectPlacesModal rendered with places:", places.length);
 
-  // Reset selected places when the modal opens or places change
   useEffect(() => {
     if (open) {
       setSelectedPlaces([]);
@@ -54,7 +54,6 @@ export function SelectPlacesModal({
     onSave(selectedPlaces);
   };
 
-  // Helper function to safely format numbers
   const formatNumber = (value: string | number | undefined): string => {
     if (typeof value === 'number') {
       return value.toFixed(1);

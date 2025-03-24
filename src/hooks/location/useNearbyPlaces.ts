@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 // Category definitions with their included types
 const categoryConfig = {
@@ -282,11 +282,12 @@ export function useNearbyPlaces(
       // Update the form data with the combined places including category information
       onFieldChange("nearby_places", combinedPlaces);
       
-      // Save to Supabase
+      // Save to Supabase - convert to Json format
       console.log("Saving places to Supabase:", combinedPlaces);
+      const jsonPlaces = preparePropertiesForJsonField(combinedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: combinedPlaces })
+        .update({ nearby_places: jsonPlaces })
         .eq('id', formData.id);
       
       if (error) {
@@ -320,10 +321,11 @@ export function useNearbyPlaces(
       // Update the form data
       onFieldChange("nearby_places", updatedPlaces);
       
-      // Save to Supabase
+      // Save to Supabase - convert to Json format
+      const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: updatedPlaces })
+        .update({ nearby_places: jsonPlaces })
         .eq('id', formData.id);
       
       if (error) {

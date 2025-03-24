@@ -1,15 +1,18 @@
 
 import React from "react";
 import { PropertyData } from "@/types/property";
-import { WebviewSectionTitle } from "../WebviewSectionTitle";
 import { StarIcon } from "lucide-react";
 import { groupPlacesByCategory } from "../../form/steps/location/utils/placeUtils";
 
+// Import WebviewSectionTitle from the correct path
+import { WebviewSectionTitle } from "../components/WebviewSectionTitle";
+
 interface NeighborhoodSectionProps {
   property: PropertyData;
+  waitForPlaces?: boolean;
 }
 
-export function NeighborhoodSection({ property }: NeighborhoodSectionProps) {
+export function NeighborhoodSection({ property, waitForPlaces }: NeighborhoodSectionProps) {
   if (!property.nearby_places || property.nearby_places.length === 0) {
     return null;
   }

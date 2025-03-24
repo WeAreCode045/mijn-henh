@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { OverviewSection } from "../sections/OverviewSection";
@@ -86,12 +85,11 @@ export function getSections({
     });
   }
   
-  // Add remaining sections
+  // Add remaining sections - fix the NeighborhoodSection props
   sections.push({
     title: "Neighborhood",
     content: <NeighborhoodSection 
       property={property} 
-      settings={settings} 
       waitForPlaces={waitForPlaces} 
     />
   });
