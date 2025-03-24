@@ -140,8 +140,9 @@ export const PropertyCard = ({
             <h3 className="text-sm/4 font-bold mb-1 line-clamp-2">{property.title}</h3>
           </div>
           <div className="flex justify-start items-start gap-y-5">
-            <p className="text-sm font-bold">€{property.price},-</p>
-          </div>
+
+          <p className="text-sm font-bold">€{property.price},-</p>
+            </div>
           <div className="mt-3">
             <PropertyCardActions 
               property={property}

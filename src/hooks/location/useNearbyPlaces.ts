@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -157,9 +156,6 @@ export function useNearbyPlaces(
         // Store the search results
         setSearchResults(transformedPlaces);
         
-        // Save the places to the database automatically
-        await saveSelectedPlaces(transformedPlaces);
-        
         // Return the results in the same format expected by the components
         const result = { [categoryName]: transformedPlaces };
         setIsLoading(false);
@@ -237,9 +233,6 @@ export function useNearbyPlaces(
     
         // Store the search results
         setSearchResults(allResults);
-        
-        // Save the places to the database automatically
-        await saveSelectedPlaces(allResults);
     
         // Group results by type
         const groupedResults = allResults.reduce((acc, place) => {

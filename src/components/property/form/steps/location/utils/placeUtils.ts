@@ -1,33 +1,21 @@
 
-import { PropertyNearbyPlace } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 
 /**
- * Formats a category name for better readability
- */
-export function formatCategoryName(category: string): string {
-  // Convert from API format (e.g. shopping_mall) to display format (e.g. Shopping Mall)
-  return category
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-/**
- * Groups places by their category for display
+ * Groups places by their category for display purposes
  */
 export function groupPlacesByCategory(places: PropertyNearbyPlace[]): Record<string, PropertyNearbyPlace[]> {
-  const grouped: Record<string, PropertyNearbyPlace[]> = {};
-  
-  places.forEach(place => {
-    // Use category as the primary grouping if it exists
-    const displayCategory = place.category || formatCategoryName(place.type);
+  const grouped = places.reduce((acc, place) => {
+    // Use the category if available, otherwise use the type as fallback
+    const category = place.category || place.type || 'Other';
     
-    if (!grouped[displayCategory]) {
-      grouped[displayCategory] = [];
+    if (!acc[category]) {
+      acc[category] = [];
     }
     
-    grouped[displayCategory].push(place);
-  });
+    acc[category].push(place);
+    return acc;
+  }, {} as Record<string, PropertyNearbyPlace[]>);
   
   return grouped;
 }

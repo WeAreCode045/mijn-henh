@@ -1,13 +1,13 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
+import { PropertyPlaceType } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { StarIcon } from "lucide-react";
 import { groupPlacesByCategory } from "./form/steps/location/utils/placeUtils";
 
 interface PropertyNearbyPlacesProps {
-  places: PropertyNearbyPlace[];
+  places: PropertyPlaceType[];
   onPlaceDelete?: (e: React.MouseEvent, id: string) => void;
 }
 
@@ -19,8 +19,8 @@ export function PropertyNearbyPlaces({ places, onPlaceDelete }: PropertyNearbyPl
     return groupPlacesByCategory(places);
   }, [places]);
 
-  // Get all categories from the grouped places and sort them
-  const categories = Object.keys(placesByCategory).sort();
+  // Get all categories from the grouped places
+  const categories = Object.keys(placesByCategory);
 
   return (
     <Card className="overflow-hidden">

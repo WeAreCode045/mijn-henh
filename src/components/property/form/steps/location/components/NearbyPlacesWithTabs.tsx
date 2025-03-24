@@ -36,16 +36,6 @@ export function NearbyPlacesWithTabs({
   isFetchingCategory,
   currentCategory
 }: NearbyPlacesWithTabsProps) {
-  // Get unique raw categories from places for tab creation
-  const uniqueRawCategories = Object.keys(
-    nearbyPlaces.reduce((acc, place) => {
-      if (place.category) {
-        acc[place.category] = true;
-      }
-      return acc;
-    }, {} as Record<string, boolean>)
-  ).sort();
-  
   return (
     <div className="space-y-4">
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
@@ -61,18 +51,6 @@ export function NearbyPlacesWithTabs({
               </TabsTrigger>
             );
           })}
-          
-          {/* Add tabs for raw categories that aren't in our predefined list */}
-          {uniqueRawCategories
-            .filter(cat => !categories.some(c => c.id === cat))
-            .map(extraCategory => {
-              const count = nearbyPlaces.filter(p => p.category === extraCategory).length;
-              return (
-                <TabsTrigger key={extraCategory} value={extraCategory}>
-                  {extraCategory} ({count})
-                </TabsTrigger>
-              );
-            })}
         </TabsList>
         
         <div className="mt-4">
@@ -121,27 +99,6 @@ export function NearbyPlacesWithTabs({
             />
           </TabsContent>
         ))}
-        
-        {/* Add content for raw categories that aren't in our predefined list */}
-        {uniqueRawCategories
-          .filter(cat => !categories.some(c => c.id === cat))
-          .map(extraCategory => {
-            const placesInCategory = nearbyPlaces.filter(p => p.category === extraCategory);
-            return (
-              <TabsContent key={extraCategory} value={extraCategory} className="space-y-4">
-                <NearbyPlacesTabContent
-                  tabId={extraCategory}
-                  category={extraCategory}
-                  places={placesInCategory}
-                  onRemovePlace={onRemovePlace}
-                  toggleVisibility={togglePlaceVisibility}
-                  toggleSelection={togglePlaceSelection}
-                  selectedIndices={selectedPlacesToDelete}
-                  selectionMode={selectedPlacesToDelete.length > 0}
-                />
-              </TabsContent>
-            );
-          })}
       </Tabs>
     </div>
   );
