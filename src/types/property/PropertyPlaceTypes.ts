@@ -1,4 +1,3 @@
-
 export type PropertyPlaceType = 'restaurant' | 'school' | 'park' | 'shop' | 'hospital' | 'transit' | 'other';
 
 export interface PropertyNearbyPlace {
