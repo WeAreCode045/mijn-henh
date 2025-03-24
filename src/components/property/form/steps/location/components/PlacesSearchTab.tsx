@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SelectCategoryModal } from "./SelectCategoryModal";
 import { Loader2 } from "lucide-react";
 
 interface PlacesSearchTabProps {
@@ -12,37 +12,6 @@ interface PlacesSearchTabProps {
   onFetchPlaces?: (category: string) => Promise<any>;
   isLoading?: boolean;
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
-}
-
-// A simple temporary modal component until we rebuild the feature
-function BasicPlacesModal({
-  isOpen,
-  onClose,
-  isLoading
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  isLoading: boolean;
-}) {
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Places Search</DialogTitle>
-        </DialogHeader>
-        <div className="p-6 flex flex-col items-center">
-          {isLoading ? (
-            <div className="flex items-center space-x-2">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <p>Loading places...</p>
-            </div>
-          ) : (
-            <p className="text-center">Nearby places functionality is being rebuilt.</p>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 export function PlacesSearchTab({
@@ -91,6 +60,25 @@ export function PlacesSearchTab({
     setShowModal(true);
   };
 
+  const handleSelectCategory = async (category: string) => {
+    if (!onFetchPlaces) return;
+    
+    try {
+      setLocalIsLoading(true);
+      await onFetchPlaces(category);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error fetching places:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby places",
+        variant: "destructive"
+      });
+    } finally {
+      setLocalIsLoading(false);
+    }
+  };
+
   const hasCoordinates = !!(formData.latitude && formData.longitude);
   const hasPropertyId = !!formData.id;
   const canSearch = hasCoordinates && hasPropertyId;
@@ -107,7 +95,14 @@ export function PlacesSearchTab({
           onClick={handleOpenModal}
           disabled={combinedIsLoading || !canSearch}
         >
-          {combinedIsLoading ? "Loading..." : "Find Places"}
+          {combinedIsLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading...
+            </>
+          ) : (
+            "Find Places"
+          )}
         </Button>
       </div>
       
@@ -123,9 +118,10 @@ export function PlacesSearchTab({
         </p>
       )}
       
-      <BasicPlacesModal
+      <SelectCategoryModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
+        onSelect={handleSelectCategory}
         isLoading={combinedIsLoading}
       />
     </div>

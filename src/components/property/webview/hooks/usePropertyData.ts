@@ -88,6 +88,7 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
             objectId: data?.object_id,
             hasFloorplanScript: !!data?.floorplanEmbedScript,
             scriptLength: data?.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
+            scriptType: typeof data.floorplanEmbedScript,
             imageCount: data?.property_images?.length || 0
           });
 

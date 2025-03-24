@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { PropertyBreadcrumb } from "./PropertyBreadcrumb";
