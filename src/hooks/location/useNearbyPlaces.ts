@@ -1,6 +1,3 @@
-
-// Only updating the parts that need to change - the transformedPlace creation in both places
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -138,7 +135,7 @@ export function useNearbyPlaces(
         }
         
         // Transform the response to match our expected format with category information
-        const transformedPlaces = placesData.places.map((place: any) => ({
+        const transformedPlace: PropertyNearbyPlace = {
           id: place.id,
           name: place.displayName?.text || place.name || "Unknown place",
           vicinity: place.formattedAddress || "",
@@ -151,7 +148,7 @@ export function useNearbyPlaces(
           latitude: place.location?.latitude || null,
           longitude: place.location?.longitude || null,
           category: 'Other' // Default category when searching by specific type
-        }));
+        };
         
         console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for single type ${categoryName}`);
         

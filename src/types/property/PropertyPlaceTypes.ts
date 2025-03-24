@@ -1,5 +1,4 @@
 
-
 export type PropertyPlaceType = 'restaurant' | 'school' | 'park' | 'shop' | 'hospital' | 'transit' | 'other';
 
 export interface PropertyNearbyPlace {
@@ -16,4 +15,3 @@ export interface PropertyNearbyPlace {
   longitude?: number;
   category?: string; // Category field to track which category a place belongs to
 }
-
