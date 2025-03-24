@@ -7,14 +7,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface SelectCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectCategory: (category: string) => void;
+  onSelect: (category: string) => void;
   isLoading?: boolean;
 }
 
 export function SelectCategoryModal({ 
   isOpen, 
   onClose, 
-  onSelectCategory, 
+  onSelect, 
   isLoading = false 
 }: SelectCategoryModalProps) {
   const categories = [
@@ -37,7 +37,7 @@ export function SelectCategoryModal({
 
   const handleSelectCategory = (category: string) => {
     if (!isLoading) {
-      onSelectCategory(category);
+      onSelect(category);
     }
   };
 

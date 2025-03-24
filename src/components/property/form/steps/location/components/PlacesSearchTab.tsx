@@ -22,13 +22,14 @@ export function PlacesSearchTab({
   isLoading = false,
   onSearchClick
 }: PlacesSearchTabProps) {
-  const { getCategories } = useCategories();
+  const categoriesData = useCategories();
   const [selectCategoryOpen, setSelectCategoryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const categories = getCategories();
+  // Now correctly accessing the categories property from the hook's return value
+  const categories = categoriesData.categories;
   
   const handleCategorySelect = async (category: string) => {
     console.log("Selected category:", category);
@@ -117,7 +118,6 @@ export function PlacesSearchTab({
       <SelectCategoryModal
         isOpen={selectCategoryOpen}
         onClose={() => setSelectCategoryOpen(false)}
-        categories={categories}
         onSelect={handleCategorySelect}
       />
     </div>
