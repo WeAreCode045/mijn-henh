@@ -9,10 +9,16 @@ import { groupPlacesByCategory } from "../utils/placeUtils";
 interface PlacesViewTabProps {
   places: PropertyNearbyPlace[];
   onRemove?: (index: number) => void;
+  onToggleVisibility?: (index: number, visible: boolean) => void;
   isDisabled?: boolean;
 }
 
-export function PlacesViewTab({ places, onRemove, isDisabled }: PlacesViewTabProps) {
+export function PlacesViewTab({ 
+  places, 
+  onRemove, 
+  onToggleVisibility,
+  isDisabled 
+}: PlacesViewTabProps) {
   // Group the places by category
   const placesByCategory = React.useMemo(() => {
     return groupPlacesByCategory(places);
@@ -32,14 +38,18 @@ export function PlacesViewTab({ places, onRemove, isDisabled }: PlacesViewTabPro
     );
   }
 
+  // Sort categories alphabetically
+  const sortedCategories = [...categories].sort();
+
   return (
     <div className="space-y-6">
-      {categories.map((category) => (
+      {sortedCategories.map((category) => (
         <div key={category} className="space-y-2">
           <h3 className="text-lg font-semibold">{category}</h3>
           <PlacesList
             places={placesByCategory[category]}
             onRemove={onRemove}
+            onToggleVisibility={onToggleVisibility}
             isDisabled={isDisabled}
           />
         </div>

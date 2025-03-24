@@ -31,8 +31,8 @@ export function NeighborhoodSection({ property, waitForPlaces }: NeighborhoodSec
     return groupPlacesByCategory(visiblePlaces);
   }, [visiblePlaces]);
 
-  // Get all categories from the grouped places
-  const categories = Object.keys(placesByCategory);
+  // Get all categories from the grouped places and sort them
+  const categories = Object.keys(placesByCategory).sort();
 
   return (
     <div className="py-8 border-b border-estate-100">
