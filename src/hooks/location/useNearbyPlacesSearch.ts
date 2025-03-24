@@ -135,7 +135,7 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: matchedType, // Use the specific matched type
-          propertyTypes: place.types || [],  // Renamed from 'types' to 'propertyTypes'
+          propertyTypes: place.types || [],  // Use propertyTypes for the renamed property
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,

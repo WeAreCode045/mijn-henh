@@ -135,20 +135,20 @@ export function useNearbyPlaces(
         }
         
         // Transform the response to match our expected format with category information
-        const transformedPlace: PropertyNearbyPlace = {
+        const transformedPlaces = placesData.places.map((place: any) => ({
           id: place.id,
           name: place.displayName?.text || place.name || "Unknown place",
           vicinity: place.formattedAddress || "",
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: categoryName,
-          propertyTypes: place.types || [], // Renamed from 'types' to 'propertyTypes'
+          propertyTypes: place.types || [], // Use propertyTypes for the renamed property
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
           longitude: place.location?.longitude || null,
           category: 'Other' // Default category when searching by specific type
-        };
+        }));
         
         console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for single type ${categoryName}`);
         
@@ -240,7 +240,7 @@ export function useNearbyPlaces(
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: matchedType, // Use the specific matched type
-          propertyTypes: place.types || [], // Renamed from 'types' to 'propertyTypes'
+          propertyTypes: place.types || [], // Use propertyTypes for the renamed property
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
