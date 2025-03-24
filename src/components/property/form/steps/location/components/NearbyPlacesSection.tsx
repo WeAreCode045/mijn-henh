@@ -14,7 +14,7 @@ export interface NearbyPlacesSectionProps {
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   isLoadingNearbyPlaces?: boolean;
   onRemoveNearbyPlace?: (index: number) => void;
-  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => void;
+  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }
 
 export function NearbyPlacesSection({
@@ -42,6 +42,14 @@ export function NearbyPlacesSection({
     onFetchCategoryPlaces,
     onRemoveNearbyPlace,
     onSearchClick
+  });
+
+  console.log("NearbyPlacesSection props:", { 
+    hasSearchClick: !!onSearchClick, 
+    hasFormData: !!formData, 
+    hasFetchCategoryPlaces: !!onFetchCategoryPlaces,
+    searchResultsCount: searchResults.length,
+    showModal: showSelectionModal
   });
 
   return (
@@ -77,7 +85,7 @@ export function NearbyPlacesSection({
         </Tabs>
         
         {/* Modal for selecting places */}
-        {showSelectionModal && (
+        {showSelectionModal && searchResults.length > 0 && (
           <SelectPlacesModal
             open={showSelectionModal}
             onClose={() => {

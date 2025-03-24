@@ -18,7 +18,7 @@ interface PlacesSearchTabProps {
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchPlaces: (category: string) => Promise<any>;
   isLoading: boolean;
-  onSearchClick: (e: React.MouseEvent<HTMLButtonElement>, category: string) => void;
+  onSearchClick: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }
 
 export function PlacesSearchTab({

@@ -40,6 +40,7 @@ export function LocationStep({
     e.stopPropagation();
     
     if (onFetchCategoryPlaces) {
+      console.log(`LocationStep: Handling search for category ${category}`);
       // Make the actual API call through the passed function
       return await onFetchCategoryPlaces(category);
     }

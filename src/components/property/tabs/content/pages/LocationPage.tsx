@@ -96,6 +96,7 @@ export function LocationPage({
     e.stopPropagation();
     
     if (onFetchCategoryPlaces) {
+      console.log(`LocationPage: Handling search for category ${category}`);
       // Make the actual API call and return the results
       return await onFetchCategoryPlaces(category);
     }

@@ -13,7 +13,7 @@ export function useNearbyPlacesSection({
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onRemoveNearbyPlace?: (index: number) => void;
-  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => void;
+  onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }) {
   const [activeTab, setActiveTab] = useState("view");
   const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
@@ -38,7 +38,7 @@ export function useNearbyPlacesSection({
   }, [formData.nearby_places, onFieldChange, onRemoveNearbyPlace, toast]);
   
   const fetchPlaces = useCallback(async (category: string) => {
-    if (!onFetchCategoryPlaces) return;
+    if (!onFetchCategoryPlaces) return null;
     
     try {
       console.log("Fetching places for category:", category);
@@ -98,19 +98,39 @@ export function useNearbyPlacesSection({
     e.preventDefault();
     e.stopPropagation();
     
+    let results = null;
+    
     if (onSearchClick) {
       // Use the parent component's search handler if provided
-      await onSearchClick(e, category);
+      results = await onSearchClick(e, category);
     } else if (onFetchCategoryPlaces) {
       // Otherwise use the default fetch logic
-      const places = await fetchPlaces(category);
+      results = await fetchPlaces(category);
+    }
+    
+    // Process the results
+    if (results) {
+      console.log("Processing search results:", results);
+      let places: PropertyNearbyPlace[] = [];
       
-      // If places were found and the modal isn't already showing, show it
-      if (places && places.length > 0 && !showSelectionModal) {
+      // Handle different result formats
+      if (typeof results === 'object' && !Array.isArray(results)) {
+        Object.values(results).forEach(categoryPlaces => {
+          if (Array.isArray(categoryPlaces)) {
+            places = [...places, ...categoryPlaces as PropertyNearbyPlace[]];
+          }
+        });
+      } else if (Array.isArray(results)) {
+        places = results;
+      }
+      
+      if (places.length > 0) {
+        console.log(`Found ${places.length} places to display`);
+        setSearchResults(places);
         setShowSelectionModal(true);
       }
     }
-  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick, showSelectionModal]);
+  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick]);
   
   // Function to save selected places to the property
   const handleSavePlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {
