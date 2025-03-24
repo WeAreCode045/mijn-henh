@@ -1,10 +1,8 @@
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 
-// Category definitions with their included types
 const categoryConfig = {
   "Food & Drinks": ["restaurant", "bar", "cafe"],
   "Nightlife & Entertainment": ["casino", "concert_hall", "event_venue", "night_club", "movie_theater"],
@@ -22,7 +20,6 @@ export function useNearbyPlaces(
   const { toast } = useToast();
 
   const fetchPlaces = useCallback(async (categoryName: string): Promise<any> => {
-    // Validate required parameters
     if (!formData.latitude || !formData.longitude) {
       toast({
         title: "Error",
@@ -32,7 +29,6 @@ export function useNearbyPlaces(
       return null;
     }
     
-    // Validate property ID
     if (!formData.id) {
       toast({
         title: "Error",
@@ -49,7 +45,6 @@ export function useNearbyPlaces(
     setIsLoading(true);
     
     try {
-      // Get Google Maps API key from settings first
       const { data: settingsData, error: settingsError } = await supabase
         .from('agency_settings')
         .select('google_maps_api_key')
@@ -74,15 +69,12 @@ export function useNearbyPlaces(
         return null;
       }
       
-      // Get the types for this category from our config
       const types = categoryConfig[categoryName as keyof typeof categoryConfig];
       
       if (!types || types.length === 0) {
         console.log(`useNearbyPlaces: No types found for category ${categoryName}, using it as a direct type`);
-        // If it's not a predefined category, use it as a single type
         const includedTypes = [categoryName];
         
-        // Prepare the request body with the exact structure specified
         const requestBody = {
           includedTypes: includedTypes,
           maxResultCount: 10,
@@ -99,7 +91,6 @@ export function useNearbyPlaces(
         
         console.log("useNearbyPlaces: Places API request body:", JSON.stringify(requestBody));
         
-        // Make direct API call to Google Places API v2
         const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
         
         console.log("useNearbyPlaces: Calling Google Places API for direct type");
@@ -135,7 +126,6 @@ export function useNearbyPlaces(
           return null;
         }
         
-        // Transform the response to match our expected format with category information
         const transformedPlaces = placesData.places.map((place: any) => ({
           id: place.id,
           name: place.displayName?.text || place.name || "Unknown place",
@@ -143,36 +133,31 @@ export function useNearbyPlaces(
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
           type: categoryName,
-          propertyTypes: place.types || [], // Store all types
+          propertyTypes: place.types || [],
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
           longitude: place.location?.longitude || null,
-          category: 'Other' // Default category when searching by specific type
+          category: 'Other'
         }));
         
         console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for single type ${categoryName}`);
         
-        // Store the search results
         setSearchResults(transformedPlaces);
         
-        // Return the results in the same format expected by the components
         const result = { [categoryName]: transformedPlaces };
         setIsLoading(false);
         return result;
       }
       
-      // For a category with multiple types
       console.log(`useNearbyPlaces: Using category ${categoryName} with types:`, types);
       
-      // Prepare to store results grouped by type
       const typeResults: Record<string, PropertyNearbyPlace[]> = {};
       const allResults: PropertyNearbyPlace[] = [];
       
-      // Prepare the request body with the exact structure specified for multiple types
       const requestBody = {
         includedTypes: types,
-        maxResultCount: 30, // Request more for better sorting by type
+        maxResultCount: 30,
         locationRestriction: {
           circle: {
             center: {
@@ -186,7 +171,6 @@ export function useNearbyPlaces(
       
       console.log("useNearbyPlaces: Places API request body for category search:", JSON.stringify(requestBody));
       
-      // Make direct API call to Google Places API
       const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
       
       console.log(`useNearbyPlaces: Calling Google Places API for category ${categoryName}`);
@@ -222,13 +206,11 @@ export function useNearbyPlaces(
         return null;
       }
       
-      // Group places by type
       placesData.places.forEach((place: any) => {
-        // Find the specific type from our requested types that this place matches
         const matchedType = types.find(type => 
           place.types && Array.isArray(place.types) && 
           place.types.includes(type)
-        ) || types[0]; // Default to first type if no match
+        ) || types[0];
         
         if (!typeResults[matchedType]) {
           typeResults[matchedType] = [];
@@ -240,19 +222,18 @@ export function useNearbyPlaces(
           vicinity: place.formattedAddress || "",
           rating: place.rating || null,
           user_ratings_total: place.userRatingCount || 0,
-          type: matchedType, // Use the specific matched type
-          propertyTypes: place.types || [], // Store all types
+          type: matchedType,
+          propertyTypes: place.types || [],
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
           longitude: place.location?.longitude || null,
-          category: categoryName // Store the original category
+          category: categoryName
         };
         
         typeResults[matchedType].push(transformedPlace);
       });
       
-      // Sort each type's results by rating (high to low) and limit to 6 per type
       Object.keys(typeResults).forEach(type => {
         typeResults[type].sort((a, b) => {
           const ratingA = a.rating || 0;
@@ -260,17 +241,14 @@ export function useNearbyPlaces(
           return ratingB - ratingA;
         });
         
-        // Limit to 6 places per type
         const limitedResults = typeResults[type].slice(0, 6);
         allResults.push(...limitedResults);
       });
       
       console.log(`useNearbyPlaces: Found ${allResults.length} places for category ${categoryName}`);
       
-      // Store the search results
       setSearchResults(allResults);
       
-      // Return the results in the format expected by the components
       setIsLoading(false);
       return allResults;
       
@@ -289,16 +267,13 @@ export function useNearbyPlaces(
   const saveSelectedPlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {
     if (!formData.id) return;
     
-    // Filter out duplicates based on place ID
     const existingPlaces = formData.nearby_places || [];
     const newPlaces = selectedPlaces.filter(newPlace => 
       !existingPlaces.some(existingPlace => existingPlace.id === newPlace.id)
     );
     
-    // Combine existing and new places
     const combinedPlaces = [...existingPlaces, ...newPlaces];
     
-    // Update the form data with the combined places
     onFieldChange("nearby_places", combinedPlaces);
     
     toast({

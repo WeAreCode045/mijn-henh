@@ -1,4 +1,3 @@
-
 import { WebViewSectionProps } from "../types";
 import { useRef, useEffect, useState } from "react";
 import { PropertyNearbyPlace } from "@/types/property";
@@ -8,11 +7,9 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
-    // Simplified function to handle map loading
     const initMap = () => {
       if (!mapRef.current) return;
       
-      // Just mark as loaded for now
       setMapLoaded(true);
       
       console.log("Map would be initialized here with coordinates:", property.latitude, property.longitude);
@@ -21,7 +18,6 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
       // but for now we'll just show a placeholder
     };
 
-    // Try to initialize the map (in a real implementation we would check for Google Maps API)
     initMap();
 
     return () => {
@@ -29,15 +25,12 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     };
   }, [property.latitude, property.longitude, waitForPlaces]);
 
-  // Filter places by visibility
   const visiblePlaces = property.nearby_places ? 
     property.nearby_places.filter(place => place.visible_in_webview !== false) : 
     [];
 
-  // Group nearby places first by category then by type
   const groupedPlaces = visiblePlaces.length > 0 ? 
     visiblePlaces.reduce((acc: Record<string, Record<string, any[]>>, place: PropertyNearbyPlace) => {
-      // Use the place's category if available, otherwise determine it from the type
       const category = place.category || 
         (place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
           ? 'Education'
@@ -51,12 +44,10 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
           ? 'Shopping'
           : 'Other');
       
-      // Create category if it doesn't exist
       if (!acc[category]) {
         acc[category] = {};
       }
       
-      // Group by type within category
       const type = place.type || 'other';
       if (!acc[category][type]) {
         acc[category][type] = [];
@@ -67,7 +58,6 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     }, {}) 
     : {};
   
-  // Format transportation type
   const getTransportType = (place: any) => {
     if (place.type?.toLowerCase().includes('train') || place.type?.toLowerCase().includes('rail')) {
       return 'Train';
@@ -78,7 +68,6 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     }
   };
   
-  // Filter cities by visibility
   const visibleCities = property.nearby_cities ? 
     property.nearby_cities.filter(city => city.visible_in_webview !== false) : 
     [];
@@ -95,7 +84,6 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Map placeholder or actual map image */}
           <div className="h-[300px] rounded-lg overflow-hidden">
             {property.map_image ? (
               <img 
@@ -112,7 +100,6 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
             )}
           </div>
           
-          {/* Address and Nearby Places */}
           <div className="space-y-4">
             <div>
               <h4 className="font-semibold mb-2">Address</h4>
