@@ -26,10 +26,9 @@ export function useLocationDataFetch(
     toast
   );
   
-  const { fetchCategoryPlaces, removeNearbyPlace } = useNearbyPlaces(
+  const { fetchPlaces, removePlaceAtIndex, isLoading: isLoadingPlaces } = useNearbyPlaces(
     formData, 
-    onFieldChange, 
-    toast
+    onFieldChange
   );
   
   const { fetchNearbyCities } = useNearbyCities(formData, toast);
@@ -50,12 +49,12 @@ export function useLocationDataFetch(
   
   return {
     fetchLocationData,
-    fetchCategoryPlaces,
+    fetchCategoryPlaces: fetchPlaces,
     fetchNearbyCities,
     generateLocationDescription,
     generateMapImage,
-    removeNearbyPlace,
-    isLoading,
+    removeNearbyPlace: removePlaceAtIndex,
+    isLoading: isLoading || isLoadingPlaces,
     isGeneratingMap
   };
 }

@@ -110,6 +110,7 @@ export function NearbyPlacesSection({
             <PlacesViewTab 
               places={formData.nearby_places || []}
               onRemovePlace={handleRemovePlace}
+              isLoading={isLoadingNearbyPlaces || nearbyPlacesHook.isLoading}
             />
           </TabsContent>
         </Tabs>

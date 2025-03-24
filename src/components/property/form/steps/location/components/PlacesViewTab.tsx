@@ -1,24 +1,24 @@
 
 import React, { useMemo } from "react";
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property";
 import { Loader2 } from "lucide-react";
 
 interface PlacesViewTabProps {
-  formData: PropertyFormData;
-  isLoading: boolean;
+  places: PropertyNearbyPlace[];
+  isLoading?: boolean;
   onRemovePlace: (index: number) => void;
 }
 
 export function PlacesViewTab({ 
-  formData, 
-  isLoading, 
+  places, 
+  isLoading = false, 
   onRemovePlace 
 }: PlacesViewTabProps) {
   // Group places by type for the view tab
   const placesByType = useMemo(() => {
-    if (!formData.nearby_places || formData.nearby_places.length === 0) return {};
+    if (!places || places.length === 0) return {};
     
-    return formData.nearby_places.reduce((acc: Record<string, PropertyNearbyPlace[]>, place) => {
+    return places.reduce((acc: Record<string, PropertyNearbyPlace[]>, place) => {
       const type = place.type || 'other';
       if (!acc[type]) {
         acc[type] = [];
@@ -26,7 +26,7 @@ export function PlacesViewTab({
       acc[type].push(place);
       return acc;
     }, {});
-  }, [formData.nearby_places]);
+  }, [places]);
 
   if (isLoading) {
     return (
@@ -40,12 +40,11 @@ export function PlacesViewTab({
   return (
     <div className="space-y-4">
       {Object.keys(placesByType).length > 0 ? (
-        Object.entries(placesByType).map(([type, places]) => (
+        Object.entries(placesByType).map(([type, typePlaces]) => (
           <PlacesTypeGroup 
             key={type} 
             type={type} 
-            places={places} 
-            formData={formData}
+            places={typePlaces} 
             onRemovePlace={onRemovePlace} 
           />
         ))
@@ -61,20 +60,22 @@ export function PlacesViewTab({
 interface PlacesTypeGroupProps {
   type: string;
   places: PropertyNearbyPlace[];
-  formData: PropertyFormData;
   onRemovePlace: (index: number) => void;
 }
 
-function PlacesTypeGroup({ type, places, formData, onRemovePlace }: PlacesTypeGroupProps) {
+function PlacesTypeGroup({ type, places, onRemovePlace }: PlacesTypeGroupProps) {
   return (
     <div className="border rounded-lg p-4">
       <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {places.map((place, idx) => {
-          // Find the original index in the full array
-          const globalIndex = formData.nearby_places?.findIndex(p => p.id === place.id) ?? -1;
-          return <PlaceCard key={place.id || idx} place={place} index={globalIndex} onRemove={onRemovePlace} />;
-        })}
+        {places.map((place, idx) => (
+          <PlaceCard 
+            key={place.id || idx} 
+            place={place} 
+            index={idx} 
+            onRemove={onRemovePlace} 
+          />
+        ))}
       </div>
     </div>
   );
@@ -87,8 +88,6 @@ interface PlaceCardProps {
 }
 
 function PlaceCard({ place, index, onRemove }: PlaceCardProps) {
-  if (index < 0) return null;
-  
   return (
     <div className="bg-muted p-3 rounded-md relative group">
       <div className="flex justify-between items-start">
@@ -98,7 +97,7 @@ function PlaceCard({ place, index, onRemove }: PlaceCardProps) {
             <p className="text-sm text-muted-foreground">{place.vicinity}</p>
           )}
           {place.rating && (
-            <p className="text-yellow-500 text-sm">★ {place.rating}</p>
+            <p className="text-yellow-500 text-sm">★ {typeof place.rating === 'number' ? place.rating.toFixed(1) : place.rating}</p>
           )}
           {place.distance && (
             <p className="text-sm text-muted-foreground">
