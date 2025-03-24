@@ -66,7 +66,6 @@ export function PlacesSearchTab({
     try {
       setLocalIsLoading(true);
       await onFetchPlaces(category);
-      setShowModal(false);
     } catch (error) {
       console.error("Error fetching places:", error);
       toast({

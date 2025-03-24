@@ -73,8 +73,8 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types,places.location'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types,places.location',
+          'X-Goog-Api-Key': apiKey
         },
         body: JSON.stringify(requestBody)
       });
