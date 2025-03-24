@@ -36,6 +36,12 @@ export function DescriptionSection({ formData, onFieldChange, setPendingChanges 
         .eq('id', formData.id);
         
       if (error) throw error;
+      
+      // Show success notification
+      toast({
+        title: "Saved",
+        description: `${field} updated successfully`,
+      });
     } catch (error) {
       console.error(`Error saving ${field} to database:`, error);
       toast({

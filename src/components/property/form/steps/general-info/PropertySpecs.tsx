@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -46,6 +45,12 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
         .eq('id', formData.id);
         
       if (error) throw error;
+      
+      // Show success notification
+      toast({
+        title: "Saved",
+        description: `${field} updated successfully`,
+      });
     } catch (error) {
       console.error(`Error saving ${field} to database:`, error);
       toast({
@@ -74,15 +79,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
     // Set a new timeout to save after 2 seconds
     saveTimeoutRef.current = setTimeout(async () => {
       await saveToDatabase(field, value);
-      
-      // Only show toast for property type changes and limit success message frequency
-      if (field === 'propertyType' && value !== initialPropertyType) {
-        setInitialPropertyType(value);
-        toast({
-          title: "Success",
-          description: "Property type updated",
-        });
-      }
       
       if (setPendingChanges) {
         setPendingChanges(false);

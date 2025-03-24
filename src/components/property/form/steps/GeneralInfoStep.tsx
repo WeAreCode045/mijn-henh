@@ -1,7 +1,5 @@
 
 import { PropertyFormData } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { PropertySpecs } from "./general-info/PropertySpecs";
 import { DescriptionSection } from "./general-info/DescriptionSection";
 import { ImageSelections } from "./general-info/ImageSelections";
@@ -13,6 +11,7 @@ interface GeneralInfoStepProps {
   handleSetFeaturedImage?: (url: string | null) => void;
   handleToggleFeaturedImage?: (url: string) => void;
   isUploading?: boolean;
+  setPendingChanges?: (pending: boolean) => void;
 }
 
 export function GeneralInfoStep({
@@ -20,10 +19,9 @@ export function GeneralInfoStep({
   onFieldChange,
   handleSetFeaturedImage,
   handleToggleFeaturedImage,
-  isUploading
+  isUploading,
+  setPendingChanges
 }: GeneralInfoStepProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
   const handleFeaturedImageSelect = (url: string | null) => {
     if (handleSetFeaturedImage) {
       handleSetFeaturedImage(url);
@@ -42,12 +40,14 @@ export function GeneralInfoStep({
       <PropertySpecs 
         formData={formData} 
         onFieldChange={onFieldChange}
+        setPendingChanges={setPendingChanges}
       />
       
       {/* Description Section */}
       <DescriptionSection 
         formData={formData}
         onFieldChange={onFieldChange}
+        setPendingChanges={setPendingChanges}
       />
       
       {/* Image Selections - Only display if there are images available */}
