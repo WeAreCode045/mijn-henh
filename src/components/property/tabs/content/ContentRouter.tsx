@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
 import { GeneralPage } from "./pages/GeneralPage";
@@ -8,6 +8,8 @@ import { FeaturesPage } from "./pages/FeaturesPage";
 import { AreasPage } from "./pages/AreasPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ContentRouterProps {
   formData: PropertyFormData;
@@ -49,9 +51,68 @@ export function ContentRouter({
 }: ContentRouterProps) {
   const { id, step: stepSlug } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [hasPendingChanges, setHasPendingChanges] = React.useState(false);
+  const [lastFormState, setLastFormState] = React.useState<PropertyFormData | null>(null);
+
+  // Track form changes
+  useEffect(() => {
+    if (lastFormState && JSON.stringify(lastFormState) !== JSON.stringify(formData)) {
+      setHasPendingChanges(true);
+    }
+    
+    // Update the last form state
+    setLastFormState(formData);
+  }, [formData, lastFormState]);
+
+  // Save changes when navigating away
+  const saveChanges = async () => {
+    if (!hasPendingChanges || !formData.id) return;
+    
+    try {
+      console.log("Saving property changes...");
+      
+      // Only save relevant fields to avoid overwriting data we don't have
+      const updateData = {
+        title: formData.title,
+        price: formData.price,
+        address: formData.address,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        sqft: formData.sqft,
+        livingArea: formData.livingArea,
+        buildYear: formData.buildYear,
+        garages: formData.garages,
+        energyLabel: formData.energyLabel,
+        hasGarden: formData.hasGarden,
+        description: formData.description,
+        shortDescription: formData.shortDescription,
+        propertyType: formData.propertyType
+      };
+
+      const { error } = await supabase
+        .from('properties')
+        .update(updateData)
+        .eq('id', formData.id);
+      
+      if (error) throw error;
+      
+      setHasPendingChanges(false);
+      
+      // Don't show a success toast to avoid too many notifications
+      console.log("Property saved successfully");
+    } catch (error) {
+      console.error("Error saving property:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save property changes",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Sync URL with current step if they don't match
-  React.useEffect(() => {
+  useEffect(() => {
     if (id && stepSlug) {
       const stepIndex = contentStepSlugs.indexOf(stepSlug);
       if (stepIndex !== -1 && stepIndex !== currentStep) {
@@ -61,8 +122,11 @@ export function ContentRouter({
   }, [stepSlug, currentStep, id, handlers]);
 
   // Handle step navigation via URLs
-  const handleStepNavigation = (step: number) => {
-    // First call the original handler to ensure data is saved
+  const handleStepNavigation = async (step: number) => {
+    // Save changes before navigating
+    await saveChanges();
+    
+    // Call the original handler 
     handlers.handleStepClick(step);
     
     // Navigate to the corresponding URL if needed
@@ -72,10 +136,19 @@ export function ContentRouter({
     }
   };
 
-  // Prevent default form submission behavior
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // Handle form submission
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    await saveChanges();
+  };
+
+  // Set up a local version of setPendingChanges
+  const setPendingChanges = (pending: boolean) => {
+    setHasPendingChanges(pending);
+    if (handlers.setPendingChanges) {
+      handlers.setPendingChanges(pending);
+    }
   };
 
   const renderContent = () => {
@@ -85,7 +158,7 @@ export function ContentRouter({
           <GeneralPage
             formData={formData}
             onFieldChange={handlers.onFieldChange}
-            setPendingChanges={handlers.setPendingChanges}
+            setPendingChanges={setPendingChanges}
           />
         );
       case 1:
@@ -100,7 +173,7 @@ export function ContentRouter({
             onGenerateMap={handlers.onGenerateMap}
             isLoadingLocationData={handlers.isLoadingLocationData}
             isGeneratingMap={handlers.isGeneratingMap}
-            setPendingChanges={handlers.setPendingChanges}
+            setPendingChanges={setPendingChanges}
           />
         );
       case 2:
@@ -111,7 +184,7 @@ export function ContentRouter({
             onAddFeature={handlers.onAddFeature}
             onRemoveFeature={handlers.onRemoveFeature}
             onUpdateFeature={handlers.onUpdateFeature}
-            setPendingChanges={handlers.setPendingChanges}
+            setPendingChanges={setPendingChanges}
           />
         );
       case 3:
@@ -125,7 +198,7 @@ export function ContentRouter({
             onAreaImageRemove={handlers.onAreaImageRemove}
             onAreaImageUpload={handlers.onAreaImageUpload}
             isUploading={handlers.isUploading}
-            setPendingChanges={handlers.setPendingChanges}
+            setPendingChanges={setPendingChanges}
           />
         );
       default:

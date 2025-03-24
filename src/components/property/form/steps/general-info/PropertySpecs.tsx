@@ -5,6 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertySpecsProps {
   formData: PropertyFormData;
@@ -13,18 +16,64 @@ interface PropertySpecsProps {
 }
 
 export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: PropertySpecsProps) {
-  const handleInputChange = (field: keyof PropertyFormData, value: any) => {
+  const [initialPropertyType, setInitialPropertyType] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Set the initial property type when the component mounts
+  useEffect(() => {
+    if (formData.propertyType && initialPropertyType === null) {
+      setInitialPropertyType(formData.propertyType);
+    }
+  }, [formData.propertyType, initialPropertyType]);
+
+  const saveToDatabase = async (field: keyof PropertyFormData, value: any) => {
+    if (!formData.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ [field]: value })
+        .eq('id', formData.id);
+        
+      if (error) throw error;
+    } catch (error) {
+      console.error(`Error saving ${field} to database:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to save ${field}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleInputChange = async (field: keyof PropertyFormData, value: any) => {
     onFieldChange(field, value);
+    
     if (setPendingChanges) {
       setPendingChanges(true);
+    }
+    
+    // Save the change to the database
+    await saveToDatabase(field, value);
+    
+    // Only show toast for property type changes
+    if (field === 'propertyType') {
+      toast({
+        title: "Success",
+        description: "Property type updated",
+      });
     }
   };
   
-  const handleSwitchChange = (field: keyof PropertyFormData, checked: boolean) => {
+  const handleSwitchChange = async (field: keyof PropertyFormData, checked: boolean) => {
     onFieldChange(field, checked);
+    
     if (setPendingChanges) {
       setPendingChanges(true);
     }
+    
+    // Save the change to the database
+    await saveToDatabase(field, checked);
   };
   
   const propertyTypes = [

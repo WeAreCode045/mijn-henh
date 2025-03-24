@@ -2,7 +2,6 @@
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BasicDetails } from "@/components/property/form/steps/general-info/BasicDetails";
 import { DescriptionSection } from "@/components/property/form/steps/general-info/DescriptionSection";
 import { PropertySpecs } from "@/components/property/form/steps/general-info/PropertySpecs";
 
@@ -38,13 +37,6 @@ export function GeneralPage({
           />
         </div>
       </div>
-      
-      {/* Basic Details */}
-      <BasicDetails 
-        formData={formData}
-        onFieldChange={onFieldChange}
-        setPendingChanges={setPendingChanges}
-      />
     </div>
   );
 }

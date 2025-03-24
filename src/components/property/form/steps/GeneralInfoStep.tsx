@@ -1,15 +1,8 @@
-
 import { PropertyFormData } from "@/types/property";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { BasicDetails } from "./general-info/BasicDetails";
-import { DescriptionSection } from "./general-info/DescriptionSection";
 import { PropertySpecs } from "./general-info/PropertySpecs";
+import { DescriptionSection } from "./general-info/DescriptionSection";
 import { ImageSelections } from "./general-info/ImageSelections";
 import { useState } from "react";
 
@@ -29,15 +22,6 @@ export function GeneralInfoStep({
   isUploading
 }: GeneralInfoStepProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onFieldChange(name as keyof PropertyFormData, value);
-  };
-  
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    onFieldChange(name as keyof PropertyFormData, checked);
-  };
 
   const handleFeaturedImageSelect = (url: string | null) => {
     if (handleSetFeaturedImage) {
@@ -53,12 +37,6 @@ export function GeneralInfoStep({
 
   return (
     <div className="space-y-6">
-      {/* Basic Details */}
-      <BasicDetails 
-        formData={formData}
-        onFieldChange={onFieldChange}
-      />
-      
       {/* Property Specifications */}
       <PropertySpecs 
         formData={formData} 
