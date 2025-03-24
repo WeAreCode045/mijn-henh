@@ -58,33 +58,29 @@ export function PropertyFormManager({
     onFetchCategoryPlaces: wrapMethod(formManager.onFetchCategoryPlaces),
     onFetchNearbyCities: wrapMethod(formManager.onFetchNearbyCities),
     images: formManager.images,
+    isLoadingLocationData: formManager.isLoadingLocationData || false,
+    isGeneratingMap: formManager.isGeneratingMap || false,
   };
 
   // Use the original methods or the wrapped methods based on the archived status
   const methods = isArchived ? wrappedMethods : {
     ...formManager,
-    // Backward compatibility aliases
-    onAddFeature: formManager.addFeature,
-    onRemoveFeature: formManager.removeFeature,
-    onUpdateFeature: formManager.updateFeature,
-    onAddArea: formManager.addArea,
-    onRemoveArea: formManager.removeArea,
-    onUpdateArea: formManager.updateArea,
-    onAreaImageRemove: formManager.handleAreaImageRemove,
-    onAreaImagesSelect: formManager.handleAreaImagesSelect,
+    // Make sure isLoadingLocationData and isGeneratingMap are included
+    isLoadingLocationData: formManager.isLoadingLocationData || false,
+    isGeneratingMap: formManager.isGeneratingMap || false,
   };
 
   // Add backward compatibility aliases
   const fullMethods = {
     ...methods,
-    onAddFeature: methods.addFeature || methods.onAddFeature,
-    onRemoveFeature: methods.removeFeature || methods.onRemoveFeature,
-    onUpdateFeature: methods.updateFeature || methods.onUpdateFeature,
-    onAddArea: methods.addArea || methods.onAddArea,
-    onRemoveArea: methods.removeArea || methods.onRemoveArea,
-    onUpdateArea: methods.updateArea || methods.onUpdateArea,
-    onAreaImageRemove: methods.handleAreaImageRemove || methods.onAreaImageRemove,
-    onAreaImagesSelect: methods.handleAreaImagesSelect || methods.onAreaImagesSelect,
+    onAddFeature: methods.addFeature,
+    onRemoveFeature: methods.removeFeature,
+    onUpdateFeature: methods.updateFeature,
+    onAddArea: methods.addArea,
+    onRemoveArea: methods.removeArea,
+    onUpdateArea: methods.updateArea,
+    onAreaImageRemove: methods.handleAreaImageRemove,
+    onAreaImagesSelect: methods.handleAreaImagesSelect,
   };
 
   return children(fullMethods);
