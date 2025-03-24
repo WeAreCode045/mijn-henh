@@ -9,6 +9,7 @@ export function useNearbyPlaces(
   onFieldChange: (field: keyof PropertyFormData, value: any) => void
 ) {
   const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
   const { toast } = useToast();
 
   const fetchPlaces = useCallback(async (category: string): Promise<any> => {
@@ -137,6 +138,9 @@ export function useNearbyPlaces(
       
       console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for category ${category}`);
       
+      // Store the search results
+      setSearchResults(transformedPlaces);
+      
       // For a single category search, add the places to the current list
       if (category && transformedPlaces.length > 0) {
         const existingPlaces = formData.nearby_places || [];
@@ -181,6 +185,29 @@ export function useNearbyPlaces(
     }
   }, [formData.id, formData.latitude, formData.longitude, formData.nearby_places, onFieldChange, toast]);
 
+  const saveSelectedPlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {
+    if (!formData.id) return;
+    
+    // Filter out duplicates based on place ID
+    const existingPlaces = formData.nearby_places || [];
+    const newPlaces = selectedPlaces.filter(newPlace => 
+      !existingPlaces.some(existingPlace => existingPlace.id === newPlace.id)
+    );
+    
+    // Combine existing and new places
+    const combinedPlaces = [...existingPlaces, ...newPlaces];
+    
+    // Update the form data with the combined places
+    onFieldChange("nearby_places", combinedPlaces);
+    
+    toast({
+      title: "Places saved",
+      description: `Added ${newPlaces.length} places to the property`
+    });
+    
+    return combinedPlaces;
+  }, [formData.id, formData.nearby_places, onFieldChange, toast]);
+
   const removePlaceAtIndex = useCallback((index: number) => {
     if (!formData.nearby_places) return;
     
@@ -197,7 +224,9 @@ export function useNearbyPlaces(
 
   return {
     fetchPlaces,
+    saveSelectedPlaces,
     removePlaceAtIndex,
+    searchResults,
     isLoading
   };
 }
