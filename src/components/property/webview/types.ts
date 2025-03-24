@@ -9,7 +9,7 @@ export interface WebViewSectionProps {
   setSelectedImage?: (image: string | null) => void;
 }
 
-export interface WebViewDialogProps {
+interface WebViewDialogProps {
   property: PropertyData;
   open: boolean;
   onOpenChange: (open: boolean) => void;

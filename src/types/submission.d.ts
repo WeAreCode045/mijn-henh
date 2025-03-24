@@ -21,7 +21,7 @@ export interface Submission {
   replies?: any[];
 }
 
-export interface SubmissionDetailProps {
+interface SubmissionDetailProps {
   submission: Submission;
   onSendReply: (text: string) => Promise<void>;
   isSending: boolean;

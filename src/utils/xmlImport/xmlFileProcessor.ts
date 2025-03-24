@@ -1,5 +1,5 @@
 
-export const extractXmlValue = (property: Element, path: string): string => {
+const extractXmlValue = (property: Element, path: string): string => {
   try {
     // Split the path and navigate through the XML structure
     const segments = path.split('/').filter(s => s.trim() !== '');

@@ -4,7 +4,7 @@ import { AgencySettings } from "@/types/agency";
 import { useToast } from "@/components/ui/use-toast";
 import { agencySettingsService } from "@/services/agencySettingsService";
 
-export interface UseBackgroundUploadProps {
+interface UseBackgroundUploadProps {
   settings: AgencySettings;
   setSettings: React.Dispatch<React.SetStateAction<AgencySettings>>;
 }

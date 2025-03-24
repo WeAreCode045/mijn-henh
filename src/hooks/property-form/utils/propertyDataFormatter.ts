@@ -4,7 +4,7 @@ import { PropertySubmitData } from "@/types/property";
 /**
  * Prepares and formats JSON fields for database submission
  */
-export const formatPropertyJsonFields = (data: Partial<PropertySubmitData>) => {
+const formatPropertyJsonFields = (data: Partial<PropertySubmitData>) => {
   // Format features JSON
   const featuresJson = typeof data.features === 'string' 
     ? data.features 
@@ -30,7 +30,7 @@ export const formatPropertyJsonFields = (data: Partial<PropertySubmitData>) => {
 /**
  * Creates or updates metadata object with status
  */
-export const prepareMetadata = (data: Partial<PropertySubmitData>) => {
+const prepareMetadata = (data: Partial<PropertySubmitData>) => {
   // Create or update metadata if status exists
   const metadata = data.metadata || {};
   if (data.status) {
@@ -43,7 +43,7 @@ export const prepareMetadata = (data: Partial<PropertySubmitData>) => {
 /**
  * Removes fields that don't exist in the database to prepare data for submission
  */
-export const cleanupPropertyData = (data: Partial<PropertySubmitData>) => {
+const cleanupPropertyData = (data: Partial<PropertySubmitData>) => {
   // Make a copy of data without fields that don't exist in the database
   const { 
     featuredImage, 
@@ -60,7 +60,7 @@ export const cleanupPropertyData = (data: Partial<PropertySubmitData>) => {
 /**
  * Removes timestamp fields to let Supabase handle them automatically
  */
-export const removeTimestampFields = (data: Record<string, any>) => {
+const removeTimestampFields = (data: Record<string, any>) => {
   const result = { ...data };
   
   // Remove created_at and updated_at to let Supabase handle them automatically

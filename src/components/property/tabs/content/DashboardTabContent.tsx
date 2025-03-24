@@ -3,7 +3,7 @@ import React from "react";
 import { PropertyData } from "@/types/property";
 import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
 
-export interface DashboardTabContentProps {
+interface DashboardTabContentProps {
   property: PropertyData;
   onDelete: () => Promise<void>;
   onSave: () => void;

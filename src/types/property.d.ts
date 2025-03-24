@@ -22,7 +22,7 @@ export interface PropertyImage {
 }
 
 // Define PropertyFloorplan as an alias to PropertyImage for compatibility
-export type PropertyFloorplan = PropertyImage;
+type PropertyFloorplan = PropertyImage;
 
 // Property area with all required fields
 export interface PropertyArea {
@@ -49,7 +49,7 @@ export interface PropertyNearbyPlace {
 }
 
 // Define PropertyPlaceType as PropertyNearbyPlace (not a union type)
-export type PropertyPlaceType = PropertyNearbyPlace;
+type PropertyPlaceType = PropertyNearbyPlace;
 
 // City type
 export interface PropertyCity {

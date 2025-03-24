@@ -53,7 +53,7 @@ export function getImageUrl(image: string | PropertyImage | { url: string }): st
 /**
  * Get image ID from various image formats
  */
-export function getImageId(image: string | PropertyImage | { url: string }): string {
+function getImageId(image: string | PropertyImage | { url: string }): string {
   if (typeof image === 'object' && 'id' in image) {
     return image.id;
   }
@@ -73,7 +73,7 @@ export function getImageId(image: string | PropertyImage | { url: string }): str
 /**
  * Converts any image format to PropertyImage[] format
  */
-export function normalizeImages(images: any[] | null | undefined): PropertyImage[] {
+function normalizeImages(images: any[] | null | undefined): PropertyImage[] {
   if (!images || !Array.isArray(images)) return [];
   
   return images.map(img => normalizeImage(img));
@@ -82,7 +82,7 @@ export function normalizeImages(images: any[] | null | undefined): PropertyImage
 /**
  * Check if an image is of a specific format
  */
-export function isImageOfType(image: any, type: 'string' | 'object' | 'property-image'): boolean {
+function isImageOfType(image: any, type: 'string' | 'object' | 'property-image'): boolean {
   if (type === 'string') return typeof image === 'string';
   if (type === 'object') return typeof image === 'object' && image !== null;
   if (type === 'property-image') return typeof image === 'object' && image !== null && 'id' in image && 'url' in image;

@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { fetchAgencySettings } from "@/utils/fetchAgencySettings";
 import { agencySettingsService } from "@/services/agencySettingsService";
 
-export interface UseAgencySubmitProps {
+interface UseAgencySubmitProps {
   settings: AgencySettings;
   setSettings: React.Dispatch<React.SetStateAction<AgencySettings>>;
   logoPreview: string | null;

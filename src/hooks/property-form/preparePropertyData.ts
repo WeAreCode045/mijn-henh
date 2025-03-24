@@ -68,6 +68,6 @@ export function prepareImagesForSubmission(images: any[]): string[] {
  * Prepare floorplans for JSON field
  * This is a compatibility function to keep the API consistent
  */
-export function prepareFloorplansForFormSubmission(floorplans: any[]): Json {
+function prepareFloorplansForFormSubmission(floorplans: any[]): Json {
   return preparePropertiesForJsonField(floorplans || []);
 }

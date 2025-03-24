@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 
-export interface MediaReplacementItem {
+interface MediaReplacementItem {
   property: any;
   propertyData: any;
   existingProperty: any;

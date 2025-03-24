@@ -1,7 +1,7 @@
 
 import { AgencySettings } from "@/types/agency";
 
-export interface UseAgencyFormHandlersProps {
+interface UseAgencyFormHandlersProps {
   setSettings: React.Dispatch<React.SetStateAction<AgencySettings>>;
 }
 

@@ -53,7 +53,7 @@ export function PropertyDashboardTab({
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select('*')
-        .eq('property_id', id);
+        .eq('id', id);
 
       if (error) {
         toast({

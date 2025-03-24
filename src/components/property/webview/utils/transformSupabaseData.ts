@@ -3,7 +3,7 @@ import { PropertyData, PropertyImage } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
 
-export interface SupabasePropertyData {
+interface SupabasePropertyData {
   id: string;
   title: string;
   price: string;

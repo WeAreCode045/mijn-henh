@@ -600,7 +600,7 @@ export type Database = {
 
 type PublicSchema = Database[Extract<keyof Database, "public">]
 
-export type Tables<
+type Tables<
   PublicTableNameOrOptions extends
     | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
@@ -625,7 +625,7 @@ export type Tables<
       : never
     : never
 
-export type TablesInsert<
+type TablesInsert<
   PublicTableNameOrOptions extends
     | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
@@ -646,7 +646,7 @@ export type TablesInsert<
       : never
     : never
 
-export type TablesUpdate<
+type TablesUpdate<
   PublicTableNameOrOptions extends
     | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
@@ -667,7 +667,7 @@ export type TablesUpdate<
       : never
     : never
 
-export type Enums<
+type Enums<
   PublicEnumNameOrOptions extends
     | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
@@ -680,7 +680,7 @@ export type Enums<
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
 
-export type CompositeTypes<
+type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof PublicSchema["CompositeTypes"]
     | { schema: keyof Database },

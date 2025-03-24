@@ -14,13 +14,13 @@ const categoryConfig = {
 
 export function useNearbyPlaces(
   formData: PropertyFormData,
-  onFieldChange: (field: keyof PropertyFormData, value: any) => void
+  onFieldChange: (field: keyof PropertyFormData, value: unknown) => void
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
   const { toast } = useToast();
 
-  const fetchPlaces = useCallback(async (categoryName: string): Promise<any> => {
+  const fetchPlaces = useCallback(async (categoryName: string): Promise<unknown> => {
     // Validate required parameters
     if (!formData.latitude || !formData.longitude) {
       toast({
@@ -135,7 +135,7 @@ export function useNearbyPlaces(
         }
         
         // Transform the response to match our expected format
-        const transformedPlaces = placesData.places.map((place: any) => ({
+        const transformedPlaces = placesData.places.map((place: { id: string; displayName?: { text: string }; name?: string; formattedAddress?: string; rating?: number; userRatingCount?: number; types?: string[]; location?: { latitude: number; longitude: number } }) => ({
           id: place.id,
           name: place.displayName?.text || place.name || "Unknown place",
           vicinity: place.formattedAddress || "",
@@ -208,7 +208,7 @@ export function useNearbyPlaces(
           console.log(`useNearbyPlaces: Places API raw response for type ${type}:`, placesData);
     
           if (placesData.places && Array.isArray(placesData.places)) {
-            const transformedPlaces = placesData.places.map((place: any) => ({
+            const transformedPlaces = placesData.places.map((place: { id: string; displayName?: { text: string }; name?: string; formattedAddress?: string; rating?: number; userRatingCount?: number; types?: string[]; location?: { latitude: number; longitude: number } }) => ({
               id: place.id,
               name: place.displayName?.text || place.name || "Unknown place",
               vicinity: place.formattedAddress || "",
@@ -319,29 +319,3 @@ export function useNearbyPlaces(
 }
 
 // Example component rendering the results
-const ResultsComponent = ({ results }: { results: (PropertyNearbyPlace | { separator: string })[] }) => {
-  return (
-    <div>
-      {results.map((item, index) => {
-        if ('separator' in item) {
-          return (
-            <div key={index} style={{ fontWeight: 'bold', marginTop: '10px' }}>
-              {item.separator}
-            </div>
-          );
-        } else {
-          return (
-            <div key={item.id} style={{ border: '1px solid #ccc', padding: '10px', marginTop: '5px' }}>
-              <div>Type: {item.type}</div>
-              <div>Name: {item.name}</div>
-              <div>Vicinity: {item.vicinity}</div>
-              <div>Rating: {item.rating}</div>
-              <div>User Ratings Total: {item.user_ratings_total}</div>
-              {/* Add other fields as needed */}
-            </div>
-          );
-        }
-      })}
-    </div>
-  );
-};

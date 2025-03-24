@@ -1,6 +1,6 @@
-
 // Create a string of CSS rules for print styles
-export const getPrintStylesContent = () => `
+export const getPrintStylesContent = () => 
+  `/* Print Styles */
   @media print {
     body {
       font-family: 'Arial', sans-serif;
@@ -48,11 +48,11 @@ export const getPrintStylesContent = () => `
 `;
 
 // This function should be used in a React component context
-export const getPrintStyles = () => {
+const getPrintStyles = () => {
   return {
     __html: getPrintStylesContent()
   };
 };
 
 // For backwards compatibility - in case this is imported elsewhere
-export { getPrintStyles as PrintStyles };
+;

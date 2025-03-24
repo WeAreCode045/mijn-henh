@@ -4,7 +4,7 @@ import { PropertyFormManagerChildrenProps } from './types/PropertyFormManagerTyp
 
 const PropertyFormContext = createContext<PropertyFormManagerChildrenProps | undefined>(undefined);
 
-export function usePropertyFormContext() {
+function usePropertyFormContext() {
   const context = useContext(PropertyFormContext);
   if (context === undefined) {
     throw new Error('usePropertyFormContext must be used within a PropertyFormManagerProvider');

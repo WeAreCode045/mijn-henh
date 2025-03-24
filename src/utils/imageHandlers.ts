@@ -23,7 +23,7 @@ export function normalizeImageCollection(
 /**
  * Function to handle image URL extraction from various formats
  */
-export function extractImageUrls(images: (string | PropertyImage | { url: string })[] | null | undefined): string[] {
+function extractImageUrls(images: (string | PropertyImage | { url: string })[] | null | undefined): string[] {
   if (!images || !Array.isArray(images)) return [];
   return images.map(img => safelyGetImageUrl(img)).filter((url): url is string => url !== null);
 }
@@ -31,7 +31,7 @@ export function extractImageUrls(images: (string | PropertyImage | { url: string
 /**
  * Function to safely get an image's ID
  */
-export function safelyGetImageId(image: string | PropertyImage | { url: string; id?: string } | null | undefined): string | null {
+function safelyGetImageId(image: string | PropertyImage | { url: string; id?: string } | null | undefined): string | null {
   if (!image) return null;
   if (typeof image === 'string') return null;
   return (image as PropertyImage).id || null;

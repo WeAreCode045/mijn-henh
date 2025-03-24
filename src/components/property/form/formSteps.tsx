@@ -5,7 +5,7 @@ import { FeaturesStep } from "./steps/FeaturesStep";
 import { LocationStep } from "./steps/LocationStep";
 import { Info, MapPin, List, Grid } from "lucide-react";
 
-export interface FormStep {
+interface FormStep {
   id: number;
   title: string;
   component: React.ComponentType<any>;
