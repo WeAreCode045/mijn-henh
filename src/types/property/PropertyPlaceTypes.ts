@@ -13,5 +13,5 @@ export interface PropertyNearbyPlace {
   visible_in_webview?: boolean;
   latitude?: number | null;
   longitude?: number | null;
-  category?: string; // Added the category property
+  category?: string; // Added category property
 }
