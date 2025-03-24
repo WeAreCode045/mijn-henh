@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NearbyPlacesList } from "./components/NearbyPlacesList";
 import { NearbyPlacesSearch } from "./components/NearbyPlacesSearch";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -24,6 +25,7 @@ export function NearbyPlacesSection({
   onRemoveNearbyPlace
 }: NearbyPlacesSectionProps) {
   const [activeTab, setActiveTab] = useState("view");
+  const { toast } = useToast();
   
   const handleRemovePlace = (index: number) => {
     if (onRemoveNearbyPlace) {
@@ -35,6 +37,11 @@ export function NearbyPlacesSection({
     
     const updatedPlaces = formData.nearby_places.filter((_, i) => i !== index);
     onFieldChange('nearby_places', updatedPlaces);
+    
+    toast({
+      title: "Removed",
+      description: "Nearby place removed successfully",
+    });
   };
   
   const fetchPlaces = async (category: string) => {
@@ -42,9 +49,28 @@ export function NearbyPlacesSection({
     
     try {
       // Prevent default button behavior
-      return await onFetchCategoryPlaces(category);
+      const result = await onFetchCategoryPlaces(category);
+      
+      if (result && result.length > 0) {
+        toast({
+          title: "Success",
+          description: `Found ${result.length} nearby places`,
+        });
+      } else {
+        toast({
+          title: "Info",
+          description: "No nearby places found in this category",
+        });
+      }
+      
+      return result;
     } catch (error) {
       console.error("Error fetching places:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby places",
+        variant: "destructive",
+      });
       return null;
     }
   };
@@ -92,7 +118,7 @@ export function NearbyPlacesSection({
               onFieldChange={onFieldChange}
               onFetchPlaces={fetchPlaces}
               isLoading={isLoadingNearbyPlaces}
-              onSearchClick={handleSearchClick} // Pass the handler to prevent default
+              onSearchClick={handleSearchClick}
             />
           </TabsContent>
         </Tabs>

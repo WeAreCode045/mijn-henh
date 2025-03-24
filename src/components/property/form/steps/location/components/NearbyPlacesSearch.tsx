@@ -37,6 +37,13 @@ export function NearbyPlacesSearch({
     { id: "transit_station", label: "Transit Stations" }
   ];
 
+  // Handle the search button click with explicit prevention of default behavior
+  const handleSearchButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSearchClick(e, selectedCategory);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
@@ -46,6 +53,7 @@ export function NearbyPlacesSearch({
             variant={selectedCategory === category.id ? "default" : "outline"}
             onClick={() => setSelectedCategory(category.id)}
             className="flex-grow-0"
+            type="button"
           >
             {category.label}
           </Button>
@@ -55,7 +63,7 @@ export function NearbyPlacesSearch({
       <div className="flex justify-end">
         <Button
           variant="default"
-          onClick={(e) => onSearchClick(e, selectedCategory)}
+          onClick={handleSearchButtonClick}
           disabled={isLoading || !formData.latitude || !formData.longitude}
           type="button" 
         >

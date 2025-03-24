@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +36,8 @@ export function LocationPage({
   isGeneratingMap = false,
   setPendingChanges
 }: LocationPageProps) {
+  const { toast } = useToast();
+  
   const handleLocationDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onFieldChange('location_description', e.target.value);
     if (setPendingChanges) {

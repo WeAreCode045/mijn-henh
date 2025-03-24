@@ -127,7 +127,7 @@ export function MapSection({
         
         {/* Map Preview */}
         {mapImageUrl ? (
-          <div className={hideControls ? "" : "mt-4"} className="relative">
+          <div className={hideControls ? "" : "mt-4"}>
             <img 
               src={mapImageUrl} 
               alt="Property location map" 
@@ -135,14 +135,16 @@ export function MapSection({
             />
           </div>
         ) : (
-          <div className={hideControls ? "" : "mt-4"} className="bg-muted rounded-md p-8 flex items-center justify-center border border-border">
-            <p className="text-muted-foreground text-center">
-              {formData.latitude && formData.longitude ? (
-                "Generating map..."
-              ) : (
-                "Enter address to enable map generation"
-              )}
-            </p>
+          <div className={hideControls ? "" : "mt-4"}>
+            <div className="bg-muted rounded-md p-8 flex items-center justify-center border border-border">
+              <p className="text-muted-foreground text-center">
+                {formData.latitude && formData.longitude ? (
+                  "Generating map..."
+                ) : (
+                  "Enter address to enable map generation"
+                )}
+              </p>
+            </div>
           </div>
         )}
       </CardContent>
