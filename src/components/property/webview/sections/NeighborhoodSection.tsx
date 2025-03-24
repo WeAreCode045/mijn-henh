@@ -1,6 +1,7 @@
 
 import { WebViewSectionProps } from "../types";
 import { useRef, useEffect, useState } from "react";
+import { PropertyNearbyPlace } from "@/types/property";
 
 export function NeighborhoodSection({ property, settings, waitForPlaces = false }: WebViewSectionProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -35,7 +36,7 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
 
   // Group nearby places first by category then by type
   const groupedPlaces = visiblePlaces.length > 0 ? 
-    visiblePlaces.reduce((acc: Record<string, Record<string, any[]>>, place) => {
+    visiblePlaces.reduce((acc: Record<string, Record<string, any[]>>, place: PropertyNearbyPlace) => {
       // Use the place's category if available, otherwise determine it from the type
       const category = place.category || 
         (place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 

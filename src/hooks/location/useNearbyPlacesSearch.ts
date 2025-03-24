@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyNearbyPlace } from "@/types/property";
@@ -147,7 +146,7 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         typeResults[matchedType].push(transformedPlace);
       });
       
-      // Sort each type's results by rating (high to low) and limit to 6 per type
+      // Transform places by rating (high to low) and limit to 6 per type
       Object.keys(typeResults).forEach(type => {
         typeResults[type].sort((a, b) => {
           const ratingA = a.rating || 0;

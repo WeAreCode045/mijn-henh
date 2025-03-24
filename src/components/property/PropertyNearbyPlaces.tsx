@@ -1,15 +1,15 @@
 
-import { PropertyPlaceType } from "@/types/property";
+import { PropertyNearbyPlace, PropertyPlaceType } from "@/types/property";
 
 interface PropertyNearbyPlacesProps {
-  places: PropertyPlaceType[];
+  places: PropertyNearbyPlace[];
 }
 
 export function PropertyNearbyPlaces({ places }: PropertyNearbyPlacesProps) {
   if (!places || places.length === 0) return null;
 
   // First group by category
-  const placesByCategory = places.reduce((acc: Record<string, Record<string, PropertyPlaceType[]>>, place) => {
+  const placesByCategory = places.reduce((acc: Record<string, Record<string, PropertyNearbyPlace[]>>, place) => {
     const category = place.category || 'Other'; 
     const type = place.type;
     
