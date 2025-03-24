@@ -53,24 +53,22 @@ export function useNearbyPlaces(
       }
       
       // Call the nearby-places edge function
-      console.log("Calling Supabase Edge Function: nearby-places with payload:", {
+      const payload = {
         category,
         latitude: formData.latitude,
         longitude: formData.longitude,
         radius: 5000,
         propertyId: formData.id,
-        apiKeyProvided: !!apiKey
+        apiKey
+      };
+      
+      console.log("Calling Supabase Edge Function: nearby-places with payload:", {
+        ...payload,
+        apiKey: apiKey ? "API_KEY_PROVIDED" : "NO_API_KEY"
       });
       
       const { data, error } = await supabase.functions.invoke("nearby-places", {
-        body: {
-          category,
-          latitude: formData.latitude,
-          longitude: formData.longitude,
-          radius: 5000,
-          propertyId: formData.id,
-          apiKey: apiKey || ""
-        }
+        body: payload
       });
       
       if (error) {

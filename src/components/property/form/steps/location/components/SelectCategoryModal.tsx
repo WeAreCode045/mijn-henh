@@ -45,19 +45,22 @@ export function SelectCategoryModal({
     
     try {
       console.log(`Starting API request for category: ${category}`);
-      const result = await onSelect(category);
-      console.log(`API request completed for ${category}:`, result);
       
-      // Only close the modal if we got results or if explicitly handling empty results
-      if (result && (Object.keys(result).length > 0 || result[category]?.length > 0)) {
+      // Make the API call but don't close the modal yet
+      const result = await onSelect(category);
+      console.log(`SelectCategoryModal: API request completed for ${category}:`, result);
+      
+      // Only close the modal if we got valid results
+      if (result && (Object.keys(result).length > 0 && result[category]?.length > 0)) {
+        console.log(`Results found for category: ${category}, places count:`, result[category].length);
         onClose();
       } else {
-        console.log(`No results found for category: ${category}`);
-        // Keep modal open if no results
-        setIsProcessing(false);
+        console.log(`No valid results found for category: ${category}`, result);
+        // Keep modal open but reset processing state
       }
     } catch (error) {
       console.error(`Error fetching places for category ${category}:`, error);
+    } finally {
       setIsProcessing(false);
     }
   };

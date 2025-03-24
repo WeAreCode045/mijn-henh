@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { SelectCategoryModal } from "./SelectCategoryModal";
@@ -24,6 +24,17 @@ export function PlacesSearchTab({
   const [showModal, setShowModal] = useState(false);
   const { categories } = useCategories();
   const { toast } = useToast();
+  const [localIsLoading, setLocalIsLoading] = useState(false);
+
+  // Combine external and local loading states
+  const combinedIsLoading = isLoading || localIsLoading;
+
+  // Reset local loading when external loading changes
+  useEffect(() => {
+    if (!isLoading) {
+      setLocalIsLoading(false);
+    }
+  }, [isLoading]);
 
   const handleOpenModal = () => {
     if (!formData.latitude || !formData.longitude) {
@@ -40,6 +51,7 @@ export function PlacesSearchTab({
 
   const handleCategorySelect = async (category: string) => {
     console.log("Selected category:", category);
+    setLocalIsLoading(true);
     
     try {
       let result = null;
@@ -84,6 +96,8 @@ export function PlacesSearchTab({
         variant: "destructive"
       });
       return null;
+    } finally {
+      setLocalIsLoading(false);
     }
   };
 
@@ -99,9 +113,9 @@ export function PlacesSearchTab({
         <Button
           variant="default"
           onClick={handleOpenModal}
-          disabled={isLoading || !hasCoordinates}
+          disabled={combinedIsLoading || !hasCoordinates}
         >
-          {isLoading ? "Loading..." : "Find Places"}
+          {combinedIsLoading ? "Loading..." : "Find Places"}
         </Button>
       </div>
       
@@ -115,7 +129,7 @@ export function PlacesSearchTab({
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSelect={handleCategorySelect}
-        isLoading={isLoading}
+        isLoading={combinedIsLoading}
       />
     </div>
   );
