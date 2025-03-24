@@ -1,5 +1,4 @@
 import { PropertyData } from "./PropertyDataTypes";
-import { PropertyPlaceType, PropertyNearbyPlace as ImportedPropertyNearbyPlace } from "./PropertyPlaceTypes";
 
 // Basic data types
 export interface PropertyFeature {
@@ -53,8 +52,19 @@ export interface PropertyFloorplan {
   columns?: number; // Used for layout
 }
 
-// Re-export the imported PropertyNearbyPlace interface
-export type PropertyNearbyPlace = ImportedPropertyNearbyPlace;
+export interface PropertyNearbyPlace {
+  id: string;
+  name: string;
+  vicinity: string;
+  rating: number;
+  user_ratings_total: number;
+  type: string;
+  types?: string[];
+  visible_in_webview?: boolean;
+  distance?: number | string;
+  latitude?: number;
+  longitude?: number;
+}
 
 export interface PropertyCity {
   id: string;
@@ -144,5 +154,5 @@ export interface PropertySubmitData {
   }; // Metadata property
 }
 
-// Export PropertyPlaceType from PropertyPlaceTypes
-export type { PropertyPlaceType };
+// Export PropertyPlaceType as a type, not the interface
+export type { PropertyPlaceType } from './PropertyPlaceTypes';
