@@ -44,7 +44,7 @@ export function LocationStep({
     
     // Validate that we have a property ID
     if (!formData.id) {
-      console.error("Cannot fetch places: Missing property ID");
+      console.error("LocationStep: Cannot fetch places: Missing property ID");
       toast({
         title: "Error",
         description: "Please save the property first before searching for places",
@@ -53,8 +53,9 @@ export function LocationStep({
       return null;
     }
     
+    console.log(`LocationStep: Handling search for category ${category}`);
+    
     if (onFetchCategoryPlaces) {
-      console.log(`LocationStep: Handling search for category ${category}`);
       // Make the actual API call through the passed function
       return await onFetchCategoryPlaces(category);
     }

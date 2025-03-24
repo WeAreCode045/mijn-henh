@@ -60,7 +60,7 @@ export function PlacesSearchTab({
   };
 
   const handleCategorySelect = async (category: string) => {
-    console.log("Selected category:", category);
+    console.log("PlacesSearchTab: Selected category:", category);
     
     // Validate property ID before proceeding
     if (!formData.id) {
@@ -79,18 +79,18 @@ export function PlacesSearchTab({
       let result = null;
       
       if (onSearchClick) {
-        console.log("Using provided search handler for category:", category);
+        console.log("PlacesSearchTab: Using provided search handler for category:", category);
         // Use the parent component's click handler
         const dummyEvent = { preventDefault: () => {}, stopPropagation: () => {} } as React.MouseEvent<HTMLButtonElement>;
         result = await onSearchClick(dummyEvent, category);
-        console.log("Search handler returned result:", result);
+        console.log("PlacesSearchTab: Search handler returned result:", result);
       } else if (onFetchPlaces) {
-        console.log("Using provided fetch handler for category:", category);
+        console.log("PlacesSearchTab: Using provided fetch handler for category:", category);
         // Use the provided fetch handler directly
         result = await onFetchPlaces(category);
-        console.log("Fetch handler returned result:", result);
+        console.log("PlacesSearchTab: Fetch handler returned result:", result);
       } else {
-        console.error("No fetch handler provided for category:", category);
+        console.error("PlacesSearchTab: No fetch handler provided for category:", category);
         toast({
           title: "Error",
           description: "No handler available to fetch places",
@@ -100,7 +100,7 @@ export function PlacesSearchTab({
       }
       
       if (!result || (result[category] && result[category].length === 0)) {
-        console.log(`No places found for category: ${category}`);
+        console.log(`PlacesSearchTab: No places found for category: ${category}`);
         toast({
           title: "No places found",
           description: `No ${category.replace('_', ' ')} places found near this location.`,
@@ -111,7 +111,7 @@ export function PlacesSearchTab({
       
       return result;
     } catch (error) {
-      console.error("Error fetching places:", error);
+      console.error("PlacesSearchTab: Error fetching places:", error);
       toast({
         title: "Error",
         description: "Failed to fetch nearby places",

@@ -32,9 +32,9 @@ export function useNearbyPlaces(
       return null;
     }
     
-    console.log(`Fetching nearby places for category: ${category}`);
-    console.log(`Coordinates: ${formData.latitude}, ${formData.longitude}`);
-    console.log(`Property ID: ${formData.id}`);
+    console.log(`useNearbyPlaces: Fetching nearby places for category: ${category}`);
+    console.log(`useNearbyPlaces: Coordinates: ${formData.latitude}, ${formData.longitude}`);
+    console.log(`useNearbyPlaces: Property ID: ${formData.id}`);
     
     setIsLoading(true);
     
@@ -46,15 +46,15 @@ export function useNearbyPlaces(
         .single();
       
       if (settingsError) {
-        console.error("Error fetching API key from settings:", settingsError);
+        console.error("useNearbyPlaces: Error fetching API key from settings:", settingsError);
         throw new Error("Could not fetch Google Maps API key from settings");
       }
       
       const apiKey = settingsData?.google_maps_api_key;
-      console.log("Using API key from settings:", apiKey ? "API key found" : "No API key found");
+      console.log("useNearbyPlaces: Using API key from settings:", apiKey ? "API key found" : "No API key found");
       
       if (!apiKey) {
-        console.error("No Google Maps API key found in settings");
+        console.error("useNearbyPlaces: No Google Maps API key found in settings");
         toast({
           title: "Missing API Key",
           description: "Please set a Google Maps API key in your agency settings",
@@ -64,16 +64,15 @@ export function useNearbyPlaces(
         return null;
       }
       
-      // Make direct API call to Google Places API instead of using the edge function
+      // Make direct API call to Google Places API
       const radius = 5000; // 5km radius
       const placesApiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${formData.latitude},${formData.longitude}&radius=${radius}&type=${category}&key=${apiKey}`;
       
       // Use a CORS proxy for client-side requests to Google's API
       // Note: In production, you might need a proper CORS proxy or a small serverless function
-      // We're using a temporary approach for demo purposes
       const corsProxyUrl = `https://cors-anywhere.herokuapp.com/${placesApiUrl}`;
       
-      console.log("Calling Google Places API directly");
+      console.log("useNearbyPlaces: Calling Google Places API directly");
       
       const response = await fetch(corsProxyUrl, {
         headers: {
@@ -82,15 +81,16 @@ export function useNearbyPlaces(
       });
       
       if (!response.ok) {
+        console.error(`useNearbyPlaces: Places API returned status ${response.status}`);
         throw new Error(`Places API returned status ${response.status}`);
       }
       
       const placesData = await response.json();
       
-      console.log("Places API response:", placesData);
+      console.log("useNearbyPlaces: Places API response:", placesData);
       
       if (!placesData.results || !Array.isArray(placesData.results)) {
-        console.log("No results found from Places API");
+        console.log("useNearbyPlaces: No results found from Places API");
         toast({
           title: "No places found",
           description: `No ${category} places found near this location.`,
@@ -115,7 +115,7 @@ export function useNearbyPlaces(
         longitude: place.geometry?.location?.lng || null
       }));
       
-      console.log(`Found ${transformedPlaces.length} places for category ${category}`);
+      console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for category ${category}`);
       
       // For a single category search, add the places to the current list
       if (category && transformedPlaces.length > 0) {
@@ -150,7 +150,7 @@ export function useNearbyPlaces(
       setIsLoading(false);
       return result;
     } catch (error) {
-      console.error("Error in fetchPlaces:", error);
+      console.error("useNearbyPlaces: Error in fetchPlaces:", error);
       toast({
         title: "Error",
         description: `Failed to fetch ${category} places. Please try again.`,

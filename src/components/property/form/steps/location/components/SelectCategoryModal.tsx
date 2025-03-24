@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ export function SelectCategoryModal({
     setIsProcessing(true);
     
     try {
-      console.log(`Starting API request for category: ${category}`);
+      console.log(`SelectCategoryModal: Starting API request for category: ${category}`);
       
       // Make the API call but don't close the modal yet
       const result = await onSelect(category);
@@ -56,7 +57,7 @@ export function SelectCategoryModal({
       if (result) {
         // Check if the result has the category property with places
         if (result[category] && result[category].length > 0) {
-          console.log(`Results found for category: ${category}, places count:`, result[category].length);
+          console.log(`SelectCategoryModal: Results found for category: ${category}, places count:`, result[category].length);
           toast({
             title: "Places found",
             description: `Found ${result[category].length} ${category} places nearby.`
@@ -64,7 +65,7 @@ export function SelectCategoryModal({
           // Close modal only after successful results
           onClose();
         } else {
-          console.log(`No valid results found for category: ${category}`, result);
+          console.log(`SelectCategoryModal: No valid results found for category: ${category}`, result);
           toast({
             title: "No places found",
             description: `No ${category.replace('_', ' ')} places found near this location.`,
@@ -73,7 +74,7 @@ export function SelectCategoryModal({
           // Keep modal open
         }
       } else {
-        console.log(`No results returned for category: ${category}`);
+        console.log(`SelectCategoryModal: No results returned for category: ${category}`);
         toast({
           title: "Error",
           description: "Failed to fetch nearby places",
@@ -81,7 +82,7 @@ export function SelectCategoryModal({
         });
       }
     } catch (error) {
-      console.error(`Error fetching places for category ${category}:`, error);
+      console.error(`SelectCategoryModal: Error fetching places for category ${category}:`, error);
       toast({
         title: "Error",
         description: "Failed to fetch nearby places",
