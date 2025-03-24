@@ -277,6 +277,13 @@ export function useNearbyPlaces(
       return acc;
     }, {} as Record<string, PropertyNearbyPlace[]>);
     
+    // Create a list with separators and type information
+    const placesWithSeparators: (PropertyNearbyPlace | { separator: string })[] = [];
+    for (const [type, places] of Object.entries(groupedPlaces)) {
+      placesWithSeparators.push({ separator: type });
+      placesWithSeparators.push(...places);
+    }
+    
     // Update the form data with the combined places
     onFieldChange("nearby_places", combinedPlaces);
     
@@ -285,7 +292,7 @@ export function useNearbyPlaces(
       description: `Added ${newPlaces.length} places to the property`
     });
     
-    return groupedPlaces;
+    return placesWithSeparators;
   }, [formData.id, formData.nearby_places, onFieldChange, toast]);
 
   const removePlaceAtIndex = useCallback((index: number) => {
@@ -310,3 +317,31 @@ export function useNearbyPlaces(
     isLoading
   };
 }
+
+// Example component rendering the results
+const ResultsComponent = ({ results }: { results: (PropertyNearbyPlace | { separator: string })[] }) => {
+  return (
+    <div>
+      {results.map((item, index) => {
+        if ('separator' in item) {
+          return (
+            <div key={index} style={{ fontWeight: 'bold', marginTop: '10px' }}>
+              {item.separator}
+            </div>
+          );
+        } else {
+          return (
+            <div key={item.id} style={{ border: '1px solid #ccc', padding: '10px', marginTop: '5px' }}>
+              <div>Type: {item.type}</div>
+              <div>Name: {item.name}</div>
+              <div>Vicinity: {item.vicinity}</div>
+              <div>Rating: {item.rating}</div>
+              <div>User Ratings Total: {item.user_ratings_total}</div>
+              {/* Add other fields as needed */}
+            </div>
+          );
+        }
+      })}
+    </div>
+  );
+};
