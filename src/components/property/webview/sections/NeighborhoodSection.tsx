@@ -1,170 +1,71 @@
 
-import { WebViewSectionProps } from "../types";
-import { useRef, useEffect, useState } from "react";
+import React from "react";
+import { PropertyData } from "@/types/property";
+import { WebviewSectionTitle } from "../WebviewSectionTitle";
+import { StarIcon } from "lucide-react";
+import { groupPlacesByCategory } from "../../form/steps/location/utils/placeUtils";
 
-export function NeighborhoodSection({ property, settings, waitForPlaces = false }: WebViewSectionProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+interface NeighborhoodSectionProps {
+  property: PropertyData;
+}
 
-  useEffect(() => {
-    // Simplified function to handle map loading
-    const initMap = () => {
-      if (!mapRef.current) return;
-      
-      // Just mark as loaded for now
-      setMapLoaded(true);
-      
-      console.log("Map would be initialized here with coordinates:", property.latitude, property.longitude);
-      
-      // In a real implementation, we would initialize the Google Maps here
-      // but for now we'll just show a placeholder
-    };
+export function NeighborhoodSection({ property }: NeighborhoodSectionProps) {
+  if (!property.nearby_places || property.nearby_places.length === 0) {
+    return null;
+  }
 
-    // Try to initialize the map (in a real implementation we would check for Google Maps API)
-    initMap();
+  // Filter only places that are marked as visible
+  const visiblePlaces = property.nearby_places.filter(place => 
+    place.visible_in_webview !== false
+  );
 
-    return () => {
-      // Cleanup would happen here
-    };
-  }, [property.latitude, property.longitude, waitForPlaces]);
+  if (visiblePlaces.length === 0) {
+    return null;
+  }
 
-  // Filter places by visibility
-  const visiblePlaces = property.nearby_places ? 
-    property.nearby_places.filter(place => place.visible_in_webview !== false) : 
-    [];
+  // Group the places by category
+  const placesByCategory = React.useMemo(() => {
+    return groupPlacesByCategory(visiblePlaces);
+  }, [visiblePlaces]);
 
-  // Group nearby places by category with improved categorization
-  const groupedPlacesByCategory = visiblePlaces.length > 0 ? 
-    visiblePlaces.reduce((acc: {[key: string]: any[]}, place) => {
-      const category = place.category || place.type || 'other';
-      
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(place);
-      return acc;
-    }, {}) 
-    : {};
-  
-  // Format transportation type
-  const getTransportType = (place: any) => {
-    if (place.type?.toLowerCase().includes('train') || place.type?.toLowerCase().includes('rail')) {
-      return 'Train';
-    } else if (place.type?.toLowerCase().includes('bus')) {
-      return 'Bus';
-    } else {
-      return 'Transit';
-    }
-  };
-  
-  // Filter cities by visibility
-  const visibleCities = property.nearby_cities ? 
-    property.nearby_cities.filter(city => city.visible_in_webview !== false) : 
-    [];
+  // Get all categories from the grouped places
+  const categories = Object.keys(placesByCategory);
 
   return (
-    <div className="space-y-6 pb-24">
-      <div className="bg-white/90 p-4 rounded-lg shadow-sm mx-6">
-        <h3 className="text-xl font-semibold mb-4">Location & Nearby Places</h3>
-        
-        {property.location_description && (
-          <div className="mb-6">
-            <p className="text-gray-700 whitespace-pre-line">{property.location_description}</p>
-          </div>
-        )}
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Map placeholder or actual map image */}
-          <div className="h-[300px] rounded-lg overflow-hidden">
-            {property.map_image ? (
-              <img 
-                src={property.map_image} 
-                alt="Property location" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div ref={mapRef} className="w-full h-full flex items-center justify-center bg-gray-200">
-                <p className="text-gray-500">
-                  Map loading... (requires Google Maps API)
-                </p>
-              </div>
-            )}
-          </div>
-          
-          {/* Address and Nearby Places */}
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Address</h4>
-              <p className="text-sm">
-                {property.address}
-              </p>
+    <div className="py-8 border-b border-estate-100">
+      <WebviewSectionTitle title="Omgeving" />
+      
+      <div className="mt-6 space-y-6">
+        {categories.map((category) => (
+          <div key={category} className="space-y-3">
+            <h3 className="font-semibold text-lg">{category}</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {placesByCategory[category].map(place => (
+                <div 
+                  key={place.id} 
+                  className="p-4 bg-white rounded-lg border border-estate-100 shadow-sm"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-estate-800">{place.name}</h4>
+                      {place.vicinity && (
+                        <p className="text-sm text-estate-500 mt-1">{place.vicinity}</p>
+                      )}
+                    </div>
+                    
+                    {place.rating && (
+                      <div className="flex items-center bg-amber-50 text-amber-700 px-2 py-1 rounded">
+                        <StarIcon className="h-4 w-4 fill-amber-500 text-amber-500 mr-1" />
+                        <span>{place.rating.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            
-            {Object.keys(groupedPlacesByCategory).length > 0 ? (
-              <div>
-                <h4 className="font-semibold mb-2">Nearby Places</h4>
-                <div className="space-y-4">
-                  {Object.entries(groupedPlacesByCategory).map(([category, places]) => (
-                    <div key={category} className="space-y-1">
-                      <h5 className="text-sm text-gray-500 font-medium capitalize">{category.replace('_', ' ')}</h5>
-                      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
-                        {places.map((place, index) => (
-                          <li key={index} className="text-sm flex items-start">
-                            <svg 
-                              className="w-4 h-4 mr-2 mt-0.5 text-green-500" 
-                              fill="none" 
-                              viewBox="0 0 24 24" 
-                              stroke="currentColor"
-                            >
-                              <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M5 13l4 4L19 7" 
-                              />
-                            </svg>
-                            <div>
-                              <span className="font-medium">{place.name}</span>
-                              {place.type === 'transit' && (
-                                <span className="ml-1 text-blue-600">({getTransportType(place)})</span>
-                              )}
-                              {place.rating && (
-                                <span className="ml-1 text-yellow-600">★ {place.rating}</span>
-                              )}
-                              {place.distance && (
-                                <span className="ml-1 text-gray-400">
-                                  {typeof place.distance === 'number' 
-                                    ? `(${place.distance} km)` 
-                                    : `(${place.distance})`}
-                                </span>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : waitForPlaces ? (
-              <p className="text-sm text-gray-500 italic">
-                Places data will be available in the printed version.
-              </p>
-            ) : null}
-            
-            {visibleCities.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2">Nearby Cities</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {visibleCities.map((city, index) => (
-                    <div key={index} className="text-sm">
-                      <span className="font-medium">{city.name}</span>
-                      <span className="ml-1 text-gray-500">({city.distance} km)</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
