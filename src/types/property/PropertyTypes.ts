@@ -64,6 +64,7 @@ export interface PropertyNearbyPlace {
   distance?: number | string;
   latitude?: number;
   longitude?: number;
+  category?: string; // Add category property
 }
 
 export interface PropertyCity {
