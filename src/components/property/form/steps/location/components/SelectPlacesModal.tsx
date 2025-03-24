@@ -54,6 +54,14 @@ export function SelectPlacesModal({
     onSave(selectedPlaces);
   };
 
+  // Helper function to safely format numbers
+  const formatNumber = (value: string | number | undefined): string => {
+    if (typeof value === 'number') {
+      return value.toFixed(1);
+    }
+    return String(value || '');
+  };
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-lg">
@@ -95,12 +103,12 @@ export function SelectPlacesModal({
                         <div className="flex mt-1 gap-2">
                           {place.rating && (
                             <span className="bg-yellow-100 text-yellow-800 px-1.5 rounded-sm">
-                              ★ {place.rating.toFixed(1)}
+                              ★ {formatNumber(place.rating)}
                             </span>
                           )}
                           {place.distance && (
                             <span className="bg-blue-100 text-blue-800 px-1.5 rounded-sm">
-                              {place.distance.toFixed(1)} km
+                              {formatNumber(place.distance)} km
                             </span>
                           )}
                         </div>
