@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   Coffee, Utensils, School, Building, Stethoscope, 
-  ShoppingCart, Bus, Park, Bank, Building2, Landmark 
+  ShoppingCart, Bus, Trees, Building2, Landmark, Map
 } from "lucide-react";
 
 interface SelectCategoryModalProps {
@@ -38,16 +37,16 @@ export function SelectCategoryModal({
     { id: "school", label: "Schools", icon: <School className="h-4 w-4" /> },
     { id: "supermarket", label: "Supermarkets", icon: <ShoppingCart className="h-4 w-4" /> },
     { id: "hospital", label: "Hospitals", icon: <Stethoscope className="h-4 w-4" /> },
-    { id: "park", label: "Parks", icon: <Park className="h-4 w-4" /> }
+    { id: "park", label: "Parks", icon: <Trees className="h-4 w-4" /> }
   ];
   
   const moreCategories: CategoryOption[] = [
-    { id: "bank", label: "Banks", icon: <Bank className="h-4 w-4" /> },
+    { id: "bank", label: "Banks", icon: <Building2 className="h-4 w-4" /> },
     { id: "shopping_mall", label: "Shopping Malls", icon: <ShoppingCart className="h-4 w-4" /> },
     { id: "library", label: "Libraries", icon: <Building2 className="h-4 w-4" /> },
     { id: "transit_station", label: "Transit Stations", icon: <Bus className="h-4 w-4" /> },
     { id: "gym", label: "Gyms", icon: <Building className="h-4 w-4" /> },
-    { id: "tourist_attraction", label: "Tourist Attractions", icon: <Landmark className="h-4 w-4" /> }
+    { id: "tourist_attraction", label: "Tourist Attractions", icon: <Map className="h-4 w-4" /> }
   ];
   
   const handleSelectCategory = useCallback(async (category: string) => {
