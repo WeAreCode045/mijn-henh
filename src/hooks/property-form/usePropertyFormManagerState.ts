@@ -41,6 +41,14 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
   );
   
   // Property form images
+  const imagesData = usePropertyFormImages(
+    formState.id, 
+    formState, 
+    handleFieldChange, 
+    setPendingChanges
+  );
+  
+  // Extract images-related properties and functions
   const { 
     handleImageUpload, 
     handleRemoveImage, 
@@ -54,12 +62,7 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     handleYoutubeUrlUpdate,
     handleFloorplanEmbedScriptUpdate,
     images
-  } = usePropertyFormImages(
-    formState.id, 
-    formState, 
-    handleFieldChange, 
-    setPendingChanges
-  );
+  } = imagesData;
   
   // Property form areas
   const { 
@@ -148,6 +151,7 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     isGeneratingMap,
     onFetchCategoryPlaces,
     onFetchNearbyCities,
+    // Make sure images is included in the return
     images
   };
 }

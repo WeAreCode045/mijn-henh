@@ -10,12 +10,12 @@ export type {
   PropertyPlaceType,
   PropertyFormData,
   PropertySubmitData,
-  PropertyAgent
+  PropertyAgent,
+  // Add Area export explicitly
+  Area
 } from './PropertyTypes';
 
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export type { PropertyData } from './PropertyDataTypes';
 
-// Add Area as an alias to PropertyArea for backward compatibility
-import { PropertyArea } from './PropertyTypes';
-export type Area = PropertyArea;
+// Add Area as an alias to PropertyArea for backward compatibility - This is removed since it's now directly exported from PropertyTypes

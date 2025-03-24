@@ -3,6 +3,7 @@ import React from "react";
 import { PropertyFormManagerProps } from "./types/PropertyFormManagerTypes";
 import { usePropertyFormManagerState } from "@/hooks/property-form/usePropertyFormManagerState";
 import { usePropertyActionWrapper } from "@/hooks/property-form/usePropertyActionWrapper";
+import { PropertyFormManagerProvider } from "./PropertyFormManagerContext";
 
 export function PropertyFormManager({ 
   property, 
@@ -17,6 +18,7 @@ export function PropertyFormManager({
 
   // Wrap all modification methods when property is archived
   const wrappedMethods = {
+    formState: formManager.formState,
     handleFieldChange: wrapMethod(formManager.handleFieldChange),
     handleSaveObjectId: wrapMethod(formManager.handleSaveObjectId),
     handleSaveAgent: isArchived ? formManager.handleSaveAgent : wrapMethod(formManager.handleSaveAgent), // Allow agent changes even when archived
@@ -31,23 +33,31 @@ export function PropertyFormManager({
     handleAreaImageUpload: wrapMethod(formManager.handleAreaImageUpload),
     handleImageUpload: wrapMethod(formManager.handleImageUpload),
     handleRemoveImage: wrapMethod(formManager.handleRemoveImage),
+    isUploading: formManager.isUploading,
     handleAreaPhotosUpload: wrapMethod(formManager.handleAreaPhotosUpload),
     handleRemoveAreaPhoto: wrapMethod(formManager.handleRemoveAreaPhoto),
     handleFloorplanUpload: wrapMethod(formManager.handleFloorplanUpload),
     handleRemoveFloorplan: wrapMethod(formManager.handleRemoveFloorplan),
+    isUploadingFloorplan: formManager.isUploadingFloorplan,
     handleSetFeaturedImage: wrapMethod(formManager.handleSetFeaturedImage),
     handleToggleFeaturedImage: wrapMethod(formManager.handleToggleFeaturedImage),
     handleVirtualTourUpdate: wrapMethod(formManager.handleVirtualTourUpdate),
     handleYoutubeUrlUpdate: wrapMethod(formManager.handleYoutubeUrlUpdate),
     handleFloorplanEmbedScriptUpdate: wrapMethod(formManager.handleFloorplanEmbedScriptUpdate),
     onSubmit: wrapMethod(formManager.onSubmit),
+    currentStep: formManager.currentStep,
+    handleStepClick: wrapMethod(formManager.handleStepClick),
+    propertyWithRequiredProps: formManager.propertyWithRequiredProps,
+    lastSaved: formManager.lastSaved,
+    isSaving: formManager.isSaving,
+    setPendingChanges: wrapMethod(formManager.setPendingChanges),
     onFetchLocationData: wrapMethod(formManager.onFetchLocationData),
     onGenerateLocationDescription: wrapMethod(formManager.onGenerateLocationDescription),
     onGenerateMap: wrapMethod(formManager.onGenerateMap),
     onRemoveNearbyPlace: wrapMethod(formManager.onRemoveNearbyPlace),
     onFetchCategoryPlaces: wrapMethod(formManager.onFetchCategoryPlaces),
     onFetchNearbyCities: wrapMethod(formManager.onFetchNearbyCities),
-    setPendingChanges: wrapMethod(formManager.setPendingChanges),
+    images: formManager.images,
   };
 
   // Use the original methods or the wrapped methods based on the archived status
@@ -64,17 +74,18 @@ export function PropertyFormManager({
     onAreaImagesSelect: formManager.handleAreaImagesSelect,
   };
 
-  return children({
+  // Add backward compatibility aliases
+  const fullMethods = {
     ...methods,
-    // Add backward compatibility aliases if using the original methods
-    onAddFeature: methods.addFeature,
-    onRemoveFeature: methods.removeFeature,
-    onUpdateFeature: methods.updateFeature,
-    onAddArea: methods.addArea,
-    onRemoveArea: methods.removeArea,
-    onUpdateArea: methods.updateArea,
-    onAreaImageRemove: methods.handleAreaImageRemove,
-    onAreaImagesSelect: methods.handleAreaImagesSelect,
-    images: methods.images,
-  });
+    onAddFeature: methods.addFeature || methods.onAddFeature,
+    onRemoveFeature: methods.removeFeature || methods.onRemoveFeature,
+    onUpdateFeature: methods.updateFeature || methods.onUpdateFeature,
+    onAddArea: methods.addArea || methods.onAddArea,
+    onRemoveArea: methods.removeArea || methods.onRemoveArea,
+    onUpdateArea: methods.updateArea || methods.onUpdateArea,
+    onAreaImageRemove: methods.handleAreaImageRemove || methods.onAreaImageRemove,
+    onAreaImagesSelect: methods.handleAreaImagesSelect || methods.onAreaImagesSelect,
+  };
+
+  return children(fullMethods);
 }

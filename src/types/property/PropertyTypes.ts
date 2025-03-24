@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -18,7 +17,7 @@ export interface PropertyArea {
   images: string[];
 }
 
-// Alias Area to PropertyArea for backward compatibility
+// Explicitly export Area as an alias to PropertyArea
 export type Area = PropertyArea;
 
 export interface PropertyAgent {
