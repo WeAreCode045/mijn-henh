@@ -64,34 +64,33 @@ export function useNearbyPlaces(
         return null;
       }
       
-      // Call the nearby-places edge function
-      const payload = {
-        category,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        radius: 5000, // 5km radius
-        propertyId: formData.id,
-        apiKey
-      };
+      // Make direct API call to Google Places API instead of using the edge function
+      const radius = 5000; // 5km radius
+      const placesApiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${formData.latitude},${formData.longitude}&radius=${radius}&type=${category}&key=${apiKey}`;
       
-      console.log("Calling Supabase Edge Function: nearby-places with payload:", {
-        ...payload,
-        apiKey: "API_KEY_REDACTED" // Don't log the actual key
+      // Use a CORS proxy for client-side requests to Google's API
+      // Note: In production, you might need a proper CORS proxy or a small serverless function
+      // We're using a temporary approach for demo purposes
+      const corsProxyUrl = `https://cors-anywhere.herokuapp.com/${placesApiUrl}`;
+      
+      console.log("Calling Google Places API directly");
+      
+      const response = await fetch(corsProxyUrl, {
+        headers: {
+          'Origin': window.location.origin,
+        }
       });
       
-      const { data, error } = await supabase.functions.invoke("nearby-places", {
-        body: payload
-      });
-      
-      if (error) {
-        console.error("Error response from nearby-places function:", error);
-        throw error;
+      if (!response.ok) {
+        throw new Error(`Places API returned status ${response.status}`);
       }
       
-      console.log("Nearby places API response:", data);
+      const placesData = await response.json();
       
-      if (!data || Object.keys(data).length === 0) {
-        console.log("No places found for category:", category);
+      console.log("Places API response:", placesData);
+      
+      if (!placesData.results || !Array.isArray(placesData.results)) {
+        console.log("No results found from Places API");
         toast({
           title: "No places found",
           description: `No ${category} places found near this location.`,
@@ -101,22 +100,27 @@ export function useNearbyPlaces(
         return null;
       }
       
+      // Transform the response to match our expected format
+      const transformedPlaces = placesData.results.map((place: any) => ({
+        id: place.place_id,
+        name: place.name,
+        vicinity: place.vicinity,
+        rating: place.rating || null,
+        user_ratings_total: place.user_ratings_total || 0,
+        type: category,
+        types: place.types || [],
+        visible_in_webview: true,
+        distance: null, // We could calculate this if needed
+        latitude: place.geometry?.location?.lat || null,
+        longitude: place.geometry?.location?.lng || null
+      }));
+      
+      console.log(`Found ${transformedPlaces.length} places for category ${category}`);
+      
       // For a single category search, add the places to the current list
-      if (category && data[category]) {
+      if (category && transformedPlaces.length > 0) {
         const existingPlaces = formData.nearby_places || [];
-        const newPlaces = data[category] as PropertyNearbyPlace[];
-        
-        console.log(`Found ${newPlaces.length} places for category ${category}`);
-        
-        if (newPlaces.length === 0) {
-          toast({
-            title: "No places found",
-            description: `No ${category} places found near this location.`,
-            variant: "default"
-          });
-          setIsLoading(false);
-          return null;
-        }
+        const newPlaces = transformedPlaces as PropertyNearbyPlace[];
         
         // Combine existing and new places, avoiding duplicates by ID
         const combinedPlaces = [
@@ -133,10 +137,18 @@ export function useNearbyPlaces(
           title: "Places found",
           description: `Found ${newPlaces.length} ${category} places nearby.`
         });
+      } else {
+        toast({
+          title: "No places found",
+          description: `No ${category} places found near this location.`,
+          variant: "default"
+        });
       }
       
+      // Return the results in the same format expected by the components
+      const result = { [category]: transformedPlaces };
       setIsLoading(false);
-      return data;
+      return result;
     } catch (error) {
       console.error("Error in fetchPlaces:", error);
       toast({

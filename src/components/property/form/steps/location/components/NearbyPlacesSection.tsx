@@ -26,7 +26,7 @@ export function NearbyPlacesSection({
   onSearchClick
 }: NearbyPlacesSectionProps) {
   const [activeTab, setActiveTab] = useState("search");
-  const { toast } = useToast(); // Import toast directly from useToast hook
+  const { toast } = useToast();
   
   // Log key props for debugging
   useEffect(() => {
