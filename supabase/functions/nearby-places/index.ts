@@ -31,6 +31,13 @@ serve(async (req) => {
       propertyId: requestData.propertyId
     });
     
+    // Log more detailed API key info for troubleshooting
+    if (requestData.apiKey) {
+      console.log(`API Key received: ${requestData.apiKey.substring(0, 5)}...${requestData.apiKey.substring(requestData.apiKey.length - 5)}`);
+    } else {
+      console.error("ERROR: No API key provided in request");
+    }
+    
     const { 
       address, 
       apiKey, 
@@ -44,6 +51,7 @@ serve(async (req) => {
     } = requestData;
     
     if (!apiKey) {
+      console.error('ERROR: API key is required but was not provided');
       throw new Error('API key is required')
     }
 

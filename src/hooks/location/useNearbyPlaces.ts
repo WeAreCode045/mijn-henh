@@ -27,7 +27,30 @@ export function useNearbyPlaces(
     setIsLoading(true);
     
     try {
+      // Get Google Maps API key from settings first - log this for troubleshooting
+      const { data: settingsData, error: settingsError } = await supabase
+        .from('agency_settings')
+        .select('google_maps_api_key')
+        .single();
+      
+      if (settingsError) {
+        console.error("Error fetching API key from settings:", settingsError);
+        throw new Error("Could not fetch Google Maps API key from settings");
+      }
+      
+      const apiKey = settingsData?.google_maps_api_key;
+      console.log("Using API key from settings:", apiKey ? "API key found" : "No API key found");
+      
       // Call the nearby-places edge function
+      console.log("Calling Supabase Edge Function: nearby-places with payload:", {
+        category,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        radius: 5000,
+        propertyId: formData.id,
+        apiKeyProvided: !!apiKey
+      });
+      
       const { data, error } = await supabase.functions.invoke("nearby-places", {
         body: {
           category,
@@ -35,12 +58,12 @@ export function useNearbyPlaces(
           longitude: formData.longitude,
           radius: 5000,
           propertyId: formData.id,
-          apiKey: process.env.GOOGLE_MAPS_API_KEY || ""
+          apiKey: apiKey || ""
         }
       });
       
       if (error) {
-        console.error("Error fetching nearby places:", error);
+        console.error("Error response from nearby-places function:", error);
         throw error;
       }
       
@@ -60,6 +83,8 @@ export function useNearbyPlaces(
       if (category && data[category]) {
         const existingPlaces = formData.nearby_places || [];
         const newPlaces = data[category] as PropertyNearbyPlace[];
+        
+        console.log(`Found ${newPlaces.length} places for category ${category}`);
         
         // Combine existing and new places, avoiding duplicates by ID
         const combinedPlaces = [

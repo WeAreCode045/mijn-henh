@@ -58,11 +58,14 @@ export async function fetchPlacesFromAPI(
   console.log(`Request body for ${category}:`, JSON.stringify(requestBody));
   
   try {
-    console.log(`Making API request to Places API for ${category}`);
+    // Log the full API URL being called
+    const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
+    console.log(`Making API request to Places API: ${placesApiUrl}`);
+    console.log(`Using API key: ${apiKey ? apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4) : 'No API key provided'}`);
     
     // Make request to Places API v1
     const placesResponse = await fetch(
-      'https://places.googleapis.com/v1/places:searchNearby',
+      placesApiUrl,
       {
         method: 'POST',
         headers: {

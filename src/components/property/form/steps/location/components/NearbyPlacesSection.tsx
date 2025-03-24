@@ -37,7 +37,8 @@ export function NearbyPlacesSection({
       searchResultsCount: Object.keys(searchResults).length,
       showModal,
       latitude: formData.latitude,
-      longitude: formData.longitude
+      longitude: formData.longitude,
+      nearbyPlacesCount: formData.nearby_places?.length || 0
     });
   }, [
     formData,
@@ -54,15 +55,23 @@ export function NearbyPlacesSection({
   );
   
   const handleFetchPlaces = async (category: string) => {
+    console.log(`handleFetchPlaces called for category: ${category}`);
+    
     if (onFetchCategoryPlaces) {
+      console.log(`Using parent component's onFetchCategoryPlaces for ${category}`);
       const results = await onFetchCategoryPlaces(category);
+      console.log(`Results from onFetchCategoryPlaces for ${category}:`, results);
+      
       if (results) {
         setSearchResults(results);
         setActiveTab("view");
       }
       return results;
     } else {
+      console.log(`Using local nearbyPlacesHook.fetchPlaces for ${category}`);
       const results = await nearbyPlacesHook.fetchPlaces(category);
+      console.log(`Results from nearbyPlacesHook.fetchPlaces for ${category}:`, results);
+      
       if (results) {
         setSearchResults(results);
         setActiveTab("view");
@@ -72,12 +81,21 @@ export function NearbyPlacesSection({
   };
   
   const handleRemovePlace = (index: number) => {
+    console.log(`Removing place at index: ${index}`);
+    
     if (onRemoveNearbyPlace) {
       onRemoveNearbyPlace(index);
     } else {
       nearbyPlacesHook.removePlaceAtIndex(index);
     }
   };
+
+  // Check if we have nearby places to determine which tab to show by default
+  useEffect(() => {
+    if (formData.nearby_places && formData.nearby_places.length > 0) {
+      setActiveTab("view");
+    }
+  }, [formData.nearby_places]);
 
   return (
     <Card>
