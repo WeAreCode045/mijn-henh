@@ -1,218 +1,109 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+
+import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlacesSearchTab } from "./PlacesSearchTab";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, Star, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useNearbyPlaces } from "@/hooks/location/useNearbyPlaces";
+import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { SearchPlacesTab } from "./SearchPlacesTab";
+import { PlacesViewTab } from "./PlacesViewTab";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
+  onRemoveNearbyPlace?: (index: number) => void;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
-  onRemoveNearbyPlace?: (index: number) => void;
   isLoadingNearbyPlaces?: boolean;
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }
 
 export function NearbyPlacesSection({
   formData,
+  onRemoveNearbyPlace,
   onFieldChange,
   onFetchCategoryPlaces,
-  onRemoveNearbyPlace,
-  isLoadingNearbyPlaces = false,
+  isLoadingNearbyPlaces,
   onSearchClick
 }: NearbyPlacesSectionProps) {
-  const [activeTab, setActiveTab] = useState("view");
-  const [selectedPlaces, setSelectedPlaces] = useState<PropertyNearbyPlace[]>([]);
-  const [showResultsModal, setShowResultsModal] = useState(false);
-
-  const {
-    fetchPlaces: hookFetchPlaces,
-    removePlaceAtIndex: hookRemovePlaceAtIndex,
-    saveSelectedPlaces,
-    searchResults,
-    isLoading: hookIsLoading
-  } = onFieldChange ? useNearbyPlaces(formData, onFieldChange) : { 
-    fetchPlaces: null, 
-    removePlaceAtIndex: null,
-    saveSelectedPlaces: null,
-    searchResults: [],
-    isLoading: false 
-  };
-
-  const fetchPlaces = onFetchCategoryPlaces || hookFetchPlaces;
-  const removePlaceAtIndex = onRemoveNearbyPlace || hookRemovePlaceAtIndex;
-  const isLoading = isLoadingNearbyPlaces || hookIsLoading;
-
-  const handlePlaceClick = (place: PropertyNearbyPlace) => {
-    setSelectedPlaces(prev => {
-      const isSelected = prev.some(p => p.id === place.id);
-      return isSelected 
-        ? prev.filter(p => p.id !== place.id) 
-        : [...prev, place];
-    });
-  };
-
-  const handleSaveSelectedPlaces = () => {
-    if (saveSelectedPlaces) {
-      saveSelectedPlaces(selectedPlaces);
-      setShowResultsModal(false);
-      setSelectedPlaces([]);
+  const [activeTab, setActiveTab] = useState<"view" | "search">("view");
+  const { toast } = useToast();
+  
+  const nearbyPlaces = formData.nearby_places || [];
+  
+  const handleToggleVisibility = useCallback(async (index: number, visible: boolean) => {
+    if (!onFieldChange || !formData.id || !formData.nearby_places) return;
+    
+    try {
+      // Create a copy of the places array
+      const updatedPlaces = [...formData.nearby_places];
+      
+      // Update the visibility of the place at the specified index
+      updatedPlaces[index] = {
+        ...updatedPlaces[index],
+        visible_in_webview: visible
+      };
+      
+      // Update form state
+      onFieldChange('nearby_places', updatedPlaces);
+      
+      // Update in Supabase
+      const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
+      const { error } = await supabase
+        .from('properties')
+        .update({ nearby_places: jsonPlaces })
+        .eq('id', formData.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        description: `Place will ${visible ? 'be shown' : 'not be shown'} in the property webview`,
+      });
+    } catch (error) {
+      console.error("Error toggling place visibility:", error);
+      toast({
+        variant: "destructive",
+        description: "Failed to update place visibility",
+      });
     }
-  };
-
-  const handleSearchResults = useCallback((places: PropertyNearbyPlace[]) => {
-    if (places && places.length > 0) {
-      setSelectedPlaces([]);
-      setShowResultsModal(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (searchResults && searchResults.length > 0) {
-      handleSearchResults(searchResults);
-    }
-  }, [searchResults, handleSearchResults]);
-
+  }, [formData.id, formData.nearby_places, onFieldChange, toast]);
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle>Nearby Places</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="view" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
+      <CardContent className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "view" | "search")}>
+          <TabsList>
             <TabsTrigger value="view">View Places</TabsTrigger>
-            <TabsTrigger value="add">Add Places</TabsTrigger>
+            <TabsTrigger value="search">Search</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="view" className="pt-4">
-            {formData.nearby_places?.length ? (
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-2">
-                  {formData.nearby_places.map((place, index) => (
-                    <div key={place.id} className="border rounded-md p-3 relative group">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium">{place.name}</h4>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="h-3.5 w-3.5 mr-1" />
-                            <span>{place.vicinity || "No address available"}</span>
-                          </div>
-
-                          <div className="flex items-center space-x-2 mt-1">
-                            {place.rating && (
-                              <div className="flex items-center">
-                                <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                                <span className="text-sm">
-                                  {place.rating} ({place.user_ratings_total || 0})
-                                </span>
-                              </div>
-                            )}
-                            
-                            <Badge variant="outline">{place.type}</Badge>
-                          </div>
-                        </div>
-                        
-                        {removePlaceAtIndex && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removePlaceAtIndex(index)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="border border-dashed rounded-md p-8 text-center">
-                <p className="text-muted-foreground">No nearby places added yet.</p>
-                <Button
-                  variant="link"
-                  className="mt-2"
-                  onClick={() => setActiveTab("add")}
-                >
-                  Add places
-                </Button>
-              </div>
-            )}
+          <TabsContent value="view" className="space-y-4 pt-4">
+            <PlacesViewTab 
+              places={nearbyPlaces}
+              onRemove={onRemoveNearbyPlace}
+              onToggleVisibility={handleToggleVisibility}
+              isDisabled={!formData.id}
+            />
           </TabsContent>
           
-          <TabsContent value="add" className="pt-4">
-            <PlacesSearchTab
-              formData={formData}
-              onFieldChange={onFieldChange}
-              onFetchPlaces={fetchPlaces}
-              isLoading={isLoading}
+          <TabsContent value="search" className="space-y-4 pt-4">
+            <SearchPlacesTab 
+              onSearch={onFetchCategoryPlaces}
+              isLoading={isLoadingNearbyPlaces}
+              coordinates={{ 
+                latitude: formData.latitude, 
+                longitude: formData.longitude 
+              }}
+              propertyId={formData.id}
               onSearchClick={onSearchClick}
             />
           </TabsContent>
         </Tabs>
-
-        <Dialog open={showResultsModal} onOpenChange={setShowResultsModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Select Places to Add</DialogTitle>
-            </DialogHeader>
-            
-            <ScrollArea className="max-h-[400px] pr-4">
-              <div className="space-y-2">
-                {searchResults.map((place) => (
-                  <div 
-                    key={place.id} 
-                    className={`p-3 border rounded-md cursor-pointer transition-colors ${
-                      selectedPlaces.some(p => p.id === place.id) ? 'bg-primary/10 border-primary' : 'hover:bg-muted'
-                    }`}
-                    onClick={() => handlePlaceClick(place)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{place.name}</h4>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5 mr-1" />
-                          <span>{place.vicinity || "No address available"}</span>
-                        </div>
-                        {place.rating && (
-                          <div className="flex items-center mt-1">
-                            <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                            <span className="text-sm">
-                              {place.rating} ({place.user_ratings_total || 0} reviews)
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowResultsModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveSelectedPlaces}
-                disabled={selectedPlaces.length === 0}
-              >
-                Add {selectedPlaces.length} Selected
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </CardContent>
     </Card>
   );
