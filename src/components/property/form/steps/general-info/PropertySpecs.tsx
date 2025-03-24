@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PropertySpecsProps {
@@ -18,6 +18,7 @@ interface PropertySpecsProps {
 export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: PropertySpecsProps) {
   const [initialPropertyType, setInitialPropertyType] = useState<string | null>(null);
   const { toast } = useToast();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Set the initial property type when the component mounts
   useEffect(() => {
@@ -25,6 +26,15 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
       setInitialPropertyType(formData.propertyType);
     }
   }, [formData.propertyType, initialPropertyType]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const saveToDatabase = async (field: keyof PropertyFormData, value: any) => {
     if (!formData.id) return;
@@ -46,24 +56,38 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
     }
   };
 
-  const handleInputChange = async (field: keyof PropertyFormData, value: any) => {
+  const handleInputChange = (field: keyof PropertyFormData, value: any) => {
+    // Update the local state immediately
     onFieldChange(field, value);
     
     if (setPendingChanges) {
       setPendingChanges(true);
     }
-    
-    // Save the change to the database
-    await saveToDatabase(field, value);
-    
-    // Only show toast for property type changes and limit success message frequency
-    if (field === 'propertyType' && value !== initialPropertyType) {
-      setInitialPropertyType(value);
-      toast({
-        title: "Success",
-        description: "Property type updated",
-      });
+  };
+  
+  const handleInputBlur = (field: keyof PropertyFormData, value: any) => {
+    // Clear any existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+    
+    // Set a new timeout to save after 2 seconds
+    saveTimeoutRef.current = setTimeout(async () => {
+      await saveToDatabase(field, value);
+      
+      // Only show toast for property type changes and limit success message frequency
+      if (field === 'propertyType' && value !== initialPropertyType) {
+        setInitialPropertyType(value);
+        toast({
+          title: "Success",
+          description: "Property type updated",
+        });
+      }
+      
+      if (setPendingChanges) {
+        setPendingChanges(false);
+      }
+    }, 2000);
   };
   
   const handleSwitchChange = async (field: keyof PropertyFormData, checked: boolean) => {
@@ -73,8 +97,18 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
       setPendingChanges(true);
     }
     
-    // Save the change to the database
-    await saveToDatabase(field, checked);
+    // Save the change to the database with a delay
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(async () => {
+      await saveToDatabase(field, checked);
+      
+      if (setPendingChanges) {
+        setPendingChanges(false);
+      }
+    }, 2000);
   };
   
   const propertyTypes = [
@@ -97,7 +131,10 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Label htmlFor="property-type">Type</Label>
             <Select
               value={formData.propertyType || ""}
-              onValueChange={(value) => handleInputChange("propertyType", value)}
+              onValueChange={(value) => {
+                handleInputChange("propertyType", value);
+                handleInputBlur("propertyType", value);
+              }}
             >
               <SelectTrigger id="property-type">
                 <SelectValue placeholder="Select type" />
@@ -117,6 +154,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               id="price"
               value={formData.price || ""}
               onChange={(e) => handleInputChange("price", e.target.value)}
+              onBlur={(e) => handleInputBlur("price", e.target.value)}
               placeholder="e.g. $500,000"
             />
           </div>
@@ -130,6 +168,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               min="0"
               value={formData.bedrooms || ""}
               onChange={(e) => handleInputChange("bedrooms", e.target.value)}
+              onBlur={(e) => handleInputBlur("bedrooms", e.target.value)}
               placeholder="e.g. 3"
             />
           </div>
@@ -144,6 +183,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               step="0.5"
               value={formData.bathrooms || ""}
               onChange={(e) => handleInputChange("bathrooms", e.target.value)}
+              onBlur={(e) => handleInputBlur("bathrooms", e.target.value)}
               placeholder="e.g. 2"
             />
           </div>
@@ -157,6 +197,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               min="0"
               value={formData.garages || ""}
               onChange={(e) => handleInputChange("garages", e.target.value)}
+              onBlur={(e) => handleInputBlur("garages", e.target.value)}
               placeholder="e.g. 1"
             />
           </div>
@@ -168,6 +209,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               id="size"
               value={formData.sqft || ""}
               onChange={(e) => handleInputChange("sqft", e.target.value)}
+              onBlur={(e) => handleInputBlur("sqft", e.target.value)}
               placeholder="e.g. 1,500"
             />
           </div>
@@ -179,6 +221,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               id="lot-size"
               value={formData.livingArea || ""}
               onChange={(e) => handleInputChange("livingArea", e.target.value)}
+              onBlur={(e) => handleInputBlur("livingArea", e.target.value)}
               placeholder="e.g. 0.25 acres"
             />
           </div>
@@ -193,6 +236,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               max={new Date().getFullYear()}
               value={formData.buildYear || ""}
               onChange={(e) => handleInputChange("buildYear", e.target.value)}
+              onBlur={(e) => handleInputBlur("buildYear", e.target.value)}
               placeholder="e.g. 2005"
             />
           </div>
@@ -202,7 +246,10 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             <Label htmlFor="energy-label">Energy Label</Label>
             <Select
               value={formData.energyLabel || "none"}
-              onValueChange={(value) => handleInputChange("energyLabel", value)}
+              onValueChange={(value) => {
+                handleInputChange("energyLabel", value);
+                handleInputBlur("energyLabel", value);
+              }}
             >
               <SelectTrigger id="energy-label">
                 <SelectValue placeholder="Select energy label" />
