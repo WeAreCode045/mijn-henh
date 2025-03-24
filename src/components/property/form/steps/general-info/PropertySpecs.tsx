@@ -200,7 +200,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
           
           {/* SIZE */}
           <div>
-            <Label htmlFor="size">Size (sq ft)</Label>
+            <Label htmlFor="size">Living Area (m2)</Label>
             <Input
               id="size"
               value={formData.sqft || ""}
