@@ -6,6 +6,7 @@ import { PlacesSearchTab } from "./PlacesSearchTab";
 import { PlacesViewTab } from "./PlacesViewTab";
 import { useState, useEffect } from "react";
 import { useNearbyPlaces } from "@/hooks/location/useNearbyPlaces";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -25,7 +26,7 @@ export function NearbyPlacesSection({
   onSearchClick
 }: NearbyPlacesSectionProps) {
   const [activeTab, setActiveTab] = useState("search");
-  const { toast } = useNearbyPlaces(formData, onFieldChange || (() => {}));
+  const { toast } = useToast(); // Import toast directly from useToast hook
   
   // Log key props for debugging
   useEffect(() => {
