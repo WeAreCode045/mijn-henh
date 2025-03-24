@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
 import { GeneralPage } from "./pages/GeneralPage";
@@ -24,8 +24,6 @@ interface ContentRouterProps {
     onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
     onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     handleStepClick: (step: number) => void;
-    handleNext?: () => void;
-    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
     onFetchCategoryPlaces?: (category: string) => Promise<any>;
     onFetchNearbyCities?: () => Promise<any>;
@@ -53,7 +51,7 @@ export function ContentRouter({
   const navigate = useNavigate();
 
   // Sync URL with current step if they don't match
-  useEffect(() => {
+  React.useEffect(() => {
     if (id && stepSlug) {
       const stepIndex = contentStepSlugs.indexOf(stepSlug);
       if (stepIndex !== -1 && stepIndex !== currentStep) {
@@ -78,11 +76,9 @@ export function ContentRouter({
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Form submit prevented in ContentRouter");
   };
 
   const renderContent = () => {
-
     switch (currentStep) {
       case 0:
         return (

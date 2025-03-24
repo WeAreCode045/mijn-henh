@@ -9,6 +9,7 @@ export function usePropertyFormState(
 ) {
   const { autosaveField, setPendingChanges } = usePropertyAutoSave();
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [changedField, setChangedField] = useState<{field: keyof PropertyFormData, value: any} | null>(null);
   
   // Type-safe field change handler
   const handleFieldChange = useCallback(<K extends keyof PropertyFormData>(
@@ -20,6 +21,9 @@ export function usePropertyFormState(
       ...prevState,
       [field]: value
     }));
+    
+    // Track which field changed and its new value
+    setChangedField({field, value});
     
     // Mark that there are pending changes
     setPendingChanges(true);
@@ -37,6 +41,8 @@ export function usePropertyFormState(
           .then(success => {
             if (success) {
               console.log(`Field ${String(field)} autosaved successfully`);
+              // Reset the changed field tracking after successful save
+              setChangedField(null);
             }
           })
           .catch(error => {
@@ -46,16 +52,48 @@ export function usePropertyFormState(
       
       setSaveTimeout(newTimeout);
     }
-  }, [formState, setFormState, autosaveField, setPendingChanges, saveTimeout]);
+  }, [formState.id, autosaveField, setPendingChanges, saveTimeout]);
   
-  // Clean up timeout on unmount
+  // Save the last changed field when leaving the page
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (changedField && formState.id) {
+        // Attempt to save the last changed field without waiting for the timeout
+        autosaveField(formState.id, changedField.field, changedField.value)
+          .then(success => {
+            if (success) {
+              console.log(`Field ${String(changedField.field)} saved on page leave`);
+            }
+          })
+          .catch(error => {
+            console.error(`Error saving field on page leave:`, error);
+          });
+      }
+    };
+
+    // Add beforeunload event listener
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Clean up timeout and event listener on unmount
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
       if (saveTimeout) {
         clearTimeout(saveTimeout);
       }
+      
+      // Save any unsaved changes when component unmounts
+      if (changedField && formState.id) {
+        autosaveField(formState.id, changedField.field, changedField.value)
+          .then(success => {
+            if (success) console.log(`Field ${String(changedField.field)} saved on unmount`);
+          })
+          .catch(error => {
+            console.error(`Error saving field on unmount:`, error);
+          });
+      }
     };
-  }, [saveTimeout]);
+  }, [saveTimeout, changedField, formState.id, autosaveField]);
   
   return {
     formState,

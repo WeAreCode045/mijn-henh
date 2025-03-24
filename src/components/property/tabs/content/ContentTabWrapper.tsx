@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { ContentRouter } from './ContentRouter';
 import { usePropertyContentStepNavigation } from '@/hooks/usePropertyContentStepNavigation';
@@ -21,8 +21,6 @@ interface ContentTabWrapperProps {
     onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
-    handleNext?: () => void;
-    handlePrevious?: () => void;
     onFetchLocationData?: () => Promise<void>;
     onFetchCategoryPlaces?: (category: string) => Promise<any>;
     onFetchNearbyCities?: () => Promise<any>;
@@ -45,7 +43,6 @@ export function ContentTabWrapper({
 }: ContentTabWrapperProps) {
   const [pendingChanges, setPendingChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { step: stepSlug } = useParams<{ step: string }>();
   
   // Create a centralized navigation handler
   const { 
@@ -59,17 +56,13 @@ export function ContentTabWrapper({
     pendingChanges,
     setPendingChanges,
     setLastSaved,
-    handlers.handleStepClick,
-    handlers.handleNext,
-    handlers.handlePrevious
+    handlers.handleStepClick
   );
 
   // Create a complete bundle of all handlers needed for content routing
   const contentHandlers = {
     ...handlers,
     handleStepClick: internalHandleStepClick,
-    handleNext,
-    handlePrevious,
     setPendingChanges: (value: boolean) => {
       setPendingChanges(value);
       if (handlers.setPendingChanges) {
@@ -79,7 +72,6 @@ export function ContentTabWrapper({
     // Ensure isSaving is not undefined for ContentRouter
     isSaving: handlers.isSaving || false
   };
-
 
   return (
     <ContentRouter 
