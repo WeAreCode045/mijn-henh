@@ -1,3 +1,4 @@
+
 import { PropertyData } from "./PropertyDataTypes";
 
 // Basic data types
@@ -59,7 +60,7 @@ export interface PropertyNearbyPlace {
   rating?: number | null;
   user_ratings_total?: number;
   type: string;
-  propertyTypes?: string[]; // Updated property name to match
+  propertyTypes?: string[]; // Property for place types
   visible_in_webview?: boolean;
   distance?: number | string;
   latitude?: number;
