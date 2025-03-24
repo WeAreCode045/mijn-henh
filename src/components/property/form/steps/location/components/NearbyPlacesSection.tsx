@@ -44,12 +44,14 @@ export function NearbyPlacesSection({
     onSearchClick
   });
 
-  console.log("NearbyPlacesSection props:", { 
+  console.log("NearbyPlacesSection props & state:", { 
     hasSearchClick: !!onSearchClick, 
     hasFormData: !!formData, 
     hasFetchCategoryPlaces: !!onFetchCategoryPlaces,
     searchResultsCount: searchResults.length,
-    showModal: showSelectionModal
+    showModal: showSelectionModal,
+    latitude: formData.latitude,
+    longitude: formData.longitude
   });
 
   return (
@@ -84,11 +86,12 @@ export function NearbyPlacesSection({
           </TabsContent>
         </Tabs>
         
-        {/* Modal for selecting places */}
-        {showSelectionModal && searchResults.length > 0 && (
+        {/* Modal for selecting places - show even if no results to display error message */}
+        {showSelectionModal && (
           <SelectPlacesModal
             open={showSelectionModal}
             onClose={() => {
+              console.log("Closing modal");
               setShowSelectionModal(false);
               setSearchResults([]);
             }}

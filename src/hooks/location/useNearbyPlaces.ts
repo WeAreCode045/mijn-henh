@@ -10,10 +10,26 @@ export function useNearbyPlaces(
   toast: any
 ) {
   const fetchCategoryPlaces = useCallback(async (category: string) => {
+    console.log("fetchCategoryPlaces called with category:", category);
+    
     if (!formData.address) {
+      console.error("Error: Address is missing");
       toast({
         title: "Error",
         description: "Please enter an address first",
+        variant: "destructive",
+      });
+      return null;
+    }
+    
+    if (!formData.latitude || !formData.longitude) {
+      console.error("Error: Coordinates are missing", { 
+        latitude: formData.latitude, 
+        longitude: formData.longitude 
+      });
+      toast({
+        title: "Error",
+        description: "Property coordinates are required. Please set the coordinates first.",
         variant: "destructive",
       });
       return null;
@@ -28,9 +44,13 @@ export function useNearbyPlaces(
         .select('google_maps_api_key')
         .single();
         
-      if (settingsError) throw settingsError;
+      if (settingsError) {
+        console.error("Error fetching API key:", settingsError);
+        throw settingsError;
+      }
       
       if (!settings?.google_maps_api_key) {
+        console.error("Google Maps API key not configured");
         toast({
           title: "Error",
           description: "Google Maps API key not configured in agency settings",
@@ -39,23 +59,27 @@ export function useNearbyPlaces(
         return null;
       }
       
+      const requestData = { 
+        address: formData.address,
+        apiKey: settings.google_maps_api_key,
+        category: category,
+        propertyId: formData.id,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        radius: 5000  // 5km radius
+      };
+      
       console.log("Calling nearby-places Edge Function with data:", {
         address: formData.address,
         category,
         latitude: formData.latitude,
-        longitude: formData.longitude
+        longitude: formData.longitude,
+        propertyId: formData.id,
+        // Don't log the API key for security reasons
       });
       
       const { data, error } = await supabase.functions.invoke('nearby-places', {
-        body: { 
-          address: formData.address,
-          apiKey: settings.google_maps_api_key,
-          category: category,
-          propertyId: formData.id,
-          latitude: formData.latitude,
-          longitude: formData.longitude,
-          radius: 5000  // 5km radius
-        }
+        body: requestData
       });
       
       if (error) {
@@ -64,10 +88,31 @@ export function useNearbyPlaces(
       }
       
       if (data) {
-        console.log(`${category} places fetched:`, data);
+        console.log(`Places data received for category ${category}:`, data);
+        
+        // Check if any places were found
+        let totalPlaces = 0;
+        if (typeof data === 'object' && !Array.isArray(data)) {
+          Object.entries(data).forEach(([key, places]) => {
+            if (Array.isArray(places)) {
+              totalPlaces += places.length;
+              console.log(`Category ${key} has ${places.length} places`);
+            }
+          });
+        }
+        
+        if (totalPlaces === 0) {
+          console.log("No places found in the response");
+          toast({
+            title: "No places found",
+            description: `No ${category} places found within 5km of this location.`,
+          });
+        }
+        
         return data;
       }
       
+      console.log("No data returned from edge function");
       return null;
     } catch (error) {
       console.error(`Error fetching ${category} places:`, error);

@@ -41,8 +41,10 @@ export function useNearbyPlacesSection({
     if (!onFetchCategoryPlaces) return null;
     
     try {
-      console.log("Fetching places for category:", category);
+      console.log("Starting fetchPlaces for category:", category);
       const result = await onFetchCategoryPlaces(category);
+      
+      console.log("API response for category:", category, result);
       
       if (result) {
         console.log("Search results:", result);
@@ -72,6 +74,7 @@ export function useNearbyPlacesSection({
           
           return places;
         } else {
+          console.log("No places found for category:", category);
           toast({
             title: "Info",
             description: "No nearby places found in this category",
@@ -100,37 +103,65 @@ export function useNearbyPlacesSection({
     
     let results = null;
     
-    if (onSearchClick) {
-      // Use the parent component's search handler if provided
-      results = await onSearchClick(e, category);
-    } else if (onFetchCategoryPlaces) {
-      // Otherwise use the default fetch logic
-      results = await fetchPlaces(category);
-    }
-    
-    // Process the results
-    if (results) {
-      console.log("Processing search results:", results);
-      let places: PropertyNearbyPlace[] = [];
+    try {
+      if (onSearchClick) {
+        // Use the parent component's search handler if provided
+        console.log("Using parent onSearchClick handler for category:", category);
+        results = await onSearchClick(e, category);
+        console.log("Results from parent search handler:", results);
+      } else if (onFetchCategoryPlaces) {
+        // Otherwise use the default fetch logic
+        console.log("Using default fetchPlaces for category:", category);
+        results = await fetchPlaces(category);
+        console.log("Results from fetchPlaces:", results);
+      }
       
-      // Handle different result formats
-      if (typeof results === 'object' && !Array.isArray(results)) {
-        Object.values(results).forEach(categoryPlaces => {
-          if (Array.isArray(categoryPlaces)) {
-            places = [...places, ...categoryPlaces as PropertyNearbyPlace[]];
-          }
+      // Process the results
+      if (results) {
+        console.log("Processing search results:", results);
+        let places: PropertyNearbyPlace[] = [];
+        
+        // Handle different result formats
+        if (typeof results === 'object' && !Array.isArray(results)) {
+          console.log("Results are an object, flattening categories");
+          Object.entries(results).forEach(([categoryKey, categoryPlaces]) => {
+            console.log(`Processing category ${categoryKey} with ${Array.isArray(categoryPlaces) ? categoryPlaces.length : 0} places`);
+            if (Array.isArray(categoryPlaces)) {
+              places = [...places, ...categoryPlaces as PropertyNearbyPlace[]];
+            }
+          });
+        } else if (Array.isArray(results)) {
+          console.log("Results are already an array of length:", results.length);
+          places = results;
+        }
+        
+        if (places.length > 0) {
+          console.log(`Found ${places.length} places to display in modal`);
+          setSearchResults(places);
+          setShowSelectionModal(true);
+        } else {
+          console.log("No places found after processing results");
+          toast({
+            title: "No results",
+            description: "No places found in this category. Try another category.",
+          });
+        }
+      } else {
+        console.log("No results returned from search");
+        toast({
+          title: "No results",
+          description: "The search did not return any places. Check your location settings or try another category.",
         });
-      } else if (Array.isArray(results)) {
-        places = results;
       }
-      
-      if (places.length > 0) {
-        console.log(`Found ${places.length} places to display`);
-        setSearchResults(places);
-        setShowSelectionModal(true);
-      }
+    } catch (error) {
+      console.error("Error during search:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred while searching for places",
+        variant: "destructive",
+      });
     }
-  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick]);
+  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick, toast]);
   
   // Function to save selected places to the property
   const handleSavePlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {
