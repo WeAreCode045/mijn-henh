@@ -34,19 +34,9 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     [];
 
   // Group nearby places by category with improved categorization
-  const groupedPlaces = visiblePlaces.length > 0 ? 
+  const groupedPlacesByCategory = visiblePlaces.length > 0 ? 
     visiblePlaces.reduce((acc: {[key: string]: any[]}, place) => {
-      const category = place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
-        ? 'education'
-        : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport') ||
-          place.type?.toLowerCase().includes('fitness') || place.type?.toLowerCase().includes('tennis') || 
-          place.type?.toLowerCase().includes('soccer')
-        ? 'sports'
-        : place.type?.toLowerCase().includes('transit') || place.type?.toLowerCase().includes('station') || place.type?.toLowerCase().includes('bus')
-        ? 'transportation'
-        : place.type?.toLowerCase().includes('store') || place.type?.toLowerCase().includes('supermarket') || place.type?.toLowerCase().includes('mall')
-        ? 'shopping'
-        : 'other';
+      const category = place.category || place.type || 'other';
       
       if (!acc[category]) acc[category] = [];
       acc[category].push(place);
@@ -108,14 +98,14 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
               </p>
             </div>
             
-            {Object.keys(groupedPlaces).length > 0 ? (
+            {Object.keys(groupedPlacesByCategory).length > 0 ? (
               <div>
                 <h4 className="font-semibold mb-2">Nearby Places</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {Object.entries(groupedPlaces).map(([category, places]) => (
+                <div className="space-y-4">
+                  {Object.entries(groupedPlacesByCategory).map(([category, places]) => (
                     <div key={category} className="space-y-1">
-                      <h5 className="text-sm text-gray-500 font-medium capitalize">{category}</h5>
-                      <ul className="space-y-1">
+                      <h5 className="text-sm text-gray-500 font-medium capitalize">{category.replace('_', ' ')}</h5>
+                      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                         {places.map((place, index) => (
                           <li key={index} className="text-sm flex items-start">
                             <svg 
@@ -133,7 +123,7 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
                             </svg>
                             <div>
                               <span className="font-medium">{place.name}</span>
-                              {category === 'transportation' && (
+                              {place.type === 'transit' && (
                                 <span className="ml-1 text-blue-600">({getTransportType(place)})</span>
                               )}
                               {place.rating && (

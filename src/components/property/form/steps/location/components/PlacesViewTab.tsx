@@ -14,16 +14,17 @@ export function PlacesViewTab({
   isLoading = false, 
   onRemovePlace 
 }: PlacesViewTabProps) {
-  // Group places by type for the view tab
-  const placesByType = useMemo(() => {
+  // Group places by category first, then by type
+  const placesByCategory = useMemo(() => {
     if (!places || places.length === 0) return {};
     
+    // First group by category
     return places.reduce((acc: Record<string, PropertyNearbyPlace[]>, place) => {
-      const type = place.type || 'other';
-      if (!acc[type]) {
-        acc[type] = [];
+      const category = place.category || place.type || 'Other';
+      if (!acc[category]) {
+        acc[category] = [];
       }
-      acc[type].push(place);
+      acc[category].push(place);
       return acc;
     }, {});
   }, [places]);
@@ -38,15 +39,18 @@ export function PlacesViewTab({
   }
 
   return (
-    <div className="space-y-4">
-      {Object.keys(placesByType).length > 0 ? (
-        Object.entries(placesByType).map(([type, typePlaces]) => (
-          <PlacesTypeGroup 
-            key={type} 
-            type={type} 
-            places={typePlaces} 
-            onRemovePlace={onRemovePlace} 
-          />
+    <div className="space-y-6">
+      {Object.keys(placesByCategory).length > 0 ? (
+        Object.entries(placesByCategory).map(([category, categoryPlaces]) => (
+          <div key={category} className="mb-6">
+            <h3 className="text-lg font-medium mb-2 capitalize">{category.replace('_', ' ')}</h3>
+            
+            {/* Group by types within the category */}
+            <PlacesTypeGroup 
+              places={categoryPlaces} 
+              onRemovePlace={onRemovePlace} 
+            />
+          </div>
         ))
       ) : (
         <div className="text-center py-8 text-muted-foreground">
@@ -58,25 +62,21 @@ export function PlacesViewTab({
 }
 
 interface PlacesTypeGroupProps {
-  type: string;
   places: PropertyNearbyPlace[];
   onRemovePlace: (index: number) => void;
 }
 
-function PlacesTypeGroup({ type, places, onRemovePlace }: PlacesTypeGroupProps) {
+function PlacesTypeGroup({ places, onRemovePlace }: PlacesTypeGroupProps) {
   return (
-    <div className="border rounded-lg p-4">
-      <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {places.map((place, idx) => (
-          <PlaceCard 
-            key={place.id || idx} 
-            place={place} 
-            index={idx} 
-            onRemove={onRemovePlace} 
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      {places.map((place, idx) => (
+        <PlaceCard 
+          key={place.id || idx} 
+          place={place} 
+          index={idx} 
+          onRemove={onRemovePlace} 
+        />
+      ))}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -146,7 +147,8 @@ export function useNearbyPlaces(
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
-          longitude: place.location?.longitude || null
+          longitude: place.location?.longitude || null,
+          category: categoryName // Add category for grouping
         }));
         
         console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for single type ${categoryName}`);
@@ -219,7 +221,8 @@ export function useNearbyPlaces(
               visible_in_webview: true,
               distance: null,
               latitude: place.location?.latitude || null,
-              longitude: place.location?.longitude || null
+              longitude: place.location?.longitude || null,
+              category: categoryName // Add category for grouping purposes
             }));
     
             allResults.push(...transformedPlaces);
@@ -268,23 +271,7 @@ export function useNearbyPlaces(
     // Combine existing and new places
     const combinedPlaces = [...existingPlaces, ...newPlaces];
     
-    // Group places by type
-    const groupedPlaces = combinedPlaces.reduce((acc, place) => {
-      if (!acc[place.type]) {
-        acc[place.type] = [];
-      }
-      acc[place.type].push(place);
-      return acc;
-    }, {} as Record<string, PropertyNearbyPlace[]>);
-    
-    // Create a list with separators and type information
-    const placesWithSeparators: (PropertyNearbyPlace | { separator: string })[] = [];
-    for (const [type, places] of Object.entries(groupedPlaces)) {
-      placesWithSeparators.push({ separator: type });
-      placesWithSeparators.push(...places);
-    }
-    
-    // Update the form data with the combined places
+    // Update the form data with the combined places including category information
     onFieldChange("nearby_places", combinedPlaces);
     
     toast({
@@ -292,7 +279,7 @@ export function useNearbyPlaces(
       description: `Added ${newPlaces.length} places to the property`
     });
     
-    return placesWithSeparators;
+    return combinedPlaces;
   }, [formData.id, formData.nearby_places, onFieldChange, toast]);
 
   const removePlaceAtIndex = useCallback((index: number) => {
@@ -318,30 +305,4 @@ export function useNearbyPlaces(
   };
 }
 
-// Example component rendering the results
-const ResultsComponent = ({ results }: { results: (PropertyNearbyPlace | { separator: string })[] }) => {
-  return (
-    <div>
-      {results.map((item, index) => {
-        if ('separator' in item) {
-          return (
-            <div key={index} style={{ fontWeight: 'bold', marginTop: '10px' }}>
-              {item.separator}
-            </div>
-          );
-        } else {
-          return (
-            <div key={item.id} style={{ border: '1px solid #ccc', padding: '10px', marginTop: '5px' }}>
-              <div>Type: {item.type}</div>
-              <div>Name: {item.name}</div>
-              <div>Vicinity: {item.vicinity}</div>
-              <div>Rating: {item.rating}</div>
-              <div>User Ratings Total: {item.user_ratings_total}</div>
-              {/* Add other fields as needed */}
-            </div>
-          );
-        }
-      })}
-    </div>
-  );
-};
+// Remove the example component as it's not needed
