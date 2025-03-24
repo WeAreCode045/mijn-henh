@@ -5,6 +5,7 @@ import { MapPreviewSection } from "./location/MapPreviewSection";
 import { NearbyPlacesSection } from "./location/components/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
 import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
+import { useToast } from "@/components/ui/use-toast";
 
 interface LocationStepProps {
   formData: PropertyFormData;
@@ -35,9 +36,22 @@ export function LocationStep({
   onGenerateMap,
   isGeneratingMap = false
 }: LocationStepProps) {
+  const { toast } = useToast();
+
   const handleCategorySearch = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Validate that we have a property ID
+    if (!formData.id) {
+      console.error("Cannot fetch places: Missing property ID");
+      toast({
+        title: "Error",
+        description: "Please save the property first before searching for places",
+        variant: "destructive"
+      });
+      return null;
+    }
     
     if (onFetchCategoryPlaces) {
       console.log(`LocationStep: Handling search for category ${category}`);

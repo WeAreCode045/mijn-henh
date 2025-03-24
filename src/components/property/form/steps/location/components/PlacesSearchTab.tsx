@@ -35,6 +35,7 @@ export function PlacesSearchTab({
   }, [isLoading]);
 
   const handleOpenModal = () => {
+    // Validate that we have coordinates and property ID
     if (!formData.latitude || !formData.longitude) {
       console.error("Cannot open modal: missing coordinates");
       toast({
@@ -44,11 +45,34 @@ export function PlacesSearchTab({
       });
       return;
     }
+    
+    if (!formData.id) {
+      console.error("Cannot open modal: missing property ID");
+      toast({
+        title: "Error",
+        description: "Please save the property first before searching for places",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setShowModal(true);
   };
 
   const handleCategorySelect = async (category: string) => {
     console.log("Selected category:", category);
+    
+    // Validate property ID before proceeding
+    if (!formData.id) {
+      console.error("Cannot fetch places: Missing property ID");
+      toast({
+        title: "Error",
+        description: "Please save the property first before searching for places",
+        variant: "destructive"
+      });
+      return null;
+    }
+    
     setLocalIsLoading(true);
     
     try {
@@ -100,6 +124,8 @@ export function PlacesSearchTab({
   };
 
   const hasCoordinates = !!(formData.latitude && formData.longitude);
+  const hasPropertyId = !!formData.id;
+  const canSearch = hasCoordinates && hasPropertyId;
 
   return (
     <div className="space-y-4">
@@ -111,7 +137,7 @@ export function PlacesSearchTab({
         <Button
           variant="default"
           onClick={handleOpenModal}
-          disabled={combinedIsLoading || !hasCoordinates}
+          disabled={combinedIsLoading || !canSearch}
         >
           {combinedIsLoading ? "Loading..." : "Find Places"}
         </Button>
@@ -120,6 +146,12 @@ export function PlacesSearchTab({
       {!hasCoordinates && (
         <p className="text-sm text-destructive text-center">
           Please enter property coordinates before searching for nearby places.
+        </p>
+      )}
+      
+      {!hasPropertyId && (
+        <p className="text-sm text-destructive text-center">
+          Please save the property first before searching for nearby places.
         </p>
       )}
       

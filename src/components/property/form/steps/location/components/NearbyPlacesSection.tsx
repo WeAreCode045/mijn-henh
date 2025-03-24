@@ -55,6 +55,17 @@ export function NearbyPlacesSection({
   const handleFetchPlaces = async (category: string) => {
     console.log(`handleFetchPlaces called for category: ${category}`);
     
+    // Validate that we have a property ID before attempting to fetch
+    if (!formData.id) {
+      console.error("Cannot fetch places: Missing property ID");
+      toast({
+        title: "Error",
+        description: "Cannot fetch places: Missing property ID",
+        variant: "destructive"
+      });
+      return null;
+    }
+    
     // Try to use the provided fetch function or fall back to the hook's function
     if (onFetchCategoryPlaces) {
       console.log(`Using parent component's onFetchCategoryPlaces for ${category}`);

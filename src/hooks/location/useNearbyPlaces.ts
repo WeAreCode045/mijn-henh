@@ -12,6 +12,7 @@ export function useNearbyPlaces(
   const { toast } = useToast();
 
   const fetchPlaces = useCallback(async (category: string): Promise<any> => {
+    // Validate required parameters
     if (!formData.latitude || !formData.longitude) {
       toast({
         title: "Error",
@@ -21,8 +22,19 @@ export function useNearbyPlaces(
       return null;
     }
     
+    // Validate property ID
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is required to fetch nearby places. Please save the property first.",
+        variant: "destructive"
+      });
+      return null;
+    }
+    
     console.log(`Fetching nearby places for category: ${category}`);
     console.log(`Coordinates: ${formData.latitude}, ${formData.longitude}`);
+    console.log(`Property ID: ${formData.id}`);
     
     setIsLoading(true);
     
