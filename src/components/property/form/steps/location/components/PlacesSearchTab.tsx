@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { SelectCategoryModal } from "./SelectCategoryModal";
-import { useCategories } from "../hooks/useCategories";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PlacesSearchTabProps {
@@ -22,9 +21,8 @@ export function PlacesSearchTab({
   onSearchClick
 }: PlacesSearchTabProps) {
   const [showModal, setShowModal] = useState(false);
-  const { categories } = useCategories();
-  const { toast } = useToast();
   const [localIsLoading, setLocalIsLoading] = useState(false);
+  const { toast } = useToast();
 
   // Combine external and local loading states
   const combinedIsLoading = isLoading || localIsLoading;

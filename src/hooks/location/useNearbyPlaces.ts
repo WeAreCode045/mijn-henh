@@ -27,7 +27,7 @@ export function useNearbyPlaces(
     setIsLoading(true);
     
     try {
-      // Get Google Maps API key from settings first - log this for troubleshooting
+      // Get Google Maps API key from settings first
       const { data: settingsData, error: settingsError } = await supabase
         .from('agency_settings')
         .select('google_maps_api_key')
@@ -57,14 +57,14 @@ export function useNearbyPlaces(
         category,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        radius: 5000,
+        radius: 5000, // 5km radius
         propertyId: formData.id,
         apiKey
       };
       
       console.log("Calling Supabase Edge Function: nearby-places with payload:", {
         ...payload,
-        apiKey: apiKey ? "API_KEY_PROVIDED" : "NO_API_KEY"
+        apiKey: "API_KEY_REDACTED" // Don't log the actual key
       });
       
       const { data, error } = await supabase.functions.invoke("nearby-places", {

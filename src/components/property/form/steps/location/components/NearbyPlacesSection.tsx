@@ -25,8 +25,7 @@ export function NearbyPlacesSection({
   onSearchClick
 }: NearbyPlacesSectionProps) {
   const [activeTab, setActiveTab] = useState("search");
-  const [searchResults, setSearchResults] = useState<Record<string, any>>({});
-  const [showModal, setShowModal] = useState(false);
+  const { toast } = useNearbyPlaces(formData, onFieldChange || (() => {}));
   
   // Log key props for debugging
   useEffect(() => {
@@ -34,8 +33,8 @@ export function NearbyPlacesSection({
       hasSearchClick: !!onSearchClick,
       hasFormData: !!formData,
       hasFetchCategoryPlaces: !!onFetchCategoryPlaces,
-      searchResultsCount: Object.keys(searchResults).length,
-      showModal,
+      searchResultsCount: 0,
+      showModal: false,
       latitude: formData.latitude,
       longitude: formData.longitude,
       nearbyPlacesCount: formData.nearby_places?.length || 0
@@ -43,13 +42,11 @@ export function NearbyPlacesSection({
   }, [
     formData,
     onSearchClick,
-    onFetchCategoryPlaces,
-    searchResults,
-    showModal
+    onFetchCategoryPlaces
   ]);
-  
-  // Use our fixed hook if onFetchCategoryPlaces wasn't provided
-  const nearbyPlacesHook = useNearbyPlaces(
+
+  // Use the hook's fetch function if onFetchCategoryPlaces wasn't provided
+  const { fetchPlaces, removePlaceAtIndex, isLoading: hookIsLoading } = useNearbyPlaces(
     formData,
     onFieldChange || (() => {})
   );
@@ -57,36 +54,21 @@ export function NearbyPlacesSection({
   const handleFetchPlaces = async (category: string) => {
     console.log(`handleFetchPlaces called for category: ${category}`);
     
+    // Try to use the provided fetch function or fall back to the hook's function
     if (onFetchCategoryPlaces) {
       console.log(`Using parent component's onFetchCategoryPlaces for ${category}`);
-      const results = await onFetchCategoryPlaces(category);
-      console.log(`Results from onFetchCategoryPlaces for ${category}:`, results);
-      
-      if (results) {
-        setSearchResults(results);
-        setActiveTab("view");
-      }
-      return results;
+      return await onFetchCategoryPlaces(category);
     } else {
-      console.log(`Using local nearbyPlacesHook.fetchPlaces for ${category}`);
-      const results = await nearbyPlacesHook.fetchPlaces(category);
-      console.log(`Results from nearbyPlacesHook.fetchPlaces for ${category}:`, results);
-      
-      if (results) {
-        setSearchResults(results);
-        setActiveTab("view");
-      }
-      return results;
+      console.log(`Using local hook's fetchPlaces for ${category}`);
+      return await fetchPlaces(category);
     }
   };
   
   const handleRemovePlace = (index: number) => {
-    console.log(`Removing place at index: ${index}`);
-    
     if (onRemoveNearbyPlace) {
       onRemoveNearbyPlace(index);
     } else {
-      nearbyPlacesHook.removePlaceAtIndex(index);
+      removePlaceAtIndex(index);
     }
   };
 
@@ -118,8 +100,8 @@ export function NearbyPlacesSection({
             <PlacesSearchTab 
               formData={formData}
               onFieldChange={onFieldChange}
-              onFetchPlaces={handleFetchPlaces}
-              isLoading={isLoadingNearbyPlaces || nearbyPlacesHook.isLoading}
+              onFetchPlaces={handleFetchPlaces} 
+              isLoading={isLoadingNearbyPlaces || hookIsLoading}
               onSearchClick={onSearchClick}
             />
           </TabsContent>
@@ -128,7 +110,7 @@ export function NearbyPlacesSection({
             <PlacesViewTab 
               places={formData.nearby_places || []}
               onRemovePlace={handleRemovePlace}
-              isLoading={isLoadingNearbyPlaces || nearbyPlacesHook.isLoading}
+              isLoading={isLoadingNearbyPlaces || hookIsLoading}
             />
           </TabsContent>
         </Tabs>

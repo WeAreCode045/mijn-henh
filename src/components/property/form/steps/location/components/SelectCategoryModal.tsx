@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SelectCategoryModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function SelectCategoryModal({
 }: SelectCategoryModalProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
 
   const categories = [
     { id: "restaurant", name: "Restaurants", icon: "🍽️" },
@@ -50,16 +52,41 @@ export function SelectCategoryModal({
       const result = await onSelect(category);
       console.log(`SelectCategoryModal: API request completed for ${category}:`, result);
       
-      // Only close the modal if we got valid results
-      if (result && (Object.keys(result).length > 0 && result[category]?.length > 0)) {
-        console.log(`Results found for category: ${category}, places count:`, result[category].length);
-        onClose();
+      // Check if we got results
+      if (result) {
+        // Check if the result has the category property with places
+        if (result[category] && result[category].length > 0) {
+          console.log(`Results found for category: ${category}, places count:`, result[category].length);
+          toast({
+            title: "Places found",
+            description: `Found ${result[category].length} ${category} places nearby.`
+          });
+          // Close modal only after successful results
+          onClose();
+        } else {
+          console.log(`No valid results found for category: ${category}`, result);
+          toast({
+            title: "No places found",
+            description: `No ${category.replace('_', ' ')} places found near this location.`,
+            variant: "destructive"
+          });
+          // Keep modal open
+        }
       } else {
-        console.log(`No valid results found for category: ${category}`, result);
-        // Keep modal open but reset processing state
+        console.log(`No results returned for category: ${category}`);
+        toast({
+          title: "Error",
+          description: "Failed to fetch nearby places",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error(`Error fetching places for category ${category}:`, error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby places",
+        variant: "destructive"
+      });
     } finally {
       setIsProcessing(false);
     }

@@ -46,67 +46,109 @@ export async function fetchPlacesFromAPI(
     }
   }
   
-  // Build request body
-  const requestBody = buildPlacesRequestBody(
-    includedTypes,
-    config.maxResults,
-    lat,
-    lng,
-    radius
-  );
-  
-  console.log(`Request body for ${category}:`, JSON.stringify(requestBody));
-  
+  // Use the classic Places API for backward compatibility with the most common types
   try {
-    // Log the full API URL being called
-    const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
-    console.log(`Making API request to Places API: ${placesApiUrl}`);
-    console.log(`Using API key: ${apiKey ? apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4) : 'No API key provided'}`);
+    console.log(`Making classic API request for ${category}`);
+    const placesApiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${category}&key=${apiKey}`;
     
-    // Make request to Places API v1
-    const placesResponse = await fetch(
-      placesApiUrl,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.primaryType,places.types,places.location'
-        },
-        body: JSON.stringify(requestBody)
-      }
-    );
+    const placesResponse = await fetch(placesApiUrl);
     
     const responseStatus = placesResponse.status;
-    const responseText = await placesResponse.text();
+    console.log(`Classic Places API response status: ${responseStatus}`);
     
-    console.log(`Places API response status: ${responseStatus}`);
-    console.log(`Places API response for ${category}:`, responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''));
-    
-    let placesData;
-    try {
-      placesData = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error(`Error parsing Places API response: ${parseError.message}`);
-      return [];
+    if (responseStatus !== 200) {
+      throw new Error(`Places API returned status ${responseStatus}`);
     }
     
-    if (!placesData.places || !Array.isArray(placesData.places)) {
-      console.log(`No places found for category ${category}:`, placesData);
-      if (placesData.error) {
-        console.error(`API error for ${category}:`, placesData.error);
-      }
-      return [];
+    const placesData = await placesResponse.json();
+    
+    if (!placesData.results || !Array.isArray(placesData.results)) {
+      console.log(`No results found from classic API for ${category}:`, placesData);
+      throw new Error('No results returned from Places API');
     }
     
-    console.log(`Found ${placesData.places.length} places for category ${category}`);
+    console.log(`Found ${placesData.results.length} places from classic API for ${category}`);
     
-    // Transform and sort the data
-    const transformedPlaces = transformPlacesData(placesData.places, category, lat, lng);
+    const transformedPlaces = placesData.results.map(place => ({
+      id: place.place_id,
+      name: place.name,
+      vicinity: place.vicinity,
+      rating: place.rating || null,
+      user_ratings_total: place.user_ratings_total || 0,
+      type: category,
+      types: place.types || [],
+      visible_in_webview: true,
+      distance: null, // Distance is calculated later if needed
+      latitude: place.geometry?.location?.lat || null,
+      longitude: place.geometry?.location?.lng || null
+    }));
+    
     return sortPlacesByRating(transformedPlaces);
-    
   } catch (error) {
-    console.error(`Error fetching places for category ${category}:`, error);
-    return [];
+    console.error(`Error with classic Places API for ${category}:`, error);
+    
+    // Try Places API v1 as fallback
+    try {
+      // Build request body
+      const requestBody = buildPlacesRequestBody(
+        includedTypes,
+        config.maxResults,
+        lat,
+        lng,
+        radius
+      );
+      
+      console.log(`Request body for ${category}:`, JSON.stringify(requestBody));
+      
+      // Log the full API URL being called
+      const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
+      console.log(`Making fallback API request to Places API v1: ${placesApiUrl}`);
+      
+      // Make request to Places API v1
+      const placesResponse = await fetch(
+        placesApiUrl,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+            'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.primaryType,places.types,places.location'
+          },
+          body: JSON.stringify(requestBody)
+        }
+      );
+      
+      const responseStatus = placesResponse.status;
+      const responseText = await placesResponse.text();
+      
+      console.log(`Places API v1 response status: ${responseStatus}`);
+      console.log(`Places API v1 response for ${category}:`, responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''));
+      
+      let placesData;
+      try {
+        placesData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error(`Error parsing Places API response: ${parseError.message}`);
+        return [];
+      }
+      
+      if (!placesData.places || !Array.isArray(placesData.places)) {
+        console.log(`No places found from v1 API for category ${category}:`, placesData);
+        if (placesData.error) {
+          console.error(`API error for ${category}:`, placesData.error);
+        }
+        return [];
+      }
+      
+      console.log(`Found ${placesData.places.length} places from v1 API for category ${category}`);
+      
+      // Transform and sort the data
+      const transformedPlaces = transformPlacesData(placesData.places, category, lat, lng);
+      return sortPlacesByRating(transformedPlaces);
+      
+    } catch (fallbackError) {
+      console.error(`Error with fallback Places API for ${category}:`, fallbackError);
+      return [];
+    }
   }
 }
