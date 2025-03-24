@@ -11,7 +11,7 @@ export interface PropertyNearbyPlace {
   type: PropertyPlaceType | string;
   types?: string[];
   visible_in_webview?: boolean;
-  latitude?: number;
-  longitude?: number;
-  category?: string; // Add category property
+  latitude?: number | null;
+  longitude?: number | null;
+  category?: string; // Ensure the category property is defined
 }
