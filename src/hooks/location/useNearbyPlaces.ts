@@ -158,88 +158,91 @@ export function useNearbyPlaces(
         const result = { [categoryName]: transformedPlaces };
         setIsLoading(false);
         return result;
-      }
-      
-      // For a category with multiple types
-      console.log(`useNearbyPlaces: Using category ${categoryName} with types:`, types);
-      
-      // Prepare the request body with the exact structure specified for multiple types
-      const requestBody = {
-        includedTypes: types,
-        maxResultCount: 20, // More results since we're searching for multiple types
-        locationRestriction: {
-          circle: {
-            center: {
-              latitude: formData.latitude,
-              longitude: formData.longitude
+      } else {
+        // For a category with multiple types
+        console.log(`useNearbyPlaces: Using category ${categoryName} with types:`, types);
+    
+        const allResults: PropertyNearbyPlace[] = [];
+    
+        for (const type of types) {
+          // Prepare the request body with the exact structure specified for each type
+          const requestBody = {
+            includedTypes: [type],
+            maxResultCount: 10,
+            locationRestriction: {
+              circle: {
+                center: {
+                  latitude: formData.latitude,
+                  longitude: formData.longitude
+                },
+                radius: 5000
+              }
+            }
+          };
+    
+          console.log(`useNearbyPlaces: Places API request body for type ${type}:`, JSON.stringify(requestBody));
+    
+          // Make direct API call to Google Places API
+          const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
+    
+          console.log(`useNearbyPlaces: Calling Google Places API for type ${type}`);
+    
+          const response = await fetch(placesApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Goog-Api-Key': apiKey,
+              'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types,places.location'
             },
-            radius: 5000
+            body: JSON.stringify(requestBody)
+          });
+    
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`useNearbyPlaces: Places API returned status ${response.status}`, errorText);
+            throw new Error(`Places API returned error: ${errorText}`);
+          }
+    
+          const placesData = await response.json();
+    
+          console.log(`useNearbyPlaces: Places API raw response for type ${type}:`, placesData);
+    
+          if (placesData.places && Array.isArray(placesData.places)) {
+            const transformedPlaces = placesData.places.map((place: any) => ({
+              id: place.id,
+              name: place.displayName?.text || place.name || "Unknown place",
+              vicinity: place.formattedAddress || "",
+              rating: place.rating || null,
+              user_ratings_total: place.userRatingCount || 0,
+              type: type,
+              types: place.types || [],
+              visible_in_webview: true,
+              distance: null,
+              latitude: place.location?.latitude || null,
+              longitude: place.location?.longitude || null
+            }));
+    
+            allResults.push(...transformedPlaces);
           }
         }
-      };
-      
-      console.log("useNearbyPlaces: Places API request body for category search:", JSON.stringify(requestBody));
-      
-      // Make direct API call to Google Places API
-      const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
-      
-      console.log(`useNearbyPlaces: Calling Google Places API for category ${categoryName}`);
-      
-      const response = await fetch(placesApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.types,places.location'
-        },
-        body: JSON.stringify(requestBody)
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`useNearbyPlaces: Places API returned status ${response.status}`, errorText);
-        throw new Error(`Places API returned error: ${errorText}`);
-      }
-      
-      const placesData = await response.json();
-      
-      console.log("useNearbyPlaces: Places API raw response for category search:", placesData);
-      
-      if (!placesData.places || !Array.isArray(placesData.places)) {
-        console.log(`useNearbyPlaces: No results found from Places API for category ${categoryName}`);
-        toast({
-          title: "No places found",
-          description: `No ${categoryName} places found near this location.`,
-          variant: "default"
-        });
+    
+        console.log(`useNearbyPlaces: Found ${allResults.length} places for category ${categoryName}`);
+    
+        // Store the search results
+        setSearchResults(allResults);
+    
+        // Group results by type
+        const groupedResults = allResults.reduce((acc, place) => {
+          if (!acc[place.type]) {
+            acc[place.type] = [];
+          }
+          acc[place.type].push(place);
+          return acc;
+        }, {} as Record<string, PropertyNearbyPlace[]>);
+    
         setIsLoading(false);
-        return null;
+        return groupedResults;
       }
-      
-      // Transform the response to match our expected format for category search
-      const transformedPlaces = placesData.places.map((place: any) => ({
-        id: place.id,
-        name: place.displayName?.text || place.name || "Unknown place",
-        vicinity: place.formattedAddress || "",
-        rating: place.rating || null,
-        user_ratings_total: place.userRatingCount || 0,
-        type: categoryName, // Use category name for all places
-        types: place.types || [],
-        visible_in_webview: true,
-        distance: null,
-        latitude: place.location?.latitude || null,
-        longitude: place.location?.longitude || null
-      }));
-      
-      console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for category ${categoryName}`);
-      
-      // Store the search results
-      setSearchResults(transformedPlaces);
-      
-      // Return the results in the format expected by the components
-      const result = { [categoryName]: transformedPlaces };
-      setIsLoading(false);
-      return result;
       
     } catch (error) {
       console.error("useNearbyPlaces: Error in fetchPlaces:", error);
@@ -265,6 +268,15 @@ export function useNearbyPlaces(
     // Combine existing and new places
     const combinedPlaces = [...existingPlaces, ...newPlaces];
     
+    // Group places by type
+    const groupedPlaces = combinedPlaces.reduce((acc, place) => {
+      if (!acc[place.type]) {
+        acc[place.type] = [];
+      }
+      acc[place.type].push(place);
+      return acc;
+    }, {} as Record<string, PropertyNearbyPlace[]>);
+    
     // Update the form data with the combined places
     onFieldChange("nearby_places", combinedPlaces);
     
@@ -273,7 +285,7 @@ export function useNearbyPlaces(
       description: `Added ${newPlaces.length} places to the property`
     });
     
-    return combinedPlaces;
+    return groupedPlaces;
   }, [formData.id, formData.nearby_places, onFieldChange, toast]);
 
   const removePlaceAtIndex = useCallback((index: number) => {
