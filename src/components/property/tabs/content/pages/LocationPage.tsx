@@ -19,6 +19,7 @@ interface LocationPageProps {
   onFetchNearbyCities?: () => Promise<any>;
   onGenerateLocationDescription?: () => Promise<void>;
   onGenerateMap?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
   isLoadingLocationData?: boolean;
   isGeneratingMap?: boolean;
   setPendingChanges?: (pending: boolean) => void;
@@ -32,6 +33,7 @@ export function LocationPage({
   onFetchNearbyCities,
   onGenerateLocationDescription,
   onGenerateMap,
+  onRemoveNearbyPlace,
   isLoadingLocationData = false,
   isGeneratingMap = false,
   setPendingChanges
