@@ -68,7 +68,7 @@ export const PropertyCard = ({
     const { data } = await supabase
       .from('property_contact_submissions')
       .select('*')
-      .eq(property.id)
+      .eq('property_id', property.id)
       .order('created_at', { ascending: false });
 
     if (data) {
@@ -112,7 +112,7 @@ export const PropertyCard = ({
   const agentName = property.agent ? (property.agent.full_name || property.agent.name || 'Unnamed Agent') : null;
 
   return (
-    
+    <>
       <Card key={property.id} className="p-6 space-y-6 relative group cursor-pointer hover:shadow-lg transition-shadow" onClick={handleCardClick}>
         <div className="relative">
           <img
@@ -140,9 +140,8 @@ export const PropertyCard = ({
             <h3 className="text-sm/4 font-bold mb-1 line-clamp-2">{property.title}</h3>
           </div>
           <div className="flex justify-start items-start gap-y-5">
-
-          <p className="text-sm font-bold">€{property.price},-</p>
-            </div>
+            <p className="text-sm font-bold">€{property.price},-</p>
+          </div>
           <div className="mt-3">
             <PropertyCardActions 
               property={property}
