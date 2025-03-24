@@ -70,13 +70,14 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
       
       console.log(`Searching for category ${categoryName} with types:`, types);
 
-      // Search for each type in the category
+      // Prepare to store results grouped by type
+      const typeResults: Record<string, PropertyNearbyPlace[]> = {};
       const allResults: PropertyNearbyPlace[] = [];
       
-      // Make a single request with the first type, but we'll label results with the category name
+      // Request more results (we'll limit to 6 per type later)
       const requestBody = {
         includedTypes: types,
-        maxResultCount: 20, // More results since we're combining categories
+        maxResultCount: 30, // Request more results since we'll filter by type
         locationRestriction: {
           circle: {
             center: {
@@ -116,27 +117,55 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         return [];
       }
 
-      // Transform the places data and add them to our results
-      const transformedPlaces: PropertyNearbyPlace[] = data.places.map((place: any) => ({
-        id: place.id,
-        name: place.displayName?.text || "Unknown Place",
-        vicinity: place.formattedAddress || "",
-        rating: place.rating || null,
-        user_ratings_total: place.userRatingCount || 0,
-        type: categoryName, // Use the category name for display purposes
-        types: place.types || [],
-        visible_in_webview: true,
-        distance: null,
-        latitude: place.location?.latitude || null,
-        longitude: place.location?.longitude || null
-      }));
+      // Group places by type
+      data.places.forEach((place: any) => {
+        // Find the specific type from our requested types that this place matches
+        const matchedType = types.find(type => 
+          place.types && Array.isArray(place.types) && 
+          place.types.includes(type)
+        ) || types[0]; // Default to first type if no match
+        
+        if (!typeResults[matchedType]) {
+          typeResults[matchedType] = [];
+        }
+        
+        const transformedPlace: PropertyNearbyPlace = {
+          id: place.id,
+          name: place.displayName?.text || "Unknown Place",
+          vicinity: place.formattedAddress || "",
+          rating: place.rating || null,
+          user_ratings_total: place.userRatingCount || 0,
+          type: matchedType, // Use the specific matched type
+          types: place.types || [],
+          visible_in_webview: true,
+          distance: null,
+          latitude: place.location?.latitude || null,
+          longitude: place.location?.longitude || null,
+          category: categoryName // Store the original category
+        };
+        
+        typeResults[matchedType].push(transformedPlace);
+      });
+      
+      // Sort each type's results by rating (high to low) and limit to 6 per type
+      Object.keys(typeResults).forEach(type => {
+        typeResults[type].sort((a, b) => {
+          const ratingA = a.rating || 0;
+          const ratingB = b.rating || 0;
+          return ratingB - ratingA;
+        });
+        
+        // Limit to 6 places per type
+        const limitedResults = typeResults[type].slice(0, 6);
+        allResults.push(...limitedResults);
+      });
 
-      console.log(`Found ${transformedPlaces.length} places for category: ${categoryName}`);
+      console.log(`Found ${allResults.length} places for category: ${categoryName}`);
 
       // Update state with results
-      setResults(transformedPlaces);
+      setResults(allResults);
       
-      return transformedPlaces;
+      return allResults;
     } catch (error) {
       console.error("Error searching for places:", error);
       toast({

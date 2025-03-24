@@ -33,23 +33,35 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
     property.nearby_places.filter(place => place.visible_in_webview !== false) : 
     [];
 
-  // Group nearby places by category with improved categorization
+  // Group nearby places first by category then by type
   const groupedPlaces = visiblePlaces.length > 0 ? 
-    visiblePlaces.reduce((acc: {[key: string]: any[]}, place) => {
-      const category = place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
-        ? 'education'
-        : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport') ||
-          place.type?.toLowerCase().includes('fitness') || place.type?.toLowerCase().includes('tennis') || 
-          place.type?.toLowerCase().includes('soccer')
-        ? 'sports'
-        : place.type?.toLowerCase().includes('transit') || place.type?.toLowerCase().includes('station') || place.type?.toLowerCase().includes('bus')
-        ? 'transportation'
-        : place.type?.toLowerCase().includes('store') || place.type?.toLowerCase().includes('supermarket') || place.type?.toLowerCase().includes('mall')
-        ? 'shopping'
-        : 'other';
+    visiblePlaces.reduce((acc: Record<string, Record<string, any[]>>, place) => {
+      // Use the place's category if available, otherwise determine it from the type
+      const category = place.category || 
+        (place.type?.toLowerCase().includes('school') || place.type?.toLowerCase().includes('education') 
+          ? 'Education'
+          : place.type?.toLowerCase().includes('gym') || place.type?.toLowerCase().includes('sport') ||
+            place.type?.toLowerCase().includes('fitness') || place.type?.toLowerCase().includes('tennis') || 
+            place.type?.toLowerCase().includes('soccer')
+          ? 'Sports'
+          : place.type?.toLowerCase().includes('transit') || place.type?.toLowerCase().includes('station') || place.type?.toLowerCase().includes('bus')
+          ? 'Transportation'
+          : place.type?.toLowerCase().includes('store') || place.type?.toLowerCase().includes('supermarket') || place.type?.toLowerCase().includes('mall')
+          ? 'Shopping'
+          : 'Other');
       
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(place);
+      // Create category if it doesn't exist
+      if (!acc[category]) {
+        acc[category] = {};
+      }
+      
+      // Group by type within category
+      const type = place.type || 'other';
+      if (!acc[category][type]) {
+        acc[category][type] = [];
+      }
+      
+      acc[category][type].push(place);
       return acc;
     }, {}) 
     : {};
@@ -111,45 +123,57 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
             {Object.keys(groupedPlaces).length > 0 ? (
               <div>
                 <h4 className="font-semibold mb-2">Nearby Places</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {Object.entries(groupedPlaces).map(([category, places]) => (
-                    <div key={category} className="space-y-1">
-                      <h5 className="text-sm text-gray-500 font-medium capitalize">{category}</h5>
-                      <ul className="space-y-1">
-                        {places.map((place, index) => (
-                          <li key={index} className="text-sm flex items-start">
-                            <svg 
-                              className="w-4 h-4 mr-2 mt-0.5 text-green-500" 
-                              fill="none" 
-                              viewBox="0 0 24 24" 
-                              stroke="currentColor"
-                            >
-                              <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M5 13l4 4L19 7" 
-                              />
-                            </svg>
-                            <div>
-                              <span className="font-medium">{place.name}</span>
-                              {category === 'transportation' && (
-                                <span className="ml-1 text-blue-600">({getTransportType(place)})</span>
-                              )}
-                              {place.rating && (
-                                <span className="ml-1 text-yellow-600">★ {place.rating}</span>
-                              )}
-                              {place.distance && (
-                                <span className="ml-1 text-gray-400">
-                                  {typeof place.distance === 'number' 
-                                    ? `(${place.distance} km)` 
-                                    : `(${place.distance})`}
-                                </span>
-                              )}
-                            </div>
-                          </li>
+                <div className="space-y-4">
+                  {Object.entries(groupedPlaces).map(([category, typeGroups]) => (
+                    <div key={category} className="space-y-2">
+                      <h5 className="text-sm font-medium">{category}</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {Object.entries(typeGroups).map(([type, places]) => (
+                          <div key={type} className="space-y-1">
+                            <h6 className="text-xs text-gray-500 font-medium capitalize">
+                              {type.replace('_', ' ')}
+                            </h6>
+                            <ul className="space-y-1">
+                              {places
+                                .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+                                .slice(0, 4) // Limit to 4 per type in the webview for better display
+                                .map((place, index) => (
+                                  <li key={index} className="text-sm flex items-start">
+                                    <svg 
+                                      className="w-3 h-3 mr-1 mt-0.5 text-green-500" 
+                                      fill="none" 
+                                      viewBox="0 0 24 24" 
+                                      stroke="currentColor"
+                                    >
+                                      <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={2} 
+                                        d="M5 13l4 4L19 7" 
+                                      />
+                                    </svg>
+                                    <div className="text-xs">
+                                      <span className="font-medium">{place.name}</span>
+                                      {category === 'Transportation' && (
+                                        <span className="ml-1 text-blue-600">({getTransportType(place)})</span>
+                                      )}
+                                      {place.rating && (
+                                        <span className="ml-1 text-yellow-600">★ {place.rating}</span>
+                                      )}
+                                      {place.distance && (
+                                        <span className="ml-1 text-gray-400">
+                                          {typeof place.distance === 'number' 
+                                            ? `(${place.distance} km)` 
+                                            : `(${place.distance})`}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </li>
+                                ))}
+                            </ul>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -14,18 +14,29 @@ export function PlacesViewTab({
   isLoading = false, 
   onRemovePlace 
 }: PlacesViewTabProps) {
-  // Group places by type for the view tab
-  const placesByType = useMemo(() => {
+  // Group places by category first, then by type
+  const groupedPlaces = useMemo(() => {
     if (!places || places.length === 0) return {};
     
-    return places.reduce((acc: Record<string, PropertyNearbyPlace[]>, place) => {
+    // First group by category
+    const byCategory: Record<string, Record<string, PropertyNearbyPlace[]>> = {};
+    
+    places.forEach(place => {
+      const category = place.category || 'Other';
       const type = place.type || 'other';
-      if (!acc[type]) {
-        acc[type] = [];
+      
+      if (!byCategory[category]) {
+        byCategory[category] = {};
       }
-      acc[type].push(place);
-      return acc;
-    }, {});
+      
+      if (!byCategory[category][type]) {
+        byCategory[category][type] = [];
+      }
+      
+      byCategory[category][type].push(place);
+    });
+    
+    return byCategory;
   }, [places]);
 
   if (isLoading) {
@@ -38,13 +49,13 @@ export function PlacesViewTab({
   }
 
   return (
-    <div className="space-y-4">
-      {Object.keys(placesByType).length > 0 ? (
-        Object.entries(placesByType).map(([type, typePlaces]) => (
-          <PlacesTypeGroup 
-            key={type} 
-            type={type} 
-            places={typePlaces} 
+    <div className="space-y-6">
+      {Object.keys(groupedPlaces).length > 0 ? (
+        Object.entries(groupedPlaces).map(([category, typeGroups]) => (
+          <CategoryGroup 
+            key={category} 
+            category={category} 
+            typeGroups={typeGroups} 
             onRemovePlace={onRemovePlace} 
           />
         ))
@@ -57,25 +68,53 @@ export function PlacesViewTab({
   );
 }
 
-interface PlacesTypeGroupProps {
+interface CategoryGroupProps {
+  category: string;
+  typeGroups: Record<string, PropertyNearbyPlace[]>;
+  onRemovePlace: (index: number) => void;
+}
+
+function CategoryGroup({ category, typeGroups, onRemovePlace }: CategoryGroupProps) {
+  return (
+    <div className="border rounded-lg p-4">
+      <h4 className="font-medium mb-3 text-lg">{category}</h4>
+      <div className="space-y-4">
+        {Object.entries(typeGroups).map(([type, places]) => (
+          <TypeGroup 
+            key={type} 
+            type={type} 
+            places={places} 
+            onRemovePlace={onRemovePlace} 
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface TypeGroupProps {
   type: string;
   places: PropertyNearbyPlace[];
   onRemovePlace: (index: number) => void;
 }
 
-function PlacesTypeGroup({ type, places, onRemovePlace }: PlacesTypeGroupProps) {
+function TypeGroup({ type, places, onRemovePlace }: TypeGroupProps) {
   return (
-    <div className="border rounded-lg p-4">
-      <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>
+    <div className="border-t pt-3">
+      <h5 className="font-medium mb-2 capitalize text-sm">{type.replace('_', ' ')}</h5>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {places.map((place, idx) => (
-          <PlaceCard 
-            key={place.id || idx} 
-            place={place} 
-            index={idx} 
-            onRemove={onRemovePlace} 
-          />
-        ))}
+        {places.map((place, idx) => {
+          // We need to find the actual index in the overall places array
+          const placeId = place.id;
+          return (
+            <PlaceCard 
+              key={placeId || idx} 
+              place={place} 
+              index={idx} 
+              onRemove={onRemovePlace} 
+            />
+          );
+        })}
       </div>
     </div>
   );
