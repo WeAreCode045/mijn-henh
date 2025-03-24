@@ -34,7 +34,12 @@ export function NearbyPlacesSearch({
     { id: "pharmacy", label: "Pharmacies" },
     { id: "park", label: "Parks" },
     { id: "gym", label: "Gyms" },
-    { id: "transit_station", label: "Transit Stations" }
+    { id: "transit_station", label: "Transit Stations" },
+    { id: "shopping", label: "Shopping" },
+    { id: "entertainment", label: "Entertainment" },
+    { id: "sports", label: "Sports" },
+    { id: "education", label: "Education" },
+    { id: "all", label: "All Places" }
   ];
 
   // Handle the search button click with explicit prevention of default behavior
@@ -51,7 +56,10 @@ export function NearbyPlacesSearch({
           <Button
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
-            onClick={() => setSelectedCategory(category.id)}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent form submission
+              setSelectedCategory(category.id);
+            }}
             className="flex-grow-0"
             type="button"
           >

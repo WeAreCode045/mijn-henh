@@ -153,6 +153,7 @@ export function LocationPage({
         onFieldChange={onFieldChange}
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         isLoadingNearbyPlaces={isLoadingLocationData}
+        onRemoveNearbyPlace={onRemoveNearbyPlace}
       />
     </div>
   );

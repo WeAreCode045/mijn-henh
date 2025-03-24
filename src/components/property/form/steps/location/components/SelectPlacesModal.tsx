@@ -1,160 +1,157 @@
 
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { PropertyNearbyPlace } from "@/types/property";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Check, MapPin, Star } from "lucide-react";
 
-export interface PlaceOption {
-  id: string;
-  name: string;
-  vicinity?: string;
-  rating?: number;
-  distance?: number;
-  type: string;
-  types?: string[];
-  maxSelections?: number;
+export interface PlaceOption extends PropertyNearbyPlace {
+  selected?: boolean;
 }
 
 interface SelectPlacesModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  places: PlaceOption[];
-  onSave: (selectedPlaces: PlaceOption[]) => void;
-  category: string;
-  isLoading?: boolean;
-  maxSelections?: number;
+  places: PropertyNearbyPlace[];
+  onSave: (selectedPlaces: PropertyNearbyPlace[]) => void;
 }
 
-export function SelectPlacesModal({
-  isOpen,
-  onClose,
-  places = [],
-  onSave,
-  category,
-  isLoading = false,
-  maxSelections = 5
-}: SelectPlacesModalProps) {
-  const [selectedPlaces, setSelectedPlaces] = useState<PlaceOption[]>([]);
+export function SelectPlacesModal({ open, onClose, places, onSave }: SelectPlacesModalProps) {
+  const [options, setOptions] = useState<PlaceOption[]>(
+    places.map(place => ({ ...place, selected: false }))
+  );
   
-  // Get the effective max selections (from first place if available, or prop)
-  const effectiveMaxSelections = places[0]?.maxSelections || maxSelections;
-
-  // Reset selections when modal is opened with new places
-  useEffect(() => {
-    if (isOpen && places.length > 0) {
-      setSelectedPlaces([]);
+  // Group places by type
+  const placesByType = options.reduce((acc: Record<string, PlaceOption[]>, place) => {
+    const type = place.type || 'other';
+    if (!acc[type]) {
+      acc[type] = [];
     }
-  }, [isOpen, places]);
-
-  const handleTogglePlace = (place: PlaceOption) => {
-    if (selectedPlaces.some(p => p.id === place.id)) {
-      setSelectedPlaces(selectedPlaces.filter(p => p.id !== place.id));
-    } else {
-      // Count how many places of this type are already selected
-      const selectedOfThisType = selectedPlaces.filter(p => p.type === place.type).length;
-      
-      // Only allow selection if we haven't reached the max for this type
-      if (selectedOfThisType < effectiveMaxSelections) {
-        setSelectedPlaces([...selectedPlaces, place]);
-      }
-    }
+    acc[type].push(place);
+    return acc;
+  }, {});
+  
+  const togglePlace = (id: string) => {
+    setOptions(prev => 
+      prev.map(place => 
+        place.id === id ? { ...place, selected: !place.selected } : place
+      )
+    );
   };
-
+  
   const handleSave = () => {
+    const selectedPlaces = options.filter(place => place.selected);
     onSave(selectedPlaces);
-    onClose();
   };
-
-  const formatCategory = (cat: string) => {
-    return cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  
+  const selectedCount = options.filter(place => place.selected).length;
+  
+  const handleSelectAll = (type: string, selected: boolean) => {
+    setOptions(prev => 
+      prev.map(place => 
+        place.type === type ? { ...place, selected } : place
+      )
+    );
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Select {formatCategory(category)}</DialogTitle>
+          <DialogTitle>Select Places</DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Select up to {effectiveMaxSelections} places per type (found {places.length} places).
+            Select places to add to this property ({selectedCount} selected)
           </p>
           
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : places.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">No places found for this category</p>
-          ) : (
-            <ScrollArea className="h-[300px] pr-4">
-              <div className="space-y-2">
-                {places.map((place) => {
-                  // Count how many places of this type are already selected
-                  const selectedOfThisType = selectedPlaces.filter(p => p.type === place.type).length;
-                  const isDisabled = !selectedPlaces.some(p => p.id === place.id) && 
-                                     selectedOfThisType >= effectiveMaxSelections;
+          <div className="space-y-6">
+            {Object.entries(placesByType).map(([type, typePlaces]) => (
+              <div key={type} className="border rounded-lg p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-medium capitalize text-lg">{type.replace('_', ' ')}</h3>
                   
-                  return (
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleSelectAll(type, true)}
+                    >
+                      Select All
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleSelectAll(type, false)}
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {typePlaces.map((place) => (
                     <div 
                       key={place.id} 
-                      className="flex items-start p-3 rounded-md border bg-white"
+                      className={`border p-3 rounded-md cursor-pointer transition-colors ${
+                        place.selected ? 'bg-primary/10 border-primary' : ''
+                      }`}
+                      onClick={() => togglePlace(place.id)}
                     >
-                      <Checkbox 
-                        id={`place-${place.id}`}
-                        className="mt-1"
-                        checked={selectedPlaces.some(p => p.id === place.id)}
-                        onCheckedChange={() => handleTogglePlace(place)}
-                        disabled={isDisabled}
-                      />
-                      <div className="ml-3 space-y-1 flex-1">
-                        <label 
-                          htmlFor={`place-${place.id}`}
-                          className="font-medium cursor-pointer"
-                        >
-                          {place.name}
-                        </label>
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={place.selected}
+                          onCheckedChange={() => togglePlace(place.id)}
+                          className="mt-1"
+                        />
                         
-                        {place.vicinity && (
-                          <p className="text-sm text-gray-500">{place.vicinity}</p>
-                        )}
-                        
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {place.distance !== undefined && (
-                            <Badge variant="outline" className="text-xs">
-                              {typeof place.distance === 'number' 
-                                ? `${place.distance.toFixed(1)} km` 
-                                : place.distance}
-                            </Badge>
+                        <div className="flex-1">
+                          <div className="font-medium">{place.name}</div>
+                          
+                          {place.vicinity && (
+                            <div className="text-sm text-muted-foreground flex items-center mt-1">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              {place.vicinity}
+                            </div>
                           )}
                           
-                          {place.rating && (
-                            <Badge variant="outline" className="text-xs flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              {place.rating.toFixed(1)}
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            {place.rating && (
+                              <Badge variant="secondary" className="flex items-center gap-1">
+                                <Star className="h-3 w-3 text-yellow-500" />
+                                {place.rating}
+                              </Badge>
+                            )}
+                            
+                            {place.distance && (
+                              <Badge variant="outline" className="text-xs">
+                                {typeof place.distance === 'number' 
+                                  ? `${place.distance.toFixed(1)} km` 
+                                  : place.distance}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
+                        
+                        {place.selected && (
+                          <Check className="h-5 w-5 text-primary shrink-0" />
+                        )}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </ScrollArea>
-          )}
+            ))}
+          </div>
         </div>
         
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={selectedPlaces.length === 0}
-          >
-            Save {selectedPlaces.length} places
+          <Button onClick={handleSave} disabled={selectedCount === 0}>
+            Add {selectedCount} {selectedCount === 1 ? 'Place' : 'Places'}
           </Button>
         </DialogFooter>
       </DialogContent>
