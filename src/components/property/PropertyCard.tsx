@@ -112,7 +112,7 @@ export const PropertyCard = ({
   const agentName = property.agent ? (property.agent.full_name || property.agent.name || 'Unnamed Agent') : null;
 
   return (
-    <>
+    
       <Card key={property.id} className="p-6 space-y-6 relative group cursor-pointer hover:shadow-lg transition-shadow" onClick={handleCardClick}>
         <div className="relative">
           <img
