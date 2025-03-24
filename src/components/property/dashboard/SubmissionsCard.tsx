@@ -7,8 +7,8 @@ interface SubmissionsCardProps {
 }
 
 export function SubmissionsCard({ propertyId }: SubmissionsCardProps) {
-  // Skip rendering if propertyId is empty or invalid
-  if (!propertyId || propertyId.trim() === '') {
+  // Only render if propertyId is a valid UUID string
+  if (!propertyId || propertyId.trim() === '' || propertyId === '1') {
     return (
       <Card className="h-full">
         <CardHeader className="pb-3">
@@ -16,7 +16,7 @@ export function SubmissionsCard({ propertyId }: SubmissionsCardProps) {
         </CardHeader>
         <CardContent>
           <div className="text-center py-4 text-muted-foreground">
-            Property ID is required to display submissions.
+            Valid property ID is required to display submissions.
           </div>
         </CardContent>
       </Card>

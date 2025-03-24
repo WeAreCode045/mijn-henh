@@ -8,9 +8,15 @@ export function useSubmissions(propertyId: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Validate propertyId is a proper UUID before using it in a query
+  const isValidPropertyId = propertyId && 
+                           propertyId.trim() !== '' && 
+                           propertyId !== '1' &&
+                           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(propertyId);
+
   const fetchSubmissions = useCallback(async () => {
-    // Check if propertyId exists and is not empty
-    if (!propertyId || propertyId.trim() === '') {
+    // Check if propertyId exists and is valid
+    if (!isValidPropertyId) {
       console.log('useSubmissions: No valid propertyId provided, skipping fetch');
       setSubmissions([]);
       setIsLoading(false);
@@ -19,6 +25,8 @@ export function useSubmissions(propertyId: string) {
 
     try {
       setIsLoading(true);
+      console.log(`Fetching submissions for property ID: ${propertyId}`);
+      
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select(`
@@ -28,7 +36,12 @@ export function useSubmissions(propertyId: string) {
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        throw error;
+      }
+
+      console.log(`Found ${data?.length || 0} submissions for property ID: ${propertyId}`);
 
       // Transform data to match Submission interface
       const transformedData = data.map(item => ({
@@ -61,7 +74,7 @@ export function useSubmissions(propertyId: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [propertyId]);
+  }, [propertyId, isValidPropertyId]);
 
   useEffect(() => {
     fetchSubmissions();

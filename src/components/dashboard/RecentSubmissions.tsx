@@ -28,9 +28,17 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
   const { profile, isAdmin } = useAuth();
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
-  const { data: recentSubmissions = [] } = useQuery({
+  // Validate propertyId is a proper UUID before using it in a query
+  const isValidPropertyId = propertyId && 
+                           propertyId.trim() !== '' && 
+                           propertyId !== '1' &&
+                           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(propertyId);
+
+  const { data: recentSubmissions = [], error } = useQuery({
     queryKey: ['recent-submissions', profile?.id, isAdmin, propertyId],
     queryFn: async () => {
+      console.log("Fetching submissions with propertyId:", propertyId, "isValid:", isValidPropertyId);
+      
       let query = supabase
         .from('property_contact_submissions')
         .select(`
@@ -40,7 +48,7 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (propertyId && propertyId.trim() !== '') {
+      if (isValidPropertyId) {
         query = query.eq('property_id', propertyId);
       } 
       else if (!isAdmin && profile?.id) {
@@ -49,10 +57,24 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching submissions:", error);
+        throw error;
+      }
+      console.log("Fetched submissions:", data?.length || 0);
       return data;
     },
+    enabled: isAdmin || !!profile?.id || isValidPropertyId,
   });
+
+  if (error) {
+    console.error("Error in submissions query:", error);
+    return (
+      <div className="text-center py-4 text-muted-foreground">
+        Error loading submissions. Please try again.
+      </div>
+    );
+  }
 
   if (recentSubmissions.length === 0) {
     return (
@@ -74,7 +96,7 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
             <div>
               <h3 className="font-medium">{submission.name}</h3>
               <p className="text-sm text-muted-foreground">
-                {submission.properties?.title}
+                {submission.properties?.title || 'Unknown property'}
               </p>
             </div>
             <div className="text-sm text-muted-foreground">
@@ -94,7 +116,7 @@ export function RecentSubmissions({ propertyId }: RecentSubmissionsProps) {
               <>
                 <div>
                   <h3 className="font-medium">Property</h3>
-                  <p>{selectedSubmission.properties?.title}</p>
+                  <p>{selectedSubmission.properties?.title || 'Unknown property'}</p>
                 </div>
                 <div>
                   <h3 className="font-medium">Contact Information</h3>

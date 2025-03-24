@@ -7,9 +7,15 @@ export function useFetchSubmissions(propertyId?: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Validate propertyId is a proper UUID
+  const isValidPropertyId = propertyId && 
+                           propertyId.trim() !== '' && 
+                           propertyId !== '1' &&
+                           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(propertyId);
+
   const fetchSubmissions = useCallback(async () => {
-    // Check if propertyId exists and is not empty
-    if (!propertyId || propertyId.trim() === '') {
+    // Check if propertyId exists and is valid
+    if (!isValidPropertyId) {
       console.log('useFetchSubmissions: No valid propertyId provided, skipping fetch');
       setSubmissions([]);
       setIsLoading(false);
@@ -18,6 +24,8 @@ export function useFetchSubmissions(propertyId?: string) {
     
     setIsLoading(true);
     try {
+      console.log(`Fetching submissions for property ID: ${propertyId}`);
+      
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select(`
@@ -33,7 +41,12 @@ export function useFetchSubmissions(propertyId?: string) {
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching submissions:', error);
+        throw error;
+      }
+      
+      console.log(`Found ${data?.length || 0} submissions for property ID: ${propertyId}`);
       
       // Create default Submission objects with empty replies arrays
       const transformedSubmissions: Submission[] = (data || []).map(item => ({
@@ -64,7 +77,7 @@ export function useFetchSubmissions(propertyId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [propertyId]);
+  }, [propertyId, isValidPropertyId]);
 
   useEffect(() => {
     fetchSubmissions();

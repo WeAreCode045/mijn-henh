@@ -13,11 +13,16 @@ interface CommunicationsTabContentProps {
 }
 
 export function CommunicationsTabContent({ propertyId }: CommunicationsTabContentProps) {
-  // Handle empty or invalid propertyId
-  if (!propertyId || propertyId.trim() === '') {
+  // Validate propertyId format
+  const isValidPropertyId = propertyId && 
+                           propertyId.trim() !== '' && 
+                           propertyId !== '1' &&
+                           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(propertyId);
+  
+  if (!isValidPropertyId) {
     return (
       <div className="p-4 text-center">
-        <p className="text-muted-foreground">Property ID is required to display communications.</p>
+        <p className="text-muted-foreground">Valid property ID is required to display communications.</p>
       </div>
     );
   }
