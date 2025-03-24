@@ -39,6 +39,13 @@ export function useNearbyPlaces(
         return null;
       }
       
+      console.log("Calling nearby-places Edge Function with data:", {
+        address: formData.address,
+        category,
+        latitude: formData.latitude,
+        longitude: formData.longitude
+      });
+      
       const { data, error } = await supabase.functions.invoke('nearby-places', {
         body: { 
           address: formData.address,
@@ -51,7 +58,10 @@ export function useNearbyPlaces(
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Edge function error:", error);
+        throw error;
+      }
       
       if (data) {
         console.log(`${category} places fetched:`, data);

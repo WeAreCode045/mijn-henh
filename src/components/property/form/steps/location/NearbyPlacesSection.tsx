@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NearbyPlacesList } from "./components/NearbyPlacesList";
 import { NearbyPlacesSearch } from "./components/NearbyPlacesSearch";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { SelectPlacesModal } from "./components/SelectPlacesModal";
 
@@ -51,9 +51,11 @@ export function NearbyPlacesSection({
     if (!onFetchCategoryPlaces) return;
     
     try {
+      console.log("Fetching places for category:", category);
       const result = await onFetchCategoryPlaces(category);
       
       if (result) {
+        console.log("Search results:", result);
         // Flatten results if it's an object with category keys
         let places: PropertyNearbyPlace[] = [];
         if (typeof result === 'object' && !Array.isArray(result)) {
@@ -69,6 +71,7 @@ export function NearbyPlacesSection({
         
         // Only show results if we have places to show
         if (places.length > 0) {
+          console.log("Places to display in modal:", places.length);
           setSearchResults(places);
           setShowSelectionModal(true);
           
@@ -98,6 +101,7 @@ export function NearbyPlacesSection({
 
   // Function to handle search button click
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
+    console.log("Search handler called for category:", category);
     e.preventDefault(); // Prevent form submission
     e.stopPropagation(); // Stop event propagation
     
@@ -201,7 +205,7 @@ export function NearbyPlacesSection({
                                     className="h-8 w-8 opacity-0 group-hover:opacity-100 absolute top-2 right-2"
                                     onClick={() => handleRemovePlace(globalIndex)}
                                   >
-                                    <Loader2 className="h-4 w-4" />
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 )}
                               </div>

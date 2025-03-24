@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { useLocationDataFetch } from '@/hooks/location/useLocationDataFetch';
+import { useToast } from '@/components/ui/use-toast';
 
 export function usePropertyContent(
   formData: PropertyFormData,
@@ -11,6 +12,7 @@ export function usePropertyContent(
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState(false);
+  const { toast } = useToast();
   
   const { 
     fetchLocationData, 
@@ -24,6 +26,7 @@ export function usePropertyContent(
   } = useLocationDataFetch(formData, onFieldChange);
   
   const handleStepClick = useCallback((step: number) => {
+    console.log("Step clicked in PropertyContentTab:", step);
     setCurrentStep(step);
   }, []);
   
@@ -46,8 +49,13 @@ export function usePropertyContent(
       setPendingChanges(false);
       setLastSaved(new Date());
       setIsSaving(false);
+      
+      toast({
+        title: "Saved",
+        description: "Changes saved successfully"
+      });
     }, 1000);
-  }, []);
+  }, [toast]);
   
   return {
     fetchLocationData,

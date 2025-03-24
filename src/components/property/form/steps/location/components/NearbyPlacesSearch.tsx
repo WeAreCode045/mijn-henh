@@ -43,10 +43,11 @@ export function NearbyPlacesSearch({
   ];
 
   // Handle the search button click with explicit prevention of default behavior
-  const handleSearchButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSearchButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log("Search button clicked for category:", selectedCategory);
     e.preventDefault();
     e.stopPropagation();
-    onSearchClick(e, selectedCategory);
+    await onSearchClick(e, selectedCategory);
   };
 
   return (
