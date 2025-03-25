@@ -27,7 +27,7 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
   if (settings.global_features) {
     if (Array.isArray(settings.global_features)) {
       // If it's already an array, use it
-      globalFeaturesList = settings.global_features as string[];
+      globalFeaturesList = settings.global_features;
     } else if (typeof settings.global_features === 'string') {
       // If it's a JSON string, try to parse it
       try {

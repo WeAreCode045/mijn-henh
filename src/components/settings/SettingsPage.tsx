@@ -1,3 +1,4 @@
+
 import { useState, useEffect, ChangeEvent } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgencyTab } from "./AgencyTab";
@@ -95,6 +96,7 @@ export function SettingsPage() {
     if (!settings) return;
     
     try {
+      // Process global features for database storage
       let globalFeaturesData: string[] = [];
       if (Array.isArray(settings.globalFeatures)) {
         globalFeaturesData = settings.globalFeatures;

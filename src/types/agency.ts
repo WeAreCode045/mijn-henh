@@ -1,8 +1,8 @@
 
 import { Settings } from "@/types/settings";
 
-// Agency settings interface - extends the Settings type
-export interface AgencySettings extends Settings {
+// Agency settings interface
+export interface AgencySettings {
   id: string;
   name: string;
   email?: string;
@@ -27,7 +27,7 @@ export interface AgencySettings extends Settings {
   iconBuildYear?: string;
   iconGarages?: string;
   iconEnergyClass?: string;
-  globalFeatures?: string[] | null;
+  globalFeatures?: string[];
   
   // SMTP settings
   smtpHost?: string;
@@ -40,6 +40,11 @@ export interface AgencySettings extends Settings {
   
   // OpenAI API key
   openaiApiKey?: string;
+  
+  // Database field aliases
+  primary_color?: string;
+  secondary_color?: string;
+  global_features?: any; // This is needed to handle the database field
 }
 
 // Default settings

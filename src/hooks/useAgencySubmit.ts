@@ -92,11 +92,12 @@ export const useAgencySubmit = ({
         
         if (latestSettings.global_features) {
           // Handle either array or string format
-          if (Array.isArray(latestSettings.global_features)) {
-            globalFeaturesList = latestSettings.global_features as string[];
-          } else if (typeof latestSettings.global_features === 'string') {
+          const gfValue = latestSettings.global_features;
+          if (Array.isArray(gfValue)) {
+            globalFeaturesList = gfValue as string[];
+          } else if (typeof gfValue === 'string') {
             try {
-              const parsed = JSON.parse(latestSettings.global_features);
+              const parsed = JSON.parse(gfValue);
               if (Array.isArray(parsed)) {
                 globalFeaturesList = parsed;
               }
@@ -108,9 +109,11 @@ export const useAgencySubmit = ({
 
         // Create a properly typed object to pass to setSettings
         const updatedSettings: AgencySettings = {
-          ...latestSettings,
           id: latestSettings.id,
           name: latestSettings.name,
+          email: latestSettings.email,
+          phone: latestSettings.phone,
+          address: latestSettings.address,
           primaryColor: latestSettings.primary_color,
           secondaryColor: latestSettings.secondary_color,
           logoUrl: latestSettings.logo_url,
@@ -118,8 +121,24 @@ export const useAgencySubmit = ({
           facebookUrl: latestSettings.facebook_url,
           instagramUrl: latestSettings.instagram_url,
           youtubeUrl: latestSettings.youtube_url,
-          globalFeatures: globalFeaturesList,
-          // Add any other properties that need mapping
+          googleMapsApiKey: latestSettings.google_maps_api_key,
+          xmlImportUrl: latestSettings.xml_import_url,
+          iconBedrooms: latestSettings.icon_bedrooms,
+          iconBathrooms: latestSettings.icon_bathrooms,
+          iconSqft: latestSettings.icon_sqft,
+          iconLivingSpace: latestSettings.icon_living_space,
+          iconBuildYear: latestSettings.icon_build_year,
+          iconGarages: latestSettings.icon_garages,
+          iconEnergyClass: latestSettings.icon_energy_class,
+          smtpHost: latestSettings.smtp_host,
+          smtpPort: latestSettings.smtp_port,
+          smtpUsername: latestSettings.smtp_username,
+          smtpPassword: latestSettings.smtp_password,
+          smtpFromEmail: latestSettings.smtp_from_email,
+          smtpFromName: latestSettings.smtp_from_name,
+          smtpSecure: latestSettings.smtp_secure,
+          openaiApiKey: latestSettings.openai_api_key,
+          globalFeatures: globalFeaturesList
         };
         
         setSettings(updatedSettings);
