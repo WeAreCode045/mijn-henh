@@ -2,6 +2,14 @@
 import { PropertyImage } from './PropertyImageTypes';
 
 /**
+ * Represents an image in an area with sort order
+ */
+export interface AreaImage {
+  ImageID: string;
+  imageSortOrder: number;
+}
+
+/**
  * Represents an area of a property
  */
 export interface PropertyArea {
@@ -13,4 +21,5 @@ export interface PropertyArea {
   imageIds: string[]; // Explicitly defined property
   columns: number;
   images: PropertyImage[] | string[];
+  areaImages?: AreaImage[]; // New property for the updated format
 }

@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 import { PropertyPlaceType } from './PropertyPlaceTypes';
 
@@ -8,6 +7,7 @@ export interface PropertyFeature {
   description: string;
 }
 
+// Define AreaImage interface directly here to ensure it's exported properly
 export interface AreaImage {
   ImageID: string;
   imageSortOrder: number;
@@ -21,7 +21,7 @@ export interface PropertyArea {
   size: string;
   columns: number;
   // New structure for area images
-  areaImages: AreaImage[];
+  areaImages?: AreaImage[];
   // Legacy fields maintained for backward compatibility
   imageIds?: string[];
   images?: string[] | any[];
