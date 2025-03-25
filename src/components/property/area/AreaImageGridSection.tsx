@@ -21,9 +21,8 @@ export function AreaImageGridSection({
   onImageRemove,
   onImagesReorder
 }: AreaImageGridSectionProps) {
-  const handleImagesReorder = (areaId: string, reorderedImages: PropertyImage[]) => {
+  const handleImagesReorder = (areaId: string, reorderedImageIds: string[]) => {
     // Extract just the IDs from the reordered images
-    const reorderedImageIds = reorderedImages.map(img => img.id);
     console.log("Reordering images with IDs:", reorderedImageIds);
     
     // Call the parent component's reorder function with the IDs
