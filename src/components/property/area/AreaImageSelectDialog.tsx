@@ -1,9 +1,9 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PropertyImage } from "@/types/property";
 import { Check } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AreaImageSelectDialogProps {
   open: boolean;
@@ -12,6 +12,7 @@ interface AreaImageSelectDialogProps {
   areaTitle: string;
   selectedImageIds: string[];
   onUpdate: (imageIds: string[]) => void;
+  maxSelect?: number;
 }
 
 export function AreaImageSelectDialog({
@@ -21,11 +22,11 @@ export function AreaImageSelectDialog({
   areaTitle,
   selectedImageIds,
   onUpdate,
+  maxSelect = 10,
 }: AreaImageSelectDialogProps) {
-  // Local state to manage selection during dialog interaction
   const [localSelection, setLocalSelection] = useState<string[]>([]);
+  const { toast } = useToast();
   
-  // Update local selection when props change or dialog opens
   useEffect(() => {
     if (open) {
       console.log("AreaImageSelectDialog opened with selectedImageIds:", selectedImageIds);
@@ -37,29 +38,31 @@ export function AreaImageSelectDialog({
     console.log(`Toggling selection for image ${imageId}`);
     setLocalSelection(current => {
       if (current.includes(imageId)) {
-        // Remove from selection
         return current.filter(id => id !== imageId);
+      } else if (current.length >= maxSelect) {
+        toast({
+          title: "Maximum images reached",
+          description: `You can select up to ${maxSelect} images for an area`,
+          variant: "destructive"
+        });
+        return current;
       } else {
-        // Add to selection
         return [...current, imageId];
       }
     });
   };
   
   const handleConfirm = () => {
-    // Update parent component with the selection
     console.log(`AreaImageSelectDialog confirming selection:`, localSelection);
     onUpdate(localSelection);
     onOpenChange(false);
   };
   
   const handleCancel = () => {
-    // Reset to original selection and close dialog
     setLocalSelection([...selectedImageIds]);
     onOpenChange(false);
   };
   
-  // Debug output to check image URLs and IDs
   useEffect(() => {
     if (open) {
       console.log("Available images:", images);
@@ -76,6 +79,9 @@ export function AreaImageSelectDialog({
         </DialogHeader>
         
         <div className="py-4">
+          <div className="mb-2 text-sm text-muted-foreground">
+            Select up to {maxSelect} images ({localSelection.length}/{maxSelect} selected)
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto p-1">
             {images.map((image) => {
               const isSelected = localSelection.includes(image.id);

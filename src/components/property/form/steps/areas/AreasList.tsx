@@ -17,6 +17,7 @@ interface AreasListProps {
   propertyImages?: PropertyImage[];
   isUploading?: boolean;
   onReorder?: (reorderedAreas: PropertyArea[]) => void;
+  onReorderAreaImages?: (areaId: string, reorderedImageIds: string[]) => void;
 }
 
 export function AreasList({
@@ -28,7 +29,8 @@ export function AreasList({
   onAreaImagesSelect,
   propertyImages = [],
   isUploading = false,
-  onReorder
+  onReorder,
+  onReorderAreaImages
 }: AreasListProps) {
   const [expandedAreas, setExpandedAreas] = useState<string[]>(
     areas.length > 0 ? [areas[0].id] : []
@@ -125,8 +127,14 @@ export function AreasList({
                                   ? (imageIds) => onAreaImagesSelect(area.id, imageIds)
                                   : undefined
                               }
+                              onReorderImages={
+                                onReorderAreaImages
+                                  ? (imageIds) => onReorderAreaImages(area.id, imageIds)
+                                  : undefined
+                              }
                               propertyImages={propertyImages}
                               isUploading={isUploading}
+                              maxImageSelect={10} // Set maximum images per area to 10
                             />
                           </AccordionContent>
                         </AccordionItem>

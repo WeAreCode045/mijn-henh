@@ -15,6 +15,7 @@ interface AreasPageProps {
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  onReorderAreaImages?: (areaId: string, reorderedImageIds: string[]) => void;
   isUploading?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -28,11 +29,20 @@ export function AreasPage({
   onAreaImageRemove,
   onAreaImageUpload,
   onAreaImagesSelect,
+  onReorderAreaImages,
   isUploading = false,
   setPendingChanges
 }: AreasPageProps) {
   const handleAddArea = () => {
     onAddArea();
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+  };
+  
+  // Handle area reordering
+  const handleReorderAreas = (reorderedAreas) => {
+    onFieldChange("areas", reorderedAreas);
     if (setPendingChanges) {
       setPendingChanges(true);
     }
@@ -70,8 +80,10 @@ export function AreasPage({
             onAreaImageRemove={onAreaImageRemove}
             onAreaImageUpload={onAreaImageUpload}
             onAreaImagesSelect={onAreaImagesSelect}
+            onReorderAreaImages={onReorderAreaImages}
             propertyImages={formData.images as PropertyImage[]}
             isUploading={isUploading}
+            onReorder={handleReorderAreas}
           />
         </CardContent>
       </Card>

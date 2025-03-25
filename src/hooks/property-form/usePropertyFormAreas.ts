@@ -147,10 +147,82 @@ export function usePropertyFormAreas(
   const handleAreaImagesSelect = useCallback((areaId: string, imageIds: string[]) => {
     if (!formState.areas) return;
     
-    // Implementation for selecting images for an area
-    console.log("Selecting images for area:", areaId, imageIds);
+    // Find the images from the property images
+    const selectedImages = formState.images
+      ? (formState.images as any[]).filter(img => imageIds.includes(typeof img === 'string' ? img : img.id))
+      : [];
+    
+    // Update the area with the selected images
+    const updatedAreas = formState.areas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          images: selectedImages,
+          imageIds: imageIds
+        };
+      }
+      return area;
+    });
+    
+    handleFieldChange("areas", updatedAreas);
     setPendingChanges(true);
-  }, [setPendingChanges]);
+    
+    // Auto-save the change if we have an ID
+    if (formState.id) {
+      autosaveField(formState.id, "areas", updatedAreas)
+        .catch(error => console.error("Error auto-saving areas:", error));
+    }
+  }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
+  
+  const handleReorderAreaImages = useCallback((areaId: string, reorderedImageIds: string[]) => {
+    if (!formState.areas) return;
+    
+    // Find the area to update
+    const areaToUpdate = formState.areas.find(area => area.id === areaId);
+    if (!areaToUpdate) return;
+    
+    // Get all images for this area
+    const areaImages = areaToUpdate.images || [];
+    
+    // Reorder the images based on the new imageIds order
+    const reorderedImages = reorderedImageIds.map(id => 
+      areaImages.find(img => typeof img === 'string' ? img === id : img.id === id)
+    ).filter(Boolean);
+    
+    // Update the area with the reordered images
+    const updatedAreas = formState.areas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          images: reorderedImages,
+          imageIds: reorderedImageIds
+        };
+      }
+      return area;
+    });
+    
+    handleFieldChange("areas", updatedAreas);
+    setPendingChanges(true);
+    
+    // Auto-save the change if we have an ID
+    if (formState.id) {
+      autosaveField(formState.id, "areas", updatedAreas)
+        .then(() => {
+          toast({
+            title: "Success",
+            description: "Image order updated",
+          });
+        })
+        .catch(error => {
+          console.error("Error auto-saving areas:", error);
+          toast({
+            title: "Error",
+            description: "Failed to update image order",
+            variant: "destructive",
+          });
+        });
+    }
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
   const handleAreaImageUpload = useCallback(async (areaId: string, files: FileList) => {
     if (!formState.areas) return;
@@ -186,6 +258,7 @@ export function usePropertyFormAreas(
     handleAreaImageRemove,
     handleAreaImagesSelect,
     handleAreaImageUpload,
+    handleReorderAreaImages,
     isUploading,
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto
