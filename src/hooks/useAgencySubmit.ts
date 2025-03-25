@@ -92,6 +92,15 @@ export const useAgencySubmit = ({
         if (latestSettings.global_features) {
           if (Array.isArray(latestSettings.global_features)) {
             globalFeaturesList = latestSettings.global_features as string[];
+          } else if (typeof latestSettings.global_features === 'string') {
+            try {
+              const parsed = JSON.parse(latestSettings.global_features);
+              if (Array.isArray(parsed)) {
+                globalFeaturesList = parsed;
+              }
+            } catch (e) {
+              console.error('Error parsing global_features:', e);
+            }
           }
         }
 

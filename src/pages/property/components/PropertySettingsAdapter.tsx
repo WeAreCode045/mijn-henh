@@ -26,6 +26,15 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
   if (settings.global_features) {
     if (Array.isArray(settings.global_features)) {
       globalFeaturesList = settings.global_features as string[];
+    } else if (typeof settings.global_features === 'string') {
+      try {
+        const parsed = JSON.parse(settings.global_features);
+        if (Array.isArray(parsed)) {
+          globalFeaturesList = parsed;
+        }
+      } catch (e) {
+        console.error('Error parsing global_features:', e);
+      }
     }
   }
 

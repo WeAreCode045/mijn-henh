@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySettings } from "@/types/agency";
 import { defaultAgencySettings } from "./defaultAgencySettings";
@@ -24,7 +25,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     } else if (typeof data.global_features === 'string') {
       // If it's a JSON string, try to parse it
       try {
-        const parsed = JSON.parse(data.global_features);
+        const parsed = JSON.parse(data.global_features as string);
         if (Array.isArray(parsed)) {
           globalFeatures = parsed;
         }

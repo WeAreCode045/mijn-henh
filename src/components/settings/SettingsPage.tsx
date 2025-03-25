@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ChangeEvent } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgencyTab } from "./AgencyTab";
@@ -21,7 +20,6 @@ export function SettingsPage() {
   const [globalFeatures, setGlobalFeatures] = useState<PropertyFeature[]>([]);
   const { toast } = useToast();
 
-  // Fetch settings
   useEffect(() => {
     const getSettings = async () => {
       try {
@@ -29,7 +27,6 @@ export function SettingsPage() {
         const agencySettings = await fetchAgencySettings();
         setSettings(agencySettings);
         
-        // Also fetch global features
         await fetchGlobalFeatures();
       } catch (error) {
         console.error("Error fetching settings:", error);
@@ -46,7 +43,6 @@ export function SettingsPage() {
     getSettings();
   }, [toast]);
 
-  // Fetch global features from database
   const fetchGlobalFeatures = async () => {
     try {
       const { data, error } = await supabase
@@ -67,7 +63,6 @@ export function SettingsPage() {
     }
   };
 
-  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (settings) {
@@ -78,7 +73,6 @@ export function SettingsPage() {
     }
   };
 
-  // Handle select changes
   const handleSelectChange = (name: string, value: string) => {
     if (settings) {
       setSettings({
@@ -88,7 +82,6 @@ export function SettingsPage() {
     }
   };
 
-  // Handle checkbox changes
   const handleCheckboxChange = (name: string, checked: boolean) => {
     if (settings) {
       setSettings({
@@ -98,18 +91,15 @@ export function SettingsPage() {
     }
   };
 
-  // Handle save
   const handleSave = async () => {
     if (!settings) return;
     
     try {
-      // Prepare global features for database (convert to string array)
       let globalFeaturesData: string[] = [];
       if (settings.globalFeatures && Array.isArray(settings.globalFeatures)) {
         globalFeaturesData = settings.globalFeatures;
       }
       
-      // Update agency_settings table
       const { error } = await supabase
         .from('agency_settings')
         .update({
@@ -141,7 +131,6 @@ export function SettingsPage() {
           smtp_from_name: settings.smtpFromName,
           smtp_secure: settings.smtpSecure,
           openai_api_key: settings.openaiApiKey,
-          // Pass the properly formatted global features array
           global_features: globalFeaturesData
         })
         .eq('id', settings.id);
@@ -162,7 +151,6 @@ export function SettingsPage() {
     }
   };
 
-  // Handle global feature add
   const handleFeatureAdd = async (description: string) => {
     try {
       const { data, error } = await supabase
@@ -188,7 +176,6 @@ export function SettingsPage() {
     }
   };
 
-  // Handle global feature remove
   const handleFeatureRemove = async (id: string) => {
     try {
       const { error } = await supabase
@@ -214,7 +201,6 @@ export function SettingsPage() {
     }
   };
 
-  // Handle bulk feature update
   const handleFeatureBulkUpdate = async (featuresStr: string) => {
     try {
       const featuresList = featuresStr
@@ -224,7 +210,6 @@ export function SettingsPage() {
       
       if (featuresList.length === 0) return;
       
-      // Insert all features (we'll handle duplicates in the database)
       for (const description of featuresList) {
         try {
           await supabase
