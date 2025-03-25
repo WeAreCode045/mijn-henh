@@ -7,7 +7,7 @@ export function useFetchSubmissions(propertyId?: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Validate propertyId is a proper UUID
+  // Validate propertyId is a proper UUID before using it in a query
   const isValidPropertyId = propertyId && 
                            propertyId.trim() !== '' && 
                            propertyId !== '1' &&
