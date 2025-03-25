@@ -1,14 +1,25 @@
+
 import { AgencySettings } from "@/types/agency";
 
-interface FormData {
+export interface ContactFormData {
   name: string;
   email: string;
   phone: string;
   message: string;
+  inquiry_type: "information" | "viewing" | "offer";
 }
 
-export async function sendFormSubmission(
-  formData: FormData,
+export async function submitContactForm(
+  formData: ContactFormData,
+  property: any,
+  agencySettings: AgencySettings | null
+): Promise<boolean> {
+  const propertyTitle = property?.title || "Unknown Property";
+  return sendFormSubmission(formData, propertyTitle, agencySettings);
+}
+
+async function sendFormSubmission(
+  formData: ContactFormData,
   propertyTitle: string,
   agencySettings: AgencySettings | null
 ): Promise<boolean> {
@@ -19,11 +30,12 @@ export async function sendFormSubmission(
     return false;
   }
   
-  const { name, email, phone, message } = formData;
+  const { name, email, phone, message, inquiry_type } = formData;
   const subject = `New Inquiry for ${propertyTitle}`;
   const body = `
     New Inquiry Details:
     Property: ${propertyTitle}
+    Inquiry Type: ${inquiry_type}
     Name: ${name}
     Email: ${email}
     Phone: ${phone}
@@ -56,7 +68,7 @@ export async function sendFormSubmission(
 }
 
 // Prepare SMTP configuration from settings
-function getSMTPConfig(settings: AgencySettings) {
+function getSMTPConfig(settings: AgencySettings | null) {
   if (!settings) return null;
   
   const config = {
