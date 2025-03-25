@@ -51,6 +51,7 @@ export function AreaEditor({
   };
 
   const handleImagesSelect = (selectedIds: string[]) => {
+    console.log("handleImagesSelect in AreaEditor called with:", selectedIds);
     if (onAreaImagesSelect) {
       onAreaImagesSelect(selectedIds);
     }
@@ -59,6 +60,7 @@ export function AreaEditor({
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !onReorderImages || !area.imageIds) return;
     
+    console.log("Reordering images:", result);
     const reorderedImages = [...area.imageIds];
     const [removed] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, removed);
@@ -116,7 +118,7 @@ export function AreaEditor({
               }
             </div>
             
-            {area.images && area.images.length > 0 ? (
+            {area.imageIds && area.imageIds.length > 0 ? (
               <DragDropContext onDragEnd={handleDragEnd}>
                 <Droppable droppableId="area-images" direction="horizontal">
                   {(provided) => (
@@ -125,19 +127,16 @@ export function AreaEditor({
                       {...provided.droppableProps} 
                       className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4"
                     >
-                      {(area.imageIds || []).map((imageId, index) => {
+                      {area.imageIds.map((imageId, index) => {
                         // Find the image object for this ID
-                        const imageObj = area.images.find(img => 
-                          typeof img === 'string' 
-                            ? img === imageId 
-                            : img.id === imageId
-                        );
+                        const imageObj = propertyImages.find(img => img.id === imageId);
                         
-                        if (!imageObj) return null;
+                        if (!imageObj) {
+                          console.warn(`Could not find image with ID ${imageId} in propertyImages`);
+                          return null;
+                        }
                         
-                        const imageUrl = typeof imageObj === 'string' 
-                          ? imageObj 
-                          : imageObj.url;
+                        const imageUrl = imageObj.url;
                           
                         return (
                           <Draggable 

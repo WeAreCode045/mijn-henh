@@ -34,6 +34,7 @@ export function AreasPage({
   setPendingChanges
 }: AreasPageProps) {
   const handleAddArea = () => {
+    console.log("Adding new area");
     onAddArea();
     if (setPendingChanges) {
       setPendingChanges(true);
@@ -42,6 +43,7 @@ export function AreasPage({
   
   // Handle area reordering
   const handleReorderAreas = (reorderedAreas) => {
+    console.log("Reordering areas", reorderedAreas);
     onFieldChange("areas", reorderedAreas);
     if (setPendingChanges) {
       setPendingChanges(true);
@@ -66,21 +68,32 @@ export function AreasPage({
           <AreasList
             areas={formData.areas || []}
             onRemove={(id) => {
+              console.log("Removing area", id);
               onRemoveArea(id);
               if (setPendingChanges) {
                 setPendingChanges(true);
               }
             }}
             onUpdate={(id, field, value) => {
+              console.log(`Updating area ${id}, field ${field} with value:`, value);
               onUpdateArea(id, field, value);
               if (setPendingChanges) {
                 setPendingChanges(true);
               }
             }}
-            onAreaImageRemove={onAreaImageRemove}
+            onAreaImageRemove={onAreaImageRemove && ((areaId, imageId) => {
+              console.log(`Removing image ${imageId} from area ${areaId}`);
+              onAreaImageRemove(areaId, imageId);
+            })}
             onAreaImageUpload={onAreaImageUpload}
-            onAreaImagesSelect={onAreaImagesSelect}
-            onReorderAreaImages={onReorderAreaImages}
+            onAreaImagesSelect={onAreaImagesSelect && ((areaId, imageIds) => {
+              console.log(`Selecting images for area ${areaId}:`, imageIds);
+              onAreaImagesSelect(areaId, imageIds);
+            })}
+            onReorderAreaImages={onReorderAreaImages && ((areaId, reorderedImageIds) => {
+              console.log(`Reordering images for area ${areaId}:`, reorderedImageIds);
+              onReorderAreaImages(areaId, reorderedImageIds);
+            })}
             propertyImages={formData.images as PropertyImage[]}
             isUploading={isUploading}
             onReorder={handleReorderAreas}

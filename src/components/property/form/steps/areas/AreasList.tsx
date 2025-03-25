@@ -53,6 +53,8 @@ export function AreasList({
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !onReorder) return;
     
+    console.log("Drag end event:", result);
+    
     const reorderedAreas = [...areas];
     const [removed] = reorderedAreas.splice(result.source.index, 1);
     reorderedAreas.splice(result.destination.index, 0, removed);
@@ -114,7 +116,10 @@ export function AreasList({
                               onUpdate={(field, value) => onUpdate(area.id, field, value)}
                               onAreaImageRemove={
                                 onAreaImageRemove 
-                                  ? (imageId) => onAreaImageRemove(area.id, imageId)
+                                  ? (imageId) => {
+                                      console.log(`Removing image ${imageId} from area ${area.id}`);
+                                      onAreaImageRemove(area.id, imageId);
+                                    }
                                   : undefined
                               }
                               onAreaImageUpload={
@@ -124,7 +129,10 @@ export function AreasList({
                               }
                               onAreaImagesSelect={
                                 onAreaImagesSelect
-                                  ? (imageIds) => onAreaImagesSelect(area.id, imageIds)
+                                  ? (imageIds) => {
+                                      console.log(`Selecting images for area ${area.id}:`, imageIds);
+                                      onAreaImagesSelect(area.id, imageIds);
+                                    }
                                   : undefined
                               }
                               onReorderImages={
