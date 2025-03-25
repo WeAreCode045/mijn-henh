@@ -2,13 +2,34 @@
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { PropertyFormData, PropertyFeature } from '@/types/property';
+import { supabase } from '@/integrations/supabase/client';
 
 export function usePropertyFeatures(
   formData: PropertyFormData,
   onFieldChange: (field: keyof PropertyFormData, value: any) => void
 ) {
+  // Save feature changes directly to the database
+  const saveFeaturesField = async (features: PropertyFeature[]) => {
+    if (!formData.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ features: JSON.stringify(features) })
+        .eq('id', formData.id);
+        
+      if (error) {
+        console.error("Error saving features:", error);
+      } else {
+        console.log("Features saved to database successfully");
+      }
+    } catch (err) {
+      console.error("Failed to save features:", err);
+    }
+  };
+  
   // Add a new feature to the property
-  const addFeature = useCallback(() => {
+  const addFeature = useCallback(async () => {
     const newFeature: PropertyFeature = {
       id: uuidv4(),
       description: ''
@@ -18,19 +39,28 @@ export function usePropertyFeatures(
       [...formData.features, newFeature] : 
       [newFeature];
     
+    // Update in-memory state
     onFieldChange('features', updatedFeatures);
+    
+    // Save directly to database
+    await saveFeaturesField(updatedFeatures);
   }, [formData.features, onFieldChange]);
   
   // Remove a feature from the property
-  const removeFeature = useCallback((id: string) => {
+  const removeFeature = useCallback(async (id: string) => {
     if (!formData.features) return;
     
     const updatedFeatures = formData.features.filter(feature => feature.id !== id);
+    
+    // Update in-memory state
     onFieldChange('features', updatedFeatures);
+    
+    // Save directly to database
+    await saveFeaturesField(updatedFeatures);
   }, [formData.features, onFieldChange]);
   
   // Update a feature's description
-  const updateFeature = useCallback((id: string, description: string) => {
+  const updateFeature = useCallback(async (id: string, description: string) => {
     if (!formData.features) return;
     
     const updatedFeatures = formData.features.map(feature => {
@@ -40,7 +70,11 @@ export function usePropertyFeatures(
       return feature;
     });
     
+    // Update in-memory state
     onFieldChange('features', updatedFeatures);
+    
+    // Save directly to database
+    await saveFeaturesField(updatedFeatures);
   }, [formData.features, onFieldChange]);
   
   return {

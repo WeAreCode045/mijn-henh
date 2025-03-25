@@ -8,6 +8,7 @@ import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from "@/integrations/supabase/client";
 
 interface FeaturesPageProps {
   formData: PropertyFormData;
@@ -29,36 +30,69 @@ export function FeaturesPage({
   const [activeTab, setActiveTab] = useState<string>("manual");
   const { availableFeatures, isLoading, addFeature: addToAvailableFeatures } = useAvailableFeatures();
   
-  const handleFeatureChange = (id: string, description: string) => {
-    // Now this is only called on blur, so we can update immediately
-    onUpdateFeature(id, description);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+  // Save feature changes directly to the database
+  const saveFeaturesField = async (features: PropertyFeature[]) => {
+    if (!formData.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ features: JSON.stringify(features) })
+        .eq('id', formData.id);
+        
+      if (error) {
+        console.error("Error saving features:", error);
+      } else {
+        console.log("Features saved to database successfully");
+        if (setPendingChanges) {
+          setPendingChanges(false);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to save features:", err);
     }
   };
   
-  const handleAddFeature = (feature: PropertyFeature) => {
+  const handleFeatureChange = async (id: string, description: string) => {
+    // Update in-memory state
+    onUpdateFeature(id, description);
+    
+    // Update features in the database directly - only the features field
+    if (formData.id) {
+      const updatedFeatures = formData.features.map(feature => 
+        feature.id === id ? { ...feature, description } : feature
+      );
+      
+      await saveFeaturesField(updatedFeatures);
+    }
+  };
+  
+  const handleAddFeature = async (feature: PropertyFeature) => {
     // If we already have this feature, don't add it again
     if (formData.features?.some(f => f.id === feature.id)) {
       return;
     }
     
     const updatedFeatures = [...(formData.features || []), feature];
+    
+    // Update in-memory state
     onFieldChange('features', updatedFeatures);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
+    
+    // Update features in the database
+    await saveFeaturesField(updatedFeatures);
   };
   
-  const handleRemoveSelectedFeature = (id: string) => {
+  const handleRemoveSelectedFeature = async (id: string) => {
     const updatedFeatures = formData.features?.filter(feature => feature.id !== id) || [];
+    
+    // Update in-memory state
     onFieldChange('features', updatedFeatures);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
+    
+    // Update features in the database
+    await saveFeaturesField(updatedFeatures);
   };
   
-  const handleAddMultipleFeatures = (newFeatures: PropertyFeature[]) => {
+  const handleAddMultipleFeatures = async (newFeatures: PropertyFeature[]) => {
     // Add multiple features at once
     // First, add the new features to the available features list
     newFeatures.forEach(feature => {
@@ -66,12 +100,31 @@ export function FeaturesPage({
       addToAvailableFeatures(feature.description);
     });
     
-    // Then add them to the property
+    // Update in-memory state with new features
     const updatedFeatures = [...(formData.features || []), ...newFeatures];
     onFieldChange('features', updatedFeatures);
-    if (setPendingChanges) {
-      setPendingChanges(true);
-    }
+    
+    // Update features in the database
+    await saveFeaturesField(updatedFeatures);
+  };
+  
+  const handleAddClick = async () => {
+    // Add a new feature
+    onAddFeature();
+    
+    // Wait for state to update, then save to database
+    setTimeout(async () => {
+      await saveFeaturesField(formData.features);
+    }, 0);
+  };
+  
+  const handleRemoveClick = async (id: string) => {
+    // Remove the feature
+    onRemoveFeature(id);
+    
+    // Update features in the database - need to filter it manually since formData won't update yet
+    const updatedFeatures = formData.features.filter(feature => feature.id !== id);
+    await saveFeaturesField(updatedFeatures);
   };
   
   return (
@@ -90,18 +143,8 @@ export function FeaturesPage({
             <TabsContent value="manual">
               <PropertyFeatures
                 features={formData.features || []}
-                onAdd={() => {
-                  onAddFeature();
-                  if (setPendingChanges) {
-                    setPendingChanges(true);
-                  }
-                }}
-                onRemove={(id) => {
-                  onRemoveFeature(id);
-                  if (setPendingChanges) {
-                    setPendingChanges(true);
-                  }
-                }}
+                onAdd={handleAddClick}
+                onRemove={handleRemoveClick}
                 onUpdate={handleFeatureChange}
               />
             </TabsContent>
