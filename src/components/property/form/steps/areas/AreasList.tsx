@@ -1,11 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { PropertyArea, PropertyImage } from "@/types/property";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { AreaEditor } from "./AreaEditor";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface AreasListProps {
   areas: PropertyArea[];
@@ -16,6 +16,7 @@ interface AreasListProps {
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   propertyImages?: PropertyImage[];
   isUploading?: boolean;
+  onReorder?: (reorderedAreas: PropertyArea[]) => void;
 }
 
 export function AreasList({
@@ -26,8 +27,13 @@ export function AreasList({
   onAreaImageUpload,
   onAreaImagesSelect,
   propertyImages = [],
-  isUploading = false
+  isUploading = false,
+  onReorder
 }: AreasListProps) {
+  const [expandedAreas, setExpandedAreas] = useState<string[]>(
+    areas.length > 0 ? [areas[0].id] : []
+  );
+
   if (!areas.length) {
     return (
       <div className="text-center py-8 border border-dashed rounded-lg">
@@ -36,53 +42,104 @@ export function AreasList({
     );
   }
 
+  // Handle accordion state changes
+  const handleAccordionChange = (value: string[]) => {
+    setExpandedAreas(value);
+  };
+
+  // Handle drag end event
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !onReorder) return;
+    
+    const reorderedAreas = [...areas];
+    const [removed] = reorderedAreas.splice(result.source.index, 1);
+    reorderedAreas.splice(result.destination.index, 0, removed);
+    
+    onReorder(reorderedAreas);
+  };
+
   return (
     <div className="space-y-4">
-      <Accordion type="multiple" defaultValue={areas.length > 0 ? [areas[0].id] : []}>
-        {areas.map((area, index) => (
-          <AccordionItem key={area.id} value={area.id} className="border rounded-md mb-4">
-            <div className="flex items-center justify-between px-4">
-              <AccordionTrigger>
-                {area.title || area.name || `Area ${index + 1}`}
-              </AccordionTrigger>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(area.id);
-                }}
-                className="h-8 w-8 p-0"
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="areas-list">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              <Accordion 
+                type="multiple" 
+                value={expandedAreas}
+                onValueChange={handleAccordionChange}
               >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+                {areas.map((area, index) => (
+                  <Draggable 
+                    key={area.id} 
+                    draggableId={area.id}
+                    index={index}
+                    isDragDisabled={!onReorder}
+                  >
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                      >
+                        <AccordionItem value={area.id} className="border rounded-md mb-4">
+                          <div className="flex items-center justify-between px-4">
+                            <div 
+                              className="flex-1 flex items-center"
+                              {...provided.dragHandleProps}
+                            >
+                              <AccordionTrigger>
+                                {area.title || area.name || `Area ${index + 1}`}
+                              </AccordionTrigger>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onRemove(area.id);
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                          <AccordionContent>
+                            <AreaEditor
+                              area={area}
+                              onUpdate={(field, value) => onUpdate(area.id, field, value)}
+                              onAreaImageRemove={
+                                onAreaImageRemove 
+                                  ? (imageId) => onAreaImageRemove(area.id, imageId)
+                                  : undefined
+                              }
+                              onAreaImageUpload={
+                                onAreaImageUpload
+                                  ? (files) => onAreaImageUpload(area.id, files)
+                                  : undefined
+                              }
+                              onAreaImagesSelect={
+                                onAreaImagesSelect
+                                  ? (imageIds) => onAreaImagesSelect(area.id, imageIds)
+                                  : undefined
+                              }
+                              propertyImages={propertyImages}
+                              isUploading={isUploading}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+              </Accordion>
+              {provided.placeholder}
             </div>
-            <AccordionContent>
-              <AreaEditor
-                area={area}
-                onUpdate={(field, value) => onUpdate(area.id, field, value)}
-                onAreaImageRemove={
-                  onAreaImageRemove 
-                    ? (imageId) => onAreaImageRemove(area.id, imageId)
-                    : undefined
-                }
-                onAreaImageUpload={
-                  onAreaImageUpload
-                    ? (files) => onAreaImageUpload(area.id, files)
-                    : undefined
-                }
-                onAreaImagesSelect={
-                  onAreaImagesSelect
-                    ? (imageIds) => onAreaImagesSelect(area.id, imageIds)
-                    : undefined
-                }
-                propertyImages={propertyImages}
-                isUploading={isUploading}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 }
