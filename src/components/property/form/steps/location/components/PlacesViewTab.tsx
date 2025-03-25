@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { PlacesList } from "./PlacesList";
 import { groupPlacesByCategory } from "../utils/placeUtils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PlacesViewTabProps {
   places: PropertyNearbyPlace[];
@@ -33,16 +34,20 @@ export function PlacesViewTab({ places, onRemove, isDisabled }: PlacesViewTabPro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {categories.map((category) => (
-        <div key={category} className="space-y-2">
-          <h3 className="text-lg font-semibold">{category}</h3>
-          <PlacesList
-            places={placesByCategory[category]}
-            onRemove={onRemove}
-            isDisabled={isDisabled}
-          />
-        </div>
+        <Card key={category} className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg capitalize">{category}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PlacesList
+              places={placesByCategory[category]}
+              onRemove={onRemove}
+              isDisabled={isDisabled}
+            />
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

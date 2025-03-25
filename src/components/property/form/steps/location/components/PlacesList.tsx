@@ -3,77 +3,56 @@ import React from "react";
 import { PropertyNearbyPlace } from "@/types/property";
 import { Button } from "@/components/ui/button";
 import { StarIcon, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface PlacesListProps {
   places: PropertyNearbyPlace[];
   onRemove?: (index: number) => void;
-  onToggleVisibility?: (index: number, visible: boolean) => void;
   isDisabled?: boolean;
 }
 
-export function PlacesList({ 
-  places, 
-  onRemove, 
-  onToggleVisibility,
-  isDisabled = false 
-}: PlacesListProps) {
+export function PlacesList({ places, onRemove, isDisabled = false }: PlacesListProps) {
+  if (!places.length) {
+    return (
+      <div className="py-2 text-center text-muted-foreground text-sm">
+        No places in this category
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {places.map((place, index) => (
-        <Card key={place.id} className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <h4 className="font-medium">{place.name}</h4>
-                  {onToggleVisibility && (
-                    <Checkbox 
-                      checked={place.visible_in_webview !== false} 
-                      onCheckedChange={(checked) => 
-                        onToggleVisibility(index, checked as boolean)
-                      }
-                      disabled={isDisabled}
-                    />
-                  )}
-                </div>
-                
-                {place.vicinity && (
-                  <p className="text-sm text-muted-foreground">{place.vicinity}</p>
-                )}
-                
-                <div className="flex flex-wrap gap-2">
-                  {place.rating && (
-                    <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 border-amber-200">
-                      <StarIcon className="h-3 w-3 fill-amber-500 text-amber-500" />
-                      <span className="text-amber-700">{place.rating.toFixed(1)}</span>
-                      {place.user_ratings_total && (
-                        <span className="text-amber-600 text-xs">({place.user_ratings_total})</span>
-                      )}
-                    </Badge>
-                  )}
-                  
-                  <Badge variant="outline">
-                    {place.type}
-                  </Badge>
-                </div>
-              </div>
-              
-              {onRemove && !isDisabled && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onRemove(index)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+        <div 
+          key={`${place.id}-${index}`}
+          className="flex justify-between items-center p-2 rounded-md hover:bg-slate-50 group"
+        >
+          <div className="flex-1">
+            <div className="font-medium">{place.name}</div>
+            {place.vicinity && (
+              <div className="text-xs text-muted-foreground">{place.vicinity}</div>
+            )}
+            <div className="flex items-center gap-1 mt-1">
+              {place.rating && (
+                <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                  <StarIcon className="h-3 w-3 text-amber-500 fill-amber-500" />
+                  <span>{place.rating.toFixed(1)}</span>
+                </Badge>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          
+          {onRemove && !isDisabled && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => onRemove(index)}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          )}
+        </div>
       ))}
     </div>
   );
