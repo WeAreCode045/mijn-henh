@@ -9,8 +9,7 @@ export type {
   PropertyFormData,
   PropertySubmitData,
   PropertyAgent,
-  Area,
-  AreaImage
+  Area
 } from './PropertyTypes';
 
 // Re-export types from PropertyPlaceTypes.ts
@@ -22,5 +21,5 @@ export type {
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export type { PropertyData } from './PropertyDataTypes';
 
-// Re-export types from PropertyAreaTypes.ts
-export type { AreaImage as AreaImageType } from './PropertyAreaTypes';
+// Re-export AreaImage from PropertyAreaTypes.ts
+export type { AreaImage } from './PropertyAreaTypes';
