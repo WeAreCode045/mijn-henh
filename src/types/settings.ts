@@ -1,5 +1,5 @@
 
-export type SettingsTab = "agency" | "design" | "advanced" | "icons";
+export type SettingsTab = "agency" | "design" | "advanced" | "icons" | "global";
 
 export interface Settings {
   name: string;
@@ -22,6 +22,7 @@ export interface Settings {
   icon_build_year?: string | null;
   icon_garages?: string | null;
   icon_energy_class?: string | null;
+  global_features?: string[] | null;
   
   // SMTP settings
   smtp_host?: string | null;

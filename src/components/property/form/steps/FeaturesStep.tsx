@@ -5,8 +5,9 @@ import { FeatureSelector } from "@/components/property/features/FeatureSelector"
 import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { GlobalFeaturesSelector } from "@/components/property/features/GlobalFeaturesSelector";
 
 interface FeaturesStepProps {
   formData: PropertyFormData;
@@ -28,6 +29,34 @@ export function FeaturesStep({
   console.log("FeaturesStep rendering with features:", formData.features);
   
   const { availableFeatures, isLoading, addFeature, addMultipleFeatures } = useAvailableFeatures();
+  const [globalFeatures, setGlobalFeatures] = useState<PropertyFeature[]>([]);
+  const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
+  
+  // Fetch global features on component mount
+  useEffect(() => {
+    const fetchGlobalFeatures = async () => {
+      setIsLoadingGlobal(true);
+      try {
+        const { data, error } = await supabase
+          .from('property_features')
+          .select('*')
+          .order('description', { ascending: true });
+        
+        if (error) {
+          console.error("Error fetching global features:", error);
+          return;
+        }
+        
+        setGlobalFeatures(data || []);
+      } catch (err) {
+        console.error("Failed to fetch global features:", err);
+      } finally {
+        setIsLoadingGlobal(false);
+      }
+    };
+    
+    fetchGlobalFeatures();
+  }, []);
   
   const handleFeatureChange = async (id: string, description: string) => {
     // Now this is only called on blur, so we can update immediately
@@ -153,6 +182,11 @@ export function FeaturesStep({
     }
   };
   
+  const handleGlobalFeatureSelect = (feature: PropertyFeature) => {
+    // Add selected global feature to property features
+    handleAddFeature(feature);
+  };
+  
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Property Features</h2>
@@ -160,11 +194,28 @@ export function FeaturesStep({
         Add all the distinctive features that make this property stand out.
       </p>
       
-      <Tabs defaultValue="list">
+      <Tabs defaultValue="global">
         <TabsList className="mb-4">
-          <TabsTrigger value="list">Manual Entry</TabsTrigger>
+          <TabsTrigger value="global">Global Features</TabsTrigger>
+          <TabsTrigger value="list">Custom Features</TabsTrigger>
           <TabsTrigger value="select">Select Features</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="global">
+          {isLoadingGlobal ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-muted-foreground">Loading global features...</span>
+            </div>
+          ) : (
+            <GlobalFeaturesSelector
+              globalFeatures={globalFeatures}
+              propertyFeatures={formData.features}
+              onSelect={handleGlobalFeatureSelect}
+              onDeselect={handleRemoveSelectedFeature}
+            />
+          )}
+        </TabsContent>
         
         <TabsContent value="list">
           <PropertyFeatures

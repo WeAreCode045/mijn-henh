@@ -1,77 +1,92 @@
 
 import { useState } from "react";
 import { AgencySettings } from "@/types/agency";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { fetchAgencySettings } from "@/utils/fetchAgencySettings";
-import { agencySettingsService } from "@/services/agencySettingsService";
+import { PropertyFeature } from "@/types/property";
 
 interface UseAgencySubmitProps {
   settings: AgencySettings;
-  setSettings: React.Dispatch<React.SetStateAction<AgencySettings>>;
-  logoPreview: string | null;
+  setSettings: (settings: AgencySettings) => void;
+  logoPreview: string;
+  globalFeatures?: PropertyFeature[];
 }
 
-export const useAgencySubmit = ({ settings, setSettings, logoPreview }: UseAgencySubmitProps) => {
-  const { toast } = useToast();
+export const useAgencySubmit = ({ 
+  settings, 
+  setSettings, 
+  logoPreview,
+  globalFeatures = []
+}: UseAgencySubmitProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      let logoUrl = settings.logoUrl;
-
-      if (logoPreview && !logoPreview.startsWith('http')) {
-        const file = await (await fetch(logoPreview)).blob();
-        const filename = `logo-${Date.now()}.png`;
-        logoUrl = await agencySettingsService.uploadLogo(file, filename);
-      }
-
-      const updateData = {
-        ...settings,
-        logoUrl
-      };
-
-      if (settings.id) {
-        await agencySettingsService.updateSettings(settings.id, updateData);
-      } else {
-        const createData = {
+      const { data, error } = await supabase
+        .from('agency_settings')
+        .update({
           name: settings.name,
           email: settings.email,
           phone: settings.phone,
           address: settings.address,
-          primary_color: settings.primaryColor,
-          secondary_color: settings.secondaryColor,
-          logo_url: logoUrl,
-          description_background_url: settings.pdfBackgroundUrl || settings.webviewBackgroundUrl,
-          icon_build_year: settings.iconBuildYear,
-          icon_bedrooms: settings.iconBedrooms,
-          icon_bathrooms: settings.iconBathrooms,
-          icon_garages: settings.iconGarages,
-          icon_energy_class: settings.iconEnergyClass,
-          icon_sqft: settings.iconSqft,
-          icon_living_space: settings.iconLivingSpace,
-          google_maps_api_key: settings.googleMapsApiKey,
-          xml_import_url: settings.xmlImportUrl,
-          instagram_url: settings.instagramUrl,
-          youtube_url: settings.youtubeUrl,
-          facebook_url: settings.facebookUrl
-        };
-        await agencySettingsService.createSettings(createData);
+          primary_color: settings.primaryColor || settings.primary_color,
+          secondary_color: settings.secondaryColor || settings.secondary_color,
+          logo_url: logoPreview || settings.logo_url,
+          description_background_url: settings.description_background_url,
+          facebook_url: settings.facebook_url,
+          instagram_url: settings.instagram_url,
+          youtube_url: settings.youtube_url,
+          google_maps_api_key: settings.google_maps_api_key,
+          xml_import_url: settings.xml_import_url,
+          icon_bedrooms: settings.icon_bedrooms,
+          icon_bathrooms: settings.icon_bathrooms,
+          icon_sqft: settings.icon_sqft,
+          icon_living_space: settings.icon_living_space,
+          icon_build_year: settings.icon_build_year,
+          icon_garages: settings.icon_garages,
+          icon_energy_class: settings.icon_energy_class,
+          smtp_host: settings.smtp_host,
+          smtp_port: settings.smtp_port,
+          smtp_username: settings.smtp_username,
+          smtp_password: settings.smtp_password,
+          smtp_from_email: settings.smtp_from_email,
+          smtp_from_name: settings.smtp_from_name,
+          smtp_secure: settings.smtp_secure,
+          openai_api_key: settings.openai_api_key,
+          global_features: JSON.stringify(globalFeatures.map(f => f.description))
+        })
+        .eq('id', settings.id);
+
+      if (error) {
+        throw error;
       }
 
       toast({
         title: "Success",
-        description: "Settings saved successfully",
+        description: "Settings updated successfully",
       });
 
-      const newSettings = await fetchAgencySettings();
-      if (newSettings) {
-        setSettings(newSettings);
+      // Update the settings state with the latest data
+      const { data: latestSettings, error: fetchError } = await supabase
+        .from('agency_settings')
+        .select('*')
+        .eq('id', settings.id)
+        .single();
+
+      if (!fetchError && latestSettings) {
+        setSettings({
+          ...latestSettings,
+          primaryColor: latestSettings.primary_color,
+          secondaryColor: latestSettings.secondary_color,
+          logoUrl: latestSettings.logo_url,
+        });
       }
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error("Error saving settings:", error);
       toast({
         title: "Error",
         description: "Failed to save settings",
@@ -84,6 +99,6 @@ export const useAgencySubmit = ({ settings, setSettings, logoPreview }: UseAgenc
 
   return {
     isLoading,
-    handleSubmit
+    handleSubmit,
   };
 };

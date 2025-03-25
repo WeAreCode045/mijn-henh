@@ -7,6 +7,7 @@ import { AgencyTab } from "@/components/settings/AgencyTab";
 import { DesignTab } from "@/components/settings/DesignTab";
 import { AdvancedTab } from "@/components/settings/AdvancedTab";
 import { IconSettings } from "@/components/settings/IconSettings";
+import { GlobalTab } from "@/components/settings/GlobalTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>("agency");
@@ -21,12 +22,16 @@ const Settings = () => {
     handleLogoUpload,
     handlePdfBackgroundUpload,
     handleWebviewBackgroundUpload,
+    handleGlobalFeatureAdd,
+    handleGlobalFeatureRemove,
+    handleGlobalFeatureBulkUpdate,
+    globalFeatures,
   } = useAgencySettings();
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <Button 
           onClick={() => setActiveTab("agency")} 
           variant={activeTab === "agency" ? "default" : "outline"}
@@ -50,6 +55,12 @@ const Settings = () => {
           variant={activeTab === "icons" ? "default" : "outline"}
         >
           Icons
+        </Button>
+        <Button 
+          onClick={() => setActiveTab("global")} 
+          variant={activeTab === "global" ? "default" : "outline"}
+        >
+          Global
         </Button>
       </div>
 
@@ -85,6 +96,17 @@ const Settings = () => {
           <IconSettings
             settings={settings}
             onSelectChange={handleSelectChange}
+          />
+        )}
+
+        {activeTab === "global" && (
+          <GlobalTab
+            settings={settings}
+            onSelectChange={handleSelectChange}
+            globalFeatures={globalFeatures}
+            onFeatureAdd={handleGlobalFeatureAdd}
+            onFeatureRemove={handleGlobalFeatureRemove}
+            onFeatureBulkUpdate={handleGlobalFeatureBulkUpdate}
           />
         )}
 
