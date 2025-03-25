@@ -96,7 +96,7 @@ export function SettingsPage() {
     
     try {
       let globalFeaturesData: string[] = [];
-      if (settings.globalFeatures && Array.isArray(settings.globalFeatures)) {
+      if (Array.isArray(settings.globalFeatures)) {
         globalFeaturesData = settings.globalFeatures;
       }
       

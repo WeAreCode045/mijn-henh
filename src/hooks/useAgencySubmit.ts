@@ -44,27 +44,27 @@ export const useAgencySubmit = ({
           primary_color: settings.primaryColor || settings.primary_color,
           secondary_color: settings.secondaryColor || settings.secondary_color,
           logo_url: logoPreview || settings.logoUrl,
-          description_background_url: settings.description_background_url,
-          facebook_url: settings.facebook_url,
-          instagram_url: settings.instagram_url,
-          youtube_url: settings.youtube_url,
-          google_maps_api_key: settings.google_maps_api_key,
-          xml_import_url: settings.xml_import_url,
-          icon_bedrooms: settings.icon_bedrooms,
-          icon_bathrooms: settings.icon_bathrooms,
-          icon_sqft: settings.icon_sqft,
-          icon_living_space: settings.icon_living_space,
-          icon_build_year: settings.icon_build_year,
-          icon_garages: settings.icon_garages,
-          icon_energy_class: settings.icon_energy_class,
-          smtp_host: settings.smtp_host,
-          smtp_port: settings.smtp_port,
-          smtp_username: settings.smtp_username,
-          smtp_password: settings.smtp_password,
-          smtp_from_email: settings.smtp_from_email,
-          smtp_from_name: settings.smtp_from_name,
-          smtp_secure: settings.smtp_secure,
-          openai_api_key: settings.openai_api_key,
+          description_background_url: settings.webviewBgImage,
+          facebook_url: settings.facebookUrl,
+          instagram_url: settings.instagramUrl,
+          youtube_url: settings.youtubeUrl,
+          google_maps_api_key: settings.googleMapsApiKey,
+          xml_import_url: settings.xmlImportUrl,
+          icon_bedrooms: settings.iconBedrooms,
+          icon_bathrooms: settings.iconBathrooms,
+          icon_sqft: settings.iconSqft,
+          icon_living_space: settings.iconLivingSpace,
+          icon_build_year: settings.iconBuildYear,
+          icon_garages: settings.iconGarages,
+          icon_energy_class: settings.iconEnergyClass,
+          smtp_host: settings.smtpHost,
+          smtp_port: settings.smtpPort,
+          smtp_username: settings.smtpUsername,
+          smtp_password: settings.smtpPassword,
+          smtp_from_email: settings.smtpFromEmail,
+          smtp_from_name: settings.smtpFromName,
+          smtp_secure: settings.smtpSecure,
+          openai_api_key: settings.openaiApiKey,
           // Make sure we're sending a properly formatted array
           global_features: featureDescriptions
         })
@@ -89,7 +89,9 @@ export const useAgencySubmit = ({
       if (!fetchError && latestSettings) {
         // Process the global_features field
         let globalFeaturesList: string[] = [];
+        
         if (latestSettings.global_features) {
+          // Handle either array or string format
           if (Array.isArray(latestSettings.global_features)) {
             globalFeaturesList = latestSettings.global_features as string[];
           } else if (typeof latestSettings.global_features === 'string') {
@@ -104,13 +106,23 @@ export const useAgencySubmit = ({
           }
         }
 
-        setSettings({
+        // Create a properly typed object to pass to setSettings
+        const updatedSettings: AgencySettings = {
           ...latestSettings,
+          id: latestSettings.id,
+          name: latestSettings.name,
           primaryColor: latestSettings.primary_color,
           secondaryColor: latestSettings.secondary_color,
           logoUrl: latestSettings.logo_url,
-          globalFeatures: globalFeaturesList
-        });
+          webviewBgImage: latestSettings.description_background_url,
+          facebookUrl: latestSettings.facebook_url,
+          instagramUrl: latestSettings.instagram_url,
+          youtubeUrl: latestSettings.youtube_url,
+          globalFeatures: globalFeaturesList,
+          // Add any other properties that need mapping
+        };
+        
+        setSettings(updatedSettings);
       }
     } catch (error) {
       console.error("Error saving settings:", error);

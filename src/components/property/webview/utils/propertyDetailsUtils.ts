@@ -32,7 +32,10 @@ export const getEnergyLabelImagePath = (energyLabel?: string) => {
  */
 export const getSafeSettings = (settings?: AgencySettings): AgencySettings => {
   if (settings) {
-    return settings;
+    return {
+      ...settings,
+      globalFeatures: Array.isArray(settings.globalFeatures) ? settings.globalFeatures : []
+    };
   }
   
   // Return default settings if no settings provided

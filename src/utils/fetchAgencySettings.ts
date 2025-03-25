@@ -18,6 +18,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
 
   // Safely handle the global_features field - ensure it's an array of strings
   let globalFeatures: string[] = [];
+  
   if (data.global_features) {
     if (Array.isArray(data.global_features)) {
       // If it's already an array, use it

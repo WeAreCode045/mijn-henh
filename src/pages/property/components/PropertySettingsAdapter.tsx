@@ -21,12 +21,15 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     };
   }
 
-  // Ensure global_features is properly handled
+  // Ensure global_features is properly handled and converted to string[]
   let globalFeaturesList: string[] = [];
+  
   if (settings.global_features) {
     if (Array.isArray(settings.global_features)) {
+      // If it's already an array, use it
       globalFeaturesList = settings.global_features as string[];
     } else if (typeof settings.global_features === 'string') {
+      // If it's a JSON string, try to parse it
       try {
         const parsed = JSON.parse(settings.global_features);
         if (Array.isArray(parsed)) {
