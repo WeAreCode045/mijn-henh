@@ -7,12 +7,12 @@ import { AdvancedTab } from "./AdvancedTab";
 import { GlobalTab } from "./GlobalTab";
 import { AgencySettings } from "@/types/agency";
 import { fetchAgencySettings } from "@/utils/fetchAgencySettings";
-import { updateAgencySettings } from "@/services/agencySettingsService";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { SettingsTab } from "@/types/settings";
-import { supabase } from "@/integrations/supabase/client";
 import { PropertyFeature } from "@/types/property";
+import { IconSettings } from "./IconSettings";
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<AgencySettings | null>(null);
@@ -103,7 +103,45 @@ export function SettingsPage() {
     if (!settings) return;
     
     try {
-      await updateAgencySettings(settings);
+      // Update agency_settings table
+      const { error } = await supabase
+        .from('agency_settings')
+        .update({
+          name: settings.name,
+          email: settings.email,
+          phone: settings.phone,
+          address: settings.address,
+          primary_color: settings.primaryColor,
+          secondary_color: settings.secondaryColor,
+          logo_url: settings.logoUrl,
+          description_background_url: settings.webviewBgImage,
+          facebook_url: settings.facebookUrl,
+          instagram_url: settings.instagramUrl,
+          youtube_url: settings.youtubeUrl,
+          google_maps_api_key: settings.googleMapsApiKey,
+          xml_import_url: settings.xmlImportUrl,
+          icon_bedrooms: settings.iconBedrooms,
+          icon_bathrooms: settings.iconBathrooms,
+          icon_sqft: settings.iconSqft,
+          icon_living_space: settings.iconLivingSpace,
+          icon_build_year: settings.iconBuildYear,
+          icon_garages: settings.iconGarages,
+          icon_energy_class: settings.iconEnergyClass,
+          smtp_host: settings.smtpHost,
+          smtp_port: settings.smtpPort,
+          smtp_username: settings.smtpUsername,
+          smtp_password: settings.smtpPassword,
+          smtp_from_email: settings.smtpFromEmail,
+          smtp_from_name: settings.smtpFromName,
+          smtp_secure: settings.smtpSecure,
+          openai_api_key: settings.openaiApiKey,
+          // Convert globalFeatures to the correct format if needed
+          global_features: settings.globalFeatures
+        })
+        .eq('id', settings.id);
+      
+      if (error) throw error;
+      
       toast({
         title: "Settings saved",
         description: "Your settings have been updated successfully",
@@ -237,6 +275,7 @@ export function SettingsPage() {
         <TabsList className="w-full border-b mb-8">
           <TabsTrigger value="agency">Agency</TabsTrigger>
           <TabsTrigger value="design">Design</TabsTrigger>
+          <TabsTrigger value="icons">Icons</TabsTrigger>
           <TabsTrigger value="global">Global</TabsTrigger>
           <TabsTrigger value="advanced">Advanced</TabsTrigger>
         </TabsList>
@@ -246,8 +285,14 @@ export function SettingsPage() {
             settings={settings}
             logoPreview=""
             onChange={handleInputChange}
-            onLogoUpload={(e) => {}}
+            onLogoUpload={() => {}}
           />
+          <button 
+            onClick={handleSave}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md"
+          >
+            Save Changes
+          </button>
         </TabsContent>
         
         <TabsContent value="design">
@@ -255,9 +300,28 @@ export function SettingsPage() {
             settings={settings}
             onChange={handleInputChange}
             onSelectChange={handleSelectChange}
-            onPdfBackgroundUpload={(e) => {}}
-            onWebviewBackgroundUpload={(e) => {}}
+            onPdfBackgroundUpload={() => {}}
+            onWebviewBackgroundUpload={() => {}}
           />
+          <button 
+            onClick={handleSave}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md"
+          >
+            Save Changes
+          </button>
+        </TabsContent>
+        
+        <TabsContent value="icons">
+          <IconSettings 
+            settings={settings} 
+            onSelectChange={handleSelectChange} 
+          />
+          <button 
+            onClick={handleSave}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md"
+          >
+            Save Changes
+          </button>
         </TabsContent>
         
         <TabsContent value="global">
@@ -269,6 +333,12 @@ export function SettingsPage() {
             onFeatureRemove={handleFeatureRemove}
             onFeatureBulkUpdate={handleFeatureBulkUpdate}
           />
+          <button 
+            onClick={handleSave}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md"
+          >
+            Save Changes
+          </button>
         </TabsContent>
         
         <TabsContent value="advanced">
@@ -277,6 +347,12 @@ export function SettingsPage() {
             onChange={handleInputChange}
             onSwitchChange={handleCheckboxChange}
           />
+          <button 
+            onClick={handleSave}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md"
+          >
+            Save Changes
+          </button>
         </TabsContent>
       </Tabs>
     </div>

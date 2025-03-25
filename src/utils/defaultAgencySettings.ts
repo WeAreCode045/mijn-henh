@@ -21,5 +21,6 @@ export const defaultAgencySettings: AgencySettings = {
   xmlImportUrl: "",
   instagramUrl: "",
   youtubeUrl: "",
-  facebookUrl: ""
+  facebookUrl: "",
+  globalFeatures: []
 };

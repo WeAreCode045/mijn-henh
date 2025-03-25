@@ -43,7 +43,7 @@ export const useAgencySubmit = ({
           address: settings.address,
           primary_color: settings.primaryColor || settings.primary_color,
           secondary_color: settings.secondaryColor || settings.secondary_color,
-          logo_url: logoPreview || settings.logo_url,
+          logo_url: logoPreview || settings.logoUrl,
           description_background_url: settings.description_background_url,
           facebook_url: settings.facebook_url,
           instagram_url: settings.instagram_url,
@@ -65,7 +65,7 @@ export const useAgencySubmit = ({
           smtp_from_name: settings.smtp_from_name,
           smtp_secure: settings.smtp_secure,
           openai_api_key: settings.openai_api_key,
-          global_features: JSON.stringify(featureDescriptions)
+          global_features: featureDescriptions
         })
         .eq('id', settings.id);
 
@@ -91,6 +91,7 @@ export const useAgencySubmit = ({
           primaryColor: latestSettings.primary_color,
           secondaryColor: latestSettings.secondary_color,
           logoUrl: latestSettings.logo_url,
+          globalFeatures: latestSettings.global_features
         });
       }
     } catch (error) {

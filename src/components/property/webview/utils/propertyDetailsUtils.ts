@@ -33,6 +33,7 @@ export const getEnergyLabelImagePath = (energyLabel?: string) => {
 export const getSafeSettings = (settings?: AgencySettings): AgencySettings => {
   // Using defaultAgencySettings for colors if settings is undefined
   return settings || {
+    ...defaultAgencySettings,
     id: "",
     name: "",
     email: "",

@@ -10,7 +10,7 @@ interface AgencySettingsData {
   primary_color: string;
   secondary_color: string;
   logo_url?: string;
-  description_background_url?: string; // Updated to use existing column
+  description_background_url?: string;
   icon_build_year: string;
   icon_bedrooms: string;
   icon_bathrooms: string;
@@ -23,6 +23,7 @@ interface AgencySettingsData {
   instagram_url?: string;
   youtube_url?: string;
   facebook_url?: string;
+  global_features?: string[] | null;
   // SMTP settings
   smtp_host?: string;
   smtp_port?: string;
@@ -73,7 +74,7 @@ export const agencySettingsService = {
       primary_color: data.primaryColor || "#40497A",
       secondary_color: data.secondaryColor || "#E2E8F0",
       logo_url: data.logoUrl,
-      description_background_url: data.pdfBackgroundUrl || data.webviewBackgroundUrl, // Store both in the same field
+      description_background_url: data.pdfBackgroundUrl || data.webviewBackgroundUrl, 
       icon_build_year: data.iconBuildYear || "calendar",
       icon_bedrooms: data.iconBedrooms || "bed",
       icon_bathrooms: data.iconBathrooms || "bath",
@@ -86,16 +87,17 @@ export const agencySettingsService = {
       instagram_url: data.instagramUrl,
       youtube_url: data.youtubeUrl,
       facebook_url: data.facebookUrl,
+      global_features: data.globalFeatures,
       // SMTP settings
-      smtp_host: data.smtp_host || null,
-      smtp_port: data.smtp_port || null,
-      smtp_username: data.smtp_username || null,
-      smtp_password: data.smtp_password || null,
-      smtp_from_email: data.smtp_from_email || null,
-      smtp_from_name: data.smtp_from_name || null,
-      smtp_secure: data.smtp_secure || false,
+      smtp_host: data.smtpHost || null,
+      smtp_port: data.smtpPort || null,
+      smtp_username: data.smtpUsername || null,
+      smtp_password: data.smtpPassword || null,
+      smtp_from_email: data.smtpFromEmail || null,
+      smtp_from_name: data.smtpFromName || null,
+      smtp_secure: data.smtpSecure || false,
       // OpenAI API key
-      openai_api_key: data.openai_api_key || null,
+      openai_api_key: data.openaiApiKey || null,
     };
 
     const { error } = await supabase

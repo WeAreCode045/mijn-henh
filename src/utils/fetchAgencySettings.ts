@@ -40,15 +40,17 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     iconLivingSpace: data.icon_living_space || defaultAgencySettings.iconLivingSpace,
     googleMapsApiKey: data.google_maps_api_key || defaultAgencySettings.googleMapsApiKey,
     xmlImportUrl: data.xml_import_url || defaultAgencySettings.xmlImportUrl,
+    // Handle global_features properly - if it's a JSON string, parse it; if it's an array, use it directly
+    globalFeatures: data.global_features || [],
     // SMTP settings
-    smtp_host: data.smtp_host || null,
-    smtp_port: data.smtp_port || null,
-    smtp_username: data.smtp_username || null,
-    smtp_password: data.smtp_password || null,
-    smtp_from_email: data.smtp_from_email || null,
-    smtp_from_name: data.smtp_from_name || null,
-    smtp_secure: data.smtp_secure || false,
+    smtpHost: data.smtp_host || null,
+    smtpPort: data.smtp_port || null,
+    smtpUsername: data.smtp_username || null,
+    smtpPassword: data.smtp_password || null,
+    smtpFromEmail: data.smtp_from_email || null,
+    smtpFromName: data.smtp_from_name || null,
+    smtpSecure: data.smtp_secure || false,
     // OpenAI API key
-    openai_api_key: data.openai_api_key || null,
+    openaiApiKey: data.openai_api_key || null,
   };
 }

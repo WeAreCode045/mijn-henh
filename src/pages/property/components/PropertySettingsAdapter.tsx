@@ -17,6 +17,7 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
       facebookUrl: "",
       instagramUrl: "",
       youtubeUrl: "",
+      globalFeatures: []
     };
   }
 
@@ -33,5 +34,6 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     facebookUrl: settings.facebook_url || "",
     instagramUrl: settings.instagram_url || "",
     youtubeUrl: settings.youtube_url || "",
+    globalFeatures: settings.global_features || []
   };
 }
