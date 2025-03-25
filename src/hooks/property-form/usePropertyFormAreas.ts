@@ -73,10 +73,12 @@ export function usePropertyFormAreas({
     setFormData((prevState: PropertyFormData): PropertyFormData => {
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === areaId) {
-          const updatedAreaImages = area.areaImages
+          // For AreaImage[] type, ensure it's an array before filtering
+          const updatedAreaImages = Array.isArray(area.areaImages)
             ? area.areaImages.filter((img: AreaImage) => img.ImageID !== imageId)
             : [];
 
+          // For images, make sure it's an array before filtering
           const updatedImages = Array.isArray(area.images)
             ? area.images.filter(img => {
                 if (typeof img === 'string') return img !== imageId;
@@ -85,7 +87,8 @@ export function usePropertyFormAreas({
               })
             : [];
 
-          const updatedImageIds = area.imageIds
+          // For imageIds, ensure it's an array before filtering
+          const updatedImageIds = Array.isArray(area.imageIds)
             ? area.imageIds.filter(id => id !== imageId)
             : [];
 
@@ -180,7 +183,8 @@ export function usePropertyFormAreas({
       setFormData((prevState: PropertyFormData): PropertyFormData => {
         const updatedAreas = prevState.areas.map(area => {
           if (area.id === areaId) {
-            const updatedAreaImages = area.areaImages ? [...area.areaImages] : [];
+            // Ensure areaImages is an array before trying to spread it
+            const updatedAreaImages = Array.isArray(area.areaImages) ? [...area.areaImages] : [];
 
             uploadedImages.forEach((newImage, index) => {
               updatedAreaImages.push({

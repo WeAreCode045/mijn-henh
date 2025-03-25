@@ -80,7 +80,7 @@ export function AreasList({
                 {areas.map((area, index) => (
                   <Draggable 
                     key={area.id} 
-                    draggableId={area.id}
+                    draggableId={area.id || `area-${index}`} // Ensure we always have a draggableId
                     index={index}
                     isDragDisabled={!onReorder}
                   >

@@ -49,6 +49,7 @@ export function PropertyAreas({
   // Check if areas exist and have valid content
   const hasAreas = Array.isArray(areas) && areas.length > 0;
 
+  // Now explicitly typed to match PropertyArea[] type
   const handleAreasGenerated = (newAreas: PropertyArea[]) => {
     if (onAreasGenerated) {
       onAreasGenerated(newAreas);
