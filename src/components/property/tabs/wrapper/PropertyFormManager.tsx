@@ -31,7 +31,6 @@ export function PropertyFormManager({
     handleAreaImageRemove: wrapMethod(formManager.handleAreaImageRemove),
     handleAreaImagesSelect: wrapMethod(formManager.handleAreaImagesSelect),
     handleAreaImageUpload: wrapMethod(formManager.handleAreaImageUpload),
-    handleReorderAreaImages: wrapMethod(formManager.handleReorderAreaImages),
     handleImageUpload: wrapMethod(formManager.handleImageUpload),
     handleRemoveImage: wrapMethod(formManager.handleRemoveImage),
     isUploading: formManager.isUploading,

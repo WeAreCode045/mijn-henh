@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
+import { PropertyFormData, PropertyArea } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/property-autosave";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -188,24 +188,15 @@ export function usePropertyFormAreas(
         return;
       }
       
-      // Fix for type error: Explicitly convert to PropertyImage[] by ensuring all elements are objects
-      const selectedImages: PropertyImage[] = formState.images
-        ? formState.images
-            .filter(img => {
-              if (typeof img === 'string') {
-                return imageIds.includes(img);
-              } else if (typeof img === 'object' && 'id' in img) {
-                return imageIds.includes(img.id);
-              }
-              return false;
-            })
-            .map(img => {
-              // Ensure each item is a PropertyImage object
-              if (typeof img === 'string') {
-                return { id: img, url: img };
-              }
-              return img as PropertyImage;
-            })
+      const selectedImages = formState.images
+        ? formState.images.filter(img => {
+            if (typeof img === 'string') {
+              return imageIds.includes(img);
+            } else if (typeof img === 'object' && 'id' in img) {
+              return imageIds.includes(img.id);
+            }
+            return false;
+          })
         : [];
       
       console.log(`Found ${selectedImages.length} selected images:`, selectedImages);
@@ -297,7 +288,7 @@ export function usePropertyFormAreas(
         variant: "destructive",
       });
     }
-  }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, toast]);
+  }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
   const handleReorderAreaImages = useCallback(async (areaId: string, reorderedImageIds: string[]) => {
     if (!formState.areas || !formState.id) {
@@ -314,39 +305,11 @@ export function usePropertyFormAreas(
         return;
       }
       
-      for (let i = 0; i < reorderedImageIds.length; i++) {
-        const imageId = reorderedImageIds[i];
-        const { error } = await supabase
-          .from('property_images')
-          .update({ sort_order: i })
-          .eq('id', imageId)
-          .eq('property_id', formState.id);
-          
-        if (error) {
-          console.error(`Error updating sort_order for image ${imageId}:`, error);
-        }
-      }
-      
       const updatedAreas = formState.areas.map(area => {
         if (area.id === areaId) {
-          let updatedImages = [...area.images];
-          if (Array.isArray(updatedImages) && updatedImages.length > 0) {
-            updatedImages = reorderedImageIds.map(id => {
-              if (typeof area.images[0] === 'string') {
-                return id;
-              } else {
-                const img = area.images.find(img => 
-                  typeof img === 'object' && 'id' in img && img.id === id
-                );
-                return img || { id, url: '' };
-              }
-            });
-          }
-          
           return {
             ...area,
-            imageIds: reorderedImageIds,
-            images: updatedImages
+            imageIds: reorderedImageIds
           };
         }
         return area;
@@ -365,16 +328,49 @@ export function usePropertyFormAreas(
         columns: area.columns || 2
       }));
       
-      await supabase
+      const { error: updateError } = await supabase
         .from('properties')
         .update({ areas: areasForDb })
         .eq('id', formState.id);
+        
+      if (updateError) {
+        console.error('Error updating areas in properties table:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to update image order in database",
+          variant: "destructive",
+        });
+        return;
+      }
       
-      toast({
-        title: "Success",
-        description: "Image order updated successfully",
-      });
+      console.log('Successfully updated areas in properties table with new image order');
       
+      const updatePromises = reorderedImageIds.map((imageId, index) => 
+        supabase
+          .from('property_images')
+          .update({ sort_order: index })
+          .eq('id', imageId)
+          .eq('property_id', formState.id)
+          .eq('area', areaId)
+      );
+      
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter(res => res.error).map(res => res.error);
+      
+      if (errors.length > 0) {
+        console.error(`Errors updating image sort orders:`, errors);
+        toast({
+          title: "Warning",
+          description: "Some image orders could not be saved",
+          variant: "destructive",
+        });
+      } else {
+        console.log(`Updated sort orders for ${reorderedImageIds.length} images`);
+        toast({
+          title: "Success",
+          description: "Image order updated successfully",
+        });
+      }
     } catch (error) {
       console.error("Error in handleReorderAreaImages:", error);
       toast({
@@ -383,9 +379,9 @@ export function usePropertyFormAreas(
         variant: "destructive",
       });
     }
-  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, toast]);
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
-  const handleAreaPhotosUpload = useCallback(async (areaId: string, files: FileList) => {
+  const handleAreaImageUpload = useCallback(async (areaId: string, files: FileList) => {
     if (!formState.areas) return;
     
     setIsUploading(true);
@@ -403,6 +399,10 @@ export function usePropertyFormAreas(
     }
   }, [setPendingChanges]);
   
+  const handleAreaPhotosUpload = useCallback(async (areaId: string, files: FileList) => {
+    await handleAreaImageUpload(areaId, files);
+  }, [handleAreaImageUpload]);
+  
   const handleRemoveAreaPhoto = useCallback((areaId: string, photoId: string) => {
     handleAreaImageRemove(areaId, photoId);
   }, [handleAreaImageRemove]);
@@ -413,9 +413,11 @@ export function usePropertyFormAreas(
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
+    handleAreaImageUpload,
     handleReorderAreaImages,
     isUploading,
     handleAreaPhotosUpload,
     handleRemoveAreaPhoto
   };
 }
+

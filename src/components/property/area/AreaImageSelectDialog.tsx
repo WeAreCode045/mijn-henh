@@ -23,7 +23,7 @@ export function AreaImageSelectDialog({
   areaTitle,
   selectedImageIds,
   onUpdate,
-  maxSelect = 30, // Increased from 10 to 30
+  maxSelect = 10,
 }: AreaImageSelectDialogProps) {
   const [localSelection, setLocalSelection] = useState<string[]>([]);
   const { toast } = useToast();

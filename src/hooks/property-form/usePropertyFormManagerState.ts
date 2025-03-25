@@ -71,7 +71,7 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-    handleReorderAreaImages,
+    handleAreaImageUpload,
     handleAreaPhotosUpload, 
     handleRemoveAreaPhoto
   } = usePropertyFormAreas(
@@ -79,22 +79,6 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     handleFieldChange, 
     setPendingChanges
   );
-  
-  // Add the missing handleAreaImageUpload function
-  const handleAreaImageUpload = useCallback(async (areaId: string, files: FileList) => {
-    console.log(`Uploading images for area ${areaId}`, files);
-    // This will delegate to the handleAreaPhotosUpload function
-    if (files && files.length > 0) {
-      const event = {
-        target: {
-          files
-        }
-      } as unknown as React.ChangeEvent<HTMLInputElement>;
-      
-      await handleAreaPhotosUpload(areaId, event.target.files);
-    }
-    return Promise.resolve();
-  }, [handleAreaPhotosUpload]);
   
   // Property form steps
   const { 
@@ -142,7 +126,6 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     handleAreaImageRemove,
     handleAreaImagesSelect,
     handleAreaImageUpload,
-    handleReorderAreaImages,
     handleImageUpload,
     handleRemoveImage,
     isUploading,
