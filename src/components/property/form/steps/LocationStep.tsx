@@ -6,6 +6,7 @@ import { NearbyPlacesSection } from "./location/components/NearbyPlacesSection";
 import { NearbyCitiesSection } from "./location/NearbyCitiesSection";
 import { LocationDescriptionSection } from "./location/LocationDescriptionSection";
 import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 interface LocationStepProps {
   formData: PropertyFormData;
@@ -37,6 +38,7 @@ export function LocationStep({
   isGeneratingMap = false
 }: LocationStepProps) {
   const { toast } = useToast();
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const handleCategorySearch = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
     e.preventDefault();
@@ -62,6 +64,17 @@ export function LocationStep({
     return null;
   };
 
+  const handleGenerateDescription = async () => {
+    if (!onGenerateLocationDescription) return;
+    
+    setIsGeneratingDescription(true);
+    try {
+      await onGenerateLocationDescription();
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card className="bg-white shadow-sm">
@@ -73,8 +86,8 @@ export function LocationStep({
             <LocationDescriptionSection 
               formData={formData}
               onFieldChange={onFieldChange}
-              onGenerateDescription={onGenerateLocationDescription}
-              isGeneratingDescription={isLoadingLocationData}
+              onGenerateDescription={handleGenerateDescription}
+              isGeneratingDescription={isGeneratingDescription}
             />
             
             <MapPreviewSection 

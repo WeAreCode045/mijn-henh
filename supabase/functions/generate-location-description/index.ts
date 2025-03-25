@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { address, nearbyPlaces, language = 'nl' } = await req.json();
+    const { address, nearbyPlaces, description, language = 'nl', maxLength = 1000 } = await req.json();
 
     if (!address) {
       return new Response(
@@ -38,11 +38,9 @@ serve(async (req) => {
       );
     }
 
-    // Prepare prompt with nearby places information
+    // Prepare nearby places information for better context
     let placesInfo = "";
     if (nearbyPlaces && nearbyPlaces.length > 0) {
-      placesInfo = "Nearby places include:\n";
-      
       // Group places by type for better context
       const placesByType: Record<string, any[]> = {};
       nearbyPlaces.forEach((place: any) => {
@@ -52,26 +50,35 @@ serve(async (req) => {
         placesByType[place.type].push(place);
       });
       
-      // Add nearby places by type with distances
+      // Format nearby places by type with distances
+      placesInfo = "Nearby places include:\n";
       Object.entries(placesByType).forEach(([type, places]) => {
         placesInfo += `- ${type.replace('_', ' ')}: ${places.map(p => `${p.name} (${p.distance || 'unknown'} km)`).join(', ')}\n`;
       });
     }
 
+    // Add property description context if available
+    let propertyContext = "";
+    if (description) {
+      propertyContext = `\nThe property itself is described as: "${description}"\n`;
+    }
+
     const systemPrompt = `You are a professional real estate copywriter specializing in location descriptions.
-Your task is to write compelling location descriptions for property listings in Dutch.
+Your task is to write compelling location descriptions for property listings in ${language === 'nl' ? 'Dutch' : 'English'}.
 Focus on the property's neighborhood advantages, accessibility, and lifestyle benefits.
 Highlight proximity to amenities, transportation, and attractive features of the area.
 Write in a professional but warm tone that appeals to potential buyers/renters.
-Keep descriptions factual, positive, and focused on what makes the location desirable.`;
+Keep descriptions factual, positive, and focused on what makes the location desirable.
+The description should be approximately ${maxLength} characters long.`;
 
-    const userPrompt = `Write a concise but comprehensive location description in Dutch for a property at "${address}".
+    const userPrompt = `Write a concise but comprehensive location description in ${language === 'nl' ? 'Dutch' : 'English'} for a property at "${address}".
 ${placesInfo}
+${propertyContext}
 The description should be appealing to potential property buyers/renters.
-Limit the response to 3-4 paragraphs maximum.
+Limit the description to approximately ${maxLength} characters.
 Highlight neighborhood quality, accessibility, and nearby amenities.
 Include information about transportation options if available.
-Always write in Dutch, as this is for the Dutch real estate market.`;
+Always write in ${language === 'nl' ? 'Dutch' : 'English'}, as this is for the ${language === 'nl' ? 'Dutch' : 'English'} real estate market.`;
 
     console.log("Sending request to OpenAI");
 
@@ -104,10 +111,10 @@ Always write in Dutch, as this is for the Dutch real estate market.`;
       throw new Error("No response from OpenAI");
     }
 
-    const description = data.choices[0].message.content;
+    const generatedDescription = data.choices[0].message.content;
 
     return new Response(
-      JSON.stringify({ description: description.trim() }),
+      JSON.stringify({ description: generatedDescription.trim() }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
