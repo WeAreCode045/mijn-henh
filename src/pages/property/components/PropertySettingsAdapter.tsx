@@ -21,6 +21,14 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     };
   }
 
+  // Ensure global_features is properly handled
+  let globalFeaturesList: string[] = [];
+  if (settings.global_features) {
+    if (Array.isArray(settings.global_features)) {
+      globalFeaturesList = settings.global_features as string[];
+    }
+  }
+
   return {
     id: "",
     name: settings.name || "",
@@ -34,6 +42,6 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     facebookUrl: settings.facebook_url || "",
     instagramUrl: settings.instagram_url || "",
     youtubeUrl: settings.youtube_url || "",
-    globalFeatures: settings.global_features || []
+    globalFeatures: globalFeaturesList
   };
 }

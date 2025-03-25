@@ -65,6 +65,7 @@ export const useAgencySubmit = ({
           smtp_from_name: settings.smtp_from_name,
           smtp_secure: settings.smtp_secure,
           openai_api_key: settings.openai_api_key,
+          // Make sure we're sending a properly formatted array
           global_features: featureDescriptions
         })
         .eq('id', settings.id);
@@ -86,12 +87,20 @@ export const useAgencySubmit = ({
         .single();
 
       if (!fetchError && latestSettings) {
+        // Process the global_features field
+        let globalFeaturesList: string[] = [];
+        if (latestSettings.global_features) {
+          if (Array.isArray(latestSettings.global_features)) {
+            globalFeaturesList = latestSettings.global_features as string[];
+          }
+        }
+
         setSettings({
           ...latestSettings,
           primaryColor: latestSettings.primary_color,
           secondaryColor: latestSettings.secondary_color,
           logoUrl: latestSettings.logo_url,
-          globalFeatures: latestSettings.global_features
+          globalFeatures: globalFeaturesList
         });
       }
     } catch (error) {

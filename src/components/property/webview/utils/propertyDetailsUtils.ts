@@ -31,8 +31,12 @@ export const getEnergyLabelImagePath = (energyLabel?: string) => {
  * Get safe settings with defaults
  */
 export const getSafeSettings = (settings?: AgencySettings): AgencySettings => {
-  // Using defaultAgencySettings for colors if settings is undefined
-  return settings || {
+  if (settings) {
+    return settings;
+  }
+  
+  // Return default settings if no settings provided
+  return {
     ...defaultAgencySettings,
     id: "",
     name: "",
@@ -47,6 +51,7 @@ export const getSafeSettings = (settings?: AgencySettings): AgencySettings => {
     iconGarages: "car",
     iconEnergyClass: "zap",
     iconSqft: "ruler",
-    iconLivingSpace: "home"
+    iconLivingSpace: "home",
+    globalFeatures: []
   };
 };

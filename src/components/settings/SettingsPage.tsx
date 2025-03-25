@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AgencyTab } from "./AgencyTab";
 import { DesignTab } from "./DesignTab";
@@ -103,6 +103,12 @@ export function SettingsPage() {
     if (!settings) return;
     
     try {
+      // Prepare global features for database (convert to string array)
+      let globalFeaturesData: string[] = [];
+      if (settings.globalFeatures && Array.isArray(settings.globalFeatures)) {
+        globalFeaturesData = settings.globalFeatures;
+      }
+      
       // Update agency_settings table
       const { error } = await supabase
         .from('agency_settings')
@@ -135,8 +141,8 @@ export function SettingsPage() {
           smtp_from_name: settings.smtpFromName,
           smtp_secure: settings.smtpSecure,
           openai_api_key: settings.openaiApiKey,
-          // Convert globalFeatures to the correct format if needed
-          global_features: settings.globalFeatures
+          // Pass the properly formatted global features array
+          global_features: globalFeaturesData
         })
         .eq('id', settings.id);
       
@@ -219,11 +225,16 @@ export function SettingsPage() {
       if (featuresList.length === 0) return;
       
       // Insert all features (we'll handle duplicates in the database)
-      const { error } = await supabase.rpc('upsert_features', {
-        feature_descriptions: featuresList
-      });
-      
-      if (error) throw error;
+      for (const description of featuresList) {
+        try {
+          await supabase
+            .from('property_features')
+            .insert({ description })
+            .select();
+        } catch (error) {
+          console.error(`Error inserting feature "${description}":`, error);
+        }
+      }
       
       toast({
         title: "Features updated",
