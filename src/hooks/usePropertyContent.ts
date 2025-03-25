@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { PropertyFormData } from '@/types/property';
 import { supabase } from '@/integrations/supabase/client';
@@ -208,6 +209,7 @@ export function usePropertyContent(formData: PropertyFormData, onFieldChange: (f
     
     try {
       // Use the autosaveData function to save all property data
+      // We don't pass specific fields here since this is a manual save of all data
       const success = await autosaveData(formData);
       
       if (success) {

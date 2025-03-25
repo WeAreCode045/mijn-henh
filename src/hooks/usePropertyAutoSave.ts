@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -101,7 +102,11 @@ export function usePropertyAutoSave() {
     }
   };
 
-  const autosaveData = async (formData: PropertyFormData): Promise<boolean> => {
+  // Updated to optionally accept a specific fields subset to save
+  const autosaveData = async (
+    formData: PropertyFormData, 
+    specificFields?: Record<string, any>
+  ): Promise<boolean> => {
     if (!formData.id) return false;
     
     try {
@@ -114,7 +119,8 @@ export function usePropertyAutoSave() {
         .eq('id', formData.id)
         .single();
       
-      const submitData = {
+      // If specific fields provided, only save those
+      const submitData = specificFields || {
         title: formData.title,
         price: formData.price,
         address: formData.address,
@@ -139,7 +145,7 @@ export function usePropertyAutoSave() {
         floorplanEmbedScript: formData.floorplanEmbedScript,
       };
       
-      console.log('Auto-saving property data...', formData);
+      console.log('Auto-saving property data...', specificFields ? 'Specific fields only' : 'All fields');
 
       // Don't include updated_at to let Supabase update it automatically
       const { error, data: updatedData } = await supabase

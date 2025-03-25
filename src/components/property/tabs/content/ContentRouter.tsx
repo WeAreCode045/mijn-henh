@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
 import { GeneralPage } from "./pages/GeneralPage";
@@ -55,11 +55,37 @@ export function ContentRouter({
   const [hasPendingChanges, setHasPendingChanges] = React.useState(false);
   const [lastFormState, setLastFormState] = React.useState<PropertyFormData | null>(null);
   const [previousStep, setPreviousStep] = React.useState<number | null>(null);
+  const changedFieldsRef = useRef<Record<string, any>>({});
 
   // Track form changes
   useEffect(() => {
-    if (lastFormState && JSON.stringify(lastFormState) !== JSON.stringify(formData)) {
-      setHasPendingChanges(true);
+    if (lastFormState) {
+      // Compare current form data with last form state to detect changes
+      const changedFields: Record<string, any> = {};
+      
+      // Only check simple top-level fields (not arrays or objects)
+      Object.keys(formData).forEach(key => {
+        const fieldKey = key as keyof PropertyFormData;
+        const currentValue = formData[fieldKey];
+        const previousValue = lastFormState[fieldKey];
+        
+        // Skip complex fields that would trigger unnecessary saves
+        if (
+          typeof currentValue !== 'object' && 
+          currentValue !== previousValue
+        ) {
+          changedFields[key] = currentValue;
+        }
+      });
+      
+      // If we have changed fields, store them and set pending changes flag
+      if (Object.keys(changedFields).length > 0) {
+        changedFieldsRef.current = {
+          ...changedFieldsRef.current,
+          ...changedFields
+        };
+        setHasPendingChanges(true);
+      }
     }
     
     // Update the last form state
@@ -76,28 +102,13 @@ export function ContentRouter({
 
   // Save changes when navigating away
   const saveChanges = async () => {
-    if (!hasPendingChanges || !formData.id) return;
+    if (!hasPendingChanges || !formData.id || Object.keys(changedFieldsRef.current).length === 0) return;
     
     try {
-      console.log("Saving property changes...");
+      console.log("Saving only changed property fields:", changedFieldsRef.current);
       
-      // Only save relevant fields to avoid overwriting data we don't have
-      const updateData = {
-        title: formData.title,
-        price: formData.price,
-        address: formData.address,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        sqft: formData.sqft,
-        livingArea: formData.livingArea,
-        buildYear: formData.buildYear,
-        garages: formData.garages,
-        energyLabel: formData.energyLabel,
-        hasGarden: formData.hasGarden,
-        description: formData.description,
-        shortDescription: formData.shortDescription,
-        propertyType: formData.propertyType
-      };
+      // Only save the fields that were actually changed
+      const updateData = changedFieldsRef.current;
 
       const { error } = await supabase
         .from('properties')
@@ -106,10 +117,17 @@ export function ContentRouter({
       
       if (error) throw error;
       
+      // Reset after successful save
       setHasPendingChanges(false);
+      changedFieldsRef.current = {};
       
-      // Don't show a success toast to avoid too many notifications
-      console.log("Property saved successfully");
+      // Show a success toast but only once
+      toast({
+        title: "Success",
+        description: "Changes saved successfully",
+      });
+      
+      console.log("Property changes saved successfully");
     } catch (error) {
       console.error("Error saving property:", error);
       toast({
@@ -160,13 +178,23 @@ export function ContentRouter({
     }
   };
 
+  // Field change handler that tracks which fields were modified
+  const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
+    // Call the original handler
+    handlers.onFieldChange(field, value);
+    
+    // Store the changed field
+    changedFieldsRef.current[field] = value;
+    setHasPendingChanges(true);
+  };
+
   const renderContent = () => {
     switch (currentStep) {
       case 0:
         return (
           <GeneralPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             setPendingChanges={setPendingChanges}
           />
         );
@@ -174,7 +202,7 @@ export function ContentRouter({
         return (
           <LocationPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             onFetchLocationData={handlers.onFetchLocationData}
             onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
             onFetchNearbyCities={handlers.onFetchNearbyCities}
@@ -189,7 +217,7 @@ export function ContentRouter({
         return (
           <FeaturesPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             onAddFeature={handlers.onAddFeature}
             onRemoveFeature={handlers.onRemoveFeature}
             onUpdateFeature={handlers.onUpdateFeature}
@@ -200,7 +228,7 @@ export function ContentRouter({
         return (
           <AreasPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             onAddArea={handlers.onAddArea}
             onRemoveArea={handlers.onRemoveArea}
             onUpdateArea={handlers.onUpdateArea}
@@ -224,13 +252,8 @@ export function ContentRouter({
         propertyId={id}
       />
       
-      {/* Changed from form to div to avoid nested form elements */}
-      <div className="space-y-6" onSubmit={handleFormSubmit}>
-        <Card>
-          <CardContent className="pt-6">
-            {renderContent()}
-          </CardContent>
-        </Card>
+      <div className="mt-6">
+        {renderContent()}
       </div>
     </div>
   );
