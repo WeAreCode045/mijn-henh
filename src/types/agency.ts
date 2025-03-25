@@ -12,6 +12,9 @@ export interface AgencySettings extends Settings {
   primaryColor?: string;
   secondaryColor?: string;
   descriptionBackgroundUrl?: string;
+  pdfBackgroundUrl?: string;
+  webviewBackgroundUrl?: string;
+  webviewBgImage?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   youtubeUrl?: string;

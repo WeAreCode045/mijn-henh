@@ -17,6 +17,7 @@ export type Database = {
           description_background_url: string | null
           email: string | null
           facebook_url: string | null
+          global_features: Json | null
           google_maps_api_key: string | null
           icon_bathrooms: string | null
           icon_bedrooms: string | null
@@ -51,6 +52,7 @@ export type Database = {
           description_background_url?: string | null
           email?: string | null
           facebook_url?: string | null
+          global_features?: Json | null
           google_maps_api_key?: string | null
           icon_bathrooms?: string | null
           icon_bedrooms?: string | null
@@ -85,6 +87,7 @@ export type Database = {
           description_background_url?: string | null
           email?: string | null
           facebook_url?: string | null
+          global_features?: Json | null
           google_maps_api_key?: string | null
           icon_bathrooms?: string | null
           icon_bedrooms?: string | null

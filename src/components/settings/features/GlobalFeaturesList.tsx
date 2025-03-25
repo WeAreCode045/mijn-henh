@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlusCircle, MinusCircle, Edit, Save } from "lucide-react";
+import { X, Plus, Edit, Save, Trash } from "lucide-react";
 import { PropertyFeature } from "@/types/property";
 
 interface GlobalFeaturesListProps {
@@ -17,7 +17,7 @@ export function GlobalFeaturesList({
   onFeatureRemove
 }: GlobalFeaturesListProps) {
   const [newFeature, setNewFeature] = useState("");
-  const [editId, setEditId] = useState<string | null>(null);
+  const [editingFeature, setEditingFeature] = useState<PropertyFeature | null>(null);
   const [editValue, setEditValue] = useState("");
 
   const handleAddFeature = () => {
@@ -28,100 +28,108 @@ export function GlobalFeaturesList({
   };
 
   const startEditing = (feature: PropertyFeature) => {
-    setEditId(feature.id);
+    setEditingFeature(feature);
     setEditValue(feature.description);
   };
 
-  const saveEdit = (id: string) => {
-    if (editValue.trim()) {
-      // Find the feature and update its description
-      const updatedFeature = { 
-        id, 
-        description: editValue.trim() 
-      };
-      
-      // Remove the old feature
-      onFeatureRemove(id);
-      
-      // Add the updated feature
-      onFeatureAdd(updatedFeature.description);
-    }
-    
-    setEditId(null);
+  const cancelEditing = () => {
+    setEditingFeature(null);
     setEditValue("");
+  };
+
+  const saveEditing = () => {
+    if (editingFeature && editValue.trim()) {
+      // For now, remove the old feature and add the new one
+      // In a real app, you'd want to have an update function
+      onFeatureRemove(editingFeature.id);
+      onFeatureAdd(editValue.trim());
+      setEditingFeature(null);
+      setEditValue("");
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div className="text-sm font-medium mb-2">Features List</div>
-      
-      {features.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">
-          No global features added yet. Add features below to make them available to all properties.
-        </p>
-      ) : (
-        <div className="space-y-2 max-h-60 overflow-y-auto p-2 border rounded-md">
-          {features.map((feature) => (
-            <div key={feature.id} className="flex items-center gap-2">
-              {editId === feature.id ? (
-                <>
-                  <Input
+      <div>
+        <h3 className="text-sm font-medium mb-2">Global Features</h3>
+        <div className="text-xs text-muted-foreground mb-4">
+          These features will be available to select for all properties.
+        </div>
+      </div>
+
+      {/* Feature list */}
+      <div className="space-y-2">
+        {features.length === 0 ? (
+          <div className="text-sm text-muted-foreground italic">No global features added yet.</div>
+        ) : (
+          features.map((feature) => (
+            <div 
+              key={feature.id} 
+              className="flex items-center justify-between p-2 border rounded-md"
+            >
+              {editingFeature?.id === feature.id ? (
+                <div className="flex-1 flex gap-2">
+                  <Input 
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
-                    placeholder="Feature description"
                     className="flex-1"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => saveEdit(feature.id)}
+                  <Button 
+                    size="icon" 
+                    variant="outline" 
+                    onClick={saveEditing}
                   >
-                    <Save className="w-4 h-4 text-primary" />
+                    <Save className="h-4 w-4" />
                   </Button>
-                </>
+                  <Button 
+                    size="icon" 
+                    variant="outline" 
+                    onClick={cancelEditing}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               ) : (
                 <>
-                  <span className="flex-1">{feature.description}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => startEditing(feature)}
-                  >
-                    <Edit className="w-4 h-4 text-primary" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onFeatureRemove(feature.id)}
-                  >
-                    <MinusCircle className="w-4 h-4 text-destructive" />
-                  </Button>
+                  <span className="text-sm">{feature.description}</span>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      onClick={() => startEditing(feature)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={() => onFeatureRemove(feature.id)}
+                    >
+                      <Trash className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
-          ))}
-        </div>
-      )}
-      
-      <div className="flex items-center gap-2">
+          ))
+        )}
+      </div>
+
+      {/* Add new feature */}
+      <div className="flex gap-2">
         <Input
           value={newFeature}
           onChange={(e) => setNewFeature(e.target.value)}
-          placeholder="Add a new feature"
+          placeholder="Add new feature"
           className="flex-1"
         />
         <Button
-          type="button"
-          variant="outline"
-          size="sm"
           onClick={handleAddFeature}
           disabled={!newFeature.trim()}
+          className="shrink-0"
         >
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Add Feature
+          <Plus className="h-4 w-4 mr-2" />
+          Add
         </Button>
       </div>
     </div>

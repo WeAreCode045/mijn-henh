@@ -1,90 +1,158 @@
 
-import { useState, useRef, useCallback } from "react";
-import type { PropertyFeature, PropertyFormData } from "@/types/property";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { PropertyFeature } from '@/types/property';
 
-export function useFeatures(
-  formData: PropertyFormData,
-  setFormData: (data: PropertyFormData) => void
-) {
-  const addFeature = useCallback(() => {
-    const newFeature = { id: Date.now().toString(), description: "" };
-    const updatedFeatures = [...formData.features, newFeature];
-    
-    setFormData({
-      ...formData,
-      features: updatedFeatures,
-    });
-    
-    // Save directly to database if we have a property ID
-    if (formData.id) {
-      supabase
-        .from('properties')
-        .update({ features: JSON.stringify(updatedFeatures) }) // Convert to JSON string
-        .eq('id', formData.id)
-        .then(({ error }) => {
-          if (error) {
-            console.error("Error saving feature addition:", error);
-          } else {
-            console.log("Feature added and saved to database");
-          }
-        });
-    }
-  }, [formData, setFormData]);
+export function useFeatures(propertyId: string) {
+  const [features, setFeatures] = useState<PropertyFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [globalFeatures, setGlobalFeatures] = useState<PropertyFeature[]>([]);
+  const { toast } = useToast();
 
-  const removeFeature = useCallback((id: string) => {
-    const updatedFeatures = formData.features.filter((feature) => feature.id !== id);
-    
-    setFormData({
-      ...formData,
-      features: updatedFeatures,
-    });
-    
-    // Save directly to database if we have a property ID
-    if (formData.id) {
-      supabase
-        .from('properties')
-        .update({ features: JSON.stringify(updatedFeatures) }) // Convert to JSON string
-        .eq('id', formData.id)
-        .then(({ error }) => {
-          if (error) {
-            console.error("Error saving feature removal:", error);
-          } else {
-            console.log("Feature removed and saved to database");
-          }
+  // Fetch features for a property
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch property features
+        const { data: propertyData } = await supabase
+          .from('properties')
+          .select('features')
+          .eq('id', propertyId)
+          .single();
+        
+        if (propertyData && propertyData.features) {
+          const parsedFeatures = typeof propertyData.features === 'string' 
+            ? JSON.parse(propertyData.features) 
+            : propertyData.features;
+          
+          setFeatures(Array.isArray(parsedFeatures) ? parsedFeatures : []);
+        }
+        
+        // Fetch global features
+        const { data: globalData, error: globalError } = await supabase
+          .from('property_features')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (globalError) throw globalError;
+        
+        setGlobalFeatures(globalData as PropertyFeature[]);
+      } catch (error) {
+        console.error('Error fetching features:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load property features',
+          variant: 'destructive',
         });
-    }
-  }, [formData, setFormData]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const updateFeature = useCallback((id: string, description: string) => {
-    const updatedFeatures = formData.features.map((feature) =>
-      feature.id === id ? { ...feature, description } : feature
-    );
-    
-    setFormData({
-      ...formData,
-      features: updatedFeatures,
-    });
-    
-    // Save directly to database if we have a property ID
-    if (formData.id) {
-      supabase
-        .from('properties')
-        .update({ features: JSON.stringify(updatedFeatures) }) // Convert to JSON string
-        .eq('id', formData.id)
-        .then(({ error }) => {
-          if (error) {
-            console.error("Error saving feature update:", error);
-          } else {
-            console.log("Feature updated and saved to database");
-          }
-        });
+    if (propertyId) {
+      fetchFeatures();
     }
-  }, [formData, setFormData]);
+  }, [propertyId, toast]);
+
+  // Add a feature
+  const addFeature = async (description: string) => {
+    try {
+      const newFeature: PropertyFeature = {
+        id: crypto.randomUUID(),
+        description,
+      };
+      
+      const updatedFeatures = [...features, newFeature];
+      setFeatures(updatedFeatures);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ features: JSON.stringify(updatedFeatures) })
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Feature added successfully',
+      });
+    } catch (error) {
+      console.error('Error adding feature:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add feature',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Remove a feature
+  const removeFeature = async (featureId: string) => {
+    try {
+      const updatedFeatures = features.filter(feature => feature.id !== featureId);
+      setFeatures(updatedFeatures);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ features: JSON.stringify(updatedFeatures) })
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Feature removed successfully',
+      });
+    } catch (error) {
+      console.error('Error removing feature:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to remove feature',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Add a global feature to this property
+  const addGlobalFeature = async (globalFeature: PropertyFeature) => {
+    try {
+      // Check if the feature is already added
+      const isAlreadyAdded = features.some(f => f.id === globalFeature.id);
+      if (isAlreadyAdded) return;
+      
+      const updatedFeatures = [...features, globalFeature];
+      setFeatures(updatedFeatures);
+      
+      const { error } = await supabase
+        .from('properties')
+        .update({ features: JSON.stringify(updatedFeatures) })
+        .eq('id', propertyId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Global feature added to property',
+      });
+    } catch (error) {
+      console.error('Error adding global feature:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add global feature',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return {
+    features,
+    globalFeatures,
+    isLoading,
     addFeature,
     removeFeature,
-    updateFeature,
+    addGlobalFeature
   };
 }
