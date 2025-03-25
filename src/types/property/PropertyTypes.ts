@@ -1,4 +1,5 @@
 import { PropertyData } from "./PropertyDataTypes";
+import { AreaImage } from './PropertyAreaTypes';
 import { PropertyPlaceType } from './PropertyPlaceTypes';
 
 // Basic data types

@@ -7,7 +7,7 @@ import { PropertyFormData } from "@/types/property";
 interface PropertyAreasHeaderProps {
   onAdd: () => void;
   propertyData?: PropertyFormData;
-  onAreasGenerated?: (newAreas: any[]) => void;
+  onAreasGenerated?: (newAreas: PropertyFormData[]) => void;
 }
 
 export function PropertyAreasHeader({ 
