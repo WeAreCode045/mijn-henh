@@ -1,7 +1,6 @@
-
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyArea } from '@/types/property';
+import type { PropertyFormData, PropertyArea, AreaImage } from '@/types/property';
 
 interface AreaImage {
   ImageID: string;

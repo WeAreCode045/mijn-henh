@@ -189,20 +189,27 @@ export function usePropertyFormAreas({
               });
             });
 
+            // Ensure images is an array before trying to spread it
+            const existingImages = Array.isArray(area.images) ? area.images : [];
+            const existingImageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
+
             return {
               ...area,
               areaImages: updatedAreaImages,
-              imageIds: [...(area.imageIds || []), ...uploadedImages.map(img => img.id)],
-              images: [...(area.images || []), ...uploadedImages] as PropertyImage[]
+              imageIds: [...existingImageIds, ...uploadedImages.map(img => img.id)],
+              images: [...existingImages, ...uploadedImages] as PropertyImage[]
             };
           }
           return area;
         });
 
+        // Ensure images is an array before trying to spread it
+        const existingImages = Array.isArray(prevState.images) ? prevState.images : [];
+
         return {
           ...prevState,
           areas: updatedAreas,
-          images: [...(prevState.images || []), ...uploadedImages] as PropertyImage[]
+          images: [...existingImages, ...uploadedImages] as PropertyImage[]
         };
       });
       setPendingChanges(true);

@@ -1,5 +1,5 @@
+
 import { PropertyData } from "./PropertyDataTypes";
-import { AreaImage } from './PropertyAreaTypes';
 import { PropertyPlaceType } from './PropertyPlaceTypes';
 
 // Basic data types
@@ -8,7 +8,7 @@ export interface PropertyFeature {
   description: string;
 }
 
-// Re-export AreaImage from PropertyAreaTypes
+// Re-export AreaImage from PropertyAreaTypes.ts
 export type { AreaImage } from './PropertyAreaTypes';
 
 export interface PropertyArea {

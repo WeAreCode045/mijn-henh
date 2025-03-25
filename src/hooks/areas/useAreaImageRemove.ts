@@ -1,7 +1,6 @@
-
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyArea, PropertyImage as AreaImage } from '@/types/property';
+import type { PropertyFormData, PropertyArea, PropertyImage, AreaImage } from '@/types/property';
 
 export function useAreaImageRemove(
   formData: PropertyFormData,
