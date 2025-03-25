@@ -137,7 +137,10 @@ export function AreasList({
                               }
                               onReorderImages={
                                 onReorderAreaImages
-                                  ? (imageIds) => onReorderAreaImages(area.id, imageIds)
+                                  ? (imageIds) => {
+                                      console.log(`Reordering images for area ${area.id}:`, imageIds);
+                                      onReorderAreaImages(area.id, imageIds);
+                                    }
                                   : undefined
                               }
                               propertyImages={propertyImages}

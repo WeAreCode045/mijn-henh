@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
@@ -35,7 +36,7 @@ interface ContentRouterProps {
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
     onSubmit: () => void;
-    isSaving: boolean; // This is required
+    isSaving: boolean;
     onReorderAreaImages?: (areaId: string, reorderedImageIds: string[]) => void;
   };
 }

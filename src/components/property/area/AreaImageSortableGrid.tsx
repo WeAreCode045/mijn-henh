@@ -1,7 +1,7 @@
 
 import { PropertyImage } from "@/types/property";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, arrayMove, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -61,7 +61,7 @@ interface AreaImageSortableGridProps {
   areaId: string;
   areaTitle: string;
   onImageRemove: (areaId: string, imageId: string) => void;
-  onImagesReorder: (areaId: string, reorderedImages: PropertyImage[]) => void;
+  onImagesReorder: (areaId: string, reorderedImageIds: string[]) => void;
 }
 
 export function AreaImageSortableGrid({ 
@@ -105,17 +105,20 @@ export function AreaImageSortableGrid({
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
-      setOrderedImages(items => {
-        const oldIndex = items.findIndex(item => item.id === active.id);
-        const newIndex = items.findIndex(item => item.id === over.id);
+      const oldIndex = orderedImages.findIndex(item => item.id === active.id);
+      const newIndex = orderedImages.findIndex(item => item.id === over.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrderedImages = arrayMove(orderedImages, oldIndex, newIndex);
+        setOrderedImages(newOrderedImages);
         
-        const newOrderedImages = arrayMove(items, oldIndex, newIndex);
+        // Extract just the IDs for the callback
+        const reorderedIds = newOrderedImages.map(img => img.id);
+        console.log("Reordered image IDs:", reorderedIds);
         
-        // Update the parent component with the new order
-        onImagesReorder(areaId, newOrderedImages);
-        
-        return newOrderedImages;
-      });
+        // Call the parent component's reorder function
+        onImagesReorder(areaId, reorderedIds);
+      }
     }
   };
 
@@ -136,7 +139,7 @@ export function AreaImageSortableGrid({
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
         <SortableContext 
           items={validAreaImages.map(img => img.id)}
-          strategy={verticalListSortingStrategy}
+          strategy={rectSortingStrategy}
         >
           {validAreaImages.map((image) => (
             <SortableImageItem 

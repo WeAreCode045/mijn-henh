@@ -163,6 +163,8 @@ export function usePropertyFormAreas(
               .then(({ error }) => {
                 if (error) {
                   console.error("Error updating property_images:", error);
+                } else {
+                  console.log("Property image record updated successfully");
                 }
               });
           }
@@ -172,7 +174,10 @@ export function usePropertyFormAreas(
   }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField]);
   
   const handleAreaImagesSelect = useCallback(async (areaId: string, imageIds: string[]) => {
-    if (!formState.areas) return;
+    if (!formState.areas || !formState.id) {
+      console.error("Cannot select images: missing areas or property ID");
+      return;
+    }
     
     console.log(`Selecting images for area ${areaId}:`, imageIds);
     
@@ -210,79 +215,70 @@ export function usePropertyFormAreas(
       handleFieldChange("areas", updatedAreas);
       setPendingChanges(true);
       
-      if (formState.id) {
-        console.log(`Auto-saving areas for property ${formState.id}`);
+      const areasForDb = updatedAreas.map(area => ({
+        id: area.id,
+        title: area.title || '',
+        description: area.description || '',
+        name: area.name || '',
+        size: area.size || '',
+        imageIds: area.imageIds || [],
+        columns: area.columns || 2
+      }));
+      
+      const { error: updateError } = await supabase
+        .from('properties')
+        .update({ areas: areasForDb })
+        .eq('id', formState.id);
         
-        const areasForDb = updatedAreas.map(area => ({
-          id: area.id,
-          title: area.title || '',
-          description: area.description || '',
-          name: area.name || '',
-          size: area.size || '',
-          imageIds: area.imageIds || [],
-          columns: area.columns || 2
-        }));
+      if (updateError) {
+        console.error('Error updating areas in properties table:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to save area images to database",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('Successfully updated areas in properties table');
+      
+      const { error: clearError } = await supabase
+        .from('property_images')
+        .update({ area: null })
+        .eq('property_id', formState.id)
+        .in('id', imageIds);
         
-        const { error: updateError } = await supabase
-          .from('properties')
-          .update({ areas: areasForDb })
-          .eq('id', formState.id);
-          
-        if (updateError) {
-          console.error('Error updating areas in properties table:', updateError);
-          toast({
-            title: "Error",
-            description: "Failed to save area images to database",
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        console.log('Successfully updated areas in properties table');
-        
-        const { error: clearError } = await supabase
+      if (clearError) {
+        console.error(`Error clearing area assignments for area ${areaId}:`, clearError);
+      }
+      
+      const updatePromises = imageIds.map((imageId, index) => 
+        supabase
           .from('property_images')
-          .update({ area: null })
+          .update({ 
+            area: areaId,
+            sort_order: index 
+          })
+          .eq('id', imageId)
           .eq('property_id', formState.id)
-          .eq('area', areaId);
-          
-        if (clearError) {
-          console.error(`Error clearing area assignments for area ${areaId}:`, clearError);
-          toast({
-            title: "Warning",
-            description: "Failed to clear previous area assignments",
-            variant: "destructive",
-          });
-        }
-        
-        const updatePromises = imageIds.map((imageId, index) => 
-          supabase
-            .from('property_images')
-            .update({ 
-              area: areaId,
-              sort_order: index 
-            })
-            .eq('id', imageId)
-            .eq('property_id', formState.id)
-        );
-        
-        const results = await Promise.all(updatePromises);
-        const errors = results.filter(res => res.error).map(res => res.error);
-        
-        if (errors.length > 0) {
-          console.error(`Errors updating property_images:`, errors);
-          toast({
-            title: "Warning",
-            description: "Some image assignments could not be saved",
-            variant: "destructive",
-          });
-        } else {
-          console.log(`Updated ${imageIds.length} images in property_images table`);
-          toast({
-            title: "Success",
-            description: `Area images updated successfully (${imageIds.length} images)`,
-          });
-        }
+      );
+      
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter(res => res.error).map(res => res.error);
+      
+      if (errors.length > 0) {
+        console.error(`Errors updating property_images:`, errors);
+        toast({
+          title: "Warning",
+          description: "Some image assignments could not be saved",
+          variant: "destructive",
+        });
+      } else {
+        console.log(`Updated ${imageIds.length} images in property_images table`);
+        toast({
+          title: "Success",
+          description: `Area images updated successfully (${imageIds.length} images)`,
+        });
       }
     } catch (error) {
       console.error("Error in handleAreaImagesSelect:", error);
@@ -294,74 +290,96 @@ export function usePropertyFormAreas(
     }
   }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
-  const handleReorderAreaImages = useCallback((areaId: string, reorderedImageIds: string[]) => {
-    if (!formState.areas) return;
+  const handleReorderAreaImages = useCallback(async (areaId: string, reorderedImageIds: string[]) => {
+    if (!formState.areas || !formState.id) {
+      console.error("Cannot reorder images: missing areas or property ID");
+      return;
+    }
     
     console.log(`Reordering images for area ${areaId}:`, reorderedImageIds);
     
-    const areaToUpdate = formState.areas.find(area => area.id === areaId);
-    if (!areaToUpdate) return;
-    
-    const areaImages = formState.images 
-      ? formState.images.filter(img => {
-          if (typeof img === 'string') {
-            return reorderedImageIds.includes(img);
-          } else if (typeof img === 'object' && 'id' in img) {
-            return reorderedImageIds.includes(img.id);
-          }
-          return false;
-        })
-      : [];
-    
-    const updatedAreas = formState.areas.map(area => {
-      if (area.id === areaId) {
-        return {
-          ...area,
-          imageIds: reorderedImageIds
-        };
+    try {
+      const areaToUpdate = formState.areas.find(area => area.id === areaId);
+      if (!areaToUpdate) {
+        console.error(`Area ${areaId} not found`);
+        return;
       }
-      return area;
-    });
-    
-    handleFieldChange("areas", updatedAreas);
-    setPendingChanges(true);
-    
-    if (formState.id) {
-      autosaveField(formState.id, "areas", updatedAreas)
-        .then(success => {
-          if (success) {
-            toast({
-              title: "Success",
-              description: "Image order updated",
-            });
-            
-            Promise.all(reorderedImageIds.map((imageId, index) => 
-              supabase
-                .from('property_images')
-                .update({ sort_order: index })
-                .eq('id', imageId)
-                .eq('property_id', formState.id)
-                .eq('area', areaId)
-            )).then(results => {
-              const errors = results.filter(res => res.error).map(res => res.error);
-              if (errors.length > 0) {
-                console.error(`Errors updating image sort orders:`, errors);
-              } else {
-                console.log(`Updated sort orders for ${reorderedImageIds.length} images`);
-              }
-            });
-          }
-        })
-        .catch(error => {
-          console.error("Error auto-saving areas:", error);
-          toast({
-            title: "Error",
-            description: "Failed to update image order",
-            variant: "destructive",
-          });
+      
+      const updatedAreas = formState.areas.map(area => {
+        if (area.id === areaId) {
+          return {
+            ...area,
+            imageIds: reorderedImageIds
+          };
+        }
+        return area;
+      });
+      
+      handleFieldChange("areas", updatedAreas);
+      setPendingChanges(true);
+      
+      const areasForDb = updatedAreas.map(area => ({
+        id: area.id,
+        title: area.title || '',
+        description: area.description || '',
+        name: area.name || '',
+        size: area.size || '',
+        imageIds: area.imageIds || [],
+        columns: area.columns || 2
+      }));
+      
+      const { error: updateError } = await supabase
+        .from('properties')
+        .update({ areas: areasForDb })
+        .eq('id', formState.id);
+        
+      if (updateError) {
+        console.error('Error updating areas in properties table:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to update image order in database",
+          variant: "destructive",
         });
+        return;
+      }
+      
+      console.log('Successfully updated areas in properties table with new image order');
+      
+      const updatePromises = reorderedImageIds.map((imageId, index) => 
+        supabase
+          .from('property_images')
+          .update({ sort_order: index })
+          .eq('id', imageId)
+          .eq('property_id', formState.id)
+          .eq('area', areaId)
+      );
+      
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter(res => res.error).map(res => res.error);
+      
+      if (errors.length > 0) {
+        console.error(`Errors updating image sort orders:`, errors);
+        toast({
+          title: "Warning",
+          description: "Some image orders could not be saved",
+          variant: "destructive",
+        });
+      } else {
+        console.log(`Updated sort orders for ${reorderedImageIds.length} images`);
+        toast({
+          title: "Success",
+          description: "Image order updated successfully",
+        });
+      }
+    } catch (error) {
+      console.error("Error in handleReorderAreaImages:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update image order",
+        variant: "destructive",
+      });
     }
-  }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
+  }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
   
   const handleAreaImageUpload = useCallback(async (areaId: string, files: FileList) => {
     if (!formState.areas) return;
@@ -402,3 +420,4 @@ export function usePropertyFormAreas(
     handleRemoveAreaPhoto
   };
 }
+

@@ -10,7 +10,7 @@ interface AreaImageGridSectionProps {
   areaImages: PropertyImage[];
   onSelectClick: () => void;
   onImageRemove: (areaId: string, imageId: string) => void;
-  onImagesReorder: (areaId: string, reorderedImages: PropertyImage[]) => void;
+  onImagesReorder: (areaId: string, reorderedImageIds: string[]) => void;
 }
 
 export function AreaImageGridSection({
@@ -21,6 +21,15 @@ export function AreaImageGridSection({
   onImageRemove,
   onImagesReorder
 }: AreaImageGridSectionProps) {
+  const handleImagesReorder = (areaId: string, reorderedImages: PropertyImage[]) => {
+    // Extract just the IDs from the reordered images
+    const reorderedImageIds = reorderedImages.map(img => img.id);
+    console.log("Reordering images with IDs:", reorderedImageIds);
+    
+    // Call the parent component's reorder function with the IDs
+    onImagesReorder(areaId, reorderedImageIds);
+  };
+
   return (
     <div>
       <AreaImageActions onSelectClick={onSelectClick} />
@@ -32,7 +41,7 @@ export function AreaImageGridSection({
           areaId={areaId}
           areaTitle={areaTitle}
           onImageRemove={onImageRemove}
-          onImagesReorder={onImagesReorder}
+          onImagesReorder={handleImagesReorder}
         />
       </div>
     </div>
