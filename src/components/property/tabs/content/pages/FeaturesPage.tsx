@@ -1,13 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyFormData, PropertyFeature } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
-import { FeatureSelector } from "@/components/property/features/FeatureSelector";
+import { GlobalFeaturesSelector } from "@/components/property/features/GlobalFeaturesSelector";
 import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 
 interface FeaturesPageProps {
@@ -27,8 +25,35 @@ export function FeaturesPage({
   onUpdateFeature,
   setPendingChanges
 }: FeaturesPageProps) {
-  const [activeTab, setActiveTab] = useState<string>("manual");
-  const { availableFeatures, isLoading, addFeature: addToAvailableFeatures } = useAvailableFeatures();
+  const { availableFeatures, isLoading } = useAvailableFeatures();
+  const [globalFeatures, setGlobalFeatures] = useState<PropertyFeature[]>([]);
+  const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
+  
+  // Fetch global features on component mount
+  useEffect(() => {
+    const fetchGlobalFeatures = async () => {
+      setIsLoadingGlobal(true);
+      try {
+        const { data, error } = await supabase
+          .from('property_features')
+          .select('*')
+          .order('description', { ascending: true });
+        
+        if (error) {
+          console.error("Error fetching global features:", error);
+          return;
+        }
+        
+        setGlobalFeatures(data || []);
+      } catch (err) {
+        console.error("Failed to fetch global features:", err);
+      } finally {
+        setIsLoadingGlobal(false);
+      }
+    };
+    
+    fetchGlobalFeatures();
+  }, []);
   
   // Save feature changes directly to the database
   const saveFeaturesField = async (features: PropertyFeature[]) => {
@@ -92,22 +117,6 @@ export function FeaturesPage({
     await saveFeaturesField(updatedFeatures);
   };
   
-  const handleAddMultipleFeatures = async (newFeatures: PropertyFeature[]) => {
-    // Add multiple features at once
-    // First, add the new features to the available features list
-    newFeatures.forEach(feature => {
-      // Fix: Pass the description string instead of the whole feature object
-      addToAvailableFeatures(feature.description);
-    });
-    
-    // Update in-memory state with new features
-    const updatedFeatures = [...(formData.features || []), ...newFeatures];
-    onFieldChange('features', updatedFeatures);
-    
-    // Update features in the database
-    await saveFeaturesField(updatedFeatures);
-  };
-  
   const handleAddClick = async () => {
     // Add a new feature
     onAddFeature();
@@ -134,38 +143,39 @@ export function FeaturesPage({
           <CardTitle>Property Features</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="manual" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-              <TabsTrigger value="select">Select Features</TabsTrigger>
-            </TabsList>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Global Features Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Select Global Features</h3>
+              {isLoadingGlobal ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Loading global features...</span>
+                </div>
+              ) : (
+                <GlobalFeaturesSelector
+                  globalFeatures={globalFeatures}
+                  propertyFeatures={formData.features || []}
+                  onSelect={handleAddFeature}
+                  onDeselect={handleRemoveSelectedFeature}
+                />
+              )}
+            </div>
             
-            <TabsContent value="manual">
+            {/* Custom Features Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Add Custom Features</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                These features are specific to this property and won't be added to the global list.
+              </p>
               <PropertyFeatures
                 features={formData.features || []}
                 onAdd={handleAddClick}
                 onRemove={handleRemoveClick}
                 onUpdate={handleFeatureChange}
               />
-            </TabsContent>
-            
-            <TabsContent value="select">
-              {isLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-muted-foreground">Loading features...</span>
-                </div>
-              ) : (
-                <FeatureSelector
-                  availableFeatures={availableFeatures}
-                  selectedFeatures={formData.features || []}
-                  onAddFeature={handleAddFeature}
-                  onRemoveFeature={handleRemoveSelectedFeature}
-                  onAddMultipleFeatures={handleAddMultipleFeatures}
-                />
-              )}
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
