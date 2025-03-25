@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyNearbyPlace } from "@/types/property";
@@ -128,13 +127,15 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         visible_in_webview: true,
         distance: null,
         latitude: place.location?.latitude || null,
-        longitude: place.location?.longitude || null
+        longitude: place.location?.longitude || null,
+        category: categoryName // Add category for grouping
       }));
 
       console.log(`Found ${transformedPlaces.length} places for category: ${categoryName}`);
 
       // Update state with results
       setResults(transformedPlaces);
+      setIsSearching(false);
       
       return transformedPlaces;
     } catch (error) {
@@ -144,16 +145,14 @@ export function useNearbyPlacesSearch({ latitude, longitude }: UseNearbyPlacesSe
         description: "Failed to search for nearby places",
         variant: "destructive"
       });
-      return [];
-    } finally {
       setIsSearching(false);
+      return [];
     }
   }, [latitude, longitude, toast]);
 
   return {
     searchPlaces,
-    isSearching,
     results,
-    setResults
+    isSearching
   };
 }

@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
 
@@ -26,7 +26,9 @@ export function useLocationDescription(
         body: { 
           address: formData.address,
           nearbyPlaces: formData.nearby_places || [],
-          language: 'nl'
+          description: formData.description,
+          language: 'nl',
+          maxLength: 1000
         }
       });
       
@@ -35,6 +37,16 @@ export function useLocationDescription(
       if (data && data.description) {
         console.log("Generated description:", data.description);
         onFieldChange('location_description', data.description);
+        
+        // Also save to database if we have a property ID
+        if (formData.id) {
+          const { error: updateError } = await supabase
+            .from('properties')
+            .update({ location_description: data.description })
+            .eq('id', formData.id);
+            
+          if (updateError) throw updateError;
+        }
         
         toast({
           title: "Success",
@@ -51,7 +63,7 @@ export function useLocationDescription(
     } finally {
       setIsLoading(false);
     }
-  }, [formData.address, formData.nearby_places, onFieldChange, setIsLoading, toast]);
+  }, [formData.address, formData.id, formData.nearby_places, formData.description, onFieldChange, setIsLoading, toast]);
   
   return { generateLocationDescription };
 }

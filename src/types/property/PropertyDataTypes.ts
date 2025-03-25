@@ -3,10 +3,12 @@ import type {
   PropertyArea,
   PropertyFeature,
   PropertyImage,
-  PropertyNearbyPlace,
   PropertyCity,
   PropertyFloorplan
 } from './PropertyTypes';
+
+// Import PropertyNearbyPlace from PropertyPlaceTypes instead
+import { PropertyNearbyPlace } from './PropertyPlaceTypes';
 
 export interface PropertyData {
   id: string;

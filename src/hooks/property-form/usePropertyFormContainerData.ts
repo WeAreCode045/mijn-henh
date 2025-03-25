@@ -21,7 +21,7 @@ export function usePropertyFormContainerData() {
   useEffect(() => {
     if (formData && formData.id) {
       const fetchAgentInfo = async () => {
-        if (formData.agent_id) {
+        if (formData.agent_id && formData.agent_id.trim() !== '') {
           const { data } = await supabase
             .from('profiles')
             .select('id, full_name')

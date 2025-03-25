@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, Wand2 } from "lucide-react";
 
 interface LocationDescriptionSectionProps {
   formData: PropertyFormData;
@@ -51,7 +51,7 @@ export function LocationDescriptionSection({
                     </>
                   ) : (
                     <>
-                      <MapPin className="h-4 w-4" />
+                      <Wand2 className="h-4 w-4" />
                       Generate Description
                     </>
                   )}

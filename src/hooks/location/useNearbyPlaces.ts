@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
 // Category definitions with their included types
 const categoryConfig = {
@@ -83,7 +84,7 @@ export function useNearbyPlaces(
         
         // Prepare the request body with the exact structure specified
         const requestBody = {
-          includedTypes: includedTypes,
+          includedTypes: [categoryName],
           maxResultCount: 10,
           locationRestriction: {
             circle: {
@@ -146,7 +147,8 @@ export function useNearbyPlaces(
           visible_in_webview: true,
           distance: null,
           latitude: place.location?.latitude || null,
-          longitude: place.location?.longitude || null
+          longitude: place.location?.longitude || null,
+          category: categoryName // Add category for grouping
         }));
         
         console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for single type ${categoryName}`);
@@ -219,7 +221,8 @@ export function useNearbyPlaces(
               visible_in_webview: true,
               distance: null,
               latitude: place.location?.latitude || null,
-              longitude: place.location?.longitude || null
+              longitude: place.location?.longitude || null,
+              category: categoryName // Add category for grouping purposes
             }));
     
             allResults.push(...transformedPlaces);
@@ -256,58 +259,93 @@ export function useNearbyPlaces(
     }
   }, [formData.id, formData.latitude, formData.longitude, toast]);
 
-  const saveSelectedPlaces = useCallback((selectedPlaces: PropertyNearbyPlace[]) => {
-    if (!formData.id) return;
-    
-    // Filter out duplicates based on place ID
-    const existingPlaces = formData.nearby_places || [];
-    const newPlaces = selectedPlaces.filter(newPlace => 
-      !existingPlaces.some(existingPlace => existingPlace.id === newPlace.id)
-    );
-    
-    // Combine existing and new places
-    const combinedPlaces = [...existingPlaces, ...newPlaces];
-    
-    // Group places by type
-    const groupedPlaces = combinedPlaces.reduce((acc, place) => {
-      if (!acc[place.type]) {
-        acc[place.type] = [];
-      }
-      acc[place.type].push(place);
-      return acc;
-    }, {} as Record<string, PropertyNearbyPlace[]>);
-    
-    // Create a list with separators and type information
-    const placesWithSeparators: (PropertyNearbyPlace | { separator: string })[] = [];
-    for (const [type, places] of Object.entries(groupedPlaces)) {
-      placesWithSeparators.push({ separator: type });
-      placesWithSeparators.push(...places);
+  const saveSelectedPlaces = useCallback(async (selectedPlaces: PropertyNearbyPlace[]) => {
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing. Please save the property first.",
+        variant: "destructive"
+      });
+      return;
     }
     
-    // Update the form data with the combined places
-    onFieldChange("nearby_places", combinedPlaces);
-    
-    toast({
-      title: "Places saved",
-      description: `Added ${newPlaces.length} places to the property`
-    });
-    
-    return placesWithSeparators;
+    try {
+      // Filter out duplicates based on place ID
+      const existingPlaces = formData.nearby_places || [];
+      const newPlaces = selectedPlaces.filter(newPlace => 
+        !existingPlaces.some(existingPlace => existingPlace.id === newPlace.id)
+      );
+      
+      // Combine existing and new places
+      const combinedPlaces = [...existingPlaces, ...newPlaces];
+      
+      // Update the form data with the combined places including category information
+      onFieldChange("nearby_places", combinedPlaces);
+      
+      // Save to Supabase - convert to Json format
+      console.log("Saving places to Supabase:", combinedPlaces);
+      const jsonPlaces = preparePropertiesForJsonField(combinedPlaces);
+      const { error } = await supabase
+        .from('properties')
+        .update({ nearby_places: jsonPlaces })
+        .eq('id', formData.id);
+      
+      if (error) {
+        console.error("Error saving places to Supabase:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Places saved",
+        description: `Added ${newPlaces.length} places to the property`
+      });
+      
+      return combinedPlaces;
+    } catch (error) {
+      console.error("Error saving selected places:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save places to the database",
+        variant: "destructive"
+      });
+    }
   }, [formData.id, formData.nearby_places, onFieldChange, toast]);
 
-  const removePlaceAtIndex = useCallback((index: number) => {
-    if (!formData.nearby_places) return;
+  const removePlaceAtIndex = useCallback(async (index: number) => {
+    if (!formData.nearby_places || !formData.id) return;
     
-    const updatedPlaces = [...formData.nearby_places];
-    updatedPlaces.splice(index, 1);
-    
-    onFieldChange("nearby_places", updatedPlaces);
-    
-    toast({
-      title: "Place removed",
-      description: "Nearby place has been removed successfully"
-    });
-  }, [formData.nearby_places, onFieldChange, toast]);
+    try {
+      const updatedPlaces = [...formData.nearby_places];
+      updatedPlaces.splice(index, 1);
+      
+      // Update the form data
+      onFieldChange("nearby_places", updatedPlaces);
+      
+      // Save to Supabase - convert to Json format
+      const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
+      const { error } = await supabase
+        .from('properties')
+        .update({ nearby_places: jsonPlaces })
+        .eq('id', formData.id);
+      
+      if (error) {
+        console.error("Error removing place from Supabase:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Place removed",
+        description: "Nearby place has been removed successfully"
+      });
+    } catch (error) {
+      console.error("Error removing place:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove the place from the database",
+        variant: "destructive"
+      });
+    }
+  }, [formData.nearby_places, formData.id, onFieldChange, toast]);
 
   return {
     fetchPlaces,

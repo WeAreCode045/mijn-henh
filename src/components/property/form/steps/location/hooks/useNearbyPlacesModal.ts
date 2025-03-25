@@ -19,52 +19,69 @@ export function useNearbyPlacesModal({
   const { toast } = useToast();
 
   const handleSavePlaces = async (selectedPlaces: PlaceOption[]) => {
-    if (!onFieldChange || !formData.nearby_places) return;
+    if (!onFieldChange || !formData.id) {
+      toast({
+        title: "Error",
+        description: "Cannot save places: property ID is missing or change handler is not provided",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    const newPlaces: PropertyNearbyPlace[] = selectedPlaces.map(place => ({
-      id: place.id,
-      name: place.name,
-      vicinity: place.vicinity,
-      rating: place.rating,
-      distance: place.distance || 0,
-      type: place.type,
-      visible_in_webview: true
-    }));
-    
-    const existingPlaces = formData.nearby_places.filter(
-      place => !newPlaces.some(newPlace => newPlace.id === place.id)
-    );
-    
-    const updatedPlaces = [...existingPlaces, ...newPlaces];
-    onFieldChange('nearby_places', updatedPlaces);
-    
-    // Save to database if we have a property ID
-    if (formData.id) {
-      try {
-        const updatedPlacesJson = preparePropertiesForJsonField(updatedPlaces);
-        
-        const { error } = await supabase
-          .from('properties')
-          .update({ nearby_places: updatedPlacesJson })
-          .eq('id', formData.id);
+    try {
+      // Transform selected places to our PropertyNearbyPlace format
+      const newPlaces: PropertyNearbyPlace[] = selectedPlaces.map(place => ({
+        id: place.id,
+        name: place.name,
+        vicinity: place.vicinity || "",
+        rating: place.rating || null,
+        user_ratings_total: place.user_ratings_total || 0,
+        type: place.type || currentCategory,
+        visible_in_webview: true,
+        distance: place.distance || 0,
+        category: currentCategory, // Make sure the category is set
+        latitude: place.latitude || null,
+        longitude: place.longitude || null
+      }));
+      
+      // Filter out duplicates from existing places
+      const existingPlaces = formData.nearby_places || [];
+      const existingFiltered = existingPlaces.filter(
+        place => !newPlaces.some(newPlace => newPlace.id === place.id)
+      );
+      
+      // Combine existing and new places
+      const updatedPlaces = [...existingFiltered, ...newPlaces];
+      
+      // Update form state
+      onFieldChange('nearby_places', updatedPlaces);
+      
+      // Save to database - convert to Json format for Supabase
+      console.log("Saving places to database:", updatedPlaces);
+      const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
+      const { error } = await supabase
+        .from('properties')
+        .update({ nearby_places: jsonPlaces })
+        .eq('id', formData.id);
           
-        if (error) {
-          console.error("Error saving places to database:", error);
-          throw error;
-        }
-        
-        toast({
-          title: "Places saved",
-          description: `${selectedPlaces.length} places have been added.`
-        });
-      } catch (error) {
-        console.error("Error updating database:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to save places to database. Please try again.",
-        });
+      if (error) {
+        console.error("Error saving places to database:", error);
+        throw error;
       }
+      
+      toast({
+        title: "Places saved",
+        description: `${newPlaces.length} places have been added.`
+      });
+      
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Error updating database:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save places to database. Please try again.",
+      });
     }
   };
 

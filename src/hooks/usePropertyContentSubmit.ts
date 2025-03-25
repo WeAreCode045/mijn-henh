@@ -31,7 +31,7 @@ export function usePropertyContentSubmit(
           try {
             // Create a form event to pass to handleSubmit
             const formEvent = {} as React.FormEvent;
-            // Pass the current formData and set redirectAfterSave to false
+            // Always pass false for redirectAfterSave to prevent any redirects
             const success = await handleSubmit(formEvent, formData, false);
             
             if (success) {

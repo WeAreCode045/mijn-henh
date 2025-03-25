@@ -9,6 +9,7 @@ import { MapSection } from "@/components/property/form/steps/location/MapSection
 import { NearbyPlacesSection } from "@/components/property/form/steps/location/components/NearbyPlacesSection";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Wand2 } from "lucide-react";
 
 interface LocationPageProps {
   formData: PropertyFormData;
@@ -38,6 +39,7 @@ export function LocationPage({
   setPendingChanges
 }: LocationPageProps) {
   const { toast } = useToast();
+  const [isGeneratingDescription, setIsGeneratingDescription] = React.useState(false);
   
   const handleLocationDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onFieldChange('location_description', e.target.value);
@@ -91,6 +93,90 @@ export function LocationPage({
     };
   }, []);
 
+  const handleGenerateDescription = async () => {
+    if (!formData.id || !formData.address) {
+      toast({
+        title: "Error",
+        description: "Property ID and address are required to generate a description",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsGeneratingDescription(true);
+    
+    try {
+      // Get OpenAI API key from settings first
+      const { data: settingsData, error: settingsError } = await supabase
+        .from('agency_settings')
+        .select('openai_api_key')
+        .single();
+      
+      if (settingsError) {
+        console.error("Error fetching API key from settings:", settingsError);
+        throw new Error("Could not fetch OpenAI API key from settings");
+      }
+      
+      const apiKey = settingsData?.openai_api_key;
+      
+      if (!apiKey) {
+        console.error("No OpenAI API key found in settings");
+        toast({
+          title: "Missing API Key",
+          description: "Please set an OpenAI API key in your agency settings",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Call the edge function to generate the description
+      const { data, error } = await supabase.functions.invoke('generate-location-description', {
+        body: { 
+          address: formData.address,
+          nearbyPlaces: formData.nearby_places || [],
+          description: formData.description,
+          language: 'nl',
+          maxLength: 1000
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data?.description) {
+        // Update the form state
+        onFieldChange('location_description', data.description);
+        
+        // Save to database
+        const { error: updateError } = await supabase
+          .from('properties')
+          .update({ location_description: data.description })
+          .eq('id', formData.id);
+          
+        if (updateError) throw updateError;
+        
+        toast({
+          title: "Success",
+          description: "Location description generated successfully",
+        });
+        
+        if (setPendingChanges) {
+          setPendingChanges(false);
+        }
+      } else {
+        throw new Error("No description was generated");
+      }
+    } catch (error: any) {
+      console.error("Error generating location description:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate location description",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   const handleCategorySearch = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -116,21 +202,26 @@ export function LocationPage({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="location_description">Location Description</Label>
                   
-                  {onGenerateLocationDescription && (
-                    <Button 
-                      type="button"
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        if (onGenerateLocationDescription) {
-                          onGenerateLocationDescription();
-                        }
-                      }}
-                      disabled={isLoadingLocationData}
-                    >
-                      {isLoadingLocationData ? 'Generating...' : 'Generate Description'}
-                    </Button>
-                  )}
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDescription || !formData.address}
+                    className="flex gap-2 items-center"
+                  >
+                    {isGeneratingDescription ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="h-4 w-4" />
+                        Generate Description
+                      </>
+                    )}
+                  </Button>
                 </div>
                 
                 <Textarea

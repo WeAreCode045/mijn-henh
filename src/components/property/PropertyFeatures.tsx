@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,14 @@ export function PropertyFeatures({
   onRemove,
   onUpdate,
 }: PropertyFeaturesProps) {
+  // Local state for form values
+  const [localFeatures, setLocalFeatures] = useState<PropertyFeature[]>(features);
+  
+  // Sync local state with props
+  useEffect(() => {
+    setLocalFeatures(features);
+  }, [features]);
+
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("Adding new feature");
@@ -31,9 +39,23 @@ export function PropertyFeatures({
     onRemove(id);
   };
 
-  const handleUpdate = (id: string, value: string) => {
-    console.log("Updating feature:", id, value);
-    onUpdate(id, value);
+  const handleLocalUpdate = (id: string, value: string) => {
+    // Update local state immediately for UI responsiveness
+    setLocalFeatures(prev => 
+      prev.map(feature => 
+        feature.id === id ? { ...feature, description: value } : feature
+      )
+    );
+  };
+  
+  // Handle blur event to save changes only when the field loses focus
+  const handleBlur = (id: string, value: string) => {
+    // Only call the update function if the value has actually changed
+    const originalFeature = features.find(feature => feature.id === id);
+    if (originalFeature && originalFeature.description !== value) {
+      console.log("Saving feature on blur:", id, value);
+      onUpdate(id, value);
+    }
   };
 
   return (
@@ -45,16 +67,17 @@ export function PropertyFeatures({
           Add Feature
         </Button>
       </div>
-      {features.length === 0 ? (
+      {localFeatures.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">
           No features added yet. Click the button above to add features.
         </p>
       ) : (
-        features.map((feature) => (
+        localFeatures.map((feature) => (
           <div key={feature.id} className="flex items-center gap-2">
             <Input
               value={feature.description}
-              onChange={(e) => handleUpdate(feature.id, e.target.value)}
+              onChange={(e) => handleLocalUpdate(feature.id, e.target.value)}
+              onBlur={(e) => handleBlur(feature.id, e.target.value)}
               placeholder="Enter feature"
             />
             <Button

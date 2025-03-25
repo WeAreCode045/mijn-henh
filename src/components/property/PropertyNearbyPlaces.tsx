@@ -1,44 +1,69 @@
 
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyPlaceType } from "@/types/property";
+import { Button } from "@/components/ui/button";
+import { StarIcon } from "lucide-react";
+import { groupPlacesByCategory } from "./form/steps/location/utils/placeUtils";
 
 interface PropertyNearbyPlacesProps {
   places: PropertyPlaceType[];
+  onPlaceDelete?: (e: React.MouseEvent, id: string) => void;
 }
 
-export function PropertyNearbyPlaces({ places }: PropertyNearbyPlacesProps) {
+export function PropertyNearbyPlaces({ places, onPlaceDelete }: PropertyNearbyPlacesProps) {
   if (!places || places.length === 0) return null;
 
-  const placesByType = places.reduce((acc: Record<string, PropertyPlaceType[]>, place) => {
-    if (!acc[place.type]) {
-      acc[place.type] = [];
-    }
-    acc[place.type].push(place);
-    return acc;
-  }, {});
+  // Group the places by category
+  const placesByCategory = React.useMemo(() => {
+    return groupPlacesByCategory(places);
+  }, [places]);
+
+  // Get all categories from the grouped places
+  const categories = Object.keys(placesByCategory);
 
   return (
-    <div className="mt-6 space-y-4">
-      <h3 className="font-medium text-lg">Nearby Places</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(placesByType).map(([type, places]) => (
-          <div key={type} className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 capitalize">{type.replace('_', ' ')}</h4>
-            <ul className="space-y-2">
-              {places.map((place) => (
-                <li key={place.id} className="text-sm">
-                  <span className="font-medium">{place.name}</span>
-                  {place.rating && (
-                    <span className="text-yellow-500 ml-2">★ {place.rating}</span>
-                  )}
-                  {place.vicinity && (
-                    <p className="text-gray-500 text-xs mt-1">{place.vicinity}</p>
-                  )}
-                </li>
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-estate-500 text-white">
+        <CardTitle className="text-white">Nabijgelegen voorzieningen</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        {categories.map((category) => (
+          <div key={category} className="p-4 border-b last:border-b-0">
+            <h3 className="font-semibold text-lg mb-3">{category}</h3>
+            <div className="space-y-2">
+              {placesByCategory[category].map((place) => (
+                <div key={place.id} className="flex justify-between items-center">
+                  <div>
+                    <span className="font-medium">{place.name}</span>
+                    {place.vicinity && (
+                      <p className="text-sm text-gray-500">{place.vicinity}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {place.rating && (
+                      <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded text-xs">
+                        <StarIcon className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        <span>{place.rating.toFixed(1)}</span>
+                      </div>
+                    )}
+                    {onPlaceDelete && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={(e) => onPlaceDelete(e, place.id)}
+                      >
+                        &times;
+                      </Button>
+                    )}
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

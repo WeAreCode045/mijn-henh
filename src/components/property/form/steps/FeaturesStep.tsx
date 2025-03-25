@@ -5,6 +5,8 @@ import { FeatureSelector } from "@/components/property/features/FeatureSelector"
 import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FeaturesStepProps {
   formData: PropertyFormData;
@@ -27,10 +29,29 @@ export function FeaturesStep({
   
   const { availableFeatures, isLoading, addFeature, addMultipleFeatures } = useAvailableFeatures();
   
-  const handleFeatureChange = (id: string, description: string) => {
+  const handleFeatureChange = async (id: string, description: string) => {
+    // Now this is only called on blur, so we can update immediately
     onUpdateFeature(id, description);
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    
+    // Save the features field to the database directly
+    if (formData.id) {
+      try {
+        const { error } = await supabase
+          .from('properties')
+          .update({ features: JSON.stringify(formData.features) })
+          .eq('id', formData.id);
+          
+        if (error) {
+          console.error("Error saving feature change:", error);
+        } else {
+          console.log("Feature updated and saved to database");
+          if (setPendingChanges) {
+            setPendingChanges(false);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to save feature change:", err);
+      }
     }
   };
   
@@ -44,8 +65,27 @@ export function FeaturesStep({
     if (onFieldChange) {
       const updatedFeatures = [...formData.features, feature];
       onFieldChange('features', updatedFeatures);
-      if (setPendingChanges) {
-        setPendingChanges(true);
+      
+      // Save the features field to the database
+      if (formData.id) {
+        try {
+          supabase
+            .from('properties')
+            .update({ features: JSON.stringify(updatedFeatures) })
+            .eq('id', formData.id)
+            .then(({ error }) => {
+              if (error) {
+                console.error("Error saving feature addition:", error);
+              } else {
+                console.log("Feature added and saved to database");
+                if (setPendingChanges) {
+                  setPendingChanges(false);
+                }
+              }
+            });
+        } catch (err) {
+          console.error("Failed to save feature addition:", err);
+        }
       }
     }
   };
@@ -54,8 +94,27 @@ export function FeaturesStep({
     if (onFieldChange) {
       const updatedFeatures = formData.features.filter(feature => feature.id !== id);
       onFieldChange('features', updatedFeatures);
-      if (setPendingChanges) {
-        setPendingChanges(true);
+      
+      // Save the features field to the database
+      if (formData.id) {
+        try {
+          supabase
+            .from('properties')
+            .update({ features: JSON.stringify(updatedFeatures) })
+            .eq('id', formData.id)
+            .then(({ error }) => {
+              if (error) {
+                console.error("Error saving feature removal:", error);
+              } else {
+                console.log("Feature removed and saved to database");
+                if (setPendingChanges) {
+                  setPendingChanges(false);
+                }
+              }
+            });
+        } catch (err) {
+          console.error("Failed to save feature removal:", err);
+        }
       }
     }
   };
@@ -69,8 +128,27 @@ export function FeaturesStep({
       // Then add them to the property
       const updatedFeatures = [...formData.features, ...newFeatures];
       onFieldChange('features', updatedFeatures);
-      if (setPendingChanges) {
-        setPendingChanges(true);
+      
+      // Save the features field to the database
+      if (formData.id) {
+        try {
+          supabase
+            .from('properties')
+            .update({ features: JSON.stringify(updatedFeatures) })
+            .eq('id', formData.id)
+            .then(({ error }) => {
+              if (error) {
+                console.error("Error saving multiple features:", error);
+              } else {
+                console.log("Multiple features added and saved to database");
+                if (setPendingChanges) {
+                  setPendingChanges(false);
+                }
+              }
+            });
+        } catch (err) {
+          console.error("Failed to save multiple features:", err);
+        }
       }
     }
   };
@@ -93,14 +171,58 @@ export function FeaturesStep({
             features={formData.features || []} // Ensure we always pass an array
             onAdd={() => {
               onAddFeature();
-              if (setPendingChanges) {
-                setPendingChanges(true);
+              
+              // Save the updated features to the database after adding
+              if (formData.id) {
+                // We need to wait a tick for the formData to update
+                setTimeout(() => {
+                  try {
+                    supabase
+                      .from('properties')
+                      .update({ features: JSON.stringify(formData.features) })
+                      .eq('id', formData.id)
+                      .then(({ error }) => {
+                        if (error) {
+                          console.error("Error saving new feature:", error);
+                        } else {
+                          console.log("New feature saved to database");
+                          if (setPendingChanges) {
+                            setPendingChanges(false);
+                          }
+                        }
+                      });
+                  } catch (err) {
+                    console.error("Failed to save new feature:", err);
+                  }
+                }, 0);
               }
             }}
             onRemove={(id) => {
               onRemoveFeature(id);
-              if (setPendingChanges) {
-                setPendingChanges(true);
+              
+              // Save the updated features to the database after removing
+              if (formData.id) {
+                // We need to wait a tick for the formData to update
+                setTimeout(() => {
+                  try {
+                    supabase
+                      .from('properties')
+                      .update({ features: JSON.stringify(formData.features.filter(f => f.id !== id)) })
+                      .eq('id', formData.id)
+                      .then(({ error }) => {
+                        if (error) {
+                          console.error("Error saving feature removal:", error);
+                        } else {
+                          console.log("Feature removal saved to database");
+                          if (setPendingChanges) {
+                            setPendingChanges(false);
+                          }
+                        }
+                      });
+                  } catch (err) {
+                    console.error("Failed to save feature removal:", err);
+                  }
+                }, 0);
               }
             }}
             onUpdate={handleFeatureChange}

@@ -1,12 +1,11 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
 import { GeneralPage } from "./pages/GeneralPage";
 import { LocationPage } from "./pages/LocationPage";
 import { FeaturesPage } from "./pages/FeaturesPage";
 import { AreasPage } from "./pages/AreasPage";
-import { Card, CardContent } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -52,73 +51,7 @@ export function ContentRouter({
   const { id, step: stepSlug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [hasPendingChanges, setHasPendingChanges] = React.useState(false);
-  const [lastFormState, setLastFormState] = React.useState<PropertyFormData | null>(null);
   const [previousStep, setPreviousStep] = React.useState<number | null>(null);
-
-  // Track form changes
-  useEffect(() => {
-    if (lastFormState && JSON.stringify(lastFormState) !== JSON.stringify(formData)) {
-      setHasPendingChanges(true);
-    }
-    
-    // Update the last form state
-    setLastFormState(formData);
-  }, [formData, lastFormState]);
-
-  // Save changes when current step changes (navigating between tabs)
-  useEffect(() => {
-    if (previousStep !== null && previousStep !== currentStep && hasPendingChanges) {
-      saveChanges();
-    }
-    setPreviousStep(currentStep);
-  }, [currentStep]);
-
-  // Save changes when navigating away
-  const saveChanges = async () => {
-    if (!hasPendingChanges || !formData.id) return;
-    
-    try {
-      console.log("Saving property changes...");
-      
-      // Only save relevant fields to avoid overwriting data we don't have
-      const updateData = {
-        title: formData.title,
-        price: formData.price,
-        address: formData.address,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        sqft: formData.sqft,
-        livingArea: formData.livingArea,
-        buildYear: formData.buildYear,
-        garages: formData.garages,
-        energyLabel: formData.energyLabel,
-        hasGarden: formData.hasGarden,
-        description: formData.description,
-        shortDescription: formData.shortDescription,
-        propertyType: formData.propertyType
-      };
-
-      const { error } = await supabase
-        .from('properties')
-        .update(updateData)
-        .eq('id', formData.id);
-      
-      if (error) throw error;
-      
-      setHasPendingChanges(false);
-      
-      // Don't show a success toast to avoid too many notifications
-      console.log("Property saved successfully");
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property changes",
-        variant: "destructive",
-      });
-    }
-  };
 
   // Sync URL with current step if they don't match
   useEffect(() => {
@@ -130,12 +63,8 @@ export function ContentRouter({
     }
   }, [stepSlug, currentStep, id, handlers]);
 
-  // Handle step navigation via URLs
-  const handleStepNavigation = async (step: number) => {
-    // Save changes before navigating
-    await saveChanges();
-    
-    // Call the original handler 
+  // Handle step navigation via URLs without auto-saving
+  const handleStepNavigation = (step: number) => {
     handlers.handleStepClick(step);
     
     // Navigate to the corresponding URL if needed
@@ -145,19 +74,17 @@ export function ContentRouter({
     }
   };
 
-  // Handle form submission
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await saveChanges();
-  };
-
   // Set up a local version of setPendingChanges
   const setPendingChanges = (pending: boolean) => {
-    setHasPendingChanges(pending);
     if (handlers.setPendingChanges) {
       handlers.setPendingChanges(pending);
     }
+  };
+
+  // Field change handler that handles only the changed field
+  const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
+    // Call the original handler
+    handlers.onFieldChange(field, value);
   };
 
   const renderContent = () => {
@@ -166,7 +93,7 @@ export function ContentRouter({
         return (
           <GeneralPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             setPendingChanges={setPendingChanges}
           />
         );
@@ -174,7 +101,7 @@ export function ContentRouter({
         return (
           <LocationPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             onFetchLocationData={handlers.onFetchLocationData}
             onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
             onFetchNearbyCities={handlers.onFetchNearbyCities}
@@ -189,7 +116,7 @@ export function ContentRouter({
         return (
           <FeaturesPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             onAddFeature={handlers.onAddFeature}
             onRemoveFeature={handlers.onRemoveFeature}
             onUpdateFeature={handlers.onUpdateFeature}
@@ -200,7 +127,7 @@ export function ContentRouter({
         return (
           <AreasPage
             formData={formData}
-            onFieldChange={handlers.onFieldChange}
+            onFieldChange={handleFieldChange}
             onAddArea={handlers.onAddArea}
             onRemoveArea={handlers.onRemoveArea}
             onUpdateArea={handlers.onUpdateArea}
@@ -224,13 +151,8 @@ export function ContentRouter({
         propertyId={id}
       />
       
-      {/* Changed from form to div to avoid nested form elements */}
-      <div className="space-y-6" onSubmit={handleFormSubmit}>
-        <Card>
-          <CardContent className="pt-6">
-            {renderContent()}
-          </CardContent>
-        </Card>
+      <div className="mt-6">
+        {renderContent()}
       </div>
     </div>
   );
