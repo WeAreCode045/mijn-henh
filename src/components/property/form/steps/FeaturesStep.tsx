@@ -1,13 +1,12 @@
 
+import { useState, useEffect } from "react";
 import { PropertyFormData, PropertyFeature } from "@/types/property";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
-import { FeatureSelector } from "@/components/property/features/FeatureSelector";
-import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GlobalFeaturesSelector } from "@/components/property/features/GlobalFeaturesSelector";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface FeaturesStepProps {
   formData: PropertyFormData;
@@ -28,7 +27,6 @@ export function FeaturesStep({
 }: FeaturesStepProps) {
   console.log("FeaturesStep rendering with features:", formData.features);
   
-  const { availableFeatures, isLoading, addFeature, addMultipleFeatures } = useAvailableFeatures();
   const [globalFeatures, setGlobalFeatures] = useState<PropertyFeature[]>([]);
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
   
@@ -148,40 +146,6 @@ export function FeaturesStep({
     }
   };
   
-  const handleAddMultipleFeatures = (newFeatures: PropertyFeature[]) => {
-    // Add multiple features at once
-    if (onFieldChange) {
-      // First, add the new features to the available features list
-      addMultipleFeatures(newFeatures);
-      
-      // Then add them to the property
-      const updatedFeatures = [...formData.features, ...newFeatures];
-      onFieldChange('features', updatedFeatures);
-      
-      // Save the features field to the database
-      if (formData.id) {
-        try {
-          supabase
-            .from('properties')
-            .update({ features: JSON.stringify(updatedFeatures) })
-            .eq('id', formData.id)
-            .then(({ error }) => {
-              if (error) {
-                console.error("Error saving multiple features:", error);
-              } else {
-                console.log("Multiple features added and saved to database");
-                if (setPendingChanges) {
-                  setPendingChanges(false);
-                }
-              }
-            });
-        } catch (err) {
-          console.error("Failed to save multiple features:", err);
-        }
-      }
-    }
-  };
-  
   const handleGlobalFeatureSelect = (feature: PropertyFeature) => {
     // Add selected global feature to property features
     handleAddFeature(feature);
@@ -194,109 +158,98 @@ export function FeaturesStep({
         Add all the distinctive features that make this property stand out.
       </p>
       
-      <Tabs defaultValue="global">
-        <TabsList className="mb-4">
-          <TabsTrigger value="global">Global Features</TabsTrigger>
-          <TabsTrigger value="list">Custom Features</TabsTrigger>
-          <TabsTrigger value="select">Select Features</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Global Features Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Global Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingGlobal ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Loading global features...</span>
+              </div>
+            ) : (
+              <GlobalFeaturesSelector
+                globalFeatures={globalFeatures}
+                propertyFeatures={formData.features}
+                onSelect={handleGlobalFeatureSelect}
+                onDeselect={handleRemoveSelectedFeature}
+              />
+            )}
+          </CardContent>
+        </Card>
         
-        <TabsContent value="global">
-          {isLoadingGlobal ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">Loading global features...</span>
-            </div>
-          ) : (
-            <GlobalFeaturesSelector
-              globalFeatures={globalFeatures}
-              propertyFeatures={formData.features}
-              onSelect={handleGlobalFeatureSelect}
-              onDeselect={handleRemoveSelectedFeature}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="list">
-          <PropertyFeatures
-            features={formData.features || []} // Ensure we always pass an array
-            onAdd={() => {
-              onAddFeature();
-              
-              // Save the updated features to the database after adding
-              if (formData.id) {
-                // We need to wait a tick for the formData to update
-                setTimeout(() => {
-                  try {
-                    supabase
-                      .from('properties')
-                      .update({ features: JSON.stringify(formData.features) })
-                      .eq('id', formData.id)
-                      .then(({ error }) => {
-                        if (error) {
-                          console.error("Error saving new feature:", error);
-                        } else {
-                          console.log("New feature saved to database");
-                          if (setPendingChanges) {
-                            setPendingChanges(false);
+        {/* Custom Features Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Add Custom Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PropertyFeatures
+              features={formData.features || []} // Ensure we always pass an array
+              onAdd={() => {
+                onAddFeature();
+                
+                // Save the updated features to the database after adding
+                if (formData.id) {
+                  // We need to wait a tick for the formData to update
+                  setTimeout(() => {
+                    try {
+                      supabase
+                        .from('properties')
+                        .update({ features: JSON.stringify(formData.features) })
+                        .eq('id', formData.id)
+                        .then(({ error }) => {
+                          if (error) {
+                            console.error("Error saving new feature:", error);
+                          } else {
+                            console.log("New feature saved to database");
+                            if (setPendingChanges) {
+                              setPendingChanges(false);
+                            }
                           }
-                        }
-                      });
-                  } catch (err) {
-                    console.error("Failed to save new feature:", err);
-                  }
-                }, 0);
-              }
-            }}
-            onRemove={(id) => {
-              onRemoveFeature(id);
-              
-              // Save the updated features to the database after removing
-              if (formData.id) {
-                // We need to wait a tick for the formData to update
-                setTimeout(() => {
-                  try {
-                    supabase
-                      .from('properties')
-                      .update({ features: JSON.stringify(formData.features.filter(f => f.id !== id)) })
-                      .eq('id', formData.id)
-                      .then(({ error }) => {
-                        if (error) {
-                          console.error("Error saving feature removal:", error);
-                        } else {
-                          console.log("Feature removal saved to database");
-                          if (setPendingChanges) {
-                            setPendingChanges(false);
+                        });
+                    } catch (err) {
+                      console.error("Failed to save new feature:", err);
+                    }
+                  }, 0);
+                }
+              }}
+              onRemove={(id) => {
+                onRemoveFeature(id);
+                
+                // Save the updated features to the database after removing
+                if (formData.id) {
+                  // We need to wait a tick for the formData to update
+                  setTimeout(() => {
+                    try {
+                      supabase
+                        .from('properties')
+                        .update({ features: JSON.stringify(formData.features.filter(f => f.id !== id)) })
+                        .eq('id', formData.id)
+                        .then(({ error }) => {
+                          if (error) {
+                            console.error("Error saving feature removal:", error);
+                          } else {
+                            console.log("Feature removal saved to database");
+                            if (setPendingChanges) {
+                              setPendingChanges(false);
+                            }
                           }
-                        }
-                      });
-                  } catch (err) {
-                    console.error("Failed to save feature removal:", err);
-                  }
-                }, 0);
-              }
-            }}
-            onUpdate={handleFeatureChange}
-          />
-        </TabsContent>
-        
-        <TabsContent value="select">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">Loading features...</span>
-            </div>
-          ) : (
-            <FeatureSelector
-              availableFeatures={availableFeatures}
-              selectedFeatures={formData.features || []}
-              onAddFeature={handleAddFeature}
-              onRemoveFeature={handleRemoveSelectedFeature}
-              onAddMultipleFeatures={handleAddMultipleFeatures}
+                        });
+                    } catch (err) {
+                      console.error("Failed to save feature removal:", err);
+                    }
+                  }, 0);
+                }
+              }}
+              onUpdate={handleFeatureChange}
             />
-          )}
-        </TabsContent>
-      </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
