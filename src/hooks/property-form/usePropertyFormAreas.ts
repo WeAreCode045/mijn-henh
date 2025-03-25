@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/property-autosave";
@@ -298,7 +297,7 @@ export function usePropertyFormAreas(
         variant: "destructive",
       });
     }
-  }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
+  }, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, toast]);
   
   const handleReorderAreaImages = useCallback(async (areaId: string, reorderedImageIds: string[]) => {
     if (!formState.areas || !formState.id) {
@@ -386,7 +385,7 @@ export function usePropertyFormAreas(
     }
   }, [formState.areas, formState.id, handleFieldChange, setPendingChanges, toast]);
   
-  const handleAreaImageUpload = useCallback(async (areaId: string, files: FileList) => {
+  const handleAreaPhotosUpload = useCallback(async (areaId: string, files: FileList) => {
     if (!formState.areas) return;
     
     setIsUploading(true);
@@ -403,10 +402,6 @@ export function usePropertyFormAreas(
       setIsUploading(false);
     }
   }, [setPendingChanges]);
-  
-  const handleAreaPhotosUpload = useCallback(async (areaId: string, files: FileList) => {
-    await handleAreaImageUpload(areaId, files);
-  }, [handleAreaImageUpload]);
   
   const handleRemoveAreaPhoto = useCallback((areaId: string, photoId: string) => {
     handleAreaImageRemove(areaId, photoId);

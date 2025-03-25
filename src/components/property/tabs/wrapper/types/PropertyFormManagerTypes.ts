@@ -1,6 +1,7 @@
 
 import { PropertyData } from "@/types/property";
 import { PropertyFormData } from "@/types/property";
+import React from "react";
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
