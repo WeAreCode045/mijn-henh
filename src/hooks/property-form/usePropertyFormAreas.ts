@@ -1,5 +1,6 @@
+
 import { useState, useCallback } from "react";
-import { PropertyFormData, PropertyArea } from "@/types/property";
+import { PropertyFormData, PropertyArea, PropertyImage, AreaImage } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/property-autosave";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +25,8 @@ export function usePropertyFormAreas(
       images: [],
       imageIds: [],
       columns: 2,
-      size: ""
+      size: "",
+      areaImages: [] // New field for the updated format
     };
     
     const updatedAreas = [...areas, newArea];
@@ -127,18 +129,30 @@ export function usePropertyFormAreas(
     console.log(`Removing image ${imageId} from area ${areaId}`);
     
     const updatedAreas = formState.areas.map(area => {
-      if (area.id === areaId && area.images) {
-        const updatedImageIds = area.imageIds ? area.imageIds.filter(id => id !== imageId) : [];
+      if (area.id === areaId) {
+        // Update using the new format
+        const updatedAreaImages = area.areaImages
+          ? area.areaImages.filter(img => img.ImageID !== imageId)
+          : [];
+          
+        // For backward compatibility
+        const updatedImageIds = area.imageIds 
+          ? area.imageIds.filter(id => id !== imageId) 
+          : [];
+          
+        const updatedImages = area.images
+          ? area.images.filter(image => {
+              if (typeof image === 'string') return image !== imageId;
+              if (typeof image === 'object' && 'id' in image) return image.id !== imageId;
+              return true;
+            })
+          : [];
         
         return {
           ...area,
-          images: area.images.filter(image => {
-            if (typeof image === 'string') {
-              return image !== imageId;
-            }
-            return image.id !== imageId;
-          }),
-          imageIds: updatedImageIds
+          areaImages: updatedAreaImages,
+          imageIds: updatedImageIds,
+          images: updatedImages
         };
       }
       return area;
@@ -188,16 +202,34 @@ export function usePropertyFormAreas(
         return;
       }
       
-      const selectedImages = formState.images
-        ? formState.images.filter(img => {
-            if (typeof img === 'string') {
-              return imageIds.includes(img);
-            } else if (typeof img === 'object' && 'id' in img) {
-              return imageIds.includes(img.id);
+      // Create area images with the new format with proper sort order
+      const areaImages: AreaImage[] = imageIds.map((id, index) => ({
+        ImageID: id,
+        imageSortOrder: index + 1
+      }));
+      
+      // Convert image strings to PropertyImage objects for backward compatibility
+      const selectedImages: PropertyImage[] = [];
+      
+      if (formState.images) {
+        // Find all images matching the provided ids
+        for (const imageId of imageIds) {
+          // Find the image in the formState.images
+          const matchingImage = formState.images.find(img => {
+            if (typeof img === 'string') return img === imageId;
+            return img.id === imageId;
+          });
+          
+          if (matchingImage) {
+            // Convert string to PropertyImage object if needed
+            if (typeof matchingImage === 'string') {
+              selectedImages.push({ id: matchingImage, url: matchingImage });
+            } else {
+              selectedImages.push(matchingImage as PropertyImage);
             }
-            return false;
-          })
-        : [];
+          }
+        }
+      }
       
       console.log(`Found ${selectedImages.length} selected images:`, selectedImages);
       
@@ -205,8 +237,9 @@ export function usePropertyFormAreas(
         if (area.id === areaId) {
           return {
             ...area,
-            images: selectedImages,
-            imageIds: imageIds
+            areaImages: areaImages, // New format
+            images: selectedImages, // For backward compatibility
+            imageIds: imageIds // For backward compatibility
           };
         }
         return area;
@@ -221,6 +254,7 @@ export function usePropertyFormAreas(
         description: area.description || '',
         name: area.name || '',
         size: area.size || '',
+        areaImages: area.areaImages || [],
         imageIds: area.imageIds || [],
         columns: area.columns || 2
       }));
@@ -416,8 +450,7 @@ export function usePropertyFormAreas(
     handleAreaImageUpload,
     handleReorderAreaImages,
     isUploading,
-    handleAreaPhotosUpload,
-    handleRemoveAreaPhoto
+    handleAreaPhotosUpload: handleAreaImageUpload,
+    handleRemoveAreaPhoto: handleAreaImageRemove
   };
-}
-
+}, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);

@@ -65,6 +65,13 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
   } = imagesData;
   
   // Property form areas
+  const areasData = usePropertyFormAreas(
+    formState, 
+    handleFieldChange, 
+    setPendingChanges
+  );
+  
+  // Extract area-related functions
   const { 
     addArea, 
     removeArea, 
@@ -74,11 +81,7 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     handleAreaImageUpload,
     handleAreaPhotosUpload, 
     handleRemoveAreaPhoto
-  } = usePropertyFormAreas(
-    formState, 
-    handleFieldChange, 
-    setPendingChanges
-  );
+  } = areasData;
   
   // Property form steps
   const { 

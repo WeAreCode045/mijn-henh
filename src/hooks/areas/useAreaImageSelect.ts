@@ -1,7 +1,7 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyImage } from '@/types/property';
+import type { PropertyFormData, AreaImage } from '@/types/property';
 
 export function useAreaImageSelect(
   formData: PropertyFormData,
@@ -9,33 +9,51 @@ export function useAreaImageSelect(
 ) {
   const { toast } = useToast();
 
+  // Handle the selection of images for an area
   const handleAreaImagesSelect = async (areaId: string, imageIds: string[]) => {
     console.log(`Selecting images for area ${areaId}:`, imageIds);
     
     try {
-      // Get the selected images objects
-      const selectedImages = formData.images.filter(img => imageIds.includes(img.id));
-      console.log(`Found ${selectedImages.length} images to assign to area ${areaId}`, selectedImages);
+      // Find the area to update
+      const areaToUpdate = formData.areas.find(area => area.id === areaId);
       
-      // First update the area's images in the local state
+      if (!areaToUpdate) {
+        console.error(`Area with ID ${areaId} not found`);
+        throw new Error(`Area with ID ${areaId} not found`);
+      }
+      
+      // Convert selected imageIds to the new areaImages format with sort order
+      const areaImages: AreaImage[] = imageIds.map((id, index) => ({
+        ImageID: id,
+        imageSortOrder: index + 1
+      }));
+      
+      // Update the areas with the selected images
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
-          console.log(`Updating area ${areaId} with ${selectedImages.length} selected images`);
           return {
             ...area,
-            images: selectedImages,
-            imageIds: imageIds
+            areaImages: areaImages,
+            // For backward compatibility, also update legacy fields
+            imageIds: imageIds,
+            images: formData.images
+              ? formData.images.filter(img => {
+                  if (typeof img === 'string') return imageIds.includes(img);
+                  if (typeof img === 'object' && 'id' in img) return imageIds.includes(img.id);
+                  return false;
+                })
+              : []
           };
         }
         return area;
       });
       
-      // Update the form data with the modified areas
+      // Update the form data with the selected images
       setFormData(prevData => ({
         ...prevData,
         areas: updatedAreas
       }));
-
+      
       // If we have a property ID, update the property_images table
       if (formData.id) {
         console.log(`Updating area assignments for images in property_images table`);
@@ -52,7 +70,7 @@ export function useAreaImageSelect(
           throw clearError;
         }
         
-        // Now set the area for each selected image with default sort order
+        // Then, assign the selected images to this area with proper sort order
         for (let i = 0; i < imageIds.length; i++) {
           const { error } = await supabase
             .from('property_images')
@@ -64,7 +82,7 @@ export function useAreaImageSelect(
             .eq('property_id', formData.id);
             
           if (error) {
-            console.error(`Error updating area for image ${imageIds[i]}:`, error);
+            console.error(`Error updating property_image ${imageIds[i]}:`, error);
             throw error;
           }
         }
@@ -72,14 +90,14 @@ export function useAreaImageSelect(
       
       toast({
         title: "Success",
-        description: `Area images updated (${selectedImages.length} images)`,
+        description: `${imageIds.length} images assigned to area`,
       });
       
     } catch (error) {
-      console.error('Error selecting images for area:', error);
+      console.error('Error assigning images to area:', error);
       toast({
         title: "Error",
-        description: "Failed to update area images",
+        description: "Failed to assign images to area",
         variant: "destructive",
       });
     }

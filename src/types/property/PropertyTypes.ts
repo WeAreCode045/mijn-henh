@@ -8,15 +8,23 @@ export interface PropertyFeature {
   description: string;
 }
 
+export interface AreaImage {
+  ImageID: string;
+  imageSortOrder: number;
+}
+
 export interface PropertyArea {
   id: string;
   title: string;
   description: string;
-  imageIds: string[]; // Explicitly defined property
-  columns: number;
   name: string;
   size: string;
-  images: string[];
+  columns: number;
+  // New structure for area images
+  areaImages: AreaImage[];
+  // Legacy fields maintained for backward compatibility
+  imageIds?: string[];
+  images?: string[] | any[];
 }
 
 // Explicitly export Area as an alias to PropertyArea

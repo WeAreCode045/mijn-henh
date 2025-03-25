@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import type { PropertyArea, PropertyFormData } from '@/types/property';
@@ -19,8 +18,11 @@ export function useAreaManagement(
       columns: 2, // Default to 2 columns
       name: '',
       size: '',
+      // Initialize with empty areaImages array
+      areaImages: [],
+      // Keep legacy fields for backward compatibility
       images: [],
-      imageIds: [] // Added this missing property
+      imageIds: []
     };
     
     console.log("Adding new area with default columns:", newArea);
@@ -42,7 +44,7 @@ export function useAreaManagement(
   };
 
   // Update a specific field of an area
-  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number) => {
+  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number | any[]) => {
     console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
     
     setFormData(prevData => {

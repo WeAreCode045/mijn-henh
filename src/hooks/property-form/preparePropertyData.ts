@@ -1,5 +1,5 @@
 
-import type { PropertyArea } from "@/types/property";
+import type { PropertyArea, AreaImage } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 
 /**
@@ -22,7 +22,13 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     const columns = (area as any).columns || 2; // Default to 2 columns if not specified
     const name = (area as any).name || '';
     const size = (area as any).size || '';
+    
+    // Handle the new areaImages format
+    const areaImages = (area as any).areaImages || [];
+    
+    // Handle legacy fields for backward compatibility
     const images = (area as any).images || [];
+    const imageIds = (area as any).imageIds || [];
     
     return {
       id,
@@ -31,7 +37,9 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
       columns,
       name,
       size,
-      images
+      areaImages,
+      images,
+      imageIds
     };
   });
 }
