@@ -84,15 +84,24 @@ export function AreasPage({
             onAreaImageRemove={onAreaImageRemove && ((areaId, imageId) => {
               console.log(`Removing image ${imageId} from area ${areaId}`);
               onAreaImageRemove(areaId, imageId);
+              if (setPendingChanges) {
+                setPendingChanges(true);
+              }
             })}
             onAreaImageUpload={onAreaImageUpload}
             onAreaImagesSelect={onAreaImagesSelect && ((areaId, imageIds) => {
               console.log(`Selecting images for area ${areaId}:`, imageIds);
               onAreaImagesSelect(areaId, imageIds);
+              if (setPendingChanges) {
+                setPendingChanges(true);
+              }
             })}
             onReorderAreaImages={onReorderAreaImages && ((areaId, reorderedImageIds) => {
               console.log(`Reordering images for area ${areaId}:`, reorderedImageIds);
               onReorderAreaImages(areaId, reorderedImageIds);
+              if (setPendingChanges) {
+                setPendingChanges(true);
+              }
             })}
             propertyImages={formData.images as PropertyImage[]}
             isUploading={isUploading}

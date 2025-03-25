@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import { PropertyFormData } from "@/types/property";
 import { ContentTabNavigation } from "./ContentTabNavigation";
@@ -37,6 +36,7 @@ interface ContentRouterProps {
     isUploading?: boolean;
     onSubmit: () => void;
     isSaving: boolean; // This is required
+    onReorderAreaImages?: (areaId: string, reorderedImageIds: string[]) => void;
   };
 }
 
@@ -133,6 +133,8 @@ export function ContentRouter({
             onUpdateArea={handlers.onUpdateArea}
             onAreaImageRemove={handlers.onAreaImageRemove}
             onAreaImageUpload={handlers.onAreaImageUpload}
+            onAreaImagesSelect={handlers.onAreaImagesSelect}
+            onReorderAreaImages={handlers.onReorderAreaImages}
             isUploading={handlers.isUploading}
             setPendingChanges={setPendingChanges}
           />
