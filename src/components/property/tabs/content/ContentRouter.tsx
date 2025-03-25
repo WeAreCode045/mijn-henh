@@ -6,7 +6,6 @@ import { GeneralPage } from "./pages/GeneralPage";
 import { LocationPage } from "./pages/LocationPage";
 import { FeaturesPage } from "./pages/FeaturesPage";
 import { AreasPage } from "./pages/AreasPage";
-import { Card, CardContent } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -52,95 +51,7 @@ export function ContentRouter({
   const { id, step: stepSlug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [hasPendingChanges, setHasPendingChanges] = React.useState(false);
-  const [lastFormState, setLastFormState] = React.useState<PropertyFormData | null>(null);
   const [previousStep, setPreviousStep] = React.useState<number | null>(null);
-  const changedFieldsRef = useRef<Record<string, any>>({});
-  const [shouldShowToast, setShouldShowToast] = React.useState(false);
-
-  // Track form changes
-  useEffect(() => {
-    if (lastFormState) {
-      // Compare current form data with last form state to detect changes
-      const changedFields: Record<string, any> = {};
-      
-      // Only check simple top-level fields (not arrays or objects)
-      Object.keys(formData).forEach(key => {
-        const fieldKey = key as keyof PropertyFormData;
-        const currentValue = formData[fieldKey];
-        const previousValue = lastFormState[fieldKey];
-        
-        // Skip complex fields that would trigger unnecessary saves
-        if (
-          typeof currentValue !== 'object' && 
-          currentValue !== previousValue
-        ) {
-          changedFields[key] = currentValue;
-        }
-      });
-      
-      // If we have changed fields, store them and set pending changes flag
-      if (Object.keys(changedFields).length > 0) {
-        changedFieldsRef.current = {
-          ...changedFieldsRef.current,
-          ...changedFields
-        };
-        setHasPendingChanges(true);
-      }
-    }
-    
-    // Update the last form state
-    setLastFormState(formData);
-  }, [formData, lastFormState]);
-
-  // Save changes when current step changes (navigating between tabs)
-  useEffect(() => {
-    if (previousStep !== null && previousStep !== currentStep && hasPendingChanges) {
-      saveChanges();
-    }
-    setPreviousStep(currentStep);
-  }, [currentStep]);
-
-  // Save changes when navigating away
-  const saveChanges = async () => {
-    if (!hasPendingChanges || !formData.id || Object.keys(changedFieldsRef.current).length === 0) return;
-    
-    try {
-      console.log("Saving only changed property fields:", changedFieldsRef.current);
-      
-      // Only save the fields that were actually changed
-      const updateData = changedFieldsRef.current;
-
-      const { error } = await supabase
-        .from('properties')
-        .update(updateData)
-        .eq('id', formData.id);
-      
-      if (error) throw error;
-      
-      // Reset after successful save
-      setHasPendingChanges(false);
-      changedFieldsRef.current = {};
-      
-      // Show a success toast but only once per navigation
-      if (shouldShowToast) {
-        toast({
-          title: "Success",
-          description: "Changes saved successfully",
-        });
-        setShouldShowToast(false);
-      }
-      
-      console.log("Property changes saved successfully");
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property changes",
-        variant: "destructive",
-      });
-    }
-  };
 
   // Sync URL with current step if they don't match
   useEffect(() => {
@@ -152,15 +63,8 @@ export function ContentRouter({
     }
   }, [stepSlug, currentStep, id, handlers]);
 
-  // Handle step navigation via URLs
-  const handleStepNavigation = async (step: number) => {
-    // Set flag to show toast if there are changes to save
-    setShouldShowToast(hasPendingChanges);
-    
-    // Save changes before navigating
-    await saveChanges();
-    
-    // Call the original handler 
+  // Handle step navigation via URLs without auto-saving
+  const handleStepNavigation = (step: number) => {
     handlers.handleStepClick(step);
     
     // Navigate to the corresponding URL if needed
@@ -170,29 +74,17 @@ export function ContentRouter({
     }
   };
 
-  // Handle form submission
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await saveChanges();
-  };
-
   // Set up a local version of setPendingChanges
   const setPendingChanges = (pending: boolean) => {
-    setHasPendingChanges(pending);
     if (handlers.setPendingChanges) {
       handlers.setPendingChanges(pending);
     }
   };
 
-  // Field change handler that tracks which fields were modified
+  // Field change handler that handles only the changed field
   const handleFieldChange = (field: keyof PropertyFormData, value: any) => {
     // Call the original handler
     handlers.onFieldChange(field, value);
-    
-    // Store the changed field
-    changedFieldsRef.current[field] = value;
-    setHasPendingChanges(true);
   };
 
   const renderContent = () => {

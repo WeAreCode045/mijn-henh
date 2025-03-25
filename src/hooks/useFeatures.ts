@@ -6,8 +6,6 @@ export function useFeatures(
   formData: PropertyFormData,
   setFormData: (data: PropertyFormData) => void
 ) {
-  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
-
   const addFeature = useCallback(() => {
     setFormData({
       ...formData,
@@ -16,12 +14,6 @@ export function useFeatures(
   }, [formData, setFormData]);
 
   const removeFeature = useCallback((id: string) => {
-    // Cancel any pending debounce for this feature
-    if (debounceTimers.current[id]) {
-      clearTimeout(debounceTimers.current[id]);
-      delete debounceTimers.current[id];
-    }
-    
     setFormData({
       ...formData,
       features: formData.features.filter((feature) => feature.id !== id),
