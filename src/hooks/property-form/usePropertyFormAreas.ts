@@ -1,5 +1,6 @@
+
 import { useState, useCallback } from "react";
-import { PropertyFormData, PropertyArea } from "@/types/property";
+import { PropertyFormData, PropertyArea, PropertyImage } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/property-autosave";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -188,15 +189,24 @@ export function usePropertyFormAreas(
         return;
       }
       
-      const selectedImages = formState.images
-        ? formState.images.filter(img => {
-            if (typeof img === 'string') {
-              return imageIds.includes(img);
-            } else if (typeof img === 'object' && 'id' in img) {
-              return imageIds.includes(img.id);
-            }
-            return false;
-          })
+      // Fix for type error: Explicitly convert to PropertyImage[] by ensuring all elements are objects
+      const selectedImages: PropertyImage[] = formState.images
+        ? formState.images
+            .filter(img => {
+              if (typeof img === 'string') {
+                return imageIds.includes(img);
+              } else if (typeof img === 'object' && 'id' in img) {
+                return imageIds.includes(img.id);
+              }
+              return false;
+            })
+            .map(img => {
+              // Ensure each item is a PropertyImage object
+              if (typeof img === 'string') {
+                return { id: img, url: img };
+              }
+              return img as PropertyImage;
+            })
         : [];
       
       console.log(`Found ${selectedImages.length} selected images:`, selectedImages);
@@ -408,7 +418,6 @@ export function usePropertyFormAreas(
     updateArea,
     handleAreaImageRemove,
     handleAreaImagesSelect,
-    handleAreaImageUpload,
     handleReorderAreaImages,
     isUploading,
     handleAreaPhotosUpload,
