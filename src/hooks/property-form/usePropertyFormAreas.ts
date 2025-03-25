@@ -1,4 +1,6 @@
+
 import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 import type { PropertyFormData, PropertyArea, PropertyImage, AreaImage } from '@/types/property';
 
 interface UsePropertyFormAreasProps {
@@ -12,8 +14,13 @@ export function usePropertyFormAreas({
   handleFieldChange,
   setPendingChanges,
 }: UsePropertyFormAreasProps) {
-  const setFormData = (newState: PropertyFormData) => {
-    handleFieldChange('areas', newState.areas);
+  const setFormData = (updater: ((prevState: PropertyFormData) => PropertyFormData) | PropertyFormData) => {
+    if (typeof updater === 'function') {
+      const newState = updater(formState);
+      handleFieldChange('areas', newState.areas);
+    } else {
+      handleFieldChange('areas', updater.areas);
+    }
   };
 
   // Update the addArea function to include areaImages
@@ -30,7 +37,7 @@ export function usePropertyFormAreas({
       areaImages: []
     };
     
-    setFormData(prevState => ({
+    setFormData((prevState: PropertyFormData): PropertyFormData => ({
       ...prevState,
       areas: [...(prevState.areas || []), newArea]
     }));
@@ -39,7 +46,7 @@ export function usePropertyFormAreas({
   };
 
   const removeArea = (id: string) => {
-    setFormData(prevState => ({
+    setFormData((prevState: PropertyFormData): PropertyFormData => ({
       ...prevState,
       areas: prevState.areas.filter(area => area.id !== id)
     }));
@@ -47,7 +54,7 @@ export function usePropertyFormAreas({
   };
 
   const updateArea = (id: string, field: keyof PropertyArea, value: any) => {
-    setFormData(prevState => {
+    setFormData((prevState: PropertyFormData): PropertyFormData => {
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === id) {
           return { ...area, [field]: value };
@@ -63,7 +70,7 @@ export function usePropertyFormAreas({
   };
 
   const handleAreaImageRemove = (areaId: string, imageId: string) => {
-    setFormData(prevState => {
+    setFormData((prevState: PropertyFormData): PropertyFormData => {
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === areaId) {
           const updatedAreaImages = area.areaImages
@@ -100,7 +107,7 @@ export function usePropertyFormAreas({
   };
 
   const handleAreaImagesSelect = (areaId: string, imageIds: string[]) => {
-    setFormData(prevState => {
+    setFormData((prevState: PropertyFormData): PropertyFormData => {
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === areaId) {
           const areaImages: AreaImage[] = imageIds.map((id, index) => ({
@@ -165,7 +172,7 @@ export function usePropertyFormAreas({
 
       const uploadedImages = await Promise.all(uploadPromises);
 
-      setFormData(prevState => {
+      setFormData((prevState: PropertyFormData): PropertyFormData => {
         const updatedAreas = prevState.areas.map(area => {
           if (area.id === areaId) {
             const updatedAreaImages = area.areaImages ? [...area.areaImages] : [];
@@ -232,7 +239,7 @@ export function usePropertyFormAreas({
 
       const uploadedImages = await Promise.all(uploadPromises);
 
-      setFormData(prevState => ({
+      setFormData((prevState: PropertyFormData): PropertyFormData => ({
         ...prevState,
         areaPhotos: [...(prevState.areaPhotos || []), ...uploadedImages]
       }));
@@ -245,7 +252,7 @@ export function usePropertyFormAreas({
   };
 
   const handleRemoveAreaPhoto = (imageId: string) => {
-    setFormData(prevState => ({
+    setFormData((prevState: PropertyFormData): PropertyFormData => ({
       ...prevState,
       areaPhotos: prevState.areaPhotos.filter(image => image.id !== imageId)
     }));

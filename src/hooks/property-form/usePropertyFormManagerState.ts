@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from "react";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { usePropertyFormState } from "@/hooks/property-form/usePropertyFormState";
@@ -65,11 +64,11 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
   } = imagesData;
   
   // Property form areas
-  const areasData = usePropertyFormAreas(
+  const areasData = usePropertyFormAreas({
     formState, 
     handleFieldChange, 
     setPendingChanges
-  );
+  });
   
   // Extract area-related functions
   const { 
@@ -154,7 +153,6 @@ export function usePropertyFormManagerState(property: PropertyData, isArchived: 
     isGeneratingMap,
     onFetchCategoryPlaces,
     onFetchNearbyCities,
-    // Include the images property in the returned object
     images
   };
 }
