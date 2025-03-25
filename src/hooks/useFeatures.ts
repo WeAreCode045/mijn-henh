@@ -20,7 +20,7 @@ export function useFeatures(
     if (formData.id) {
       supabase
         .from('properties')
-        .update({ features: updatedFeatures })
+        .update({ features: JSON.stringify(updatedFeatures) }) // Convert to JSON string
         .eq('id', formData.id)
         .then(({ error }) => {
           if (error) {
@@ -44,7 +44,7 @@ export function useFeatures(
     if (formData.id) {
       supabase
         .from('properties')
-        .update({ features: updatedFeatures })
+        .update({ features: JSON.stringify(updatedFeatures) }) // Convert to JSON string
         .eq('id', formData.id)
         .then(({ error }) => {
           if (error) {
@@ -70,7 +70,7 @@ export function useFeatures(
     if (formData.id) {
       supabase
         .from('properties')
-        .update({ features: updatedFeatures })
+        .update({ features: JSON.stringify(updatedFeatures) }) // Convert to JSON string
         .eq('id', formData.id)
         .then(({ error }) => {
           if (error) {
