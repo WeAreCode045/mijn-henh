@@ -77,7 +77,7 @@ export function usePropertyFormAreas({
             ? area.areaImages.filter((img: AreaImage) => img.ImageID !== imageId)
             : [];
 
-          const updatedImages = area.images
+          const updatedImages = Array.isArray(area.images)
             ? area.images.filter(img => {
                 if (typeof img === 'string') return img !== imageId;
                 if (typeof img === 'object' && 'id' in img) return img.id !== imageId;
@@ -119,7 +119,7 @@ export function usePropertyFormAreas({
             ...area,
             areaImages: areaImages,
             imageIds: imageIds,
-            images: prevState.images
+            images: Array.isArray(prevState.images)
               ? prevState.images.filter(img => {
                   if (typeof img === 'string') return imageIds.includes(img);
                   if (typeof img === 'object' && 'id' in img) return imageIds.includes(img.id);
@@ -156,7 +156,12 @@ export function usePropertyFormAreas({
           throw uploadError;
         }
 
-        const imageUrl = `${supabase.storageUrl}/property_images/${filePath}`;
+        // Get the full URL using getPublicUrl
+        const { data: publicUrlData } = supabase.storage
+          .from('property_images')
+          .getPublicUrl(filePath);
+
+        const imageUrl = publicUrlData.publicUrl;
 
         // Create a new PropertyImage object
         const newImage: PropertyImage = {
@@ -187,8 +192,8 @@ export function usePropertyFormAreas({
             return {
               ...area,
               areaImages: updatedAreaImages,
-              imageIds: [...area.imageIds, ...uploadedImages.map(img => img.id)],
-              images: [...area.images, ...uploadedImages]
+              imageIds: [...(area.imageIds || []), ...uploadedImages.map(img => img.id)],
+              images: [...(area.images || []), ...uploadedImages] as PropertyImage[]
             };
           }
           return area;
@@ -197,7 +202,7 @@ export function usePropertyFormAreas({
         return {
           ...prevState,
           areas: updatedAreas,
-          images: [...prevState.images, ...uploadedImages]
+          images: [...(prevState.images || []), ...uploadedImages] as PropertyImage[]
         };
       });
       setPendingChanges(true);
@@ -224,7 +229,12 @@ export function usePropertyFormAreas({
           throw uploadError;
         }
 
-        const imageUrl = `${supabase.storageUrl}/property_images/${filePath}`;
+        // Get the full URL using getPublicUrl
+        const { data: publicUrlData } = supabase.storage
+          .from('property_images')
+          .getPublicUrl(filePath);
+
+        const imageUrl = publicUrlData.publicUrl;
 
         // Create a new PropertyImage object
         const newImage: PropertyImage = {
@@ -241,7 +251,7 @@ export function usePropertyFormAreas({
 
       setFormData((prevState: PropertyFormData): PropertyFormData => ({
         ...prevState,
-        areaPhotos: [...(prevState.areaPhotos || []), ...uploadedImages]
+        areaPhotos: [...(prevState.areaPhotos || []), ...uploadedImages] as PropertyImage[]
       }));
       setPendingChanges(true);
     } catch (error) {
@@ -254,7 +264,7 @@ export function usePropertyFormAreas({
   const handleRemoveAreaPhoto = (imageId: string) => {
     setFormData((prevState: PropertyFormData): PropertyFormData => ({
       ...prevState,
-      areaPhotos: prevState.areaPhotos.filter(image => image.id !== imageId)
+      areaPhotos: prevState.areaPhotos.filter((image: PropertyImage) => image.id !== imageId) as PropertyImage[]
     }));
     setPendingChanges(true);
   };

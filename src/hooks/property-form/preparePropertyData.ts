@@ -1,4 +1,4 @@
-import type { PropertyArea, AreaImage } from "@/types/property";
+import { PropertyFormData, AreaImage, PropertyArea, PropertyNearbyPlace, PropertyFeature } from '@/types/property';
 import { Json } from "@/integrations/supabase/types";
 
 /**
