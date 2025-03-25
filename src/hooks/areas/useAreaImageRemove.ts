@@ -15,7 +15,7 @@ export function useAreaImageRemove(
     
     try {
       // Find the area to update
-      const areaToUpdate = formData.areas.find(area => area.id === areaId);
+      const areaToUpdate = formData.areas?.find(area => area.id === areaId);
       
       if (!areaToUpdate) {
         console.error(`Area with ID ${areaId} not found`);
@@ -23,9 +23,18 @@ export function useAreaImageRemove(
       }
       
       // First update the area's images in the local state
-      const updatedAreas = formData.areas.map(area => {
+      const updatedAreas = formData.areas?.map(area => {
         if (area.id === areaId) {
-          const updatedImages = area.images.filter(img => img.id !== imageId);
+          // Filter out the removed image but preserve other images
+          const updatedImages = Array.isArray(area.images) 
+            ? area.images.filter(img => {
+                if (typeof img === 'string') {
+                  return img !== imageId;
+                }
+                return img.id !== imageId;
+              })
+            : [];
+            
           console.log(`Updating area ${areaId} images after removal:`, updatedImages);
           return {
             ...area,
@@ -33,7 +42,7 @@ export function useAreaImageRemove(
           };
         }
         return area;
-      });
+      }) || [];
       
       // Update the form data with the modified areas
       setFormData(prevData => ({
@@ -46,6 +55,7 @@ export function useAreaImageRemove(
         console.log(`Removing area assignment for image ${imageId} in property_images table`);
         
         // Update the property_images record to set area to null
+        // IMPORTANT: We're only updating the area field, not deleting the image
         const { error } = await supabase
           .from('property_images')
           .update({ area: null })
