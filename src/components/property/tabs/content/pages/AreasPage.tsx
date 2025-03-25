@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyImage } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreasList } from "@/components/property/form/steps/areas/AreasList";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ interface AreasPageProps {
   onUpdateArea: (id: string, field: any, value: any) => void;
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
+  onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   isUploading?: boolean;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -26,6 +27,7 @@ export function AreasPage({
   onUpdateArea,
   onAreaImageRemove,
   onAreaImageUpload,
+  onAreaImagesSelect,
   isUploading = false,
   setPendingChanges
 }: AreasPageProps) {
@@ -67,6 +69,8 @@ export function AreasPage({
             }}
             onAreaImageRemove={onAreaImageRemove}
             onAreaImageUpload={onAreaImageUpload}
+            onAreaImagesSelect={onAreaImagesSelect}
+            propertyImages={formData.images as PropertyImage[]}
             isUploading={isUploading}
           />
         </CardContent>
