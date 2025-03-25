@@ -71,14 +71,15 @@ export function AreaCard({
     }
   };
 
-  const handleImagesReorder = async (areaId: string, reorderedImages: PropertyImage[]) => {
+  const handleImagesReorder = async (areaId: string, reorderedImageIds: string[]) => {
     if (propertyId) {
       try {
-        for (let i = 0; i < reorderedImages.length; i++) {
+        // Update sort order for each image based on its position in the reorderedImageIds array
+        for (let i = 0; i < reorderedImageIds.length; i++) {
           await supabase
             .from('property_images')
             .update({ sort_order: i })
-            .eq('id', reorderedImages[i].id)
+            .eq('id', reorderedImageIds[i])
             .eq('property_id', propertyId);
         }
         
@@ -86,6 +87,16 @@ export function AreaCard({
           title: "Images reordered",
           description: "The display order of images has been updated.",
         });
+        
+        // Update local state to reflect the new order
+        if (areaImages.length > 0) {
+          // Create a new array of images in the reordered sequence
+          const newOrderedImages = reorderedImageIds.map(
+            id => areaImages.find(img => img.id === id)
+          ).filter((img): img is PropertyImage => img !== undefined);
+          
+          setAreaImages(newOrderedImages);
+        }
       } catch (err) {
         console.error("Error updating image order:", err);
         toast({
@@ -95,8 +106,6 @@ export function AreaCard({
         });
       }
     }
-    
-    setAreaImages(reorderedImages);
   };
 
   const handleGenerateDescription = async () => {

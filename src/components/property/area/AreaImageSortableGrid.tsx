@@ -61,7 +61,7 @@ interface AreaImageSortableGridProps {
   areaId: string;
   areaTitle: string;
   onImageRemove: (areaId: string, imageId: string) => void;
-  onImagesReorder: (areaId: string, reorderedImageIds: string[]) => void;
+  onImagesReorder: (areaId: string, reorderedImages: PropertyImage[]) => void;
 }
 
 export function AreaImageSortableGrid({ 
@@ -112,12 +112,10 @@ export function AreaImageSortableGrid({
         const newOrderedImages = arrayMove(orderedImages, oldIndex, newIndex);
         setOrderedImages(newOrderedImages);
         
-        // Extract just the IDs for the callback
-        const reorderedIds = newOrderedImages.map(img => img.id);
-        console.log("Reordered image IDs:", reorderedIds);
+        console.log("Reordering images in AreaImageSortableGrid:", newOrderedImages);
         
         // Call the parent component's reorder function
-        onImagesReorder(areaId, reorderedIds);
+        onImagesReorder(areaId, newOrderedImages);
       }
     }
   };
