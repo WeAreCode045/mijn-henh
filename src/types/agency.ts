@@ -3,7 +3,7 @@ import { Settings } from "@/types/settings";
 
 // Agency settings interface - extends the Settings type
 export interface AgencySettings extends Settings {
-  id: string;
+  id?: string;
   name: string;
   email?: string;
   phone?: string;

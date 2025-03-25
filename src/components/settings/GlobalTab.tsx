@@ -1,5 +1,5 @@
 
-import { Settings } from "@/types/settings";
+import { AgencySettings } from "@/types/agency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconSettingsGrid } from "./icons/IconSettingsGrid";
 import { GlobalFeaturesList } from "./features/GlobalFeaturesList";
@@ -7,7 +7,7 @@ import { GlobalFeaturesBulkUpload } from "./features/GlobalFeaturesBulkUpload";
 import { PropertyFeature } from "@/types/property";
 
 interface GlobalTabProps {
-  settings: Settings;
+  settings: AgencySettings;
   onSelectChange: (name: string, value: string) => void;
   globalFeatures: PropertyFeature[];
   onFeatureAdd: (feature: string) => void;

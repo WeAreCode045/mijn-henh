@@ -67,22 +67,22 @@ export const agencySettingsService = {
   async updateSettings(id: string, data: AgencySettings) {
     const updateData: AgencySettingsData = {
       name: data.name,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
-      primary_color: data.primaryColor,
-      secondary_color: data.secondaryColor,
+      email: data.email || "",
+      phone: data.phone || "",
+      address: data.address || "",
+      primary_color: data.primaryColor || "#40497A",
+      secondary_color: data.secondaryColor || "#E2E8F0",
       logo_url: data.logoUrl,
       description_background_url: data.pdfBackgroundUrl || data.webviewBackgroundUrl, // Store both in the same field
-      icon_build_year: data.iconBuildYear,
-      icon_bedrooms: data.iconBedrooms,
-      icon_bathrooms: data.iconBathrooms,
-      icon_garages: data.iconGarages,
-      icon_energy_class: data.iconEnergyClass,
-      icon_sqft: data.iconSqft,
-      icon_living_space: data.iconLivingSpace,
-      google_maps_api_key: data.googleMapsApiKey,
-      xml_import_url: data.xmlImportUrl,
+      icon_build_year: data.iconBuildYear || "calendar",
+      icon_bedrooms: data.iconBedrooms || "bed",
+      icon_bathrooms: data.iconBathrooms || "bath",
+      icon_garages: data.iconGarages || "car",
+      icon_energy_class: data.iconEnergyClass || "zap",
+      icon_sqft: data.iconSqft || "ruler",
+      icon_living_space: data.iconLivingSpace || "home",
+      google_maps_api_key: data.googleMapsApiKey || "",
+      xml_import_url: data.xmlImportUrl || "",
       instagram_url: data.instagramUrl,
       youtube_url: data.youtubeUrl,
       facebook_url: data.facebookUrl,
@@ -113,4 +113,13 @@ export const agencySettingsService = {
 
     if (error) throw error;
   }
+};
+
+// Export a function that can be imported as 'updateAgencySettings'
+export const updateAgencySettings = async (settings: AgencySettings) => {
+  if (!settings.id) {
+    throw new Error("Settings ID is required for update");
+  }
+  
+  return await agencySettingsService.updateSettings(settings.id, settings);
 };

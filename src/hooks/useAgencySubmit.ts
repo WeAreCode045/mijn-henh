@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { AgencySettings } from "@/types/agency";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PropertyFeature } from "@/types/property";
 
 interface UseAgencySubmitProps {
@@ -26,6 +26,14 @@ export const useAgencySubmit = ({
     setIsLoading(true);
 
     try {
+      // Make sure settings has an id
+      if (!settings.id) {
+        throw new Error("Settings ID is required for update");
+      }
+
+      // Convert globalFeatures to string array for database
+      const featureDescriptions = globalFeatures.map(f => f.description);
+      
       const { data, error } = await supabase
         .from('agency_settings')
         .update({
@@ -57,7 +65,7 @@ export const useAgencySubmit = ({
           smtp_from_name: settings.smtp_from_name,
           smtp_secure: settings.smtp_secure,
           openai_api_key: settings.openai_api_key,
-          global_features: JSON.stringify(globalFeatures.map(f => f.description))
+          global_features: JSON.stringify(featureDescriptions)
         })
         .eq('id', settings.id);
 

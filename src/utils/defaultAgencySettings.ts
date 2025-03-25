@@ -2,6 +2,7 @@
 import { AgencySettings } from "@/types/agency";
 
 export const defaultAgencySettings: AgencySettings = {
+  id: "",
   name: "",
   email: "",
   phone: "",

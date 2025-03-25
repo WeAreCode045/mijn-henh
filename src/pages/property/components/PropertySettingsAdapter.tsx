@@ -5,6 +5,7 @@ import { AgencySettings } from "@/types/agency";
 export function createAgencySettingsFromSettings(settings: Settings | null | undefined): AgencySettings {
   if (!settings) {
     return {
+      id: "",
       name: "",
       email: "",
       phone: "",
@@ -20,6 +21,7 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
   }
 
   return {
+    id: "",
     name: settings.name || "",
     email: settings.email || "",
     phone: settings.phone || "",

@@ -8,7 +8,7 @@ import { GlobalTab } from "./GlobalTab";
 import { AgencySettings } from "@/types/agency";
 import { fetchAgencySettings } from "@/utils/fetchAgencySettings";
 import { updateAgencySettings } from "@/services/agencySettingsService";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { SettingsTab } from "@/types/settings";
 import { supabase } from "@/integrations/supabase/client";
@@ -244,17 +244,19 @@ export function SettingsPage() {
         <TabsContent value="agency">
           <AgencyTab
             settings={settings}
-            onInputChange={handleInputChange}
-            onSave={handleSave}
+            logoPreview=""
+            onChange={handleInputChange}
+            onLogoUpload={(e) => {}}
           />
         </TabsContent>
         
         <TabsContent value="design">
           <DesignTab
             settings={settings}
-            onInputChange={handleInputChange}
+            onChange={handleInputChange}
             onSelectChange={handleSelectChange}
-            onSave={handleSave}
+            onPdfBackgroundUpload={(e) => {}}
+            onWebviewBackgroundUpload={(e) => {}}
           />
         </TabsContent>
         
@@ -272,9 +274,8 @@ export function SettingsPage() {
         <TabsContent value="advanced">
           <AdvancedTab
             settings={settings}
-            onInputChange={handleInputChange}
-            onCheckboxChange={handleCheckboxChange}
-            onSave={handleSave}
+            onChange={handleInputChange}
+            onSwitchChange={handleCheckboxChange}
           />
         </TabsContent>
       </Tabs>

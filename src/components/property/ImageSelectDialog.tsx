@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
 import { PropertyImage } from "@/types/property";
@@ -125,14 +124,12 @@ export function ImageSelectDialog({
 
   // Only render the trigger if we're not controlled
   const trigger = controlledOpen === undefined ? (
-    <DialogTrigger asChild>
-      <DialogTriggerButton
-        buttonText={buttonText}
-        buttonIcon={buttonIcon}
-        id={id}
-        onClick={() => handleOpenChange(true)}
-      />
-    </DialogTrigger>
+    <DialogTriggerButton
+      buttonText={buttonText}
+      buttonIcon={buttonIcon}
+      id={id}
+      onClick={() => handleOpenChange(true)}
+    />
   ) : null;
 
   // Fix: Extract image URLs for the ImageGrid component
