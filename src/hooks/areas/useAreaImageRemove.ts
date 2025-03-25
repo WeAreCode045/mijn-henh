@@ -1,7 +1,7 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyArea, AreaImage } from '@/types/property';
+import type { PropertyFormData, PropertyArea } from '@/types/property';
 
 export function useAreaImageRemove(
   formData: PropertyFormData,
@@ -26,8 +26,8 @@ export function useAreaImageRemove(
       const updatedAreas = formData.areas.map(area => {
         if (area.id === areaId) {
           // Remove the image from areaImages array
-          const updatedAreaImages = area.areaImages 
-            ? area.areaImages.filter(img => img.ImageID !== imageId) 
+          const updatedAreaImages = Array.isArray(area.areaImages)
+            ? area.areaImages.filter((img: { ImageID: string }) => img.ImageID !== imageId)
             : [];
             
           // For backward compatibility, also update the legacy fields

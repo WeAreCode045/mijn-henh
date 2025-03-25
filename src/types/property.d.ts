@@ -26,6 +26,7 @@ type PropertyFloorplan = PropertyImage;
 
 // Property area with all required fields
 export interface PropertyArea {
+  areaImages: unknown;
   id: string;
   name: string;
   size: string;
@@ -112,7 +113,7 @@ export interface PropertyData {
   archived?: boolean; // Added archived property
   metadata?: {
     status?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
   // For backward compatibility - can be PropertyImage[] or string[]
@@ -165,7 +166,7 @@ export interface PropertySubmitData {
   archived?: boolean; // Added archived property
   metadata?: {
     status?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
 }

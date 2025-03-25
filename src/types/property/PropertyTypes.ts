@@ -22,7 +22,7 @@ export interface PropertyArea {
   areaImages?: AreaImage[];
   // Legacy fields maintained for backward compatibility
   imageIds?: string[];
-  images?: string[] | any[];
+  images?: string[] | unknown[];
 }
 
 // Explicitly export Area as an alias to PropertyArea
@@ -131,7 +131,7 @@ export interface PropertySubmitData {
   shortDescription?: string;
   location_description: string;
   features: string;
-  areas: any;
+  areas: unknown;
   nearby_places: string;
   nearby_cities?: string;
   latitude: number | null;
@@ -148,7 +148,7 @@ export interface PropertySubmitData {
   propertyType?: string; // Property type property
   metadata?: {
     status?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }; // Metadata property
 }
 
