@@ -56,6 +56,7 @@ export function ContentRouter({
   const [lastFormState, setLastFormState] = React.useState<PropertyFormData | null>(null);
   const [previousStep, setPreviousStep] = React.useState<number | null>(null);
   const changedFieldsRef = useRef<Record<string, any>>({});
+  const [shouldShowToast, setShouldShowToast] = React.useState(false);
 
   // Track form changes
   useEffect(() => {
@@ -121,11 +122,14 @@ export function ContentRouter({
       setHasPendingChanges(false);
       changedFieldsRef.current = {};
       
-      // Show a success toast but only once
-      toast({
-        title: "Success",
-        description: "Changes saved successfully",
-      });
+      // Show a success toast but only once per navigation
+      if (shouldShowToast) {
+        toast({
+          title: "Success",
+          description: "Changes saved successfully",
+        });
+        setShouldShowToast(false);
+      }
       
       console.log("Property changes saved successfully");
     } catch (error) {
@@ -150,6 +154,9 @@ export function ContentRouter({
 
   // Handle step navigation via URLs
   const handleStepNavigation = async (step: number) => {
+    // Set flag to show toast if there are changes to save
+    setShouldShowToast(hasPendingChanges);
+    
     // Save changes before navigating
     await saveChanges();
     

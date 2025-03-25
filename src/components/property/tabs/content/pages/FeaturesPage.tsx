@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { PropertyFormData, PropertyFeature } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
@@ -30,7 +30,7 @@ export function FeaturesPage({
   const { availableFeatures, isLoading, addFeature: addToAvailableFeatures } = useAvailableFeatures();
   
   const handleFeatureChange = (id: string, description: string) => {
-    // The debouncing is now handled in the PropertyFeatures component
+    // Now this is only called on blur, so we can update immediately
     onUpdateFeature(id, description);
     if (setPendingChanges) {
       setPendingChanges(true);

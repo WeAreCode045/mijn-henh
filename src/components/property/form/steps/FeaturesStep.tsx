@@ -1,11 +1,10 @@
-
 import { PropertyFormData, PropertyFeature } from "@/types/property";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import { FeatureSelector } from "@/components/property/features/FeatureSelector";
 import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 interface FeaturesStepProps {
   formData: PropertyFormData;
@@ -27,10 +26,9 @@ export function FeaturesStep({
   console.log("FeaturesStep rendering with features:", formData.features);
   
   const { availableFeatures, isLoading, addFeature, addMultipleFeatures } = useAvailableFeatures();
-  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
   
   const handleFeatureChange = (id: string, description: string) => {
-    // The debouncing is now handled in the PropertyFeatures component
+    // Now this is only called on blur, so we can update immediately
     onUpdateFeature(id, description);
     if (setPendingChanges) {
       setPendingChanges(true);

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,9 +19,8 @@ export function PropertyFeatures({
   onRemove,
   onUpdate,
 }: PropertyFeaturesProps) {
-  // Add debounced updates
+  // Local state for form values
   const [localFeatures, setLocalFeatures] = useState<PropertyFeature[]>(features);
-  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
   
   // Sync local state with props
   useEffect(() => {
@@ -47,25 +46,17 @@ export function PropertyFeatures({
         feature.id === id ? { ...feature, description: value } : feature
       )
     );
-    
-    // Clear any existing timer for this feature
-    if (debounceTimers.current[id]) {
-      clearTimeout(debounceTimers.current[id]);
-    }
-    
-    // Set a new debounce timer
-    debounceTimers.current[id] = setTimeout(() => {
-      console.log("Updating feature after debounce:", id, value);
-      onUpdate(id, value);
-    }, 500); // 500ms debounce delay
   };
-
-  // Clear timers on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(debounceTimers.current).forEach(timer => clearTimeout(timer));
-    };
-  }, []);
+  
+  // Handle blur event to save changes only when the field loses focus
+  const handleBlur = (id: string, value: string) => {
+    // Only call the update function if the value has actually changed
+    const originalFeature = features.find(feature => feature.id === id);
+    if (originalFeature && originalFeature.description !== value) {
+      console.log("Saving feature on blur:", id, value);
+      onUpdate(id, value);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -86,6 +77,7 @@ export function PropertyFeatures({
             <Input
               value={feature.description}
               onChange={(e) => handleLocalUpdate(feature.id, e.target.value)}
+              onBlur={(e) => handleBlur(feature.id, e.target.value)}
               placeholder="Enter feature"
             />
             <Button

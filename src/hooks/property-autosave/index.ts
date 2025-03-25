@@ -4,6 +4,7 @@ import { useAutoSaveData } from "./useAutoSaveData";
 import { useAutoSaveState } from "./useAutoSaveState";
 import { useEditLoggerIntegration } from "./useEditLoggerIntegration";
 import { PropertyFormData } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePropertyAutoSave() {
   const { autosaveField: saveField, isSaving: isFieldSaving } = useAutoSaveField();
@@ -35,6 +36,13 @@ export function usePropertyAutoSave() {
         .eq('id', propertyId)
         .single();
         
+      // Only perform save if value has actually changed
+      if (currentPropertyData && JSON.stringify(currentPropertyData[field as string]) === JSON.stringify(value)) {
+        console.log(`Field ${String(field)} unchanged, skipping save`);
+        setIsSaving(false);
+        return true;
+      }
+      
       // Perform the save operation
       const success = await saveField(propertyId, field, value);
       
@@ -132,6 +140,3 @@ export function usePropertyAutoSave() {
     setLastSaved
   };
 }
-
-// Import missing dependency
-import { supabase } from "@/integrations/supabase/client";
