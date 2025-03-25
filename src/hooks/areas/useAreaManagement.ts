@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import type { PropertyArea, PropertyFormData } from '@/types/property';
+import type { PropertyArea, PropertyFormData, AreaImage } from '@/types/property';
 import { Dispatch, SetStateAction } from 'react';
 
 export function useAreaManagement(
