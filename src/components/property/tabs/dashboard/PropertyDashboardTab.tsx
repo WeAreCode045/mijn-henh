@@ -50,6 +50,9 @@ export function PropertyDashboardTab({
 
   useEffect(() => {
     const fetchSubmissions = async () => {
+      // Validate id is present and valid
+      if (!id || id.trim() === '') return;
+      
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select('*')
@@ -81,6 +84,9 @@ export function PropertyDashboardTab({
 
     // Fetch property status to check if archived
     const fetchPropertyStatus = async () => {
+      // Only fetch if we have a valid ID
+      if (!id || id.trim() === '') return;
+      
       const { data, error } = await supabase
         .from('properties')
         .select('archived')

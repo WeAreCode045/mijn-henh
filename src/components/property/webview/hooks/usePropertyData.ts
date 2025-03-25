@@ -36,6 +36,16 @@ export const usePropertyData = (id?: string, property?: PropertyData) => {
       setIsLoading(false);
       return;
     }
+
+    // Validate if id is a proper UUID or object_id string
+    const isValidId = id.trim() !== '';
+    
+    if (!isValidId) {
+      console.log("usePropertyData - Invalid ID provided:", id);
+      setError("Invalid property ID provided");
+      setIsLoading(false);
+      return;
+    }
     
     const fetchProperty = async () => {
       if (!id || !isMounted.current) return;

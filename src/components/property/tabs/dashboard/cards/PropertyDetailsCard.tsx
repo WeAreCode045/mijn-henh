@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +49,9 @@ export function PropertyDetailsCard({
   
   useEffect(() => {
     const fetchPropertyDetails = async () => {
+      // Only fetch if we have a valid UUID
+      if (!id || id.trim() === '') return;
+      
       const { data, error } = await supabase
         .from('properties')
         .select('address')
@@ -115,6 +119,8 @@ export function PropertyDetailsCard({
   const handleSaveDetails = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!id || id.trim() === '') return;
     
     try {
       const { error } = await supabase
