@@ -1,4 +1,3 @@
-
 // Type for property features
 export interface PropertyFeature {
   id: string;
@@ -26,7 +25,6 @@ type PropertyFloorplan = PropertyImage;
 
 // Property area with all required fields
 export interface PropertyArea {
-  areaImages: unknown;
   id: string;
   name: string;
   size: string;
@@ -35,6 +33,7 @@ export interface PropertyArea {
   images: PropertyImage[]; 
   imageIds: string[]; // Adding this property to match PropertyAreaTypes.ts
   columns: number;
+  areaImages?: unknown; // Add areaImages property to fix type errors
 }
 
 // Property nearby place

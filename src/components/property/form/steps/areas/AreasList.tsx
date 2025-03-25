@@ -75,6 +75,7 @@ export function AreasList({
                 type="multiple" 
                 value={expandedAreas}
                 onValueChange={handleAccordionChange}
+                className="space-y-2"
               >
                 {areas.map((area, index) => (
                   <Draggable 
@@ -87,14 +88,15 @@ export function AreasList({
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
+                        className="mb-3"
                       >
-                        <AccordionItem value={area.id} className="border rounded-md mb-4">
+                        <AccordionItem value={area.id} className="border rounded-md">
                           <div className="flex items-center justify-between px-4">
                             <div 
                               className="flex-1 flex items-center"
                               {...provided.dragHandleProps}
                             >
-                              <AccordionTrigger>
+                              <AccordionTrigger className="py-3">
                                 {area.title || area.name || `Area ${index + 1}`}
                               </AccordionTrigger>
                             </div>
@@ -111,42 +113,44 @@ export function AreasList({
                             </Button>
                           </div>
                           <AccordionContent>
-                            <AreaEditor
-                              area={area}
-                              onUpdate={(field, value) => onUpdate(area.id, field, value)}
-                              onAreaImageRemove={
-                                onAreaImageRemove 
-                                  ? (imageId) => {
-                                      console.log(`Removing image ${imageId} from area ${area.id}`);
-                                      onAreaImageRemove(area.id, imageId);
-                                    }
-                                  : undefined
-                              }
-                              onAreaImageUpload={
-                                onAreaImageUpload
-                                  ? (files) => onAreaImageUpload(area.id, files)
-                                  : undefined
-                              }
-                              onAreaImagesSelect={
-                                onAreaImagesSelect
-                                  ? (imageIds) => {
-                                      console.log(`Selecting images for area ${area.id}:`, imageIds);
-                                      onAreaImagesSelect(area.id, imageIds);
-                                    }
-                                  : undefined
-                              }
-                              onReorderImages={
-                                onReorderAreaImages
-                                  ? (imageIds) => {
-                                      console.log(`Reordering images for area ${area.id}:`, imageIds);
-                                      onReorderAreaImages(area.id, imageIds);
-                                    }
-                                  : undefined
-                              }
-                              propertyImages={propertyImages}
-                              isUploading={isUploading}
-                              maxImageSelect={10} // Set maximum images per area to 10
-                            />
+                            <div className="p-4 pt-0">
+                              <AreaEditor
+                                area={area}
+                                onUpdate={(field, value) => onUpdate(area.id, field, value)}
+                                onAreaImageRemove={
+                                  onAreaImageRemove 
+                                    ? (imageId) => {
+                                        console.log(`Removing image ${imageId} from area ${area.id}`);
+                                        onAreaImageRemove(area.id, imageId);
+                                      }
+                                    : undefined
+                                }
+                                onAreaImageUpload={
+                                  onAreaImageUpload
+                                    ? (files) => onAreaImageUpload(area.id, files)
+                                    : undefined
+                                }
+                                onAreaImagesSelect={
+                                  onAreaImagesSelect
+                                    ? (imageIds) => {
+                                        console.log(`Selecting images for area ${area.id}:`, imageIds);
+                                        onAreaImagesSelect(area.id, imageIds);
+                                      }
+                                    : undefined
+                                }
+                                onReorderImages={
+                                  onReorderAreaImages
+                                    ? (imageIds) => {
+                                        console.log(`Reordering images for area ${area.id}:`, imageIds);
+                                        onReorderAreaImages(area.id, imageIds);
+                                      }
+                                    : undefined
+                                }
+                                propertyImages={propertyImages}
+                                isUploading={isUploading}
+                                maxImageSelect={10} // Set maximum images per area to 10
+                              />
+                            </div>
                           </AccordionContent>
                         </AccordionItem>
                       </div>
