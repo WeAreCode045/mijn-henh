@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -32,6 +31,10 @@ export function AddressSection({
   const { toast } = useToast();
   const [isLoadingCoordinates, setIsLoadingCoordinates] = useState(false);
   const autocompleteInputRef = useRef<HTMLInputElement>(null);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [localAddress, setLocalAddress] = useState(formData.address || "");
+  const [localLocationDescription, setLocalLocationDescription] = useState(formData.location_description || "");
+  
   const { fetchLocationData } = useLocationCoordinates(
     formData, 
     onFieldChange || (() => {}), 
@@ -39,29 +42,48 @@ export function AddressSection({
     toast
   );
 
+  useEffect(() => {
+    setLocalAddress(formData.address || "");
+    setLocalLocationDescription(formData.location_description || "");
+  }, [formData.address, formData.location_description]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (onFieldChange) {
-      onFieldChange(e.target.name as keyof PropertyFormData, e.target.value);
-      
-      // Auto-fetch coordinates when address changes
-      if (e.target.name === 'address' && e.target.value && formData.id) {
-        // Add slight delay to allow for typing to complete
-        const timer = setTimeout(() => {
-          console.log("Auto-fetching coordinates for address:", e.target.value);
-          fetchLocationData();
-        }, 1500);
-        
-        return () => clearTimeout(timer);
-      }
+    const { name, value } = e.target;
+    
+    if (name === 'address') {
+      setLocalAddress(value);
+    } else if (name === 'location_description') {
+      setLocalLocationDescription(value);
     }
+    
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    fetchTimeoutRef.current = setTimeout(() => {
+      if (onFieldChange) {
+        onFieldChange(name as keyof PropertyFormData, value);
+        
+        if (name === 'address' && value && formData.id) {
+          console.log("Auto-fetching coordinates for address:", value);
+          fetchLocationData();
+        }
+      }
+    }, 500);
   };
 
-  // Set up Google Places Autocomplete
+  useEffect(() => {
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const googleApiKey = settings?.googleMapsApiKey;
     if (!googleApiKey || !autocompleteInputRef.current) return;
 
-    // Load the Google Maps JavaScript API
     const loadGoogleMapsScript = () => {
       const scriptId = 'google-maps-script';
       if (document.getElementById(scriptId)) return;
@@ -77,7 +99,6 @@ export function AddressSection({
     };
 
     const initializeAutocomplete = () => {
-      // Use window with type assertion to access the google object
       if (!(window as GoogleMapsWindow).google || 
           !(window as GoogleMapsWindow).google?.maps || 
           !(window as GoogleMapsWindow).google?.maps?.places) {
@@ -95,7 +116,6 @@ export function AddressSection({
         if (place.formatted_address && onFieldChange) {
           onFieldChange('address', place.formatted_address);
           
-          // Autocomplete also gives us the coordinates directly
           if (place.geometry?.location) {
             const lat = place.geometry.location.lat();
             const lng = place.geometry.location.lng();
@@ -120,7 +140,7 @@ export function AddressSection({
               <Input
                 id="address"
                 name="address"
-                value={formData.address || ""}
+                value={localAddress}
                 onChange={handleChange}
                 placeholder="Enter full property address"
                 className="flex-1"
@@ -132,7 +152,7 @@ export function AddressSection({
                   variant="outline"
                   size="sm"
                   onClick={onFetchLocationData}
-                  disabled={isLoadingLocationData || !formData.address}
+                  disabled={isLoadingLocationData || !localAddress}
                   className="whitespace-nowrap"
                 >
                   {isLoadingLocationData ? (
@@ -160,7 +180,7 @@ export function AddressSection({
                   variant="outline"
                   size="sm"
                   onClick={onFetchLocationDescription}
-                  disabled={isLoadingLocationDescription || !formData.address}
+                  disabled={isLoadingLocationDescription || !localAddress}
                   className="flex gap-2 items-center"
                 >
                   {isLoadingLocationDescription ? (
@@ -180,7 +200,7 @@ export function AddressSection({
             <Textarea
               id="location_description"
               name="location_description"
-              value={formData.location_description || ""}
+              value={localLocationDescription}
               onChange={handleChange}
               placeholder="Describe the property location and surroundings"
               rows={6}

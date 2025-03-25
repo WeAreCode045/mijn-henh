@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,15 @@ export function PropertyFeatures({
   onRemove,
   onUpdate,
 }: PropertyFeaturesProps) {
+  // Add debounced updates
+  const [localFeatures, setLocalFeatures] = useState<PropertyFeature[]>(features);
+  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
+  
+  // Sync local state with props
+  useEffect(() => {
+    setLocalFeatures(features);
+  }, [features]);
+
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log("Adding new feature");
@@ -31,10 +40,32 @@ export function PropertyFeatures({
     onRemove(id);
   };
 
-  const handleUpdate = (id: string, value: string) => {
-    console.log("Updating feature:", id, value);
-    onUpdate(id, value);
+  const handleLocalUpdate = (id: string, value: string) => {
+    // Update local state immediately for UI responsiveness
+    setLocalFeatures(prev => 
+      prev.map(feature => 
+        feature.id === id ? { ...feature, description: value } : feature
+      )
+    );
+    
+    // Clear any existing timer for this feature
+    if (debounceTimers.current[id]) {
+      clearTimeout(debounceTimers.current[id]);
+    }
+    
+    // Set a new debounce timer
+    debounceTimers.current[id] = setTimeout(() => {
+      console.log("Updating feature after debounce:", id, value);
+      onUpdate(id, value);
+    }, 500); // 500ms debounce delay
   };
+
+  // Clear timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimers.current).forEach(timer => clearTimeout(timer));
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -45,16 +76,16 @@ export function PropertyFeatures({
           Add Feature
         </Button>
       </div>
-      {features.length === 0 ? (
+      {localFeatures.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">
           No features added yet. Click the button above to add features.
         </p>
       ) : (
-        features.map((feature) => (
+        localFeatures.map((feature) => (
           <div key={feature.id} className="flex items-center gap-2">
             <Input
               value={feature.description}
-              onChange={(e) => handleUpdate(feature.id, e.target.value)}
+              onChange={(e) => handleLocalUpdate(feature.id, e.target.value)}
               placeholder="Enter feature"
             />
             <Button
