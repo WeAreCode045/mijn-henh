@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyArea } from "@/types/property";
 import { usePropertyAutoSave } from "@/hooks/property-autosave";

@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { ImageSelectDialog } from "@/components/property/ImageSelectDialog";
 import { AreaImageSelectDialog } from "@/components/property/area/AreaImageSelectDialog";
 
 interface AreaEditorProps {
@@ -17,7 +16,7 @@ interface AreaEditorProps {
   onAreaImageUpload?: (files: FileList) => Promise<void>;
   onAreaImagesSelect?: (imageIds: string[]) => void;
   onReorderImages?: (imageIds: string[]) => void;
-  propertyImages?: { id: string; url: string }[];
+  propertyImages?: PropertyImage[];
   isUploading?: boolean;
   maxImageSelect?: number;
 }
