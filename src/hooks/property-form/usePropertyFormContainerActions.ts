@@ -46,6 +46,7 @@ export function usePropertyFormContainerActions(
     setIsSubmitting(true);
     try {
       const event = {} as React.FormEvent;
+      // Pass false as the third parameter to prevent any redirection
       const result = await handleSubmit(event, formData, false);
       
       if (result) {

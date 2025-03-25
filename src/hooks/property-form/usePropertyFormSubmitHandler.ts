@@ -52,8 +52,12 @@ export function usePropertyFormSubmitHandler() {
           await logChanges(formData.id, currentPropertyData, submitData);
         }
         
+        // Remove redirect logic. Only redirect if explicitly asked to and successful
         if (success && shouldRedirect) {
-          navigate('/');
+          // Instead of always redirecting to index, we'll use the current URL
+          // This will effectively just reload the current page
+          const currentUrl = window.location.pathname;
+          navigate(currentUrl);
         }
       } else {
         // This should not happen anymore since we create properties upfront
