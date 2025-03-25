@@ -264,7 +264,9 @@ export function usePropertyFormAreas({
   const handleRemoveAreaPhoto = (imageId: string) => {
     setFormData((prevState: PropertyFormData): PropertyFormData => ({
       ...prevState,
-      areaPhotos: prevState.areaPhotos.filter((image: PropertyImage) => image.id !== imageId) as PropertyImage[]
+      areaPhotos: prevState.areaPhotos && Array.isArray(prevState.areaPhotos) 
+        ? prevState.areaPhotos.filter((image: PropertyImage) => image.id !== imageId) as PropertyImage[]
+        : []
     }));
     setPendingChanges(true);
   };
