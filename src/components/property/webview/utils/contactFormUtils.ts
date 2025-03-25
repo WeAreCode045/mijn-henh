@@ -71,11 +71,11 @@ export async function submitContactForm(
     try {
       // Check if we have SMTP settings to use
       const hasSMTPSettings = 
-        settings.smtp_host && 
-        settings.smtp_port && 
-        settings.smtp_username && 
-        settings.smtp_password && 
-        settings.smtp_from_email;
+        settings.smtpHost && 
+        settings.smtpPort && 
+        settings.smtpUsername && 
+        settings.smtpPassword && 
+        settings.smtpFromEmail;
 
       if (hasSMTPSettings) {
         // Get the inquiry type label for the email

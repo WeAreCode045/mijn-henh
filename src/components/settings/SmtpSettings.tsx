@@ -23,22 +23,22 @@ export function SmtpSettings({ settings, onChange, onSwitchChange }: SmtpSetting
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="smtp_host">SMTP Host</Label>
+            <Label htmlFor="smtpHost">SMTP Host</Label>
             <Input
-              id="smtp_host"
-              name="smtp_host"
+              id="smtpHost"
+              name="smtpHost"
               placeholder="smtp.example.com"
-              value={settings.smtp_host || ''}
+              value={settings.smtpHost || ''}
               onChange={onChange}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="smtp_port">SMTP Port</Label>
+            <Label htmlFor="smtpPort">SMTP Port</Label>
             <Input
-              id="smtp_port"
-              name="smtp_port"
+              id="smtpPort"
+              name="smtpPort"
               placeholder="587"
-              value={settings.smtp_port || ''}
+              value={settings.smtpPort || ''}
               onChange={onChange}
             />
           </div>
@@ -46,23 +46,23 @@ export function SmtpSettings({ settings, onChange, onSwitchChange }: SmtpSetting
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="smtp_username">SMTP Username</Label>
+            <Label htmlFor="smtpUsername">SMTP Username</Label>
             <Input
-              id="smtp_username"
-              name="smtp_username"
+              id="smtpUsername"
+              name="smtpUsername"
               placeholder="user@example.com"
-              value={settings.smtp_username || ''}
+              value={settings.smtpUsername || ''}
               onChange={onChange}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="smtp_password">SMTP Password</Label>
+            <Label htmlFor="smtpPassword">SMTP Password</Label>
             <Input
-              id="smtp_password"
-              name="smtp_password"
+              id="smtpPassword"
+              name="smtpPassword"
               type="password"
               placeholder="Your SMTP password"
-              value={settings.smtp_password || ''}
+              value={settings.smtpPassword || ''}
               onChange={onChange}
             />
           </div>
@@ -70,22 +70,22 @@ export function SmtpSettings({ settings, onChange, onSwitchChange }: SmtpSetting
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="smtp_from_email">From Email Address</Label>
+            <Label htmlFor="smtpFromEmail">From Email Address</Label>
             <Input
-              id="smtp_from_email"
-              name="smtp_from_email"
+              id="smtpFromEmail"
+              name="smtpFromEmail"
               placeholder="noreply@youragency.com"
-              value={settings.smtp_from_email || ''}
+              value={settings.smtpFromEmail || ''}
               onChange={onChange}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="smtp_from_name">From Name</Label>
+            <Label htmlFor="smtpFromName">From Name</Label>
             <Input
-              id="smtp_from_name"
-              name="smtp_from_name"
+              id="smtpFromName"
+              name="smtpFromName"
               placeholder="Your Agency Name"
-              value={settings.smtp_from_name || ''}
+              value={settings.smtpFromName || ''}
               onChange={onChange}
             />
           </div>
@@ -93,11 +93,11 @@ export function SmtpSettings({ settings, onChange, onSwitchChange }: SmtpSetting
         
         <div className="flex items-center space-x-2">
           <Switch
-            id="smtp_secure"
-            checked={settings.smtp_secure === true}
-            onCheckedChange={(checked) => onSwitchChange('smtp_secure', checked)}
+            id="smtpSecure"
+            checked={settings.smtpSecure === true}
+            onCheckedChange={(checked) => onSwitchChange('smtpSecure', checked)}
           />
-          <Label htmlFor="smtp_secure">Use secure connection (TLS/SSL)</Label>
+          <Label htmlFor="smtpSecure">Use secure connection (TLS/SSL)</Label>
         </div>
       </CardContent>
     </Card>

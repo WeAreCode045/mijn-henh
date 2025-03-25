@@ -15,9 +15,9 @@ export function AdvancedTab({ settings, onChange, onSwitchChange }: AdvancedTabP
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="google_maps_api_key">Google Maps API Key</Label>
+        <Label htmlFor="googleMapsApiKey">Google Maps API Key</Label>
         <Input
-          id="google_maps_api_key"
+          id="googleMapsApiKey"
           name="googleMapsApiKey"
           value={settings.googleMapsApiKey || ''}
           onChange={onChange}
@@ -26,11 +26,11 @@ export function AdvancedTab({ settings, onChange, onSwitchChange }: AdvancedTabP
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="openai_api_key">OpenAI API Key</Label>
+        <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
         <Input
-          id="openai_api_key"
-          name="openai_api_key"
-          value={settings.openai_api_key || ''}
+          id="openaiApiKey"
+          name="openaiApiKey"
+          value={settings.openaiApiKey || ''}
           onChange={onChange}
           type="password"
           placeholder="sk-..."
