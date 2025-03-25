@@ -453,4 +453,4 @@ export function usePropertyFormAreas(
     handleAreaPhotosUpload: handleAreaImageUpload,
     handleRemoveAreaPhoto: handleAreaImageRemove
   };
-}, [formState.areas, formState.images, formState.id, handleFieldChange, setPendingChanges, autosaveField, toast]);
+}
