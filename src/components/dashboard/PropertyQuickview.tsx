@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,7 @@ export function PropertyQuickview() {
       try {
         let query = supabase
           .from('properties')
-          .select('id, title, status, price, address, bedrooms, bathrooms, sqft, thumbnail_url')
+          .select('id, title, status, price, address, bedrooms, bathrooms, sqft')
           .eq('archived', false)
           .order('title');
           
@@ -42,7 +41,14 @@ export function PropertyQuickview() {
         
         if (error) throw error;
         if (data) {
-          setProperties(data as PropertyData[]);
+          // Transform the data to match the PropertyData interface
+          const formattedProperties = data.map(property => ({
+            ...property,
+            // Add any required fields from PropertyData that might be missing
+            images: [] // Adding empty array for required images field
+          })) as PropertyData[];
+          
+          setProperties(formattedProperties);
           
           // If no property is selected yet, select the first one
           if (!selectedPropertyId && data.length > 0) {
@@ -67,13 +73,20 @@ export function PropertyQuickview() {
       try {
         const { data, error } = await supabase
           .from('properties')
-          .select('*')
+          .select('*, property_images(*)')
           .eq('id', selectedPropertyId)
           .single();
           
         if (error) throw error;
         if (data) {
-          setSelectedProperty(data as PropertyData);
+          // Transform the data to match the PropertyData interface
+          const propertyData: PropertyData = {
+            ...data,
+            images: data.property_images || [],
+            // Make sure all required fields from PropertyData are present
+          };
+          
+          setSelectedProperty(propertyData);
         }
       } catch (error) {
         console.error("Error fetching property details:", error);
@@ -91,6 +104,28 @@ export function PropertyQuickview() {
     if (selectedPropertyId) {
       navigate(`/property/${selectedPropertyId}`);
     }
+  };
+
+  // Function to get the main image URL if available
+  const getMainImageUrl = (property: PropertyData | null): string | null => {
+    if (!property) return null;
+    
+    // Check if property has images
+    if (property.images && property.images.length > 0) {
+      // Try to find a main or featured image first
+      const mainImage = property.images.find(img => img.is_main || img.is_featured_image);
+      if (mainImage && mainImage.url) return mainImage.url;
+      
+      // Otherwise, return the first image
+      if (typeof property.images[0] === 'string') {
+        return property.images[0];
+      } else if (typeof property.images[0] === 'object' && 'url' in property.images[0]) {
+        return property.images[0].url;
+      }
+    }
+    
+    // Return null if no images are found
+    return null;
   };
   
   return (
@@ -176,9 +211,9 @@ export function PropertyQuickview() {
                   </div>
                 </div>
                 
-                {selectedProperty.thumbnail_url && (
+                {getMainImageUrl(selectedProperty) && (
                   <img 
-                    src={selectedProperty.thumbnail_url} 
+                    src={getMainImageUrl(selectedProperty)} 
                     alt={selectedProperty.title} 
                     className="w-full h-40 object-cover rounded-md"
                   />
