@@ -39,23 +39,23 @@ export function DashboardTabs() {
           </TabsList>
         </div>
         
-        <TabsContent value="agenda" className="m-0">
+        <TabsContent value="agenda" className="m-0 p-0">
           <AgendaSection />
         </TabsContent>
         
-        <TabsContent value="todo" className="m-0">
+        <TabsContent value="todo" className="m-0 p-0">
           <TodoSection />
         </TabsContent>
         
-        <TabsContent value="communications" className="m-0">
+        <TabsContent value="communications" className="m-0 p-0">
           <CommunicationsSection />
         </TabsContent>
         
-        <TabsContent value="contacts" className="m-0">
+        <TabsContent value="contacts" className="m-0 p-0">
           <UnderConstructionView title="Contacts" />
         </TabsContent>
         
-        <TabsContent value="documents" className="m-0">
+        <TabsContent value="documents" className="m-0 p-0">
           <UnderConstructionView title="Documents" />
         </TabsContent>
       </Tabs>

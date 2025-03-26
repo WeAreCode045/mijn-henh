@@ -1,30 +1,24 @@
 
 import { PropertyQuickview } from "@/components/dashboard/PropertyQuickview";
-import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { NotificationsBar } from "@/components/dashboard/NotificationsBar";
 
 export default function Index() {
   return (
     <div className="container mx-auto pt-4 pb-8">
-      {/* First row: Property Quickview and User Profile */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-        <div className="lg:col-span-4">
+      {/* First row: Property Quickview and Notifications */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+        <div className="lg:col-span-3">
           <PropertyQuickview />
-        </div>
-        <div className="lg:col-span-1">
-          <UserProfileCard />
-        </div>
-      </div>
-      
-      {/* Second row: Dashboard Tabs and Notifications */}
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-        <div className="lg:col-span-5">
-          <DashboardTabs />
         </div>
         <div className="lg:col-span-1">
           <NotificationsBar />
         </div>
+      </div>
+      
+      {/* Second row: Dashboard Tabs (full width) */}
+      <div className="grid grid-cols-1 gap-6">
+        <DashboardTabs />
       </div>
     </div>
   );

@@ -1,106 +1,99 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PlusCircle, CalendarDays, ListFilter } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { AgendaDialog } from "./AgendaDialog";
 import { AgendaCalendarView } from "./AgendaCalendarView";
 import { AgendaListView } from "./AgendaListView";
-import { AgendaDialog } from "./AgendaDialog";
 import { useAgenda, AgendaItem } from "@/hooks/useAgenda";
 
 export function AgendaSection() {
-  const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [activeTab, setActiveTab] = useState<string>("list");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<"add" | "edit">("add");
-  const [selectedAgendaItem, setSelectedAgendaItem] = useState<AgendaItem | undefined>(undefined);
-  const { agendaItems, isLoading, addAgendaItem, deleteAgendaItem, updateAgendaItem } = useAgenda();
-
+  const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
+  
+  const { agendaItems, isLoading, addAgendaItem, updateAgendaItem, deleteAgendaItem } = useAgenda();
+  
   const handleAddClick = () => {
-    setDialogMode("add");
-    setSelectedAgendaItem(undefined);
+    setSelectedItem(null);
     setDialogOpen(true);
+  };
+  
+  const handleSave = async (data: Omit<AgendaItem, "id" | "created_at" | "updated_at">) => {
+    if (selectedItem) {
+      await updateAgendaItem(selectedItem.id, data);
+    } else {
+      await addAgendaItem(data.title, data.description, data.event_date, data.event_time);
+    }
   };
   
   const handleEditItem = (item: AgendaItem) => {
-    setDialogMode("edit");
-    setSelectedAgendaItem(item);
+    setSelectedItem(item);
     setDialogOpen(true);
   };
   
-  const handleSaveAgendaItem = async (
-    title: string,
-    description: string | null,
-    date: string,
-    time: string,
-    propertyId?: string | null
-  ) => {
-    if (dialogMode === "add") {
-      await addAgendaItem(title, description, date, time, propertyId);
-    } else {
-      if (selectedAgendaItem) {
-        await updateAgendaItem(
-          selectedAgendaItem.id,
-          title,
-          description,
-          date,
-          time,
-          propertyId
-        );
-      }
-    }
+  const handleDeleteItem = async (id: string) => {
+    await deleteAgendaItem(id);
   };
-
+  
   return (
-    <Card className="col-span-full h-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg">Agenda</CardTitle>
-        <div className="flex items-center gap-2">
-          <Tabs defaultValue={view} onValueChange={(v) => setView(v as "calendar" | "list")}>
-            <TabsList>
-              <TabsTrigger value="calendar" className="flex items-center gap-1">
-                <CalendarDays className="h-4 w-4" />
-                <span className="hidden sm:inline">Calendar</span>
-              </TabsTrigger>
-              <TabsTrigger value="list" className="flex items-center gap-1">
-                <ListFilter className="h-4 w-4" />
-                <span className="hidden sm:inline">List</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button onClick={handleAddClick} size="sm" className="flex items-center gap-1">
-            <PlusCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Item</span>
-          </Button>
+    <CardContent className="p-4 pt-0">
+      <div className="flex justify-between items-center mb-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
+          <TabsList>
+            <TabsTrigger value="list">List View</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Button onClick={handleAddClick} size="sm" className="h-8">
+          <PlusCircle className="h-4 w-4 mr-1" />
+          Add Event
+        </Button>
+      </div>
+      
+      <TabsContent value="list" className="mt-0">
+        <AgendaListView 
+          agendaItems={agendaItems} 
+          isLoading={isLoading} 
+          onEdit={handleEditItem}
+          onDelete={handleDeleteItem}
+          showEditRemoveButtons={true}
+        />
+      </TabsContent>
+      
+      <TabsContent value="calendar" className="mt-0">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-1">
+            <AgendaCalendarView 
+              agendaItems={agendaItems} 
+              isLoading={isLoading}
+              onDayClick={(date) => console.log(date)}
+              className="w-full"
+              compactMode={true}
+            />
+          </div>
+          <div className="md:col-span-3">
+            <AgendaListView 
+              agendaItems={agendaItems} 
+              isLoading={isLoading} 
+              onEdit={handleEditItem}
+              onDelete={handleDeleteItem}
+              showEditRemoveButtons={true}
+              showDate={true}
+            />
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="pt-4">
-        {isLoading ? (
-          <div className="h-64 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          <div>
-            {view === "calendar" ? (
-              <AgendaCalendarView agendaItems={agendaItems} />
-            ) : (
-              <AgendaListView 
-                agendaItems={agendaItems} 
-                onDelete={deleteAgendaItem}
-                onEdit={handleEditItem}
-              />
-            )}
-          </div>
-        )}
-      </CardContent>
-
+      </TabsContent>
+      
       <AgendaDialog
         isOpen={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        onSave={handleSaveAgendaItem}
-        item={selectedAgendaItem}
-        mode={dialogMode}
+        onSave={handleSave}
+        item={selectedItem}
+        mode={selectedItem ? "edit" : "add"}
       />
-    </Card>
+    </CardContent>
   );
 }

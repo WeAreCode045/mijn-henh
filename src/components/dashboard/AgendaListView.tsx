@@ -1,229 +1,132 @@
 
-import { useState } from "react";
-import { AgendaItem } from "@/hooks/useAgenda";
+import { format, isToday, parseISO } from "date-fns";
+import { CalendarIcon, Clock, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, ChevronDown, ChevronUp, ExternalLink, Trash2, Edit } from "lucide-react";
-import { format, parseISO, startOfDay, addDays, isAfter, isBefore, isToday, isFuture } from "date-fns";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { AgendaItem } from "@/hooks/useAgenda";
 
 interface AgendaListViewProps {
   agendaItems: AgendaItem[];
-  onDelete: (id: string) => Promise<void>;
-  onEdit: (item: AgendaItem) => void;
+  isLoading: boolean;
+  onEdit?: (item: AgendaItem) => void;
+  onDelete?: (id: string) => void;
+  showEditRemoveButtons?: boolean;
+  showDate?: boolean;
 }
 
-export function AgendaListView({ agendaItems, onDelete, onEdit }: AgendaListViewProps) {
-  const [filter, setFilter] = useState<'all' | 'today' | 'upcoming' | 'past'>('upcoming');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
-  const navigate = useNavigate();
+export function AgendaListView({ 
+  agendaItems, 
+  isLoading, 
+  onEdit, 
+  onDelete, 
+  showEditRemoveButtons = false,
+  showDate = false
+}: AgendaListViewProps) {
 
-  const today = startOfDay(new Date());
-  const endOfUpcoming = addDays(today, 7); // 7 days from now
-  
-  const filteredItems = agendaItems.filter(item => {
-    const itemDate = parseISO(item.event_date);
-    
-    switch(filter) {
-      case 'today':
-        return isToday(itemDate);
-      case 'upcoming':
-        return isFuture(itemDate) || isToday(itemDate);
-      case 'past':
-        return isBefore(itemDate, today);
-      default:
-        return true;
-    }
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (agendaItems.length === 0) {
+    return (
+      <div className="text-center py-6 text-muted-foreground">
+        No upcoming events scheduled
+      </div>
+    );
+  }
+
+  // Sort by date and time
+  const sortedItems = [...agendaItems].sort((a, b) => {
+    const dateA = new Date(`${a.event_date}T${a.event_time}`);
+    const dateB = new Date(`${b.event_date}T${b.event_time}`);
+    return dateA.getTime() - dateB.getTime();
   });
 
-  // Group agenda items by date
-  const groupedItems = filteredItems.reduce((acc, item) => {
-    const date = item.event_date;
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(item);
-    return acc;
-  }, {} as Record<string, AgendaItem[]>);
-
-  // Sort dates chronologically
-  const sortedDates = Object.keys(groupedItems).sort();
-  
-  const confirmDelete = (id: string) => {
-    setItemToDelete(id);
-    setDeleteDialogOpen(true);
-  };
-  
-  const handleDelete = async () => {
-    if (itemToDelete) {
-      await onDelete(itemToDelete);
-      setDeleteDialogOpen(false);
-    }
-  };
-
-  const navigateToProperty = (propertyId: string) => {
-    navigate(`/property/${propertyId}/dashboard`);
-  };
-
   return (
-    <div className="space-y-4">
-      <div className="flex space-x-2">
-        <Button 
-          variant={filter === 'today' ? 'default' : 'outline'} 
-          size="sm"
-          onClick={() => setFilter('today')}
-        >
-          Today
-        </Button>
-        <Button 
-          variant={filter === 'upcoming' ? 'default' : 'outline'} 
-          size="sm"
-          onClick={() => setFilter('upcoming')}
-        >
-          Upcoming
-        </Button>
-        <Button 
-          variant={filter === 'past' ? 'default' : 'outline'} 
-          size="sm"
-          onClick={() => setFilter('past')}
-        >
-          Past
-        </Button>
-        <Button 
-          variant={filter === 'all' ? 'default' : 'outline'} 
-          size="sm"
-          onClick={() => setFilter('all')}
-        >
-          All
-        </Button>
-      </div>
-      
-      <div className="space-y-4">
-        {sortedDates.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No agenda items found for the selected filter.
-          </div>
-        ) : (
-          sortedDates.map(date => (
-            <Collapsible key={date} defaultOpen={true} className="border rounded-md">
-              <CollapsibleTrigger className="flex justify-between items-center w-full p-3 hover:bg-accent">
+    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+      {sortedItems.map((item) => {
+        const eventDate = parseISO(item.event_date);
+        const isCurrentDay = isToday(eventDate);
+        
+        return (
+          <div 
+            key={item.id} 
+            className="p-3 border rounded-lg hover:bg-muted/50 transition-colors flex justify-between"
+          >
+            <div className="flex items-start space-x-3 flex-grow">
+              <div className="flex flex-col items-center justify-center min-w-[40px] h-10 bg-accent rounded-md">
+                <span className="text-xs font-medium">{format(parseISO(item.event_date), "dd")}</span>
+                <span className="text-xs">{format(parseISO(item.event_date), "MMM")}</span>
+              </div>
+              
+              <div className="space-y-1">
                 <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span className="font-medium">
-                    {format(parseISO(date), 'EEEE, MMMM do, yyyy')}
-                  </span>
-                  {isToday(parseISO(date)) && (
-                    <Badge className="ml-2" variant="default">Today</Badge>
+                  <h4 className="font-medium">{item.title}</h4>
+                  {isCurrentDay && (
+                    <Badge variant="outline" className="ml-2 text-xs bg-primary/10">Today</Badge>
                   )}
                 </div>
-                <div className="flex items-center">
-                  <span className="text-sm text-muted-foreground mr-2">
-                    {groupedItems[date].length} item{groupedItems[date].length !== 1 ? 's' : ''}
-                  </span>
-                  <ChevronDown className="h-4 w-4 chevron-down" />
-                  <ChevronUp className="h-4 w-4 chevron-up" />
+                
+                <div className="flex items-center text-xs text-muted-foreground gap-2">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{item.event_time.substring(0, 5)}</span>
+                  </div>
+                  
+                  {showDate && (
+                    <div className="flex items-center gap-1">
+                      <CalendarIcon className="h-3 w-3" />
+                      <span>{format(parseISO(item.event_date), "EEEE, MMM d")}</span>
+                    </div>
+                  )}
                 </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="p-3 space-y-3 border-t">
-                  {groupedItems[date]
-                    .sort((a, b) => a.event_time.localeCompare(b.event_time))
-                    .map(item => (
-                      <div key={item.id} className="flex items-start space-x-3 p-2 rounded-md hover:bg-accent/50">
-                        <div className="flex-shrink-0 flex flex-col items-center justify-center w-12 h-12 bg-muted rounded-md">
-                          <span className="text-xs font-medium">
-                            {item.event_time.substring(0, 5)}
-                          </span>
-                          <Clock className="h-3 w-3 text-muted-foreground mt-1" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between">
-                            <h4 className="text-sm font-medium">{item.title}</h4>
-                            <div className="flex space-x-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => onEdit(item)}
-                              >
-                                <Edit className="h-3 w-3" />
-                                <span className="sr-only">Edit</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={() => confirmDelete(item.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                                <span className="sr-only">Delete</span>
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          {item.description && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {item.description}
-                            </p>
-                          )}
-                          
-                          {item.property && (
-                            <div className="mt-2 flex items-center">
-                              <Badge variant="outline" className="text-xs">
-                                Property: {item.property.title}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 ml-1 text-xs"
-                                onClick={() => navigateToProperty(item.property!.id)}
-                              >
-                                <ExternalLink className="h-3 w-3 mr-1" />
-                                View
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          ))
-        )}
-      </div>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the agenda item.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                
+                {item.description && (
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                    {item.description}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {showEditRemoveButtons && (
+              <div className="flex space-x-1 ml-2">
+                {onEdit && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(item);
+                    }}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
+                
+                {onDelete && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 text-destructive" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(item.id);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

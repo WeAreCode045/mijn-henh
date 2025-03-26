@@ -7,7 +7,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User, Mail, Phone, Edit } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
-export function UserProfileCard() {
+interface UserProfileCardProps {
+  inSidebar?: boolean;
+}
+
+export function UserProfileCard({ inSidebar = false }: UserProfileCardProps) {
   const { profile } = useAuth();
   const navigate = useNavigate();
   
@@ -23,6 +27,40 @@ export function UserProfileCard() {
       .join("")
       .toUpperCase();
   };
+
+  if (inSidebar) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center space-x-3">
+          <Avatar className="h-10 w-10">
+            {profile?.avatar_url ? (
+              <AvatarImage src={profile.avatar_url} alt={profile.full_name || "User"} />
+            ) : (
+              <AvatarFallback className="text-sm">
+                {profile?.full_name ? getInitials(profile.full_name) : <User className="h-4 w-4" />}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div className="space-y-0.5">
+            <h3 className="text-sm font-medium">{profile?.full_name || "User"}</h3>
+            <p className="text-xs text-muted-foreground">{profile?.role || "User"}</p>
+          </div>
+        </div>
+        <div className="text-xs space-y-1 ml-1">
+          <div className="flex items-center gap-1.5">
+            <Mail className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground truncate max-w-[160px]">{profile?.email || "No email"}</span>
+          </div>
+          {profile?.phone && (
+            <div className="flex items-center gap-1.5">
+              <Phone className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">{profile.phone}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Card className="h-full">

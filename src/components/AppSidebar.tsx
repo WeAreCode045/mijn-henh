@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -83,9 +84,10 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="mb-4 px-4">
         <SidebarGroup>
-          <SidebarMenu>
+          <UserProfileCard inSidebar={true} />
+          <SidebarMenu className="mt-4">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout}>
                 <LogOut className="w-4 h-4" />

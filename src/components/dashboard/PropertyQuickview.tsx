@@ -63,7 +63,6 @@ export function PropertyQuickview() {
             features: [],
             images: [],
             areas: [],
-            // Add all required properties from PropertyData interface
             livingArea: "",
             buildYear: "",
             garages: "",
@@ -114,14 +113,11 @@ export function PropertyQuickview() {
           
         if (error) throw error;
         if (data) {
-          // Parse nearby_places and nearby_cities from JSON if they exist
           let nearbyPlaces: PropertyNearbyPlace[] = [];
           let nearbyCities: PropertyCity[] = [];
           
-          // Safely parse nearby_places
           if (data.nearby_places) {
             try {
-              // If it's already an array, use it, otherwise try to parse it
               nearbyPlaces = Array.isArray(data.nearby_places) 
                 ? data.nearby_places 
                 : (typeof data.nearby_places === 'string' 
@@ -133,10 +129,8 @@ export function PropertyQuickview() {
             }
           }
           
-          // Safely parse nearby_cities
           if (data.nearby_cities) {
             try {
-              // If it's already an array, use it, otherwise try to parse it
               nearbyCities = Array.isArray(data.nearby_cities) 
                 ? data.nearby_cities 
                 : (typeof data.nearby_cities === 'string' 
@@ -148,7 +142,6 @@ export function PropertyQuickview() {
             }
           }
           
-          // Create a complete PropertyData object with all required properties
           setSelectedProperty({
             id: data.id,
             title: data.title || "",
@@ -164,7 +157,6 @@ export function PropertyQuickview() {
             object_id: data.object_id || "",
             created_at: data.created_at,
             updated_at: data.updated_at,
-            // Add all required properties from PropertyData interface
             livingArea: data.livingArea || "",
             buildYear: data.buildYear || "",
             garages: data.garages || "",
@@ -185,7 +177,7 @@ export function PropertyQuickview() {
             notes: data.notes || "",
             floorplans: [],
             floorplanEmbedScript: data.floorplanEmbedScript || "",
-            featuredImage: null, // We'll get this from images
+            featuredImage: null,
             featuredImages: [],
             propertyType: data.propertyType || ""
           });
@@ -289,7 +281,6 @@ export function PropertyQuickview() {
         description: "Property details updated successfully",
       });
       
-      // Update the local property data
       if (selectedProperty) {
         setSelectedProperty({
           ...selectedProperty,
@@ -327,17 +318,14 @@ export function PropertyQuickview() {
     return null;
   };
 
-  // Format dates
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Ensure we have a safe value for selectedPropertyId
   const safeSelectedPropertyId = selectedPropertyId || "select-property";
   
-  // Construct API endpoint for the property
   const apiEndpoint = selectedPropertyId 
     ? `${window.location.origin}/api/properties/${selectedPropertyId}` 
     : "No property selected";
@@ -347,158 +335,154 @@ export function PropertyQuickview() {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
           <span>Property Quickview</span>
-          {selectedPropertyId && !isEditing && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-sm flex items-center gap-1"
-              onClick={navigateToProperty}
-            >
-              View Property <ChevronRight className="h-4 w-4" />
-            </Button>
-          )}
-          {selectedPropertyId && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleToggleEdit}
-              type="button"
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              {isEditing ? "Cancel" : "Edit"}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {selectedPropertyId && !isEditing && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-sm flex items-center gap-1"
+                onClick={navigateToProperty}
+              >
+                View Property <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+            {selectedPropertyId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleToggleEdit}
+                type="button"
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                {isEditing ? "Cancel" : "Edit"}
+              </Button>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-1">
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search properties..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <Select 
-              value={safeSelectedPropertyId} 
-              onValueChange={handlePropertySelect}
-              defaultValue="select-property"
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a property" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="select-property" disabled>Select a property</SelectItem>
-                {properties.map((property) => (
-                  <SelectItem 
-                    key={property.id} 
-                    value={property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
-                  >
-                    {property.title || `Property ID ${property.id.substring(0, 8)}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search properties..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           
-          <div className="md:col-span-3">
-            {selectedProperty ? (
+          <Select 
+            value={safeSelectedPropertyId} 
+            onValueChange={handlePropertySelect}
+            defaultValue="select-property"
+          >
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Select a property" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="select-property" disabled>Select a property</SelectItem>
+              {properties.map((property) => (
+                <SelectItem 
+                  key={property.id} 
+                  value={property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                >
+                  {property.title || `Property ID ${property.id.substring(0, 8)}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {selectedProperty ? (
+          <div className="space-y-4">
+            {isEditing ? (
               <div className="space-y-4">
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="property-title">Title</Label>
-                      <Input
-                        id="property-title"
-                        value={propertyTitle}
-                        onChange={(e) => setPropertyTitle(e.target.value)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="property-address">Address</Label>
-                      <Input
-                        id="property-address"
-                        value={propertyAddress}
-                        onChange={(e) => setPropertyAddress(e.target.value)}
-                        className="mt-1"
-                        ref={addressInputRef}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="object-id">Object ID</Label>
-                      <Input
-                        id="object-id"
-                        value={propertyObjectId}
-                        onChange={(e) => setPropertyObjectId(e.target.value)}
-                        placeholder="Enter object ID"
-                        className="sm:flex-1"
-                      />
-                    </div>
-                    <Button onClick={handleSaveDetails} disabled={isUpdating} type="button">
-                      {isUpdating ? "Saving..." : "Save Details"}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2 space-y-4">
-                      <div>
-                        <h3 className="text-lg font-semibold">{selectedProperty.title}</h3>
-                        <p className="text-muted-foreground">{selectedProperty.address || "No address specified"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">ID:</span>
-                        <p className="text-sm font-mono break-all">{selectedProperty.id}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">Object ID:</span>
-                        <p className="text-sm break-all">{selectedProperty.object_id || "Not specified"}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium">API Endpoint:</span>
-                        <Code className="text-xs mt-1 overflow-x-auto w-full block">{apiEndpoint}</Code>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <span className="text-sm font-medium">Created:</span>
-                          <p className="text-sm">{formatDate(selectedProperty.created_at)}</p>
-                        </div>
-                        <div>
-                          <span className="text-sm font-medium">Last Modified:</span>
-                          <p className="text-sm">{formatDate(selectedProperty.updated_at)}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      {getMainImageUrl(selectedProperty) ? (
-                        <img 
-                          src={getMainImageUrl(selectedProperty)} 
-                          alt={selectedProperty.title} 
-                          className="w-full h-40 object-cover rounded-md"
-                        />
-                      ) : (
-                        <div className="w-full h-40 bg-muted flex items-center justify-center rounded-md">
-                          <p className="text-muted-foreground text-sm">No image available</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="property-title">Title</Label>
+                  <Input
+                    id="property-title"
+                    value={propertyTitle}
+                    onChange={(e) => setPropertyTitle(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="property-address">Address</Label>
+                  <Input
+                    id="property-address"
+                    value={propertyAddress}
+                    onChange={(e) => setPropertyAddress(e.target.value)}
+                    className="mt-1"
+                    ref={addressInputRef}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="object-id">Object ID</Label>
+                  <Input
+                    id="object-id"
+                    value={propertyObjectId}
+                    onChange={(e) => setPropertyObjectId(e.target.value)}
+                    placeholder="Enter object ID"
+                    className="sm:flex-1"
+                  />
+                </div>
+                <Button onClick={handleSaveDetails} disabled={isUpdating} type="button">
+                  {isUpdating ? "Saving..." : "Save Details"}
+                </Button>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-40 text-muted-foreground">
-                {isLoading ? 'Loading property details...' : 'Select a property to view details'}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">{selectedProperty.title}</h3>
+                    <p className="text-muted-foreground">{selectedProperty.address || "No address specified"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">ID:</span>
+                    <p className="text-sm font-mono break-all">{selectedProperty.id}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Object ID:</span>
+                    <p className="text-sm break-all">{selectedProperty.object_id || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">API Endpoint:</span>
+                    <Code className="text-xs mt-1 overflow-x-auto w-full block">{apiEndpoint}</Code>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-sm font-medium">Created:</span>
+                      <p className="text-sm">{formatDate(selectedProperty.created_at)}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium">Last Modified:</span>
+                      <p className="text-sm">{formatDate(selectedProperty.updated_at)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  {getMainImageUrl(selectedProperty) ? (
+                    <img 
+                      src={getMainImageUrl(selectedProperty)} 
+                      alt={selectedProperty.title} 
+                      className="w-full h-40 object-cover rounded-md"
+                    />
+                  ) : (
+                    <div className="w-full h-40 bg-muted flex items-center justify-center rounded-md">
+                      <p className="text-muted-foreground text-sm">No image available</p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center justify-center h-40 text-muted-foreground">
+            {isLoading ? 'Loading property details...' : 'Select a property to view details'}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
