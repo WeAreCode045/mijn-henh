@@ -106,7 +106,7 @@ export function TodoAssignmentFields({
             <SelectItem value="unassigned">Unassigned</SelectItem>
             {properties.map(property => (
               <SelectItem key={property.id} value={property.id}>
-                {property.title}
+                {property.title || `Property ${property.id.substring(0, 8)}`}
               </SelectItem>
             ))}
           </SelectContent>

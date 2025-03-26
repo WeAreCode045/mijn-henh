@@ -97,6 +97,7 @@ export function AgendaDialog({
     }
   };
 
+  // Ensure we have a safe value for the property id
   const safeSelectedPropertyId = selectedPropertyId || "none";
 
   return (

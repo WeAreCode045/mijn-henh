@@ -150,6 +150,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
     }
   };
 
+  // Ensure we have a safe value for role
+  const safeRole = formData.role || "agent";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -231,7 +234,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
       <div className="space-y-2">
         <Label htmlFor="role">Role</Label>
         <Select
-          value={formData.role}
+          value={safeRole}
           onValueChange={(value: "admin" | "agent") =>
             setFormData((prev) => ({ ...prev, role: value }))
           }

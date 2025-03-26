@@ -15,6 +15,9 @@ interface ContactFormProps {
 export function ContactForm({ property, settings }: ContactFormProps) {
   const { formData, handleChange, handleSelectChange, handleSubmit, isSubmitting } = useContactForm(property, settings);
 
+  // Make sure we have a safe value for the inquiry type
+  const safeInquiryType = formData.inquiry_type || "information";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -58,7 +61,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
             <Label htmlFor="inquiry_type" className="block text-sm mb-2">Ik wil graag:</Label>
             <Select 
               name="inquiry_type" 
-              value={formData.inquiry_type || "information"} 
+              value={safeInquiryType} 
               onValueChange={(value) => handleSelectChange("inquiry_type", value)}
               defaultValue="information"
             >

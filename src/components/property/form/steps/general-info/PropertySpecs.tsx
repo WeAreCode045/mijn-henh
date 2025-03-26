@@ -109,6 +109,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
     "A+++", "A++", "A+", "A", "B", "C", "D", "E", "F", "G"
   ];
 
+  // Ensure we have safe values for selects
   const safePropertyType = formData.propertyType || "not_specified";
   const safeEnergyLabel = formData.energyLabel || "none";
 

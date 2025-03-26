@@ -19,11 +19,14 @@ export function AreaColumnsSelector({
   areaId, 
   onColumnsChange 
 }: AreaColumnsSelectorProps) {
+  // Ensure we have a valid columns value
+  const safeColumns = columns || 2;
+  
   return (
     <div>
       <Label htmlFor={`columns-${areaId}`}>Image Grid Columns</Label>
       <Select
-        value={columns.toString()}
+        value={safeColumns.toString()}
         onValueChange={(value) => onColumnsChange(parseInt(value))}
         defaultValue="2" // Default to 2 columns
       >

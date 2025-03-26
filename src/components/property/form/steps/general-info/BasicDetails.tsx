@@ -24,6 +24,10 @@ export function BasicDetails({ formData, onFieldChange, setPendingChanges }: Bas
     if (setPendingChanges) setPendingChanges(true);
   };
 
+  // Ensure we have safe values for selects
+  const safePropertyType = formData.propertyType || "not_selected";
+  const safeStatus = formData.status || "not_selected";
+
   return (
     <Card>
       <CardHeader>
@@ -47,7 +51,7 @@ export function BasicDetails({ formData, onFieldChange, setPendingChanges }: Bas
           <div>
             <Label htmlFor="propertyType">Property Type</Label>
             <Select
-              value={formData.propertyType || 'not_selected'}
+              value={safePropertyType}
               onValueChange={(value) => handleSelectChange('propertyType', value)}
               defaultValue="not_selected"
             >
@@ -71,7 +75,7 @@ export function BasicDetails({ formData, onFieldChange, setPendingChanges }: Bas
           <div>
             <Label htmlFor="status">Status</Label>
             <Select
-              value={formData.status || 'not_selected'}
+              value={safeStatus}
               onValueChange={(value) => handleSelectChange('status', value)}
               defaultValue="not_selected"
             >
