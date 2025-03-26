@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, CheckCircle2, CircleDashed } from "lucide-react";
-import { TodoDialog } from "@/components/dashboard/TodoDialog";
+import { TodoDialog } from "@/components/dashboard/todo/TodoDialog";
 import { useTodoItems } from "@/hooks/useTodoItems";
 import { format, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
