@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -183,7 +184,7 @@ export function AgendaDialog({
                 {properties.map((property) => (
                   <SelectItem 
                     key={property.id} 
-                    value={property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                    value={property.id || `property-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
                   >
                     {property.title || `Property ${property.id.substring(0, 8)}`}
                   </SelectItem>

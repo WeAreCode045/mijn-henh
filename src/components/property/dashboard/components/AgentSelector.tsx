@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         
         if (data) {
           setAgents(data.map(agent => ({
-            id: agent.id || `id_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            id: agent.id || `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             full_name: agent.full_name || 'Unnamed Agent'
           })));
         }
@@ -86,7 +87,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
           {agents.map(agent => (
             <SelectItem 
               key={agent.id} 
-              value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+              value={agent.id || `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
             >
               {agent.full_name}
             </SelectItem>

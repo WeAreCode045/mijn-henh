@@ -21,7 +21,7 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
         <Select
           value={safeSelectedAgent}
           onValueChange={onAgentSelect}
-          defaultValue="none" // Add default value
+          defaultValue="none"
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an agent" />
@@ -31,7 +31,7 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
             {agents.map((agent) => (
               <SelectItem 
                 key={agent.id} 
-                value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                value={agent.id || `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
               >
                 {agent.full_name}
               </SelectItem>

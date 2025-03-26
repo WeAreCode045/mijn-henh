@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import {
@@ -35,7 +36,7 @@ export function TodoAssignmentFields({
       if (!error && data) {
         // Make sure all agents have valid ids
         setAgents(data.map(agent => ({
-          id: agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          id: agent.id || `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           full_name: agent.full_name || "Unnamed Agent"
         })));
       }
@@ -51,7 +52,7 @@ export function TodoAssignmentFields({
       if (!error && data) {
         // Make sure all properties have valid ids
         setProperties(data.map(property => ({
-          id: property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          id: property.id || `property-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           title: property.title || `Property ${property.id?.substring(0, 8) || "Untitled"}`
         })));
       }

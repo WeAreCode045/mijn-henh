@@ -42,7 +42,7 @@ export function FieldMapper({
             {xmlFields.map((field) => (
               <SelectItem 
                 key={field} 
-                value={field || `field_${fieldId}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`}
+                value={field || `field-${fieldId}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
               >
                 {field}
               </SelectItem>

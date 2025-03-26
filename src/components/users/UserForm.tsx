@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -234,6 +235,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           onValueChange={(value: "admin" | "agent") =>
             setFormData((prev) => ({ ...prev, role: value }))
           }
+          defaultValue="agent"
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a role" />

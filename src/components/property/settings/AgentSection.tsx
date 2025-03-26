@@ -73,7 +73,7 @@ export function AgentSection({
               {agents.map((agent) => (
                 <SelectItem 
                   key={agent.id} 
-                  value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                  value={agent.id || `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
                 >
                   {agent.full_name}
                 </SelectItem>

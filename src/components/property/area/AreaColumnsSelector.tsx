@@ -25,6 +25,7 @@ export function AreaColumnsSelector({
       <Select
         value={columns.toString()}
         onValueChange={(value) => onColumnsChange(parseInt(value))}
+        defaultValue="2" // Default to 2 columns
       >
         <SelectTrigger 
           id={`columns-${areaId}`}

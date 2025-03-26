@@ -60,6 +60,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
               name="inquiry_type" 
               value={formData.inquiry_type || "information"} 
               onValueChange={(value) => handleSelectChange("inquiry_type", value)}
+              defaultValue="information"
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecteer een optie" />
