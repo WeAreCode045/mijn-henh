@@ -34,14 +34,8 @@ import {
 interface AgendaDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (
-    title: string,
-    description: string | null,
-    date: string,
-    time: string,
-    propertyId?: string | null
-  ) => Promise<void>;
-  item?: AgendaItem;
+  onSave: (data: Omit<AgendaItem, "id" | "created_at" | "updated_at">) => Promise<void>;
+  item?: AgendaItem | null;
   mode: "add" | "edit";
 }
 
@@ -82,13 +76,13 @@ export function AgendaDialog({
     setIsSaving(true);
     try {
       const formattedDate = date ? format(date, "yyyy-MM-dd") : "";
-      await onSave(
+      await onSave({
         title,
         description,
-        formattedDate,
-        time,
-        selectedPropertyId
-      );
+        event_date: formattedDate,
+        event_time: time,
+        property_id: selectedPropertyId
+      });
       onClose();
     } catch (error) {
       console.error("Error saving agenda item:", error);
