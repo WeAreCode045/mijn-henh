@@ -1,25 +1,18 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from 'lucide-react';
-import { Submission } from './types';
+import { CheckCircle, ArrowLeft } from 'lucide-react';
+import { Submission, SubmissionDetailProps } from '@/types/submission';
 import { SubmissionReplies } from './SubmissionReplies';
 import { SubmissionReplyForm } from './SubmissionReplyForm';
-
-interface SubmissionDetailProps {
-  submission: Submission;
-  onSendReply: (text: string) => Promise<void>;
-  isSending: boolean;
-  onMarkAsRead: () => Promise<void>;
-  isMarking: boolean;
-}
 
 export function SubmissionDetail({ 
   submission,
   onSendReply,
   isSending,
   onMarkAsRead,
-  isMarking
+  isMarking,
+  onBack
 }: SubmissionDetailProps) {
   const [replyText, setReplyText] = useState('');
 
@@ -39,7 +32,18 @@ export function SubmissionDetail({
   return (
     <div className="p-4 border rounded-lg">
       <div className="flex justify-between items-start">
-        <h3 className="text-lg font-semibold">{submission.name}</h3>
+        {onBack && (
+          <Button 
+            onClick={onBack} 
+            variant="ghost" 
+            size="sm"
+            className="mr-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
+        <h3 className="text-lg font-semibold flex-grow">{submission.name}</h3>
         {!submission.is_read && (
           <Button 
             onClick={handleMarkAsReadClick} 

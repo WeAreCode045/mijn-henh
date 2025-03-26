@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { PlacesList } from "./PlacesList";

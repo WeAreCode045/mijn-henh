@@ -9,11 +9,11 @@ export function groupPlacesByCategory(places: PropertyNearbyPlace[]): Record<str
     // Use the category if available, otherwise use the type as fallback
     const category = place.category || place.type || 'Other';
     
-    if (!acc[category]) {
-      acc[category] = [];
+    if (!acc[category as string]) {
+      acc[category as string] = [];
     }
     
-    acc[category].push(place);
+    acc[category as string].push(place);
     return acc;
   }, {} as Record<string, PropertyNearbyPlace[]>);
   

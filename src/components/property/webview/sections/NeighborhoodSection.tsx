@@ -3,6 +3,7 @@ import React from "react";
 import { PropertyData } from "@/types/property";
 import { StarIcon } from "lucide-react";
 import { groupPlacesByCategory } from "../../form/steps/location/utils/placeUtils";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 
 // Import WebviewSectionTitle from the correct path
 import { WebviewSectionTitle } from "../components/WebviewSectionTitle";
@@ -18,7 +19,7 @@ export function NeighborhoodSection({ property, waitForPlaces }: NeighborhoodSec
   }
 
   // Filter only places that are marked as visible
-  const visiblePlaces = property.nearby_places.filter(place => 
+  const visiblePlaces = (property.nearby_places as PropertyNearbyPlace[]).filter(place => 
     place.visible_in_webview !== false
   );
 
@@ -57,7 +58,7 @@ export function NeighborhoodSection({ property, waitForPlaces }: NeighborhoodSec
                       )}
                     </div>
                     
-                    {place.rating && (
+                    {place.rating !== undefined && typeof place.rating === 'number' && (
                       <div className="flex items-center bg-amber-50 text-amber-700 px-2 py-1 rounded">
                         <StarIcon className="h-4 w-4 fill-amber-500 text-amber-500 mr-1" />
                         <span>{place.rating.toFixed(1)}</span>

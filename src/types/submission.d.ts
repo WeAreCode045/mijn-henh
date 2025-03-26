@@ -18,14 +18,35 @@ export interface Submission {
     phone?: string;
     avatar_url?: string;
   };
-  replies?: any[];
+  replies?: SubmissionReply[];
 }
 
-interface SubmissionDetailProps {
+export interface SubmissionReply {
+  id: string;
+  submission_id: string;
+  agent_id: string;
+  message: string;
+  created_at: string;
+  agent?: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url?: string;
+  };
+  text?: string; // Added for compatibility
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url?: string;
+  };
+}
+
+export interface SubmissionDetailProps {
   submission: Submission;
   onSendReply: (text: string) => Promise<void>;
   isSending: boolean;
   onMarkAsRead: () => Promise<void>;
   isMarking: boolean;
-  onBack?: () => void;
+  onBack?: () => void; // Making this optional so it matches existing usage
 }

@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Submission } from '../types';
+import { Submission, SubmissionReply } from '@/types/submission';
 
 export function useFetchSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -40,6 +40,8 @@ export function useFetchSubmissions(propertyId: string) {
           replies:property_submission_replies(
             id,
             reply_text,
+            submission_id,
+            user_id,
             created_at,
             updated_at,
             user:user_id(id, full_name, email, avatar_url)
@@ -56,28 +58,14 @@ export function useFetchSubmissions(propertyId: string) {
       console.log(`Found ${data?.length || 0} submissions for property ID: ${propertyId}`);
       
       // Create Submission objects with replies arrays
-      const transformedSubmissions: Submission[] = (data || []).map(item => ({
-        id: item.id,
-        property_id: item.property_id,
-        name: item.name,
-        email: item.email,
-        phone: item.phone,
-        message: item.message || '',
-        inquiry_type: item.inquiry_type,
-        is_read: item.is_read,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        agent_id: item.agent_id,
-        agent: item.agent ? {
-          id: item.agent.id,
-          full_name: item.agent.full_name,
-          email: item.agent.email,
-          phone: item.agent.phone || '',
-          avatar_url: item.agent.avatar_url
-        } : undefined,
-        replies: (item.replies || []).map((reply: any) => ({
+      const transformedSubmissions: Submission[] = (data || []).map(item => {
+        // Transform replies to match SubmissionReply structure
+        const transformedReplies: SubmissionReply[] = (item.replies || []).map((reply: any) => ({
           id: reply.id,
-          text: reply.reply_text,
+          submission_id: reply.submission_id,
+          agent_id: reply.user_id,
+          message: reply.reply_text,
+          text: reply.reply_text, // For compatibility
           created_at: reply.created_at,
           user: reply.user ? {
             id: reply.user.id,
@@ -85,8 +73,30 @@ export function useFetchSubmissions(propertyId: string) {
             email: reply.user.email,
             avatar_url: reply.user.avatar_url
           } : undefined
-        }))
-      }));
+        }));
+        
+        return {
+          id: item.id,
+          property_id: item.property_id,
+          name: item.name,
+          email: item.email,
+          phone: item.phone,
+          message: item.message || '',
+          inquiry_type: item.inquiry_type,
+          is_read: item.is_read,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          agent_id: item.agent_id,
+          agent: item.agent ? {
+            id: item.agent.id,
+            full_name: item.agent.full_name,
+            email: item.agent.email,
+            phone: item.agent.phone || '',
+            avatar_url: item.agent.avatar_url
+          } : undefined,
+          replies: transformedReplies
+        };
+      });
       
       setSubmissions(transformedSubmissions);
     } catch (error) {

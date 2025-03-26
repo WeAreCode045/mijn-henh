@@ -1,13 +1,13 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PropertyPlaceType } from "@/types/property";
+import { PropertyPlaceType, PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 import { Button } from "@/components/ui/button";
 import { StarIcon } from "lucide-react";
 import { groupPlacesByCategory } from "./form/steps/location/utils/placeUtils";
 
 interface PropertyNearbyPlacesProps {
-  places: PropertyPlaceType[];
+  places: PropertyNearbyPlace[];
   onPlaceDelete?: (e: React.MouseEvent, id: string) => void;
 }
 
@@ -41,7 +41,7 @@ export function PropertyNearbyPlaces({ places, onPlaceDelete }: PropertyNearbyPl
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    {place.rating && (
+                    {place.rating !== undefined && typeof place.rating === 'number' && (
                       <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded text-xs">
                         <StarIcon className="h-3 w-3 fill-amber-500 text-amber-500" />
                         <span>{place.rating.toFixed(1)}</span>
