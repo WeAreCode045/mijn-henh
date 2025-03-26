@@ -26,7 +26,7 @@ export function CommunicationsSection() {
     const fetchSubmissions = async () => {
       try {
         const { data, error } = await supabase
-          .from('property_submissions')
+          .from('property_contact_submissions')
           .select(`
             id,
             created_at,
@@ -35,7 +35,7 @@ export function CommunicationsSection() {
             name,
             email,
             message,
-            read
+            is_read as read
           `)
           .order('created_at', { ascending: false })
           .limit(10);
