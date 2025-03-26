@@ -88,7 +88,7 @@ export function SortableImageGrid({
         items={sortedImages.map(image => image.id)} 
         strategy={rectSortingStrategy}
       >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {sortedImages.map((image, index) => {
             const imageUrl = typeof image === 'string' ? image : image.url;
             const isMain = featuredImage === imageUrl;
