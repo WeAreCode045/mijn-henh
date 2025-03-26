@@ -9,7 +9,6 @@ export function usePropertySaveHandlers(
 ) {
   const { toast } = useToast();
 
-  // Updated to return Promise<void>
   const handleSaveObjectId = async (objectId: string): Promise<void> => {
     if (!formState.id) {
       toast({
@@ -46,7 +45,6 @@ export function usePropertySaveHandlers(
     }
   };
 
-  // Updated to return Promise<void>
   const handleSaveAgent = async (agentId: string): Promise<void> => {
     if (!formState.id) {
       toast({

@@ -29,29 +29,28 @@ export function AgendaCalendarView({ agendaItems }: AgendaCalendarViewProps) {
 
   const selectedDateItems = getAgendaItemsForDate(selectedDate);
 
-  // Function to render the day cell content (to show indicators for days with agenda items)
-  const renderDayContent = (day: Date) => {
-    const hasItems = agendaItems.some(item => isSameDay(parseISO(item.event_date), day));
-
-    if (hasItems) {
-      return (
-        <div className="relative h-full w-full">
-          <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-            <div className="h-1 w-1 rounded-full bg-primary"></div>
-          </div>
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
   };
 
   const navigateToProperty = (propertyId: string) => {
     navigate(`/property/${propertyId}/dashboard`);
+  };
+
+  // Custom day component to show indicators for days with agenda items
+  const customDayRender = (day: Date, modifiers: any) => {
+    const hasItems = agendaItems.some(item => isSameDay(parseISO(item.event_date), day));
+
+    return (
+      <div className="relative h-full w-full">
+        <div>{day.getDate()}</div>
+        {hasItems && (
+          <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+            <div className="h-1 w-1 rounded-full bg-primary"></div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -120,13 +119,32 @@ export function AgendaCalendarView({ agendaItems }: AgendaCalendarViewProps) {
           selected={selectedDate}
           onSelect={handleDateSelect}
           className="rounded-md border"
+          modifiersStyles={{
+            today: {
+              fontWeight: "bold"
+            }
+          }}
+          modifiers={{
+            hasEvents: (date) => 
+              agendaItems.some(item => isSameDay(parseISO(item.event_date), date))
+          }}
           components={{
-            DayContent: ({ date }: { date: Date }) => (
-              <>
-                {date.getDate()}
-                {renderDayContent(date)}
-              </>
-            )
+            Day: ({ date, displayMonth, selected, disabled, ...props }) => {
+              const hasItems = agendaItems.some(item => 
+                isSameDay(parseISO(item.event_date), date)
+              );
+              
+              return (
+                <div {...props}>
+                  {date.getDate()}
+                  {hasItems && (
+                    <div className="absolute bottom-1 left-0 right-0 flex justify-center">
+                      <div className="h-1 w-1 rounded-full bg-primary"></div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
           }}
         />
       </div>

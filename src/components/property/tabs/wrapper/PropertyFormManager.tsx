@@ -60,28 +60,32 @@ export function PropertyFormManager({
     images: formManager.images,
     isLoadingLocationData: formManager.isLoadingLocationData || false,
     isGeneratingMap: formManager.isGeneratingMap || false,
+    // Add backward compatibility aliases for the children function
+    onAddFeature: wrapMethod(formManager.addFeature),
+    onRemoveFeature: wrapMethod(formManager.removeFeature),
+    onUpdateFeature: wrapMethod(formManager.updateFeature),
+    onAddArea: wrapMethod(formManager.addArea),
+    onRemoveArea: wrapMethod(formManager.removeArea),
+    onUpdateArea: wrapMethod(formManager.updateArea),
+    onAreaImageRemove: wrapMethod(formManager.handleAreaImageRemove),
+    onAreaImagesSelect: wrapMethod(formManager.handleAreaImagesSelect),
   };
 
   // Use the original methods or the wrapped methods based on the archived status
   const methods = isArchived ? wrappedMethods : {
     ...formManager,
-    // Make sure isLoadingLocationData and isGeneratingMap are included
     isLoadingLocationData: formManager.isLoadingLocationData || false,
     isGeneratingMap: formManager.isGeneratingMap || false,
+    // Add backward compatibility aliases
+    onAddFeature: formManager.addFeature,
+    onRemoveFeature: formManager.removeFeature,
+    onUpdateFeature: formManager.updateFeature,
+    onAddArea: formManager.addArea,
+    onRemoveArea: formManager.removeArea,
+    onUpdateArea: formManager.updateArea,
+    onAreaImageRemove: formManager.handleAreaImageRemove,
+    onAreaImagesSelect: formManager.handleAreaImagesSelect,
   };
 
-  // Add backward compatibility aliases
-  const fullMethods = {
-    ...methods,
-    onAddFeature: methods.addFeature,
-    onRemoveFeature: methods.removeFeature,
-    onUpdateFeature: methods.updateFeature,
-    onAddArea: methods.addArea,
-    onRemoveArea: methods.removeArea,
-    onUpdateArea: methods.updateArea,
-    onAreaImageRemove: methods.handleAreaImageRemove,
-    onAreaImagesSelect: methods.handleAreaImagesSelect,
-  };
-
-  return children(fullMethods);
+  return children(methods);
 }

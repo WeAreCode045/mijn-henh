@@ -7,7 +7,7 @@ export function usePropertyActionWrapper(isArchived: boolean) {
   
   // Modification wrapper to handle archived status
   const wrapMethod = useCallback((method: (...args: any[]) => Promise<any> | void) => {
-    return (...args: any[]) => {
+    return (...args: any[]): Promise<any> => {
       if (isArchived) {
         toast({
           title: "Action blocked",
@@ -16,7 +16,14 @@ export function usePropertyActionWrapper(isArchived: boolean) {
         });
         return Promise.resolve();
       }
-      return method(...args);
+      
+      // Ensure we always return a Promise
+      const result = method(...args);
+      if (result instanceof Promise) {
+        return result;
+      } else {
+        return Promise.resolve(result);
+      }
     };
   }, [isArchived, toast]);
 
