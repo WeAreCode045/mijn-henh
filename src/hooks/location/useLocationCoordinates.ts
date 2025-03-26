@@ -69,44 +69,44 @@ export function useLocationCoordinates(
     } finally {
       setIsLoading(false);
     }
-  }, [formData.address, formData.id, onFieldChange, toast, setIsLoading]);
-  
-  // New function to generate map with coordinates
-  const generateMapWithCoordinates = async (latitude: number, longitude: number) => {
-    try {
-      const { data: settings } = await supabase
-        .from('agency_settings')
-        .select('google_maps_api_key')
-        .single();
-      
-      if (!settings?.google_maps_api_key) {
-        throw new Error("Google Maps API key not configured");
+
+    // New function to generate map with coordinates
+    async function generateMapWithCoordinates(latitude: number, longitude: number) {
+      try {
+        const { data: settings } = await supabase
+          .from('agency_settings')
+          .select('google_maps_api_key')
+          .single();
+        
+        if (!settings?.google_maps_api_key) {
+          throw new Error("Google Maps API key not configured");
+        }
+        
+        const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${latitude},${longitude}&key=${settings.google_maps_api_key}`;
+        
+        onFieldChange('map_image', mapImageUrl);
+        
+        if (formData.id) {
+          await supabase
+            .from('properties')
+            .update({ map_image: mapImageUrl })
+            .eq('id', formData.id);
+        }
+        
+        toast({
+          title: "Success",
+          description: "Map image generated automatically",
+        });
+      } catch (error) {
+        console.error("Error generating map image:", error);
+        toast({
+          title: "Error",
+          description: "Failed to generate map image",
+          variant: "destructive",
+        });
       }
-      
-      const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${latitude},${longitude}&key=${settings.google_maps_api_key}`;
-      
-      onFieldChange('map_image', mapImageUrl);
-      
-      if (formData.id) {
-        await supabase
-          .from('properties')
-          .update({ map_image: mapImageUrl })
-          .eq('id', formData.id);
-      }
-      
-      toast({
-        title: "Success",
-        description: "Map image generated automatically",
-      });
-    } catch (error) {
-      console.error("Error generating map image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate map image",
-        variant: "destructive",
-      });
     }
-  };
+  }, [formData.address, formData.id, onFieldChange, toast, setIsLoading]);
   
   // Automatically fetch coordinates when address changes and has a value
   useEffect(() => {
@@ -117,7 +117,7 @@ export function useLocationCoordinates(
       
       return () => clearTimeout(timer);
     }
-  }, [formData.address, formData.id]);
+  }, [formData.address, formData.id, fetchLocationData]);
   
   return { fetchLocationData };
 }

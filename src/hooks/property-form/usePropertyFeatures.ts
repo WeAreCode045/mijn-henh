@@ -9,15 +9,15 @@ export function usePropertyFeatures(
   onFieldChange: (field: keyof PropertyFormData, value: any) => void
 ) {
   // Save feature changes directly to the database
-  const saveFeaturesField = async (features: PropertyFeature[]) => {
+  const saveFeaturesField = useCallback(async (features: PropertyFeature[]) => {
     if (!formData.id) return;
-    
+
     try {
       const { error } = await supabase
         .from('properties')
         .update({ features: JSON.stringify(features) })
         .eq('id', formData.id);
-        
+
       if (error) {
         console.error("Error saving features:", error);
       } else {
@@ -26,7 +26,7 @@ export function usePropertyFeatures(
     } catch (err) {
       console.error("Failed to save features:", err);
     }
-  };
+  }, [formData.id]);
   
   // Add a new feature to the property
   const addFeature = useCallback(async () => {
@@ -44,7 +44,7 @@ export function usePropertyFeatures(
     
     // Save directly to database
     await saveFeaturesField(updatedFeatures);
-  }, [formData.features, onFieldChange]);
+  }, [formData.features, onFieldChange, saveFeaturesField]);
   
   // Remove a feature from the property
   const removeFeature = useCallback(async (id: string) => {
@@ -57,7 +57,7 @@ export function usePropertyFeatures(
     
     // Save directly to database
     await saveFeaturesField(updatedFeatures);
-  }, [formData.features, onFieldChange]);
+  }, [formData.features, onFieldChange, saveFeaturesField]);
   
   // Update a feature's description
   const updateFeature = useCallback(async (id: string, description: string) => {
@@ -75,7 +75,7 @@ export function usePropertyFeatures(
     
     // Save directly to database
     await saveFeaturesField(updatedFeatures);
-  }, [formData.features, onFieldChange]);
+  }, [formData.features, onFieldChange, saveFeaturesField]);
   
   return {
     addFeature,

@@ -46,7 +46,7 @@ export function usePropertyFloorplans(
       const files = Array.from(e.target.files);
       const uploadPromises = files.map(async (file, index) => {
         // Sanitize the file name
-        const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
+        const sanitizedFileName = file.name.replace(/[^\x20-\x7E]/g, '');
         
         // Create a unique file name
         const fileName = `${crypto.randomUUID()}-${sanitizedFileName}`;

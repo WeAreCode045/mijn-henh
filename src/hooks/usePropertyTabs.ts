@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 export function usePropertyTabs() {
@@ -8,19 +8,17 @@ export function usePropertyTabs() {
   const location = useLocation();
   
   // Valid tab values and their corresponding paths
-  const validTabs = ['dashboard', 'content', 'media', 'communications'];
+  const validTabs = useMemo(() => ['dashboard', 'content', 'media', 'communications'], []);
   
   // Extract the current tab from the URL path
-  const getTabFromPath = (path: string): string => {
-    // Check if the path includes one of our valid tabs
+  const getTabFromPath = useCallback((path: string): string => {
     for (const tab of validTabs) {
       if (path.includes(`/${tab}`)) {
         return tab;
       }
     }
-    // If no valid tab is found in the path, default to dashboard
     return 'dashboard';
-  };
+  }, [validTabs]);
   
   // Get the initial active tab from the URL
   const [activeTab, setActiveTab] = useState(getTabFromPath(location.pathname));
@@ -45,7 +43,7 @@ export function usePropertyTabs() {
     if (id && (location.pathname === `/property/${id}` || location.pathname === `/property/${id}/`)) {
       navigate(`/property/${id}/dashboard`);
     }
-  }, [location.pathname, activeTab, id, navigate]);
+  }, [location.pathname, activeTab, id, navigate, getTabFromPath]);
   
   return {
     activeTab,

@@ -9,9 +9,10 @@ export function useAutoSaveState() {
 
   // Cleanup timeout on unmount
   useEffect(() => {
+    const currentTimeout = timeoutRef.current;
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (currentTimeout) {
+        clearTimeout(currentTimeout);
       }
     };
   }, []);

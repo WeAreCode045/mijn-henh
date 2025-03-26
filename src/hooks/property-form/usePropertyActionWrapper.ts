@@ -6,7 +6,7 @@ export function usePropertyActionWrapper(isArchived: boolean) {
   const { toast } = useToast();
   
   // Modification wrapper to handle archived status
-  const wrapMethod = useCallback((method: Function) => {
+  const wrapMethod = useCallback((method: (...args: any[]) => Promise<any> | void) => {
     return (...args: any[]) => {
       if (isArchived) {
         toast({

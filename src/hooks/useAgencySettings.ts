@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AgencySettings } from "@/types/agency";
 import { fetchAgencySettings } from "@/utils/fetchAgencySettings";
 import { defaultAgencySettings } from "@/utils/defaultAgencySettings";
@@ -35,7 +35,7 @@ export const useAgencySettings = () => {
   });
 
   // Fetch global features from the database
-  const fetchGlobalFeatures = async () => {
+  const fetchGlobalFeatures = useCallback(async () => {
     const { data, error } = await supabase
       .from('property_features')
       .select('*')
@@ -52,7 +52,7 @@ export const useAgencySettings = () => {
     }
     
     setGlobalFeatures(data || []);
-  };
+  }, [toast]);
 
   // Handle adding a new global feature
   const handleGlobalFeatureAdd = async (featureDescription: string) => {
@@ -171,7 +171,7 @@ export const useAgencySettings = () => {
       await fetchGlobalFeatures();
     };
     loadSettings();
-  }, []);
+  }, [fetchGlobalFeatures, setLogoPreview]);
 
   return {
     settings,

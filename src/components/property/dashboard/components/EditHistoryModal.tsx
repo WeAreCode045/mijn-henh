@@ -28,41 +28,41 @@ export function EditHistoryModal({ propertyId, open, onOpenChange }: EditHistory
   const { toast } = useToast();
 
   useEffect(() => {
+    const fetchEditLogs = async () => {
+      try {
+        setIsLoading(true);
+        setLogs([]);
+        console.log("Fetching edit logs for property:", propertyId);
+        
+        const { data, error } = await supabase
+          .from('property_edit_logs')
+          .select('*')
+          .eq('property_id', propertyId)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching edit logs:", error);
+          throw error;
+        }
+
+        console.log("Fetched logs:", data?.length || 0);
+        setLogs(data || []);
+      } catch (error) {
+        console.error("Error fetching edit logs:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load edit history",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (open && propertyId) {
       fetchEditLogs();
     }
-  }, [open, propertyId]);
-
-  const fetchEditLogs = async () => {
-    try {
-      setIsLoading(true);
-      setLogs([]);
-      console.log("Fetching edit logs for property:", propertyId);
-      
-      const { data, error } = await supabase
-        .from('property_edit_logs')
-        .select('*')
-        .eq('property_id', propertyId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Error fetching edit logs:", error);
-        throw error;
-      }
-
-      console.log("Fetched logs:", data?.length || 0);
-      setLogs(data || []);
-    } catch (error: any) {
-      console.error("Error fetching edit logs:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load edit history",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [open, propertyId, toast]);
 
   // Format field name for display
   const formatFieldName = (fieldName: string) => {
