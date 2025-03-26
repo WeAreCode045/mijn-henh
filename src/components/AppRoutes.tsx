@@ -5,7 +5,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { PropertyLayout } from "./PropertyLayout";
 
 // Lazy-loaded components
-const Index = lazy(() => import("../pages/Index"));
+const Index = lazy(() => import("../pages/index"));
 const Properties = lazy(() => import("../pages/Properties"));
 const PropertyFormPage = lazy(() => import("../pages/PropertyFormPage"));
 const Settings = lazy(() => import("../pages/Settings"));

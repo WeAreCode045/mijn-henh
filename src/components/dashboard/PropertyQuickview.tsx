@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PropertyData, PropertyFeature, PropertyImage } from "@/types/property";
+import { Json } from "@/integrations/supabase/types";
 
 export function PropertyQuickview() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
@@ -86,6 +87,18 @@ export function PropertyQuickview() {
           
         if (error) throw error;
         if (data) {
+          // Helper function to safely parse features
+          const safeParseFeatures = (features: unknown): PropertyFeature[] => {
+            if (!features) return [];
+            if (Array.isArray(features)) {
+              return features.map(feature => ({
+                id: typeof feature.id === 'string' ? feature.id : String(Date.now()),
+                description: typeof feature.description === 'string' ? feature.description : ''
+              }));
+            }
+            return [];
+          };
+          
           // Transform the data to match the PropertyData interface
           const propertyData: PropertyData = {
             id: data.id,
@@ -98,12 +111,16 @@ export function PropertyQuickview() {
             sqft: data.sqft || "",
             description: data.description || "",
             location_description: data.location_description || "",
-            features: (Array.isArray(data.features) ? data.features : []) as PropertyFeature[],
-            images: data.property_images || [],
+            features: safeParseFeatures(data.features),
+            images: (data.property_images || []) as PropertyImage[],
             agent_id: data.agent_id || undefined,
-            template_id: data.template_id || undefined,
+            // Handle template_id with optional chaining as it might not exist
+            template_id: data?.template_id || undefined,
             object_id: data.object_id || undefined,
-            metadata: typeof data.metadata === 'object' ? data.metadata : { status: data.status || "Draft" },
+            // Ensure metadata is an object with the correct shape
+            metadata: typeof data.metadata === 'object' && data.metadata !== null && !Array.isArray(data.metadata) 
+              ? { status: data.status || "Draft", ...data.metadata as Record<string, unknown> }
+              : { status: data.status || "Draft" },
             archived: data.archived || false
           };
           
