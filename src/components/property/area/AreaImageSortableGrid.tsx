@@ -112,7 +112,7 @@ export function AreaImageSortableGrid({
         const newOrderedImages = arrayMove(orderedImages, oldIndex, newIndex);
         setOrderedImages(newOrderedImages);
         
-        console.log("Reordering images in AreaImageSortableGrid:", newOrderedImages);
+        console.log("Reordering images in AreaImageSortableGrid:", newOrderedImages.map(img => img.id));
         
         // Call the parent component's reorder function with just the IDs
         const reorderedImageIds = newOrderedImages.map(img => img.id);

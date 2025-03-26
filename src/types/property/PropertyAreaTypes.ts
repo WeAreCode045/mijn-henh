@@ -3,8 +3,10 @@
  * Represents an image in an area with sort order
  */
 export interface AreaImage {
+  id?: string;
   ImageID: string;
   imageSortOrder: number;
+  url?: string;
 }
 
 /**

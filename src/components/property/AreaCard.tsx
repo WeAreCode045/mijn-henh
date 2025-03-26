@@ -72,15 +72,22 @@ export function AreaCard({
   };
 
   const handleImagesReorder = async (areaId: string, reorderedImageIds: string[]) => {
+    console.log(`Reordering images for area ${areaId}:`, reorderedImageIds);
+    
     if (propertyId) {
       try {
         // Update sort order for each image based on its position in the reorderedImageIds array
         for (let i = 0; i < reorderedImageIds.length; i++) {
-          await supabase
+          const { error } = await supabase
             .from('property_images')
             .update({ sort_order: i })
             .eq('id', reorderedImageIds[i])
             .eq('property_id', propertyId);
+            
+          if (error) {
+            console.error(`Error updating sort order for image ${reorderedImageIds[i]}:`, error);
+            throw error;
+          }
         }
         
         toast({
