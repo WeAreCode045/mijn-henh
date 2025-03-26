@@ -21,6 +21,7 @@ export const IconSelector = ({ label, value, defaultIcon, onChange }: IconSelect
       <Select 
         value={safeValue} 
         onValueChange={(value) => onChange(value)}
+        defaultValue={defaultIcon}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select icon">

@@ -73,6 +73,7 @@ export default function Properties() {
                 <Select
                   value={selectedAgentId}
                   onValueChange={setSelectedAgentId}
+                  defaultValue="all-agents"
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by agent" />

@@ -9,11 +9,6 @@ interface AgentSelectorProps {
 }
 
 export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSelectorProps) {
-  // Handler to convert "none" to empty string if needed
-  const handleAgentSelect = (value: string) => {
-    onAgentSelect(value === "none" ? "" : value);
-  };
-
   // Ensure the value is never empty
   const safeSelectedAgent = selectedAgent || "none";
 
@@ -25,7 +20,8 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
       <CardContent>
         <Select
           value={safeSelectedAgent}
-          onValueChange={handleAgentSelect}
+          onValueChange={onAgentSelect}
+          defaultValue="none" // Add default value
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an agent" />

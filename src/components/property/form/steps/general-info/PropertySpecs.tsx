@@ -126,6 +126,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
                 handleInputChange("propertyType", value);
                 handleInputBlur("propertyType", value);
               }}
+              defaultValue="not_specified"
             >
               <SelectTrigger id="property-type">
                 <SelectValue placeholder="Select type" />
@@ -238,6 +239,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
                 handleInputChange("energyLabel", value);
                 handleInputBlur("energyLabel", value);
               }}
+              defaultValue="none"
             >
               <SelectTrigger id="energy-label">
                 <SelectValue placeholder="Select energy label" />

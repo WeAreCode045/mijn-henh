@@ -22,11 +22,18 @@ export function FieldMapper({
   selectedField,
   onFieldChange,
 }: FieldMapperProps) {
+  // Make sure we have a valid default value
+  const safeSelectedField = selectedField || "not_mapped";
+  
   return (
     <div className="flex items-center gap-2">
       <div className="w-1/3 font-medium text-sm">{fieldName}:</div>
       <div className="w-2/3">
-        <Select value={selectedField} onValueChange={onFieldChange}>
+        <Select 
+          value={safeSelectedField} 
+          onValueChange={onFieldChange}
+          defaultValue="not_mapped"
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select an XML field" />
           </SelectTrigger>

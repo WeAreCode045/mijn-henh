@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import {
@@ -62,7 +61,7 @@ export function TodoAssignmentFields({
     fetchProperties();
   }, []);
 
-  // Ensure we always have valid values for select
+  // Ensure we always have valid values for selects
   const safeAssignedToId = assignedToId || "unassigned";
   const safePropertyId = propertyId || "unassigned";
 
@@ -73,6 +72,7 @@ export function TodoAssignmentFields({
         <Select 
           value={safeAssignedToId}
           onValueChange={(value) => onAssignedToIdChange(value === "unassigned" ? null : value)}
+          defaultValue="unassigned"
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an agent" />
@@ -96,6 +96,7 @@ export function TodoAssignmentFields({
         <Select 
           value={safePropertyId} 
           onValueChange={(value) => onPropertyIdChange(value === "unassigned" ? null : value)}
+          defaultValue="unassigned"
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a property" />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -50,11 +49,8 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, []);
 
   const handleAgentChange = async (agentId: string) => {
-    if (!agentId || agentId === "") {
-      agentId = "no-agent"; // Use default value instead of empty string
-    }
-    
     const finalAgentId = agentId === "no-agent" ? "" : agentId;
+    
     try {
       setCurrentAgentId(agentId);
       await onAgentChange(finalAgentId);
@@ -80,6 +76,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         value={currentAgentId} 
         onValueChange={handleAgentChange}
         disabled={isLoadingAgents}
+        defaultValue="no-agent"
       >
         <SelectTrigger id="agent-select" className="w-full">
           <SelectValue placeholder="Select an agent" />

@@ -63,6 +63,7 @@ export function AgentSection({
             value={currentAgentId} 
             onValueChange={setCurrentAgentId}
             disabled={isDisabled}
+            defaultValue="none"
           >
             <SelectTrigger id="agent-select">
               <SelectValue placeholder="Select an agent" />

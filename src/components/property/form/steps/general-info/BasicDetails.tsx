@@ -49,6 +49,7 @@ export function BasicDetails({ formData, onFieldChange, setPendingChanges }: Bas
             <Select
               value={formData.propertyType || 'not_selected'}
               onValueChange={(value) => handleSelectChange('propertyType', value)}
+              defaultValue="not_selected"
             >
               <SelectTrigger id="propertyType">
                 <SelectValue placeholder="Select property type" />
@@ -72,6 +73,7 @@ export function BasicDetails({ formData, onFieldChange, setPendingChanges }: Bas
             <Select
               value={formData.status || 'not_selected'}
               onValueChange={(value) => handleSelectChange('status', value)}
+              defaultValue="not_selected"
             >
               <SelectTrigger id="status">
                 <SelectValue placeholder="Select status" />

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -97,6 +96,8 @@ export function AgendaDialog({
     }
   };
 
+  const safeSelectedPropertyId = selectedPropertyId || "none";
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -170,8 +171,9 @@ export function AgendaDialog({
               Property
             </Label>
             <Select
-              value={selectedPropertyId || "none"}
+              value={safeSelectedPropertyId}
               onValueChange={(value) => setSelectedPropertyId(value === "none" ? null : value)}
+              defaultValue="none"
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="No property (optional)" />

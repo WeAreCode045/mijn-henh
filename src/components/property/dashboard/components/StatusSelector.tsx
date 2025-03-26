@@ -60,6 +60,7 @@ export function StatusSelector({ propertyId, initialStatus, onStatusChange }: St
         value={currentStatus} 
         onValueChange={handleStatusChange}
         disabled={isUpdating}
+        defaultValue="draft"
       >
         <SelectTrigger id="status-select" className="w-full">
           <SelectValue placeholder="Select a status" />
