@@ -1,22 +1,31 @@
 
-import { AnalyticsOverview } from "@/components/dashboard/AnalyticsOverview";
-import { RecentProperties } from "@/components/dashboard/RecentProperties";
-import { RecentSubmissions } from "@/components/dashboard/RecentSubmissions";
-import { AgendaSection } from "@/components/dashboard/AgendaSection";
-import { TodoSection } from "@/components/dashboard/TodoSection";
+import { useState } from "react";
+import { PropertyQuickview } from "@/components/dashboard/PropertyQuickview";
+import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
+import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
+import { NotificationsBar } from "@/components/dashboard/NotificationsBar";
 
 export default function Index() {
   return (
     <div className="container mx-auto pt-4 pb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AnalyticsOverview />
-        <RecentProperties />
-        <RecentSubmissions />
+      {/* First row: Property Quickview and User Profile */}
+      <div className="grid grid-cols-5 gap-6 mb-6">
+        <div className="col-span-4">
+          <PropertyQuickview />
+        </div>
+        <div className="col-span-1">
+          <UserProfileCard />
+        </div>
       </div>
       
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <AgendaSection />
-        <TodoSection />
+      {/* Second row: Dashboard Tabs and Notifications */}
+      <div className="grid grid-cols-6 gap-6">
+        <div className="col-span-5">
+          <DashboardTabs />
+        </div>
+        <div className="col-span-1">
+          <NotificationsBar />
+        </div>
       </div>
     </div>
   );
