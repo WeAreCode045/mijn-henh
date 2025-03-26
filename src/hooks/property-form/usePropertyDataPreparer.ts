@@ -1,6 +1,6 @@
 
 import { PropertyFormData, PropertySubmitData } from "@/types/property";
-import { preparePropertiesForJsonField } from "./preparePropertyData";
+import { preparePropertiesForJsonField, prepareAreasForFormSubmission, prepareImagesForSubmission } from "./preparePropertyData";
 
 export function usePropertyDataPreparer() {
   // Helper function to convert data to string JSON
@@ -15,22 +15,10 @@ export function usePropertyDataPreparer() {
     const nearby_citiesJson = prepareJsonString(formData.nearby_cities || []);
     
     // Convert areas to appropriate format
-    const areasForSubmission = formData.areas?.map(area => ({
-      id: area.id,
-      name: area.name || '',
-      title: area.title || '',
-      description: area.description || '',
-      size: area.size || '',
-      columns: area.columns || 2,
-      imageIds: area.imageIds || [],
-      images: area.images || [],
-      areaImages: area.areaImages || []
-    })) || [];
+    const areasForSubmission = prepareAreasForFormSubmission(formData.areas || []);
     
     // Extract just the URLs for type compatibility
-    const imageUrls = Array.isArray(formData.images)
-      ? formData.images.map(img => typeof img === 'string' ? img : img.url)
-      : [];
+    const imageUrls = prepareImagesForSubmission(formData.images || []);
     
     return {
       title: formData.title,

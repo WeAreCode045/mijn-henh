@@ -4,7 +4,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { preparePropertiesForJsonField } from "@/hooks/property-form/preparePropertyData";
 
-// Category definitions with their included types
 const categoryConfig = {
   "Food & Drinks": ["restaurant", "bar", "cafe"],
   "Nightlife & Entertainment": ["casino", "concert_hall", "event_venue", "night_club", "movie_theater"],
@@ -22,7 +21,6 @@ export function useNearbyPlaces(
   const { toast } = useToast();
 
   const fetchPlaces = useCallback(async (categoryName: string): Promise<unknown> => {
-    // Validate required parameters
     if (!formData.latitude || !formData.longitude) {
       toast({
         title: "Error",
@@ -32,7 +30,6 @@ export function useNearbyPlaces(
       return null;
     }
     
-    // Validate property ID
     if (!formData.id) {
       toast({
         title: "Error",
@@ -49,7 +46,6 @@ export function useNearbyPlaces(
     setIsLoading(true);
     
     try {
-      // Get Google Maps API key from settings first
       const { data: settingsData, error: settingsError } = await supabase
         .from('agency_settings')
         .select('google_maps_api_key')
@@ -74,15 +70,12 @@ export function useNearbyPlaces(
         return null;
       }
       
-      // Get the types for this category from our config
       const types = categoryConfig[categoryName as keyof typeof categoryConfig];
       
       if (!types || types.length === 0) {
         console.log(`useNearbyPlaces: No types found for category ${categoryName}, using it as a direct type`);
-        // If it's not a predefined category, use it as a single type
         const includedTypes = [categoryName];
         
-        // Prepare the request body with the exact structure specified
         const requestBody = {
           includedTypes: [categoryName],
           maxResultCount: 10,
@@ -99,7 +92,6 @@ export function useNearbyPlaces(
         
         console.log("useNearbyPlaces: Places API request body:", JSON.stringify(requestBody));
         
-        // Make direct API call to Google Places API v2
         const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
         
         console.log("useNearbyPlaces: Calling Google Places API for direct type");
@@ -135,7 +127,6 @@ export function useNearbyPlaces(
           return null;
         }
         
-        // Transform the response to match our expected format
         const transformedPlaces = placesData.places.map((place: { id: string; displayName?: { text: string }; name?: string; formattedAddress?: string; rating?: number; userRatingCount?: number; types?: string[]; location?: { latitude: number; longitude: number } }) => ({
           id: place.id,
           name: place.displayName?.text || place.name || "Unknown place",
@@ -148,26 +139,22 @@ export function useNearbyPlaces(
           distance: null,
           latitude: place.location?.latitude || null,
           longitude: place.location?.longitude || null,
-          category: categoryName // Add category for grouping
+          category: categoryName
         }));
         
         console.log(`useNearbyPlaces: Found ${transformedPlaces.length} places for single type ${categoryName}`);
         
-        // Store the search results
         setSearchResults(transformedPlaces);
         
-        // Return the results in the same format expected by the components
         const result = { [categoryName]: transformedPlaces };
         setIsLoading(false);
         return result;
       } else {
-        // For a category with multiple types
         console.log(`useNearbyPlaces: Using category ${categoryName} with types:`, types);
     
         const allResults: PropertyNearbyPlace[] = [];
     
         for (const type of types) {
-          // Prepare the request body with the exact structure specified for each type
           const requestBody = {
             includedTypes: [type],
             maxResultCount: 10,
@@ -184,7 +171,6 @@ export function useNearbyPlaces(
     
           console.log(`useNearbyPlaces: Places API request body for type ${type}:`, JSON.stringify(requestBody));
     
-          // Make direct API call to Google Places API
           const placesApiUrl = 'https://places.googleapis.com/v1/places:searchNearby';
     
           console.log(`useNearbyPlaces: Calling Google Places API for type ${type}`);
@@ -222,7 +208,7 @@ export function useNearbyPlaces(
               distance: null,
               latitude: place.location?.latitude || null,
               longitude: place.location?.longitude || null,
-              category: categoryName // Add category for grouping purposes
+              category: categoryName
             }));
     
             allResults.push(...transformedPlaces);
@@ -231,10 +217,8 @@ export function useNearbyPlaces(
     
         console.log(`useNearbyPlaces: Found ${allResults.length} places for category ${categoryName}`);
     
-        // Store the search results
         setSearchResults(allResults);
     
-        // Group results by type
         const groupedResults = allResults.reduce((acc, place) => {
           if (!acc[place.type]) {
             acc[place.type] = [];
@@ -270,24 +254,20 @@ export function useNearbyPlaces(
     }
     
     try {
-      // Filter out duplicates based on place ID
       const existingPlaces = formData.nearby_places || [];
       const newPlaces = selectedPlaces.filter(newPlace => 
         !existingPlaces.some(existingPlace => existingPlace.id === newPlace.id)
       );
       
-      // Combine existing and new places
       const combinedPlaces = [...existingPlaces, ...newPlaces];
       
-      // Update the form data with the combined places including category information
       onFieldChange("nearby_places", combinedPlaces);
       
-      // Save to Supabase - convert to Json format
       console.log("Saving places to Supabase:", combinedPlaces);
       const jsonPlaces = preparePropertiesForJsonField(combinedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: jsonPlaces as any }) // Cast to any to fix Json type
+        .update({ nearby_places: jsonPlaces as any })
         .eq('id', formData.id);
       
       if (error) {
@@ -318,14 +298,12 @@ export function useNearbyPlaces(
       const updatedPlaces = [...formData.nearby_places];
       updatedPlaces.splice(index, 1);
       
-      // Update the form data
       onFieldChange("nearby_places", updatedPlaces);
       
-      // Save to Supabase - convert to Json format
       const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: jsonPlaces as any }) // Cast to any to fix Json type
+        .update({ nearby_places: jsonPlaces as any })
         .eq('id', formData.id);
       
       if (error) {
@@ -355,5 +333,3 @@ export function useNearbyPlaces(
     isLoading
   };
 }
-
-// Example component rendering the results

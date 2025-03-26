@@ -9,7 +9,7 @@ export interface Submission {
   inquiry_type: string;
   is_read: boolean;
   created_at: string;
-  updated_at?: string;
+  updated_at: string; // Required to match the components/property/tabs/communications/types.ts
   agent_id?: string;
   agent?: {
     id: string;
@@ -48,5 +48,5 @@ export interface SubmissionDetailProps {
   isSending: boolean;
   onMarkAsRead: () => Promise<void>;
   isMarking: boolean;
-  onBack?: () => void; // Making this required to match usage
+  onBack?: () => void; // Make this optional to match usage
 }

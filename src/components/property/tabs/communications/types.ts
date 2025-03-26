@@ -9,7 +9,7 @@ export interface Submission {
   inquiry_type: string;
   is_read: boolean | null;
   created_at: string;
-  updated_at: string;
+  updated_at: string; // Making this required
   agent_id: string | null;
   agent?: {
     id: string;

@@ -21,5 +21,5 @@ export interface PropertyNearbyPlace {
   visible_in_webview?: boolean;
   icon?: string;
   category?: string;
-  [key: string]: unknown;
+  [key: string]: unknown; // Add index signature to allow arbitrary properties
 }
