@@ -9,8 +9,8 @@ export function usePropertyChangesLogger(propertyId: string | undefined) {
     
     await logPropertyChange(
       propertyId,
-      "field_update",
-      `Updated ${field} to ${JSON.stringify(value)}`
+      field,
+      typeof value === 'object' ? JSON.stringify(value) : String(value)
     );
   };
   

@@ -1,48 +1,48 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { PropertyFormData } from "@/types/property";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyFormData } from "@/types/property";
 import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyAutoSave(propertyId: string | undefined) {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-  
-  const saveData = useCallback(async (data: Partial<PropertyFormData>) => {
+
+  const saveData = async (data: Partial<PropertyFormData>) => {
     if (!propertyId) return;
     
+    setIsSaving(true);
+    
     try {
-      setIsSaving(true);
+      // Clean up data to ensure propertyImages are properly formatted
+      const cleanData: any = { ...data };
       
-      // Remove any complex objects that can't be directly saved to the database
-      const cleanedData = { ...data };
+      // Remove complex objects that shouldn't be directly saved
+      if (cleanData.areaPhotos) delete cleanData.areaPhotos;
+      if (cleanData.gridImages) delete cleanData.gridImages;
       
-      // Convert any arrays of objects to simple arrays if needed
-      if (Array.isArray(cleanedData.areaPhotos)) {
-        const stringArray = cleanedData.areaPhotos.map(photo => 
-          typeof photo === 'string' ? photo : photo.url
-        );
-        cleanedData.areaPhotos = stringArray;
-      }
-      
+      // Update the property
       const { error } = await supabase
-        .from('properties')
-        .update(cleanedData)
-        .eq('id', propertyId);
-        
+        .from("properties")
+        .update(cleanData)
+        .eq("id", propertyId);
+      
       if (error) throw error;
       
     } catch (error) {
-      console.error("Error auto-saving property data:", error);
+      console.error("Error autosaving property data:", error);
       toast({
-        title: "Auto-save error",
-        description: "Failed to save your changes automatically.",
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSaving(false);
     }
-  }, [propertyId, toast]);
-  
-  return { saveData, isSaving };
+  };
+
+  return {
+    saveData,
+    isSaving
+  };
 }

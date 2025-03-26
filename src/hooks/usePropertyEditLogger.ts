@@ -7,41 +7,35 @@ export function usePropertyEditLogger() {
   const [isLogging, setIsLogging] = useState(false);
   const { user } = useAuth();
 
-  const logPropertyChange = async (
-    propertyId: string,
-    editType: string,
-    description: string
-  ) => {
-    if (!propertyId) return;
-    
+  const logPropertyChange = async (propertyId: string, fieldName: string, newValue: string) => {
+    if (!user) return;
+
+    setIsLogging(true);
+
     try {
-      setIsLogging(true);
-      
-      const { error } = await supabase
-        .from('property_edit_logs')
-        .insert({
-          property_id: propertyId,
-          edit_type: editType,
-          description: description,
-          user_id: user?.id || null
-        });
-        
+      // Get current timestamp
+      const timestamp = new Date().toISOString();
+
+      // Insert log entry
+      const { error } = await supabase.from("property_edit_logs").insert({
+        property_id: propertyId,
+        user_id: user.id,
+        user_name: user.user_metadata?.full_name || user.email,
+        field_name: fieldName,
+        new_value: newValue,
+        created_at: timestamp
+      });
+
       if (error) throw error;
-      
-      console.log(`Property edit logged: ${editType} - ${description}`);
     } catch (error) {
-      console.error("Error logging property edit:", error);
+      console.error("Error logging property change:", error);
     } finally {
       setIsLogging(false);
     }
   };
 
-  // Alias for logPropertyChange for backward compatibility
-  const logPropertyEdit = logPropertyChange;
-
   return {
     logPropertyChange,
-    logPropertyEdit,
     isLogging
   };
 }

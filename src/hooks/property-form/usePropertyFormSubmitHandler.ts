@@ -1,93 +1,71 @@
 
-import { PropertyFormData } from "@/types/property";
-import { useToast } from "@/components/ui/use-toast";
-import { usePropertyValidation } from "./usePropertyValidation";
 import { useNavigate } from "react-router-dom";
-import { usePropertyDataPreparer } from "./usePropertyDataPreparer";
-import { usePropertyDatabase } from "./usePropertyDatabase";
+import { PropertyFormData } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
 import { usePropertyChangesLogger } from "./usePropertyChangesLogger";
-import { usePropertyAfterSaveActions } from "./usePropertyAfterSaveActions";
+import { useToast } from "@/components/ui/use-toast";
 
 export function usePropertyFormSubmitHandler() {
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const { validatePropertyData } = usePropertyValidation();
-  const { prepareSubmitData } = usePropertyDataPreparer();
-  const { updateProperty } = usePropertyDatabase();
-  const { fetchCurrentPropertyData, logChanges } = usePropertyChangesLogger();
-  const { handleExistingPropertySave } = usePropertyAfterSaveActions();
+  const { toast } = useToast();
+  const { logChanges } = usePropertyChangesLogger(undefined);
 
-  const handleSubmit = async (e: React.FormEvent, formData: PropertyFormData, shouldRedirect = false) => {
-    if (e && e.preventDefault) {
-      e.preventDefault();
-    }
+  const handleSubmit = async (
+    e: React.FormEvent,
+    formData: PropertyFormData,
+    shouldRedirect: boolean = true
+  ) => {
+    e.preventDefault();
     
-    console.log("usePropertyFormSubmit - handleSubmit called with formData:", formData);
-    
-    // For all properties, validate the data
-    if (!validatePropertyData(formData)) {
+    if (!formData.id) {
+      console.error("Property ID is missing");
       return false;
     }
     
     try {
-      // Prepare data for submission
-      const submitData = prepareSubmitData(formData);
-      console.log("usePropertyFormSubmit - Final submit data:", submitData);
+      // Update basic property data
+      const { error } = await supabase
+        .from("properties")
+        .update({
+          title: formData.title,
+          description: formData.description,
+          address: formData.address,
+          price: formData.price,
+          bedrooms: formData.bedrooms,
+          bathrooms: formData.bathrooms,
+          sqft: formData.sqft,
+          propertyType: formData.propertyType,
+          status: formData.status,
+          features: formData.features,
+          energyLabel: formData.energyLabel,
+          buildYear: formData.buildYear,
+          livingArea: formData.livingArea,
+          garages: formData.garages,
+          hasGarden: formData.hasGarden
+        })
+        .eq("id", formData.id);
       
-      let success = false;
-      let updatedPropertyData = null;
+      if (error) throw error;
       
-      if (formData.id) {
-        // Get the current property data before updating to compare changes
-        const currentPropertyData = await fetchCurrentPropertyData(formData.id);
-          
-        // Update property
-        success = await updateProperty(formData.id, submitData);
-        
-        if (success) {
-          // Perform after-save actions
-          updatedPropertyData = await handleExistingPropertySave(formData);
-          
-          // Log the changes if update was successful
-          await logChanges(formData.id, currentPropertyData, submitData);
-        }
-        
-        // Remove redirect logic. Only redirect if explicitly asked to and successful
-        if (success && shouldRedirect) {
-          // Instead of always redirecting to index, we'll use the current URL
-          // This will effectively just reload the current page
-          const currentUrl = window.location.pathname;
-          navigate(currentUrl);
-        }
-      } else {
-        // This should not happen anymore since we create properties upfront
-        toast({
-          title: "Error",
-          description: "Property ID is missing. This should not happen.",
-          variant: "destructive",
-        });
-        return false;
+      // Log changes
+      await logChanges("form_submission", JSON.stringify({submitted: true}));
+      
+      // Handle navigation or success message
+      if (shouldRedirect) {
+        navigate("/properties");
       }
       
-      console.log("usePropertyFormSubmit - Submission result:", success ? "Success" : "Failed");
-      if (updatedPropertyData) {
-        console.log("usePropertyFormSubmit - Updated timestamp:", updatedPropertyData.updated_at);
-      }
+      toast({
+        title: "Success",
+        description: "Property saved successfully",
+      });
       
-      // Show a toast notification to confirm the save was successful
-      if (success) {
-        toast({
-          title: "Success",
-          description: "Property updated successfully",
-        });
-      }
-      
-      return success;
+      return true;
     } catch (error) {
-      console.error("Error during property submit:", error);
+      console.error("Error submitting property form:", error);
       toast({
         title: "Error",
-        description: "There was a problem processing your request",
+        description: "Failed to save property",
         variant: "destructive",
       });
       return false;

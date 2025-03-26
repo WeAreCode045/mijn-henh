@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -124,15 +123,11 @@ export function PropertyQuickview() {
             images: (data.property_images || []) as PropertyImage[],
             areas: [], // Adding required empty areas array
             agent_id: data.agent_id || undefined,
-            // Handle template_id with optional chaining as it might not exist
-            template_id: data?.template_id || undefined,
             object_id: data.object_id || undefined,
-            // Ensure metadata is an object with the correct shape
             metadata: typeof data.metadata === 'object' && data.metadata !== null && !Array.isArray(data.metadata) 
               ? { status: data.status || "Draft", ...data.metadata as Record<string, unknown> }
               : { status: data.status || "Draft" },
             archived: data.archived || false,
-            // Add missing required properties
             livingArea: data.livingArea || "",
             buildYear: data.buildYear || "",
             garages: data.garages || "",

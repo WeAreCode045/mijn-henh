@@ -6,12 +6,12 @@ export function useEditLoggerIntegration() {
   
   const logChanges = async (
     propertyId: string,
-    editType: string,
+    fieldName: string,
     description: string
   ) => {
     if (!propertyId) return;
     
-    await logPropertyChange(propertyId, editType, description);
+    await logPropertyChange(propertyId, fieldName, description);
   };
   
   return {
