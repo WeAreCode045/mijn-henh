@@ -24,7 +24,7 @@ export function StatusSelector({ propertyId, initialStatus, onStatusChange }: St
   }, [initialStatus]);
 
   const handleStatusChange = async (status: string) => {
-    if (!status || status === "") {
+    if (!status) {
       return; // Prevent empty status
     }
     

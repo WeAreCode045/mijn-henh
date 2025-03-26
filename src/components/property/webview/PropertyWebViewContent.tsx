@@ -1,12 +1,9 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { useEffect, useState } from "react";
-import { useContactForm } from "./hooks/useContactForm";
-import { usePageCalculation } from "./hooks/usePageCalculation";
-import { getPrintStylesContent } from "./PrintStyles";
+import { useState } from "react";
 import { WebViewSectionContent } from "./components/WebViewSectionContent";
-import { useWebViewContent } from "./hooks/useWebViewContent";
+import { getPrintStylesContent } from "./PrintStyles";
 
 interface PropertyWebViewContentProps {
   property: PropertyData;
