@@ -5,7 +5,7 @@ import { useMarkAsRead } from '@/hooks/useMarkAsRead';
 import { useSendResponse } from '@/hooks/useSendResponse';
 import { SubmissionsList } from '../communications/SubmissionsList';
 import { SubmissionDetail } from '../communications/SubmissionDetail';
-import { Submission } from '../communications/types';
+import { Submission } from '../communications/types'; // Import from local types
 import { useAuth } from '@/providers/AuthProvider';
 
 interface CommunicationsTabContentProps {
@@ -60,7 +60,7 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
     <div className="flex flex-col md:flex-row gap-4 h-full">
       <div className={`w-full ${selectedSubmission ? 'hidden md:block md:w-1/3' : 'w-full'}`}>
         <SubmissionsList 
-          submissions={submissions}
+          submissions={submissions as Submission[]} 
           isLoading={isLoading}
           onSelect={handleSelectSubmission}
           selectedId={selectedSubmission?.id}

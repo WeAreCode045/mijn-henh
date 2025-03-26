@@ -9,8 +9,8 @@ export interface Submission {
   inquiry_type: string;
   is_read: boolean | null;
   created_at: string;
-  updated_at: string; // Making this required
-  agent_id: string | null;
+  updated_at: string;
+  agent_id: string | null; // Changed from string to string | null to match the global type
   agent?: {
     id: string;
     full_name: string;

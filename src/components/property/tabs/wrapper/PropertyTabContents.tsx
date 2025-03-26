@@ -24,7 +24,22 @@ export function PropertyTabContents({
   return (
     <>
       <TabsContent value="dashboard" className="space-y-6">
-        <PropertyDashboardTab property={property} {...props} />
+        <PropertyDashboardTab 
+          id={property.id}
+          title={property.title}
+          objectId={property.object_id}
+          agentId={property.agent_id}
+          createdAt={property.created_at}
+          updatedAt={property.updated_at}
+          agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : null}
+          isUpdating={false}
+          onSave={props.onSave || (() => {})}
+          onDelete={props.onDelete || (async () => {})}
+          handleSaveObjectId={props.handleSaveObjectId || (async () => {})}
+          handleSaveAgent={props.handleSaveAgent || (async () => {})}
+          handleGeneratePDF={props.handleGeneratePDF || (() => {})}
+          handleWebView={props.handleWebView || (() => {})}
+        />
       </TabsContent>
       
       <TabsContent value="content" className="space-y-6">
