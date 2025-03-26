@@ -59,7 +59,7 @@ export function TodoAssignmentFields({
       <div className="grid gap-2">
         <Label htmlFor="agent">Assign to Agent (optional)</Label>
         <Select 
-          value={assignedToId || ""} 
+          value={assignedToId || "unassigned"} 
           onValueChange={(value) => onAssignedToIdChange(value === "unassigned" ? null : value)}
         >
           <SelectTrigger>
@@ -79,7 +79,7 @@ export function TodoAssignmentFields({
       <div className="grid gap-2">
         <Label htmlFor="property">Assign to Property (optional)</Label>
         <Select 
-          value={propertyId || ""} 
+          value={propertyId || "unassigned"} 
           onValueChange={(value) => onPropertyIdChange(value === "unassigned" ? null : value)}
         >
           <SelectTrigger>
