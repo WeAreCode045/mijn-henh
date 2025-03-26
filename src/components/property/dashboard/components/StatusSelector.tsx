@@ -15,7 +15,7 @@ export function StatusSelector({ propertyId, initialStatus, onStatusChange }: St
   const [currentStatus, setCurrentStatus] = useState(initialStatus || "draft");
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
-  const { logPropertyEdit } = usePropertyEditLogger();
+  const { logPropertyChange } = usePropertyEditLogger();
 
   useEffect(() => {
     if (initialStatus !== undefined) {
@@ -36,7 +36,7 @@ export function StatusSelector({ propertyId, initialStatus, onStatusChange }: St
       });
       
       // Log the property edit
-      logPropertyEdit(propertyId, "status", `Updated status to ${status}`);
+      await logPropertyChange(propertyId, "status", `Updated status to ${status}`);
     } catch (error) {
       console.error("Error updating status:", error);
       toast({

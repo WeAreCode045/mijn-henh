@@ -1,6 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-// Make sure to get the logPropertyChange function
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function useMarkAsRead() {

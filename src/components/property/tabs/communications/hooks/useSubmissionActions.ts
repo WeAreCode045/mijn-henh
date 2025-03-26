@@ -1,90 +1,56 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
-interface SubmissionActionsProps {
-  propertyId: string;
-  submissionId: string;
-  onSuccess?: () => void;
-}
-
-export function useSubmissionActions({ propertyId, submissionId, onSuccess }: SubmissionActionsProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export function useSubmissionActions() {
+  const [isArchiving, setIsArchiving] = useState(false);
   const { toast } = useToast();
   const { logPropertyChange } = usePropertyEditLogger();
 
-  const handleDeleteSubmission = async () => {
-    setIsLoading(true);
+  const archiveSubmission = async (propertyId: string, submissionId: string, isArchived: boolean) => {
     try {
+      setIsArchiving(true);
+      
       const { error } = await supabase
         .from('property_contact_submissions')
-        .delete()
+        .update({ is_archived: isArchived })
         .eq('id', submissionId);
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
+      
+      await logPropertyChange(
+        propertyId, 
+        "submission", 
+        isArchived 
+          ? `Archived submission ${submissionId}` 
+          : `Unarchived submission ${submissionId}`
+      );
+      
       toast({
         title: "Success",
-        description: "Submission deleted successfully",
+        description: isArchived 
+          ? "Submission archived successfully" 
+          : "Submission unarchived successfully",
       });
-
-      await logPropertyChange(propertyId, "submission", `Deleted submission ${submissionId}`);
-
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error: any) {
-      console.error("Error deleting submission:", error);
+      
+      return true;
+    } catch (error) {
+      console.error("Error updating submission archive status:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete submission",
+        description: "Failed to update submission",
         variant: "destructive",
       });
+      return false;
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleArchiveSubmission = async (isArchived: boolean) => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('property_contact_submissions')
-        .update({ archived: isArchived })
-        .eq('id', submissionId);
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: `Submission ${isArchived ? 'archived' : 'unarchived'} successfully`,
-      });
-
-      await logPropertyChange(propertyId, "submission", `Archived submission ${submissionId}`);
-
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error: any) {
-      console.error("Error archiving submission:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to archive submission",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      setIsArchiving(false);
     }
   };
 
   return {
-    isLoading,
-    handleDeleteSubmission,
-    handleArchiveSubmission,
+    isArchiving,
+    archiveSubmission
   };
 }

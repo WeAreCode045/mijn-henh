@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,7 +17,7 @@ export function useSendResponse() {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from("property_contact_responses")
+        .from("property_submission_replies")
         .insert([
           {
             property_id: propertyId,
