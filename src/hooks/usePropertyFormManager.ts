@@ -54,12 +54,12 @@ export function usePropertyFormManager(property: PropertyFormData) {
     onSubmit
   } = usePropertyContent(formState, onFieldChange);
   
-  // Hook for managing images
+  // Hook for managing images - need to pass property.id parameter first
   const {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyImages(formState, onFieldChange);
+  } = usePropertyImages(property.id || '', formState, onFieldChange);
   
   // Hook for property save handlers
   const {
