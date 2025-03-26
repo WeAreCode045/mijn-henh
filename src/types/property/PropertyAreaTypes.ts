@@ -22,4 +22,4 @@ export interface PropertyArea {
   areaImages?: AreaImage[]; // New property for the updated format
 }
 
-import { PropertyImage } from './PropertyImageTypes';
+import { PropertyImage } from './PropertyTypes';
