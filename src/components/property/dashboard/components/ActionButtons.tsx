@@ -93,7 +93,7 @@ export function ActionButtons({
         <CardContent>
           <StatusSelector 
             propertyId={propertyId} 
-            initialStatus={""} 
+            initialStatus={"draft"} 
             onStatusChange={handleStatusChange}
           />
         </CardContent>

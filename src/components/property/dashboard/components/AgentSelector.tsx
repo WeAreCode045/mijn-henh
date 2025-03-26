@@ -50,6 +50,10 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, []);
 
   const handleAgentChange = async (agentId: string) => {
+    if (!agentId || agentId === "") {
+      agentId = "no-agent"; // Use default value instead of empty string
+    }
+    
     const finalAgentId = agentId === "no-agent" ? "" : agentId;
     try {
       setCurrentAgentId(agentId);

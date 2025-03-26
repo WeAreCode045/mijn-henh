@@ -9,7 +9,7 @@ export function usePropertyArchive() {
   const { toast } = useToast();
   const { logPropertyChange } = usePropertyEditLogger();
 
-  const archiveProperty = async (propertyId: string, isArchived: boolean) => {
+  const archiveProperty = async (propertyId: string, isArchived: boolean): Promise<boolean> => {
     setIsArchiving(true);
     try {
       const { error } = await supabase
