@@ -54,7 +54,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     onSubmit
   } = usePropertyContent(formState, onFieldChange);
   
-  // Hook for managing images
+  // Hook for managing images - use the extended version with all required properties
   const {
     handleImageUpload,
     handleRemoveImage,

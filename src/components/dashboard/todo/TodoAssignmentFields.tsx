@@ -68,7 +68,10 @@ export function TodoAssignmentFields({
           <SelectContent>
             <SelectItem value="unassigned">Unassigned</SelectItem>
             {agents.map(agent => (
-              <SelectItem key={agent.id} value={agent.id || `agent_${Date.now()}`}>
+              <SelectItem 
+                key={agent.id} 
+                value={agent.id || `agent_${Date.now()}`}
+              >
                 {agent.full_name || "Unnamed Agent"}
               </SelectItem>
             ))}
@@ -87,11 +90,15 @@ export function TodoAssignmentFields({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="unassigned">Unassigned</SelectItem>
-            {properties.map(property => (
-              <SelectItem key={property.id} value={property.id || `property_${Date.now()}`}>
-                {property.title || `Property ${property.id.substring(0, 8)}`}
-              </SelectItem>
-            ))}
+            {properties.map(property => {
+              // Ensure we never have an empty string value
+              const safeId = property.id || `property_${Date.now()}`;
+              return (
+                <SelectItem key={safeId} value={safeId}>
+                  {property.title || `Property ${safeId.substring(0, 8)}`}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

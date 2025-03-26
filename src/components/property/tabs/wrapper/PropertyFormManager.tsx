@@ -34,10 +34,10 @@ export function PropertyFormManager({ property, isArchived = false, children }: 
     handleRemoveImage: formManager.handleRemoveImage,
     isUploading: formManager.isUploading,
     handleAreaPhotosUpload: formManager.handleImageUpload, // Use the correct handler
-    handleRemoveAreaPhoto: formManager.handleAreaImageRemove,
+    handleRemoveAreaPhoto: formManager.onAreaImageRemove,
     handleFloorplanUpload: formManager.handleFloorplanUpload,
-    handleRemoveFloorplan: formManager.handleRemoveImage,
-    isUploadingFloorplan: formManager.isUploading,
+    handleRemoveFloorplan: formManager.handleRemoveFloorplan,
+    isUploadingFloorplan: formManager.isUploadingFloorplan,
     handleSetFeaturedImage: formManager.handleSetFeaturedImage,
     handleToggleFeaturedImage: formManager.handleToggleFeaturedImage,
     onSubmit: formManager.onSubmit,
