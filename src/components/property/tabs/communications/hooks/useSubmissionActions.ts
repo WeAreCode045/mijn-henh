@@ -1,137 +1,90 @@
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
-import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { usePropertyEditLogger } from '@/hooks/usePropertyEditLogger';
-
-export interface UseMarkAsReadProps {
-  submissionId: string;
-  isRead: boolean;
+interface SubmissionActionsProps {
   propertyId: string;
+  submissionId: string;
   onSuccess?: () => void;
 }
 
-export const useMarkAsRead = ({ submissionId, isRead, propertyId, onSuccess }: UseMarkAsReadProps) => {
-  const [isUpdating, setIsUpdating] = useState(false);
+export function useSubmissionActions({ propertyId, submissionId, onSuccess }: SubmissionActionsProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { logPropertyChange } = usePropertyEditLogger();
 
-  const markAsRead = async () => {
-    if (!submissionId) return;
-    
-    setIsUpdating(true);
+  const handleDeleteSubmission = async () => {
+    setIsLoading(true);
     try {
-      // Get submission info for better logging
-      const { data: submissionData } = await supabase
-        .from('property_contact_submissions')
-        .select('inquiry_type, name')
-        .eq('id', submissionId)
-        .single();
-        
-      const inquiryType = submissionData?.inquiry_type || 'Unknown';
-      const submitterName = submissionData?.name || 'Unknown';
-      
       const { error } = await supabase
         .from('property_contact_submissions')
-        .update({ is_read: !isRead })
+        .delete()
         .eq('id', submissionId);
-        
-      if (error) throw error;
-      
-      // Log the status change
-      if (propertyId) {
-        await logPropertyChange(
-          propertyId,
-          "submission_status",
-          isRead ? "Read" : "Unread",
-          !isRead ? `Marked as read: ${inquiryType} from ${submitterName}` : 
-                   `Marked as unread: ${inquiryType} from ${submitterName}`
-        );
+
+      if (error) {
+        throw error;
       }
-      
+
       toast({
-        description: `Submission marked as ${!isRead ? 'read' : 'unread'}`
+        title: "Success",
+        description: "Submission deleted successfully",
       });
-      
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error('Error updating submission status:', error);
+
+      await logPropertyChange(propertyId, "submission", `Deleted submission ${submissionId}`);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error: any) {
+      console.error("Error deleting submission:", error);
       toast({
-        variant: 'destructive',
-        description: 'Failed to update submission status'
+        title: "Error",
+        description: error.message || "Failed to delete submission",
+        variant: "destructive",
       });
     } finally {
-      setIsUpdating(false);
+      setIsLoading(false);
     }
   };
 
-  return { markAsRead, isUpdating };
-};
-
-export interface UseSendResponseProps {
-  submissionId: string;
-  propertyId: string;
-  onSuccess?: () => void;
-}
-
-export const useSendResponse = ({ submissionId, propertyId, onSuccess }: UseSendResponseProps) => {
-  const [isSending, setIsSending] = useState(false);
-  const { toast } = useToast();
-  const { logPropertyChange } = usePropertyEditLogger();
-
-  const sendResponse = async (text: string) => {
-    if (!submissionId || !text.trim()) return;
-    
-    setIsSending(true);
+  const handleArchiveSubmission = async (isArchived: boolean) => {
+    setIsLoading(true);
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      
-      if (userError) throw userError;
-      
       const { error } = await supabase
-        .from('property_submission_replies')
-        .insert({
-          submission_id: submissionId,
-          reply_text: text,
-          user_id: userData.user?.id
-        });
-        
-      if (error) throw error;
-      
-      // Log the response
-      if (propertyId && userData.user?.id) {
-        // Get user name for better logging
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', userData.user.id)
-          .single();
-          
-        const userName = profileData?.full_name || userData.user.email || 'Unknown user';
-        
-        await logPropertyChange(
-          propertyId,
-          "submission_reply",
-          "",
-          `Response sent by ${userName}`
-        );
+        .from('property_contact_submissions')
+        .update({ archived: isArchived })
+        .eq('id', submissionId);
+
+      if (error) {
+        throw error;
       }
-      
+
       toast({
-        description: 'Response sent successfully'
+        title: "Success",
+        description: `Submission ${isArchived ? 'archived' : 'unarchived'} successfully`,
       });
-      
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error('Error sending response:', error);
+
+      await logPropertyChange(propertyId, "submission", `Archived submission ${submissionId}`);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error: any) {
+      console.error("Error archiving submission:", error);
       toast({
-        variant: 'destructive',
-        description: 'Failed to send response'
+        title: "Error",
+        description: error.message || "Failed to archive submission",
+        variant: "destructive",
       });
     } finally {
-      setIsSending(false);
+      setIsLoading(false);
     }
   };
 
-  return { sendResponse, isSending };
-};
+  return {
+    isLoading,
+    handleDeleteSubmission,
+    handleArchiveSubmission,
+  };
+}

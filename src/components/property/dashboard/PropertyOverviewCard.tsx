@@ -1,20 +1,18 @@
-
-import { PropertyData } from "@/types/property";
-import { Card, CardContent } from "@/components/ui/card";
 import { StatusSelector } from "./components/StatusSelector";
-import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { PropertyImage } from "./components/PropertyImage";
-import { PropertyTitleSection } from "./components/PropertyTitleSection";
-import { PropertyDetailsSection } from "./components/PropertyDetailsSection";
-import { AgentDisplay } from "./components/AgentDisplay";
-import { AgentSelector } from "./components/AgentSelector";
-import { SaveButton } from "./components/SaveButton";
-import { usePropertyOverviewEdit } from "./hooks/usePropertyOverviewEdit";
+import { supabase } from "@/integrations/supabase/client";
 
-interface PropertyOverviewCardProps {
-  property: PropertyData;
-  handleSaveAgent?: (agentId: string) => Promise<void>;
-}
+const handleStatusChange = async (status: string): Promise<void> => {
+  if (!propertyId) return;
+  
+  const { error } = await supabase
+    .from('properties')
+    .update({ status })
+    .eq('id', propertyId);
+    
+  if (error) {
+    throw error;
+  }
+};
 
 export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOverviewCardProps) {
   const { settings } = useAgencySettings();
@@ -59,12 +57,10 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
               setObjectId={setObjectId}
             />
             
-            {/* Display the agent when not in edit mode */}
             {!isEditing && (
               <AgentDisplay agentName={agentName} />
             )}
             
-            {/* Agent Selector - Only visible in edit mode */}
             {isEditing && handleSaveAgent && (
               <div className="mb-6">
                 <AgentSelector 
@@ -74,7 +70,6 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
               </div>
             )}
 
-            {/* Save button - Below agent selector when in edit mode */}
             {isEditing && (
               <SaveButton 
                 handleSaveAllFields={handleSaveAllFields}
@@ -85,11 +80,11 @@ export function PropertyOverviewCard({ property, handleSaveAgent }: PropertyOver
           <div className="w-full md:w-40 flex flex-col gap-4">
             <PropertyImage property={property} />
             
-            {/* Status Selector below the thumbnail */}
             {property.id && (
               <StatusSelector 
                 propertyId={property.id} 
                 initialStatus={property.metadata?.status || property.status || "Draft"}
+                onStatusChange={handleStatusChange}
               />
             )}
           </div>

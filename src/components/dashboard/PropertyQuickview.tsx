@@ -53,9 +53,16 @@ export function PropertyQuickview() {
             bedrooms: property.bedrooms || "",
             bathrooms: property.bathrooms || "",
             sqft: property.sqft || "",
-            features: [], // Add empty array for required features field
-            images: [], // Add empty array for required images field
-            areas: [] // Add empty array for required areas field
+            features: [] as PropertyFeature[], // Add empty array for required features field
+            images: [] as PropertyImage[], // Add empty array for required images field
+            areas: [], // Add empty array for required areas field
+            livingArea: "", // Add the required fields
+            buildYear: "",
+            garages: "",
+            energyLabel: "",
+            hasGarden: false,
+            description: "",
+            location_description: ""
           })) as PropertyData[];
           
           setProperties(formattedProperties);
@@ -124,7 +131,13 @@ export function PropertyQuickview() {
             metadata: typeof data.metadata === 'object' && data.metadata !== null && !Array.isArray(data.metadata) 
               ? { status: data.status || "Draft", ...data.metadata as Record<string, unknown> }
               : { status: data.status || "Draft" },
-            archived: data.archived || false
+            archived: data.archived || false,
+            // Add missing required properties
+            livingArea: data.livingArea || "",
+            buildYear: data.buildYear || "",
+            garages: data.garages || "",
+            energyLabel: data.energyLabel || "",
+            hasGarden: data.hasGarden || false
           };
           
           setSelectedProperty(propertyData);

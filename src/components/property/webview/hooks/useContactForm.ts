@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -51,9 +50,8 @@ export function useContactForm(property: PropertyData, settings: AgencySettings)
       if (property.id) {
         await logPropertyChange(
           property.id,
-          "contact_form",
-          "",
-          `Form Submission: ${formData.inquiry_type}`
+          "contact",
+          `New contact form submission received`
         );
       }
 

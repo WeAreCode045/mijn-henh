@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
@@ -16,7 +15,7 @@ export function StatusSelector({ propertyId, initialStatus, onStatusChange }: St
   const [currentStatus, setCurrentStatus] = useState(initialStatus || "draft");
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
-  const logPropertyEdit = usePropertyEditLogger();
+  const { logPropertyEdit } = usePropertyEditLogger();
 
   useEffect(() => {
     if (initialStatus !== undefined) {

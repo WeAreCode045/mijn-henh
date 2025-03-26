@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { StatusSelector } from "./StatusSelector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ActionButtonsProps {
   propertyId: string;
@@ -32,6 +32,19 @@ interface ActionButtonsProps {
   onGeneratePDF: () => void;
   isCompact?: boolean;
 }
+
+const handleStatusChange = async (status: string): Promise<void> => {
+  if (!propertyId) return;
+  
+  const { error } = await supabase
+    .from('properties')
+    .update({ status })
+    .eq('id', propertyId);
+    
+  if (error) {
+    throw error;
+  }
+};
 
 export function ActionButtons({ 
   propertyId, 
@@ -80,6 +93,7 @@ export function ActionButtons({
           <StatusSelector 
             propertyId={propertyId} 
             initialStatus={""} 
+            onStatusChange={handleStatusChange}
           />
         </CardContent>
       </Card>

@@ -1,186 +1,140 @@
-
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
-export interface AgendaItem {
+interface AgendaItem {
   id: string;
-  property_id: string;
   title: string;
-  description?: string;
-  event_date: string;
-  event_time: string;
-  created_at: string;
-  updated_at: string;
+  description: string;
+  date: string;
+  time: string;
 }
 
-export function usePropertyAgenda(propertyId: string) {
+export function usePropertyAgenda() {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { logPropertyChange } = usePropertyEditLogger();
 
-  const fetchAgendaItems = async () => {
-    setIsLoading(true);
+  const fetchAgendaItems = useCallback(async (propertyId: string) => {
     try {
       const { data, error } = await supabase
-        .from('property_agenda_items')
+        .from('property_agenda')
         .select('*')
         .eq('property_id', propertyId)
-        .order('event_date', { ascending: true })
-        .order('event_time', { ascending: true });
+        .order('date', { ascending: true });
 
-      if (error) throw error;
-      setAgendaItems(data || []);
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setAgendaItems(data);
+      }
     } catch (error: any) {
-      console.error('Error fetching agenda items:', error);
+      console.error("Error fetching agenda items:", error.message);
       toast({
         title: "Error",
-        description: "Failed to load property agenda items",
+        description: "Failed to fetch agenda items",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const addAgendaItem = async (title: string, description: string, eventDate: string, eventTime: string) => {
+  const addAgendaItem = useCallback(async (propertyId: string, data: Omit<AgendaItem, 'id'>) => {
     try {
-      const { error } = await supabase
-        .from('property_agenda_items')
-        .insert({
-          property_id: propertyId,
-          title,
-          description,
-          event_date: eventDate,
-          event_time: eventTime
+      const { data: newAgendaItem, error } = await supabase
+        .from('property_agenda')
+        .insert([{ property_id: propertyId, ...data }])
+        .select('*')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (newAgendaItem) {
+        setAgendaItems((prevItems) => [...prevItems, newAgendaItem]);
+        toast({
+          title: "Success",
+          description: "Agenda item added successfully",
         });
 
-      if (error) throw error;
-      
-      // Log the agenda item addition
-      await logPropertyChange(
-        propertyId,
-        "property_agenda",
-        "",
-        `Added agenda item: ${title}`
-      );
-      
-      toast({
-        title: "Success",
-        description: "Agenda item added successfully",
-      });
-      
-      fetchAgendaItems();
+        await logPropertyChange(propertyId, "agenda", `Added new agenda item: ${data.title}`);
+      }
     } catch (error: any) {
-      console.error('Error adding agenda item:', error);
+      console.error("Error adding agenda item:", error.message);
       toast({
         title: "Error",
         description: "Failed to add agenda item",
         variant: "destructive",
       });
     }
-  };
+  }, [toast, logPropertyChange]);
 
-  const deleteAgendaItem = async (agendaItemId: string) => {
+  const updateAgendaItem = useCallback(async (propertyId: string, id: string, updates: Partial<AgendaItem>) => {
     try {
-      // Get the agenda item title before deleting (for logging purposes)
-      const { data: agendaItemData } = await supabase
-        .from('property_agenda_items')
-        .select('title')
-        .eq('id', agendaItemId)
+      const { data: updatedAgendaItem, error } = await supabase
+        .from('property_agenda')
+        .update(updates)
+        .eq('id', id)
+        .select('*')
         .single();
-        
-      const agendaItemTitle = agendaItemData?.title || 'Unknown agenda item';
-      
-      const { error } = await supabase
-        .from('property_agenda_items')
-        .delete()
-        .eq('id', agendaItemId);
 
-      if (error) throw error;
-      
-      // Log the agenda item deletion
-      await logPropertyChange(
-        propertyId,
-        "property_agenda",
-        agendaItemTitle,
-        "Agenda item deleted"
-      );
-      
-      toast({
-        title: "Success",
-        description: "Agenda item deleted successfully",
-      });
-      
-      fetchAgendaItems();
+      if (error) {
+        throw error;
+      }
+
+      if (updatedAgendaItem) {
+        setAgendaItems((prevItems) =>
+          prevItems.map((item) => (item.id === id ? updatedAgendaItem : item))
+        );
+        toast({
+          title: "Success",
+          description: "Agenda item updated successfully",
+        });
+      }
     } catch (error: any) {
-      console.error('Error deleting agenda item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete agenda item",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const updateAgendaItem = async (
-    agendaItemId: string, 
-    title: string, 
-    description: string, 
-    eventDate: string, 
-    eventTime: string
-  ) => {
-    try {
-      const { error } = await supabase
-        .from('property_agenda_items')
-        .update({
-          title,
-          description,
-          event_date: eventDate,
-          event_time: eventTime
-        })
-        .eq('id', agendaItemId);
-
-      if (error) throw error;
-      
-      // Log the agenda item update
-      await logPropertyChange(
-        propertyId,
-        "property_agenda",
-        "Agenda item",
-        `Updated: ${title}`
-      );
-      
-      toast({
-        title: "Success",
-        description: "Agenda item updated successfully",
-      });
-      
-      fetchAgendaItems();
-    } catch (error: any) {
-      console.error('Error updating agenda item:', error);
+      console.error("Error updating agenda item:", error.message);
       toast({
         title: "Error",
         description: "Failed to update agenda item",
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  useEffect(() => {
-    if (propertyId) {
-      fetchAgendaItems();
+  const deleteAgendaItem = useCallback(async (propertyId: string, id: string) => {
+    try {
+      const { error } = await supabase
+        .from('property_agenda')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setAgendaItems((prevItems) => prevItems.filter((item) => item.id !== id));
+      toast({
+        title: "Success",
+        description: "Agenda item deleted successfully",
+      });
+    } catch (error: any) {
+      console.error("Error deleting agenda item:", error.message);
+      toast({
+        title: "Error",
+        description: "Failed to delete agenda item",
+        variant: "destructive",
+      });
     }
-  }, [propertyId]);
+  }, [toast]);
 
   return {
     agendaItems,
-    isLoading,
+    fetchAgendaItems,
     addAgendaItem,
-    deleteAgendaItem,
     updateAgendaItem,
-    refreshAgendaItems: fetchAgendaItems
+    deleteAgendaItem,
   };
 }

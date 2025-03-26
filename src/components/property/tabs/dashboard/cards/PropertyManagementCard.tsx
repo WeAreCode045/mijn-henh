@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentSelector } from "../../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../../dashboard/components/PropertyDates";
-import { StatusSelector } from "../../../dashboard/components/StatusSelector";
+import { StatusSelector } from "@/components/property/dashboard/components/StatusSelector";
 import { 
   Tooltip, 
   TooltipContent, 
@@ -156,6 +155,19 @@ export function PropertyManagementCard({
     onGeneratePDF();
   };
 
+  const handleStatusChange = async (status: string): Promise<void> => {
+    if (!propertyId) return;
+    
+    const { error } = await supabase
+      .from('properties')
+      .update({ status })
+      .eq('id', propertyId);
+      
+    if (error) {
+      throw error;
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card>
@@ -233,6 +245,7 @@ export function PropertyManagementCard({
             <StatusSelector 
               propertyId={propertyId} 
               initialStatus={""} 
+              onStatusChange={handleStatusChange}
             />
           </div>
           
