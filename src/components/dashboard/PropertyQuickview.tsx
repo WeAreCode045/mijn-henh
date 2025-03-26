@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Search, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebounce } from "@/hooks/useDebounce";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFeature, PropertyImage } from "@/types/property";
 
 export function PropertyQuickview() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
@@ -43,9 +44,15 @@ export function PropertyQuickview() {
         if (data) {
           // Transform the data to match the PropertyData interface
           const formattedProperties = data.map(property => ({
-            ...property,
-            // Add any required fields from PropertyData that might be missing
-            images: [] // Adding empty array for required images field
+            id: property.id,
+            title: property.title || "",
+            status: property.status || "Draft",
+            price: property.price || "",
+            address: property.address || "",
+            bedrooms: property.bedrooms || "",
+            bathrooms: property.bathrooms || "",
+            sqft: property.sqft || "",
+            images: [] // Add empty array for required images field
           })) as PropertyData[];
           
           setProperties(formattedProperties);
@@ -81,9 +88,23 @@ export function PropertyQuickview() {
         if (data) {
           // Transform the data to match the PropertyData interface
           const propertyData: PropertyData = {
-            ...data,
+            id: data.id,
+            title: data.title || "",
+            status: data.status || "Draft",
+            price: data.price || "",
+            address: data.address || "",
+            bedrooms: data.bedrooms || "",
+            bathrooms: data.bathrooms || "",
+            sqft: data.sqft || "",
+            description: data.description || "",
+            location_description: data.location_description || "",
+            features: (Array.isArray(data.features) ? data.features : []) as PropertyFeature[],
             images: data.property_images || [],
-            // Make sure all required fields from PropertyData are present
+            agent_id: data.agent_id || undefined,
+            template_id: data.template_id || undefined,
+            object_id: data.object_id || undefined,
+            metadata: typeof data.metadata === 'object' ? data.metadata : { status: data.status || "Draft" },
+            archived: data.archived || false
           };
           
           setSelectedProperty(propertyData);
