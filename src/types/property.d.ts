@@ -169,3 +169,18 @@ export interface PropertySubmitData {
   }; // Add metadata property
   propertyType?: string; // Add propertyType property
 }
+
+export interface AreaImage {
+  id: string;
+  url: string;
+  property_id?: string;
+  is_main?: boolean;
+  is_featured_image?: boolean;
+  type?: string;
+  area?: string | null;
+  sort_order?: number;
+  filePath?: string;
+  title?: string;
+  description?: string;
+  columns?: number; // Added for FloorplanProcessor compatibility
+}

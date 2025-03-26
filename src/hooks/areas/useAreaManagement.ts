@@ -46,7 +46,7 @@ export function useAreaManagement(
   };
 
   // Update a specific field of an area
-  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number | any[]) => {
+  const updateArea = (id: string, field: keyof PropertyArea, value: string | string[] | number | AreaImage[]) => {
     console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
     
     setFormData(prevData => {

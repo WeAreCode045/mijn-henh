@@ -27,7 +27,7 @@ export function useAreaImageRemove(
         if (area.id === areaId) {
           // Remove the image from areaImages array
           const updatedAreaImages = Array.isArray(area.areaImages)
-            ? area.areaImages.filter((img: AreaImage) => img.ImageID !== imageId)
+            ? area.areaImages.filter((img: AreaImage) => img.id !== imageId)
             : [];
             
           // For backward compatibility, also update the legacy fields

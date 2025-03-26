@@ -24,6 +24,8 @@ export function useAreaImageSelect(
       
       // Convert selected imageIds to the new areaImages format with sort order
       const areaImages: AreaImage[] = imageIds.map((id, index) => ({
+        id: id,
+        url: '', // Provide the appropriate URL here
         ImageID: id,
         imageSortOrder: index + 1
       }));

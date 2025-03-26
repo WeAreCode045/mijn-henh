@@ -15,19 +15,19 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
     }
     
     // Handle both PropertyArea and Json object types
-    const id = (area as any).id || '';
-    const title = (area as any).title || '';
-    const description = (area as any).description || '';
-    const columns = (area as any).columns || 2; // Default to 2 columns if not specified
-    const name = (area as any).name || '';
-    const size = (area as any).size || '';
+    const id = (area as PropertyArea).id || '';
+    const title = (area as PropertyArea).title || '';
+    const description = (area as PropertyArea).description || '';
+    const columns = (area as PropertyArea).columns || 2; // Default to 2 columns if not specified
+    const name = (area as PropertyArea).name || '';
+    const size = (area as PropertyArea).size || '';
     
     // Handle the new areaImages format
-    const areaImages = (area as any).areaImages || [];
+    const areaImages = (area as PropertyArea).areaImages || [];
     
     // Handle legacy fields for backward compatibility
-    const images = (area as any).images || [];
-    const imageIds = (area as any).imageIds || [];
+    const images = (area as PropertyArea).images || [];
+    const imageIds = (area as PropertyArea).imageIds || [];
     
     return {
       id,
@@ -48,7 +48,7 @@ export function prepareAreasForFormSubmission(areas: PropertyArea[] | Json[]): J
  * Works with any array of objects or primitive values
  * Returns Json type compatible with Supabase
  */
-export function preparePropertiesForJsonField(properties: any[]): Json {
+export function preparePropertiesForJsonField(properties: Record<string, unknown>[]): Json {
   if (!properties || !Array.isArray(properties)) {
     return [];
   }
@@ -59,7 +59,7 @@ export function preparePropertiesForJsonField(properties: any[]): Json {
  * Prepare images for submission
  * Converts image objects to URLs
  */
-export function prepareImagesForSubmission(images: any[]): string[] {
+export function prepareImagesForSubmission(images: { url?: string }[]): string[] {
   if (!images || !Array.isArray(images)) {
     return [];
   }
@@ -75,6 +75,6 @@ export function prepareImagesForSubmission(images: any[]): string[] {
  * Prepare floorplans for JSON field
  * This is a compatibility function to keep the API consistent
  */
-function prepareFloorplansForFormSubmission(floorplans: any[]): Json {
+function prepareFloorplansForFormSubmission(floorplans: Record<string, unknown>[]): Json {
   return preparePropertiesForJsonField(floorplans || []);
 }

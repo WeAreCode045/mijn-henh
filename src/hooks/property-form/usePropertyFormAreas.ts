@@ -4,7 +4,7 @@ import type { PropertyFormData, PropertyArea, PropertyImage, AreaImage } from '@
 
 interface UsePropertyFormAreasProps {
   formState: PropertyFormData;
-  handleFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  handleFieldChange: (field: keyof PropertyFormData, value: string | number | boolean | PropertyArea | PropertyImage | AreaImage[] | PropertyArea[]) => void;
   setPendingChanges: (pending: boolean) => void;
 }
 
@@ -51,7 +51,7 @@ export function usePropertyFormAreas({
     setPendingChanges(true);
   };
 
-  const updateArea = (id: string, field: keyof PropertyArea, value: any) => {
+  const updateArea = (id: string, field: keyof PropertyArea, value: string | number | boolean | PropertyImage | AreaImage[]) => {
     setFormData((prevState: PropertyFormData): PropertyFormData => {
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === id) {
@@ -72,7 +72,7 @@ export function usePropertyFormAreas({
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === areaId) {
           const updatedAreaImages = Array.isArray(area.areaImages)
-            ? area.areaImages.filter((img: AreaImage) => img.ImageID !== imageId)
+            ? area.areaImages.filter((img: AreaImage) => img.id !== imageId)
             : [];
 
           const updatedImages = Array.isArray(area.images)
@@ -109,6 +109,8 @@ export function usePropertyFormAreas({
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === areaId) {
           const areaImages: AreaImage[] = imageIds.map((id, index) => ({
+            id: id,
+            url: '', // Add appropriate URL if available
             ImageID: id,
             imageSortOrder: index + 1
           }));
