@@ -53,7 +53,9 @@ export function PropertyQuickview() {
             bedrooms: property.bedrooms || "",
             bathrooms: property.bathrooms || "",
             sqft: property.sqft || "",
-            images: [] // Add empty array for required images field
+            features: [], // Add empty array for required features field
+            images: [], // Add empty array for required images field
+            areas: [] // Add empty array for required areas field
           })) as PropertyData[];
           
           setProperties(formattedProperties);
@@ -113,6 +115,7 @@ export function PropertyQuickview() {
             location_description: data.location_description || "",
             features: safeParseFeatures(data.features),
             images: (data.property_images || []) as PropertyImage[],
+            areas: [], // Adding required empty areas array
             agent_id: data.agent_id || undefined,
             // Handle template_id with optional chaining as it might not exist
             template_id: data?.template_id || undefined,

@@ -9,133 +9,64 @@ import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 interface StatusSelectorProps {
   propertyId: string;
   initialStatus?: string;
+  onStatusChange: (status: string) => Promise<void>;
 }
 
-export function StatusSelector({ propertyId, initialStatus = "Draft" }: StatusSelectorProps) {
-  const [propertyStatus, setPropertyStatus] = useState(initialStatus);
+export function StatusSelector({ propertyId, initialStatus, onStatusChange }: StatusSelectorProps) {
+  const [currentStatus, setCurrentStatus] = useState(initialStatus || "draft");
+  const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
-  const { logPropertyChange } = usePropertyEditLogger();
+  const logPropertyEdit = usePropertyEditLogger();
 
   useEffect(() => {
-    if (initialStatus) {
-      setPropertyStatus(initialStatus);
-    } else if (propertyId) {
-      // If no initialStatus is provided, fetch it from the database
-      const fetchPropertyStatus = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('properties')
-            .select('status, metadata')
-            .eq('id', propertyId)
-            .single();
-            
-          if (error) {
-            console.error("Error fetching property status:", error);
-            return;
-          }
-          
-          if (data) {
-            // Check if metadata exists and has a status property, otherwise use the status field
-            let statusValue = data.status || "Draft";
-            
-            // Handle the metadata object properly
-            if (data.metadata) {
-              // Check if metadata is a string, parse it if necessary
-              const metadataObj = typeof data.metadata === 'string' 
-                ? JSON.parse(data.metadata) 
-                : data.metadata;
-                
-              if (metadataObj && typeof metadataObj === 'object' && 'status' in metadataObj) {
-                statusValue = metadataObj.status;
-              }
-            }
-            
-            setPropertyStatus(statusValue);
-          }
-        } catch (error) {
-          console.error("Error in fetchPropertyStatus:", error);
-        }
-      };
-      
-      fetchPropertyStatus();
+    if (initialStatus !== undefined) {
+      setCurrentStatus(initialStatus || "draft");
     }
-  }, [initialStatus, propertyId]);
+  }, [initialStatus]);
 
   const handleStatusChange = async (status: string) => {
     try {
-      // Get the current property data first
-      const { data: propertyData, error: fetchError } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single();
-        
-      if (fetchError) throw fetchError;
+      setIsUpdating(true);
+      await onStatusChange(status);
       
-      // Type assertion to access metadata property
-      type RawPropertyData = {
-        metadata?: Record<string, any>;
-        status?: string;
-        [key: string]: any;
-      };
+      setCurrentStatus(status);
       
-      // Prepare the metadata object, preserving any existing metadata
-      const typedPropertyData = propertyData as RawPropertyData;
-      const currentMetadata = typedPropertyData.metadata || {};
-      const currentStatus = typedPropertyData.status || 'Draft';
-      const updatedMetadata = {
-        ...currentMetadata,
-        status
-      };
-      
-      // Update the property with the new metadata
-      const { error } = await supabase
-        .from('properties')
-        .update({ 
-          metadata: updatedMetadata,
-          status: status // Also update the direct status field for backward compatibility
-        })
-        .eq('id', propertyId);
-      
-      if (error) throw error;
-      
-      // Log the status change
-      await logPropertyChange(propertyId, 'status', currentStatus, status);
-      
-      setPropertyStatus(status);
       toast({
         title: "Status updated",
-        description: `Property status changed to ${status}`,
+        description: `Property status has been set to ${status}`,
       });
+      
+      // Log the property edit
+      logPropertyEdit(propertyId, "status", `Updated status to ${status}`);
     } catch (error) {
       console.error("Error updating status:", error);
       toast({
         title: "Error",
-        description: "Failed to update the property status",
+        description: "Failed to update property status",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="property-status">Property Status</Label>
+      <Label htmlFor="status-select">Property Status</Label>
       <Select 
-        value={propertyStatus} 
+        value={currentStatus} 
         onValueChange={handleStatusChange}
-        defaultValue={propertyStatus}
+        disabled={isUpdating}
       >
-        <SelectTrigger id="property-status" className="w-full">
-          <SelectValue placeholder="Select status">
-            {propertyStatus}
-          </SelectValue>
+        <SelectTrigger id="status-select" className="w-full">
+          <SelectValue placeholder="Select a status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Draft">Draft</SelectItem>
-          <SelectItem value="Available">Available</SelectItem>
-          <SelectItem value="Under Option">Under Option</SelectItem>
-          <SelectItem value="Sold">Sold</SelectItem>
-          <SelectItem value="Withdrawn">Withdrawn</SelectItem>
+          <SelectItem value="draft">Draft</SelectItem>
+          <SelectItem value="published">Published</SelectItem>
+          <SelectItem value="sold">Sold</SelectItem>
+          <SelectItem value="rented">Rented</SelectItem>
+          <SelectItem value="pending">Pending</SelectItem>
         </SelectContent>
       </Select>
     </div>
