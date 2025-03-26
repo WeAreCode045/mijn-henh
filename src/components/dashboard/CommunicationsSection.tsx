@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -172,9 +171,8 @@ export function CommunicationsSection() {
     
     setIsSending(true);
     try {
-      // Insert into property_contact_replies
       const { error } = await supabase
-        .from('property_contact_replies')
+        .from('property_submission_replies')
         .insert({
           submission_id: selectedSubmission.id,
           reply_text: message,
@@ -183,7 +181,6 @@ export function CommunicationsSection() {
 
       if (error) throw error;
       
-      // Mark the submission as read
       await supabase
         .from('property_contact_submissions')
         .update({ is_read: true })
@@ -213,7 +210,6 @@ export function CommunicationsSection() {
     
     setIsProcessing(true);
     try {
-      // Delete the submission
       const { error } = await supabase
         .from('property_contact_submissions')
         .delete()
@@ -245,7 +241,6 @@ export function CommunicationsSection() {
     
     setIsProcessing(true);
     try {
-      // Update the submission to mark as read (archived)
       const { error } = await supabase
         .from('property_contact_submissions')
         .update({ is_read: true })

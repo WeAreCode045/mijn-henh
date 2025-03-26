@@ -23,9 +23,22 @@ export function AgendaSection() {
   
   const handleSave = async (data: Omit<AgendaItem, "id" | "created_at" | "updated_at">) => {
     if (selectedItem) {
-      await updateAgendaItem(selectedItem.id, data);
+      await updateAgendaItem(
+        selectedItem.id,
+        data.title,
+        data.description || null,
+        data.event_date,
+        data.event_time,
+        data.property_id
+      );
     } else {
-      await addAgendaItem(data.title, data.description, data.event_date, data.event_time);
+      await addAgendaItem(
+        data.title,
+        data.description || null,
+        data.event_date,
+        data.event_time,
+        data.property_id
+      );
     }
   };
   

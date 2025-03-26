@@ -171,7 +171,7 @@ export function PropertyQuickview() {
             nearby_places: nearbyPlaces,
             nearby_cities: nearbyCities,
             agent_id: data.agent_id || "",
-            template_id: data.template_id || "",
+            template_id: "",
             virtualTourUrl: data.virtualTourUrl || "",
             youtubeUrl: data.youtubeUrl || "",
             notes: data.notes || "",
