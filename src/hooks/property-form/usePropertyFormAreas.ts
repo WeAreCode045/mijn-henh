@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyArea, PropertyImage } from '@/types/property';
-import type { AreaImage } from '@/types/property';
+import type { PropertyFormData, PropertyArea, PropertyImage, AreaImage } from '@/types/property';
 
 interface UsePropertyFormAreasProps {
   formState: PropertyFormData;
