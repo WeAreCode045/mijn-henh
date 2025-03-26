@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ export function PropertyQuickview() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const navigate = useNavigate();
   
-  // Fetch properties based on search term
   useEffect(() => {
     const fetchProperties = async () => {
       setIsLoading(true);
@@ -30,19 +28,16 @@ export function PropertyQuickview() {
           .eq('archived', false)
           .order('title');
           
-        // If there's a search term, filter by title
         if (debouncedSearchTerm) {
           query = query.ilike('title', `%${debouncedSearchTerm}%`);
         }
         
-        // Limit results
         query = query.limit(10);
         
         const { data, error } = await query;
         
         if (error) throw error;
         if (data) {
-          // Transform the data to match the PropertyData interface
           const formattedProperties = data.map(property => ({
             id: property.id,
             title: property.title || "",
@@ -52,10 +47,10 @@ export function PropertyQuickview() {
             bedrooms: property.bedrooms || "",
             bathrooms: property.bathrooms || "",
             sqft: property.sqft || "",
-            features: [] as PropertyFeature[], // Add empty array for required features field
-            images: [] as PropertyImage[], // Add empty array for required images field
-            areas: [], // Add empty array for required areas field
-            livingArea: "", // Add the required fields
+            features: [] as PropertyFeature[],
+            images: [] as PropertyImage[],
+            areas: [],
+            livingArea: "",
             buildYear: "",
             garages: "",
             energyLabel: "",
@@ -66,7 +61,6 @@ export function PropertyQuickview() {
           
           setProperties(formattedProperties);
           
-          // If no property is selected yet, select the first one
           if (!selectedPropertyId && data.length > 0) {
             setSelectedPropertyId(data[0].id);
           }
@@ -81,7 +75,6 @@ export function PropertyQuickview() {
     fetchProperties();
   }, [debouncedSearchTerm, selectedPropertyId]);
   
-  // Fetch selected property details
   useEffect(() => {
     if (!selectedPropertyId) return;
     
@@ -95,7 +88,6 @@ export function PropertyQuickview() {
           
         if (error) throw error;
         if (data) {
-          // Helper function to safely parse features
           const safeParseFeatures = (features: unknown): PropertyFeature[] => {
             if (!features) return [];
             if (Array.isArray(features)) {
@@ -107,7 +99,6 @@ export function PropertyQuickview() {
             return [];
           };
           
-          // Transform the data to match the PropertyData interface
           const propertyData: PropertyData = {
             id: data.id,
             title: data.title || "",
@@ -121,7 +112,7 @@ export function PropertyQuickview() {
             location_description: data.location_description || "",
             features: safeParseFeatures(data.features),
             images: (data.property_images || []) as PropertyImage[],
-            areas: [], // Adding required empty areas array
+            areas: [],
             agent_id: data.agent_id || undefined,
             object_id: data.object_id || undefined,
             metadata: typeof data.metadata === 'object' && data.metadata !== null && !Array.isArray(data.metadata) 
@@ -155,17 +146,13 @@ export function PropertyQuickview() {
     }
   };
 
-  // Function to get the main image URL if available
   const getMainImageUrl = (property: PropertyData | null): string | null => {
     if (!property) return null;
     
-    // Check if property has images
     if (property.images && property.images.length > 0) {
-      // Try to find a main or featured image first
       const mainImage = property.images.find(img => img.is_main || img.is_featured_image);
       if (mainImage && mainImage.url) return mainImage.url;
       
-      // Otherwise, return the first image
       if (typeof property.images[0] === 'string') {
         return property.images[0];
       } else if (typeof property.images[0] === 'object' && 'url' in property.images[0]) {
@@ -173,7 +160,6 @@ export function PropertyQuickview() {
       }
     }
     
-    // Return null if no images are found
     return null;
   };
   
@@ -196,7 +182,6 @@ export function PropertyQuickview() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Property Selector */}
           <div className="md:col-span-1">
             <div className="mb-4">
               <div className="relative">
@@ -221,7 +206,10 @@ export function PropertyQuickview() {
               <SelectContent>
                 <SelectItem value="select-property" disabled>Select a property</SelectItem>
                 {properties.map(property => (
-                  <SelectItem key={property.id} value={property.id || `property_${Date.now()}`}>
+                  <SelectItem 
+                    key={property.id} 
+                    value={property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                  >
                     {property.title || `Property ID ${property.id.substring(0, 8)}`}
                   </SelectItem>
                 ))}
@@ -229,7 +217,6 @@ export function PropertyQuickview() {
             </Select>
           </div>
           
-          {/* Property Details */}
           <div className="md:col-span-3">
             {selectedProperty ? (
               <div className="space-y-4">

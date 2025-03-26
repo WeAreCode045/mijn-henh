@@ -35,7 +35,7 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
             {agents.map((agent) => (
               <SelectItem 
                 key={agent.id} 
-                value={agent.id || `agent_${Date.now()}`}
+                value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
               >
                 {agent.full_name}
               </SelectItem>

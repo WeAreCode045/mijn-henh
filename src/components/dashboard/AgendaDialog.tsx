@@ -179,7 +179,10 @@ export function AgendaDialog({
               <SelectContent>
                 <SelectItem value="none">No property</SelectItem>
                 {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id || `property_${Date.now()}`}>
+                  <SelectItem 
+                    key={property.id} 
+                    value={property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                  >
                     {property.title || `Property ${property.id.substring(0, 8)}`}
                   </SelectItem>
                 ))}
