@@ -10,6 +10,7 @@ import { usePropertySaveHandlers } from './property-form/usePropertySaveHandlers
 
 export function usePropertyFormManager(property: PropertyFormData) {
   const [formState, setFormState] = useState<PropertyFormData>(property);
+  const [pendingChanges, setPendingChanges] = useState(false);
   
   // Hook for handling form state
   const { 
@@ -50,7 +51,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handlePrevious,
     lastSaved,
     isSaving,
-    setPendingChanges,
+    setPendingChanges: setContentPendingChanges,
     onSubmit
   } = usePropertyContent(formState, onFieldChange);
   
@@ -67,18 +68,24 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleFloorplanEmbedScriptUpdate: () => { console.log('Mock handleFloorplanEmbedScriptUpdate called') }
   };
   
-  // Hook for managing images
+  // Hook for managing images - passing setPendingChanges as the fourth parameter
   const {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyImages(property.id || '', formState, onFieldChange);
+  } = usePropertyImages(property.id || '', formState, onFieldChange, setPendingChanges);
   
   // Hook for property save handlers
   const {
     handleSaveObjectId,
     handleSaveAgent
   } = usePropertySaveHandlers(formState, onFieldChange);
+  
+  // Update content pending changes to also update our local pendingChanges state
+  const handleSetPendingChanges = (pending: boolean) => {
+    setPendingChanges(pending);
+    setContentPendingChanges(pending);
+  };
   
   return {
     formState,
@@ -117,7 +124,7 @@ export function usePropertyFormManager(property: PropertyFormData) {
     // Status
     lastSaved,
     isSaving,
-    setPendingChanges,
+    setPendingChanges: handleSetPendingChanges,
     
     // Image methods
     handleImageUpload,

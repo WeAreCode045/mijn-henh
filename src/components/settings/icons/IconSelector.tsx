@@ -34,7 +34,7 @@ export const IconSelector = ({ label, value, defaultIcon, onChange }: IconSelect
         </SelectTrigger>
         <SelectContent>
           {availableIcons.map((iconName) => (
-            <SelectItem key={iconName} value={iconName} className="flex items-center">
+            <SelectItem key={iconName} value={iconName || "fallback-icon"} className="flex items-center">
               <div className="flex items-center">
                 <IconPreview iconName={iconName} className="mr-2" />
                 <span>{iconName}</span>
