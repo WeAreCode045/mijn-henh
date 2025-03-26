@@ -3,10 +3,11 @@
  * Represents an image in an area with sort order
  */
 export interface AreaImage {
-  id?: string;
+  id: string;
   ImageID: string;
   imageSortOrder: number;
-  url?: string;
+  url: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -22,6 +23,7 @@ export interface PropertyArea {
   columns: number;
   images: PropertyImage[] | string[];
   areaImages?: AreaImage[]; // New property for the updated format
+  [key: string]: unknown;
 }
 
 import { PropertyImage } from './PropertyTypes';

@@ -27,4 +27,5 @@ interface SubmissionDetailProps {
   isSending: boolean;
   onMarkAsRead: () => Promise<void>;
   isMarking: boolean;
+  onBack?: () => void;
 }

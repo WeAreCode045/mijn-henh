@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 import { PropertyPlaceType } from './PropertyPlaceTypes';
 
@@ -6,6 +5,7 @@ import { PropertyPlaceType } from './PropertyPlaceTypes';
 export interface PropertyFeature {
   id: string;
   description: string;
+  [key: string]: unknown;
 }
 
 // Import AreaImage from PropertyAreaTypes.ts
@@ -67,6 +67,7 @@ export interface PropertyCity {
   id: string;
   name: string;
   distance?: string;
+  [key: string]: unknown;
 }
 
 // Composite types for forms

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Submission } from '../types';
 
-export function useFetchSubmissions(propertyId?: string) {
+export function useFetchSubmissions(propertyId: string) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,6 +36,13 @@ export function useFetchSubmissions(propertyId?: string) {
             full_name,
             phone,
             avatar_url
+          ),
+          replies:property_submission_replies(
+            id,
+            reply_text,
+            created_at,
+            updated_at,
+            user:user_id(id, full_name, email, avatar_url)
           )
         `)
         .eq('property_id', propertyId)
@@ -48,14 +55,14 @@ export function useFetchSubmissions(propertyId?: string) {
       
       console.log(`Found ${data?.length || 0} submissions for property ID: ${propertyId}`);
       
-      // Create default Submission objects with empty replies arrays
+      // Create Submission objects with replies arrays
       const transformedSubmissions: Submission[] = (data || []).map(item => ({
         id: item.id,
         property_id: item.property_id,
         name: item.name,
         email: item.email,
         phone: item.phone,
-        message: item.message,
+        message: item.message || '',
         inquiry_type: item.inquiry_type,
         is_read: item.is_read,
         created_at: item.created_at,
@@ -68,7 +75,17 @@ export function useFetchSubmissions(propertyId?: string) {
           phone: item.agent.phone || '',
           avatar_url: item.agent.avatar_url
         } : undefined,
-        replies: []
+        replies: (item.replies || []).map((reply: any) => ({
+          id: reply.id,
+          text: reply.reply_text,
+          created_at: reply.created_at,
+          user: reply.user ? {
+            id: reply.user.id,
+            name: reply.user.full_name,
+            email: reply.user.email,
+            avatar_url: reply.user.avatar_url
+          } : undefined
+        }))
       }));
       
       setSubmissions(transformedSubmissions);
@@ -81,6 +98,32 @@ export function useFetchSubmissions(propertyId?: string) {
 
   useEffect(() => {
     fetchSubmissions();
+    
+    // Set up real-time subscription for updates
+    const channel = supabase
+      .channel('property-submissions-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'property_contact_submissions',
+        filter: `property_id=eq.${propertyId}` 
+      }, () => {
+        // Refetch when submissions change
+        fetchSubmissions();
+      })
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'property_submission_replies' 
+      }, () => {
+        // Refetch when replies change
+        fetchSubmissions();
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [propertyId, fetchSubmissions]);
 
   return {

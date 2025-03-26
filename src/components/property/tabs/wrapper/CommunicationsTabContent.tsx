@@ -45,6 +45,11 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
   
   const handleSelectSubmission = (submission: Submission) => {
     setSelectedSubmission(submission);
+    
+    // If submission is unread, mark it as read
+    if (submission && !submission.is_read) {
+      markAsRead();
+    }
   };
   
   const handleDeselectSubmission = () => {
@@ -70,6 +75,7 @@ export function CommunicationsTabContent({ propertyId }: CommunicationsTabConten
             isMarking={isMarking}
             onSendReply={sendResponse}
             isSending={isSending}
+            onBack={handleDeselectSubmission}
           />
         </div>
       )}

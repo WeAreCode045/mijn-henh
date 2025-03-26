@@ -1,79 +1,87 @@
 
 import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
-import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
+
+interface UseSendResponseProps {
+  submissionId: string;
+  agentId: string;
+  propertyId: string;
+  onSuccess?: () => void;
+}
 
 export function useSendResponse({ 
   submissionId, 
-  agentId, 
-  propertyId, 
-  onSuccess
-}: { 
-  submissionId: string; 
-  agentId: string; 
-  propertyId: string;
-  onSuccess?: () => void;
-}) {
+  agentId,
+  propertyId,
+  onSuccess 
+}: UseSendResponseProps) {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
-  const { logPropertyChange } = usePropertyEditLogger();
 
-  const sendResponse = async (responseText: string) => {
-    if (!responseText.trim()) {
+  const sendResponse = async (text: string) => {
+    if (!submissionId || !text.trim()) {
       toast({
         title: "Error",
-        description: "Response text cannot be empty",
+        description: "Missing submission ID or reply text",
         variant: "destructive",
       });
       return;
     }
-    
+
     setIsSending(true);
     try {
-      const { error } = await supabase
+      // First, save the reply in the database
+      const { error: dbError } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
-          agent_id: agentId,
-          reply_text: responseText
+          reply_text: text,
+          user_id: agentId
         });
 
-      if (error) throw error;
+      if (dbError) throw dbError;
 
-      // Log the submission reply
-      if (propertyId) {
-        // Get agent name for better logging
-        let agentName = "Unknown agent";
-        if (agentId) {
-          const { data: agentData } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', agentId)
-            .single();
-            
-          agentName = agentData?.full_name || "Unknown agent";
+      // Then try to send via Edge Function if available
+      try {
+        const { error: fnError } = await supabase.functions.invoke('send-submission-reply', {
+          body: {
+            submissionId,
+            replyText: text,
+            propertyId
+          }
+        });
+
+        if (fnError) {
+          console.warn('Edge function error (continuing):', fnError);
+          // We continue even if edge function fails since we saved to DB
         }
-        
-        await logPropertyChange(
-          propertyId,
-          "submission_reply",
-          "",
-          `Response sent by ${agentName}`
-        );
+      } catch (edgeFnError) {
+        console.warn('Edge function error (continuing):', edgeFnError);
+        // We continue even if edge function fails since we saved to DB
+      }
+
+      // Mark the submission as read
+      const { error: readError } = await supabase
+        .from('property_contact_submissions')
+        .update({ is_read: true })
+        .eq('id', submissionId);
+
+      if (readError) {
+        console.warn('Error marking as read (continuing):', readError);
       }
 
       toast({
         title: "Success",
-        description: "Response sent successfully",
+        description: "Reply sent successfully",
       });
 
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Error sending response:', error);
+      console.error('Error sending reply:', error);
       toast({
         title: "Error",
-        description: "Failed to send response",
+        description: "Failed to send reply",
         variant: "destructive",
       });
     } finally {

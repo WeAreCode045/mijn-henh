@@ -1,97 +1,42 @@
 
-import React from 'react';
-import { PropertyTabContentsProps } from './types/PropertyTabTypes';
-import { TabContentRenderers } from '../content/TabContentRenderers';
+import { TabsContent } from "@/components/ui/tabs";
+import { PropertyData } from "@/types/property";
+import { CommunicationsTabContent } from "./CommunicationsTabContent";
+import { ContentTabWrapper } from "../content/ContentTabWrapper";
+import { MediaTabContent } from "../media/MediaTabContent";
+import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
+
+interface PropertyTabContentsProps {
+  activeTab: string;
+  property: PropertyData;
+  [key: string]: any; // Additional props
+}
 
 export function PropertyTabContents({
   activeTab,
   property,
-  formState,
-  agentInfo,
-  isUpdating = false,
-  onAddFeature,
-  onRemoveFeature,
-  onUpdateFeature,
-  onAddArea,
-  onRemoveArea,
-  onUpdateArea,
-  onAreaImageRemove,
-  onAreaImagesSelect,
-  onAreaImageUpload, 
-  onFieldChange,
-  onFetchLocationData,
-  onFetchCategoryPlaces,
-  onFetchNearbyCities,
-  onGenerateLocationDescription,
-  onGenerateMap,
-  onRemoveNearbyPlace,
-  isLoadingLocationData,
-  isGeneratingMap,
-  onSave,
-  onDelete,
-  handleSaveObjectId,
-  handleSaveAgent,
-  handleSaveTemplate,
-  currentStep,
-  handleStepClick,
-  setPendingChanges,
-  isSaving,
-  handleGeneratePDF,
-  handleWebView,
-  handleImageUpload,
-  handleRemoveImage,
-  isUploading,
-  handleAreaPhotosUpload,
-  handleFloorplanUpload,
-  handleRemoveFloorplan,
-  isUploadingFloorplan,
-  handleSetFeaturedImage,
-  handleToggleFeaturedImage,
-  handleVirtualTourUpdate,
-  handleYoutubeUrlUpdate,
-  handleFloorplanEmbedScriptUpdate,
-  handleRemoveAreaPhoto,
-  isArchived
+  ...props
 }: PropertyTabContentsProps) {
-  const handlers = {
-    onSave,
-    onDelete,
-    handleSaveObjectId,
-    handleSaveAgent,
-    handleSaveTemplate,
-    onFieldChange,
-    onAddFeature,
-    onRemoveFeature,
-    onUpdateFeature,
-    onAddArea,
-    onRemoveArea,
-    onUpdateArea,
-    onAreaImageRemove,
-    onAreaImagesSelect,
-    handleAreaImageUpload: onAreaImageUpload,
-    onFetchLocationData,
-    onFetchCategoryPlaces,
-    onFetchNearbyCities,
-    onGenerateLocationDescription,
-    onGenerateMap,
-    onRemoveNearbyPlace,
-    isLoadingLocationData,
-    isGeneratingMap,
-    currentStep,
-    handleStepClick,
-    setPendingChanges,
-    isSaving: isSaving || false,
-    handleWebView,
-    handleGeneratePDF
-  };
-
-  return TabContentRenderers.renderTabContent({
-    activeTab,
-    property,
-    formState,
-    agentInfo,
-    isUpdating,
-    isArchived,
-    handlers
-  });
+  return (
+    <>
+      <TabsContent value="dashboard" className="space-y-6">
+        <PropertyDashboardTab property={property} {...props} />
+      </TabsContent>
+      
+      <TabsContent value="content" className="space-y-6">
+        <ContentTabWrapper property={property} {...props} />
+      </TabsContent>
+      
+      <TabsContent value="media" className="space-y-6">
+        <MediaTabContent property={property} {...props} />
+      </TabsContent>
+      
+      <TabsContent value="communications" className="space-y-6">
+        <CommunicationsTabContent 
+          propertyId={property.id} 
+          {...props} 
+        />
+      </TabsContent>
+    </>
+  );
 }
