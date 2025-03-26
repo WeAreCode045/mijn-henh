@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebounce } from "@/hooks/useDebounce";
 import { PropertyData, PropertyFeature, PropertyImage } from "@/types/property";
-import { Json } from "@/integrations/supabase/types";
 
 export function PropertyQuickview() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
