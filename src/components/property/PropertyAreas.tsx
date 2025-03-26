@@ -49,19 +49,12 @@ export function PropertyAreas({
   // Check if areas exist and have valid content
   const hasAreas = Array.isArray(areas) && areas.length > 0;
 
-  // Now explicitly typed to match PropertyArea[] type
-  const handleAreasGenerated = (newAreas: PropertyArea[]) => {
-    if (onAreasGenerated) {
-      onAreasGenerated(newAreas);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <PropertyAreasHeader 
         onAdd={onAdd} 
         propertyData={formData}
-        onAreasGenerated={handleAreasGenerated}
+        onAreasGenerated={onAreasGenerated}
       />
 
       {!hasAreas ? (

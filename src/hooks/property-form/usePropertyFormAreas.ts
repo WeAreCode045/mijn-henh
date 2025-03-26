@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import type { PropertyFormData, PropertyArea, PropertyImage, AreaImage } from '@/types/property';
+import type { PropertyFormData, PropertyArea, PropertyImage } from '@/types/property';
+import type { AreaImage } from '@/types/property';
 
 interface UsePropertyFormAreasProps {
   formState: PropertyFormData;
@@ -23,7 +23,6 @@ export function usePropertyFormAreas({
     }
   };
 
-  // Update the addArea function to include areaImages
   const addArea = () => {
     const newArea: PropertyArea = {
       id: crypto.randomUUID(),
@@ -73,12 +72,10 @@ export function usePropertyFormAreas({
     setFormData((prevState: PropertyFormData): PropertyFormData => {
       const updatedAreas = prevState.areas.map(area => {
         if (area.id === areaId) {
-          // For AreaImage[] type, ensure it's an array before filtering
           const updatedAreaImages = Array.isArray(area.areaImages)
             ? area.areaImages.filter((img: AreaImage) => img.ImageID !== imageId)
             : [];
 
-          // For images, make sure it's an array before filtering
           const updatedImages = Array.isArray(area.images)
             ? area.images.filter(img => {
                 if (typeof img === 'string') return img !== imageId;
@@ -87,7 +84,6 @@ export function usePropertyFormAreas({
               })
             : [];
 
-          // For imageIds, ensure it's an array before filtering
           const updatedImageIds = Array.isArray(area.imageIds)
             ? area.imageIds.filter(id => id !== imageId)
             : [];
@@ -159,14 +155,12 @@ export function usePropertyFormAreas({
           throw uploadError;
         }
 
-        // Get the full URL using getPublicUrl
         const { data: publicUrlData } = supabase.storage
           .from('property_images')
           .getPublicUrl(filePath);
 
         const imageUrl = publicUrlData.publicUrl;
 
-        // Create a new PropertyImage object
         const newImage: PropertyImage = {
           id: crypto.randomUUID(),
           url: imageUrl,
@@ -183,7 +177,6 @@ export function usePropertyFormAreas({
       setFormData((prevState: PropertyFormData): PropertyFormData => {
         const updatedAreas = prevState.areas.map(area => {
           if (area.id === areaId) {
-            // Ensure areaImages is an array before trying to spread it
             const updatedAreaImages = Array.isArray(area.areaImages) ? [...area.areaImages] : [];
 
             uploadedImages.forEach((newImage, index) => {
@@ -193,7 +186,6 @@ export function usePropertyFormAreas({
               });
             });
 
-            // Ensure images is an array before trying to spread it
             const existingImages = Array.isArray(area.images) ? area.images : [];
             const existingImageIds = Array.isArray(area.imageIds) ? area.imageIds : [];
 
@@ -207,7 +199,6 @@ export function usePropertyFormAreas({
           return area;
         });
 
-        // Ensure images is an array before trying to spread it
         const existingImages = Array.isArray(prevState.images) ? prevState.images : [];
 
         return {
@@ -240,14 +231,12 @@ export function usePropertyFormAreas({
           throw uploadError;
         }
 
-        // Get the full URL using getPublicUrl
         const { data: publicUrlData } = supabase.storage
           .from('property_images')
           .getPublicUrl(filePath);
 
         const imageUrl = publicUrlData.publicUrl;
 
-        // Create a new PropertyImage object
         const newImage: PropertyImage = {
           id: crypto.randomUUID(),
           url: imageUrl,

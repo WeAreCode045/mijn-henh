@@ -1,4 +1,3 @@
-
 import { PropertyData } from "./PropertyDataTypes";
 import { PropertyPlaceType } from './PropertyPlaceTypes';
 

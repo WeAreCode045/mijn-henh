@@ -21,5 +21,5 @@ export type {
 // Re-export types from PropertyDataTypes.ts that don't conflict
 export type { PropertyData } from './PropertyDataTypes';
 
-// Re-export AreaImage from PropertyAreaTypes.ts
+// Re-export AreaImage from PropertyAreaTypes.ts directly
 export type { AreaImage } from './PropertyAreaTypes';
