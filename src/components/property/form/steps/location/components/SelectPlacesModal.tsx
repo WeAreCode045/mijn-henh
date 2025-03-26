@@ -81,41 +81,46 @@ export function SelectPlacesModal({
           <>
             <ScrollArea className="h-[60vh] pr-4">
               <div className="space-y-4">
-                {places.map((place) => (
-                  <div
-                    key={place.id || `place_${Date.now()}_${Math.random()}`}
-                    className="flex items-start space-x-3 p-3 border rounded-md hover:bg-muted/50 transition-colors"
-                  >
-                    <Checkbox
-                      id={place.id || `place_${Date.now()}_${Math.random()}`}
-                      checked={selectedPlaces.some((p) => p.id === place.id)}
-                      onCheckedChange={() => handleTogglePlace(place)}
-                    />
-                    <div className="space-y-1">
-                      <label
-                        htmlFor={place.id || `place_${Date.now()}_${Math.random()}`}
-                        className="font-medium cursor-pointer text-sm"
-                      >
-                        {place.name}
-                      </label>
-                      <div className="text-xs text-muted-foreground">
-                        <div>{place.vicinity}</div>
-                        <div className="flex mt-1 gap-2">
-                          {place.rating && (
-                            <span className="bg-yellow-100 text-yellow-800 px-1.5 rounded-sm">
-                              ★ {formatNumber(place.rating)}
-                            </span>
-                          )}
-                          {place.distance && (
-                            <span className="bg-blue-100 text-blue-800 px-1.5 rounded-sm">
-                              {formatNumber(place.distance)} km
-                            </span>
-                          )}
+                {places.map((place) => {
+                  // Generate a guaranteed unique ID for each place
+                  const placeId = place.id || `place_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+                  
+                  return (
+                    <div
+                      key={placeId}
+                      className="flex items-start space-x-3 p-3 border rounded-md hover:bg-muted/50 transition-colors"
+                    >
+                      <Checkbox
+                        id={placeId}
+                        checked={selectedPlaces.some((p) => p.id === place.id)}
+                        onCheckedChange={() => handleTogglePlace(place)}
+                      />
+                      <div className="space-y-1">
+                        <label
+                          htmlFor={placeId}
+                          className="font-medium cursor-pointer text-sm"
+                        >
+                          {place.name}
+                        </label>
+                        <div className="text-xs text-muted-foreground">
+                          <div>{place.vicinity}</div>
+                          <div className="flex mt-1 gap-2">
+                            {place.rating && (
+                              <span className="bg-yellow-100 text-yellow-800 px-1.5 rounded-sm">
+                                ★ {formatNumber(place.rating)}
+                              </span>
+                            )}
+                            {place.distance && (
+                              <span className="bg-blue-100 text-blue-800 px-1.5 rounded-sm">
+                                {formatNumber(place.distance)} km
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
 

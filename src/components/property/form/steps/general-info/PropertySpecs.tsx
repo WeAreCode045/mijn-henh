@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -109,6 +108,9 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
     "A+++", "A++", "A+", "A", "B", "C", "D", "E", "F", "G"
   ];
 
+  const safePropertyType = formData.propertyType || "not_specified";
+  const safeEnergyLabel = formData.energyLabel || "none";
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -119,7 +121,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
           <div className="col-span-2">
             <Label htmlFor="property-type">Type</Label>
             <Select
-              value={formData.propertyType || "not_specified"}
+              value={safePropertyType}
               onValueChange={(value) => {
                 handleInputChange("propertyType", value);
                 handleInputBlur("propertyType", value);
@@ -130,7 +132,12 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               </SelectTrigger>
               <SelectContent>
                 {propertyTypes.map((type) => (
-                  <SelectItem key={type.toLowerCase()} value={type.toLowerCase() || `type_${Date.now()}`}>{type}</SelectItem>
+                  <SelectItem 
+                    key={type.toLowerCase()} 
+                    value={type.toLowerCase()}
+                  >
+                    {type}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -226,7 +233,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
           <div>
             <Label htmlFor="energy-label">Energy Label</Label>
             <Select
-              value={formData.energyLabel || "none"}
+              value={safeEnergyLabel}
               onValueChange={(value) => {
                 handleInputChange("energyLabel", value);
                 handleInputBlur("energyLabel", value);
@@ -238,7 +245,9 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {energyLabels.map((label) => (
-                  <SelectItem key={label} value={label || `label_${Date.now()}`}>{label}</SelectItem>
+                  <SelectItem key={label} value={label}>
+                    {label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

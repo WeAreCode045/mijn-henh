@@ -35,7 +35,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         
         if (data) {
           setAgents(data.map(agent => ({
-            id: agent.id,
+            id: agent.id || `id_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
             full_name: agent.full_name || 'Unnamed Agent'
           })));
         }
@@ -89,7 +89,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
           {agents.map(agent => (
             <SelectItem 
               key={agent.id} 
-              value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+              value={agent.id}
             >
               {agent.full_name}
             </SelectItem>

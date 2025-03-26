@@ -34,7 +34,11 @@ export function TodoAssignmentFields({
         .order('full_name');
         
       if (!error && data) {
-        setAgents(data);
+        // Make sure all agents have valid ids
+        setAgents(data.map(agent => ({
+          id: agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          full_name: agent.full_name || "Unnamed Agent"
+        })));
       }
     };
     
@@ -46,7 +50,11 @@ export function TodoAssignmentFields({
         .order('title');
         
       if (!error && data) {
-        setProperties(data);
+        // Make sure all properties have valid ids
+        setProperties(data.map(property => ({
+          id: property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          title: property.title || `Property ${property.id?.substring(0, 8) || "Untitled"}`
+        })));
       }
     };
     
@@ -54,12 +62,16 @@ export function TodoAssignmentFields({
     fetchProperties();
   }, []);
 
+  // Ensure we always have valid values for select
+  const safeAssignedToId = assignedToId || "unassigned";
+  const safePropertyId = propertyId || "unassigned";
+
   return (
     <>
       <div className="grid gap-2">
         <Label htmlFor="agent">Assign to Agent (optional)</Label>
         <Select 
-          value={assignedToId || "unassigned"} 
+          value={safeAssignedToId}
           onValueChange={(value) => onAssignedToIdChange(value === "unassigned" ? null : value)}
         >
           <SelectTrigger>
@@ -70,9 +82,9 @@ export function TodoAssignmentFields({
             {agents.map(agent => (
               <SelectItem 
                 key={agent.id} 
-                value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                value={agent.id}
               >
-                {agent.full_name || "Unnamed Agent"}
+                {agent.full_name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -82,7 +94,7 @@ export function TodoAssignmentFields({
       <div className="grid gap-2">
         <Label htmlFor="property">Assign to Property (optional)</Label>
         <Select 
-          value={propertyId || "unassigned"} 
+          value={safePropertyId} 
           onValueChange={(value) => onPropertyIdChange(value === "unassigned" ? null : value)}
         >
           <SelectTrigger>
@@ -90,14 +102,11 @@ export function TodoAssignmentFields({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="unassigned">Unassigned</SelectItem>
-            {properties.map(property => {
-              const safeId = property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-              return (
-                <SelectItem key={safeId} value={safeId}>
-                  {property.title || `Property ${safeId.substring(0, 8)}`}
-                </SelectItem>
-              );
-            })}
+            {properties.map(property => (
+              <SelectItem key={property.id} value={property.id}>
+                {property.title}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

@@ -14,6 +14,9 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
     onAgentSelect(value === "none" ? "" : value);
   };
 
+  // Ensure the value is never empty
+  const safeSelectedAgent = selectedAgent || "none";
+
   return (
     <Card>
       <CardHeader>
@@ -21,7 +24,7 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
       </CardHeader>
       <CardContent>
         <Select
-          value={selectedAgent || "none"}
+          value={safeSelectedAgent}
           onValueChange={handleAgentSelect}
         >
           <SelectTrigger>
@@ -32,7 +35,7 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
             {agents.map((agent) => (
               <SelectItem 
                 key={agent.id} 
-                value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+                value={agent.id || `agent_${Date.now()}`}
               >
                 {agent.full_name}
               </SelectItem>
