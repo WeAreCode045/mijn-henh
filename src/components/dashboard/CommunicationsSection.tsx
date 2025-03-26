@@ -31,17 +31,30 @@ export function CommunicationsSection() {
             id,
             created_at,
             property_id,
-            property:property_id (title),
+            property:properties(title),
             name,
             email,
             message,
-            is_read as read
+            is_read
           `)
           .order('created_at', { ascending: false })
           .limit(10);
 
         if (error) throw error;
-        setSubmissions(data || []);
+        
+        // Transform the data to match the Submission interface
+        const formattedData = data?.map(item => ({
+          id: item.id,
+          created_at: item.created_at,
+          property_id: item.property_id,
+          property: item.property,
+          name: item.name,
+          email: item.email,
+          message: item.message,
+          read: item.is_read
+        })) || [];
+        
+        setSubmissions(formattedData);
       } catch (error: any) {
         console.error('Error fetching submissions:', error);
         toast({
