@@ -69,7 +69,7 @@ export function TodoAssignmentFields({
             <SelectItem value="unassigned">Unassigned</SelectItem>
             {agents.map(agent => (
               <SelectItem key={agent.id} value={agent.id || `agent_${Date.now()}`}>
-                {agent.full_name}
+                {agent.full_name || "Unnamed Agent"}
               </SelectItem>
             ))}
           </SelectContent>

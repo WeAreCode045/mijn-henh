@@ -82,7 +82,7 @@ export function usePropertyFormImages(
     setPendingChanges(true);
   }, [setPendingChanges]);
   
-  const handleSetFeaturedImage = useCallback((imageUrl: string) => {
+  const handleSetFeaturedImage = useCallback((imageUrl: string | null) => {
     handleFieldChange("featuredImage", imageUrl);
   }, [handleFieldChange]);
   

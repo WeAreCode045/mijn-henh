@@ -58,8 +58,16 @@ export function usePropertyFormManager(property: PropertyFormData) {
   const {
     handleImageUpload,
     handleRemoveImage,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
+    isUploadingFloorplan,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate,
     images
-  } = usePropertyImages(formState, onFieldChange);
+  } = usePropertyImages(property.id || '', formState, onFieldChange, setPendingChanges);
   
   // Hook for property save handlers
   const {
@@ -109,10 +117,18 @@ export function usePropertyFormManager(property: PropertyFormData) {
     // Image methods
     handleImageUpload,
     handleRemoveImage,
-    images,
+    handleFloorplanUpload,
+    handleRemoveFloorplan,
     isUploading,
+    isUploadingFloorplan,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate,
+    images,
     
-    // Methods that now return Promises
+    // Methods that return Promises
     handleSaveObjectId,
     handleSaveAgent
   };

@@ -1,91 +1,76 @@
 
-import React from "react";
-import { PropertyFormManagerProps } from "./types/PropertyFormManagerTypes";
-import { usePropertyFormManagerState } from "@/hooks/property-form/usePropertyFormManagerState";
-import { usePropertyActionWrapper } from "@/hooks/property-form/usePropertyActionWrapper";
-import { PropertyFormManagerProvider } from "./PropertyFormManagerContext";
+import { useState, useEffect } from 'react';
+import { PropertyFormManagerProps, PropertyFormManagerChildrenProps } from './types/PropertyFormManagerTypes';
+import { usePropertyFormManager } from '@/hooks/property-form/usePropertyFormManager';
+import { PropertyData } from '@/types/property';
 
-export function PropertyFormManager({ 
-  property, 
-  isArchived = false,
-  children 
-}: PropertyFormManagerProps) {
-  // Get all the form state and handlers
-  const formManager = usePropertyFormManagerState(property, isArchived);
+export function PropertyFormManager({ property, isArchived = false, children }: PropertyFormManagerProps) {
+  const [propertyState, setPropertyState] = useState(property);
   
-  // Get the wrapper method for archived properties
-  const { wrapMethod } = usePropertyActionWrapper(isArchived);
-
-  // Wrap all modification methods when property is archived
-  const wrappedMethods = {
+  // Update internal state when property changes
+  useEffect(() => {
+    setPropertyState(property);
+  }, [property]);
+  
+  // Use the hook to manage form state and handlers
+  const formManager = usePropertyFormManager(propertyState);
+  
+  // Create the props object to pass to children
+  const childrenProps: PropertyFormManagerChildrenProps = {
     formState: formManager.formState,
-    handleFieldChange: wrapMethod(formManager.handleFieldChange),
-    handleSaveObjectId: wrapMethod(formManager.handleSaveObjectId),
-    handleSaveAgent: isArchived ? formManager.handleSaveAgent : wrapMethod(formManager.handleSaveAgent), // Allow agent changes even when archived
-    addFeature: wrapMethod(formManager.addFeature),
-    removeFeature: wrapMethod(formManager.removeFeature),
-    updateFeature: wrapMethod(formManager.updateFeature),
-    addArea: wrapMethod(formManager.addArea),
-    removeArea: wrapMethod(formManager.removeArea),
-    updateArea: wrapMethod(formManager.updateArea),
-    handleAreaImageRemove: wrapMethod(formManager.handleAreaImageRemove),
-    handleAreaImagesSelect: wrapMethod(formManager.handleAreaImagesSelect),
-    handleAreaImageUpload: wrapMethod(formManager.handleAreaImageUpload),
-    handleImageUpload: wrapMethod(formManager.handleImageUpload),
-    handleRemoveImage: wrapMethod(formManager.handleRemoveImage),
+    handleFieldChange: formManager.handleFieldChange,
+    handleSaveObjectId: formManager.handleSaveObjectId,
+    handleSaveAgent: formManager.handleSaveAgent,
+    addFeature: formManager.onAddFeature,
+    removeFeature: formManager.onRemoveFeature,
+    updateFeature: formManager.onUpdateFeature,
+    addArea: formManager.onAddArea,
+    removeArea: formManager.onRemoveArea,
+    updateArea: formManager.onUpdateArea,
+    handleAreaImageRemove: formManager.onAreaImageRemove,
+    handleAreaImagesSelect: formManager.onAreaImagesSelect,
+    handleAreaImageUpload: formManager.handleAreaImageUpload,
+    handleImageUpload: formManager.handleImageUpload,
+    handleRemoveImage: formManager.handleRemoveImage,
     isUploading: formManager.isUploading,
-    handleAreaPhotosUpload: wrapMethod(formManager.handleAreaPhotosUpload),
-    handleRemoveAreaPhoto: wrapMethod(formManager.handleRemoveAreaPhoto),
-    handleFloorplanUpload: wrapMethod(formManager.handleFloorplanUpload),
-    handleRemoveFloorplan: wrapMethod(formManager.handleRemoveFloorplan),
-    isUploadingFloorplan: formManager.isUploadingFloorplan,
-    handleSetFeaturedImage: wrapMethod(formManager.handleSetFeaturedImage),
-    handleToggleFeaturedImage: wrapMethod(formManager.handleToggleFeaturedImage),
-    handleVirtualTourUpdate: wrapMethod(formManager.handleVirtualTourUpdate),
-    handleYoutubeUrlUpdate: wrapMethod(formManager.handleYoutubeUrlUpdate),
-    handleFloorplanEmbedScriptUpdate: wrapMethod(formManager.handleFloorplanEmbedScriptUpdate),
-    onSubmit: wrapMethod(formManager.onSubmit),
+    handleAreaPhotosUpload: formManager.handleImageUpload, // Use the correct handler
+    handleRemoveAreaPhoto: formManager.handleAreaImageRemove,
+    handleFloorplanUpload: formManager.handleFloorplanUpload,
+    handleRemoveFloorplan: formManager.handleRemoveImage,
+    isUploadingFloorplan: formManager.isUploading,
+    handleSetFeaturedImage: formManager.handleSetFeaturedImage,
+    handleToggleFeaturedImage: formManager.handleToggleFeaturedImage,
+    onSubmit: formManager.onSubmit,
     currentStep: formManager.currentStep,
-    handleStepClick: wrapMethod(formManager.handleStepClick),
-    propertyWithRequiredProps: formManager.propertyWithRequiredProps,
+    handleStepClick: formManager.handleStepClick,
+    propertyWithRequiredProps: property as PropertyData,
     lastSaved: formManager.lastSaved,
     isSaving: formManager.isSaving,
-    setPendingChanges: wrapMethod(formManager.setPendingChanges),
-    onFetchLocationData: wrapMethod(formManager.onFetchLocationData),
-    onGenerateLocationDescription: wrapMethod(formManager.onGenerateLocationDescription),
-    onGenerateMap: wrapMethod(formManager.onGenerateMap),
-    onRemoveNearbyPlace: wrapMethod(formManager.onRemoveNearbyPlace),
-    onFetchCategoryPlaces: wrapMethod(formManager.onFetchCategoryPlaces),
-    onFetchNearbyCities: wrapMethod(formManager.onFetchNearbyCities),
-    images: formManager.images,
-    isLoadingLocationData: formManager.isLoadingLocationData || false,
-    isGeneratingMap: formManager.isGeneratingMap || false,
-    // Add backward compatibility aliases for the children function
-    onAddFeature: wrapMethod(formManager.addFeature),
-    onRemoveFeature: wrapMethod(formManager.removeFeature),
-    onUpdateFeature: wrapMethod(formManager.updateFeature),
-    onAddArea: wrapMethod(formManager.addArea),
-    onRemoveArea: wrapMethod(formManager.removeArea),
-    onUpdateArea: wrapMethod(formManager.updateArea),
-    onAreaImageRemove: wrapMethod(formManager.handleAreaImageRemove),
-    onAreaImagesSelect: wrapMethod(formManager.handleAreaImagesSelect),
+    setPendingChanges: formManager.setPendingChanges,
+    // Location handlers
+    onFetchLocationData: formManager.onFetchLocationData,
+    onFetchCategoryPlaces: formManager.onFetchCategoryPlaces,
+    onFetchNearbyCities: formManager.onFetchNearbyCities,
+    onGenerateLocationDescription: formManager.onGenerateLocationDescription,
+    onGenerateMap: formManager.onGenerateMap,
+    onRemoveNearbyPlace: formManager.onRemoveNearbyPlace,
+    isLoadingLocationData: formManager.isLoadingLocationData,
+    isGeneratingMap: formManager.isGeneratingMap,
+    // Media handlers
+    handleVirtualTourUpdate: formManager.handleVirtualTourUpdate,
+    handleYoutubeUrlUpdate: formManager.handleYoutubeUrlUpdate,
+    handleFloorplanEmbedScriptUpdate: formManager.handleFloorplanEmbedScriptUpdate,
+    // Backward compatibility
+    onAddFeature: formManager.onAddFeature,
+    onRemoveFeature: formManager.onRemoveFeature,
+    onUpdateFeature: formManager.onUpdateFeature,
+    onAddArea: formManager.onAddArea,
+    onRemoveArea: formManager.onRemoveArea,
+    onUpdateArea: formManager.onUpdateArea,
+    onAreaImageRemove: formManager.onAreaImageRemove,
+    onAreaImagesSelect: formManager.onAreaImagesSelect,
+    images: formManager.images
   };
-
-  // Use the original methods or the wrapped methods based on the archived status
-  const methods = isArchived ? wrappedMethods : {
-    ...formManager,
-    isLoadingLocationData: formManager.isLoadingLocationData || false,
-    isGeneratingMap: formManager.isGeneratingMap || false,
-    // Add backward compatibility aliases
-    onAddFeature: formManager.addFeature,
-    onRemoveFeature: formManager.removeFeature,
-    onUpdateFeature: formManager.updateFeature,
-    onAddArea: formManager.addArea,
-    onRemoveArea: formManager.removeArea,
-    onUpdateArea: formManager.updateArea,
-    onAreaImageRemove: formManager.handleAreaImageRemove,
-    onAreaImagesSelect: formManager.handleAreaImagesSelect,
-  };
-
-  return children(methods);
+  
+  return children(childrenProps);
 }
