@@ -3,6 +3,7 @@ import { AnalyticsOverview } from "@/components/dashboard/AnalyticsOverview";
 import { RecentProperties } from "@/components/dashboard/RecentProperties";
 import { RecentSubmissions } from "@/components/dashboard/RecentSubmissions";
 import { AgendaSection } from "@/components/dashboard/AgendaSection";
+import { TodoSection } from "@/components/dashboard/TodoSection";
 
 export default function Index() {
   return (
@@ -15,6 +16,7 @@ export default function Index() {
       
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         <AgendaSection />
+        <TodoSection />
       </div>
     </div>
   );
