@@ -2,7 +2,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertySubmitData } from "@/types/property";
-import { prepareAreasForFormSubmission } from "./preparePropertyData";
 import { preparePropertyDataForSubmission } from "./utils/propertyDataFormatter";
 
 export function usePropertyCreate() {
@@ -14,7 +13,18 @@ export function usePropertyCreate() {
     try {
       // Transform areas to the correct format for the database
       if (data.areas && Array.isArray(data.areas)) {
-        const transformedAreas = prepareAreasForFormSubmission(data.areas as any);
+        // Handle areas directly here without prepareAreasForFormSubmission
+        const transformedAreas = data.areas.map(area => ({
+          id: area.id,
+          name: area.name || '',
+          title: area.title || '',
+          description: area.description || '',
+          size: area.size || '',
+          columns: area.columns || 2,
+          imageIds: area.imageIds || [],
+          images: area.images || [],
+          areaImages: area.areaImages || []
+        }));
         data.areas = transformedAreas as any;
       }
 

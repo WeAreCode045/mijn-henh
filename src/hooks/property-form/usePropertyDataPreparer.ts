@@ -1,17 +1,31 @@
 
 import { PropertyFormData, PropertySubmitData } from "@/types/property";
-import { 
-  prepareAreasForFormSubmission, 
-  preparePropertiesForJsonField,
-  prepareImagesForSubmission
-} from "./preparePropertyData";
+import { preparePropertiesForJsonField } from "./preparePropertyData";
 
 export function usePropertyDataPreparer() {
+  // Helper function to convert data to string JSON
+  const prepareJsonString = (data: any[]): string => {
+    return JSON.stringify(preparePropertiesForJsonField(data));
+  };
+
   const prepareSubmitData = (formData: PropertyFormData): PropertySubmitData => {
-    const areasForSubmission = prepareAreasForFormSubmission(formData.areas);
-    const featuresJson = preparePropertiesForJsonField(formData.features);
-    const nearby_placesJson = preparePropertiesForJsonField(formData.nearby_places || []);
-    const nearby_citiesJson = preparePropertiesForJsonField(formData.nearby_cities || []);
+    // Use preparePropertiesForJsonField but then stringify for the database
+    const featuresJson = prepareJsonString(formData.features || []);
+    const nearby_placesJson = prepareJsonString(formData.nearby_places || []);
+    const nearby_citiesJson = prepareJsonString(formData.nearby_cities || []);
+    
+    // Convert areas to appropriate format
+    const areasForSubmission = formData.areas?.map(area => ({
+      id: area.id,
+      name: area.name || '',
+      title: area.title || '',
+      description: area.description || '',
+      size: area.size || '',
+      columns: area.columns || 2,
+      imageIds: area.imageIds || [],
+      images: area.images || [],
+      areaImages: area.areaImages || []
+    })) || [];
     
     // Extract just the URLs for type compatibility
     const imageUrls = Array.isArray(formData.images)
@@ -33,10 +47,10 @@ export function usePropertyDataPreparer() {
       description: formData.description,
       shortDescription: formData.shortDescription,
       location_description: formData.location_description,
-      features: featuresJson as string,
+      features: featuresJson,
       areas: areasForSubmission as any,
-      nearby_places: nearby_placesJson as string,
-      nearby_cities: nearby_citiesJson as string,
+      nearby_places: nearby_placesJson,
+      nearby_cities: nearby_citiesJson,
       latitude: formData.latitude,
       longitude: formData.longitude,
       map_image: formData.map_image,

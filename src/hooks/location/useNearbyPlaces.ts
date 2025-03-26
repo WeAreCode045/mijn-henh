@@ -287,7 +287,7 @@ export function useNearbyPlaces(
       const jsonPlaces = preparePropertiesForJsonField(combinedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: jsonPlaces })
+        .update({ nearby_places: jsonPlaces as any }) // Cast to any to fix Json type
         .eq('id', formData.id);
       
       if (error) {
@@ -325,7 +325,7 @@ export function useNearbyPlaces(
       const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: jsonPlaces })
+        .update({ nearby_places: jsonPlaces as any }) // Cast to any to fix Json type
         .eq('id', formData.id);
       
       if (error) {

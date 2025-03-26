@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PropertyFormData } from "@/types/property";
-import { prepareAreasForFormSubmission, preparePropertiesForJsonField } from "./property-form/preparePropertyData";
+import { preparePropertiesForJsonField } from "./property-form/preparePropertyData";
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function usePropertyAutoSave() {
@@ -44,13 +44,24 @@ export function usePropertyAutoSave() {
       
       // Special handling for specific field types
       if (field === 'features' && Array.isArray(value)) {
-        fieldValue = JSON.stringify(value) as any;
+        fieldValue = JSON.stringify(preparePropertiesForJsonField(value)) as any;
       } else if (field === 'areas' && Array.isArray(value)) {
-        fieldValue = prepareAreasForFormSubmission(value as any) as any;
+        // Handle areas specially
+        fieldValue = value.map(area => ({
+          id: area.id,
+          name: area.name || '',
+          title: area.title || '',
+          description: area.description || '',
+          size: area.size || '',
+          columns: area.columns || 2,
+          imageIds: area.imageIds || [],
+          images: area.images || [],
+          areaImages: area.areaImages || []
+        })) as any;
       } else if (field === 'nearby_places' && Array.isArray(value)) {
-        fieldValue = JSON.stringify(value) as any;
+        fieldValue = JSON.stringify(preparePropertiesForJsonField(value)) as any;
       } else if (field === 'nearby_cities' && Array.isArray(value)) {
-        fieldValue = JSON.stringify(value) as any;
+        fieldValue = JSON.stringify(preparePropertiesForJsonField(value)) as any;
       }
       
       console.log(`Auto-saving field ${String(field)}:`, fieldValue);

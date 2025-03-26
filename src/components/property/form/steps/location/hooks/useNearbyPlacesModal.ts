@@ -38,7 +38,7 @@ export function useNearbyPlacesModal({
         user_ratings_total: place.user_ratings_total || 0,
         type: place.type || currentCategory,
         visible_in_webview: true,
-        distance: place.distance || 0,
+        distance: place.distance || 0, // Ensure distance is included
         category: currentCategory, // Make sure the category is set
         latitude: place.latitude || null,
         longitude: place.longitude || null
@@ -61,7 +61,7 @@ export function useNearbyPlacesModal({
       const jsonPlaces = preparePropertiesForJsonField(updatedPlaces);
       const { error } = await supabase
         .from('properties')
-        .update({ nearby_places: jsonPlaces })
+        .update({ nearby_places: jsonPlaces as any }) // Cast to any to resolve type issues
         .eq('id', formData.id);
           
       if (error) {

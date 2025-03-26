@@ -24,7 +24,7 @@ export function PropertyTabContents({
   return (
     <>
       <TabsContent value="dashboard" className="space-y-6">
-        <PropertyDashboardTab propertyData={property} {...props} />
+        <PropertyDashboardTab property={property} {...props} />
       </TabsContent>
       
       <TabsContent value="content" className="space-y-6">

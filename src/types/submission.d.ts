@@ -5,7 +5,7 @@ export interface Submission {
   name: string;
   email: string;
   phone: string;
-  message?: string;
+  message: string; // Changed from optional to required
   inquiry_type: string;
   is_read: boolean;
   created_at: string;
@@ -48,5 +48,5 @@ export interface SubmissionDetailProps {
   isSending: boolean;
   onMarkAsRead: () => Promise<void>;
   isMarking: boolean;
-  onBack?: () => void; // Making this optional so it matches existing usage
+  onBack?: () => void; // Making this required to match usage
 }

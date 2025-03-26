@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
+import { PropertyNearbyPlace } from "@/types/property";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { PlacesList } from "./PlacesList";
@@ -16,7 +16,8 @@ interface PlacesViewTabProps {
 export function PlacesViewTab({ places, onRemove, isDisabled }: PlacesViewTabProps) {
   // Group the places by category
   const placesByCategory = React.useMemo(() => {
-    return groupPlacesByCategory(places);
+    // Cast to appropriate type to satisfy both type systems
+    return groupPlacesByCategory(places as any);
   }, [places]);
 
   // Get all categories from the grouped places

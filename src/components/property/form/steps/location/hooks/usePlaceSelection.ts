@@ -49,7 +49,7 @@ export function usePlaceSelection({
         const { error } = await supabase
           .from('properties')
           .update({ 
-            nearby_places: updatedPlacesJson
+            nearby_places: updatedPlacesJson as any // Cast to any to resolve type issues
           })
           .eq('id', formData.id);
         
