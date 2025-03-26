@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Search, ChevronRight, Pencil, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useDebounce } from "@/hooks/useDebounce";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyNearbyPlace, PropertyCity } from "@/types/property";
 import { useToast } from "@/components/ui/use-toast";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 
@@ -76,8 +75,8 @@ export function PropertyQuickview() {
             map_image: null,
             latitude: null,
             longitude: null,
-            nearby_places: [],
-            nearby_cities: [],
+            nearby_places: [] as PropertyNearbyPlace[],
+            nearby_cities: [] as PropertyCity[],
             floorplans: [],
             virtualTourUrl: "",
             youtubeUrl: "",
@@ -115,6 +114,40 @@ export function PropertyQuickview() {
           
         if (error) throw error;
         if (data) {
+          // Parse nearby_places and nearby_cities from JSON if they exist
+          let nearbyPlaces: PropertyNearbyPlace[] = [];
+          let nearbyCities: PropertyCity[] = [];
+          
+          // Safely parse nearby_places
+          if (data.nearby_places) {
+            try {
+              // If it's already an array, use it, otherwise try to parse it
+              nearbyPlaces = Array.isArray(data.nearby_places) 
+                ? data.nearby_places 
+                : (typeof data.nearby_places === 'string' 
+                  ? JSON.parse(data.nearby_places) 
+                  : []);
+            } catch (e) {
+              console.error("Error parsing nearby_places:", e);
+              nearbyPlaces = [];
+            }
+          }
+          
+          // Safely parse nearby_cities
+          if (data.nearby_cities) {
+            try {
+              // If it's already an array, use it, otherwise try to parse it
+              nearbyCities = Array.isArray(data.nearby_cities) 
+                ? data.nearby_cities 
+                : (typeof data.nearby_cities === 'string' 
+                  ? JSON.parse(data.nearby_cities) 
+                  : []);
+            } catch (e) {
+              console.error("Error parsing nearby_cities:", e);
+              nearbyCities = [];
+            }
+          }
+          
           // Create a complete PropertyData object with all required properties
           setSelectedProperty({
             id: data.id,
@@ -143,8 +176,8 @@ export function PropertyQuickview() {
             map_image: data.map_image || null,
             latitude: data.latitude || null,
             longitude: data.longitude || null,
-            nearby_places: data.nearby_places || [],
-            nearby_cities: data.nearby_cities || [],
+            nearby_places: nearbyPlaces,
+            nearby_cities: nearbyCities,
             agent_id: data.agent_id || "",
             template_id: data.template_id || "",
             virtualTourUrl: data.virtualTourUrl || "",
@@ -152,7 +185,7 @@ export function PropertyQuickview() {
             notes: data.notes || "",
             floorplans: [],
             floorplanEmbedScript: data.floorplanEmbedScript || "",
-            featuredImage: data.featuredImage || null,
+            featuredImage: null, // We'll get this from images
             featuredImages: [],
             propertyType: data.propertyType || ""
           });
