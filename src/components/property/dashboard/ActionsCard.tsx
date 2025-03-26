@@ -51,7 +51,7 @@ export function ActionsCard({
   const location = useLocation();
   const [showEditHistory, setShowEditHistory] = useState(false);
   const { generatePDF, isGenerating } = useGeneratePDF();
-  const { archiveProperty, unarchiveProperty, isArchiving } = usePropertyArchive();
+  const { archiveProperty, isArchiving } = usePropertyArchive();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
   
@@ -104,7 +104,7 @@ export function ActionsCard({
   // Handle archiving property
   const handleArchiveProperty = async () => {
     if (propertyId) {
-      const success = await archiveProperty(propertyId);
+      const success = await archiveProperty(propertyId, true);
       if (success) {
         setShowArchiveDialog(false);
         // Reload the current page instead of the entire application
@@ -116,7 +116,7 @@ export function ActionsCard({
   // Handle unarchiving property
   const handleUnarchiveProperty = async () => {
     if (propertyId) {
-      const success = await unarchiveProperty(propertyId);
+      const success = await archiveProperty(propertyId, false);
       if (success) {
         setShowUnarchiveDialog(false);
         // Reload the current page instead of the entire application

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -27,6 +28,8 @@ export function usePropertyArchive() {
 
       // Log the property edit
       await logPropertyChange(propertyId, "archive", `Property ${isArchived ? 'archived' : 'unarchived'}`);
+      
+      return true;
     } catch (error) {
       console.error("Error archiving property:", error);
       toast({
@@ -34,6 +37,7 @@ export function usePropertyArchive() {
         description: `Failed to ${isArchived ? 'archive' : 'unarchive'} property`,
         variant: "destructive",
       });
+      return false;
     } finally {
       setIsArchiving(false);
     }
@@ -41,6 +45,6 @@ export function usePropertyArchive() {
 
   return {
     isArchiving,
-    archiveProperty,
+    archiveProperty
   };
 }

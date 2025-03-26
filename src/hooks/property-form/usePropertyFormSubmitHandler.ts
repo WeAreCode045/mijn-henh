@@ -23,6 +23,9 @@ export function usePropertyFormSubmitHandler() {
     }
     
     try {
+      // Format features as JSON string
+      const featuresJson = JSON.stringify(formData.features || []);
+      
       // Update basic property data
       const { error } = await supabase
         .from("properties")
@@ -36,7 +39,7 @@ export function usePropertyFormSubmitHandler() {
           sqft: formData.sqft,
           propertyType: formData.propertyType,
           status: formData.status,
-          features: formData.features,
+          features: featuresJson,
           energyLabel: formData.energyLabel,
           buildYear: formData.buildYear,
           livingArea: formData.livingArea,

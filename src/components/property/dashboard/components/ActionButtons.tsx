@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -32,19 +33,6 @@ interface ActionButtonsProps {
   onGeneratePDF: () => void;
   isCompact?: boolean;
 }
-
-const handleStatusChange = async (status: string): Promise<void> => {
-  if (!propertyId) return;
-  
-  const { error } = await supabase
-    .from('properties')
-    .update({ status })
-    .eq('id', propertyId);
-    
-  if (error) {
-    throw error;
-  }
-};
 
 export function ActionButtons({ 
   propertyId, 
@@ -81,6 +69,19 @@ export function ActionButtons({
     const url = `${window.location.origin}/property/${propertyId}`;
     navigator.clipboard.writeText(url);
     // Show toast notification (outside the scope of this component)
+  };
+
+  const handleStatusChange = async (status: string): Promise<void> => {
+    if (!propertyId) return;
+    
+    const { error } = await supabase
+      .from('properties')
+      .update({ status })
+      .eq('id', propertyId);
+      
+    if (error) {
+      throw error;
+    }
   };
 
   return (

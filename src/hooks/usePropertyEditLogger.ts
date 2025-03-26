@@ -16,11 +16,14 @@ export function usePropertyEditLogger() {
       // Get current timestamp
       const timestamp = new Date().toISOString();
 
+      // Get user name from metadata or fallback to email
+      const userName = user.email || 'Unknown User';
+
       // Insert log entry
       const { error } = await supabase.from("property_edit_logs").insert({
         property_id: propertyId,
         user_id: user.id,
-        user_name: user.user_metadata?.full_name || user.email,
+        user_name: userName,
         field_name: fieldName,
         new_value: newValue,
         created_at: timestamp
