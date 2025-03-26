@@ -1,46 +1,39 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/providers/AuthProvider";
-import { TodoItem } from "@/types/todo";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
+import { TodoItem } from '@/types/todo';
 
 export function useTodoItems(propertyId?: string) {
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCompleted, setShowCompleted] = useState(false);
   const { toast } = useToast();
-  const { profile } = useAuth();
 
-  const fetchTodoItems = async () => {
-    if (!profile?.id) return;
-    
+  const fetchTodoItems = useCallback(async () => {
     setIsLoading(true);
     try {
       let query = supabase
         .from('todo_items')
         .select(`
           *,
-          property:property_id (
-            id,
-            title
-          ),
-          assigned_to:assigned_to_id (
-            id,
-            full_name
-          )
+          property:property_id(id, title),
+          assigned_to:assigned_to_id(id, full_name)
         `)
-        .order('sort_order', { ascending: true });
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
       
-      // If propertyId is provided, filter by property
+      // If propertyId is provided, filter by it
       if (propertyId) {
         query = query.eq('property_id', propertyId);
       }
-
+        
       const { data, error } = await query;
 
       if (error) throw error;
+      
       setTodoItems(data || []);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching todo items:', error);
       toast({
         title: "Error",
@@ -50,21 +43,34 @@ export function useTodoItems(propertyId?: string) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [propertyId, toast]);
 
-  const addTodoItem = async (itemData: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
-    try {
-      // Get max sort_order and add 1
-      const maxSortOrder = todoItems.length > 0 
-        ? Math.max(...todoItems.map(item => item.sort_order || 0)) 
-        : 0;
+  useEffect(() => {
+    fetchTodoItems();
+    
+    // Set up real-time subscription for updates to todo_items
+    const channel = supabase
+      .channel('todo_items_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'todo_items',
+        ...(propertyId ? { filter: `property_id=eq.${propertyId}` } : {})
+      }, () => {
+        fetchTodoItems();
+      })
+      .subscribe();
       
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchTodoItems, propertyId]);
+
+  const addTodoItem = async (todoData: Omit<TodoItem, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
       const { error } = await supabase
         .from('todo_items')
-        .insert({
-          ...itemData,
-          sort_order: maxSortOrder + 1
-        });
+        .insert(todoData);
 
       if (error) throw error;
       
@@ -73,8 +79,8 @@ export function useTodoItems(propertyId?: string) {
         description: "Todo item added successfully",
       });
       
-      fetchTodoItems();
-    } catch (error: any) {
+      return fetchTodoItems();
+    } catch (error) {
       console.error('Error adding todo item:', error);
       toast({
         title: "Error",
@@ -84,15 +90,12 @@ export function useTodoItems(propertyId?: string) {
     }
   };
 
-  const updateTodoItem = async (
-    itemId: string, 
-    itemData: Omit<TodoItem, "id" | "created_at" | "updated_at">
-  ) => {
+  const updateTodoItem = async (id: string, todoData: Partial<Omit<TodoItem, 'id' | 'created_at' | 'updated_at'>>) => {
     try {
       const { error } = await supabase
         .from('todo_items')
-        .update(itemData)
-        .eq('id', itemId);
+        .update(todoData)
+        .eq('id', id);
 
       if (error) throw error;
       
@@ -101,8 +104,8 @@ export function useTodoItems(propertyId?: string) {
         description: "Todo item updated successfully",
       });
       
-      fetchTodoItems();
-    } catch (error: any) {
+      return fetchTodoItems();
+    } catch (error) {
       console.error('Error updating todo item:', error);
       toast({
         title: "Error",
@@ -112,12 +115,12 @@ export function useTodoItems(propertyId?: string) {
     }
   };
 
-  const deleteTodoItem = async (itemId: string) => {
+  const deleteTodoItem = async (id: string) => {
     try {
       const { error } = await supabase
         .from('todo_items')
         .delete()
-        .eq('id', itemId);
+        .eq('id', id);
 
       if (error) throw error;
       
@@ -126,8 +129,8 @@ export function useTodoItems(propertyId?: string) {
         description: "Todo item deleted successfully",
       });
       
-      fetchTodoItems();
-    } catch (error: any) {
+      return fetchTodoItems();
+    } catch (error) {
       console.error('Error deleting todo item:', error);
       toast({
         title: "Error",
@@ -137,129 +140,49 @@ export function useTodoItems(propertyId?: string) {
     }
   };
 
-  const markTodoItemComplete = async (itemId: string, completed: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('todo_items')
-        .update({ completed })
-        .eq('id', itemId);
-
-      if (error) throw error;
-      
-      // Update local state to avoid refetching
-      setTodoItems(prev => 
-        prev.map(item => 
-          item.id === itemId ? { ...item, completed } : item
-        )
-      );
-    } catch (error: any) {
-      console.error('Error updating todo item status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update todo item status",
-        variant: "destructive",
-      });
-    }
+  const markTodoItemComplete = async (id: string, completed: boolean) => {
+    return updateTodoItem(id, { completed });
   };
 
-  const reorderTodoItems = async (startIndex: number, endIndex: number) => {
-    const reorderedItems = Array.from(todoItems);
-    const [removed] = reorderedItems.splice(startIndex, 1);
-    reorderedItems.splice(endIndex, 0, removed);
-    
-    // Update the sort_order values
-    const updatedItems = reorderedItems.map((item, index) => ({
-      ...item,
-      sort_order: index
-    }));
-    
-    // Update local state optimistically
-    setTodoItems(updatedItems);
-    
-    // Save to the database
+  const updateTodoOrder = async (reorderedItems: TodoItem[]) => {
     try {
-      const updatePromises = updatedItems.map(item => 
-        supabase
+      // Create an array of updates
+      const updates = reorderedItems.map((item, index) => ({
+        id: item.id,
+        sort_order: index
+      }));
+      
+      // Update each item
+      for (const update of updates) {
+        const { error } = await supabase
           .from('todo_items')
-          .update({ sort_order: item.sort_order })
-          .eq('id', item.id)
-      );
+          .update({ sort_order: update.sort_order })
+          .eq('id', update.id);
+          
+        if (error) throw error;
+      }
       
-      await Promise.all(updatePromises);
-    } catch (error: any) {
-      console.error('Error reordering items:', error);
+      return fetchTodoItems();
+    } catch (error) {
+      console.error('Error updating todo order:', error);
       toast({
         title: "Error",
-        description: "Failed to save the new order",
+        description: "Failed to update todo order",
         variant: "destructive",
       });
-      
-      // Revert to previous state on error
-      fetchTodoItems();
     }
   };
-
-  // Setup notification permission and display
-  useEffect(() => {
-    // Request notification permission
-    if ("Notification" in window) {
-      Notification.requestPermission();
-    }
-
-    // Check for due notifications every minute
-    const checkNotifications = async () => {
-      const now = new Date();
-      
-      todoItems.forEach(item => {
-        if (
-          item.notify_at && 
-          !item.completed &&
-          !item.notification_sent && 
-          new Date(item.notify_at) <= now
-        ) {
-          // Show notification
-          if (Notification.permission === "granted") {
-            new Notification(item.title, {
-              body: item.description || "Task reminder",
-              icon: "/favicon.ico"
-            });
-            
-            // Mark notification as sent
-            supabase
-              .from('todo_items')
-              .update({ notification_sent: true })
-              .eq('id', item.id);
-              
-            // Update local state
-            setTodoItems(prev => 
-              prev.map(todo => 
-                todo.id === item.id ? { ...todo, notification_sent: true } : todo
-              )
-            );
-          }
-        }
-      });
-    };
-    
-    const notificationInterval = setInterval(checkNotifications, 60000);
-    
-    return () => clearInterval(notificationInterval);
-  }, [todoItems]);
-
-  useEffect(() => {
-    if (profile?.id) {
-      fetchTodoItems();
-    }
-  }, [profile?.id, propertyId]);
 
   return {
     todoItems,
     isLoading,
+    showCompleted,
+    setShowCompleted,
     addTodoItem,
     updateTodoItem,
     deleteTodoItem,
     markTodoItemComplete,
-    reorderTodoItems,
-    refreshTodoItems: fetchTodoItems
+    updateTodoOrder,
+    fetchTodoItems
   };
 }

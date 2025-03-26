@@ -132,3 +132,4 @@ export function AgendaCalendarView({ agendaItems }: AgendaCalendarViewProps) {
       </div>
     </div>
   );
+}

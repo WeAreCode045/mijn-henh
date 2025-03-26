@@ -70,7 +70,7 @@ export function TodosCard() {
             No tasks for this property
           </div>
         ) : (
-          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
             {todoItems.map((item) => (
               <div 
                 key={item.id} 

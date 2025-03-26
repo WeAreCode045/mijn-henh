@@ -9,6 +9,7 @@ import { PropertyDetailsCard } from "./cards/PropertyDetailsCard";
 import { PropertyManagementCard } from "./cards/PropertyManagementCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AgendaCard } from "../../dashboard/AgendaCard";
+import { TodosCard } from "../../dashboard/TodosCard";
 
 interface PropertyDashboardTabProps {
   id: string;
@@ -167,7 +168,8 @@ export function PropertyDashboardTab({
         <AgendaCard propertyId={id} />
       </div>
       
-      <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <TodosCard />
         <NotesCard propertyId={id} />
       </div>
     </div>
