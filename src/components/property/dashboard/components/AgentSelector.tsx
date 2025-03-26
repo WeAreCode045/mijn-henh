@@ -87,7 +87,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         <SelectContent>
           <SelectItem value="no-agent">No agent assigned</SelectItem>
           {agents.map(agent => (
-            <SelectItem key={agent.id} value={agent.id}>
+            <SelectItem key={agent.id} value={agent.id || `agent_${Date.now()}`}>
               {agent.full_name}
             </SelectItem>
           ))}

@@ -33,7 +33,7 @@ export function FieldMapper({
           <SelectContent>
             <SelectItem value="not_mapped">Not mapped</SelectItem>
             {xmlFields.map((field) => (
-              <SelectItem key={field} value={field}>
+              <SelectItem key={field} value={field || `field_${fieldId}`}>
                 {field}
               </SelectItem>
             ))}

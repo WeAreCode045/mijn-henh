@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -82,17 +83,17 @@ export function SelectPlacesModal({
               <div className="space-y-4">
                 {places.map((place) => (
                   <div
-                    key={place.id}
+                    key={place.id || `place_${Date.now()}_${Math.random()}`}
                     className="flex items-start space-x-3 p-3 border rounded-md hover:bg-muted/50 transition-colors"
                   >
                     <Checkbox
-                      id={place.id}
+                      id={place.id || `place_${Date.now()}_${Math.random()}`}
                       checked={selectedPlaces.some((p) => p.id === place.id)}
                       onCheckedChange={() => handleTogglePlace(place)}
                     />
                     <div className="space-y-1">
                       <label
-                        htmlFor={place.id}
+                        htmlFor={place.id || `place_${Date.now()}_${Math.random()}`}
                         className="font-medium cursor-pointer text-sm"
                       >
                         {place.name}

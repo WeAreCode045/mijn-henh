@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -68,7 +67,6 @@ export function AgendaDialog({
       setTime(item.event_time ? item.event_time.substring(0, 5) : "09:00");
       setSelectedPropertyId(item.property_id || null);
     } else {
-      // Reset form for "add" mode
       setTitle("");
       setDescription("");
       setDate(new Date());
@@ -180,8 +178,8 @@ export function AgendaDialog({
               <SelectContent>
                 <SelectItem value="none">No property</SelectItem>
                 {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
-                    {property.title}
+                  <SelectItem key={property.id} value={property.id || `property_${Date.now()}`}>
+                    {property.title || `Property ${property.id.substring(0, 8)}`}
                   </SelectItem>
                 ))}
               </SelectContent>
