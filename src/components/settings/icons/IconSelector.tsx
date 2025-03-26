@@ -42,4 +42,4 @@ export const IconSelector = ({ label, value, defaultIcon, onChange }: IconSelect
       </Select>
     </div>
   );
-};
+}

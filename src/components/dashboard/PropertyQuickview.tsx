@@ -221,8 +221,8 @@ export function PropertyQuickview() {
               <SelectContent>
                 <SelectItem value="select-property" disabled>Select a property</SelectItem>
                 {properties.map(property => (
-                  <SelectItem key={property.id} value={property.id}>
-                    {property.title}
+                  <SelectItem key={property.id} value={property.id || `property_${Date.now()}`}>
+                    {property.title || `Property ID ${property.id.substring(0, 8)}`}
                   </SelectItem>
                 ))}
               </SelectContent>
