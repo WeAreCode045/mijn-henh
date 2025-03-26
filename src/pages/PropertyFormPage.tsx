@@ -13,11 +13,11 @@ export default function PropertyFormPage() {
     if (formData?.title) {
       document.title = formData.title;
     } else {
-      document.title = "Property";
+      document.title = "Real Estate";
     }
     
     return () => {
-      document.title = "Brochure Generator";
+      document.title = "Property Manager";
     };
   }, [formData?.title]);
 
