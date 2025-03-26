@@ -16,65 +16,23 @@ export function usePropertyStepNavigation(
   const { toast } = useToast();
   const maxSteps = steps.length;
 
-  // Single unified function to handle saving before changing steps
-  const saveBeforeStepChange = async (newStep: number | ((prev: number) => number)) => {
-    console.log("Saving before step change, pendingChanges:", pendingChanges, "formData.id:", formData.id);
-    
-    // Only save if there are pending changes and the form has an ID
-    if (pendingChanges && formData.id) {
-      try {
-        const formEvent = {} as React.FormEvent;
-        const success = await handleSubmit(formEvent, formData, false);
-        
-        if (success) {
-          console.log("Save successful before step change");
-          setLastSaved(new Date());
-          setPendingChanges(false);
-        } else {
-          console.warn("Save was not successful before step change");
-          toast({
-            title: "Warning",
-            description: "Unable to save changes before changing step",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to save before changing step:", error);
-        toast({
-          title: "Warning",
-          description: "Changes couldn't be saved before changing step",
-          variant: "destructive",
-        });
-      }
-    } else {
-      console.log("No need to save before step change");
-    }
-    
-    // Always change step even if save fails or is not needed
-    if (typeof newStep === 'function') {
-      setCurrentStep(newStep);
-    } else {
-      setCurrentStep(newStep);
-    }
-    return true;
-  };
-
+  // Modified to simply change steps without auto-saving
   const handleStepClick = (step: number) => {
     console.log("Step clicked:", step, "Current formData:", formData);
-    saveBeforeStepChange(step);
+    setCurrentStep(step);
   };
 
   const handleNext = () => {
     console.log("Next clicked", "Current formData:", formData);
     if (currentStep < maxSteps - 1) {
-      saveBeforeStepChange(currentStep + 1);
+      setCurrentStep(currentStep + 1);
     }
   };
 
   const handlePrevious = () => {
     console.log("Previous clicked", "Current formData:", formData);
     if (currentStep > 0) {
-      saveBeforeStepChange(currentStep - 1);
+      setCurrentStep(currentStep - 1);
     }
   };
 
