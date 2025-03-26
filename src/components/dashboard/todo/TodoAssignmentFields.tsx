@@ -70,7 +70,6 @@ export function TodoAssignmentFields({
             {agents.map(agent => (
               <SelectItem 
                 key={agent.id} 
-                // Fix: Ensure a non-empty value by using a unique fallback if id is empty
                 value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
               >
                 {agent.full_name || "Unnamed Agent"}
@@ -92,7 +91,6 @@ export function TodoAssignmentFields({
           <SelectContent>
             <SelectItem value="unassigned">Unassigned</SelectItem>
             {properties.map(property => {
-              // Fix: Ensure we never have an empty string value with a more unique fallback
               const safeId = property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
               return (
                 <SelectItem key={safeId} value={safeId}>

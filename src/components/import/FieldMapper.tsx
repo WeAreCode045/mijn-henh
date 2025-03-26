@@ -35,8 +35,7 @@ export function FieldMapper({
             {xmlFields.map((field) => (
               <SelectItem 
                 key={field} 
-                // Fix: Ensure non-empty string value with a unique field-specific fallback
-                value={field || `field_${fieldId}_${Date.now()}`}
+                value={field || `field_${fieldId}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`}
               >
                 {field}
               </SelectItem>

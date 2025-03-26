@@ -12,19 +12,22 @@ interface IconSelectorProps {
 }
 
 export const IconSelector = ({ label, value, defaultIcon, onChange }: IconSelectorProps) => {
+  // Ensure we never have an empty value
+  const safeValue = value || defaultIcon;
+  
   return (
     <div className="space-y-2">
       <Label htmlFor={label.toLowerCase().replace(/\s+/g, '-')}>{label}</Label>
       <Select 
-        value={value || defaultIcon} 
+        value={safeValue} 
         onValueChange={(value) => onChange(value)}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select icon">
-            {value && (
+            {safeValue && (
               <div className="flex items-center">
-                <IconPreview iconName={value} className="mr-2" />
-                <span>{value}</span>
+                <IconPreview iconName={safeValue} className="mr-2" />
+                <span>{safeValue}</span>
               </div>
             )}
           </SelectValue>

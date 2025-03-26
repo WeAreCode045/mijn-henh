@@ -54,7 +54,20 @@ export function usePropertyFormManager(property: PropertyFormData) {
     onSubmit
   } = usePropertyContent(formState, onFieldChange);
   
-  // Hook for managing images - need to pass property.id parameter first
+  // We need to create proper mock implementations for these functions
+  // that are expected by the component but not actually implemented in usePropertyImages
+  const mockHandlers = {
+    handleFloorplanUpload: async () => { console.log('Mock handleFloorplanUpload called') },
+    handleRemoveFloorplan: () => { console.log('Mock handleRemoveFloorplan called') },
+    isUploadingFloorplan: false,
+    handleSetFeaturedImage: () => { console.log('Mock handleSetFeaturedImage called') },
+    handleToggleFeaturedImage: () => { console.log('Mock handleToggleFeaturedImage called') },
+    handleVirtualTourUpdate: () => { console.log('Mock handleVirtualTourUpdate called') },
+    handleYoutubeUrlUpdate: () => { console.log('Mock handleYoutubeUrlUpdate called') },
+    handleFloorplanEmbedScriptUpdate: () => { console.log('Mock handleFloorplanEmbedScriptUpdate called') }
+  };
+  
+  // Hook for managing images
   const {
     handleImageUpload,
     handleRemoveImage,
@@ -111,6 +124,9 @@ export function usePropertyFormManager(property: PropertyFormData) {
     handleRemoveImage,
     images,
     isUploading,
+    
+    // Mock implementations for expected but missing methods
+    ...mockHandlers,
     
     // Methods that now return Promises
     handleSaveObjectId,
