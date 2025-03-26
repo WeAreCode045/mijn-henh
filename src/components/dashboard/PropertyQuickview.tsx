@@ -63,7 +63,27 @@ export function PropertyQuickview() {
             object_id: property.object_id || "",
             features: [],
             images: [],
-            areas: []
+            areas: [],
+            // Add all required properties from PropertyData interface
+            livingArea: "",
+            buildYear: "",
+            garages: "",
+            energyLabel: "",
+            hasGarden: false,
+            description: "",
+            shortDescription: "",
+            location_description: "",
+            map_image: null,
+            latitude: null,
+            longitude: null,
+            nearby_places: [],
+            nearby_cities: [],
+            floorplans: [],
+            virtualTourUrl: "",
+            youtubeUrl: "",
+            notes: "",
+            featuredImage: null,
+            featuredImages: []
           })) as PropertyData[];
           
           setProperties(formattedProperties);
@@ -95,6 +115,7 @@ export function PropertyQuickview() {
           
         if (error) throw error;
         if (data) {
+          // Create a complete PropertyData object with all required properties
           setSelectedProperty({
             id: data.id,
             title: data.title || "",
@@ -109,7 +130,31 @@ export function PropertyQuickview() {
             areas: [],
             object_id: data.object_id || "",
             created_at: data.created_at,
-            updated_at: data.updated_at
+            updated_at: data.updated_at,
+            // Add all required properties from PropertyData interface
+            livingArea: data.livingArea || "",
+            buildYear: data.buildYear || "",
+            garages: data.garages || "",
+            energyLabel: data.energyLabel || "",
+            hasGarden: data.hasGarden || false,
+            description: data.description || "",
+            shortDescription: data.shortDescription || "",
+            location_description: data.location_description || "",
+            map_image: data.map_image || null,
+            latitude: data.latitude || null,
+            longitude: data.longitude || null,
+            nearby_places: data.nearby_places || [],
+            nearby_cities: data.nearby_cities || [],
+            agent_id: data.agent_id || "",
+            template_id: data.template_id || "",
+            virtualTourUrl: data.virtualTourUrl || "",
+            youtubeUrl: data.youtubeUrl || "",
+            notes: data.notes || "",
+            floorplans: [],
+            floorplanEmbedScript: data.floorplanEmbedScript || "",
+            featuredImage: data.featuredImage || null,
+            featuredImages: [],
+            propertyType: data.propertyType || ""
           });
           
           setPropertyTitle(data.title || "");
