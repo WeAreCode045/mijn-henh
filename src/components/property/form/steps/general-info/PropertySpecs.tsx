@@ -1,3 +1,4 @@
+
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -129,7 +130,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               </SelectTrigger>
               <SelectContent>
                 {propertyTypes.map((type) => (
-                  <SelectItem key={type.toLowerCase()} value={type.toLowerCase()}>{type}</SelectItem>
+                  <SelectItem key={type.toLowerCase()} value={type.toLowerCase() || `type_${Date.now()}`}>{type}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -237,7 +238,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {energyLabels.map((label) => (
-                  <SelectItem key={label} value={label}>{label}</SelectItem>
+                  <SelectItem key={label} value={label || `label_${Date.now()}`}>{label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
