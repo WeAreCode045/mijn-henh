@@ -1,6 +1,7 @@
 
 import { PropertyData } from "@/types/property";
 import { PropertyFormData } from "@/types/property";
+import { ChangeEvent } from "react";
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
@@ -22,12 +23,12 @@ export interface PropertyFormManagerChildrenProps {
   handleAreaImageRemove: (areaId: string, imageId: string) => void;
   handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   isUploading: boolean;
-  handleAreaPhotosUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAreaPhotosUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleFloorplanUpload: (e: ChangeEvent<HTMLInputElement>) => void;
   handleRemoveFloorplan: (index: number) => void;
   isUploadingFloorplan: boolean;
   handleSetFeaturedImage: (url: string | null) => void;

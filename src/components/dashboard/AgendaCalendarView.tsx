@@ -37,22 +37,6 @@ export function AgendaCalendarView({ agendaItems }: AgendaCalendarViewProps) {
     navigate(`/property/${propertyId}/dashboard`);
   };
 
-  // Custom day component to show indicators for days with agenda items
-  const customDayRender = (day: Date, modifiers: any) => {
-    const hasItems = agendaItems.some(item => isSameDay(parseISO(item.event_date), day));
-
-    return (
-      <div className="relative h-full w-full">
-        <div>{day.getDate()}</div>
-        {hasItems && (
-          <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-            <div className="h-1 w-1 rounded-full bg-primary"></div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Left side: Selected date agenda items */}
@@ -129,14 +113,14 @@ export function AgendaCalendarView({ agendaItems }: AgendaCalendarViewProps) {
               agendaItems.some(item => isSameDay(parseISO(item.event_date), date))
           }}
           components={{
-            Day: ({ date, displayMonth, selected, disabled, ...props }) => {
+            Day: ({ day, ...props }) => {
               const hasItems = agendaItems.some(item => 
-                isSameDay(parseISO(item.event_date), date)
+                isSameDay(parseISO(item.event_date), day.date)
               );
               
               return (
                 <div {...props}>
-                  {date.getDate()}
+                  {day.date.getDate()}
                   {hasItems && (
                     <div className="absolute bottom-1 left-0 right-0 flex justify-center">
                       <div className="h-1 w-1 rounded-full bg-primary"></div>

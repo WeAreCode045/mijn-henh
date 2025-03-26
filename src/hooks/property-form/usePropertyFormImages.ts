@@ -14,15 +14,9 @@ export function usePropertyFormImages(
   const [isUploadingFloorplan, setIsUploadingFloorplan] = useState(false);
   const { toast } = useToast();
   
-  const handleImageUpload = useCallback(async (files: FileList) => {
-    if (!propertyId) {
-      toast({
-        title: "Error",
-        description: "Property ID missing. Cannot upload images.",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Modified to accept React.ChangeEvent<HTMLInputElement> instead of FileList
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
     
     setIsUploading(true);
     
@@ -57,7 +51,10 @@ export function usePropertyFormImages(
     setPendingChanges(true);
   }, [setPendingChanges]);
   
-  const handleFloorplanUpload = useCallback(async (files: FileList) => {
+  // Modified to accept React.ChangeEvent<HTMLInputElement> instead of FileList
+  const handleFloorplanUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
     setIsUploadingFloorplan(true);
     
     try {
