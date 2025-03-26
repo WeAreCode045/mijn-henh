@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -222,8 +221,8 @@ export function PropertyQuickview() {
               <SelectContent>
                 <SelectItem value="select-property" disabled>Select a property</SelectItem>
                 {properties.map(property => (
-                  <SelectItem key={property.id} value={property.id || `property_${Date.now()}`}>
-                    {property.title || `Property ${property.id.substring(0, 8)}`}
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.title}
                   </SelectItem>
                 ))}
               </SelectContent>
