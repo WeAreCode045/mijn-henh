@@ -170,14 +170,14 @@ export function AgendaDialog({
               Property
             </Label>
             <Select
-              value={selectedPropertyId || ""}
-              onValueChange={(value) => setSelectedPropertyId(value || null)}
+              value={selectedPropertyId || "none"}
+              onValueChange={(value) => setSelectedPropertyId(value === "none" ? null : value)}
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="No property (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No property</SelectItem>
+                <SelectItem value="none">No property</SelectItem>
                 {properties.map((property) => (
                   <SelectItem key={property.id} value={property.id}>
                     {property.title}

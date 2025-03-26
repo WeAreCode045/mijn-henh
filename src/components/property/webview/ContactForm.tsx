@@ -58,7 +58,7 @@ export function ContactForm({ property, settings }: ContactFormProps) {
             <Label htmlFor="inquiry_type" className="block text-sm mb-2">Ik wil graag:</Label>
             <Select 
               name="inquiry_type" 
-              value={formData.inquiry_type} 
+              value={formData.inquiry_type || "information"} 
               onValueChange={(value) => handleSelectChange("inquiry_type", value)}
             >
               <SelectTrigger>
