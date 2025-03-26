@@ -81,7 +81,10 @@ export default function Properties() {
                   <SelectContent>
                     <SelectItem value="all-agents">All Agents</SelectItem>
                     {agents.map((agent) => (
-                      <SelectItem key={agent.id} value={agent.id || `agent-${Date.now()}`}>
+                      <SelectItem 
+                        key={agent.id} 
+                        value={agent.id || `agent-${Date.now()}`}
+                      >
                         {agent.full_name || "Unnamed Agent"}
                       </SelectItem>
                     ))}

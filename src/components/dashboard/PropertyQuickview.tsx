@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -162,6 +163,9 @@ export function PropertyQuickview() {
     
     return null;
   };
+
+  // Ensure we have a safe value for selectedPropertyId
+  const safeSelectedPropertyId = selectedPropertyId || "select-property";
   
   return (
     <Card className="h-full">
@@ -197,15 +201,16 @@ export function PropertyQuickview() {
             </div>
             
             <Select 
-              value={selectedPropertyId || "select-property"} 
+              value={safeSelectedPropertyId} 
               onValueChange={handlePropertySelect}
+              defaultValue="select-property"
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a property" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="select-property" disabled>Select a property</SelectItem>
-                {properties.map(property => (
+                {properties.map((property) => (
                   <SelectItem 
                     key={property.id} 
                     value={property.id || `property_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}

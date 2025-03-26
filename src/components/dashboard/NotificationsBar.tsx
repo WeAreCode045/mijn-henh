@@ -124,6 +124,9 @@ export function NotificationsBar() {
     ? notifications.filter(notification => notification.type === filter)
     : notifications;
 
+  // Safe value for filter
+  const safeFilter = filter || "";
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
@@ -136,12 +139,12 @@ export function NotificationsBar() {
             {notifications.length}
           </span>
         </CardTitle>
-        <Select onValueChange={setFilter}>
+        <Select value={safeFilter} onValueChange={setFilter} defaultValue="all">
           <SelectTrigger>
             <SelectValue placeholder="Filter notifications" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All notifications</SelectItem>
+            <SelectItem value="all">All notifications</SelectItem>
             <SelectItem value="agenda">Agenda</SelectItem>
             <SelectItem value="todo">Todo</SelectItem>
             <SelectItem value="communication">Communications</SelectItem>
