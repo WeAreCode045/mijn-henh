@@ -33,7 +33,11 @@ export function FieldMapper({
           <SelectContent>
             <SelectItem value="not_mapped">Not mapped</SelectItem>
             {xmlFields.map((field) => (
-              <SelectItem key={field} value={field || `field_${fieldId}`}>
+              <SelectItem 
+                key={field} 
+                // Fix: Ensure non-empty string value with a unique field-specific fallback
+                value={field || `field_${fieldId}_${Date.now()}`}
+              >
                 {field}
               </SelectItem>
             ))}

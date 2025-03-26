@@ -30,7 +30,11 @@ export function AgentSelector({ agents, selectedAgent, onAgentSelect }: AgentSel
           <SelectContent>
             <SelectItem value="none">No agent</SelectItem>
             {agents.map((agent) => (
-              <SelectItem key={agent.id} value={agent.id || `agent_${Date.now()}`}>
+              <SelectItem 
+                key={agent.id} 
+                // Fix: Ensure a non-empty value with a unique fallback
+                value={agent.id || `agent_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`}
+              >
                 {agent.full_name}
               </SelectItem>
             ))}
