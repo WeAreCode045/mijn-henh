@@ -2,12 +2,12 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { GenerateAreasButton } from "./GenerateAreasButton";
-import { PropertyFormData } from "@/types/property";
+import { PropertyFormData, PropertyArea } from "@/types/property";
 
 interface PropertyAreasHeaderProps {
   onAdd: () => void;
   propertyData?: PropertyFormData;
-  onAreasGenerated?: (newAreas: PropertyFormData[]) => void;
+  onAreasGenerated?: (newAreas: PropertyArea[]) => void;
 }
 
 export function PropertyAreasHeader({ 
