@@ -16,6 +16,7 @@ interface PropertyAreasProps {
   onImageRemove: (areaId: string, imageId: string) => void;
   onImagesSelect: (areaId: string, imageIds: string[]) => void;
   onImageUpload: (areaId: string, files: FileList) => Promise<void>;
+  // Fix the type to match PropertyArea[] instead of PropertyFormData[]
   onAreasGenerated?: (areas: PropertyArea[]) => void;
   isUploading?: boolean;
 }

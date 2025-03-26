@@ -1,3 +1,4 @@
+
 import { PropertyData } from "./PropertyDataTypes";
 import { PropertyPlaceType } from './PropertyPlaceTypes';
 
@@ -7,8 +8,8 @@ export interface PropertyFeature {
   description: string;
 }
 
-// Re-export AreaImage from PropertyAreaTypes.ts
-export type { AreaImage } from './PropertyAreaTypes';
+// Import AreaImage from PropertyAreaTypes.ts
+import { AreaImage } from './PropertyAreaTypes';
 
 export interface PropertyArea {
   id: string;
