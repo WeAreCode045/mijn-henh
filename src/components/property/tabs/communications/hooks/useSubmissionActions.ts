@@ -2,46 +2,38 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function useSubmissionActions() {
   const [isArchiving, setIsArchiving] = useState(false);
   const { toast } = useToast();
-  const { logPropertyChange } = usePropertyEditLogger();
 
-  const archiveSubmission = async (propertyId: string, submissionId: string, isArchived: boolean) => {
+  const archiveSubmission = async (submissionId: string, isArchived: boolean) => {
+    setIsArchiving(true);
     try {
-      setIsArchiving(true);
-      
+      // Check if the table uses is_read instead of is_archived
       const { error } = await supabase
-        .from('property_contact_submissions')
-        .update({ is_archived: isArchived })
-        .eq('id', submissionId);
+        .from("property_contact_submissions")
+        .update({ is_read: isArchived })
+        .eq("id", submissionId);
 
-      if (error) throw error;
-      
-      await logPropertyChange(
-        propertyId, 
-        "submission", 
-        isArchived 
-          ? `Archived submission ${submissionId}` 
-          : `Unarchived submission ${submissionId}`
-      );
-      
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Success",
         description: isArchived 
-          ? "Submission archived successfully" 
-          : "Submission unarchived successfully",
+          ? "Submission has been archived." 
+          : "Submission has been unarchived.",
       });
-      
+
       return true;
-    } catch (error) {
-      console.error("Error updating submission archive status:", error);
+    } catch (error: any) {
+      console.error("Error archiving submission:", error);
       toast({
-        title: "Error",
-        description: "Failed to update submission",
         variant: "destructive",
+        title: "Error",
+        description: `Failed to ${isArchived ? "archive" : "unarchive"} submission.`,
       });
       return false;
     } finally {

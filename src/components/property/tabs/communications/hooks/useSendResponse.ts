@@ -18,13 +18,10 @@ export function useSendResponse() {
     try {
       const { error } = await supabase
         .from("property_submission_replies")
-        .insert([
-          {
-            property_id: propertyId,
-            submission_id: submissionId,
-            message: message,
-          },
-        ]);
+        .insert({
+          submission_id: submissionId,
+          reply_text: message
+        });
 
       if (error) {
         throw error;

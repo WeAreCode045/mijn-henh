@@ -2,30 +2,20 @@
 import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function useEditLoggerIntegration() {
-  const { logPropertyChanges } = usePropertyEditLogger();
-
-  const logFieldChange = async (
-    propertyId: string, 
-    oldValue: { [key: string]: any } | null,
-    newValue: { [key: string]: any }
-  ) => {
-    if (oldValue && propertyId) {
-      return await logPropertyChanges(propertyId, oldValue, newValue);
-    }
-  };
-
-  const logDataChanges = async (
+  const { logPropertyChange, isLogging } = usePropertyEditLogger();
+  
+  const logChanges = async (
     propertyId: string,
-    oldData: any,
-    newData: any
+    editType: string,
+    description: string
   ) => {
-    if (oldData && propertyId) {
-      return await logPropertyChanges(propertyId, oldData, newData);
-    }
+    if (!propertyId) return;
+    
+    await logPropertyChange(propertyId, editType, description);
   };
-
+  
   return {
-    logFieldChange,
-    logDataChanges
+    logChanges,
+    isLogging
   };
 }

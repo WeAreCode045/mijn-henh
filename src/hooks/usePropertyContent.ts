@@ -1,257 +1,36 @@
 
-import { useState, useCallback } from 'react';
-import { PropertyFormData } from '@/types/property';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-import { usePropertyAutoSave } from '@/hooks/usePropertyAutoSave';
+import { useState, useEffect } from "react";
+import { PropertyFormData } from "@/types/property";
+import { usePropertyAutoSave } from "./usePropertyAutoSave";
 
-export function usePropertyContent(formData: PropertyFormData, onFieldChange: (field: keyof PropertyFormData, value: any) => void) {
-  const [isLoadingLocationData, setIsLoadingLocationData] = useState(false);
-  const [isGeneratingMap, setIsGeneratingMap] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [pendingChanges, setPendingChanges] = useState(false);
-  const { toast } = useToast();
-  const { autosaveData } = usePropertyAutoSave();
-
-  // Function to fetch location data using Google Maps API
-  const fetchLocationData = useCallback(async () => {
-    if (!formData.address) {
-      toast({
-        title: "Error",
-        description: "Please enter an address first",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    if (!formData.id) {
-      toast({
-        title: "Error",
-        description: "Please save the property first before fetching location data",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    setIsLoadingLocationData(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('fetch-location-data', {
-        body: { 
-          address: formData.address,
-          propertyId: formData.id
-        }
-      });
-
-      if (error) throw error;
-
-      if (data && data.success) {
-        toast({
-          title: "Success",
-          description: "Location data fetched successfully",
-        });
-        
-        // Update form data with the fetched information
-        if (data.latitude) onFieldChange('latitude', data.latitude);
-        if (data.longitude) onFieldChange('longitude', data.longitude);
-        if (data.nearby_places) onFieldChange('nearby_places', data.nearby_places);
-        if (data.nearby_cities) onFieldChange('nearby_cities', data.nearby_cities);
-        
-        return data;
-      } else {
-        throw new Error(data?.error || "Failed to fetch location data");
-      }
-    } catch (error: any) {
-      console.error('Error fetching location:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to fetch location data",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsLoadingLocationData(false);
-    }
-  }, [formData.address, formData.id, onFieldChange, toast]);
-
-  // Function to generate location description using OpenAI
-  const generateLocationDescription = useCallback(async () => {
-    if (!formData.address) {
-      toast({
-        title: "Error",
-        description: "Please enter an address first",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    setIsLoadingLocationData(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-location-description', {
-        body: { 
-          address: formData.address,
-          nearbyPlaces: formData.nearby_places || []
-        }
-      });
-
-      if (error) throw error;
-
-      if (data && data.description) {
-        toast({
-          title: "Success",
-          description: "Location description generated successfully",
-        });
-        onFieldChange('location_description', data.description);
-        return data.description;
-      } else {
-        throw new Error(data?.error || "Failed to generate location description");
-      }
-    } catch (error: any) {
-      console.error('Error generating location description:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to generate location description",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsLoadingLocationData(false);
-    }
-  }, [formData.address, formData.nearby_places, onFieldChange, toast]);
-
-  // Function to generate a map image
-  const generateMapImage = useCallback(async () => {
-    if (!formData.address) {
-      toast({
-        title: "Error",
-        description: "Please enter an address first",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    if (!formData.id) {
-      toast({
-        title: "Error",
-        description: "Please save the property first before generating a map",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    setIsGeneratingMap(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('fetch-location-data', {
-        body: { 
-          address: formData.address,
-          propertyId: formData.id,
-          generateMap: true
-        }
-      });
-
-      if (error) throw error;
-
-      if (data && data.success && data.map_image) {
-        toast({
-          title: "Success",
-          description: "Map image generated successfully",
-        });
-        onFieldChange('map_image', data.map_image);
-        return data.map_image;
-      } else {
-        throw new Error(data?.error || "Failed to generate map image");
-      }
-    } catch (error: any) {
-      console.error('Error generating map image:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to generate map image",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsGeneratingMap(false);
-    }
-  }, [formData.address, formData.id, onFieldChange, toast]);
-
-  // Function to remove a nearby place
-  const removeNearbyPlace = useCallback((index: number) => {
-    if (!formData.nearby_places) return formData;
-    
-    const updatedPlaces = [...formData.nearby_places];
-    updatedPlaces.splice(index, 1);
-    
-    onFieldChange('nearby_places', updatedPlaces);
-    return {
-      ...formData,
-      nearby_places: updatedPlaces
-    };
-  }, [formData, onFieldChange]);
-
-  // Handle form submission with improved error handling and feedback
-  const onSubmit = useCallback(async () => {
-    console.log("onSubmit called in usePropertyContent");
-    
-    if (!formData.id) {
-      toast({
-        title: "Error",
-        description: "Property ID is missing. Cannot save.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSaving(true);
-    
-    try {
-      // Use the autosaveData function to save all property data
-      // We don't pass specific fields here since this is a manual save of all data
-      const success = await autosaveData(formData);
+export function usePropertyContent(
+  propertyId: string | undefined,
+  initialData: PropertyFormData
+) {
+  const [formData, setFormData] = useState<PropertyFormData>(initialData);
+  const { saveData, isSaving } = usePropertyAutoSave(propertyId);
+  
+  // Update form data when initial data changes
+  useEffect(() => {
+    setFormData(initialData);
+  }, [initialData]);
+  
+  const updateFormData = (newData: Partial<PropertyFormData>) => {
+    setFormData((prev) => {
+      const updatedData = { ...prev, ...newData };
       
-      if (success) {
-        setLastSaved(new Date());
-        setPendingChanges(false);
-        
-        toast({
-          title: "Success",
-          description: "Property saved successfully",
-        });
-      } else {
-        throw new Error("Failed to save property");
+      // Autosave the data if propertyId exists
+      if (propertyId) {
+        saveData(newData);
       }
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  }, [autosaveData, formData, toast]);
-
-  // Handle step navigation
-  const handleStepClick = useCallback((step: number) => {
-    setCurrentStep(step);
-  }, []);
-
-  return { 
-    fetchLocationData, 
-    generateLocationDescription, 
-    generateMapImage,
-    removeNearbyPlace,
-    isLoadingLocationData,
-    isGeneratingMap,
-    onSubmit,
-    currentStep,
-    handleStepClick,
-    lastSaved,
-    isSaving,
-    setPendingChanges
+      
+      return updatedData;
+    });
+  };
+  
+  return {
+    formData,
+    updateFormData,
+    isSaving
   };
 }

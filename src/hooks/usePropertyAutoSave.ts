@@ -1,83 +1,48 @@
+
 import { useState, useEffect, useCallback } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
 import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { usePropertyChangesLogger } from "@/hooks/property-form/usePropertyChangesLogger";
 
-export function usePropertyAutoSave(id: string, initialData: PropertyFormData) {
-  const [formData, setFormData] = useState<PropertyFormData>(initialData);
+export function usePropertyAutoSave(propertyId: string | undefined) {
   const [isSaving, setIsSaving] = useState(false);
-  const debouncedFormData = useDebounce(formData, 500);
   const { toast } = useToast();
-  const { fetchCurrentPropertyData, logChanges } = usePropertyChangesLogger();
   
-  useEffect(() => {
-    setFormData(initialData);
-  }, [initialData]);
-  
-  const saveProperty = useCallback(async (data: Partial<PropertyFormData>) => {
-    setIsSaving(true);
+  const saveData = useCallback(async (data: Partial<PropertyFormData>) => {
+    if (!propertyId) return;
+    
     try {
-      const { error } = await supabase
-        .from('properties')
-        .update(data)
-        .eq('id', id);
-        
-      if (error) {
-        throw error;
+      setIsSaving(true);
+      
+      // Remove any complex objects that can't be directly saved to the database
+      const cleanedData = { ...data };
+      
+      // Convert any arrays of objects to simple arrays if needed
+      if (Array.isArray(cleanedData.areaPhotos)) {
+        const stringArray = cleanedData.areaPhotos.map(photo => 
+          typeof photo === 'string' ? photo : photo.url
+        );
+        cleanedData.areaPhotos = stringArray;
       }
       
-      toast({
-        title: "Success",
-        description: "Property saved successfully!",
-      });
+      const { error } = await supabase
+        .from('properties')
+        .update(cleanedData)
+        .eq('id', propertyId);
+        
+      if (error) throw error;
+      
     } catch (error) {
-      console.error("Error saving property:", error);
+      console.error("Error auto-saving property data:", error);
       toast({
-        title: "Error",
-        description: "Failed to save property",
+        title: "Auto-save error",
+        description: "Failed to save your changes automatically.",
         variant: "destructive",
       });
     } finally {
       setIsSaving(false);
     }
-  }, [id, toast]);
+  }, [propertyId, toast]);
   
-  useEffect(() => {
-    if (id && Object.keys(debouncedFormData).length > 0) {
-      const autoSave = async () => {
-        try {
-          setIsSaving(true);
-          
-          // Fetch current property data before saving
-          const currentData = await fetchCurrentPropertyData(id);
-          
-          // Save the debounced form data
-          await saveProperty(debouncedFormData);
-          
-          // Log the changes
-          if (currentData) {
-            await logChanges(id, currentData, debouncedFormData);
-          }
-        } catch (error) {
-          console.error("Error during auto-saving:", error);
-        } finally {
-          setIsSaving(false);
-        }
-      };
-      
-      autoSave();
-    }
-  }, [debouncedFormData, id, saveProperty, fetchCurrentPropertyData, logChanges]);
-  
-  const updateFormData = (newData: Partial<PropertyFormData>) => {
-    setFormData(prev => ({ ...prev, ...newData }));
-  };
-  
-  return {
-    formData,
-    updateFormData,
-    isSaving
-  };
+  return { saveData, isSaving };
 }

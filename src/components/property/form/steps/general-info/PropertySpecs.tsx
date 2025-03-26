@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,14 +19,12 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
   const { toast } = useToast();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Set the initial property type when the component mounts
   useEffect(() => {
     if (formData.propertyType && initialPropertyType === null) {
       setInitialPropertyType(formData.propertyType);
     }
   }, [formData.propertyType, initialPropertyType]);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
@@ -47,7 +44,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
         
       if (error) throw error;
       
-      // Show success notification
       toast({
         title: "Saved",
         description: `${field} updated successfully`,
@@ -63,7 +59,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
   };
 
   const handleInputChange = (field: keyof PropertyFormData, value: any) => {
-    // Update the local state immediately
     onFieldChange(field, value);
     
     if (setPendingChanges) {
@@ -72,12 +67,10 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
   };
   
   const handleInputBlur = (field: keyof PropertyFormData, value: any) => {
-    // Clear any existing timeout
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
     
-    // Set a new timeout to save after 2 seconds
     saveTimeoutRef.current = setTimeout(async () => {
       await saveToDatabase(field, value);
       
@@ -94,7 +87,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
       setPendingChanges(true);
     }
     
-    // Save the change to the database with a delay
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
@@ -107,7 +99,7 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
       }
     }, 2000);
   };
-  
+
   const propertyTypes = [
     "House", "Apartment", "Townhouse", "Condo", "Land", "Commercial"
   ];
@@ -123,11 +115,10 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-          {/* TYPE */}
           <div className="col-span-2">
             <Label htmlFor="property-type">Type</Label>
             <Select
-              value={formData.propertyType || ""}
+              value={formData.propertyType || "not_specified"}
               onValueChange={(value) => {
                 handleInputChange("propertyType", value);
                 handleInputBlur("propertyType", value);
@@ -144,7 +135,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             </Select>
           </div>
           
-          {/* PRICE */}
           <div>
             <Label htmlFor="price">Price</Label>
             <Input
@@ -156,7 +146,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* BEDS */}
           <div>
             <Label htmlFor="beds">Beds</Label>
             <Input
@@ -170,7 +159,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* BATHS */}
           <div>
             <Label htmlFor="baths">Baths</Label>
             <Input
@@ -185,7 +173,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* GARAGES */}
           <div>
             <Label htmlFor="garages">Garages</Label>
             <Input
@@ -199,7 +186,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* SIZE */}
           <div>
             <Label htmlFor="size">Living Area (m2)</Label>
             <Input
@@ -211,7 +197,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* LOT SIZE */}
           <div>
             <Label htmlFor="lot-size">Lot Size</Label>
             <Input
@@ -223,7 +208,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* YEAR BUILT */}
           <div>
             <Label htmlFor="year-built">Year Built</Label>
             <Input
@@ -238,7 +222,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             />
           </div>
           
-          {/* ENERGY LABEL */}
           <div>
             <Label htmlFor="energy-label">Energy Label</Label>
             <Select
@@ -260,7 +243,6 @@ export function PropertySpecs({ formData, onFieldChange, setPendingChanges }: Pr
             </Select>
           </div>
           
-          {/* HAS GARDEN */}
           <div className="flex items-center space-x-2">
             <Switch
               id="hasGarden"
