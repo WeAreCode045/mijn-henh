@@ -5,12 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
-import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaItemList";
-import { DateRangeSelector } from "@/components/property/dashboard/agenda/DateRangeSelector";
 import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
 import { useAgendaDialogs } from "@/components/property/dashboard/agenda/useAgendaDialogs";
-import { AgendaCalendarView } from "./AgendaCalendarView";
-import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
 import { AgendaViewContent } from "./AgendaViewContent";
 import { AgendaDialogs } from "./AgendaDialogs";
 
