@@ -10,10 +10,9 @@ interface Agent {
   avatar_url?: string;
 }
 
-export function useAgentSelect(initialAgentId?: string) {
+export function useAgentSelect() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(initialAgentId || null);
   const { toast } = useToast();
 
   const fetchAgents = async () => {
@@ -44,8 +43,6 @@ export function useAgentSelect(initialAgentId?: string) {
   return {
     agents,
     isLoading,
-    selectedAgent,
-    setSelectedAgent,
     refreshAgents: fetchAgents
   };
 }

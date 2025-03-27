@@ -1,11 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Filter } from "lucide-react";
 import { TodoList } from "./todo/TodoList";
-import { TodoDialog } from "./todo/TodoDialog";
-import { useTodoItems } from "@/hooks/useTodoItems";
-import { TodoItem } from "@/types/todo";
+import { TodoDialog } from "./dashboard/todo/TodoDialog";
+import { useTodoItems, TodoItem } from "@/hooks/useTodoItems";
 import { useProperties } from "@/hooks/useProperties";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -47,7 +47,7 @@ export function TodoSection() {
     
     setFilteredItems(items);
   }, [todoItems, showCompleted, filterByProperty, selectedProperty]);
-
+  
   const handleAddClick = () => {
     setSelectedItem(undefined);
     setDialogOpen(true);
