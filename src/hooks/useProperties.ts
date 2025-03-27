@@ -1,3 +1,5 @@
+
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +12,7 @@ export const useProperties = () => {
   const { toast } = useToast();
   const { profile, isAdmin } = useAuth();
   const { deleteProperty } = usePropertyDeletion();
+  const [selectedProperty, setSelectedProperty] = useState<PropertyData | null>(null);
 
   const fetchProperties = async () => {
     let query = supabase
@@ -54,6 +57,8 @@ export const useProperties = () => {
 
   return {
     properties,
+    selectedProperty,
+    setSelectedProperty,
     isLoading,
     error,
     handleDelete,
