@@ -283,7 +283,6 @@ export type Database = {
           additional_users: Json | null
           agent_id: string
           created_at: string
-          created_by: string | null
           description: string | null
           end_date: string | null
           end_time: string | null
@@ -298,7 +297,6 @@ export type Database = {
           additional_users?: Json | null
           agent_id: string
           created_at?: string
-          created_by?: string | null
           description?: string | null
           end_date?: string | null
           end_time?: string | null
@@ -313,7 +311,6 @@ export type Database = {
           additional_users?: Json | null
           agent_id?: string
           created_at?: string
-          created_by?: string | null
           description?: string | null
           end_date?: string | null
           end_time?: string | null

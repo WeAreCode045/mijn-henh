@@ -51,6 +51,23 @@ export const addPropertyAgendaItem = async (
   endTime: string | null = null,
   additionalUsers: string[] = []
 ) => {
+  // Get the property's agent to add to additional users if they're not the creating agent
+  let allAdditionalUsers = [...additionalUsers];
+  
+  const { data: propertyData } = await supabase
+    .from('properties')
+    .select('agent_id')
+    .eq('id', propertyId)
+    .single();
+    
+  if (propertyData && propertyData.agent_id && propertyData.agent_id !== agentId) {
+    // Add the property's agent to additional users
+    allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
+  }
+  
+  // Remove duplicates
+  allAdditionalUsers = [...new Set(allAdditionalUsers)];
+
   // Ensure additionalUsers is properly formatted as a JSON array
   const newItem = {
     agent_id: agentId,
@@ -61,7 +78,7 @@ export const addPropertyAgendaItem = async (
     event_time: time,
     end_date: endDate,
     end_time: endTime && endTime.trim() !== "" ? endTime : null,
-    additional_users: additionalUsers || []
+    additional_users: allAdditionalUsers
   };
 
   const { data, error } = await supabase
@@ -108,13 +125,38 @@ export const updatePropertyAgendaItem = async (
   endTime: string | null = null,
   additionalUsers: string[] = []
 ) => {
+  // Get the agenda item to determine the property
+  const { data: agendaItem } = await supabase
+    .from('property_agenda_items')
+    .select('property_id, agent_id')
+    .eq('id', id)
+    .single();
+    
+  let allAdditionalUsers = [...additionalUsers];
+  
+  if (agendaItem && agendaItem.property_id) {
+    // Get the property's agent
+    const { data: propertyData } = await supabase
+      .from('properties')
+      .select('agent_id')
+      .eq('id', agendaItem.property_id)
+      .single();
+      
+    if (propertyData && propertyData.agent_id && propertyData.agent_id !== agendaItem.agent_id) {
+      // Add the property's agent to additional users if not already there
+      if (!allAdditionalUsers.includes(propertyData.agent_id)) {
+        allAdditionalUsers.push(propertyData.agent_id);
+      }
+    }
+  }
+  
   // Create an update object with only the fields we want to update
   const updates: any = {
     title,
     description,
     event_date: date,
     event_time: time,
-    additional_users: additionalUsers || []
+    additional_users: allAdditionalUsers
   };
   
   // Only include end_date if it's provided

@@ -20,23 +20,8 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
   } else {
     // Show items where the user is:
     // 1. The agent who created the item OR
-    // 2. In the additional_users array OR
-    // 3. The agent assigned to the property
-    
-    // Split into multiple conditions instead of using subquery
+    // 2. In the additional_users array
     query = query.or(`agent_id.eq.${userId},additional_users.cs.["${userId}"]`);
-    
-    // Fetch properties assigned to this agent in a separate query
-    const { data: userProperties } = await supabase
-      .from('properties')
-      .select('id')
-      .eq('agent_id', userId);
-      
-    // If user has properties, add those to the filter
-    if (userProperties && userProperties.length > 0) {
-      const propertyIds = userProperties.map(p => p.id);
-      query = query.or(`property_id.in.(${propertyIds.join(',')})`);
-    }
   }
 
   const { data, error } = await query;
@@ -79,6 +64,25 @@ export const addAgendaItem = async (
   additionalUsers: string[] = [],
   propertyId?: string | null
 ) => {
+  // If this item is linked to a property, get the property's agent
+  let allAdditionalUsers = [...additionalUsers];
+  
+  if (propertyId) {
+    const { data: propertyData } = await supabase
+      .from('properties')
+      .select('agent_id')
+      .eq('id', propertyId)
+      .single();
+      
+    if (propertyData && propertyData.agent_id && propertyData.agent_id !== userId) {
+      // Add the property's agent to additional users if they're not already the creating agent
+      allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
+    }
+  }
+  
+  // Remove duplicates
+  allAdditionalUsers = [...new Set(allAdditionalUsers)];
+
   const { error } = await supabase
     .from('property_agenda_items')
     .insert({
@@ -90,7 +94,7 @@ export const addAgendaItem = async (
       event_time: eventTime,
       end_date: endDate,
       end_time: endTime || null,
-      additional_users: additionalUsers
+      additional_users: allAdditionalUsers
     });
 
   if (error) throw error;
@@ -116,6 +120,24 @@ export const updateAgendaItem = async (
   additionalUsers: string[] = [],
   propertyId?: string | null
 ) => {
+  // If this item is linked to a property, get the property's agent
+  let allAdditionalUsers = [...additionalUsers];
+  
+  if (propertyId) {
+    const { data: propertyData } = await supabase
+      .from('properties')
+      .select('agent_id')
+      .eq('id', propertyId)
+      .single();
+      
+    if (propertyData && propertyData.agent_id) {
+      // Add the property's agent to additional users if not already there
+      if (!allAdditionalUsers.includes(propertyData.agent_id)) {
+        allAdditionalUsers.push(propertyData.agent_id);
+      }
+    }
+  }
+  
   // Create update object with required fields
   const updateObj: any = {
     property_id: propertyId,
@@ -123,7 +145,7 @@ export const updateAgendaItem = async (
     description,
     event_date: eventDate,
     event_time: eventTime,
-    additional_users: additionalUsers
+    additional_users: allAdditionalUsers
   };
   
   // Only add end_date if it has a value
