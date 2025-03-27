@@ -80,20 +80,6 @@ export function AgendaSection() {
         </Button>
       </div>
       
-      <TabsContent value="list" className="mt-0">
-        {!isLoading && agendaItems.length === 0 ? (
-          <EmptyAgendaNotification />
-        ) : (
-          <AgendaListView 
-            agendaItems={agendaItems} 
-            isLoading={isLoading} 
-            onEdit={handleEditItem}
-            onDelete={handleDeleteItem}
-            showEditRemoveButtons={true}
-          />
-        )}
-      </TabsContent>
-      
       <TabsContent value="calendar" className="mt-0">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-1">
@@ -120,6 +106,20 @@ export function AgendaSection() {
             )}
           </div>
         </div>
+      </TabsContent>
+      
+      <TabsContent value="list" className="mt-0">
+        {!isLoading && agendaItems.length === 0 ? (
+          <EmptyAgendaNotification />
+        ) : (
+          <AgendaListView 
+            agendaItems={agendaItems} 
+            isLoading={isLoading} 
+            onEdit={handleEditItem}
+            onDelete={handleDeleteItem}
+            showEditRemoveButtons={true}
+          />
+        )}
       </TabsContent>
       
       <AgendaDialog

@@ -114,12 +114,12 @@ export function CompactNotificationsBar() {
   const canGoDown = startIndex + 3 < notifications.length;
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-primary text-white">
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <Bell className="h-5 w-5" />
           <span>Notifications</span>
-          <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+          <span className="text-xs bg-white text-primary rounded-full px-2 py-0.5">
             {notifications.length}
           </span>
         </CardTitle>
@@ -127,7 +127,7 @@ export function CompactNotificationsBar() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 text-white hover:bg-white/20"
             onClick={handlePrevious}
             disabled={!canGoUp}
           >
@@ -136,7 +136,7 @@ export function CompactNotificationsBar() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 text-white hover:bg-white/20"
             onClick={handleNext}
             disabled={!canGoDown}
           >
@@ -146,32 +146,32 @@ export function CompactNotificationsBar() {
       </CardHeader>
       <CardContent className="space-y-2">
         {displayedNotifications.length === 0 ? (
-          <div className="text-center text-muted-foreground p-4">
+          <div className="text-center text-white/70 p-4">
             No notifications
           </div>
         ) : (
           displayedNotifications.map(notification => (
             <div 
               key={notification.id} 
-              className="p-3 bg-accent rounded-md relative border border-border"
+              className="p-3 bg-white/10 rounded-md relative border border-white/20"
             >
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 absolute top-1 right-1"
+                className="h-6 w-6 absolute top-1 right-1 text-white/70 hover:text-white hover:bg-white/10"
                 onClick={() => handleDeleteNotification(notification.id)}
               >
                 <X className="h-3 w-3" />
               </Button>
               
               <div className="flex items-start mb-1">
-                {notification.type === "agenda" && <Calendar className="h-4 w-4 mr-2 text-blue-500" />}
-                {notification.type === "todo" && <CheckSquare className="h-4 w-4 mr-2 text-green-500" />}
-                {notification.type === "communication" && <MessageSquare className="h-4 w-4 mr-2 text-amber-500" />}
+                {notification.type === "agenda" && <Calendar className="h-4 w-4 mr-2 text-blue-300" />}
+                {notification.type === "todo" && <CheckSquare className="h-4 w-4 mr-2 text-green-300" />}
+                {notification.type === "communication" && <MessageSquare className="h-4 w-4 mr-2 text-amber-300" />}
                 <span className="font-medium">{notification.title}</span>
               </div>
-              <p className="text-sm text-muted-foreground">{notification.message}</p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-white/70">{notification.message}</p>
+              <p className="text-xs text-white/50 mt-1">
                 {format(notification.date, "PPp")}
               </p>
             </div>
