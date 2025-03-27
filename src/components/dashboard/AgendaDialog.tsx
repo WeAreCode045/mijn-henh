@@ -84,7 +84,7 @@ export function AgendaDialog({
         event_date: formattedDate,
         event_time: time,
         property_id: selectedPropertyId,
-        creator_id: user.id,
+        agent_id: user.id,
         end_date: null,
         end_time: null,
         additional_users: []
@@ -217,5 +217,4 @@ export function AgendaDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
+  

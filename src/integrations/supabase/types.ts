@@ -281,9 +281,9 @@ export type Database = {
       property_agenda_items: {
         Row: {
           additional_users: Json | null
+          agent_id: string
           created_at: string
           created_by: string | null
-          creator_id: string
           description: string | null
           end_date: string | null
           end_time: string | null
@@ -296,9 +296,9 @@ export type Database = {
         }
         Insert: {
           additional_users?: Json | null
+          agent_id: string
           created_at?: string
           created_by?: string | null
-          creator_id: string
           description?: string | null
           end_date?: string | null
           end_time?: string | null
@@ -311,9 +311,9 @@ export type Database = {
         }
         Update: {
           additional_users?: Json | null
+          agent_id?: string
           created_at?: string
           created_by?: string | null
-          creator_id?: string
           description?: string | null
           end_date?: string | null
           end_time?: string | null
@@ -325,6 +325,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "property_agenda_items_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_agenda_items_property_id_fkey"
             columns: ["property_id"]
