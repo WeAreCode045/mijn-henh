@@ -1,34 +1,30 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { format } from "date-fns";
-import { usePropertyAgenda } from "@/hooks/property-agenda";
-import { useAgendaFiltering } from "./agenda/useAgendaFiltering";
-import { useAgendaDialogs } from "./agenda/useAgendaDialogs";
-import { DateRangeSelector } from "./agenda/DateRangeSelector";
-import { AgendaItemList } from "./agenda/AgendaItemList";
-import { ViewAgendaItemDialog } from "./agenda/ViewAgendaItemDialog";
-import { AddEditAgendaDialog } from "./agenda/AddEditAgendaDialog";
+import { Card } from "@/components/ui/card";
+import { useAgendaCard } from "./agenda/useAgendaCard";
+import { AgendaCardHeader } from "./agenda/AgendaCardHeader";
+import { AgendaCardContent } from "./agenda/AgendaCardContent";
+import { AgendaCardDialogs } from "./agenda/AgendaCardDialogs";
 
 interface AgendaCardProps {
   propertyId: string;
 }
 
 export function AgendaCard({ propertyId }: AgendaCardProps) {
-  const { agendaItems, isLoading, addAgendaItem, deleteAgendaItem, updateAgendaItem } = usePropertyAgenda(propertyId);
-  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems);
-  
   const {
+    filteredAgendaItems,
+    isLoading,
+    dateRange,
+    setDateRange,
+    handleAgendaItemClick,
+    handleAddButtonClick,
+    handleEditButtonClick,
     isAddDialogOpen,
     setIsAddDialogOpen,
     isViewDialogOpen,
     setIsViewDialogOpen,
-    isEditDialogOpen,
+    isEditDialogOpen, 
     setIsEditDialogOpen,
     selectedAgendaItem,
-    setSelectedAgendaItem,
     title,
     setTitle,
     description,
@@ -58,94 +54,31 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
     editAdditionalUsers,
     setEditAdditionalUsers,
     availableUsers,
-    resetForm,
-    handleAgendaItemClick,
-    handleAddButtonClick,
-    handleEditButtonClick
-  } = useAgendaDialogs();
-
-  const handleAddAgendaItem = () => {
-    if (selectedDate && title) {
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
-      const formattedEndDate = endDate ? format(endDate, "yyyy-MM-dd") : null;
-      
-      addAgendaItem(
-        title, 
-        description, 
-        formattedDate, 
-        selectedTime, 
-        formattedEndDate,
-        endTime,
-        additionalUsers
-      );
-      
-      setIsAddDialogOpen(false);
-      resetForm();
-    }
-  };
-
-  const handleDeleteAgendaItem = () => {
-    if (selectedAgendaItem) {
-      deleteAgendaItem(selectedAgendaItem.id);
-      setIsViewDialogOpen(false);
-    }
-  };
-
-  const handleUpdateAgendaItem = () => {
-    if (selectedAgendaItem && editDate) {
-      const formattedDate = format(editDate, "yyyy-MM-dd");
-      const formattedEndDate = editEndDate ? format(editEndDate, "yyyy-MM-dd") : null;
-      
-      updateAgendaItem(
-        selectedAgendaItem.id, 
-        editTitle, 
-        editDescription, 
-        formattedDate, 
-        editTime,
-        formattedEndDate,
-        editEndTime,
-        editAdditionalUsers
-      );
-      
-      setIsEditDialogOpen(false);
-    }
-  };
+    handleAddAgendaItem,
+    handleDeleteAgendaItem,
+    handleUpdateAgendaItem
+  } = useAgendaCard(propertyId);
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-2 flex flex-row justify-between items-center">
-        <CardTitle className="text-lg font-medium">Agenda</CardTitle>
-        <Button 
-          onClick={handleAddButtonClick} 
-          variant="ghost" 
-          size="sm"
-          className="h-8 w-8 p-0 rounded-full"
-          type="button"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">Add agenda item</span>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col space-y-4">
-          <div className="flex justify-between items-center">
-            <h4 className="font-medium text-sm">Agenda Items</h4>
-            <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
-          </div>
-          
-          <AgendaItemList 
-            filteredAgendaItems={filteredAgendaItems} 
-            isLoading={isLoading}
-            onItemClick={handleAgendaItemClick}
-          />
-        </div>
-      </CardContent>
+      <AgendaCardHeader onAddButtonClick={handleAddButtonClick} />
+      
+      <AgendaCardContent
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        filteredAgendaItems={filteredAgendaItems}
+        isLoading={isLoading}
+        onItemClick={handleAgendaItemClick}
+      />
 
-      {/* Add Agenda Item Dialog */}
-      <AddEditAgendaDialog
-        isOpen={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
-        onSave={handleAddAgendaItem}
+      <AgendaCardDialogs
+        isAddDialogOpen={isAddDialogOpen}
+        setIsAddDialogOpen={setIsAddDialogOpen}
+        isViewDialogOpen={isViewDialogOpen}
+        setIsViewDialogOpen={setIsViewDialogOpen}
+        isEditDialogOpen={isEditDialogOpen}
+        setIsEditDialogOpen={setIsEditDialogOpen}
+        selectedAgendaItem={selectedAgendaItem}
         title={title}
         setTitle={setTitle}
         description={description}
@@ -160,45 +93,26 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
         setEndTime={setEndTime}
         additionalUsers={additionalUsers}
         setAdditionalUsers={setAdditionalUsers}
+        editTitle={editTitle}
+        setEditTitle={setEditTitle}
+        editDescription={editDescription}
+        setEditDescription={setEditDescription}
+        editDate={editDate}
+        setEditDate={setEditDate}
+        editTime={editTime}
+        setEditTime={setEditTime}
+        editEndDate={editEndDate}
+        setEditEndDate={setEditEndDate}
+        editEndTime={editEndTime}
+        setEditEndTime={setEditEndTime}
+        editAdditionalUsers={editAdditionalUsers}
+        setEditAdditionalUsers={setEditAdditionalUsers}
         availableUsers={availableUsers}
-        mode="add"
+        handleAddAgendaItem={handleAddAgendaItem}
+        handleDeleteAgendaItem={handleDeleteAgendaItem}
+        handleUpdateAgendaItem={handleUpdateAgendaItem}
+        handleEditButtonClick={handleEditButtonClick}
       />
-
-      {/* View Agenda Item Dialog */}
-      {selectedAgendaItem && (
-        <ViewAgendaItemDialog
-          isOpen={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
-          selectedAgendaItem={selectedAgendaItem}
-          onDelete={handleDeleteAgendaItem}
-          onEdit={handleEditButtonClick}
-        />
-      )}
-
-      {/* Edit Agenda Item Dialog */}
-      {selectedAgendaItem && (
-        <AddEditAgendaDialog
-          isOpen={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          onSave={handleUpdateAgendaItem}
-          title={editTitle}
-          setTitle={setEditTitle}
-          description={editDescription}
-          setDescription={setEditDescription}
-          selectedDate={editDate}
-          setSelectedDate={setEditDate}
-          selectedTime={editTime}
-          setSelectedTime={setEditTime}
-          endDate={editEndDate}
-          setEndDate={setEditEndDate}
-          endTime={editEndTime}
-          setEndTime={setEditEndTime}
-          additionalUsers={editAdditionalUsers}
-          setAdditionalUsers={setEditAdditionalUsers}
-          availableUsers={availableUsers}
-          mode="edit"
-        />
-      )}
     </Card>
   );
 }
