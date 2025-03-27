@@ -121,23 +121,19 @@ export function TodoForm({ item, mode, onClose, onSave }: TodoFormProps) {
         </div>
         
         <TodoDatePicker 
+          value={dueDate}
+          onChange={setDueDate}
           label="Due Date"
-          date={dueDate}
-          onDateChange={setDueDate}
         />
         
         <TodoNotificationPicker
-          notifyAt={notifyAt}
-          notifyTime={notifyTime}
-          onNotifyAtChange={setNotifyAt}
-          onNotifyTimeChange={setNotifyTime}
+          value={notifyAt}
+          onChange={setNotifyAt}
         />
         
         <TodoAssignmentFields
           assignedToId={assignedToId}
-          propertyId={propertyId}
-          onAssignedToIdChange={setAssignedToId}
-          onPropertyIdChange={setPropertyId}
+          onAssignedToChange={setAssignedToId}
         />
       </div>
       

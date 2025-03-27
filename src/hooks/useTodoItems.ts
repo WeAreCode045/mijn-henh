@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
 import { TodoItem } from "@/types/todo";
 
-export { TodoItem };
+export type { TodoItem };
 
 export function useTodoItems(propertyId?: string) {
   const { toast } = useToast();

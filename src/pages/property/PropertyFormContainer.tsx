@@ -43,7 +43,7 @@ export function PropertyFormContainer() {
   } = {
     deleteProperty: async () => {},
     saveProperty: async () => {},
-    handleAgentChange: async () => {},
+    handleAgentChange: async (agentId: any) => {},
     handleImageUpload: async () => {},
     handleRemoveImage: async () => {},
     images: []
