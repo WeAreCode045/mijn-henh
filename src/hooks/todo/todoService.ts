@@ -43,9 +43,10 @@ export const fetchTodoItems = async (propertyId?: string): Promise<TodoItem[]> =
 export const addTodoItem = async (todoItem: TodoItemInput): Promise<TodoItem> => {
   const formattedItem = formatTodoItemDates(todoItem);
   
+  // Insert a single item, not an array
   const { data, error } = await supabase
     .from('todo_items')
-    .insert([formattedItem])
+    .insert(formattedItem)
     .select();
   
   if (error) throw error;
@@ -59,6 +60,7 @@ export const addTodoItem = async (todoItem: TodoItemInput): Promise<TodoItem> =>
 
 // Update an existing todo item
 export const updateTodoItem = async (id: string, todoItem: TodoItemUpdate): Promise<void> => {
+  // Convert Date objects to ISO strings for Supabase
   const formattedItem = formatTodoItemDates(todoItem);
   
   const { error } = await supabase
