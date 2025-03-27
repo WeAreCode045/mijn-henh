@@ -47,6 +47,9 @@ export function AgendaViewContent({
     return <EmptyAgendaNotification onAddClick={onAddClick || (() => {})} />;
   }
 
+  // Check if we have items after filtering
+  const hasFilteredItems = filteredAgendaItems && filteredAgendaItems.length > 0;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -61,11 +64,17 @@ export function AgendaViewContent({
           onDayClick={undefined}
         />
       ) : (
-        <AgendaItemList 
-          filteredAgendaItems={filteredAgendaItems} 
-          isLoading={false} 
-          onItemClick={onItemClick} 
-        />
+        hasFilteredItems ? (
+          <AgendaItemList 
+            filteredAgendaItems={filteredAgendaItems} 
+            isLoading={false} 
+            onItemClick={onItemClick} 
+          />
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            No agenda items found for the selected period.
+          </div>
+        )
       )}
     </div>
   );

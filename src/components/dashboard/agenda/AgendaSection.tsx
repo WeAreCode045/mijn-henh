@@ -18,14 +18,15 @@ export function AgendaSection() {
   const [activeTab, setActiveTab] = useState<string>("calendar");
   
   const { 
-    agendaItems: fetchedAgendaItems, 
+    agendaItems, 
     isLoading, 
     addAgendaItem, 
     updateAgendaItem, 
     deleteAgendaItem 
   } = useAgenda();
   
-  const safeAgendaItems = fetchedAgendaItems;
+  // Ensure we have a safe array of agenda items
+  const safeAgendaItems = agendaItems || [];
   
   const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(safeAgendaItems);
   

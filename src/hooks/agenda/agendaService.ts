@@ -16,6 +16,7 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
     .order('event_time', { ascending: true });
   
   if (propertyId) {
+    // If propertyId is provided, just filter by that property
     query = query.eq('property_id', propertyId);
   } else {
     // Show items where the user is:
