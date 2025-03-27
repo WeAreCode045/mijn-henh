@@ -2,94 +2,91 @@
 import { supabase } from "@/integrations/supabase/client";
 import { TodoItem, TodoItemInput, TodoItemUpdate } from "./types";
 
-// Formats date objects to ISO strings for Supabase
-export const formatTodoItemDates = <T extends { due_date?: Date | string | null; notify_at?: Date | string | null }>(
-  item: T
-): T => {
-  return {
-    ...item,
-    due_date: item.due_date instanceof Date ? item.due_date.toISOString() : item.due_date,
-    notify_at: item.notify_at instanceof Date ? item.notify_at.toISOString() : item.notify_at
-  };
+// Helper to ensure date is always a string when saving to DB
+const formatDateForDB = (date: string | Date | undefined): string | undefined => {
+  if (!date) return undefined;
+  return typeof date === 'string' ? date : date.toISOString();
 };
 
-// Fetch todo items
-export const fetchTodoItems = async (propertyId?: string): Promise<TodoItem[]> => {
-  let query = supabase
-    .from('todo_items')
-    .select(`
-      *,
-      property:properties(id, title),
-      assigned_to:profiles(id, full_name)
-    `);
+// Fetch all todo items for a user
+export const fetchTodoItems = async (userId: string): Promise<TodoItem[]> => {
+  const { data, error } = await supabase
+    .from("todo_items")
+    .select("*")
+    .or(`assigned_to_id.eq.${userId},created_by.eq.${userId}`)
+    .order("created_at", { ascending: false });
 
-  if (propertyId) {
-    query = query.eq('property_id', propertyId);
-  }
-  
-  query = query.order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false });
-  
-  const { data, error } = await query;
-  
   if (error) {
+    console.error("Error fetching todo items:", error);
     throw error;
   }
-  
+
   return data || [];
 };
 
-// Add a new todo item
-export const addTodoItem = async (todoItem: TodoItemInput): Promise<TodoItem> => {
-  const formattedItem = formatTodoItemDates(todoItem);
-  
-  // Insert a single item, not an array
+// Create a new todo item
+export const createTodoItem = async (todoData: TodoItemInput): Promise<TodoItem | undefined> => {
+  // Format dates to strings for database
+  const formattedData = {
+    ...todoData,
+    due_date: formatDateForDB(todoData.due_date)
+  };
+
   const { data, error } = await supabase
-    .from('todo_items')
-    .insert(formattedItem)
-    .select();
-  
-  if (error) throw error;
-  
-  if (!data || data.length === 0) {
-    throw new Error('No data returned after insert');
+    .from("todo_items")
+    .insert(formattedData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating todo item:", error);
+    throw error;
   }
-  
-  return data[0];
+
+  return data;
 };
 
 // Update an existing todo item
-export const updateTodoItem = async (id: string, todoItem: TodoItemUpdate): Promise<void> => {
-  // Convert Date objects to ISO strings for Supabase
-  const formattedItem = formatTodoItemDates(todoItem);
-  
-  const { error } = await supabase
-    .from('todo_items')
-    .update(formattedItem)
-    .eq('id', id);
-  
-  if (error) throw error;
-};
+export const updateTodoItem = async (id: string, todoData: TodoItemUpdate): Promise<void> => {
+  // Format dates to strings for database
+  const formattedData = {
+    ...todoData,
+    due_date: formatDateForDB(todoData.due_date)
+  };
 
-// Update the order of todo items
-export const updateTodoOrder = async (updates: { id: string, sort_order: number }[]): Promise<void> => {
-  // Update each item one by one
-  for (const update of updates) {
-    const { error } = await supabase
-      .from('todo_items')
-      .update({ sort_order: update.sort_order })
-      .eq('id', update.id);
-    
-    if (error) throw error;
+  const { error } = await supabase
+    .from("todo_items")
+    .update(formattedData)
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error updating todo item:", error);
+    throw error;
   }
 };
 
 // Delete a todo item
 export const deleteTodoItem = async (id: string): Promise<void> => {
   const { error } = await supabase
-    .from('todo_items')
+    .from("todo_items")
     .delete()
-    .eq('id', id);
-  
-  if (error) throw error;
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting todo item:", error);
+    throw error;
+  }
+};
+
+// Update multiple todo items at once (used for reordering)
+export const batchUpdateTodoItems = async (items: TodoItem[]): Promise<void> => {
+  // This would need to be implemented if batch updates are needed
+  // Supabase doesn't have a direct batch update, so we might need 
+  // to use transactions or multiple calls
+  for (const item of items) {
+    await supabase
+      .from("todo_items")
+      .update({ sort_order: item.sort_order })
+      .eq("id", item.id);
+  }
 };
