@@ -1,11 +1,11 @@
 
-import { FilterCalendarIcon, View } from "lucide-react";
+import { Calendar as CalendarIcon, Filter } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
-import { AgendaCalendarView } from "./AgendaCalendarView";
-import { AgendaListView } from "@/components/dashboard/AgendaListView";
-import { AgendaItem } from "@/hooks/agenda/types";
+import { AgendaCalendarView } from "../AgendaCalendarView";
+import { AgendaListView } from "../AgendaListView";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 interface AgendaViewContentProps {
   view: "calendar" | "list";
@@ -38,7 +38,7 @@ export function AgendaViewContent({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-2">
         <Button variant="outline" className="flex items-center gap-2" onClick={() => setDateRange(undefined)}>
-          <FilterCalendarIcon className="h-4 w-4" />
+          <Filter className="h-4 w-4" />
           {dateRange ? "Clear Filter" : "All Events"}
         </Button>
       </div>
@@ -52,13 +52,13 @@ export function AgendaViewContent({
       ) : view === "calendar" ? (
         <AgendaCalendarView 
           agendaItems={itemsToDisplay}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
           onItemClick={onItemClick}
+          isLoading={false}
         />
       ) : (
         <AgendaListView 
           agendaItems={itemsToDisplay}
+          isLoading={false}
           onItemClick={onItemClick}
         />
       )}

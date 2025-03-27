@@ -2,22 +2,22 @@
 import { useCallback, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
-import { AgendaItem } from "@/hooks/agenda/types";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { format } from "date-fns";
 
 interface AgendaCalendarViewProps {
   agendaItems: AgendaItem[];
-  dateRange: DateRange | undefined;
-  setDateRange: (range: DateRange | undefined) => void;
+  isLoading: boolean;
   onItemClick: (item: AgendaItem) => void;
 }
 
 export function AgendaCalendarView({ 
   agendaItems = [], // Provide default empty array
-  dateRange,
-  setDateRange,
+  isLoading,
   onItemClick 
 }: AgendaCalendarViewProps) {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
   // Function to determine if a day has events
   const isDayWithEvents = useCallback((date: Date) => {
     if (!agendaItems || agendaItems.length === 0) return false;
@@ -29,7 +29,7 @@ export function AgendaCalendarView({
     });
   }, [agendaItems]);
 
-  // Generate a list of events for the selected day or range
+  // Generate a list of events for the selected day
   const getEventsForDay = (date: Date) => {
     if (!agendaItems) return [];
     
@@ -40,9 +40,9 @@ export function AgendaCalendarView({
     });
   };
 
-  // Generate event list for the selected date range
-  const selectedDayEvents = dateRange?.from ? 
-    getEventsForDay(dateRange.from) : 
+  // Generate event list for the selected date
+  const selectedDayEvents = selectedDate ? 
+    getEventsForDay(selectedDate) : 
     [];
 
   return (
@@ -50,10 +50,8 @@ export function AgendaCalendarView({
       <div>
         <Calendar
           mode="single"
-          selected={dateRange?.from}
-          onSelect={(date) => 
-            date && setDateRange({ from: date, to: date })
-          }
+          selected={selectedDate}
+          onSelect={setSelectedDate}
           modifiers={{
             hasEvents: isDayWithEvents,
           }}
@@ -68,7 +66,7 @@ export function AgendaCalendarView({
       </div>
       <div>
         <h3 className="text-lg font-medium mb-2">
-          {dateRange?.from ? format(dateRange.from, "MMMM d, yyyy") : "All Events"}
+          {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "All Events"}
         </h3>
         
         {selectedDayEvents.length === 0 ? (
