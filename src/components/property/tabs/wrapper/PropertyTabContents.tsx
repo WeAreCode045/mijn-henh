@@ -1,17 +1,26 @@
 
 import { TabsContent } from "@/components/ui/tabs";
 import { PropertyData } from "@/types/property";
-import { CommunicationsTabContent } from "./CommunicationsTabContent";
 import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
+import { CommunicationsTabContent } from "./CommunicationsTabContent";
+import { useEffect } from "react";
 
 interface PropertyTabContentsProps {
   activeTab: string;
   property: PropertyData;
   formData?: any; // For content tab
   handlers?: any; // For content tab
-  [key: string]: any; // Additional props
+  onSave: () => void;
+  onDelete: () => Promise<void>;
+  handleSaveObjectId: (objectId: string) => Promise<void>;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleGeneratePDF: () => void;
+  handleWebView: (e: React.MouseEvent) => void;
+  isUpdating: boolean;
+  agentInfo?: { id: string; name: string } | null;
+  [key: string]: any;
 }
 
 export function PropertyTabContents({
@@ -19,8 +28,22 @@ export function PropertyTabContents({
   property,
   formData,
   handlers,
+  onSave,
+  onDelete,
+  handleSaveObjectId,
+  handleSaveAgent,
+  handleGeneratePDF,
+  handleWebView,
+  isUpdating,
+  agentInfo,
   ...props
 }: PropertyTabContentsProps) {
+  // Log the active tab for debugging
+  useEffect(() => {
+    console.log("PropertyTabContents - Active Tab:", activeTab);
+    console.log("PropertyTabContents - Property ID:", property.id);
+  }, [activeTab, property.id]);
+
   return (
     <>
       <TabsContent value="dashboard" className="space-y-6">
@@ -31,14 +54,14 @@ export function PropertyTabContents({
           agentId={property.agent_id}
           createdAt={property.created_at}
           updatedAt={property.updated_at}
-          agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : null}
-          isUpdating={false}
-          onSave={props.onSave || (() => {})}
-          onDelete={props.onDelete || (async () => {})}
-          handleSaveObjectId={props.handleSaveObjectId || (async () => {})}
-          handleSaveAgent={props.handleSaveAgent || (async () => {})}
-          handleGeneratePDF={props.handleGeneratePDF || (() => {})}
-          handleWebView={props.handleWebView || (() => {})}
+          agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : agentInfo}
+          isUpdating={isUpdating}
+          onSave={onSave}
+          onDelete={onDelete}
+          handleSaveObjectId={handleSaveObjectId}
+          handleSaveAgent={handleSaveAgent}
+          handleGeneratePDF={handleGeneratePDF}
+          handleWebView={handleWebView}
         />
       </TabsContent>
       

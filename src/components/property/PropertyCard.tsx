@@ -12,6 +12,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Submission } from "@/types/submission";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCardActions } from "./PropertyCardActions";
+import { PropertyImage } from "./dashboard/components/PropertyImage";
 
 interface PropertyCardProps {
   property: PropertyData;
@@ -101,27 +102,17 @@ export const PropertyCard = ({
   };
 
   const handleCardClick = () => {
-    // Update to use the correct URL format for the property tab
     navigate(`/?tab=property&propertyId=${property.id}`);
   };
-
-  const displayImage = property.featuredImage || 
-                      (property.images?.length > 0 ? property.images[0].url : '/placeholder.svg');
-
-  const agentName = property.agent ? (property.agent.full_name || property.agent.name || 'Unnamed Agent') : null;
 
   return (
     <>
       <Card key={property.id} className="p-6 space-y-6 relative group cursor-pointer hover:shadow-lg transition-shadow" onClick={handleCardClick}>
         <div className="relative">
-          <img
-            src={displayImage}
-            alt={property.title}
-            className="w-full h-48 object-cover rounded-lg"
-          />
-          {agentName && (
+          <PropertyImage property={property} />
+          {property.agent && property.agent.name && (
               <Badge variant="outline" className="absolute top-2 right-5 ml-2 text-xs bg-white">
-                {agentName}
+                {property.agent.name}
               </Badge>
           )}
           {webViewUrl && (

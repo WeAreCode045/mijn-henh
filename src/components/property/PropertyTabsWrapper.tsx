@@ -1,20 +1,20 @@
 
-import { PropertyTabs } from "./PropertyTabs";
-import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
+import React, { useState, useEffect } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyData } from "@/types/property";
-import { usePropertyTabs } from "@/hooks/usePropertyTabs";
-import { PropertyFormManager } from "./tabs/wrapper/PropertyFormManager";
-import { PropertyTabActionsHandler } from "./tabs/wrapper/PropertyTabActionsHandler";
-import { PropertyWebViewDialog } from "./tabs/wrapper/PropertyWebViewDialog";
-import { Tabs } from "@/components/ui/tabs";
+import { AgencySettings } from "@/types/agency";
+import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
+import { useSearchParams } from "react-router-dom";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
-  settings: any;
-  onSave?: () => void;
-  onDelete?: () => Promise<void>;
-  agentInfo?: { id: string; name: string } | null;
+  settings: AgencySettings;
+  onSave: () => void;
+  onDelete: () => Promise<void>;
   isArchived?: boolean;
+  agentInfo?: { id: string; name: string } | null;
+  children?: React.ReactNode;
+  [key: string]: any;
 }
 
 export function PropertyTabsWrapper({
@@ -22,142 +22,82 @@ export function PropertyTabsWrapper({
   settings,
   onSave,
   onDelete,
+  isArchived = false,
   agentInfo,
-  isArchived = false
+  children,
+  ...props
 }: PropertyTabsWrapperProps) {
-  const { activeTab, setActiveTab } = usePropertyTabs();
-  
-  // Add a stub function for handleSaveTemplate
-  const handleSaveTemplate = async (templateId: string) => {
-    console.log("Template functionality has been removed");
-    return Promise.resolve();
-  };
-  
-  return (
-    <div className="space-y-6">
-      <PropertyTabActionsHandler 
-        propertyId={property.id} 
-        propertyData={property} 
-        settings={settings}
-        isArchived={isArchived}
-      >
-        {({ webViewOpen, setWebViewOpen, handleGeneratePDF, handleOpenWebView }) => (
-          <PropertyFormManager property={property} isArchived={isArchived}>
-            {({ 
-              formState, 
-              handleFieldChange,
-              handleSaveObjectId,
-              handleSaveAgent,
-              addFeature,
-              removeFeature,
-              updateFeature,
-              addArea,
-              removeArea,
-              updateArea,
-              handleAreaImageRemove,
-              handleAreaImagesSelect,
-              handleAreaImageUpload,
-              handleImageUpload,
-              handleRemoveImage,
-              isUploading,
-              handleAreaPhotosUpload,
-              handleRemoveAreaPhoto,
-              handleFloorplanUpload,
-              handleRemoveFloorplan,
-              isUploadingFloorplan,
-              handleSetFeaturedImage,
-              handleToggleFeaturedImage,
-              handleVirtualTourUpdate,
-              handleYoutubeUrlUpdate,
-              handleFloorplanEmbedScriptUpdate,
-              onSubmit,
-              currentStep,
-              handleStepClick,
-              propertyWithRequiredProps,
-              lastSaved,
-              isSaving,
-              setPendingChanges,
-              onFetchLocationData,
-              onGenerateLocationDescription,
-              onGenerateMap,
-              onRemoveNearbyPlace,
-              isLoadingLocationData,
-              isGeneratingMap,
-              onFetchCategoryPlaces,
-              onFetchNearbyCities
-            }) => (
-              <>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <PropertyTabs 
-                    activeTab={activeTab} 
-                    handleTabChange={setActiveTab}
-                    propertyId={property.id}
-                  >
-                    <PropertyTabContents
-                      activeTab={activeTab}
-                      property={propertyWithRequiredProps}
-                      formState={formState}
-                      agentInfo={agentInfo}
-                      isUpdating={false}
-                      onSave={onSave}
-                      onDelete={onDelete}
-                      handleSaveObjectId={handleSaveObjectId}
-                      handleSaveAgent={handleSaveAgent}
-                      handleSaveTemplate={handleSaveTemplate}
-                      handleGeneratePDF={handleGeneratePDF}
-                      handleWebView={handleOpenWebView}
-                      onFieldChange={handleFieldChange}
-                      onAddFeature={addFeature}
-                      onRemoveFeature={removeFeature}
-                      onUpdateFeature={updateFeature}
-                      onAddArea={addArea}
-                      onRemoveArea={removeArea}
-                      onUpdateArea={updateArea}
-                      onAreaImageRemove={handleAreaImageRemove}
-                      onAreaImagesSelect={handleAreaImagesSelect}
-                      onAreaImageUpload={handleAreaImageUpload}
-                      handleImageUpload={handleImageUpload}
-                      handleRemoveImage={handleRemoveImage}
-                      isUploading={isUploading}
-                      handleAreaPhotosUpload={handleAreaPhotosUpload}
-                      handleFloorplanUpload={handleFloorplanUpload}
-                      handleRemoveFloorplan={handleRemoveFloorplan}
-                      isUploadingFloorplan={isUploadingFloorplan}
-                      handleSetFeaturedImage={handleSetFeaturedImage}
-                      handleToggleFeaturedImage={handleToggleFeaturedImage}
-                      handleVirtualTourUpdate={handleVirtualTourUpdate}
-                      handleYoutubeUrlUpdate={handleYoutubeUrlUpdate}
-                      handleFloorplanEmbedScriptUpdate={handleFloorplanEmbedScriptUpdate}
-                      currentStep={currentStep}
-                      handleStepClick={handleStepClick}
-                      onSubmit={onSubmit}
-                      handleRemoveAreaPhoto={handleRemoveAreaPhoto}
-                      setPendingChanges={setPendingChanges}
-                      isSaving={isSaving}
-                      onFetchLocationData={onFetchLocationData}
-                      onGenerateLocationDescription={onGenerateLocationDescription}
-                      onGenerateMap={onGenerateMap}
-                      onRemoveNearbyPlace={onRemoveNearbyPlace}
-                      isLoadingLocationData={isLoadingLocationData}
-                      isGeneratingMap={isGeneratingMap}
-                      onFetchCategoryPlaces={onFetchCategoryPlaces}
-                      onFetchNearbyCities={onFetchNearbyCities}
-                      isArchived={isArchived}
-                    />
-                  </PropertyTabs>
-                </Tabs>
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("propertyTab") || "dashboard";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
-                {/* WebView Dialog */}
-                <PropertyWebViewDialog
-                  propertyData={propertyWithRequiredProps}
-                  isOpen={webViewOpen}
-                  onOpenChange={setWebViewOpen}
-                />
-              </>
-            )}
-          </PropertyFormManager>
-        )}
-      </PropertyTabActionsHandler>
-    </div>
+  // Update URL when tab changes
+  useEffect(() => {
+    searchParams.set("propertyTab", activeTab);
+    setSearchParams(searchParams);
+  }, [activeTab]);
+
+  // Log the current tab for debugging
+  useEffect(() => {
+    console.log("PropertyTabsWrapper - Active Tab:", activeTab);
+    console.log("PropertyTabsWrapper - Property ID:", property.id);
+  }, [activeTab, property.id]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  return (
+    <Tabs
+      value={activeTab}
+      onValueChange={handleTabChange}
+      className="w-full"
+    >
+      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-4 h-auto">
+        <TabsTrigger
+          value="dashboard"
+          disabled={isArchived}
+          className="py-3 text-sm"
+        >
+          Dashboard
+        </TabsTrigger>
+        <TabsTrigger
+          value="content"
+          disabled={isArchived}
+          className="py-3 text-sm"
+        >
+          Content
+        </TabsTrigger>
+        <TabsTrigger
+          value="media"
+          disabled={isArchived}
+          className="py-3 text-sm"
+        >
+          Media
+        </TabsTrigger>
+        <TabsTrigger
+          value="communications"
+          disabled={isArchived}
+          className="py-3 text-sm"
+        >
+          Communications
+        </TabsTrigger>
+      </TabsList>
+
+      <PropertyTabContents
+        activeTab={activeTab}
+        property={property}
+        formData={props.formData}
+        handlers={props.handlers}
+        onSave={onSave}
+        onDelete={onDelete}
+        handleSaveObjectId={props.handleSaveObjectId}
+        handleSaveAgent={props.handleSaveAgent}
+        handleGeneratePDF={props.handleGeneratePDF || (() => {})}
+        handleWebView={props.handleWebView || (() => {})}
+        isUpdating={props.isUpdating || false}
+        agentInfo={agentInfo}
+      />
+    </Tabs>
   );
 }

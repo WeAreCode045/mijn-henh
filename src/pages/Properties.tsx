@@ -22,6 +22,11 @@ export default function Properties() {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("all-agents");
 
+  // Log properties for debugging
+  useEffect(() => {
+    console.log("Properties component - Properties loaded:", properties.length);
+  }, [properties]);
+
   useEffect(() => {
     if (properties) {
       if (selectedAgentId && selectedAgentId !== "all-agents") {
@@ -50,7 +55,7 @@ export default function Properties() {
       
       if (data && data.id) {
         // Navigate to the property form with the new ID
-        navigate(`/property/${data.id}`);
+        navigate(`/?tab=property&propertyId=${data.id}`);
       }
     } catch (error) {
       console.error("Error creating new property:", error);
@@ -115,32 +120,38 @@ export default function Properties() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={{
-                  ...property,
-                  price: property.price || "", // Ensure price is defined and required
-                  bedrooms: "",
-                  bathrooms: "",
-                  sqft: "",
-                  livingArea: "",
-                  buildYear: "",
-                  garages: "",
-                  energyLabel: "",
-                  hasGarden: false,
-                  description: "",
-                  location_description: "",
-                  features: [],
-                  areas: [],
-                  images: [],
-                  map_image: null,
-                  latitude: null,
-                  longitude: null
-                } as PropertyData}
-                onDelete={handleDelete}
-              />
-            ))}
+            {filteredProperties.length === 0 ? (
+              <div className="col-span-4 text-center py-20">
+                <p className="text-gray-500">No properties found</p>
+              </div>
+            ) : (
+              filteredProperties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={{
+                    ...property,
+                    price: property.price || "",
+                    bedrooms: "",
+                    bathrooms: "",
+                    sqft: "",
+                    livingArea: "",
+                    buildYear: "",
+                    garages: "",
+                    energyLabel: "",
+                    hasGarden: false,
+                    description: "",
+                    location_description: "",
+                    features: [],
+                    areas: [],
+                    images: [],
+                    map_image: null,
+                    latitude: null,
+                    longitude: null
+                  } as PropertyData}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
           </div>
         )}
       </div>

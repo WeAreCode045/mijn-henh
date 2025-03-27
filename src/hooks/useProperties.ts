@@ -11,18 +11,32 @@ export interface Property {
   object_id?: string;
   price?: string;
   agent_id?: string;
+  agent?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
-export function useProperties(searchTerm: string = "", limit: number = 10) {
+export function useProperties(searchTerm: string = "", limit: number = 50) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProperties = async () => {
     setIsLoading(true);
     try {
+      console.log("useProperties - Fetching properties");
       let query = supabase
         .from('properties')
-        .select('id, title, address, status, object_id, price, agent_id')
+        .select(`
+          id, 
+          title, 
+          address, 
+          status, 
+          object_id, 
+          price, 
+          agent_id,
+          agent:profiles(id, full_name)
+        `)
         .eq('archived', false)
         .order('title');
         
@@ -34,9 +48,21 @@ export function useProperties(searchTerm: string = "", limit: number = 10) {
       
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching properties:', error);
+        throw error;
+      }
+      
       if (data) {
-        setProperties(data);
+        console.log(`useProperties - Fetched ${data.length} properties`);
+        const processedProperties = data.map(item => ({
+          ...item,
+          agent: item.agent ? {
+            id: item.agent.id,
+            name: item.agent.full_name
+          } : null
+        }));
+        setProperties(processedProperties);
       }
     } catch (error) {
       console.error('Error fetching properties:', error);

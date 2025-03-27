@@ -1,84 +1,101 @@
 
-import React, { useState } from 'react';
-import { useFetchSubmissions } from '../communications/hooks/useFetchSubmissions';
-import { useMarkAsRead } from '@/hooks/useMarkAsRead';
-import { useSendResponse } from '@/hooks/useSendResponse';
-import { SubmissionsList } from '../communications/SubmissionsList';
-import { SubmissionDetail } from '../communications/SubmissionDetail';
-import { Submission } from '../communications/types'; // Import from local types
-import { useAuth } from '@/providers/AuthProvider';
+import { CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Submission } from "@/types/submission";
 
 interface CommunicationsTabContentProps {
   propertyId: string;
 }
 
 export function CommunicationsTabContent({ propertyId }: CommunicationsTabContentProps) {
-  // Validate propertyId format
-  const isValidPropertyId = propertyId && 
-                           propertyId.trim() !== '' && 
-                           propertyId !== '1' &&
-                           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(propertyId);
-  
-  if (!isValidPropertyId) {
-    return (
-      <div className="p-4 text-center">
-        <p className="text-muted-foreground">Valid property ID is required to display communications.</p>
-      </div>
-    );
-  }
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { submissions, isLoading, refetch } = useFetchSubmissions(propertyId);
-  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-  const { profile } = useAuth();
-  
-  const { markAsRead, isMarking } = useMarkAsRead({
-    submissionId: selectedSubmission?.id || '',
-    onSuccess: refetch
-  });
-  
-  const { sendResponse, isSending } = useSendResponse({
-    submissionId: selectedSubmission?.id || '',
-    agentId: profile?.id || '',
-    propertyId: propertyId,
-    onSuccess: refetch
-  });
-  
-  const handleSelectSubmission = (submission: Submission) => {
-    setSelectedSubmission(submission);
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      if (!propertyId) return;
+      
+      setIsLoading(true);
+      console.log("CommunicationsTabContent - Fetching submissions for property:", propertyId);
+      
+      try {
+        const { data, error } = await supabase
+          .from('property_contact_submissions')
+          .select('*')
+          .eq('property_id', propertyId)
+          .order('created_at', { ascending: false });
+          
+        if (error) {
+          console.error("Error fetching property submissions:", error);
+          return;
+        }
+        
+        if (data) {
+          console.log(`CommunicationsTabContent - Loaded ${data.length} submissions`);
+          const formattedSubmissions: Submission[] = data.map(item => ({
+            id: item.id,
+            property_id: item.property_id,
+            name: item.name,
+            email: item.email,
+            phone: item.phone,
+            message: item.message || "",
+            inquiry_type: item.inquiry_type,
+            is_read: !!item.is_read,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            agent_id: item.agent_id,
+          }));
+          
+          setSubmissions(formattedSubmissions);
+        }
+      } catch (error) {
+        console.error("Error loading submissions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // If submission is unread, mark it as read
-    if (submission && !submission.is_read) {
-      markAsRead();
-    }
-  };
-  
-  const handleDeselectSubmission = () => {
-    setSelectedSubmission(null);
-  };
+    fetchSubmissions();
+  }, [propertyId]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 h-full">
-      <div className={`w-full ${selectedSubmission ? 'hidden md:block md:w-1/3' : 'w-full'}`}>
-        <SubmissionsList 
-          submissions={submissions as Submission[]} 
-          isLoading={isLoading}
-          onSelect={handleSelectSubmission}
-          selectedId={selectedSubmission?.id}
-        />
-      </div>
+    <CardContent className="p-6">
+      <h2 className="text-2xl font-bold mb-6">Communications</h2>
       
-      {selectedSubmission && (
-        <div className="w-full md:w-2/3">
-          <SubmissionDetail
-            submission={selectedSubmission}
-            onMarkAsRead={markAsRead}
-            isMarking={isMarking}
-            onSendReply={sendResponse}
-            isSending={isSending}
-            onBack={handleDeselectSubmission}
-          />
+      {isLoading ? (
+        <div className="py-8 text-center">
+          <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-estate-600 rounded-full" role="status" aria-label="loading">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+      ) : submissions.length === 0 ? (
+        <div className="py-8 text-center">
+          <p className="text-gray-500">No communications found for this property</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {submissions.map(submission => (
+            <div key={submission.id} className={`p-4 border rounded-md ${submission.is_read ? 'bg-white' : 'bg-blue-50'}`}>
+              <div className="flex justify-between">
+                <h3 className="font-semibold">{submission.name}</h3>
+                <span className="text-sm text-gray-500">
+                  {new Date(submission.created_at).toLocaleString()}
+                </span>
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                {submission.email} • {submission.phone}
+              </div>
+              <div className="mt-2">
+                <span className="inline-block px-2 py-1 text-xs bg-gray-100 rounded">
+                  {submission.inquiry_type}
+                </span>
+              </div>
+              <p className="mt-2 text-gray-700">{submission.message}</p>
+            </div>
+          ))}
         </div>
       )}
-    </div>
+    </CardContent>
   );
 }

@@ -6,9 +6,12 @@ import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyF
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
+import { useSearchParams } from "react-router-dom";
 
 export function PropertyFormContainer() {
   const { isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
+  const propertyIdFromUrl = searchParams.get("propertyId");
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
   
   const {
@@ -23,7 +26,11 @@ export function PropertyFormContainer() {
     isSubmitting,
     setIsSubmitting,
     toast
-  } = usePropertyFormContainerData();
+  } = usePropertyFormContainerData(propertyIdFromUrl);
+
+  useEffect(() => {
+    console.log("PropertyFormContainer - Using property ID:", propertyIdFromUrl || id);
+  }, [propertyIdFromUrl, id]);
 
   const {
     deleteProperty,
