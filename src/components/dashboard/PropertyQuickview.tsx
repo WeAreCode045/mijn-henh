@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -331,16 +332,16 @@ export function PropertyQuickview() {
     : "No property selected";
   
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-primary">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-white">
           <span>Property Quickview</span>
           <div className="flex items-center gap-2">
             {selectedPropertyId && !isEditing && (
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-sm flex items-center gap-1"
+                className="text-sm flex items-center gap-1 text-white hover:bg-primary-foreground/10"
                 onClick={navigateToProperty}
               >
                 View Property <ChevronRight className="h-4 w-4" />
@@ -352,6 +353,7 @@ export function PropertyQuickview() {
                 size="sm"
                 onClick={handleToggleEdit}
                 type="button"
+                className="text-white hover:bg-primary-foreground/10"
               >
                 <Pencil className="h-4 w-4 mr-2" />
                 {isEditing ? "Cancel" : "Edit"}
@@ -360,14 +362,14 @@ export function PropertyQuickview() {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="text-white">
         <div className="flex items-center space-x-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search properties..."
-              className="pl-8"
+              className="pl-8 bg-white text-black"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -378,7 +380,7 @@ export function PropertyQuickview() {
             onValueChange={handlePropertySelect}
             defaultValue="select-property"
           >
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[220px] bg-white text-black">
               <SelectValue placeholder="Select a property" />
             </SelectTrigger>
             <SelectContent>
@@ -400,35 +402,36 @@ export function PropertyQuickview() {
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="property-title">Title</Label>
+                  <Label htmlFor="property-title" className="text-white">Title</Label>
                   <Input
                     id="property-title"
                     value={propertyTitle}
                     onChange={(e) => setPropertyTitle(e.target.value)}
-                    className="mt-1"
+                    className="mt-1 bg-white text-black"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="property-address">Address</Label>
+                  <Label htmlFor="property-address" className="text-white">Address</Label>
                   <Input
                     id="property-address"
                     value={propertyAddress}
                     onChange={(e) => setPropertyAddress(e.target.value)}
-                    className="mt-1"
+                    className="mt-1 bg-white text-black"
                     ref={addressInputRef}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="object-id">Object ID</Label>
+                  <Label htmlFor="object-id" className="text-white">Object ID</Label>
                   <Input
                     id="object-id"
                     value={propertyObjectId}
                     onChange={(e) => setPropertyObjectId(e.target.value)}
                     placeholder="Enter object ID"
-                    className="sm:flex-1"
+                    className="sm:flex-1 bg-white text-black"
                   />
                 </div>
-                <Button onClick={handleSaveDetails} disabled={isUpdating} type="button">
+                <Button onClick={handleSaveDetails} disabled={isUpdating} type="button" 
+                  className="bg-white text-primary hover:bg-white/90">
                   {isUpdating ? "Saving..." : "Save Details"}
                 </Button>
               </div>
@@ -437,7 +440,7 @@ export function PropertyQuickview() {
                 <div className="md:col-span-2 space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold">{selectedProperty.title}</h3>
-                    <p className="text-muted-foreground">{selectedProperty.address || "No address specified"}</p>
+                    <p className="text-white/80">{selectedProperty.address || "No address specified"}</p>
                   </div>
                   <div>
                     <span className="text-sm font-medium">ID:</span>
@@ -449,7 +452,7 @@ export function PropertyQuickview() {
                   </div>
                   <div>
                     <span className="text-sm font-medium">API Endpoint:</span>
-                    <Code className="text-xs mt-1 overflow-x-auto w-full block">{apiEndpoint}</Code>
+                    <Code className="text-xs mt-1 overflow-x-auto w-full block bg-primary-foreground/10 text-white">{apiEndpoint}</Code>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
@@ -470,8 +473,8 @@ export function PropertyQuickview() {
                       className="w-full h-40 object-cover rounded-md"
                     />
                   ) : (
-                    <div className="w-full h-40 bg-muted flex items-center justify-center rounded-md">
-                      <p className="text-muted-foreground text-sm">No image available</p>
+                    <div className="w-full h-40 bg-primary-foreground/20 flex items-center justify-center rounded-md">
+                      <p className="text-white/80 text-sm">No image available</p>
                     </div>
                   )}
                 </div>
@@ -479,7 +482,7 @@ export function PropertyQuickview() {
             )}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-40 text-muted-foreground">
+          <div className="flex items-center justify-center h-40 text-white/80">
             {isLoading ? 'Loading property details...' : 'Select a property to view details'}
           </div>
         )}
