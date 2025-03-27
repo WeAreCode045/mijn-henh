@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { useAgenda } from "@/hooks/useAgenda";
 import { useTodoItems } from "@/hooks/useTodoItems";
 import { isToday, parseISO } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function ActivityIndicators() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
   // Mock data - in a real app, you would fetch these from a backend
   const [unreadEmails, setUnreadEmails] = useState(3);
   const [notifications, setNotifications] = useState(5);
@@ -35,38 +37,26 @@ export function ActivityIndicators() {
   ).length;
 
   // Handle icon clicks to navigate to respective tabs
-  const handleEmailClick = () => {
-    navigate('/');
-    // Use a small timeout to ensure DOM is ready before clicking the tab
-    setTimeout(() => {
-      const tabElement = document.querySelector('[value="comms"]') as HTMLElement;
-      if (tabElement) tabElement.click();
-    }, 50);
+  const handleTabClick = (tabName: string) => {
+    // Preserve propertyId if it exists in the current URL
+    const propertyId = searchParams.get('propertyId');
+    const newSearchParams = new URLSearchParams();
+    
+    newSearchParams.set('tab', tabName);
+    if (propertyId) {
+      newSearchParams.set('propertyId', propertyId);
+    }
+    
+    navigate({
+      pathname: '/',
+      search: newSearchParams.toString()
+    });
   };
 
-  const handleCalendarClick = () => {
-    navigate('/');
-    setTimeout(() => {
-      const tabElement = document.querySelector('[value="agenda"]') as HTMLElement;
-      if (tabElement) tabElement.click();
-    }, 50);
-  };
-
-  const handleTodoClick = () => {
-    navigate('/');
-    setTimeout(() => {
-      const tabElement = document.querySelector('[value="todos"]') as HTMLElement;
-      if (tabElement) tabElement.click();
-    }, 50);
-  };
-
-  const handleNotificationClick = () => {
-    navigate('/');
-    setTimeout(() => {
-      const tabElement = document.querySelector('[value="notifications"]') as HTMLElement;
-      if (tabElement) tabElement.click();
-    }, 50);
-  };
+  const handleEmailClick = () => handleTabClick('comms');
+  const handleCalendarClick = () => handleTabClick('agenda');
+  const handleTodoClick = () => handleTabClick('todos');
+  const handleNotificationClick = () => handleTabClick('notifications');
 
   return (
     <div className="flex items-center gap-3">

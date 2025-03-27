@@ -2,8 +2,12 @@
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { PropertyQuickNav } from "@/components/dashboard/PropertyQuickNav";
 import { ActivityIndicators } from "@/components/dashboard/ActivityIndicators";
+import { useParams, useSearchParams } from "react-router-dom";
 
 export default function Index() {
+  const [searchParams] = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
+  
   return (
     <div className="container mx-auto pt-4 pb-8">
       {/* Top nav section with search and activity indicators */}

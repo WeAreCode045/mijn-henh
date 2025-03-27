@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Route, Routes, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -21,16 +20,16 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// This component handles the redirect from /edit to /dashboard
-function PropertyEditRedirect() {
+// This component handles the redirect from /property/:id to dashboard with tab=property
+function PropertyTabRedirect() {
   const { id } = useParams();
-  return <Navigate to={`/property/${id}/dashboard`} replace />;
+  return <Navigate to={`/?tab=property&propertyId=${id}`} replace />;
 }
 
-// This component handles the redirect from /property/:id to /property/:id/dashboard
+// This component handles the redirect from /property/:id/dashboard to dashboard with tab=property
 function PropertyDashboardRedirect() {
   const { id } = useParams();
-  return <Navigate to={`/property/${id}/dashboard`} replace />;
+  return <Navigate to={`/?tab=property&propertyId=${id}`} replace />;
 }
 
 // This component handles the redirect to the default content tab
@@ -117,21 +116,17 @@ export function AppRoutes() {
       
       <Route path="/property/:id" element={
         <ProtectedRoute>
-          <PropertyDashboardRedirect />
+          <PropertyTabRedirect />
         </ProtectedRoute>
       } />
       
       <Route path="/property/:id/dashboard" element={
         <ProtectedRoute>
-          <PropertyLayout>
-            <Suspense fallback={<LoadingSpinner />}>
-              <PropertyFormPage />
-            </Suspense>
-          </PropertyLayout>
+          <PropertyDashboardRedirect />
         </ProtectedRoute>
       } />
       
-      {/* Content tab routes */}
+      {/* Content tab routes - keeping these as separate pages for now */}
       <Route path="/property/:id/content" element={
         <ProtectedRoute>
           <PropertyContentRedirect />
@@ -171,7 +166,7 @@ export function AppRoutes() {
       
       <Route path="/property/:id/edit" element={
         <ProtectedRoute>
-          <PropertyEditRedirect />
+          <PropertyTabRedirect />
         </ProtectedRoute>
       } />
       

@@ -10,24 +10,42 @@ import { CommunicationsSection } from "./CommunicationsSection";
 import { UnderConstructionView } from "./UnderConstructionView";
 import { NotificationsSection } from "./NotificationsSection";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { PropertyFormContainer } from "@/pages/property/PropertyFormContainer";
 
 export function DashboardTabs() {
   const [activeTab, setActiveTab] = useState("overview");
   const location = useLocation();
+  const navigate = useNavigate();
+  const { id: propertyId } = useParams();
   
   // Check for tab parameter in URL
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'properties', 'agenda', 'todos', 'comms', 'analytics', 'notifications'].includes(tabParam)) {
+    if (tabParam && ['overview', 'properties', 'agenda', 'todos', 'comms', 'analytics', 'notifications', 'property'].includes(tabParam)) {
       setActiveTab(tabParam);
+    } else if (propertyId) {
+      // If we have a property ID in the URL but no tab specified, we should show the property tab
+      setActiveTab("property");
     }
-  }, [location]);
+  }, [location, propertyId]);
+
+  // Handle tab changes, updating the URL
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    // Update URL with tab parameter
+    const searchParams = new URLSearchParams(location.search);
+    if (value !== "property") {
+      searchParams.set('tab', value);
+      navigate({ search: searchParams.toString() });
+    }
+  };
 
   return (
     <Card>
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="w-full flex justify-start border-b px-4 pt-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="properties">Properties</TabsTrigger>
@@ -36,6 +54,7 @@ export function DashboardTabs() {
           <TabsTrigger value="comms">Communications</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          {propertyId && <TabsTrigger value="property">Property Details</TabsTrigger>}
         </TabsList>
         
         <TabsContent value="overview">
@@ -81,6 +100,14 @@ export function DashboardTabs() {
             <NotificationsSection />
           </CardContent>
         </TabsContent>
+
+        {propertyId && (
+          <TabsContent value="property">
+            <CardContent className="p-6">
+              <PropertyFormContainer />
+            </CardContent>
+          </TabsContent>
+        )}
       </Tabs>
     </Card>
   );

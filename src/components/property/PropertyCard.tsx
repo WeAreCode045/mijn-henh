@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { getOrCreateWebViewUrl } from "@/utils/webViewUtils";
@@ -101,14 +100,12 @@ export const PropertyCard = ({
   };
 
   const handleCardClick = () => {
-    navigate(`/property/${property.id}/dashboard`);
+    navigate(`/?tab=property&propertyId=${property.id}`);
   };
 
-  // Get the main display image (featured image first, then first regular image)
   const displayImage = property.featuredImage || 
                       (property.images?.length > 0 ? property.images[0].url : '/placeholder.svg');
 
-  // Get the agent name safely (handle both full_name and name properties)
   const agentName = property.agent ? (property.agent.full_name || property.agent.name || 'Unnamed Agent') : null;
 
   return (
@@ -140,7 +137,6 @@ export const PropertyCard = ({
             <h3 className="text-sm/4 font-bold mb-1 line-clamp-2">{property.title}</h3>
           </div>
           <div className="flex justify-start items-start gap-y-5">
-
           <p className="text-sm font-bold">€{property.price},-</p>
             </div>
           <div className="mt-3">
