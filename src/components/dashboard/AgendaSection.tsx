@@ -10,7 +10,7 @@ import { AgendaListView } from "./AgendaListView";
 import { useAgenda, AgendaItem } from "@/hooks/useAgenda";
 
 export function AgendaSection() {
-  const [activeTab, setActiveTab] = useState<string>("calendar");
+  const [activeTab, setActiveTab] = useState<string>("list");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
   
@@ -29,10 +29,7 @@ export function AgendaSection() {
         data.description || null,
         data.event_date,
         data.event_time,
-        data.property_id,
-        data.end_time || null,
-        data.till_date || null,
-        data.invited_users || null
+        data.property_id
       );
     } else {
       await addAgendaItem(
@@ -40,10 +37,7 @@ export function AgendaSection() {
         data.description || null,
         data.event_date,
         data.event_time,
-        data.property_id,
-        data.end_time || null,
-        data.till_date || null,
-        data.invited_users || null
+        data.property_id
       );
     }
   };
@@ -83,7 +77,7 @@ export function AgendaSection() {
       </TabsContent>
       
       <TabsContent value="calendar" className="mt-0">
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-1">
             <AgendaCalendarView 
               agendaItems={agendaItems} 
@@ -91,10 +85,9 @@ export function AgendaSection() {
               onDayClick={(date) => console.log(date)}
               className="w-full"
               compactMode={true}
-              alwaysShow={true}
             />
           </div>
-          <div className="md:col-span-5">
+          <div className="md:col-span-3">
             <AgendaListView 
               agendaItems={agendaItems} 
               isLoading={isLoading} 
