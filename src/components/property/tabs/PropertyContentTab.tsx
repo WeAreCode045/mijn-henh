@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { PropertyFormData, PropertyData } from "@/types/property";
 import { ContentTabWrapper } from './content/ContentTabWrapper';
 import { useParams, useNavigate } from 'react-router-dom';
+import { steps } from './content/ContentTabNavigation';
 
 interface PropertyContentTabProps {
   formData: PropertyFormData;
@@ -54,15 +55,19 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
   console.log("PropertyContentTab - handlers.handleStepClick is function:", typeof handlers.handleStepClick === 'function');
   console.log("PropertyContentTab - Current step:", handlers.currentStep);
   console.log("PropertyContentTab - Step slug from URL:", stepSlug);
+  console.log("PropertyContentTab - Property ID:", id);
   
   // Update step based on URL when component mounts or URL changes
   useEffect(() => {
     if (stepSlug && stepSlugMap[stepSlug] !== undefined) {
-      if (handlers.currentStep !== stepSlugMap[stepSlug]) {
-        console.log("PropertyContentTab - Updating step from URL to:", stepSlugMap[stepSlug]);
+      const stepNumber = stepSlugMap[stepSlug];
+      console.log("PropertyContentTab - Calculating step from URL:", stepNumber);
+      
+      if (handlers.currentStep !== stepNumber) {
+        console.log("PropertyContentTab - Updating step from URL to:", stepNumber);
         
         if (typeof handlers.handleStepClick === 'function') {
-          handlers.handleStepClick(stepSlugMap[stepSlug]);
+          handlers.handleStepClick(stepNumber);
         } else {
           console.error("PropertyContentTab - handleStepClick is not a function");
         }
@@ -79,6 +84,7 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
       hasFormData: !!formData, 
       hasProperty: !!property 
     });
+    return <div>Loading property data...</div>;
   }
 
   // Create a fallback handleStepClick if needed
@@ -88,9 +94,15 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
       ? handlers.handleStepClick 
       : (step: number) => {
           console.log("PropertyContentTab - Using fallback handleStepClick:", step);
+          if (id) {
+            const stepSlug = steps.find(s => s.id === step)?.slug || 'general';
+            navigate(`/property/${id}/content/${stepSlug}`);
+          }
         },
     // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
-    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload
+    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
+    // Ensure onFieldChange is always available
+    onFieldChange: handlers.onFieldChange
   };
 
   return (

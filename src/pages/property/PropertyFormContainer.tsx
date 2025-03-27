@@ -11,9 +11,15 @@ import { PropertyData } from "@/types/property";
 
 interface PropertyFormContainerProps {
   propertyId?: string;
+  initialTab?: string;
+  initialContentStep?: number;
 }
 
-export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFormContainerProps) {
+export function PropertyFormContainer({ 
+  propertyId: propPropertyId, 
+  initialTab, 
+  initialContentStep
+}: PropertyFormContainerProps) {
   const { isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
   const { id: paramsId } = useParams();
@@ -23,6 +29,8 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
   
   // Log to help with debugging
   console.log("PropertyFormContainer - Using property ID:", propertyId);
+  console.log("PropertyFormContainer - Initial tab:", initialTab);
+  console.log("PropertyFormContainer - Initial content step:", initialContentStep);
   
   const {
     id,
@@ -131,7 +139,10 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
       agentInfo={agentInfo}
       isSubmitting={isSubmitting}
     >
-      <PropertyForm />
+      <PropertyForm 
+        initialTab={initialTab}
+        initialContentStep={initialContentStep}
+      />
     </PropertyFormLayout>
   );
 }

@@ -54,7 +54,9 @@ export function ContentRouter({ formData, property, currentStep, handlers }: Con
 
   // Create safe handlers with defaults for optional functions
   const safeHandlers = {
-    onFieldChange: handlers.onFieldChange,
+    onFieldChange: handlers.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
+      console.log("No onFieldChange handler, would set", field, "to", value);
+    }),
     onAddFeature: handlers.onAddFeature || (() => console.log("No onAddFeature handler")),
     onRemoveFeature: handlers.onRemoveFeature || ((id: string) => console.log("No onRemoveFeature handler", id)),
     onUpdateFeature: handlers.onUpdateFeature || ((id: string, desc: string) => console.log("No onUpdateFeature handler", id, desc)),

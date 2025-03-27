@@ -85,6 +85,34 @@ export const MainRoutes = [
   />,
   
   <Route 
+    key="property-edit"
+    path="/property/:id/edit" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <PropertyFormPage />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
+  />,
+  
+  <Route 
+    key="property-dashboard"
+    path="/property/:id/dashboard" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <PropertyFormPage />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
+  />,
+  
+  <Route 
     key="property-media"
     path="/property/:id/media" 
     element={

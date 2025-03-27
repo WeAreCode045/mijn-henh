@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
@@ -11,14 +11,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clock } from "lucide-react";
 
-export function PropertyForm() {
+interface PropertyFormProps {
+  initialTab?: string;
+  initialContentStep?: number;
+}
+
+export function PropertyForm({ initialTab, initialContentStep }: PropertyFormProps) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { formData, setFormData, isLoading } = usePropertyForm(id);
   const { settings } = useAgencySettings();
   const { toast } = useToast();
   const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const { deleteProperty } = usePropertyDeletion();
+  
+  console.log("PropertyForm - Initial tab:", initialTab);
+  console.log("PropertyForm - Initial content step:", initialContentStep);
 
   useEffect(() => {
     if (formData?.title) {
@@ -137,6 +146,8 @@ export function PropertyForm() {
           onDelete={handleDelete}
           agentInfo={agentInfo}
           isArchived={!!formData.archived}
+          initialTab={initialTab}
+          initialContentStep={initialContentStep}
         />
       </form>
     </div>
