@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
@@ -17,7 +18,8 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
   if (propertyId) {
     query = query.eq('property_id', propertyId);
   } else {
-    query = query.or(`agent_id.eq.${userId},additional_users.cs.{"${userId}"}`);
+    // Use safer string interpolation for JSON contains check
+    query = query.or(`agent_id.eq.${userId},additional_users.cs.{${userId}}`);
   }
 
   const { data, error } = await query;
