@@ -1,5 +1,5 @@
 
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import { Route, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "../ProtectedRoute";
 import { PropertyLayout } from "../PropertyLayout";
