@@ -86,7 +86,7 @@ export function AgendaSection() {
             <AgendaCalendarView 
               agendaItems={agendaItems} 
               isLoading={isLoading}
-              onDayClick={(date) => console.log(date)}
+              onDayClick={() => {}}
               className="w-full"
               compactMode={true}
             />

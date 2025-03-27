@@ -27,8 +27,10 @@ export function AgendaCalendarView({
     const dates: Record<string, boolean> = {};
     
     agendaItems.forEach(item => {
-      const formattedDate = format(new Date(item.event_date), "yyyy-MM-dd");
-      dates[formattedDate] = true;
+      if (item.event_date) {
+        const formattedDate = format(new Date(item.event_date), "yyyy-MM-dd");
+        dates[formattedDate] = true;
+      }
     });
     
     setMarkedDates(dates);
