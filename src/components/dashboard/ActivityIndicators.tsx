@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { useAgenda } from "@/hooks/useAgenda";
 import { useTodoItems } from "@/hooks/useTodoItems";
 import { isToday, parseISO } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 export function ActivityIndicators() {
+  const navigate = useNavigate();
   // Mock data - in a real app, you would fetch these from a backend
   const [unreadEmails, setUnreadEmails] = useState(3);
   const [notifications, setNotifications] = useState(5);
@@ -32,12 +34,51 @@ export function ActivityIndicators() {
     item.event_date && isToday(parseISO(item.event_date))
   ).length;
 
+  // Handle icon clicks to navigate to respective tabs
+  const handleEmailClick = () => {
+    navigate('/');
+    // Use a small timeout to ensure DOM is ready before clicking the tab
+    setTimeout(() => {
+      const tabElement = document.querySelector('[value="comms"]') as HTMLElement;
+      if (tabElement) tabElement.click();
+    }, 50);
+  };
+
+  const handleCalendarClick = () => {
+    navigate('/');
+    setTimeout(() => {
+      const tabElement = document.querySelector('[value="agenda"]') as HTMLElement;
+      if (tabElement) tabElement.click();
+    }, 50);
+  };
+
+  const handleTodoClick = () => {
+    navigate('/');
+    setTimeout(() => {
+      const tabElement = document.querySelector('[value="todos"]') as HTMLElement;
+      if (tabElement) tabElement.click();
+    }, 50);
+  };
+
+  const handleNotificationClick = () => {
+    navigate('/');
+    setTimeout(() => {
+      const tabElement = document.querySelector('[value="notifications"]') as HTMLElement;
+      if (tabElement) tabElement.click();
+    }, 50);
+  };
+
   return (
     <div className="flex items-center gap-3">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative"
+              onClick={handleEmailClick}
+            >
               <Mail className="h-5 w-5" />
               {unreadEmails > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">
@@ -53,7 +94,12 @@ export function ActivityIndicators() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative"
+              onClick={handleCalendarClick}
+            >
               <Calendar className="h-5 w-5" />
               {todayAgendaItems > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">
@@ -69,7 +115,12 @@ export function ActivityIndicators() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative"
+              onClick={handleTodoClick}
+            >
               <CheckSquare className="h-5 w-5" />
               {todayTodos > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">
@@ -85,7 +136,12 @@ export function ActivityIndicators() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative"
+              onClick={handleNotificationClick}
+            >
               <Bell className="h-5 w-5" />
               {notifications > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">

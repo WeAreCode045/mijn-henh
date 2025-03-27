@@ -8,11 +8,26 @@ import { TodoSection } from "./TodoSection";
 import { AnalyticsOverview } from "./AnalyticsOverview";
 import { CommunicationsSection } from "./CommunicationsSection";
 import { UnderConstructionView } from "./UnderConstructionView";
+import { NotificationsSection } from "./NotificationsSection";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export function DashboardTabs() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const location = useLocation();
+  
+  // Check for tab parameter in URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['overview', 'properties', 'agenda', 'todos', 'comms', 'analytics', 'notifications'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
+
   return (
     <Card>
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full flex justify-start border-b px-4 pt-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="properties">Properties</TabsTrigger>
@@ -20,6 +35,7 @@ export function DashboardTabs() {
           <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="comms">Communications</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
@@ -57,6 +73,12 @@ export function DashboardTabs() {
         <TabsContent value="analytics">
           <CardContent className="p-6">
             <AnalyticsOverview />
+          </CardContent>
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <CardContent className="p-6">
+            <NotificationsSection />
           </CardContent>
         </TabsContent>
       </Tabs>
