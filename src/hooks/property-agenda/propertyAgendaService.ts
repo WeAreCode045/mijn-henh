@@ -24,11 +24,11 @@ export const fetchPropertyAgendaItems = async (propertyId: string) => {
       event_time: item.event_time,
       end_date: item.end_date,
       end_time: item.end_time,
-      // Convert additional_users to string[] regardless of what form it comes in
+      // Safely handle additional_users regardless of its format
       additional_users: Array.isArray(item.additional_users) 
-        ? item.additional_users.map(user => String(user))
+        ? item.additional_users.map(String)
         : typeof item.additional_users === 'object' && item.additional_users !== null
-          ? Object.values(item.additional_users).map(user => String(user))
+          ? Object.values(item.additional_users || {}).map(String)
           : [],
       created_at: item.created_at,
       updated_at: item.updated_at
@@ -51,6 +51,7 @@ export const addPropertyAgendaItem = async (
   endTime: string | null = null,
   additionalUsers: string[] = []
 ) => {
+  // Ensure additionalUsers is properly formatted as a JSON array
   const newItem = {
     creator_id: userId,
     property_id: propertyId,
@@ -60,7 +61,7 @@ export const addPropertyAgendaItem = async (
     event_time: time,
     end_date: endDate,
     end_time: endTime,
-    additional_users: additionalUsers
+    additional_users: additionalUsers || []
   };
 
   const { data, error } = await supabase
@@ -71,7 +72,7 @@ export const addPropertyAgendaItem = async (
   if (error) throw error;
 
   if (data && data[0]) {
-    // Transform to match AgendaItem type
+    // Transform to match AgendaItem type with safe handling of additional_users
     const newAgendaItem: AgendaItem = {
       id: data[0].id,
       creator_id: data[0].creator_id,
@@ -83,9 +84,9 @@ export const addPropertyAgendaItem = async (
       end_date: data[0].end_date,
       end_time: data[0].end_time,
       additional_users: Array.isArray(data[0].additional_users) 
-        ? data[0].additional_users.map(user => String(user))
+        ? data[0].additional_users.map(String)
         : typeof data[0].additional_users === 'object' && data[0].additional_users !== null
-          ? Object.values(data[0].additional_users).map(user => String(user))
+          ? Object.values(data[0].additional_users || {}).map(String)
           : [],
       created_at: data[0].created_at,
       updated_at: data[0].updated_at
@@ -107,6 +108,7 @@ export const updatePropertyAgendaItem = async (
   endTime: string | null = null,
   additionalUsers: string[] = []
 ) => {
+  // Ensure additionalUsers is properly formatted as a JSON array
   const updates = {
     title,
     description,
@@ -114,7 +116,7 @@ export const updatePropertyAgendaItem = async (
     event_time: time,
     end_date: endDate,
     end_time: endTime,
-    additional_users: additionalUsers
+    additional_users: additionalUsers || []
   };
 
   const { data, error } = await supabase
