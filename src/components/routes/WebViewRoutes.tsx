@@ -1,5 +1,5 @@
 
-import { lazy } from "react";
+import React, { lazy } from "react";
 import { Route } from "react-router-dom";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 
