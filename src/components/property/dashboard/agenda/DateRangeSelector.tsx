@@ -8,7 +8,7 @@ interface DateRangeSelectorProps {
 }
 
 export function DateRangeSelector({ dateRange, setDateRange }: DateRangeSelectorProps) {
-  // This component now needs to create actual DateRange objects with from/to dates
+  // This component creates actual DateRange objects with from/to dates
   
   const handleRangeChange = (value: string) => {
     const today = new Date();
@@ -49,7 +49,42 @@ export function DateRangeSelector({ dateRange, setDateRange }: DateRangeSelector
   const getCurrentSelection = () => {
     if (!dateRange) return "all";
     
-    // This logic can be improved based on your use case
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const from = dateRange.from;
+    const to = dateRange.to || dateRange.from;
+    
+    if (from && to) {
+      // Check if it's today
+      if (from.getTime() === today.getTime() && to.getTime() === today.getTime()) {
+        return "today";
+      }
+      
+      // Check if it's tomorrow
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (from.getTime() === tomorrow.getTime() && to.getTime() === tomorrow.getTime()) {
+        return "tomorrow";
+      }
+      
+      // Check if it's this week
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const endOfWeek = new Date(today);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      if (from.getTime() === startOfWeek.getTime() && to.getTime() === endOfWeek.getTime()) {
+        return "thisWeek";
+      }
+      
+      // Check if it's this month
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      if (from.getTime() === startOfMonth.getTime() && to.getTime() === endOfMonth.getTime()) {
+        return "thisMonth";
+      }
+    }
+    
     return "custom";
   };
   
