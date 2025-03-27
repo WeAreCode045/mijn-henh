@@ -1,59 +1,66 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { useAgencySettings } from "@/hooks/useAgencySettings";
-import { useAgentSelect } from "@/hooks/useAgentSelect";
-import { supabase } from "@/integrations/supabase/client";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { useToast } from "@/components/ui/use-toast";
+import { useAgentSelect } from "@/hooks/useAgentSelect";
+import { PropertyData } from "@/types/property";
 
-export function usePropertyFormContainerData() {
+export const usePropertyFormContainerData = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { settings } = useAgencySettings();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
+  const { formData, isLoading, error } = usePropertyForm(id);
+  const { agents, selectedAgent, setSelectedAgent } = useAgentSelect();
+  const [saving, setSaving] = useState(false);
 
-  const { formData, setFormData, isLoading } = usePropertyForm(id);
-  const { agents, selectedAgent, setSelectedAgent } = useAgentSelect(formData?.agent_id);
-
-  // Fetch agent info when formData changes
+  // Set form title based on data
   useEffect(() => {
-    if (formData && formData.id) {
-      const fetchAgentInfo = async () => {
-        if (formData.agent_id && formData.agent_id.trim() !== '') {
-          const { data } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .eq('id', formData.agent_id)
-            .single();
-          
-          if (data) {
-            setAgentInfo({ id: data.id, name: data.full_name });
-          } else {
-            setAgentInfo(null);
-          }
-        } else {
-          setAgentInfo(null);
-        }
-      };
-
-      fetchAgentInfo();
+    if (formData?.title) {
+      document.title = `Editing: ${formData.title}`;
+    } else {
+      document.title = "New Property";
     }
-  }, [formData]);
+    
+    return () => {
+      document.title = "Property Manager";
+    };
+  }, [formData?.title]);
+
+  // Select the current agent when form data loads
+  useEffect(() => {
+    if (formData?.agent_id && agents.length > 0 && !selectedAgent) {
+      const currentAgent = agents.find(agent => agent.id === formData.agent_id);
+      if (currentAgent) {
+        setSelectedAgent(currentAgent);
+      }
+    }
+  }, [formData, agents, selectedAgent, setSelectedAgent]);
+
+  const handleGoBack = () => {
+    navigate(-1); // Go back to previous page
+  };
+
+  const handleViewProperty = () => {
+    if (id) {
+      navigate(`/property/${id}/webview`);
+    }
+  };
 
   return {
     id,
     formData,
-    setFormData,
     isLoading,
-    settings,
-    agents,
-    selectedAgent,
-    setSelectedAgent,
-    agentInfo,
-    isSubmitting,
-    setIsSubmitting,
-    toast
+    error,
+    agents, 
+    saving,
+    setSaving,
+    handleGoBack,
+    handleViewProperty
   };
-}
+};
+
+export default usePropertyFormContainerData;
