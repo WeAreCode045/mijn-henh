@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, ListFilter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -27,10 +27,14 @@ export function PropertyQuickNav() {
     setSearchTerm("");
   };
 
+  const handleViewAllProperties = () => {
+    navigate('/properties');
+  };
+
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-transparent border-0 shadow-none">
       <CardHeader className="pb-2">
-        <CardTitle>Quick Property Navigation</CardTitle>
+        <CardTitle className="text-white">Quick Property Navigation</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="relative">
@@ -40,7 +44,7 @@ export function PropertyQuickNav() {
               <Input
                 type="text"
                 placeholder="Search properties..."
-                className="pl-8"
+                className="pl-8 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -58,9 +62,9 @@ export function PropertyQuickNav() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="absolute right-0 top-0 h-10 w-10"
+                  className="absolute right-0 top-0 h-10 w-10 bg-white/10 border-white/20 hover:bg-white/20"
                 >
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 text-white" />
                 </Button>
               </DropdownMenuTrigger>
             </div>
@@ -89,6 +93,16 @@ export function PropertyQuickNav() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        
+        <Button 
+          onClick={handleViewAllProperties} 
+          variant="outline" 
+          size="sm" 
+          className="w-full mt-3 text-white border-white/20 bg-white/10 hover:bg-white/20"
+        >
+          <ListFilter className="h-4 w-4 mr-2" />
+          View All Properties
+        </Button>
       </CardContent>
     </Card>
   );

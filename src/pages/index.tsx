@@ -10,17 +10,17 @@ export default function Index() {
       {/* First row: Three-column layout with notifications, property navigation, and quick actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Left column: Compact Notifications Bar */}
-        <div>
+        <div className="bg-primary text-white rounded-lg shadow-md">
           <CompactNotificationsBar />
         </div>
         
         {/* Middle column: Property Quick Navigation */}
-        <div>
+        <div className="bg-primary text-white rounded-lg shadow-md">
           <PropertyQuickNav />
         </div>
         
         {/* Right column: Quick Actions */}
-        <div>
+        <div className="bg-primary text-white rounded-lg shadow-md">
           <QuickActions />
         </div>
       </div>

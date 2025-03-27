@@ -12,15 +12,15 @@ export function QuickActions() {
   const [isAgendaDialogOpen, setIsAgendaDialogOpen] = useState(false);
   
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-transparent border-0 shadow-none">
       <CardHeader className="pb-2">
-        <CardTitle>Quick Actions</CardTitle>
+        <CardTitle className="text-white">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-2">
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 justify-start h-auto py-3"
+            className="flex items-center gap-2 justify-start h-auto py-3 text-white bg-white/10 border-white/20 hover:bg-white/20"
             onClick={() => setIsAgendaDialogOpen(true)}
           >
             <Calendar className="h-4 w-4" />
@@ -29,7 +29,7 @@ export function QuickActions() {
           
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 justify-start h-auto py-3"
+            className="flex items-center gap-2 justify-start h-auto py-3 text-white bg-white/10 border-white/20 hover:bg-white/20"
             onClick={() => navigate('/property/new')}
           >
             <Home className="h-4 w-4" />
@@ -38,7 +38,7 @@ export function QuickActions() {
           
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 justify-start h-auto py-3"
+            className="flex items-center gap-2 justify-start h-auto py-3 text-white bg-white/10 border-white/20 hover:bg-white/20"
             onClick={() => {
               // This will need to be connected to a notes functionality
               // For now, let's navigate to dashboard with a state param
@@ -51,7 +51,7 @@ export function QuickActions() {
           
           <Button 
             variant="outline" 
-            className="flex items-center gap-2 justify-start h-auto py-3"
+            className="flex items-center gap-2 justify-start h-auto py-3 text-white bg-white/10 border-white/20 hover:bg-white/20"
             onClick={() => {
               // This will need to be connected to an email functionality
               // For now, let's navigate to settings

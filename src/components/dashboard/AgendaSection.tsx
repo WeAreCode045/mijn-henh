@@ -3,14 +3,14 @@ import { useState } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { CalendarX, PlusCircle } from "lucide-react";
 import { AgendaDialog } from "./AgendaDialog";
 import { AgendaCalendarView } from "./AgendaCalendarView";
 import { AgendaListView } from "./AgendaListView";
 import { useAgenda, AgendaItem } from "@/hooks/useAgenda";
 
 export function AgendaSection() {
-  const [activeTab, setActiveTab] = useState<string>("list");
+  const [activeTab, setActiveTab] = useState<string>("calendar");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
   
@@ -51,13 +51,27 @@ export function AgendaSection() {
     await deleteAgendaItem(id);
   };
   
+  const EmptyAgendaNotification = () => (
+    <div className="flex flex-col items-center justify-center py-6 px-4 bg-muted/20 rounded-lg border border-muted mt-4">
+      <CalendarX className="h-12 w-12 text-muted-foreground mb-2" />
+      <h3 className="text-lg font-medium">No Events Scheduled</h3>
+      <p className="text-sm text-muted-foreground text-center max-w-md mt-1">
+        Your agenda is currently empty. Click the "Add Event" button above to schedule your first event.
+      </p>
+      <Button onClick={handleAddClick} variant="outline" className="mt-4">
+        <PlusCircle className="h-4 w-4 mr-2" />
+        Add Your First Event
+      </Button>
+    </div>
+  );
+  
   return (
     <CardContent className="p-4 pt-0">
       <div className="flex justify-between items-center mb-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
           <TabsList>
-            <TabsTrigger value="list">List View</TabsTrigger>
             <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+            <TabsTrigger value="list">List View</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button onClick={handleAddClick} size="sm" className="h-8">
@@ -67,13 +81,17 @@ export function AgendaSection() {
       </div>
       
       <TabsContent value="list" className="mt-0">
-        <AgendaListView 
-          agendaItems={agendaItems} 
-          isLoading={isLoading} 
-          onEdit={handleEditItem}
-          onDelete={handleDeleteItem}
-          showEditRemoveButtons={true}
-        />
+        {!isLoading && agendaItems.length === 0 ? (
+          <EmptyAgendaNotification />
+        ) : (
+          <AgendaListView 
+            agendaItems={agendaItems} 
+            isLoading={isLoading} 
+            onEdit={handleEditItem}
+            onDelete={handleDeleteItem}
+            showEditRemoveButtons={true}
+          />
+        )}
       </TabsContent>
       
       <TabsContent value="calendar" className="mt-0">
@@ -88,14 +106,18 @@ export function AgendaSection() {
             />
           </div>
           <div className="md:col-span-3">
-            <AgendaListView 
-              agendaItems={agendaItems} 
-              isLoading={isLoading} 
-              onEdit={handleEditItem}
-              onDelete={handleDeleteItem}
-              showEditRemoveButtons={true}
-              showDate={true}
-            />
+            {!isLoading && agendaItems.length === 0 ? (
+              <EmptyAgendaNotification />
+            ) : (
+              <AgendaListView 
+                agendaItems={agendaItems} 
+                isLoading={isLoading} 
+                onEdit={handleEditItem}
+                onDelete={handleDeleteItem}
+                showEditRemoveButtons={true}
+                showDate={true}
+              />
+            )}
           </div>
         </div>
       </TabsContent>
