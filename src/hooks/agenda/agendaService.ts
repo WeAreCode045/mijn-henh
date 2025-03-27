@@ -18,7 +18,7 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
   if (propertyId) {
     query = query.eq('property_id', propertyId);
   } else {
-    query = query.or(`creator_id.eq.${userId},additional_users.cs.{"${userId}"}`);
+    query = query.or(`agent_id.eq.${userId},additional_users.cs.{"${userId}"}`);
   }
 
   const { data, error } = await query;
@@ -29,7 +29,7 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
     // Transform the data to ensure it matches the AgendaItem type
     return data.map(item => ({
       id: item.id,
-      creator_id: item.creator_id,
+      agent_id: item.agent_id,
       property_id: item.property_id,
       title: item.title,
       description: item.description,
@@ -66,7 +66,7 @@ export const addAgendaItem = async (
   const { error } = await supabase
     .from('property_agenda_items')
     .insert({
-      creator_id: userId,
+      agent_id: userId,
       property_id: propertyId || null,
       title,
       description,
