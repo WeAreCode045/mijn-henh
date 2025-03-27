@@ -6,12 +6,18 @@ import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyF
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
 
-export function PropertyFormContainer() {
+interface PropertyFormContainerProps {
+  propertyId?: string;
+}
+
+export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFormContainerProps) {
   const { isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
-  const propertyIdFromUrl = searchParams.get("propertyId");
+  const { id: paramsId } = useParams();
+  // Use propertyId from props, searchParams, or URL params in that order
+  const propertyId = propPropertyId || searchParams.get("propertyId") || paramsId;
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
   
   const {
@@ -26,11 +32,11 @@ export function PropertyFormContainer() {
     isSubmitting,
     setIsSubmitting,
     toast
-  } = usePropertyFormContainerData(propertyIdFromUrl);
+  } = usePropertyFormContainerData(propertyId);
 
   useEffect(() => {
-    console.log("PropertyFormContainer - Using property ID:", propertyIdFromUrl || id);
-  }, [propertyIdFromUrl, id]);
+    console.log("PropertyFormContainer - Using property ID:", propertyId || id);
+  }, [propertyId, id]);
 
   const {
     deleteProperty,

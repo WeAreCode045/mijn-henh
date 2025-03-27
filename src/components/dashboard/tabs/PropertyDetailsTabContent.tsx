@@ -15,7 +15,13 @@ export function PropertyDetailsTabContent() {
 
   return (
     <CardContent className="p-6">
-      <PropertyFormContainer />
+      {propertyId ? (
+        <PropertyFormContainer propertyId={propertyId} />
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Select a property to view details</p>
+        </div>
+      )}
     </CardContent>
   );
 }

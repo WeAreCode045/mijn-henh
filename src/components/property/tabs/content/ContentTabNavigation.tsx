@@ -37,14 +37,14 @@ export function ContentTabNavigation({
 
     return (
       <Tabs 
-        value={currentStep.toString()} 
+        value={String(currentStep)} 
         className="w-full"
       >
         <TabsList className="grid grid-cols-4 w-full">
           {steps.map((step) => (
             <TabsTrigger 
               key={step.id} 
-              value={step.id.toString()} 
+              value={String(step.id)} 
               className="flex items-center justify-center"
               onClick={() => handleTabClick(step.id)}
             >
@@ -60,13 +60,13 @@ export function ContentTabNavigation({
   // Default behavior if not using URL-based navigation
   return (
     <Tabs 
-      value={currentStep.toString()} 
+      value={String(currentStep)} 
       onValueChange={(value) => onStepClick(parseInt(value))}
       className="w-full"
     >
       <TabsList className="grid grid-cols-4 w-full">
         {steps.map((step) => (
-          <TabsTrigger key={step.id} value={step.id.toString()} className="flex items-center justify-center">
+          <TabsTrigger key={step.id} value={String(step.id)} className="flex items-center justify-center">
             {step.icon}
             {step.label}
           </TabsTrigger>
