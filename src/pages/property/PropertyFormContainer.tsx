@@ -43,7 +43,7 @@ export function PropertyFormContainer() {
   } = {
     deleteProperty: async () => {},
     saveProperty: async () => {},
-    handleAgentChange: async (agentId: any) => {},
+    handleAgentChange: async (agentId: string) => {}, // Fixed type from 'any' to 'string'
     handleImageUpload: async () => {},
     handleRemoveImage: async () => {},
     images: []
@@ -60,7 +60,7 @@ export function PropertyFormContainer() {
       settings={settings}
       isAdmin={isAdmin}
       agents={agents}
-      selectedAgent={selectedAgent}
+      selectedAgent={selectedAgent ? selectedAgent.id : ""} // Fixed by passing the ID string instead of the whole Agent object
       onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
       onSaveProperty={saveProperty}
