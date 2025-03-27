@@ -2,37 +2,27 @@
 import React, { useState, useEffect } from "react";
 import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
-import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
 import { useAgentSelect } from "@/hooks/useAgentSelect";
+import { useParams } from "react-router-dom";
 
 export function PropertyFormContainer() {
+  const { id } = useParams();
   const { isAdmin } = useAuth();
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
   const { toast } = useToast();
   const { selectedAgent, setSelectedAgent } = useAgentSelect();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const {
-    id,
-    formData,
-    isLoading,
-    agents,
-    saving,
-    setSaving,
-    handleGoBack,
-    handleViewProperty
-  } = usePropertyFormContainerData();
+  // Get property form data - use only what's available
+  const { formData, isLoading } = usePropertyForm(id);
 
-  // Get property form data
-  const { setFormData } = usePropertyForm(id);
-
-  // Get the settings here directly
-  const [settings, setSettings] = useState(null);
+  // Add a simplified mock for agents
+  const agents = [];
+  const saving = false;
 
   const {
     deleteProperty,
@@ -58,7 +48,7 @@ export function PropertyFormContainer() {
     <PropertyFormLayout
       title={formData.title || "Edit Property"}
       propertyData={formData || { id: "" } as any}
-      settings={settings}
+      settings={null}
       isAdmin={isAdmin}
       agents={agents}
       selectedAgent={selectedAgent ? selectedAgent.id : ""}

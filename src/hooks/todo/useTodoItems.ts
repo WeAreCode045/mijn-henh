@@ -11,7 +11,7 @@ import {
 } from "./types";
 import {
   fetchTodoItems,
-  addTodoItem as addTodoItemService,
+  createTodoItem,
   updateTodoItem as updateTodoItemService,
   updateTodoOrder as updateTodoOrderService,
   deleteTodoItem as deleteTodoItemService
@@ -34,7 +34,7 @@ export function useTodoItems(propertyId?: string): UseTodoItemsReturn {
   
   const addTodoItem = async (todoItem: TodoItemInput) => {
     try {
-      const newTodo = await addTodoItemService(todoItem);
+      const newTodo = await createTodoItem(todoItem);
       
       queryClient.invalidateQueries({ queryKey: ['todoItems'] });
       

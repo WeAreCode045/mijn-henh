@@ -29,7 +29,8 @@ export const createTodoItem = async (todoData: TodoItemInput): Promise<TodoItem 
   // Format dates to strings for database
   const formattedData = {
     ...todoData,
-    due_date: formatDateForDB(todoData.due_date)
+    due_date: formatDateForDB(todoData.due_date),
+    notify_at: formatDateForDB(todoData.notify_at)
   };
 
   const { data, error } = await supabase
@@ -51,7 +52,8 @@ export const updateTodoItem = async (id: string, todoData: TodoItemUpdate): Prom
   // Format dates to strings for database
   const formattedData = {
     ...todoData,
-    due_date: formatDateForDB(todoData.due_date)
+    due_date: formatDateForDB(todoData.due_date),
+    notify_at: formatDateForDB(todoData.notify_at)
   };
 
   const { error } = await supabase
@@ -79,7 +81,7 @@ export const deleteTodoItem = async (id: string): Promise<void> => {
 };
 
 // Update multiple todo items at once (used for reordering)
-export const batchUpdateTodoItems = async (items: TodoItem[]): Promise<void> => {
+export const updateTodoOrder = async (items: TodoItem[]): Promise<void> => {
   // This would need to be implemented if batch updates are needed
   // Supabase doesn't have a direct batch update, so we might need 
   // to use transactions or multiple calls
@@ -90,3 +92,6 @@ export const batchUpdateTodoItems = async (items: TodoItem[]): Promise<void> => 
       .eq("id", item.id);
   }
 };
+
+// Alias createTodoItem as addTodoItem for backward compatibility
+export const addTodoItem = createTodoItem;

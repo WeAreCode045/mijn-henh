@@ -4,9 +4,10 @@ import { TodoItem as BaseTodoItem } from "@/types/todo";
 // Re-export the TodoItem type
 export type TodoItem = BaseTodoItem;
 
-// Type for creating or updating a todo item - ensure due_date is string only
+// Type for creating or updating a todo item - ensure due_date and notify_at are string only
 export type TodoItemInput = Omit<TodoItem, "id" | "created_at" | "updated_at"> & {
   due_date?: string; // Make sure this is string only, not Date
+  notify_at?: string; // Make sure this is string only, not Date
 };
 
 // Type for partial updates to a todo item

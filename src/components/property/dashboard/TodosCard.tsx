@@ -7,11 +7,11 @@ import { TodoDialog } from "@/components/dashboard/todo/TodoDialog";
 import { useTodoItems } from "@/hooks/todo/useTodoItems";
 import { format, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { TodoItem } from "@/hooks/todo/types";
+import { TodoItem, TodoItemInput } from "@/hooks/todo/types";
 import { useParams } from "react-router-dom";
 
 export function TodosCard() {
-  const { propertyId } = useParams<{ propertyId: string }>();
+  const { id: propertyId } = useParams<{ id: string }>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTodoItem, setSelectedTodoItem] = useState<TodoItem | undefined>(undefined);
   
@@ -38,10 +38,16 @@ export function TodosCard() {
   };
   
   const handleSaveTodoItem = async (data: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
-    // Always set the property_id to current property
-    const todoData = {
+    // Always set the property_id to current property and format dates to strings
+    const todoData: TodoItemInput = {
       ...data,
-      property_id: propertyId || null
+      property_id: propertyId || null,
+      due_date: data.due_date ? 
+        (typeof data.due_date === 'string' ? data.due_date : data.due_date.toISOString()) : 
+        undefined,
+      notify_at: data.notify_at ? 
+        (typeof data.notify_at === 'string' ? data.notify_at : data.notify_at.toISOString()) : 
+        undefined
     };
     
     if (selectedTodoItem) {

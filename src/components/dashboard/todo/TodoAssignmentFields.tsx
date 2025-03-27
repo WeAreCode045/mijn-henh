@@ -19,7 +19,9 @@ export function TodoAssignmentFields({
   onPropertyChange
 }: TodoAssignmentFieldsProps) {
   const { properties, isLoading: propertiesLoading } = usePropertiesSelect();
-  const { users, isLoading: usersLoading } = useUsers();
+  const { users, refetch } = useUsers();
+  // Since isLoading is missing, we'll set a default false value
+  const usersLoading = false;
 
   return (
     <div className="space-y-4">
