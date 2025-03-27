@@ -23,11 +23,13 @@ export function usePropertyContentStepNavigation(
   const handleStepClick = (step: number) => {
     console.log("Step clicked in PropertyContentTab:", step);
     
-    // Just change the step without auto-saving
-    if (externalHandleStepClick) {
+    // Ensure externalHandleStepClick is a function before calling it
+    if (typeof externalHandleStepClick === 'function') {
       externalHandleStepClick(step);
-    } else {
+    } else if (typeof setCurrentStep === 'function') {
       setCurrentStep(step);
+    } else {
+      console.error("No valid step click handler provided");
     }
     
     return true;
@@ -37,9 +39,9 @@ export function usePropertyContentStepNavigation(
     console.log("Next clicked in PropertyContentTab");
     
     // Just move to next step without auto-saving
-    if (externalHandleNext) {
+    if (typeof externalHandleNext === 'function') {
       externalHandleNext();
-    } else if (currentStep < maxSteps - 1) {
+    } else if (currentStep < maxSteps - 1 && typeof setCurrentStep === 'function') {
       setCurrentStep(currentStep + 1);
     }
     
@@ -50,9 +52,9 @@ export function usePropertyContentStepNavigation(
     console.log("Previous clicked in PropertyContentTab");
     
     // Just move to previous step without auto-saving
-    if (externalHandlePrevious) {
+    if (typeof externalHandlePrevious === 'function') {
       externalHandlePrevious();
-    } else if (currentStep > 0) {
+    } else if (currentStep > 0 && typeof setCurrentStep === 'function') {
       setCurrentStep(currentStep - 1);
     }
     

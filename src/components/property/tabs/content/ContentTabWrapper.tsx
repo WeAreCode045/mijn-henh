@@ -56,7 +56,7 @@ export function ContentTabWrapper({
     pendingChanges,
     setPendingChanges,
     setLastSaved,
-    handlers.handleStepClick
+    handlers.handleStepClick // Pass the handler function
   );
 
   // Create a complete bundle of all handlers needed for content routing
