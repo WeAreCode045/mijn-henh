@@ -1,6 +1,9 @@
 
 import { format, parseISO } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AgendaItem } from "./types";
+import { CalendarDays, MapPin } from "lucide-react";
 
 interface AgendaItemListProps {
   filteredAgendaItems: AgendaItem[];
@@ -8,45 +11,70 @@ interface AgendaItemListProps {
   onItemClick: (item: AgendaItem) => void;
 }
 
-export function AgendaItemList({ filteredAgendaItems, isLoading, onItemClick }: AgendaItemListProps) {
+export function AgendaItemList({ 
+  filteredAgendaItems, 
+  isLoading, 
+  onItemClick 
+}: AgendaItemListProps) {
   if (isLoading) {
     return (
-      <div className="flex justify-center py-4">
-        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+      <div className="space-y-2">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-16 w-full" />
       </div>
     );
   }
 
   if (filteredAgendaItems.length === 0) {
     return (
-      <p className="text-center py-2 text-muted-foreground text-sm">No items scheduled for this time period</p>
+      <div className="text-center py-8 text-muted-foreground">
+        No agenda items found for the selected period.
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[270px] overflow-y-auto pr-1">
-      {filteredAgendaItems.map((item) => (
-        <div 
-          key={item.id} 
-          className="p-2 border rounded-md hover:bg-accent cursor-pointer flex items-center gap-2 transition-colors"
-          onClick={() => onItemClick(item)}
-        >
-          <div className="flex-shrink-0 flex flex-col items-center justify-center w-10 h-10 bg-muted rounded-md">
-            <span className="text-xs font-medium">
-              {format(parseISO(item.event_date), "dd")}
-            </span>
-            <span className="text-xs">
-              {format(parseISO(item.event_date), "MMM")}
-            </span>
+    <div className="space-y-2">
+      {filteredAgendaItems.map((item) => {
+        const eventDate = parseISO(item.event_date);
+        const formattedDate = format(eventDate, "MMM d, yyyy");
+        
+        return (
+          <div 
+            key={item.id} 
+            className="border rounded-md p-3 hover:bg-accent cursor-pointer transition-colors"
+            onClick={() => onItemClick(item)}
+          >
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <h4 className="font-medium">{item.title}</h4>
+                {item.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-1">
+                    {item.description}
+                  </p>
+                )}
+              </div>
+              <Badge variant="outline" className="ml-2">
+                {item.event_time}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center mt-2 text-xs text-muted-foreground">
+              <CalendarDays className="h-3 w-3 mr-1" />
+              <span>{formattedDate}</span>
+              
+              {item.property && (
+                <>
+                  <span className="mx-2">•</span>
+                  <MapPin className="h-3 w-3 mr-1" />
+                  <span className="truncate max-w-[150px]">{item.property.title}</span>
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium truncate">{item.title}</h4>
-            <p className="text-xs text-muted-foreground">
-              {item.event_time.substring(0, 5)}
-            </p>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

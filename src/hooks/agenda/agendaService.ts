@@ -18,8 +18,11 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
   if (propertyId) {
     query = query.eq('property_id', propertyId);
   } else {
-    // Use safer string interpolation for JSON contains check
-    query = query.or(`agent_id.eq.${userId},additional_users.cs.{${userId}}`);
+    // Show items where the user is:
+    // 1. The agent who created the item OR
+    // 2. In the additional_users array OR
+    // 3. The agent assigned to the property
+    query = query.or(`agent_id.eq.${userId},additional_users.cs.{"${userId}"},property_id.in.(select id from properties where agent_id = '${userId}')`);
   }
 
   const { data, error } = await query;

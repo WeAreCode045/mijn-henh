@@ -1,8 +1,9 @@
 
-import { AgendaCalendarView } from "./AgendaCalendarView";
-import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DateRangeSelector } from "@/components/property/dashboard/agenda/DateRangeSelector";
 import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaItemList";
+import { AgendaCalendarView } from "./AgendaCalendarView";
+import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
 import { AgendaItem, DateRange } from "@/components/property/dashboard/agenda/types";
 
 interface AgendaViewContentProps {
@@ -24,56 +25,45 @@ export function AgendaViewContent({
   filteredAgendaItems,
   onItemClick
 }: AgendaViewContentProps) {
-  
-  if (view === "calendar") {
+  if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-1">
-          <AgendaCalendarView 
-            agendaItems={safeAgendaItems} 
-            isLoading={isLoading}
-            onDayClick={() => {}}
-            className="w-full"
-            compactMode={true}
-          />
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-8 w-40" />
         </div>
-        <div className="md:col-span-3">
-          {!isLoading && safeAgendaItems.length === 0 ? (
-            <EmptyAgendaNotification onAddClick={(e) => onItemClick(e as unknown as AgendaItem)} />
-          ) : (
-            <div className="flex flex-col space-y-3">
-              <div className="flex justify-end">
-                <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
-              </div>
-              <AgendaItemList 
-                filteredAgendaItems={filteredAgendaItems} 
-                isLoading={isLoading} 
-                onItemClick={onItemClick}
-              />
-            </div>
-          )}
+        <div className="space-y-2">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
         </div>
       </div>
     );
   }
-  
-  // List view
+
+  if (!safeAgendaItems || safeAgendaItems.length === 0) {
+    return <EmptyAgendaNotification />;
+  }
+
   return (
-    <>
-      {!isLoading && safeAgendaItems.length === 0 ? (
-        <EmptyAgendaNotification onAddClick={(e) => onItemClick(e as unknown as AgendaItem)} />
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h4 className="font-medium text-sm">Your Agenda</h4>
+        <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
+      </div>
+
+      {view === "calendar" ? (
+        <AgendaCalendarView 
+          filteredAgendaItems={filteredAgendaItems} 
+          onItemClick={onItemClick} 
+        />
       ) : (
-        <div className="flex flex-col space-y-3">
-          <div className="flex justify-end">
-            <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
-          </div>
-          <AgendaItemList 
-            filteredAgendaItems={filteredAgendaItems} 
-            isLoading={isLoading} 
-            onItemClick={onItemClick}
-          />
-        </div>
+        <AgendaItemList 
+          filteredAgendaItems={filteredAgendaItems} 
+          isLoading={false} 
+          onItemClick={onItemClick} 
+        />
       )}
-    </>
+    </div>
   );
 }
