@@ -50,11 +50,11 @@ export function useAgenda(propertyId?: string) {
           event_time: item.event_time,
           end_date: item.end_date,
           end_time: item.end_time,
-          // Convert additional_users to string[] if it's not already
+          // Convert additional_users to string[] regardless of what form it comes in
           additional_users: Array.isArray(item.additional_users) 
-            ? item.additional_users 
-            : typeof item.additional_users === 'object' 
-              ? Object.values(item.additional_users) 
+            ? item.additional_users.map(user => String(user))
+            : typeof item.additional_users === 'object' && item.additional_users !== null
+              ? Object.values(item.additional_users).map(user => String(user))
               : [],
           created_at: item.created_at,
           updated_at: item.updated_at,

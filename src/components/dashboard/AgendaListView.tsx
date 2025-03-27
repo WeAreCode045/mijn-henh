@@ -3,7 +3,7 @@ import { format, isToday, parseISO } from "date-fns";
 import { CalendarIcon, Clock, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AgendaItem } from "@/hooks/useAgenda";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 interface AgendaListViewProps {
   agendaItems: AgendaItem[];

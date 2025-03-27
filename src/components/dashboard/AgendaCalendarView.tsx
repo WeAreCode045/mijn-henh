@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { AgendaItem } from "@/hooks/useAgenda";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 interface AgendaCalendarViewProps {
   agendaItems: AgendaItem[];

@@ -19,8 +19,11 @@ export function AgendaSection() {
   const [activeTab, setActiveTab] = useState<string>("calendar");
   const { user } = useAuth();
   
-  const { agendaItems, isLoading, addAgendaItem, updateAgendaItem, deleteAgendaItem } = useAgenda();
-  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems as AgendaItem[]);
+  const { agendaItems: fetchedAgendaItems, isLoading, addAgendaItem, updateAgendaItem, deleteAgendaItem } = useAgenda();
+  
+  const safeAgendaItems: AgendaItem[] = fetchedAgendaItems;
+  
+  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(safeAgendaItems);
   
   const {
     isAddDialogOpen,

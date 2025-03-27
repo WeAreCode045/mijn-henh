@@ -38,13 +38,14 @@ export function usePropertyAgenda(initialPropertyId?: string) {
           event_time: item.event_time,
           end_date: item.end_date,
           end_time: item.end_time,
-          // Convert additional_users to string[] if it's not already
+          // Convert additional_users to string[] regardless of what form it comes in
           additional_users: Array.isArray(item.additional_users) 
-            ? item.additional_users 
-            : typeof item.additional_users === 'object' 
-              ? Object.values(item.additional_users) 
+            ? item.additional_users.map(user => String(user))
+            : typeof item.additional_users === 'object' && item.additional_users !== null
+              ? Object.values(item.additional_users).map(user => String(user))
               : [],
-          created_at: item.created_at
+          created_at: item.created_at,
+          updated_at: item.updated_at
         }));
         
         setAgendaItems(formattedData);
@@ -107,11 +108,12 @@ export function usePropertyAgenda(initialPropertyId?: string) {
           end_date: data[0].end_date,
           end_time: data[0].end_time,
           additional_users: Array.isArray(data[0].additional_users) 
-            ? data[0].additional_users 
-            : typeof data[0].additional_users === 'object' 
-              ? Object.values(data[0].additional_users) 
+            ? data[0].additional_users.map(user => String(user))
+            : typeof data[0].additional_users === 'object' && data[0].additional_users !== null
+              ? Object.values(data[0].additional_users).map(user => String(user))
               : [],
-          created_at: data[0].created_at
+          created_at: data[0].created_at,
+          updated_at: data[0].updated_at
         };
         
         setAgendaItems(prevItems => [...prevItems, newAgendaItem]);
