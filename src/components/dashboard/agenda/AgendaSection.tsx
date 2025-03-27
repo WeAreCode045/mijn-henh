@@ -9,6 +9,7 @@ import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAg
 import { useAgendaDialogs } from "@/components/property/dashboard/agenda/useAgendaDialogs";
 import { AgendaViewContent } from "./AgendaViewContent";
 import { AgendaDialogs } from "./AgendaDialogs";
+import { DateRange } from "react-day-picker";
 
 export function AgendaSection() {
   const [activeTab, setActiveTab] = useState<string>("calendar");
@@ -104,6 +105,16 @@ export function AgendaSection() {
       agendaDialogProps.setIsEditDialogOpen(false);
     }
   };
+
+  // Create a wrapper function that matches the expected parameter types
+  const handleSetDateRange = (range: DateRange | undefined) => {
+    setDateRange(range);
+  };
+
+  // Create a parameter-less function for onAddClick
+  const handleAddClick = () => {
+    handleAddButtonClick(new Event('click') as unknown as React.MouseEvent);
+  };
   
   return (
     <CardContent className="p-4 pt-0">
@@ -126,10 +137,10 @@ export function AgendaSection() {
           safeAgendaItems={safeAgendaItems}
           isLoading={isLoading}
           dateRange={dateRange}
-          setDateRange={setDateRange}
+          setDateRange={handleSetDateRange}
           filteredAgendaItems={filteredAgendaItems}
           onItemClick={handleAgendaItemClick}
-          onAddClick={handleAddButtonClick}
+          onAddClick={handleAddClick}
         />
       </TabsContent>
       
@@ -139,10 +150,10 @@ export function AgendaSection() {
           safeAgendaItems={safeAgendaItems}
           isLoading={isLoading}
           dateRange={dateRange}
-          setDateRange={setDateRange}
+          setDateRange={handleSetDateRange}
           filteredAgendaItems={filteredAgendaItems}
           onItemClick={handleAgendaItemClick}
-          onAddClick={handleAddButtonClick}
+          onAddClick={handleAddClick}
         />
       </TabsContent>
       

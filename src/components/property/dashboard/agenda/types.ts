@@ -1,4 +1,6 @@
 
+import { DateRange as DayPickerDateRange } from "react-day-picker";
+
 export interface AgendaItemDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,8 +32,8 @@ export interface AgendaAddEditDialogProps {
 }
 
 export interface DateRangeSelectorProps {
-  dateRange: DateRange;
-  setDateRange: (value: DateRange) => void;
+  dateRange: DayPickerDateRange | undefined;
+  setDateRange: (value: DayPickerDateRange | undefined) => void;
 }
 
 export interface AgendaItemListProps {
@@ -40,7 +42,7 @@ export interface AgendaItemListProps {
   onItemClick: (item: AgendaItem) => void;
 }
 
-export type DateRange = "today" | "tomorrow" | "thisWeek" | "thisMonth" | "all";
+export type DateRange = DayPickerDateRange | undefined;
 
 export interface AgendaItem {
   id: string;
