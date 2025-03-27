@@ -1,20 +1,21 @@
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { DateRangeSelector } from "@/components/property/dashboard/agenda/DateRangeSelector";
-import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaItemList";
-import { AgendaCalendarView } from "./AgendaCalendarView";
+import { FilterCalendarIcon, View } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
-import { AgendaItem, DateRange } from "@/components/property/dashboard/agenda/types";
+import { AgendaCalendarView } from "./AgendaCalendarView";
+import { AgendaListView } from "@/components/dashboard/AgendaListView";
+import { AgendaItem } from "@/hooks/agenda/types";
 
 interface AgendaViewContentProps {
   view: "calendar" | "list";
   safeAgendaItems: AgendaItem[];
   isLoading: boolean;
-  dateRange: DateRange;
-  setDateRange: (range: DateRange) => void;
+  dateRange: DateRange | undefined;
+  setDateRange: (range: DateRange | undefined) => void;
   filteredAgendaItems: AgendaItem[];
   onItemClick: (item: AgendaItem) => void;
-  onAddClick?: (e: React.MouseEvent) => void;
+  onAddClick: () => void;
 }
 
 export function AgendaViewContent({
@@ -25,56 +26,41 @@ export function AgendaViewContent({
   setDateRange,
   filteredAgendaItems,
   onItemClick,
-  onAddClick
+  onAddClick,
 }: AgendaViewContentProps) {
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-8 w-40" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!safeAgendaItems || safeAgendaItems.length === 0) {
-    return <EmptyAgendaNotification onAddClick={onAddClick || (() => {})} />;
-  }
-
-  // Check if we have items after filtering
-  const hasFilteredItems = filteredAgendaItems && filteredAgendaItems.length > 0;
-
+  // Make sure we always have an array, even if filteredAgendaItems is undefined
+  const itemsToDisplay = filteredAgendaItems || [];
+  
+  // Always check if safeAgendaItems exists before checking its length
+  const hasItems = safeAgendaItems && safeAgendaItems.length > 0;
+  
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h4 className="font-medium text-sm">Your Agenda</h4>
-        <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
+      <div className="flex flex-col sm:flex-row justify-between gap-2">
+        <Button variant="outline" className="flex items-center gap-2" onClick={() => setDateRange(undefined)}>
+          <FilterCalendarIcon className="h-4 w-4" />
+          {dateRange ? "Clear Filter" : "All Events"}
+        </Button>
       </div>
-
-      {view === "calendar" ? (
+      
+      {isLoading ? (
+        <div className="flex items-center justify-center h-60">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+        </div>
+      ) : !hasItems ? (
+        <EmptyAgendaNotification onAddClick={onAddClick} />
+      ) : view === "calendar" ? (
         <AgendaCalendarView 
-          agendaItems={filteredAgendaItems} 
-          isLoading={false}
-          onDayClick={undefined}
+          agendaItems={itemsToDisplay}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          onItemClick={onItemClick}
         />
       ) : (
-        hasFilteredItems ? (
-          <AgendaItemList 
-            filteredAgendaItems={filteredAgendaItems} 
-            isLoading={false} 
-            onItemClick={onItemClick} 
-          />
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No agenda items found for the selected period.
-          </div>
-        )
+        <AgendaListView 
+          agendaItems={itemsToDisplay}
+          onItemClick={onItemClick}
+        />
       )}
     </div>
   );

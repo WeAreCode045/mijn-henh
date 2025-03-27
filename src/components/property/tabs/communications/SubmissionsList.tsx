@@ -11,7 +11,7 @@ interface SubmissionsListProps {
   selectedId?: string;
 }
 
-export function SubmissionsList({ submissions, onSelect, isLoading, selectedId }: SubmissionsListProps) {
+export function SubmissionsList({ submissions = [], onSelect, isLoading, selectedId }: SubmissionsListProps) {
   const getInquiryTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       'information': 'Meer informatie',
@@ -29,7 +29,7 @@ export function SubmissionsList({ submissions, onSelect, isLoading, selectedId }
     );
   }
 
-  if (submissions.length === 0) {
+  if (!submissions || submissions.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500 border rounded-lg">
         No submissions found
