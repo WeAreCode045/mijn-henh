@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { format } from "date-fns";
-import { usePropertyAgenda } from "@/hooks/usePropertyAgenda";
+import { usePropertyAgenda } from "@/hooks/property-agenda";
 import { useAgendaFiltering } from "./agenda/useAgendaFiltering";
 import { useAgendaDialogs } from "./agenda/useAgendaDialogs";
 import { DateRangeSelector } from "./agenda/DateRangeSelector";
