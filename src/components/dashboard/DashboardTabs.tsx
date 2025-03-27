@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, CheckSquare, MessageSquare, Users, FileText } from "lucide-react";
-import { AgendaSection } from "@/components/dashboard/AgendaSection";
+import { AgendaSection } from "@/components/dashboard/agenda/AgendaSection";
 import { TodoSection } from "@/components/dashboard/TodoSection";
 import { CommunicationsSection } from "@/components/dashboard/CommunicationsSection";
 import { UnderConstructionView } from "@/components/dashboard/UnderConstructionView";

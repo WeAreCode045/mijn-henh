@@ -39,7 +39,7 @@ export function AgendaViewContent({
         </div>
         <div className="md:col-span-3">
           {!isLoading && safeAgendaItems.length === 0 ? (
-            <EmptyAgendaNotification onAddClick={onItemClick} />
+            <EmptyAgendaNotification onAddClick={(e) => onItemClick(e as unknown as AgendaItem)} />
           ) : (
             <div className="flex flex-col space-y-3">
               <div className="flex justify-end">
@@ -61,7 +61,7 @@ export function AgendaViewContent({
   return (
     <>
       {!isLoading && safeAgendaItems.length === 0 ? (
-        <EmptyAgendaNotification onAddClick={onItemClick} />
+        <EmptyAgendaNotification onAddClick={(e) => onItemClick(e as unknown as AgendaItem)} />
       ) : (
         <div className="flex flex-col space-y-3">
           <div className="flex justify-end">

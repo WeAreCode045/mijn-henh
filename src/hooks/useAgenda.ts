@@ -1,68 +1,24 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { fetchAgendaItems, addAgendaItem as addItem, deleteAgendaItem as deleteItem, updateAgendaItem as updateItem } from "@/hooks/agenda/agendaService";
+import { UseAgendaReturn } from "@/hooks/agenda/types";
 
-export function useAgenda(propertyId?: string) {
+export function useAgenda(propertyId?: string): UseAgendaReturn {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
 
-  const fetchAgendaItems = async () => {
+  const fetchItems = async () => {
     if (!user?.id) return;
     
     setIsLoading(true);
     try {
-      let query = supabase
-        .from('property_agenda_items')
-        .select(`
-          *,
-          property:property_id (
-            id,
-            title
-          )
-        `)
-        .order('event_date', { ascending: true })
-        .order('event_time', { ascending: true });
-      
-      if (propertyId) {
-        query = query.eq('property_id', propertyId);
-      } else {
-        query = query.or(`creator_id.eq.${user.id},additional_users.cs.{"${user.id}"}`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      
-      if (data) {
-        // Transform the data to ensure it matches the AgendaItem type
-        const formattedData: AgendaItem[] = data.map(item => ({
-          id: item.id,
-          creator_id: item.creator_id,
-          property_id: item.property_id,
-          title: item.title,
-          description: item.description,
-          event_date: item.event_date,
-          event_time: item.event_time,
-          end_date: item.end_date,
-          end_time: item.end_time,
-          // Convert additional_users to string[] regardless of what form it comes in
-          additional_users: Array.isArray(item.additional_users) 
-            ? item.additional_users.map(user => String(user))
-            : typeof item.additional_users === 'object' && item.additional_users !== null
-              ? Object.values(item.additional_users).map(user => String(user))
-              : [],
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-          property: item.property
-        }));
-        
-        setAgendaItems(formattedData);
-      }
+      const data = await fetchAgendaItems(user.id, propertyId);
+      setAgendaItems(data);
     } catch (error: any) {
       console.error('Error fetching agenda items:', error);
       toast({
@@ -85,31 +41,27 @@ export function useAgenda(propertyId?: string) {
     additionalUsers: string[] = [],
     propertyId?: string | null
   ) => {
-    if (!user?.id) return null;
+    if (!user?.id) return;
 
     try {
-      const { error } = await supabase
-        .from('property_agenda_items')
-        .insert({
-          creator_id: user.id,
-          property_id: propertyId || null,
-          title,
-          description,
-          event_date: eventDate,
-          event_time: eventTime,
-          end_date: endDate,
-          end_time: endTime,
-          additional_users: additionalUsers
-        });
-
-      if (error) throw error;
+      await addItem(
+        user.id,
+        title,
+        description,
+        eventDate,
+        eventTime,
+        endDate,
+        endTime,
+        additionalUsers,
+        propertyId
+      );
       
       toast({
         title: "Success",
         description: "Agenda item added successfully",
       });
       
-      fetchAgendaItems();
+      fetchItems();
     } catch (error: any) {
       console.error('Error adding agenda item:', error);
       toast({
@@ -122,19 +74,14 @@ export function useAgenda(propertyId?: string) {
 
   const deleteAgendaItem = async (agendaItemId: string) => {
     try {
-      const { error } = await supabase
-        .from('property_agenda_items')
-        .delete()
-        .eq('id', agendaItemId);
-
-      if (error) throw error;
+      await deleteItem(agendaItemId);
       
       toast({
         title: "Success",
         description: "Agenda item deleted successfully",
       });
       
-      fetchAgendaItems();
+      fetchItems();
     } catch (error: any) {
       console.error('Error deleting agenda item:', error);
       toast({
@@ -157,28 +104,24 @@ export function useAgenda(propertyId?: string) {
     propertyId?: string | null
   ) => {
     try {
-      const { error } = await supabase
-        .from('property_agenda_items')
-        .update({
-          property_id: propertyId,
-          title,
-          description,
-          event_date: eventDate,
-          event_time: eventTime,
-          end_date: endDate,
-          end_time: endTime,
-          additional_users: additionalUsers
-        })
-        .eq('id', agendaItemId);
-
-      if (error) throw error;
+      await updateItem(
+        agendaItemId,
+        title,
+        description,
+        eventDate,
+        eventTime,
+        endDate,
+        endTime,
+        additionalUsers,
+        propertyId
+      );
       
       toast({
         title: "Success",
         description: "Agenda item updated successfully",
       });
       
-      fetchAgendaItems();
+      fetchItems();
     } catch (error: any) {
       console.error('Error updating agenda item:', error);
       toast({
@@ -191,7 +134,7 @@ export function useAgenda(propertyId?: string) {
 
   useEffect(() => {
     if (user?.id) {
-      fetchAgendaItems();
+      fetchItems();
     }
   }, [user?.id, propertyId]);
 
@@ -201,6 +144,6 @@ export function useAgenda(propertyId?: string) {
     addAgendaItem,
     deleteAgendaItem,
     updateAgendaItem,
-    refreshAgendaItems: fetchAgendaItems
+    refreshAgendaItems: fetchItems
   };
 }
