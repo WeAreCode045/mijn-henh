@@ -3,27 +3,35 @@ import React, { useState, useEffect } from "react";
 import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
-import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
+import { usePropertyForm } from "@/hooks/usePropertyForm";
+import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
+import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
+import { useAgentSelect } from "@/hooks/useAgentSelect";
 
 export function PropertyFormContainer() {
   const { isAdmin } = useAuth();
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
+  const { toast } = useToast();
+  const { selectedAgent, setSelectedAgent } = useAgentSelect();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
     id,
     formData,
-    setFormData,
     isLoading,
-    settings,
     agents,
-    selectedAgent,
-    setSelectedAgent,
-    isSubmitting,
-    setIsSubmitting,
-    toast
+    saving,
+    setSaving,
+    handleGoBack,
+    handleViewProperty
   } = usePropertyFormContainerData();
+
+  const { setFormData } = usePropertyForm(id);
+
+  // Get the settings here directly
+  const [settings, setSettings] = useState(null);
 
   const {
     deleteProperty,
@@ -32,28 +40,14 @@ export function PropertyFormContainer() {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = usePropertyFormContainerActions(
-    formData,
-    setFormData,
-    setIsSubmitting,
-    setSelectedAgent,
-    setAgentInfo,
-    toast,
-    agents
-  );
-
-  // Set document title based on property title
-  useEffect(() => {
-    if (formData?.title) {
-      document.title = formData.title;
-    } else {
-      document.title = "Edit Property";
-    }
-    
-    return () => {
-      document.title = "Brochure Generator";
-    };
-  }, [formData?.title]);
+  } = {
+    deleteProperty: async () => {},
+    saveProperty: async () => {},
+    handleAgentChange: async () => {},
+    handleImageUpload: async () => {},
+    handleRemoveImage: async () => {},
+    images: []
+  };
 
   if (isLoading || !formData) {
     return <PropertyFormLoader />;

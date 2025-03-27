@@ -4,56 +4,58 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
+import { TodoItem } from "@/types/todo";
 
-export interface TodoItem {
-  id: string;
-  title: string;
-  description?: string;
-  due_date?: Date | null;
-  notify_at?: Date | null;
-  notification_sent: boolean;
-  completed: boolean;
-  property_id?: string | null;
-  assigned_to_id?: string | null;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
+export { TodoItem };
 
-export function useTodoItems() {
+export function useTodoItems(propertyId?: string) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
   const fetchTodoItems = async (): Promise<TodoItem[]> => {
-    const { data, error } = await supabase
+    let query = supabase
       .from('todo_items')
-      .select('*')
-      .order('sort_order', { ascending: true })
+      .select(`
+        *,
+        property:properties(id, title),
+        assigned_to:profiles(id, full_name)
+      `);
+
+    if (propertyId) {
+      query = query.eq('property_id', propertyId);
+    }
+    
+    query = query.order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
+    
+    const { data, error } = await query;
     
     if (error) {
       throw error;
     }
     
-    return data.map(item => ({
-      ...item,
-      due_date: item.due_date ? new Date(item.due_date) : null,
-      notify_at: item.notify_at ? new Date(item.notify_at) : null
-    }));
+    return data || [];
   };
   
   const { data: todoItems = [], isLoading, error } = useQuery({
-    queryKey: ['todoItems'],
+    queryKey: ['todoItems', propertyId],
     queryFn: fetchTodoItems,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
   const addTodoItem = async (todoItem: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
     try {
+      // Ensure date fields are converted to ISO strings for Supabase
+      const formattedItem = {
+        ...todoItem,
+        due_date: todoItem.due_date instanceof Date ? todoItem.due_date.toISOString() : todoItem.due_date,
+        notify_at: todoItem.notify_at instanceof Date ? todoItem.notify_at.toISOString() : todoItem.notify_at
+      };
+      
       const { data, error } = await supabase
         .from('todo_items')
-        .insert([todoItem])
+        .insert([formattedItem])
         .select();
       
       if (error) throw error;
@@ -79,9 +81,16 @@ export function useTodoItems() {
   
   const updateTodoItem = async (id: string, todoItem: Partial<Omit<TodoItem, "id" | "created_at" | "updated_at">>) => {
     try {
+      // Ensure date fields are converted to ISO strings for Supabase
+      const formattedItem = {
+        ...todoItem,
+        due_date: todoItem.due_date instanceof Date ? todoItem.due_date.toISOString() : todoItem.due_date,
+        notify_at: todoItem.notify_at instanceof Date ? todoItem.notify_at.toISOString() : todoItem.notify_at
+      };
+      
       const { error } = await supabase
         .from('todo_items')
-        .update(todoItem)
+        .update(formattedItem)
         .eq('id', id);
       
       if (error) throw error;

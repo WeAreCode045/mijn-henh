@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { usePropertyAutoSave } from "@/hooks/usePropertyAutoSave";
 import { useToast } from "@/components/ui/use-toast";
 import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { PropertyData } from "@/types/property";
@@ -13,7 +12,7 @@ export const usePropertyFormContainerData = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { formData, isLoading, error } = usePropertyForm(id);
+  const { formData, isLoading } = usePropertyForm(id);
   const { agents, selectedAgent, setSelectedAgent } = useAgentSelect();
   const [saving, setSaving] = useState(false);
 
@@ -54,7 +53,6 @@ export const usePropertyFormContainerData = () => {
     id,
     formData,
     isLoading,
-    error,
     agents, 
     saving,
     setSaving,

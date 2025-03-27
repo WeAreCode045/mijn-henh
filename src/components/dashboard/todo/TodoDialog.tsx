@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { TodoItem } from "@/hooks/useTodoItems";
+import { TodoItem } from "@/types/todo";
 import { TodoDatePicker } from "./TodoDatePicker";
 import { TodoNotificationPicker } from "./TodoNotificationPicker";
 import { TodoAssignmentFields } from "./TodoAssignmentFields";
@@ -110,21 +110,15 @@ export function TodoDialog({ isOpen, onClose, onSave, item, mode }: TodoDialogPr
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Due Date</Label>
-              <TodoDatePicker 
-                value={dueDate} 
-                onChange={setDueDate} 
-              />
-            </div>
+            <TodoDatePicker 
+              value={dueDate} 
+              onChange={setDueDate} 
+            />
             
-            <div className="space-y-2">
-              <Label>Notification</Label>
-              <TodoNotificationPicker 
-                value={notifyAt}
-                onChange={setNotifyAt}
-              />
-            </div>
+            <TodoNotificationPicker 
+              value={notifyAt}
+              onChange={setNotifyAt}
+            />
           </div>
           
           <TodoAssignmentFields 
