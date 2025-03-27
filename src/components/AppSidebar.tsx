@@ -44,39 +44,39 @@ export function AppSidebar() {
   if (!user) return null;
 
   return (
-    <Sidebar>
+    <Sidebar className="bg-primary-color text-white">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/70">Menu</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate('/')}>
+              <SidebarMenuButton onClick={() => navigate('/')} className="hover:bg-primary-color/80 text-white">
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate('/properties')}>
+              <SidebarMenuButton onClick={() => navigate('/properties')} className="hover:bg-primary-color/80 text-white">
                 <Home className="w-4 h-4" />
                 <span>Properties</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate('/import')}>
+              <SidebarMenuButton onClick={() => navigate('/import')} className="hover:bg-primary-color/80 text-white">
                 <FileUp className="w-4 h-4" />
                 <span>Import</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             {isAdmin && (
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/users')}>
+                <SidebarMenuButton onClick={() => navigate('/users')} className="hover:bg-primary-color/80 text-white">
                   <UsersIcon className="w-4 h-4" />
                   <span>Users</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )}
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate('/settings')}>
+              <SidebarMenuButton onClick={() => navigate('/settings')} className="hover:bg-primary-color/80 text-white">
                 <Settings className="w-4 h-4" />
                 <span>Settings</span>
               </SidebarMenuButton>
@@ -89,7 +89,7 @@ export function AppSidebar() {
           <UserProfileCard inSidebar={true} />
           <SidebarMenu className="mt-4">
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout}>
+              <SidebarMenuButton onClick={handleLogout} className="hover:bg-primary-color/80 text-white">
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </SidebarMenuButton>

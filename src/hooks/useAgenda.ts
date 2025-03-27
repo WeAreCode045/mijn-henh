@@ -11,6 +11,9 @@ export interface AgendaItem {
   description?: string | null;
   event_date: string;
   event_time: string;
+  end_time?: string | null;
+  till_date?: string | null;
+  invited_users?: string[] | null;
   created_at: string;
   updated_at: string;
   property?: {
@@ -61,7 +64,10 @@ export function useAgenda() {
     description: string | null, 
     eventDate: string, 
     eventTime: string, 
-    propertyId?: string | null
+    propertyId?: string | null,
+    endTime?: string | null,
+    tillDate?: string | null,
+    invitedUsers?: string[] | null
   ) => {
     try {
       const { error } = await supabase
@@ -71,7 +77,10 @@ export function useAgenda() {
           title,
           description,
           event_date: eventDate,
-          event_time: eventTime
+          event_time: eventTime,
+          end_time: endTime || null,
+          till_date: tillDate || null,
+          invited_users: invitedUsers || null
         });
 
       if (error) throw error;
@@ -123,7 +132,10 @@ export function useAgenda() {
     description: string | null, 
     eventDate: string, 
     eventTime: string,
-    propertyId?: string | null
+    propertyId?: string | null,
+    endTime?: string | null,
+    tillDate?: string | null,
+    invitedUsers?: string[] | null
   ) => {
     try {
       const { error } = await supabase
@@ -133,7 +145,10 @@ export function useAgenda() {
           title,
           description,
           event_date: eventDate,
-          event_time: eventTime
+          event_time: eventTime,
+          end_time: endTime || null,
+          till_date: tillDate || null,
+          invited_users: invitedUsers || null
         })
         .eq('id', agendaItemId);
 

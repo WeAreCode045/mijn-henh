@@ -1,44 +1,48 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/providers/AuthProvider";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Agent {
   id: string;
-  full_name: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
 }
 
-export function useAgentSelect(initialAgentId?: string) {
+export function useAgentSelect() {
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<string>(initialAgentId || "");
-  const { isAdmin } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchAgents = async () => {
-      if (isAdmin) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .or('role.eq.agent,role.eq.admin'); // Include both agent and admin roles
-        
-        if (!error && data) {
-          setAgents(data);
-        }
-      }
-    };
-    
-    fetchAgents();
-  }, [isAdmin]);
+  const fetchAgents = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url');
 
-  useEffect(() => {
-    if (initialAgentId) {
-      setSelectedAgent(initialAgentId);
+      if (error) throw error;
+      setAgents(data || []);
+    } catch (error: any) {
+      console.error('Error fetching agents:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load agents",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [initialAgentId]);
+  };
+
+  useEffect(() => {
+    fetchAgents();
+  }, []);
 
   return {
     agents,
-    selectedAgent,
-    setSelectedAgent
+    isLoading,
+    refreshAgents: fetchAgents
   };
 }
