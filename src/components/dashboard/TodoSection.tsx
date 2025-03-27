@@ -1,15 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Filter } from "lucide-react";
 import { TodoList } from "./todo/TodoList";
 import { TodoDialog } from "./todo/TodoDialog";
-import { useTodoItems } from "@/hooks/useTodoItems";
+import { useTodoItems } from "@/hooks/todo/useTodoItems";
 import { useProperties } from "@/hooks/useProperties";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { TodoItem } from "@/types/todo";
+import { TodoItem } from "@/hooks/todo/types";
 
 export function TodoSection() {
   const [showCompleted, setShowCompleted] = useState(false);

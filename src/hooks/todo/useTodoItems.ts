@@ -1,65 +1,40 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
-import { TodoItem } from "@/types/todo";
+import { 
+  TodoItem, 
+  TodoItemInput, 
+  TodoItemUpdate, 
+  UseTodoItemsReturn 
+} from "./types";
+import {
+  fetchTodoItems,
+  addTodoItem as addTodoItemService,
+  updateTodoItem as updateTodoItemService,
+  updateTodoOrder as updateTodoOrderService,
+  deleteTodoItem as deleteTodoItemService
+} from "./todoService";
 
-// Use export type for re-export when isolatedModules is enabled
-export type { TodoItem };
-
-export function useTodoItems(propertyId?: string) {
+export function useTodoItems(propertyId?: string): UseTodoItemsReturn {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   
-  const fetchTodoItems = async (): Promise<TodoItem[]> => {
-    let query = supabase
-      .from('todo_items')
-      .select(`
-        *,
-        property:properties(id, title),
-        assigned_to:profiles(id, full_name)
-      `);
-
-    if (propertyId) {
-      query = query.eq('property_id', propertyId);
-    }
-    
-    query = query.order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false });
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      throw error;
-    }
-    
-    return data || [];
-  };
-  
-  const { data: todoItems = [], isLoading, error } = useQuery({
+  const { 
+    data: todoItems = [], 
+    isLoading, 
+    error 
+  } = useQuery({
     queryKey: ['todoItems', propertyId],
-    queryFn: fetchTodoItems,
+    queryFn: () => fetchTodoItems(propertyId),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
-  const addTodoItem = async (todoItem: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
+  const addTodoItem = async (todoItem: TodoItemInput) => {
     try {
-      // Ensure date fields are properly formatted for Supabase
-      const formattedItem = {
-        ...todoItem,
-        due_date: todoItem.due_date instanceof Date ? todoItem.due_date.toISOString() : todoItem.due_date,
-        notify_at: todoItem.notify_at instanceof Date ? todoItem.notify_at.toISOString() : todoItem.notify_at
-      };
-      
-      const { data, error } = await supabase
-        .from('todo_items')
-        .insert([formattedItem])
-        .select();
-      
-      if (error) throw error;
+      const newTodo = await addTodoItemService(todoItem);
       
       queryClient.invalidateQueries({ queryKey: ['todoItems'] });
       
@@ -68,7 +43,7 @@ export function useTodoItems(propertyId?: string) {
         description: "The task has been successfully added",
       });
       
-      return data[0];
+      return newTodo;
     } catch (error: any) {
       console.error('Error adding todo item:', error);
       toast({
@@ -80,21 +55,9 @@ export function useTodoItems(propertyId?: string) {
     }
   };
   
-  const updateTodoItem = async (id: string, todoItem: Partial<Omit<TodoItem, "id" | "created_at" | "updated_at">>) => {
+  const updateTodoItem = async (id: string, todoItem: TodoItemUpdate) => {
     try {
-      // Ensure date fields are properly formatted for Supabase
-      const formattedItem = {
-        ...todoItem,
-        due_date: todoItem.due_date instanceof Date ? todoItem.due_date.toISOString() : todoItem.due_date,
-        notify_at: todoItem.notify_at instanceof Date ? todoItem.notify_at.toISOString() : todoItem.notify_at
-      };
-      
-      const { error } = await supabase
-        .from('todo_items')
-        .update(formattedItem)
-        .eq('id', id);
-      
-      if (error) throw error;
+      await updateTodoItemService(id, todoItem);
       
       queryClient.invalidateQueries({ queryKey: ['todoItems'] });
       
@@ -115,12 +78,7 @@ export function useTodoItems(propertyId?: string) {
   
   const markTodoItemComplete = async (id: string, completed: boolean) => {
     try {
-      const { error } = await supabase
-        .from('todo_items')
-        .update({ completed })
-        .eq('id', id);
-      
-      if (error) throw error;
+      await updateTodoItemService(id, { completed });
       
       queryClient.invalidateQueries({ queryKey: ['todoItems'] });
       
@@ -143,12 +101,7 @@ export function useTodoItems(propertyId?: string) {
   
   const deleteTodoItem = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('todo_items')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      await deleteTodoItemService(id);
       
       queryClient.invalidateQueries({ queryKey: ['todoItems'] });
       
@@ -175,15 +128,7 @@ export function useTodoItems(propertyId?: string) {
         sort_order: index
       }));
       
-      // Update each item one by one
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('todo_items')
-          .update({ sort_order: update.sort_order })
-          .eq('id', update.id);
-        
-        if (error) throw error;
-      }
+      await updateTodoOrderService(updates);
       
       queryClient.invalidateQueries({ queryKey: ['todoItems'] });
     } catch (error: any) {

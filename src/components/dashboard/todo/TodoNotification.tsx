@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { TodoItem } from "@/types/todo";
+import { TodoItem } from "@/hooks/todo/types";
 
 interface TodoNotificationProps {
   todoItems: TodoItem[];
