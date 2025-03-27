@@ -91,9 +91,27 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
     energyLabel: formData.energyLabel || '',
     hasGarden: formData.hasGarden || false,
     description: formData.description || '',
+    location_description: formData.location_description || '',
     features: formData.features || [],
+    areas: formData.areas || [],
+    nearby_places: formData.nearby_places || [],
+    nearby_cities: formData.nearby_cities || [],
     images: formData.images || [],
-    areas: formData.areas || []
+    floorplans: formData.floorplans || [],
+    map_image: formData.map_image || null,
+    latitude: formData.latitude || null,
+    longitude: formData.longitude || null,
+    object_id: formData.object_id || '',
+    agent_id: formData.agent_id || '',
+    template_id: formData.template_id || 'default',
+    virtualTourUrl: formData.virtualTourUrl || '',
+    youtubeUrl: formData.youtubeUrl || '',
+    floorplanEmbedScript: formData.floorplanEmbedScript || '',
+    created_at: formData.created_at,
+    updated_at: formData.updated_at,
+    status: formData.status || 'Draft',
+    featuredImage: formData.featuredImage || null,
+    featuredImages: formData.featuredImages || []
   };
 
   return (

@@ -12,15 +12,15 @@ interface ContentRouterProps {
   currentStep: number;
   handlers: {
     onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-    onAddFeature: () => void;
-    onRemoveFeature: (id: string) => void;
-    onUpdateFeature: (id: string, description: string) => void;
-    onAddArea: () => void;
-    onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageRemove: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    onAddFeature?: () => void;
+    onRemoveFeature?: (id: string) => void;
+    onUpdateFeature?: (id: string, description: string) => void;
+    onAddArea?: () => void;
+    onRemoveArea?: (id: string) => void;
+    onUpdateArea?: (id: string, field: any, value: any) => void;
+    onAreaImageRemove?: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+    onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     handleStepClick: (step: number) => void;
     handleNext?: () => void;
     handlePrevious?: () => void;
@@ -34,7 +34,7 @@ interface ContentRouterProps {
     isGeneratingMap?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUploading?: boolean;
-    onSubmit: () => void;
+    onSubmit?: () => void;
     isSaving?: boolean;
   };
 }
@@ -49,6 +49,23 @@ export function ContentRouter({ formData, property, currentStep, handlers }: Con
   // Log to help with debugging
   console.log("ContentRouter - Current step:", currentStep);
   console.log("ContentRouter - Has property data:", !!property?.id);
+  console.log("ContentRouter - Has formData:", !!formData?.id);
+  console.log("ContentRouter - Has onFieldChange:", typeof handlers.onFieldChange === 'function');
+
+  // Create safe handlers with defaults for optional functions
+  const safeHandlers = {
+    onFieldChange: handlers.onFieldChange,
+    onAddFeature: handlers.onAddFeature || (() => console.log("No onAddFeature handler")),
+    onRemoveFeature: handlers.onRemoveFeature || ((id: string) => console.log("No onRemoveFeature handler", id)),
+    onUpdateFeature: handlers.onUpdateFeature || ((id: string, desc: string) => console.log("No onUpdateFeature handler", id, desc)),
+    onAddArea: handlers.onAddArea || (() => console.log("No onAddArea handler")),
+    onRemoveArea: handlers.onRemoveArea || ((id: string) => console.log("No onRemoveArea handler", id)),
+    onUpdateArea: handlers.onUpdateArea || ((id: string, field: any, value: any) => console.log("No onUpdateArea handler", id, field, value)),
+    onAreaImageRemove: handlers.onAreaImageRemove || ((areaId: string, imageId: string) => console.log("No onAreaImageRemove handler", areaId, imageId)),
+    onAreaImagesSelect: handlers.onAreaImagesSelect || ((areaId: string, imageIds: string[]) => console.log("No onAreaImagesSelect handler", areaId, imageIds)),
+    onAreaImageUpload: handlers.onAreaImageUpload || ((areaId: string, files: FileList) => Promise.resolve(console.log("No onAreaImageUpload handler", areaId))),
+    setPendingChanges: handlers.setPendingChanges || ((value: boolean) => console.log("No setPendingChanges handler", value)),
+  };
 
   // Render the appropriate content based on the current step
   switch (currentStep) {
@@ -56,15 +73,15 @@ export function ContentRouter({ formData, property, currentStep, handlers }: Con
       return (
         <GeneralPage 
           formData={formData} 
-          onFieldChange={handlers.onFieldChange}
-          setPendingChanges={handlers.setPendingChanges}
+          onFieldChange={safeHandlers.onFieldChange}
+          setPendingChanges={safeHandlers.setPendingChanges}
         />
       );
     case 1:
       return (
         <LocationPage 
           formData={formData}
-          onFieldChange={handlers.onFieldChange}
+          onFieldChange={safeHandlers.onFieldChange}
           onFetchLocationData={handlers.onFetchLocationData}
           onFetchCategoryPlaces={handlers.onFetchCategoryPlaces}
           onFetchNearbyCities={handlers.onFetchNearbyCities}
@@ -73,33 +90,33 @@ export function ContentRouter({ formData, property, currentStep, handlers }: Con
           onRemoveNearbyPlace={handlers.onRemoveNearbyPlace}
           isLoadingLocationData={handlers.isLoadingLocationData}
           isGeneratingMap={handlers.isGeneratingMap}
-          setPendingChanges={handlers.setPendingChanges}
+          setPendingChanges={safeHandlers.setPendingChanges}
         />
       );
     case 2:
       return (
         <FeaturesPage 
           formData={formData}
-          onFieldChange={handlers.onFieldChange}
-          onAddFeature={handlers.onAddFeature}
-          onRemoveFeature={handlers.onRemoveFeature}
-          onUpdateFeature={handlers.onUpdateFeature}
-          setPendingChanges={handlers.setPendingChanges}
+          onFieldChange={safeHandlers.onFieldChange}
+          onAddFeature={safeHandlers.onAddFeature}
+          onRemoveFeature={safeHandlers.onRemoveFeature}
+          onUpdateFeature={safeHandlers.onUpdateFeature}
+          setPendingChanges={safeHandlers.setPendingChanges}
         />
       );
     case 3:
       return (
         <AreasPage 
           formData={formData}
-          onFieldChange={handlers.onFieldChange} // Adding the missing onFieldChange prop
-          onAddArea={handlers.onAddArea}
-          onRemoveArea={handlers.onRemoveArea}
-          onUpdateArea={handlers.onUpdateArea}
-          onAreaImageRemove={handlers.onAreaImageRemove}
-          onAreaImagesSelect={handlers.onAreaImagesSelect}
-          onAreaImageUpload={handlers.onAreaImageUpload}
+          onFieldChange={safeHandlers.onFieldChange}  
+          onAddArea={safeHandlers.onAddArea}
+          onRemoveArea={safeHandlers.onRemoveArea}
+          onUpdateArea={safeHandlers.onUpdateArea}
+          onAreaImageRemove={safeHandlers.onAreaImageRemove}
+          onAreaImagesSelect={safeHandlers.onAreaImagesSelect}
+          onAreaImageUpload={safeHandlers.onAreaImageUpload}
           isUploading={handlers.isUploading}
-          setPendingChanges={handlers.setPendingChanges}
+          setPendingChanges={safeHandlers.setPendingChanges}
         />
       );
     default:
