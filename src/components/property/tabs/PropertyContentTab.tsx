@@ -50,17 +50,23 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
   const { step: stepSlug, id } = useParams<{ step: string; id: string }>();
   const navigate = useNavigate();
   
-  // Log to help with debugging
-  console.log("PropertyContentTab - Using property data:", {
-    id: property?.id,
-    title: property?.title,
-    description: property?.description ? property.description.substring(0, 20) + '...' : 'N/A'
-  });
+  // Add debug logging
+  console.log("PropertyContentTab - handlers.handleStepClick is function:", typeof handlers.handleStepClick === 'function');
+  console.log("PropertyContentTab - Current step:", handlers.currentStep);
+  console.log("PropertyContentTab - Step slug from URL:", stepSlug);
   
   // Update step based on URL when component mounts or URL changes
   useEffect(() => {
-    if (stepSlug && stepSlugMap[stepSlug] !== undefined && handlers.currentStep !== stepSlugMap[stepSlug]) {
-      handlers.handleStepClick(stepSlugMap[stepSlug]);
+    if (stepSlug && stepSlugMap[stepSlug] !== undefined) {
+      if (handlers.currentStep !== stepSlugMap[stepSlug]) {
+        console.log("PropertyContentTab - Updating step from URL to:", stepSlugMap[stepSlug]);
+        
+        if (typeof handlers.handleStepClick === 'function') {
+          handlers.handleStepClick(stepSlugMap[stepSlug]);
+        } else {
+          console.error("PropertyContentTab - handleStepClick is not a function");
+        }
+      }
     } else if (id && !stepSlug) {
       // If we're at /property/:id/content without a step, redirect to /property/:id/content/general
       navigate(`/property/${id}/content/general`);
@@ -75,9 +81,14 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
     });
   }
 
-  // Ensure all necessary props are passed to ContentTabWrapper
-  const completeHandlers = {
+  // Create a fallback handleStepClick if needed
+  const safeHandlers = {
     ...handlers,
+    handleStepClick: typeof handlers.handleStepClick === 'function' 
+      ? handlers.handleStepClick 
+      : (step: number) => {
+          console.log("PropertyContentTab - Using fallback handleStepClick:", step);
+        },
     // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
     onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload
   };
@@ -86,7 +97,7 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
     <ContentTabWrapper 
       formData={formData}
       property={property} 
-      handlers={completeHandlers} 
+      handlers={safeHandlers} 
     />
   );
 }

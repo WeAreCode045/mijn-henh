@@ -19,20 +19,24 @@ export function usePropertyContentStepNavigation(
   const { handleSubmit } = usePropertyFormSubmit();
   const maxSteps = steps.length;
 
-  // Modified to simply change steps without auto-saving
+  // Modified to handle missing handler more gracefully
   const handleStepClick = (step: number) => {
     console.log("Step clicked in PropertyContentTab:", step);
     
-    // Ensure externalHandleStepClick is a function before calling it
+    // Check all possible handler functions in order of preference
     if (typeof externalHandleStepClick === 'function') {
       externalHandleStepClick(step);
-    } else if (typeof setCurrentStep === 'function') {
+      return true;
+    } 
+    
+    if (typeof setCurrentStep === 'function') {
       setCurrentStep(step);
-    } else {
-      console.error("No valid step click handler provided");
+      return true;
     }
     
-    return true;
+    // Only log error if we couldn't find any valid handler
+    console.error("No valid step click handler provided");
+    return false;
   };
   
   const handleNext = () => {
@@ -41,11 +45,15 @@ export function usePropertyContentStepNavigation(
     // Just move to next step without auto-saving
     if (typeof externalHandleNext === 'function') {
       externalHandleNext();
-    } else if (currentStep < maxSteps - 1 && typeof setCurrentStep === 'function') {
+      return true;
+    } 
+    
+    if (currentStep < maxSteps - 1 && typeof setCurrentStep === 'function') {
       setCurrentStep(currentStep + 1);
+      return true;
     }
     
-    return true;
+    return false;
   };
   
   const handlePrevious = () => {
@@ -54,11 +62,15 @@ export function usePropertyContentStepNavigation(
     // Just move to previous step without auto-saving
     if (typeof externalHandlePrevious === 'function') {
       externalHandlePrevious();
-    } else if (currentStep > 0 && typeof setCurrentStep === 'function') {
+      return true;
+    } 
+    
+    if (currentStep > 0 && typeof setCurrentStep === 'function') {
       setCurrentStep(currentStep - 1);
+      return true;
     }
     
-    return true;
+    return false;
   };
 
   return {

@@ -43,6 +43,9 @@ export function ContentTabWrapper({
   const [pendingChanges, setPendingChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
+  // Log handlers to help with debugging
+  console.log("ContentTabWrapper - handleStepClick is function:", typeof handlers.handleStepClick === 'function');
+  
   // Create a centralized navigation handler
   const { 
     handleStepClick: internalHandleStepClick,
@@ -51,11 +54,17 @@ export function ContentTabWrapper({
   } = usePropertyContentStepNavigation(
     formData,
     handlers.currentStep,
-    handlers.handleStepClick,
+    // Pass a fallback function that at least logs what's happening
+    typeof handlers.handleStepClick === 'function' 
+      ? handlers.handleStepClick 
+      : (step: number) => {
+          console.log("Fallback step click handler called with step:", step);
+          // Can't do anything more without a real handler
+        },
     pendingChanges,
     setPendingChanges,
     setLastSaved,
-    handlers.handleStepClick // Pass the handler function
+    handlers.handleStepClick // Pass the original handler function
   );
 
   // Create a complete bundle of all handlers needed for content routing
@@ -75,7 +84,6 @@ export function ContentTabWrapper({
     handlePrevious
   };
 
-  // Pass both formData and property to ContentRouter
   return (
     <ContentRouter 
       formData={formData}
