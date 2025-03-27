@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
@@ -17,7 +17,7 @@ export function PropertyFormContainer() {
   const { selectedAgent, setSelectedAgent } = useAgentSelect();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Get property form data - use only what's available
+  // Get property form data
   const { formData, isLoading } = usePropertyForm(id);
 
   // Add a simplified mock for agents
