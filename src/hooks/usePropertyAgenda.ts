@@ -3,20 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
-
-export interface AgendaItem {
-  id: string;
-  property_id: string;
-  creator_id: string;
-  title: string;
-  description: string | null;
-  event_date: string;
-  event_time: string;
-  end_date: string | null;
-  end_time: string | null;
-  additional_users: string[];
-  created_at: string;
-}
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 export function usePropertyAgenda(initialPropertyId?: string) {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -40,7 +27,27 @@ export function usePropertyAgenda(initialPropertyId?: string) {
       if (error) throw error;
       
       if (data) {
-        setAgendaItems(data as AgendaItem[]);
+        // Transform the data to ensure it matches the AgendaItem type
+        const formattedData: AgendaItem[] = data.map(item => ({
+          id: item.id,
+          creator_id: item.creator_id,
+          property_id: item.property_id,
+          title: item.title,
+          description: item.description,
+          event_date: item.event_date,
+          event_time: item.event_time,
+          end_date: item.end_date,
+          end_time: item.end_time,
+          // Convert additional_users to string[] if it's not already
+          additional_users: Array.isArray(item.additional_users) 
+            ? item.additional_users 
+            : typeof item.additional_users === 'object' 
+              ? Object.values(item.additional_users) 
+              : [],
+          created_at: item.created_at
+        }));
+        
+        setAgendaItems(formattedData);
       }
     } catch (error) {
       console.error("Error fetching agenda items:", error);
@@ -88,8 +95,27 @@ export function usePropertyAgenda(initialPropertyId?: string) {
       if (error) throw error;
 
       if (data && data[0]) {
-        setAgendaItems(prevItems => [...prevItems, data[0] as AgendaItem]);
-        return data[0];
+        // Transform to match AgendaItem type
+        const newAgendaItem: AgendaItem = {
+          id: data[0].id,
+          creator_id: data[0].creator_id,
+          property_id: data[0].property_id,
+          title: data[0].title,
+          description: data[0].description,
+          event_date: data[0].event_date,
+          event_time: data[0].event_time,
+          end_date: data[0].end_date,
+          end_time: data[0].end_time,
+          additional_users: Array.isArray(data[0].additional_users) 
+            ? data[0].additional_users 
+            : typeof data[0].additional_users === 'object' 
+              ? Object.values(data[0].additional_users) 
+              : [],
+          created_at: data[0].created_at
+        };
+        
+        setAgendaItems(prevItems => [...prevItems, newAgendaItem]);
+        return newAgendaItem;
       }
       return null;
     } catch (error) {

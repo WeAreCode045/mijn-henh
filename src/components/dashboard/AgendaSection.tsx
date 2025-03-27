@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,13 +13,14 @@ import { AddEditAgendaDialog } from "../property/dashboard/agenda/AddEditAgendaD
 import { useAgendaFiltering } from "../property/dashboard/agenda/useAgendaFiltering";
 import { useAgendaDialogs } from "../property/dashboard/agenda/useAgendaDialogs";
 import { AgendaCalendarView } from "./AgendaCalendarView";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 export function AgendaSection() {
   const [activeTab, setActiveTab] = useState<string>("calendar");
   const { user } = useAuth();
   
   const { agendaItems, isLoading, addAgendaItem, updateAgendaItem, deleteAgendaItem } = useAgenda();
-  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems);
+  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems as AgendaItem[]);
   
   const {
     isAddDialogOpen,

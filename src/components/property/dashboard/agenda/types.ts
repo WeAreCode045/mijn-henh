@@ -54,4 +54,9 @@ export interface AgendaItem {
   end_time: string | null;
   additional_users: string[];
   created_at: string;
+  updated_at?: string;
+  property?: {
+    id: string;
+    title: string;
+  } | null;
 }

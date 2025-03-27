@@ -1,26 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
-
-export interface AgendaItem {
-  id: string;
-  property_id?: string | null;
-  creator_id: string;
-  title: string;
-  description?: string | null;
-  event_date: string;
-  event_time: string;
-  end_date?: string | null;
-  end_time?: string | null;
-  additional_users?: string[];
-  created_at: string;
-  updated_at: string;
-  property?: {
-    id: string;
-    title: string;
-  } | null;
-}
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 export function useAgenda(propertyId?: string) {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
@@ -54,7 +37,32 @@ export function useAgenda(propertyId?: string) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setAgendaItems(data || []);
+      
+      if (data) {
+        // Transform the data to ensure it matches the AgendaItem type
+        const formattedData: AgendaItem[] = data.map(item => ({
+          id: item.id,
+          creator_id: item.creator_id,
+          property_id: item.property_id,
+          title: item.title,
+          description: item.description,
+          event_date: item.event_date,
+          event_time: item.event_time,
+          end_date: item.end_date,
+          end_time: item.end_time,
+          // Convert additional_users to string[] if it's not already
+          additional_users: Array.isArray(item.additional_users) 
+            ? item.additional_users 
+            : typeof item.additional_users === 'object' 
+              ? Object.values(item.additional_users) 
+              : [],
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          property: item.property
+        }));
+        
+        setAgendaItems(formattedData);
+      }
     } catch (error: any) {
       console.error('Error fetching agenda items:', error);
       toast({

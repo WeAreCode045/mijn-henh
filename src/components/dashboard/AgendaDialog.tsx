@@ -5,8 +5,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AgendaItem } from "@/hooks/useAgenda";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { usePropertiesSelect } from "@/hooks/usePropertiesSelect";
+import { useAuth } from "@/providers/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ export function AgendaDialog({
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { properties, isLoading: isPropertiesLoading } = usePropertiesSelect();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (item && mode === "edit") {
@@ -71,7 +73,7 @@ export function AgendaDialog({
   }, [item, mode, isOpen]);
 
   const handleSave = async () => {
-    if (!title || !date) return;
+    if (!title || !date || !user?.id) return;
 
     setIsSaving(true);
     try {
@@ -81,7 +83,11 @@ export function AgendaDialog({
         description,
         event_date: formattedDate,
         event_time: time,
-        property_id: selectedPropertyId
+        property_id: selectedPropertyId,
+        creator_id: user.id,
+        end_date: null,
+        end_time: null,
+        additional_users: []
       });
       onClose();
     } catch (error) {
