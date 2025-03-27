@@ -1,111 +1,39 @@
-
-import { useState, useRef } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { TodoDialog } from "./todo/TodoDialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 import { useTodoItems } from "@/hooks/useTodoItems";
-import { TodoItem } from "@/types/todo";
-import { TodoHeader } from "./todo/TodoHeader";
 import { TodoList } from "./todo/TodoList";
-import { TodoDeleteDialog } from "./todo/TodoDeleteDialog";
-import { TodoNotification } from "./todo/TodoNotification";
 
-export function TodoSection() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedTodoItem, setSelectedTodoItem] = useState<TodoItem | undefined>(undefined);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const itemToDeleteRef = useRef<string | null>(null);
-  
-  const { 
-    todoItems, 
-    isLoading, 
-    showCompleted, 
-    setShowCompleted,
-    addTodoItem, 
-    updateTodoItem, 
-    deleteTodoItem,
-    markTodoItemComplete,
-    updateTodoOrder
-  } = useTodoItems();
+interface TodoSectionProps {
+  fullWidth?: boolean;
+}
 
-  // Filter items based on completion status
-  const filteredItems = showCompleted 
-    ? todoItems 
-    : todoItems.filter(item => !item.completed);
-
-  const handleAddClick = () => {
-    setSelectedTodoItem(undefined);
-    setDialogOpen(true);
-  };
+export function TodoSection({ fullWidth = false }: TodoSectionProps) {
+  const { todos, isLoading, addTodo, toggleTodo, editTodo, deleteTodo } = useTodoItems();
   
-  const handleEditItem = (item: TodoItem) => {
-    setSelectedTodoItem(item);
-    setDialogOpen(true);
-  };
-  
-  const handleDeleteClick = (id: string) => {
-    itemToDeleteRef.current = id;
-    setDeleteDialogOpen(true);
-  };
-  
-  const confirmDelete = async () => {
-    if (itemToDeleteRef.current) {
-      await deleteTodoItem(itemToDeleteRef.current);
-      itemToDeleteRef.current = null;
-      setDeleteDialogOpen(false);
-    }
-  };
-  
-  const handleToggleComplete = async (item: TodoItem) => {
-    await markTodoItemComplete(item.id, !item.completed);
-  };
-  
-  const handleSaveTodoItem = async (data: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
-    if (selectedTodoItem) {
-      await updateTodoItem(selectedTodoItem.id, data);
-    } else {
-      await addTodoItem(data);
-    }
-  };
-
   return (
-    <Card>
-      <CardHeader>
-        <TodoHeader 
-          showCompleted={showCompleted}
-          onToggleShowCompleted={setShowCompleted}
-          onAddClick={handleAddClick}
-        />
+    <Card className={fullWidth ? "w-full" : ""}>
+      <CardHeader className="flex flex-row items-center justify-between px-6">
+        <CardTitle>Todo Items</CardTitle>
+        <Button 
+          size="sm" 
+          onClick={() => {
+            // Open add todo dialog
+          }}
+        >
+          <PlusCircle className="h-4 w-4 mr-1" />
+          Add Todo
+        </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6">
         <TodoList 
-          items={filteredItems}
+          todos={todos || []}
           isLoading={isLoading}
-          showCompleted={showCompleted}
-          onToggleComplete={handleToggleComplete}
-          onEditItem={handleEditItem}
-          onDeleteClick={handleDeleteClick}
-          onUpdateOrder={updateTodoOrder}
+          onToggle={toggleTodo}
+          onEdit={editTodo}
+          onDelete={deleteTodo}
         />
       </CardContent>
-
-      <TodoDialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSave={handleSaveTodoItem}
-        item={selectedTodoItem}
-        mode={selectedTodoItem ? "edit" : "add"}
-      />
-      
-      <TodoDeleteDialog 
-        isOpen={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirmDelete={confirmDelete}
-      />
-
-      <TodoNotification 
-        todoItems={todoItems}
-        updateTodoItem={updateTodoItem}
-      />
     </Card>
   );
 }

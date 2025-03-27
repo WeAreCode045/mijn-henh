@@ -7,19 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function RecentProperties() {
+interface RecentPropertiesProps {
+  fullWidth?: boolean;
+  showAddButton?: boolean;
+}
+
+export function RecentProperties({ fullWidth = false, showAddButton = true }: RecentPropertiesProps) {
   const { properties, isLoading, handleDelete } = useProperties();
 
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Recent Properties</CardTitle>
-        <Button size="sm" asChild>
-          <Link to="/property/new">
-            <Plus className="h-4 w-4 mr-1" />
-            Add New
-          </Link>
-        </Button>
+        {showAddButton && (
+          <Button size="sm" asChild>
+            <Link to="/property/new">
+              <Plus className="h-4 w-4 mr-1" />
+              Add New
+            </Link>
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
