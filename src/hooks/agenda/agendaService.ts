@@ -23,8 +23,20 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
     // 2. In the additional_users array OR
     // 3. The agent assigned to the property
     
-    // Using a proper array format for the contains operator
-    query = query.or(`agent_id.eq.${userId},additional_users.cs.["${userId}"],property_id.in.(select id from properties where agent_id = '${userId}')`);
+    // Split into multiple conditions instead of using subquery
+    query = query.or(`agent_id.eq.${userId},additional_users.cs.["${userId}"]`);
+    
+    // Fetch properties assigned to this agent in a separate query
+    const { data: userProperties } = await supabase
+      .from('properties')
+      .select('id')
+      .eq('agent_id', userId);
+      
+    // If user has properties, add those to the filter
+    if (userProperties && userProperties.length > 0) {
+      const propertyIds = userProperties.map(p => p.id);
+      query = query.or(`property_id.in.(${propertyIds.join(',')})`);
+    }
   }
 
   const { data, error } = await query;
