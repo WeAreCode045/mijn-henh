@@ -1,6 +1,6 @@
 
 import { format, isToday, parseISO } from "date-fns";
-import { CalendarIcon, Clock, Pencil, Trash2 } from "lucide-react";
+import { CalendarIcon, Clock, Pencil, Trash2, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
@@ -20,7 +20,7 @@ export function AgendaListView({
   onEdit, 
   onDelete, 
   showEditRemoveButtons = false,
-  showDate = false
+  showDate = true
 }: AgendaListViewProps) {
 
   if (isLoading) {
@@ -81,6 +81,13 @@ export function AgendaListView({
                     <div className="flex items-center gap-1">
                       <CalendarIcon className="h-3 w-3" />
                       <span>{format(parseISO(item.event_date), "EEEE, MMM d")}</span>
+                    </div>
+                  )}
+                  
+                  {item.property && (
+                    <div className="flex items-center gap-1">
+                      <Home className="h-3 w-3" />
+                      <span className="truncate max-w-[100px]">{item.property.title}</span>
                     </div>
                   )}
                 </div>

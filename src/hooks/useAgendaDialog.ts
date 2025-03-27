@@ -33,7 +33,7 @@ export function useAgendaDialog(
   }, [item, mode]);
 
   const handleSave = async (onSave: (data: Omit<AgendaItem, "id" | "created_at" | "updated_at">) => Promise<void>) => {
-    if (!title || !date || !user?.id) return;
+    if (!title || !date || !user?.id) return false;
 
     setIsSaving(true);
     try {

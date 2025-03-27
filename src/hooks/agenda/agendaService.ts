@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
@@ -26,7 +25,6 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
   if (error) throw error;
   
   if (data) {
-    // Transform the data to ensure it matches the AgendaItem type
     return data.map(item => ({
       id: item.id,
       agent_id: item.agent_id,
@@ -37,7 +35,6 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
       event_time: item.event_time,
       end_date: item.end_date,
       end_time: item.end_time,
-      // Convert additional_users to string[] regardless of what form it comes in
       additional_users: Array.isArray(item.additional_users) 
         ? item.additional_users.map(user => String(user))
         : typeof item.additional_users === 'object' && item.additional_users !== null
