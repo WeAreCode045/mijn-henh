@@ -37,6 +37,12 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
     setSelectedDate,
     selectedTime,
     setSelectedTime,
+    endDate,
+    setEndDate,
+    endTime,
+    setEndTime,
+    additionalUsers,
+    setAdditionalUsers,
     editTitle,
     setEditTitle,
     editDescription,
@@ -45,6 +51,13 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
     setEditDate,
     editTime,
     setEditTime,
+    editEndDate,
+    setEditEndDate,
+    editEndTime,
+    setEditEndTime,
+    editAdditionalUsers,
+    setEditAdditionalUsers,
+    availableUsers,
     resetForm,
     handleAgendaItemClick,
     handleAddButtonClick,
@@ -54,7 +67,18 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
   const handleAddAgendaItem = () => {
     if (selectedDate && title) {
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
-      addAgendaItem(title, description, formattedDate, selectedTime);
+      const formattedEndDate = endDate ? format(endDate, "yyyy-MM-dd") : null;
+      
+      addAgendaItem(
+        title, 
+        description, 
+        formattedDate, 
+        selectedTime, 
+        formattedEndDate,
+        endTime,
+        additionalUsers
+      );
+      
       setIsAddDialogOpen(false);
       resetForm();
     }
@@ -70,13 +94,19 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
   const handleUpdateAgendaItem = () => {
     if (selectedAgendaItem && editDate) {
       const formattedDate = format(editDate, "yyyy-MM-dd");
+      const formattedEndDate = editEndDate ? format(editEndDate, "yyyy-MM-dd") : null;
+      
       updateAgendaItem(
         selectedAgendaItem.id, 
         editTitle, 
         editDescription, 
         formattedDate, 
-        editTime
+        editTime,
+        formattedEndDate,
+        editEndTime,
+        editAdditionalUsers
       );
+      
       setIsEditDialogOpen(false);
     }
   };
@@ -124,6 +154,13 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
         setSelectedDate={setSelectedDate}
         selectedTime={selectedTime}
         setSelectedTime={setSelectedTime}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        endTime={endTime}
+        setEndTime={setEndTime}
+        additionalUsers={additionalUsers}
+        setAdditionalUsers={setAdditionalUsers}
+        availableUsers={availableUsers}
         mode="add"
       />
 
@@ -152,6 +189,13 @@ export function AgendaCard({ propertyId }: AgendaCardProps) {
           setSelectedDate={setEditDate}
           selectedTime={editTime}
           setSelectedTime={setEditTime}
+          endDate={editEndDate}
+          setEndDate={setEditEndDate}
+          endTime={editEndTime}
+          setEndTime={setEditEndTime}
+          additionalUsers={editAdditionalUsers}
+          setAdditionalUsers={setEditAdditionalUsers}
+          availableUsers={availableUsers}
           mode="edit"
         />
       )}

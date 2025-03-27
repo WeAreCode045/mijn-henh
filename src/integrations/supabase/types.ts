@@ -280,8 +280,12 @@ export type Database = {
       }
       property_agenda_items: {
         Row: {
+          additional_users: Json | null
           created_at: string
+          creator_id: string
           description: string | null
+          end_date: string | null
+          end_time: string | null
           event_date: string
           event_time: string
           id: string
@@ -290,8 +294,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          additional_users?: Json | null
           created_at?: string
+          creator_id: string
           description?: string | null
+          end_date?: string | null
+          end_time?: string | null
           event_date: string
           event_time: string
           id?: string
@@ -300,8 +308,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          additional_users?: Json | null
           created_at?: string
+          creator_id?: string
           description?: string | null
+          end_date?: string | null
+          end_time?: string | null
           event_date?: string
           event_time?: string
           id?: string

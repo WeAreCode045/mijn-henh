@@ -4,51 +4,114 @@ import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { CalendarX, PlusCircle } from "lucide-react";
-import { AgendaDialog } from "./AgendaDialog";
+import { useAgenda } from "@/hooks/useAgenda";
+import { format } from "date-fns";
+import { useAuth } from "@/providers/AuthProvider";
+import { DateRangeSelector } from "../property/dashboard/agenda/DateRangeSelector";
+import { AgendaItemList } from "../property/dashboard/agenda/AgendaItemList";
+import { ViewAgendaItemDialog } from "../property/dashboard/agenda/ViewAgendaItemDialog";
+import { AddEditAgendaDialog } from "../property/dashboard/agenda/AddEditAgendaDialog";
+import { useAgendaFiltering } from "../property/dashboard/agenda/useAgendaFiltering";
+import { useAgendaDialogs } from "../property/dashboard/agenda/useAgendaDialogs";
 import { AgendaCalendarView } from "./AgendaCalendarView";
-import { AgendaListView } from "./AgendaListView";
-import { useAgenda, AgendaItem } from "@/hooks/useAgenda";
 
 export function AgendaSection() {
   const [activeTab, setActiveTab] = useState<string>("calendar");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
+  const { user } = useAuth();
   
   const { agendaItems, isLoading, addAgendaItem, updateAgendaItem, deleteAgendaItem } = useAgenda();
+  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems);
   
-  const handleAddClick = () => {
-    setSelectedItem(null);
-    setDialogOpen(true);
-  };
+  const {
+    isAddDialogOpen,
+    setIsAddDialogOpen,
+    isViewDialogOpen,
+    setIsViewDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    selectedAgendaItem,
+    setSelectedAgendaItem,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    endDate,
+    setEndDate,
+    endTime,
+    setEndTime,
+    additionalUsers,
+    setAdditionalUsers,
+    editTitle,
+    setEditTitle,
+    editDescription,
+    setEditDescription,
+    editDate,
+    setEditDate,
+    editTime,
+    setEditTime,
+    editEndDate,
+    setEditEndDate,
+    editEndTime,
+    setEditEndTime,
+    editAdditionalUsers,
+    setEditAdditionalUsers,
+    availableUsers,
+    resetForm,
+    handleAgendaItemClick,
+    handleAddButtonClick,
+    handleEditButtonClick
+  } = useAgendaDialogs();
   
-  const handleSave = async (data: Omit<AgendaItem, "id" | "created_at" | "updated_at">) => {
-    if (selectedItem) {
-      await updateAgendaItem(
-        selectedItem.id,
-        data.title,
-        data.description || null,
-        data.event_date,
-        data.event_time,
-        data.property_id
+  const handleAddAgendaItem = () => {
+    if (selectedDate && title) {
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      const formattedEndDate = endDate ? format(endDate, "yyyy-MM-dd") : null;
+      
+      addAgendaItem(
+        title, 
+        description, 
+        formattedDate, 
+        selectedTime,
+        formattedEndDate,
+        endTime,
+        additionalUsers
       );
-    } else {
-      await addAgendaItem(
-        data.title,
-        data.description || null,
-        data.event_date,
-        data.event_time,
-        data.property_id
-      );
+      
+      setIsAddDialogOpen(false);
+      resetForm();
     }
   };
   
-  const handleEditItem = (item: AgendaItem) => {
-    setSelectedItem(item);
-    setDialogOpen(true);
+  const handleDeleteAgendaItem = () => {
+    if (selectedAgendaItem) {
+      deleteAgendaItem(selectedAgendaItem.id);
+      setIsViewDialogOpen(false);
+    }
   };
   
-  const handleDeleteItem = async (id: string) => {
-    await deleteAgendaItem(id);
+  const handleUpdateAgendaItem = () => {
+    if (selectedAgendaItem && editDate) {
+      const formattedDate = format(editDate, "yyyy-MM-dd");
+      const formattedEndDate = editEndDate ? format(editEndDate, "yyyy-MM-dd") : null;
+      
+      updateAgendaItem(
+        selectedAgendaItem.id, 
+        editTitle, 
+        editDescription, 
+        formattedDate, 
+        editTime,
+        formattedEndDate,
+        editEndTime,
+        editAdditionalUsers,
+        selectedAgendaItem.property_id
+      );
+      
+      setIsEditDialogOpen(false);
+    }
   };
   
   const EmptyAgendaNotification = () => (
@@ -58,7 +121,7 @@ export function AgendaSection() {
       <p className="text-sm text-muted-foreground text-center max-w-md mt-1">
         Your agenda is currently empty. Click the "Add Event" button above to schedule your first event.
       </p>
-      <Button onClick={handleAddClick} variant="outline" className="mt-4">
+      <Button onClick={handleAddButtonClick} variant="outline" className="mt-4">
         <PlusCircle className="h-4 w-4 mr-2" />
         Add Your First Event
       </Button>
@@ -74,7 +137,7 @@ export function AgendaSection() {
             <TabsTrigger value="list">List View</TabsTrigger>
           </TabsList>
         </Tabs>
-        <Button onClick={handleAddClick} size="sm" className="h-8">
+        <Button onClick={handleAddButtonClick} size="sm" className="h-8">
           <PlusCircle className="h-4 w-4 mr-1" />
           Add Event
         </Button>
@@ -95,14 +158,16 @@ export function AgendaSection() {
             {!isLoading && agendaItems.length === 0 ? (
               <EmptyAgendaNotification />
             ) : (
-              <AgendaListView 
-                agendaItems={agendaItems} 
-                isLoading={isLoading} 
-                onEdit={handleEditItem}
-                onDelete={handleDeleteItem}
-                showEditRemoveButtons={true}
-                showDate={true}
-              />
+              <div className="flex flex-col space-y-3">
+                <div className="flex justify-end">
+                  <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
+                </div>
+                <AgendaItemList 
+                  filteredAgendaItems={filteredAgendaItems} 
+                  isLoading={isLoading} 
+                  onItemClick={handleAgendaItemClick}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -112,23 +177,77 @@ export function AgendaSection() {
         {!isLoading && agendaItems.length === 0 ? (
           <EmptyAgendaNotification />
         ) : (
-          <AgendaListView 
-            agendaItems={agendaItems} 
-            isLoading={isLoading} 
-            onEdit={handleEditItem}
-            onDelete={handleDeleteItem}
-            showEditRemoveButtons={true}
-          />
+          <div className="flex flex-col space-y-3">
+            <div className="flex justify-end">
+              <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
+            </div>
+            <AgendaItemList 
+              filteredAgendaItems={filteredAgendaItems} 
+              isLoading={isLoading} 
+              onItemClick={handleAgendaItemClick}
+            />
+          </div>
         )}
       </TabsContent>
       
-      <AgendaDialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSave={handleSave}
-        item={selectedItem}
-        mode={selectedItem ? "edit" : "add"}
+      {/* Add Agenda Item Dialog */}
+      <AddEditAgendaDialog
+        isOpen={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSave={handleAddAgendaItem}
+        title={title}
+        setTitle={setTitle}
+        description={description}
+        setDescription={setDescription}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        selectedTime={selectedTime}
+        setSelectedTime={setSelectedTime}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        endTime={endTime}
+        setEndTime={setEndTime}
+        additionalUsers={additionalUsers}
+        setAdditionalUsers={setAdditionalUsers}
+        availableUsers={availableUsers}
+        mode="add"
       />
+
+      {/* View Agenda Item Dialog */}
+      {selectedAgendaItem && (
+        <ViewAgendaItemDialog
+          isOpen={isViewDialogOpen}
+          onOpenChange={setIsViewDialogOpen}
+          selectedAgendaItem={selectedAgendaItem}
+          onDelete={handleDeleteAgendaItem}
+          onEdit={handleEditButtonClick}
+        />
+      )}
+
+      {/* Edit Agenda Item Dialog */}
+      {selectedAgendaItem && (
+        <AddEditAgendaDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onSave={handleUpdateAgendaItem}
+          title={editTitle}
+          setTitle={setEditTitle}
+          description={editDescription}
+          setDescription={setEditDescription}
+          selectedDate={editDate}
+          setSelectedDate={setEditDate}
+          selectedTime={editTime}
+          setSelectedTime={setEditTime}
+          endDate={editEndDate}
+          setEndDate={setEditEndDate}
+          endTime={editEndTime}
+          setEndTime={setEditEndTime}
+          additionalUsers={editAdditionalUsers}
+          setAdditionalUsers={setEditAdditionalUsers}
+          availableUsers={availableUsers}
+          mode="edit"
+        />
+      )}
     </CardContent>
   );
 }

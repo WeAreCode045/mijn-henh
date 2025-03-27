@@ -2,14 +2,19 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/providers/AuthProvider";
 
 export interface AgendaItem {
   id: string;
   property_id: string;
+  creator_id: string;
   title: string;
   description: string | null;
   event_date: string;
   event_time: string;
+  end_date: string | null;
+  end_time: string | null;
+  additional_users: string[];
   created_at: string;
 }
 
@@ -17,10 +22,11 @@ export function usePropertyAgenda(initialPropertyId?: string) {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchAgendaItems = async (propertyId?: string) => {
     const id = propertyId || initialPropertyId;
-    if (!id) return;
+    if (!id || !user?.id) return;
     
     setIsLoading(true);
     try {
@@ -48,17 +54,30 @@ export function usePropertyAgenda(initialPropertyId?: string) {
     }
   };
 
-  const addAgendaItem = async (title: string, description: string | null, date: string, time: string, propertyId?: string | null) => {
+  const addAgendaItem = async (
+    title: string, 
+    description: string | null, 
+    date: string, 
+    time: string,
+    endDate: string | null = null,
+    endTime: string | null = null,
+    additionalUsers: string[] = [],
+    propertyId?: string | null
+  ) => {
     const id = propertyId || initialPropertyId;
-    if (!id) return null;
+    if (!id || !user?.id) return null;
 
     try {
       const newItem = {
+        creator_id: user.id,
         property_id: id,
         title,
         description,
         event_date: date,
-        event_time: time
+        event_time: time,
+        end_date: endDate,
+        end_time: endTime,
+        additional_users: additionalUsers
       };
 
       const { data, error } = await supabase
@@ -84,13 +103,27 @@ export function usePropertyAgenda(initialPropertyId?: string) {
     }
   };
 
-  const updateAgendaItem = async (id: string, title: string, description: string | null, date: string, time: string) => {
+  const updateAgendaItem = async (
+    id: string, 
+    title: string, 
+    description: string | null, 
+    date: string, 
+    time: string,
+    endDate: string | null = null,
+    endTime: string | null = null,
+    additionalUsers: string[] = []
+  ) => {
+    if (!user?.id) return null;
+    
     try {
       const updates = {
         title,
         description,
         event_date: date,
-        event_time: time
+        event_time: time,
+        end_date: endDate,
+        end_time: endTime,
+        additional_users: additionalUsers
       };
 
       const { data, error } = await supabase
@@ -144,10 +177,10 @@ export function usePropertyAgenda(initialPropertyId?: string) {
   };
 
   useEffect(() => {
-    if (initialPropertyId) {
+    if (initialPropertyId && user?.id) {
       fetchAgendaItems();
     }
-  }, [initialPropertyId]);
+  }, [initialPropertyId, user?.id]);
 
   return {
     agendaItems,

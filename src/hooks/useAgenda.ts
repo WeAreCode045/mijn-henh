@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,10 +6,14 @@ import { useAuth } from "@/providers/AuthProvider";
 export interface AgendaItem {
   id: string;
   property_id?: string | null;
+  creator_id: string;
   title: string;
   description?: string | null;
   event_date: string;
   event_time: string;
+  end_date?: string | null;
+  end_time?: string | null;
+  additional_users?: string[];
   created_at: string;
   updated_at: string;
   property?: {
@@ -19,18 +22,18 @@ export interface AgendaItem {
   } | null;
 }
 
-export function useAgenda() {
+export function useAgenda(propertyId?: string) {
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
 
   const fetchAgendaItems = async () => {
-    if (!profile?.id) return;
+    if (!user?.id) return;
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('property_agenda_items')
         .select(`
           *,
@@ -41,6 +44,14 @@ export function useAgenda() {
         `)
         .order('event_date', { ascending: true })
         .order('event_time', { ascending: true });
+      
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      } else {
+        query = query.or(`creator_id.eq.${user.id},additional_users.cs.{"${user.id}"}`);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setAgendaItems(data || []);
@@ -60,18 +71,27 @@ export function useAgenda() {
     title: string, 
     description: string | null, 
     eventDate: string, 
-    eventTime: string, 
+    eventTime: string,
+    endDate: string | null = null,
+    endTime: string | null = null,
+    additionalUsers: string[] = [],
     propertyId?: string | null
   ) => {
+    if (!user?.id) return null;
+
     try {
       const { error } = await supabase
         .from('property_agenda_items')
         .insert({
+          creator_id: user.id,
           property_id: propertyId || null,
           title,
           description,
           event_date: eventDate,
-          event_time: eventTime
+          event_time: eventTime,
+          end_date: endDate,
+          end_time: endTime,
+          additional_users: additionalUsers
         });
 
       if (error) throw error;
@@ -123,6 +143,9 @@ export function useAgenda() {
     description: string | null, 
     eventDate: string, 
     eventTime: string,
+    endDate: string | null = null,
+    endTime: string | null = null,
+    additionalUsers: string[] = [],
     propertyId?: string | null
   ) => {
     try {
@@ -133,7 +156,10 @@ export function useAgenda() {
           title,
           description,
           event_date: eventDate,
-          event_time: eventTime
+          event_time: eventTime,
+          end_date: endDate,
+          end_time: endTime,
+          additional_users: additionalUsers
         })
         .eq('id', agendaItemId);
 
@@ -156,10 +182,10 @@ export function useAgenda() {
   };
 
   useEffect(() => {
-    if (profile?.id) {
+    if (user?.id) {
       fetchAgendaItems();
     }
-  }, [profile?.id]);
+  }, [user?.id, propertyId]);
 
   return {
     agendaItems,

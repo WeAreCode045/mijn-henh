@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { AgendaItem } from "./types";
+import { useUsers } from "@/hooks/useUsers";
 
 export function useAgendaDialogs() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -14,18 +15,34 @@ export function useAgendaDialogs() {
   const [description, setDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState("09:00");
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [endTime, setEndTime] = useState("");
+  const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
   
   // Edit form state
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>(new Date());
   const [editTime, setEditTime] = useState("");
+  const [editEndDate, setEditEndDate] = useState<Date | undefined>(undefined);
+  const [editEndTime, setEditEndTime] = useState("");
+  const [editAdditionalUsers, setEditAdditionalUsers] = useState<string[]>([]);
+
+  // Get available users for the multi-select
+  const { users } = useUsers();
+  const availableUsers = users?.map(user => ({
+    id: user.id,
+    name: user.full_name || user.email || 'Unknown User'
+  })) || [];
 
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setSelectedDate(new Date());
     setSelectedTime("09:00");
+    setEndDate(undefined);
+    setEndTime("");
+    setAdditionalUsers([]);
   };
 
   const handleAgendaItemClick = (item: AgendaItem) => {
@@ -45,6 +62,16 @@ export function useAgendaDialogs() {
       setEditDescription(selectedAgendaItem.description || "");
       setEditDate(parseISO(selectedAgendaItem.event_date));
       setEditTime(selectedAgendaItem.event_time.substring(0, 5));
+      
+      if (selectedAgendaItem.end_date) {
+        setEditEndDate(parseISO(selectedAgendaItem.end_date));
+      } else {
+        setEditEndDate(undefined);
+      }
+      
+      setEditEndTime(selectedAgendaItem.end_time?.substring(0, 5) || "");
+      setEditAdditionalUsers(selectedAgendaItem.additional_users || []);
+      
       setIsViewDialogOpen(false);
       setIsEditDialogOpen(true);
     }
@@ -67,6 +94,12 @@ export function useAgendaDialogs() {
     setSelectedDate,
     selectedTime,
     setSelectedTime,
+    endDate,
+    setEndDate,
+    endTime,
+    setEndTime,
+    additionalUsers,
+    setAdditionalUsers,
     editTitle,
     setEditTitle,
     editDescription,
@@ -75,6 +108,13 @@ export function useAgendaDialogs() {
     setEditDate,
     editTime,
     setEditTime,
+    editEndDate,
+    setEditEndDate,
+    editEndTime,
+    setEditEndTime,
+    editAdditionalUsers,
+    setEditAdditionalUsers,
+    availableUsers,
     resetForm,
     handleAgendaItemClick,
     handleAddButtonClick,

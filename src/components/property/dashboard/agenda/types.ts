@@ -19,6 +19,13 @@ export interface AgendaAddEditDialogProps {
   setSelectedDate: (date: Date | undefined) => void;
   selectedTime: string;
   setSelectedTime: (time: string) => void;
+  endDate: Date | undefined;
+  setEndDate: (date: Date | undefined) => void;
+  endTime: string;
+  setEndTime: (time: string) => void;
+  additionalUsers: string[];
+  setAdditionalUsers: (users: string[]) => void;
+  availableUsers: { id: string; name: string }[];
   mode: "add" | "edit";
 }
 
@@ -37,10 +44,14 @@ export type DateRange = "today" | "tomorrow" | "thisWeek" | "thisMonth" | "all";
 
 export interface AgendaItem {
   id: string;
-  property_id: string;
+  property_id: string | null;
+  creator_id: string;
   title: string;
   description: string | null;
   event_date: string;
   event_time: string;
+  end_date: string | null;
+  end_time: string | null;
+  additional_users: string[];
   created_at: string;
 }
