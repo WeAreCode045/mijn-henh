@@ -4,12 +4,19 @@ import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Filter } from "lucide-react";
 import { TodoList } from "./todo/TodoList";
-import { TodoDialog } from "./todo/TodoDialog";
-import { useTodoItems } from "@/hooks/todo/useTodoItems";
+import { TodoDialog } from "./dashboard/todo/TodoDialog";
+import { useTodoItems, TodoItem } from "@/hooks/useTodoItems";
 import { useProperties } from "@/hooks/useProperties";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { TodoItem, TodoItemInput } from "@/hooks/todo/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function TodoSection() {
   const [showCompleted, setShowCompleted] = useState(false);
@@ -60,24 +67,15 @@ export function TodoSection() {
   };
   
   const handleSaveTodoItem = async (data: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
-    // Format dates to strings for DB
-    const todoData: TodoItemInput = {
-      ...data,
-      // If property filtering is enabled and there's a selected property, set it as default
-      property_id: filterByProperty && selectedProperty && !data.property_id ? 
-        selectedProperty.id : data.property_id,
-      due_date: data.due_date ? 
-        (typeof data.due_date === 'string' ? data.due_date : data.due_date.toISOString()) : 
-        undefined,
-      notify_at: data.notify_at ? 
-        (typeof data.notify_at === 'string' ? data.notify_at : data.notify_at.toISOString()) : 
-        undefined
-    };
+    // If property filtering is enabled and there's a selected property, set it as default
+    if (filterByProperty && selectedProperty && !data.property_id) {
+      data.property_id = selectedProperty.id;
+    }
     
     if (selectedItem) {
-      await updateTodoItem(selectedItem.id, todoData);
+      await updateTodoItem(selectedItem.id, data);
     } else {
-      await addTodoItem(todoData);
+      await addTodoItem(data);
     }
   };
   

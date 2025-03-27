@@ -1,19 +1,15 @@
 
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { TodoItem } from "@/types/todo";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { CalendarIcon, CheckCircle } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
-import { Switch } from "@/components/ui/switch";
-import { TodoAssignmentFields } from "./TodoAssignmentFields";
+import { DialogFooter } from "@/components/ui/dialog";
+import { TodoDatePicker } from "./TodoDatePicker";
 import { TodoNotificationPicker } from "./TodoNotificationPicker";
-import { TodoItem } from "@/hooks/todo/types";
+import { TodoAssignmentFields } from "./TodoAssignmentFields";
 
 interface TodoFormProps {
   item?: TodoItem;
@@ -23,183 +19,136 @@ interface TodoFormProps {
 }
 
 export function TodoForm({ item, mode, onClose, onSave }: TodoFormProps) {
-  const { toast } = useToast();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [notifyAt, setNotifyAt] = useState<Date | undefined>(undefined);
+  const [notifyTime, setNotifyTime] = useState("12:00");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Form state
-  const [title, setTitle] = useState(item?.title || "");
-  const [description, setDescription] = useState(item?.description || "");
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    item?.due_date ? new Date(item.due_date) : undefined
-  );
-  const [assignedToId, setAssignedToId] = useState<string | undefined>(
-    item?.assigned_to_id
-  );
-  const [propertyId, setPropertyId] = useState<string | undefined>(
-    item?.property_id
-  );
-  const [completed, setCompleted] = useState(item?.completed || false);
-  const [enableNotification, setEnableNotification] = useState(!!item?.notify_at);
-  const [notificationTime, setNotificationTime] = useState<Date>(
-    item?.notify_at ? new Date(item.notify_at) : new Date()
-  );
-  const [notificationTimeStr, setNotificationTimeStr] = useState(
-    item?.notify_at 
-      ? format(new Date(item.notify_at), "HH:mm") 
-      : "09:00"
-  );
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!title.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a task title",
-        variant: "destructive",
-      });
-      return;
+  const [assignedToId, setAssignedToId] = useState<string | null>(null);
+  const [propertyId, setPropertyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (item) {
+      setTitle(item.title);
+      setDescription(item.description || "");
+      setDueDate(item.due_date ? new Date(item.due_date) : undefined);
+      setAssignedToId(item.assigned_to_id);
+      setPropertyId(item.property_id);
+      
+      if (item.notify_at) {
+        const notifyDate = new Date(item.notify_at);
+        setNotifyAt(notifyDate);
+        setNotifyTime(format(notifyDate, "HH:mm"));
+      } else {
+        setNotifyAt(undefined);
+        setNotifyTime("12:00");
+      }
+    } else {
+      resetForm();
     }
+  }, [item]);
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setDueDate(undefined);
+    setNotifyAt(undefined);
+    setNotifyTime("12:00");
+    setAssignedToId(null);
+    setPropertyId(null);
+  };
+
+  const handleSubmit = async () => {
+    if (!title.trim()) return;
     
     setIsSubmitting(true);
     
     try {
-      // Prepare notification time if enabled
-      let notifyAt = null;
-      if (enableNotification && dueDate) {
-        const [hours, minutes] = notificationTimeStr.split(':').map(Number);
-        const notifyDate = new Date(dueDate);
-        notifyDate.setHours(hours, minutes, 0, 0);
-        notifyAt = notifyDate;
+      // Prepare notification date if both date and time are set
+      let notifyDateTime = null;
+      if (notifyAt) {
+        const [hours, minutes] = notifyTime.split(':').map(Number);
+        const notifyAtDate = new Date(notifyAt);
+        notifyAtDate.setHours(hours, minutes, 0, 0);
+        notifyDateTime = notifyAtDate.toISOString();
       }
       
       await onSave({
         title,
-        description,
-        due_date: dueDate,
-        assigned_to_id: assignedToId,
+        description: description || null,
+        due_date: dueDate ? dueDate.toISOString() : null,
+        notify_at: notifyDateTime,
+        notification_sent: false,
+        completed: item?.completed || false,
         property_id: propertyId,
-        completed,
-        notify_at: notifyAt,
-        notification_sent: item?.notification_sent || false,
+        assigned_to_id: assignedToId,
         sort_order: item?.sort_order || 0
       });
       
+      resetForm();
       onClose();
     } catch (error) {
       console.error("Error saving todo item:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save task",
-        variant: "destructive",
-      });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Task Title</Label>
-        <Input
-          id="title"
-          placeholder="Enter task title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="description">Description (Optional)</Label>
-        <Textarea
-          id="description"
-          placeholder="Enter task description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="dueDate">Due Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id="dueDate"
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !dueDate && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={dueDate}
-              onSelect={setDueDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="enableNotification"
-            checked={enableNotification}
-            onCheckedChange={setEnableNotification}
+    <>
+      <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Task title"
+            autoFocus
           />
-          <Label htmlFor="enableNotification">Enable Notification</Label>
         </div>
         
-        {enableNotification && dueDate && (
-          <div className="pt-2">
-            <TodoNotificationPicker
-              value={notificationTime}
-              onChange={setNotificationTime}
-              timeValue={notificationTimeStr}
-              onTimeChange={setNotificationTimeStr}
-            />
-          </div>
-        )}
+        <div className="grid gap-2">
+          <Label htmlFor="description">Description (optional)</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Add more details..."
+            className="min-h-[80px]"
+          />
+        </div>
+        
+        <TodoDatePicker 
+          label="Due Date"
+          date={dueDate}
+          onDateChange={setDueDate}
+        />
+        
+        <TodoNotificationPicker
+          notifyAt={notifyAt}
+          notifyTime={notifyTime}
+          onNotifyAtChange={setNotifyAt}
+          onNotifyTimeChange={setNotifyTime}
+        />
+        
+        <TodoAssignmentFields
+          assignedToId={assignedToId}
+          propertyId={propertyId}
+          onAssignedToIdChange={setAssignedToId}
+          onPropertyIdChange={setPropertyId}
+        />
       </div>
       
-      <TodoAssignmentFields
-        assignedToId={assignedToId}
-        propertyId={propertyId}
-        onAssignedToChange={setAssignedToId}
-        onPropertyChange={setPropertyId}
-      />
-      
-      {mode === "edit" && (
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="completed"
-            checked={completed}
-            onCheckedChange={setCompleted}
-          />
-          <Label htmlFor="completed" className="flex items-center">
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Mark as completed
-          </Label>
-        </div>
-      )}
-      
-      <div className="flex justify-end space-x-2 pt-2">
-        <Button type="button" variant="outline" onClick={onClose}>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : mode === "add" ? "Add Task" : "Update Task"}
+        <Button onClick={handleSubmit} disabled={!title.trim() || isSubmitting}>
+          {isSubmitting ? "Saving..." : mode === "add" ? "Add Task" : "Save Changes"}
         </Button>
-      </div>
-    </form>
+      </DialogFooter>
+    </>
   );
 }

@@ -10,7 +10,7 @@ type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export function useUsers() {
   const { toast } = useToast();
 
-  const { data: users, refetch, isLoading } = useQuery({
+  const { data: users, refetch } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -58,7 +58,6 @@ export function useUsers() {
   return {
     users,
     refetch,
-    deleteUser,
-    isLoading // Make sure isLoading is included in the return value
+    deleteUser
   };
 }

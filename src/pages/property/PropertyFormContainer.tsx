@@ -1,28 +1,29 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyForm } from "@/components/PropertyForm";
 import { PropertyFormLayout } from "./PropertyFormLayout";
-import { usePropertyForm } from "@/hooks/usePropertyForm";
-import { useToast } from "@/components/ui/use-toast";
+import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
+import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
-import { useAgentSelect } from "@/hooks/useAgentSelect";
-import { useParams } from "react-router-dom";
 
 export function PropertyFormContainer() {
-  const { id } = useParams();
   const { isAdmin } = useAuth();
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
-  const { toast } = useToast();
-  const { selectedAgent, setSelectedAgent } = useAgentSelect();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Get property form data
-  const { formData, isLoading } = usePropertyForm(id);
-
-  // Add a simplified mock for agents
-  const agents = [];
-  const saving = false;
+  const {
+    id,
+    formData,
+    setFormData,
+    isLoading,
+    settings,
+    agents,
+    selectedAgent,
+    setSelectedAgent,
+    isSubmitting,
+    setIsSubmitting,
+    toast
+  } = usePropertyFormContainerData();
 
   const {
     deleteProperty,
@@ -31,14 +32,28 @@ export function PropertyFormContainer() {
     handleImageUpload,
     handleRemoveImage,
     images
-  } = {
-    deleteProperty: async () => {},
-    saveProperty: async () => {},
-    handleAgentChange: async (agentId: string) => {}, 
-    handleImageUpload: async () => {},
-    handleRemoveImage: async () => {},
-    images: []
-  };
+  } = usePropertyFormContainerActions(
+    formData,
+    setFormData,
+    setIsSubmitting,
+    setSelectedAgent,
+    setAgentInfo,
+    toast,
+    agents
+  );
+
+  // Set document title based on property title
+  useEffect(() => {
+    if (formData?.title) {
+      document.title = formData.title;
+    } else {
+      document.title = "Edit Property";
+    }
+    
+    return () => {
+      document.title = "Brochure Generator";
+    };
+  }, [formData?.title]);
 
   if (isLoading || !formData) {
     return <PropertyFormLoader />;
@@ -48,10 +63,10 @@ export function PropertyFormContainer() {
     <PropertyFormLayout
       title={formData.title || "Edit Property"}
       propertyData={formData || { id: "" } as any}
-      settings={null}
+      settings={settings}
       isAdmin={isAdmin}
       agents={agents}
-      selectedAgent={selectedAgent ? selectedAgent.id : ""}
+      selectedAgent={selectedAgent}
       onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
       onSaveProperty={saveProperty}

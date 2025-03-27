@@ -1,32 +1,39 @@
 
-import React, { Suspense } from "react";
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { Route, Routes, Navigate, useParams } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PropertyLayout } from "./PropertyLayout";
-import { LoadingSpinner } from "./routes/LoadingSpinner";
 
 // Lazy-loaded components
-const Auth = React.lazy(() => import("../pages/Auth"));
-const PropertyWebView = React.lazy(() => import("./property/PropertyWebView").then(module => ({ default: module.PropertyWebView })));
-const NotFound = React.lazy(() => import("../pages/NotFound"));
-const Index = React.lazy(() => import("../pages/index"));
-const Properties = React.lazy(() => import("../pages/Properties"));
-const PropertyFormPage = React.lazy(() => import("../pages/PropertyFormPage"));
-const Settings = React.lazy(() => import("../pages/Settings"));
-const Users = React.lazy(() => import("../pages/Users"));
-const Import = React.lazy(() => import("../pages/Import"));
+const Index = lazy(() => import("../pages/index"));
+const Properties = lazy(() => import("../pages/Properties"));
+const PropertyFormPage = lazy(() => import("../pages/PropertyFormPage"));
+const Settings = lazy(() => import("../pages/Settings"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+const Auth = lazy(() => import("../pages/Auth"));
+const PropertyWebView = lazy(() => import("./property/PropertyWebView").then(module => ({ default: module.PropertyWebView })));
+const Users = lazy(() => import("../pages/Users"));
+const Import = lazy(() => import("../pages/Import"));
 
-// Redirect components
-function PropertyDashboardRedirect() {
-  const { id } = useParams();
-  return <Navigate to={`/property/${id}/dashboard`} replace />;
-}
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-estate-800"></div>
+  </div>
+);
 
+// This component handles the redirect from /edit to /dashboard
 function PropertyEditRedirect() {
   const { id } = useParams();
   return <Navigate to={`/property/${id}/dashboard`} replace />;
 }
 
+// This component handles the redirect from /property/:id to /property/:id/dashboard
+function PropertyDashboardRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/property/${id}/dashboard`} replace />;
+}
+
+// This component handles the redirect to the default content tab
 function PropertyContentRedirect() {
   const { id } = useParams();
   return <Navigate to={`/property/${id}/content/general`} replace />;
@@ -35,19 +42,20 @@ function PropertyContentRedirect() {
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes (auth, webview) */}
       <Route path="/auth" element={
         <Suspense fallback={<LoadingSpinner />}>
           <Auth />
         </Suspense>
       } />
       
+      {/* Public webview routes - accessible without login */}
       <Route path="/property/:id/webview" element={
         <Suspense fallback={<LoadingSpinner />}>
           <PropertyWebView />
         </Suspense>
       } />
       
+      {/* Simplified public route for webviews */}
       <Route path="/:id/webview" element={
         <Suspense fallback={<LoadingSpinner />}>
           <PropertyWebView />
@@ -60,13 +68,13 @@ export function AppRoutes() {
         </Suspense>
       } />
       
+      {/* Legacy view route - maintained for backward compatibility */}
       <Route path="/property/view/:id" element={
         <Suspense fallback={<LoadingSpinner />}>
           <PropertyWebView />
         </Suspense>
       } />
       
-      {/* Protected routes (dashboard, properties, etc.) */}
       <Route path="/" element={
         <ProtectedRoute>
           <PropertyLayout>
@@ -107,27 +115,6 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <PropertyLayout>
-            <Suspense fallback={<LoadingSpinner />}>
-              <Settings />
-            </Suspense>
-          </PropertyLayout>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/users" element={
-        <ProtectedRoute>
-          <PropertyLayout>
-            <Suspense fallback={<LoadingSpinner />}>
-              <Users />
-            </Suspense>
-          </PropertyLayout>
-        </ProtectedRoute>
-      } />
-      
-      {/* Property-specific routes */}
       <Route path="/property/:id" element={
         <ProtectedRoute>
           <PropertyDashboardRedirect />
@@ -144,12 +131,14 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Content tab routes */}
       <Route path="/property/:id/content" element={
         <ProtectedRoute>
           <PropertyContentRedirect />
         </ProtectedRoute>
       } />
       
+      {/* Content step routes */}
       <Route path="/property/:id/content/:step" element={
         <ProtectedRoute>
           <PropertyLayout>
@@ -186,7 +175,26 @@ export function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* 404 route */}
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <PropertyLayout>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Settings />
+            </Suspense>
+          </PropertyLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/users" element={
+        <ProtectedRoute>
+          <PropertyLayout>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Users />
+            </Suspense>
+          </PropertyLayout>
+        </ProtectedRoute>
+      } />
+      
       <Route path="*" element={
         <Suspense fallback={<LoadingSpinner />}>
           <NotFound />

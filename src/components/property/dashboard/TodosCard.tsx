@@ -4,14 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, CheckCircle2, CircleDashed } from "lucide-react";
 import { TodoDialog } from "@/components/dashboard/todo/TodoDialog";
-import { useTodoItems } from "@/hooks/todo/useTodoItems";
+import { useTodoItems } from "@/hooks/useTodoItems";
 import { format, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { TodoItem, TodoItemInput } from "@/hooks/todo/types";
+import { TodoItem } from "@/types/todo";
 import { useParams } from "react-router-dom";
 
 export function TodosCard() {
-  const { id: propertyId } = useParams<{ id: string }>();
+  const { propertyId } = useParams<{ propertyId: string }>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTodoItem, setSelectedTodoItem] = useState<TodoItem | undefined>(undefined);
   
@@ -38,16 +38,10 @@ export function TodosCard() {
   };
   
   const handleSaveTodoItem = async (data: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
-    // Always set the property_id to current property and format dates to strings
-    const todoData: TodoItemInput = {
+    // Always set the property_id to current property
+    const todoData = {
       ...data,
-      property_id: propertyId || null,
-      due_date: data.due_date ? 
-        (typeof data.due_date === 'string' ? data.due_date : data.due_date.toISOString()) : 
-        undefined,
-      notify_at: data.notify_at ? 
-        (typeof data.notify_at === 'string' ? data.notify_at : data.notify_at.toISOString()) : 
-        undefined
+      property_id: propertyId || null
     };
     
     if (selectedTodoItem) {

@@ -1,83 +1,71 @@
 
-import { useState, useEffect } from "react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { CalendarIcon, ClockIcon } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { TimePicker } from "../TimePicker";
 
-export interface TodoNotificationPickerProps {
-  value: Date;
-  onChange: React.Dispatch<React.SetStateAction<Date>>;
-  onTimeChange: React.Dispatch<React.SetStateAction<string>>;
-  timeValue: string;
+interface TodoNotificationPickerProps {
+  notifyAt: Date | undefined;
+  notifyTime: string;
+  onNotifyAtChange: (date: Date | undefined) => void;
+  onNotifyTimeChange: (time: string) => void;
 }
 
-export function TodoNotificationPicker({ 
-  value, 
-  onChange,
-  timeValue,
-  onTimeChange
+export function TodoNotificationPicker({
+  notifyAt,
+  notifyTime,
+  onNotifyAtChange,
+  onNotifyTimeChange
 }: TodoNotificationPickerProps) {
-  const [date, setDate] = useState<Date | undefined>(value);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-
-  useEffect(() => {
-    if (date) {
-      onChange(date);
-    }
-  }, [date, onChange]);
-
-  const handleSelectDate = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    setIsCalendarOpen(false);
-  };
-
   return (
-    <div className="flex space-x-2">
-      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleSelectDate}
-            initialFocus
+    <div className="grid gap-2">
+      <Label>Set Notification (optional)</Label>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !notifyAt && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {notifyAt ? format(notifyAt, "PPP") : "Notification date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={notifyAt}
+                onSelect={onNotifyAtChange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="w-24">
+          <TimePicker
+            value={notifyTime}
+            onChange={onNotifyTimeChange}
           />
-        </PopoverContent>
-      </Popover>
-
-      <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-[140px] justify-start text-left font-normal",
-              !timeValue && "text-muted-foreground"
-            )}
-          >
-            <ClockIcon className="mr-2 h-4 w-4" />
-            {timeValue || "Set time"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-4">
-          <TimePicker value={timeValue} onChange={onTimeChange} />
-        </PopoverContent>
-      </Popover>
+        </div>
+      </div>
+      {notifyAt && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mt-1" 
+          onClick={() => onNotifyAtChange(undefined)}
+        >
+          Clear notification
+        </Button>
+      )}
     </div>
   );
 }
