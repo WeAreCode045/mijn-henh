@@ -4,11 +4,19 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Filter } from "lucide-react";
 import { TodoList } from "./todo/TodoList";
 import { TodoDialog } from "./todo/TodoDialog";
-import { useTodoItems } from "@/hooks/todo/useTodoItems";
+import { useTodoItems } from "@/hooks/useTodoItems";
+import { TodoItem } from "@/types/todo";
 import { useProperties } from "@/hooks/useProperties";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { TodoItem } from "@/hooks/todo/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function TodoSection() {
   const [showCompleted, setShowCompleted] = useState(false);
@@ -39,7 +47,7 @@ export function TodoSection() {
     
     setFilteredItems(items);
   }, [todoItems, showCompleted, filterByProperty, selectedProperty]);
-  
+
   const handleAddClick = () => {
     setSelectedItem(undefined);
     setDialogOpen(true);

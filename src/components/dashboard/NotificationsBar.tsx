@@ -1,92 +1,189 @@
 
 import { useState, useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Check, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useTodoItems } from "@/hooks/todo";
-import { TodoItem } from "@/hooks/todo/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X, Calendar, CheckSquare, MessageSquare, Bell } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useTodoItems } from "@/hooks/useTodoItems";
+import { useAgenda } from "@/hooks/useAgenda";
+import { format, isPast, isToday, addDays } from "date-fns";
+
+// Interface for notification items
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: "agenda" | "todo" | "communication" | "system";
+  date: Date;
+  read: boolean;
+}
 
 export function NotificationsBar() {
-  const [showAll, setShowAll] = useState(false);
-  const { todoItems, markTodoItemComplete } = useTodoItems();
-  const [dueTasks, setDueTasks] = useState<TodoItem[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filter, setFilter] = useState<string | null>(null);
+  const { toast } = useToast();
+  const { todoItems } = useTodoItems();
+  const { agendaItems } = useAgenda();
   
+  // Sound effect for new notifications
+  const playNotificationSound = () => {
+    const audio = new Audio("/notification-sound.mp3");
+    audio.play().catch(error => {
+      console.log("Audio play failed:", error);
+    });
+  };
+  
+  // Generate notifications from todo items and agenda items
   useEffect(() => {
-    // Filter for tasks due today or overdue
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const newNotifications: Notification[] = [];
     
-    const filteredTasks = todoItems.filter(task => {
-      if (task.completed) return false;
+    // Process todo items
+    todoItems.forEach(todo => {
+      // Add notification for due items
+      if (todo.due_date && !todo.completed) {
+        const dueDate = new Date(todo.due_date);
+        if (isPast(dueDate) && !isToday(dueDate)) {
+          newNotifications.push({
+            id: `todo-due-${todo.id}`,
+            title: "Overdue Task",
+            message: `Task "${todo.title}" is overdue`,
+            type: "todo",
+            date: new Date(),
+            read: false
+          });
+        }
+      }
       
-      if (!task.due_date) return false;
-      
-      const dueDate = new Date(task.due_date);
-      dueDate.setHours(0, 0, 0, 0);
-      
-      return dueDate <= today;
+      // Add notification for upcoming notification times
+      if (todo.notify_at && !todo.notification_sent) {
+        const notifyDate = new Date(todo.notify_at);
+        if (isPast(notifyDate) || isToday(notifyDate)) {
+          newNotifications.push({
+            id: `todo-notify-${todo.id}`,
+            title: "Task Reminder",
+            message: `Reminder for "${todo.title}"`,
+            type: "todo",
+            date: notifyDate,
+            read: false
+          });
+        }
+      }
     });
     
-    setDueTasks(filteredTasks);
-  }, [todoItems]);
+    // Process agenda items
+    agendaItems.forEach(agenda => {
+      const eventDate = new Date(`${agenda.event_date}T${agenda.event_time}`);
+      const today = new Date();
+      const threeDaysFromNow = addDays(today, 3);
+      
+      // Only show notifications for upcoming events in the next 3 days
+      if (eventDate > today && eventDate <= threeDaysFromNow) {
+        newNotifications.push({
+          id: `agenda-${agenda.id}`,
+          title: "Upcoming Event",
+          message: `${agenda.title} on ${format(eventDate, "PPP")} at ${format(eventDate, "p")}`,
+          type: "agenda",
+          date: eventDate,
+          read: false
+        });
+      }
+    });
+    
+    // Sort notifications by date
+    newNotifications.sort((a, b) => a.date.getTime() - b.date.getTime());
+    
+    // Check if we have new notifications
+    if (
+      newNotifications.length > notifications.length && 
+      notifications.length > 0
+    ) {
+      playNotificationSound();
+      toast({
+        title: "New Notification",
+        description: newNotifications[0].message,
+      });
+    }
+    
+    setNotifications(newNotifications);
+  }, [todoItems, agendaItems, toast]);
   
-  const visibleTasks = showAll ? dueTasks : dueTasks.slice(0, 3);
+  // Delete a notification
+  const handleDeleteNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
   
+  // Filter notifications
+  const filteredNotifications = filter
+    ? notifications.filter(notification => notification.type === filter)
+    : notifications;
+
+  // Safe value for filter
+  const safeFilter = filter || "";
+
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-semibold flex items-center">
-            <Bell className="mr-2 h-4 w-4" />
+        <CardTitle className="flex justify-between items-center">
+          <span className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
             Notifications
-          </CardTitle>
-          {dueTasks.length > 3 && (
-            <Button 
-              variant="ghost" 
-              className="px-2 h-8 text-xs"
-              onClick={() => setShowAll(!showAll)}
-            >
-              {showAll ? "Show less" : "Show all"}
-            </Button>
-          )}
-        </div>
+          </span>
+          <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+            {notifications.length}
+          </span>
+        </CardTitle>
+        <Select value={safeFilter} onValueChange={setFilter} defaultValue="all">
+          <SelectTrigger>
+            <SelectValue placeholder="Filter notifications" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All notifications</SelectItem>
+            <SelectItem value="agenda">Agenda</SelectItem>
+            <SelectItem value="todo">Todo</SelectItem>
+            <SelectItem value="communication">Communications</SelectItem>
+            <SelectItem value="system">System</SelectItem>
+          </SelectContent>
+        </Select>
       </CardHeader>
-      <CardContent>
-        {visibleTasks.length > 0 ? (
-          <ul className="space-y-2">
-            {visibleTasks.map(task => (
-              <li 
-                key={task.id} 
-                className={cn(
-                  "flex items-start p-2 rounded-md",
-                  "bg-amber-50 border border-amber-200"
-                )}
-              >
-                <div className="flex-1 pr-2">
-                  <p className="text-sm font-medium">{task.title}</p>
-                  {task.due_date && (
-                    <p className="text-xs text-gray-500">
-                      Due: {new Date(task.due_date).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-6 w-6"
-                  onClick={() => markTodoItemComplete(task.id, true)}
-                >
-                  <CheckCircle className="h-4 w-4" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="py-6 text-center">
-            <Check className="h-8 w-8 mx-auto text-green-500 mb-2" />
-            <p className="text-sm text-gray-500">No notifications</p>
+      <CardContent className="space-y-2 max-h-[600px] overflow-y-auto">
+        {filteredNotifications.length === 0 ? (
+          <div className="text-center text-muted-foreground p-4">
+            No notifications
           </div>
+        ) : (
+          filteredNotifications.map(notification => (
+            <div 
+              key={notification.id} 
+              className="p-3 bg-accent rounded-md relative border border-border"
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 absolute top-1 right-1"
+                onClick={() => handleDeleteNotification(notification.id)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+              
+              <div className="flex items-start mb-1">
+                {notification.type === "agenda" && <Calendar className="h-4 w-4 mr-2 text-blue-500" />}
+                {notification.type === "todo" && <CheckSquare className="h-4 w-4 mr-2 text-green-500" />}
+                {notification.type === "communication" && <MessageSquare className="h-4 w-4 mr-2 text-amber-500" />}
+                <span className="font-medium">{notification.title}</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{notification.message}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {format(notification.date, "PPp")}
+              </p>
+            </div>
+          ))
         )}
       </CardContent>
     </Card>

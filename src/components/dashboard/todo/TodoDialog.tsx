@@ -1,8 +1,14 @@
 
-import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { TodoItem } from "@/types/todo";
 import { TodoForm } from "./TodoForm";
-import { TodoItem } from "@/hooks/todo/types";
 
 interface TodoDialogProps {
   isOpen: boolean;
@@ -14,12 +20,15 @@ interface TodoDialogProps {
 
 export function TodoDialog({ isOpen, onClose, onSave, item, mode }: TodoDialogProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "add" ? "Add New Task" : "Edit Task"}
-          </DialogTitle>
+          <DialogTitle>{mode === "add" ? "Add New Task" : "Edit Task"}</DialogTitle>
+          <DialogDescription>
+            {mode === "add" 
+              ? "Create a new task to keep track of your to-dos." 
+              : "Update this task's details."}
+          </DialogDescription>
         </DialogHeader>
         
         <TodoForm 
