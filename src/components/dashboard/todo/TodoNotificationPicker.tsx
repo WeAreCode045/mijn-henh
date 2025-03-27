@@ -1,57 +1,83 @@
 
-import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CalendarIcon, ClockIcon } from "lucide-react";
+import { format } from "date-fns";
 import { TimePicker } from "../TimePicker";
 
-interface TodoNotificationPickerProps {
-  value?: Date;
-  onChange: (date: Date | undefined) => void;
+export interface TodoNotificationPickerProps {
+  value: Date;
+  onChange: React.Dispatch<React.SetStateAction<Date>>;
+  onTimeChange: React.Dispatch<React.SetStateAction<string>>;
+  timeValue: string;
 }
 
-export function TodoNotificationPicker({
-  value,
-  onChange
+export function TodoNotificationPicker({ 
+  value, 
+  onChange,
+  timeValue,
+  onTimeChange
 }: TodoNotificationPickerProps) {
+  const [date, setDate] = useState<Date | undefined>(value);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+
+  useEffect(() => {
+    if (date) {
+      onChange(date);
+    }
+  }, [date, onChange]);
+
+  const handleSelectDate = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    setIsCalendarOpen(false);
+  };
+
   return (
-    <div className="grid gap-2">
-      <Label>Set Notification (optional)</Label>
-      <Popover>
+    <div className="flex space-x-2">
+      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant={"outline"}
+            variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal",
-              !value && "text-muted-foreground"
+              !date && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {value ? format(value, "PPP") : "Notification date"}
+            {date ? format(date, "PPP") : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={value}
-            onSelect={onChange}
+            selected={date}
+            onSelect={handleSelectDate}
             initialFocus
           />
         </PopoverContent>
       </Popover>
-      {value && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="mt-1" 
-          onClick={() => onChange(undefined)}
-        >
-          Clear notification
-        </Button>
-      )}
+
+      <Popover open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "w-[140px] justify-start text-left font-normal",
+              !timeValue && "text-muted-foreground"
+            )}
+          >
+            <ClockIcon className="mr-2 h-4 w-4" />
+            {timeValue || "Set time"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-4">
+          <TimePicker value={timeValue} onChange={onTimeChange} />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

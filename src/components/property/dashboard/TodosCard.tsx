@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, CheckCircle2, CircleDashed } from "lucide-react";
 import { TodoDialog } from "@/components/dashboard/todo/TodoDialog";
-import { useTodoItems } from "@/hooks/useTodoItems";
+import { useTodoItems } from "@/hooks/todo/useTodoItems";
 import { format, isPast } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { TodoItem } from "@/types/todo";
+import { TodoItem } from "@/hooks/todo/types";
 import { useParams } from "react-router-dom";
 
 export function TodosCard() {
