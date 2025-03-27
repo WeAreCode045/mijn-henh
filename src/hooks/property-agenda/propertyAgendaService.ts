@@ -16,7 +16,7 @@ export const fetchPropertyAgendaItems = async (propertyId: string) => {
     // Transform the data to ensure it matches the AgendaItem type
     const formattedData: AgendaItem[] = data.map(item => ({
       id: item.id,
-      creator_id: item.creator_id,
+      agent_id: item.agent_id,
       property_id: item.property_id,
       title: item.title,
       description: item.description,
@@ -41,7 +41,7 @@ export const fetchPropertyAgendaItems = async (propertyId: string) => {
 };
 
 export const addPropertyAgendaItem = async (
-  userId: string,
+  agentId: string,
   propertyId: string,
   title: string, 
   description: string | null, 
@@ -53,7 +53,7 @@ export const addPropertyAgendaItem = async (
 ) => {
   // Ensure additionalUsers is properly formatted as a JSON array
   const newItem = {
-    creator_id: userId,
+    agent_id: agentId,
     property_id: propertyId,
     title,
     description,
@@ -75,7 +75,7 @@ export const addPropertyAgendaItem = async (
     // Transform to match AgendaItem type with safe handling of additional_users
     const newAgendaItem: AgendaItem = {
       id: data[0].id,
-      creator_id: data[0].creator_id,
+      agent_id: data[0].agent_id,
       property_id: data[0].property_id,
       title: data[0].title,
       description: data[0].description,

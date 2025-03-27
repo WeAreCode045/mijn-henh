@@ -45,7 +45,7 @@ export type DateRange = "today" | "tomorrow" | "thisWeek" | "thisMonth" | "all";
 export interface AgendaItem {
   id: string;
   property_id: string | null;
-  creator_id: string;
+  agent_id: string;
   title: string;
   description: string | null;
   event_date: string;
