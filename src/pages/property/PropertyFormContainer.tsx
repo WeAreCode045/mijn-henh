@@ -7,6 +7,7 @@ import { usePropertyFormContainerActions } from "@/hooks/property-form/useProper
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
 import { useSearchParams, useParams } from "react-router-dom";
+import { PropertyData } from "@/types/property";
 
 interface PropertyFormContainerProps {
   propertyId?: string;
@@ -75,10 +76,30 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
     return <PropertyFormLoader />;
   }
 
+  // Create a complete PropertyData object from formData to avoid TypeScript errors
+  const propertyData: PropertyData = {
+    id: formData.id || '',
+    title: formData.title || '',
+    price: formData.price || '',
+    address: formData.address || '',
+    bedrooms: formData.bedrooms || '',
+    bathrooms: formData.bathrooms || '',
+    sqft: formData.sqft || '',
+    livingArea: formData.livingArea || '',
+    buildYear: formData.buildYear || '',
+    garages: formData.garages || '',
+    energyLabel: formData.energyLabel || '',
+    hasGarden: formData.hasGarden || false,
+    description: formData.description || '',
+    features: formData.features || [],
+    images: formData.images || [],
+    areas: formData.areas || []
+  };
+
   return (
     <PropertyFormLayout
       title={formData.title || "Edit Property"}
-      propertyData={formData || { id: "" }}
+      propertyData={propertyData}
       settings={settings}
       isAdmin={isAdmin}
       agents={agents}

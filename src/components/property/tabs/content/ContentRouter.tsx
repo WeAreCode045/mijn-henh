@@ -91,6 +91,7 @@ export function ContentRouter({ formData, property, currentStep, handlers }: Con
       return (
         <AreasPage 
           formData={formData}
+          onFieldChange={handlers.onFieldChange} // Adding the missing onFieldChange prop
           onAddArea={handlers.onAddArea}
           onRemoveArea={handlers.onRemoveArea}
           onUpdateArea={handlers.onUpdateArea}
