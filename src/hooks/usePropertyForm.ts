@@ -1,15 +1,19 @@
 
-import { usePropertyFetch } from "./property-form/usePropertyFetch";
-import { initialFormData } from "./property-form/initialFormData";
-import type { PropertyFormData } from "@/types/property";
+import { useState, useEffect } from 'react';
+import { usePropertyFetch } from './property-form/usePropertyFetch';
 
-export function usePropertyForm(id: string | undefined, onSubmit?: (data: PropertyFormData) => void) {
-  // Use the separated fetch hook for loading property data
+export function usePropertyForm(id: string | undefined) {
   const { formData, setFormData, isLoading } = usePropertyFetch(id);
-
-  return {
-    formData,
-    setFormData,
-    isLoading
-  };
+  
+  // Add additional debugging
+  useEffect(() => {
+    console.log("usePropertyForm - Property ID:", id);
+    console.log("usePropertyForm - Has formData:", !!formData);
+    if (formData) {
+      console.log("usePropertyForm - Property title:", formData.title);
+      console.log("usePropertyForm - Property ID from data:", formData.id);
+    }
+  }, [id, formData]);
+  
+  return { formData, setFormData, isLoading };
 }

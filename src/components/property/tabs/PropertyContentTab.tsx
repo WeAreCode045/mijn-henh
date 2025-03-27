@@ -9,16 +9,16 @@ interface PropertyContentTabProps {
   formData: PropertyFormData;
   property: PropertyData; 
   handlers: {
-    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-    onAddFeature: () => void;
-    onRemoveFeature: (id: string) => void;
-    onUpdateFeature: (id: string, description: string) => void;
-    onAddArea: () => void;
-    onRemoveArea: (id: string) => void;
-    onUpdateArea: (id: string, field: any, value: any) => void;
-    onAreaImageRemove: (areaId: string, imageId: string) => void;
-    onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-    onAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
+    onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
+    onAddFeature?: () => void;
+    onRemoveFeature?: (id: string) => void;
+    onUpdateFeature?: (id: string, description: string) => void;
+    onAddArea?: () => void;
+    onRemoveArea?: (id: string) => void;
+    onUpdateArea?: (id: string, field: any, value: any) => void;
+    onAreaImageRemove?: (areaId: string, imageId: string) => void;
+    onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+    onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     currentStep: number;
     handleStepClick: (step: number) => void;
@@ -33,7 +33,7 @@ interface PropertyContentTabProps {
     setPendingChanges?: (pending: boolean) => void;
     isUpdateMode?: boolean;
     isUploading?: boolean;
-    onSubmit: () => void;
+    onSubmit?: () => void;
     isSaving?: boolean;
   };
 }
@@ -56,6 +56,10 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
   console.log("PropertyContentTab - Current step:", handlers.currentStep);
   console.log("PropertyContentTab - Step slug from URL:", stepSlug);
   console.log("PropertyContentTab - Property ID:", id);
+  console.log("PropertyContentTab - Has property data:", !!property);
+  console.log("PropertyContentTab - Has formData:", !!formData);
+  console.log("PropertyContentTab - Property title:", property?.title);
+  console.log("PropertyContentTab - FormData title:", formData?.title);
   
   // Update step based on URL when component mounts or URL changes
   useEffect(() => {
@@ -102,7 +106,9 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
     // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
     onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
     // Ensure onFieldChange is always available
-    onFieldChange: handlers.onFieldChange
+    onFieldChange: handlers.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
+      console.log(`PropertyContentTab - Fallback onFieldChange: ${String(field)} =`, value);
+    })
   };
 
   return (

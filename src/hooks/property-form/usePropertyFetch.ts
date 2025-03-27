@@ -51,9 +51,13 @@ export function usePropertyFetch(id: string | undefined) {
   
   useEffect(() => {
     async function fetchProperty() {
-      if (!id) return;
+      if (!id) {
+        console.log("usePropertyFetch - No ID provided, using initial form data");
+        return;
+      }
       
       setIsLoading(true);
+      console.log("usePropertyFetch - Fetching property with ID:", id);
       
       try {
         // Fetch the property from the database
@@ -64,8 +68,17 @@ export function usePropertyFetch(id: string | undefined) {
           .single();
         
         if (error) {
+          console.error("usePropertyFetch - Error fetching property:", error);
           throw error;
         }
+        
+        console.log("usePropertyFetch - Property data fetched:", propertyData ? {
+          id: propertyData.id,
+          title: propertyData.title,
+          features: Array.isArray(propertyData.features) ? 
+            propertyData.features.length + " features" : 
+            typeof propertyData.features
+        } : "No data");
         
         // Fetch images from property_images table
         const { data: imageData, error: imageError } = await supabase
@@ -79,6 +92,7 @@ export function usePropertyFetch(id: string | undefined) {
         }
         
         const images: PropertyImage[] = imageData || [];
+        console.log("usePropertyFetch - Images fetched:", images.length);
         
         // Filter images by type and flags
         const regularImages = images.filter(img => img.type === 'image' || !img.type);
@@ -163,7 +177,7 @@ export function usePropertyFetch(id: string | undefined) {
             })) : [];
           
           // Set the form data with safe defaults for new fields
-          setFormData({
+          const updatedFormData = {
             ...initialFormData,
             ...propertyData,
             features,
@@ -183,7 +197,13 @@ export function usePropertyFetch(id: string | undefined) {
             coverImages, // Now as PropertyImage[]
             gridImages: regularImages.slice(0, 4), // Now as PropertyImage[]
             areaPhotos // Now as PropertyImage[]
-          });
+          };
+          
+          console.log("usePropertyFetch - Setting form data with fields:", Object.keys(updatedFormData).length);
+          console.log("usePropertyFetch - FormData ID:", updatedFormData.id);
+          console.log("usePropertyFetch - FormData title:", updatedFormData.title);
+          
+          setFormData(updatedFormData);
         }
       } catch (error) {
         console.error('Error fetching property:', error);

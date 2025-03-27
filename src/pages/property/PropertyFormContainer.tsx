@@ -46,6 +46,15 @@ export function PropertyFormContainer({
     toast
   } = usePropertyFormContainerData(propertyId);
 
+  // Additional debug logging
+  useEffect(() => {
+    console.log("PropertyFormContainer - formData loaded:", !!formData);
+    if (formData) {
+      console.log("PropertyFormContainer - formData ID:", formData.id);
+      console.log("PropertyFormContainer - formData title:", formData.title);
+    }
+  }, [formData]);
+
   const {
     deleteProperty,
     saveProperty,
@@ -142,6 +151,7 @@ export function PropertyFormContainer({
       <PropertyForm 
         initialTab={initialTab}
         initialContentStep={initialContentStep}
+        formData={formData}
       />
     </PropertyFormLayout>
   );

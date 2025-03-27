@@ -7,7 +7,7 @@ import { usePropertyForm } from "@/hooks/usePropertyForm";
 export default function PropertyFormPage() {
   const { id, step } = useParams();
   const location = useLocation();
-  const { formData } = usePropertyForm(id);
+  const { formData, isLoading } = usePropertyForm(id);
 
   useEffect(() => {
     // Log to help with debugging
@@ -15,6 +15,7 @@ export default function PropertyFormPage() {
     console.log("PropertyFormPage - ID param:", id);
     console.log("PropertyFormPage - Step param:", step);
     console.log("PropertyFormPage - Has formData:", !!formData);
+    console.log("PropertyFormPage - FormData:", formData ? { id: formData.id, title: formData.title } : null);
     
     // Set document title based on property title
     if (formData?.title) {
@@ -26,7 +27,7 @@ export default function PropertyFormPage() {
     return () => {
       document.title = "Property Manager";
     };
-  }, [formData?.title, location.pathname, id, step]);
+  }, [formData?.title, location.pathname, id, step, formData]);
 
   // Determine if we're in content mode by checking the URL path
   const isContentMode = location.pathname.includes('/content/');

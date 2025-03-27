@@ -5,7 +5,7 @@ import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
 import { usePropertyForm } from "@/hooks/usePropertyForm";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { useToast } from "@/components/ui/use-toast";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -14,20 +14,27 @@ import { Clock } from "lucide-react";
 interface PropertyFormProps {
   initialTab?: string;
   initialContentStep?: number;
+  formData?: PropertyFormData;
 }
 
-export function PropertyForm({ initialTab, initialContentStep }: PropertyFormProps) {
+export function PropertyForm({ initialTab, initialContentStep, formData: propFormData }: PropertyFormProps) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { formData, setFormData, isLoading } = usePropertyForm(id);
+  const { formData: hookFormData, setFormData, isLoading } = usePropertyForm(id);
   const { settings } = useAgencySettings();
   const { toast } = useToast();
   const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const { deleteProperty } = usePropertyDeletion();
   
+  // Use formData from props if available, otherwise use from hook
+  const formData = propFormData || hookFormData;
+  
   console.log("PropertyForm - Initial tab:", initialTab);
   console.log("PropertyForm - Initial content step:", initialContentStep);
+  console.log("PropertyForm - Has form data from props:", !!propFormData);
+  console.log("PropertyForm - Has form data from hook:", !!hookFormData);
+  console.log("PropertyForm - Final form data available:", !!formData);
 
   useEffect(() => {
     if (formData?.title) {
@@ -115,9 +122,16 @@ export function PropertyForm({ initialTab, initialContentStep }: PropertyFormPro
     console.log("Main property form submission prevented");
   };
 
-  if (isLoading || !formData) {
+  if (isLoading && !formData) {
     return <div className="p-4 flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+    </div>;
+  }
+
+  if (!formData) {
+    console.error("PropertyForm - No form data available");
+    return <div className="p-4 bg-red-50 text-red-800 rounded-md">
+      Error: No property data available. Please try refreshing the page.
     </div>;
   }
 
@@ -148,6 +162,19 @@ export function PropertyForm({ initialTab, initialContentStep }: PropertyFormPro
           isArchived={!!formData.archived}
           initialTab={initialTab}
           initialContentStep={initialContentStep}
+          formData={formData}
+          // Pass necessary handlers that need to be available to inner content tabs
+          handlers={{
+            onFieldChange: (field, value) => {
+              if (setFormData) {
+                setFormData(prev => ({
+                  ...prev,
+                  [field]: value
+                }));
+              }
+            },
+            currentStep: initialContentStep || 0
+          }}
         />
       </form>
     </div>

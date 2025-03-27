@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
+  formData?: PropertyFormData;
   settings: AgencySettings;
   onSave: () => void;
   onDelete: () => Promise<void>;
@@ -16,11 +17,13 @@ interface PropertyTabsWrapperProps {
   children?: React.ReactNode;
   initialTab?: string;
   initialContentStep?: number;
+  handlers?: any;
   [key: string]: any;
 }
 
 export function PropertyTabsWrapper({
   property,
+  formData,
   settings,
   onSave,
   onDelete,
@@ -29,6 +32,7 @@ export function PropertyTabsWrapper({
   children,
   initialTab,
   initialContentStep,
+  handlers = {},
   ...props
 }: PropertyTabsWrapperProps) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,7 +90,8 @@ export function PropertyTabsWrapper({
     console.log("PropertyTabsWrapper - Property ID:", property.id);
     console.log("PropertyTabsWrapper - Initial tab prop:", initialTab);
     console.log("PropertyTabsWrapper - Initial content step prop:", initialContentStep);
-  }, [activeTab, property.id, initialTab, initialContentStep, contentStep]);
+    console.log("PropertyTabsWrapper - Has formData:", !!formData);
+  }, [activeTab, property.id, initialTab, initialContentStep, contentStep, formData]);
 
   const handleTabChange = (value: string) => {
     console.log("PropertyTabsWrapper - Tab change requested to:", value);
@@ -96,6 +101,13 @@ export function PropertyTabsWrapper({
   const handleStepClick = (step: number) => {
     console.log("PropertyTabsWrapper - Content step change requested to:", step);
     setContentStep(step);
+  };
+
+  // Combine provided handlers with local handlers
+  const combinedHandlers = {
+    ...handlers,
+    currentStep: contentStep,
+    handleStepClick: handleStepClick
   };
 
   return (
@@ -138,12 +150,8 @@ export function PropertyTabsWrapper({
       <PropertyTabContents
         activeTab={activeTab}
         property={property}
-        formData={props.formData || property}
-        handlers={{
-          ...props.handlers,
-          currentStep: contentStep,
-          handleStepClick: handleStepClick
-        }}
+        formData={formData || property}
+        handlers={combinedHandlers}
         onSave={onSave}
         onDelete={onDelete}
         handleSaveObjectId={props.handleSaveObjectId}

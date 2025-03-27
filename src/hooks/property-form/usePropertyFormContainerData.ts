@@ -25,6 +25,16 @@ export function usePropertyFormContainerData(propertyIdFromUrl?: string | null) 
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Additional logging to help debug
+  useEffect(() => {
+    console.log("usePropertyFormContainerData - isLoading:", isLoading);
+    console.log("usePropertyFormContainerData - Has formData:", !!formData);
+    if (formData) {
+      console.log("usePropertyFormContainerData - formData ID:", formData.id);
+      console.log("usePropertyFormContainerData - formData title:", formData.title);
+    }
+  }, [formData, isLoading]);
+
   // Set selected agent when formData changes
   useEffect(() => {
     if (formData?.agent_id) {
