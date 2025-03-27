@@ -69,7 +69,10 @@ export function QuickActions() {
           <DialogHeader>
             <DialogTitle>New Agenda Item</DialogTitle>
           </DialogHeader>
-          <AgendaDialog onSave={() => setIsAgendaDialogOpen(false)} />
+          <AgendaDialog onSave={() => {
+            setIsAgendaDialogOpen(false);
+            return Promise.resolve();
+          }} />
         </DialogContent>
       </Dialog>
     </Card>

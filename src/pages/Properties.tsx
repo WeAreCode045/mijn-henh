@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { useProperties } from "@/hooks/useProperties";
+import { useProperties, Property } from "@/hooks/useProperties";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,7 +18,7 @@ export default function Properties() {
   const { toast } = useToast();
   const { isAdmin } = useAuth();
   const { agents } = useAgentSelect();
-  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("all-agents");
 
   useEffect(() => {
@@ -115,7 +114,7 @@ export default function Properties() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredProperties.map((property: PropertyData) => (
+            {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}
                 property={property}
