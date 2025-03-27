@@ -4,19 +4,12 @@ import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Filter } from "lucide-react";
 import { TodoList } from "./todo/TodoList";
-import { TodoDialog } from "./dashboard/todo/TodoDialog";
-import { useTodoItems, TodoItem } from "@/hooks/useTodoItems";
+import { TodoDialog } from "./todo/TodoDialog";
+import { useTodoItems } from "@/hooks/useTodoItems";
 import { useProperties } from "@/hooks/useProperties";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { TodoItem } from "@/types/todo";
 
 export function TodoSection() {
   const [showCompleted, setShowCompleted] = useState(false);

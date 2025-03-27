@@ -13,6 +13,7 @@ interface Agent {
 export function useAgentSelect() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const { toast } = useToast();
 
   const fetchAgents = async () => {
@@ -43,6 +44,8 @@ export function useAgentSelect() {
   return {
     agents,
     isLoading,
-    refreshAgents: fetchAgents
+    refreshAgents: fetchAgents,
+    selectedAgent,
+    setSelectedAgent
   };
 }

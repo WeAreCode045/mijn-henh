@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 interface TodoDatePickerProps {
-  label: string;
-  date: Date | undefined;
-  onDateChange: (date: Date | undefined) => void;
+  value?: Date;
+  onChange: (date: Date | undefined) => void;
+  label?: string;
 }
 
-export function TodoDatePicker({ label, date, onDateChange }: TodoDatePickerProps) {
+export function TodoDatePicker({ value, onChange, label = "Due Date" }: TodoDatePickerProps) {
   return (
     <div className="grid gap-2">
       <Label>{label} (optional)</Label>
@@ -23,28 +23,28 @@ export function TodoDatePicker({ label, date, onDateChange }: TodoDatePickerProp
             variant={"outline"}
             className={cn(
               "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !value && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : `Pick a ${label.toLowerCase()}`}
+            {value ? format(value, "PPP") : `Pick a ${label.toLowerCase()}`}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={date}
-            onSelect={onDateChange}
+            selected={value}
+            onSelect={onChange}
             initialFocus
           />
         </PopoverContent>
       </Popover>
-      {date && (
+      {value && (
         <Button 
           variant="ghost" 
           size="sm" 
           className="mt-1" 
-          onClick={() => onDateChange(undefined)}
+          onClick={() => onChange(undefined)}
         >
           Clear {label.toLowerCase()}
         </Button>
