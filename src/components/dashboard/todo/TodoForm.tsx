@@ -32,10 +32,10 @@ export function TodoForm({ item, mode, onClose, onSave }: TodoFormProps) {
   const [dueDate, setDueDate] = useState<Date | undefined>(
     item?.due_date ? new Date(item.due_date) : undefined
   );
-  const [assignedToId, setAssignedToId] = useState<string | undefined>(
+  const [assignedToId, setAssignedToId] = useState<string | null | undefined>(
     item?.assigned_to_id
   );
-  const [propertyId, setPropertyId] = useState<string | undefined>(
+  const [propertyId, setPropertyId] = useState<string | null | undefined>(
     item?.property_id
   );
   const [completed, setCompleted] = useState(item?.completed || false);
@@ -96,6 +96,14 @@ export function TodoForm({ item, mode, onClose, onSave }: TodoFormProps) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAssignedToChange = (id: string | null) => {
+    setAssignedToId(id);
+  };
+
+  const handlePropertyChange = (id: string | null) => {
+    setPropertyId(id);
   };
   
   return (
@@ -174,8 +182,8 @@ export function TodoForm({ item, mode, onClose, onSave }: TodoFormProps) {
       <TodoAssignmentFields
         assignedToId={assignedToId}
         propertyId={propertyId}
-        onAssignedToChange={setAssignedToId}
-        onPropertyChange={setPropertyId}
+        onAssignedToChange={handleAssignedToChange}
+        onPropertyChange={handlePropertyChange}
       />
       
       {mode === "edit" && (

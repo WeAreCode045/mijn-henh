@@ -5,7 +5,7 @@ import { TodoItem, TodoItemInput, TodoItemUpdate } from "./types";
 // Formats date objects to ISO strings for Supabase
 export const formatTodoItemDates = <T extends { due_date?: Date | string | null; notify_at?: Date | string | null }>(
   item: T
-): T => {
+): Omit<T, 'due_date' | 'notify_at'> & { due_date?: string | null; notify_at?: string | null } => {
   return {
     ...item,
     due_date: item.due_date instanceof Date ? item.due_date.toISOString() : item.due_date,
@@ -41,6 +41,7 @@ export const fetchTodoItems = async (propertyId?: string): Promise<TodoItem[]> =
 
 // Add a new todo item
 export const addTodoItem = async (todoItem: TodoItemInput): Promise<TodoItem> => {
+  // Format dates for Supabase
   const formattedItem = formatTodoItemDates(todoItem);
   
   // Insert a single item, not an array

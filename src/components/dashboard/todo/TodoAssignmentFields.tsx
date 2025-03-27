@@ -12,12 +12,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TodoAssignmentFieldsProps {
   assignedToId?: string | null;
+  propertyId?: string | null;
   onAssignedToChange: (id: string | null) => void;
+  onPropertyChange?: (id: string | null) => void;
 }
 
 export function TodoAssignmentFields({
   assignedToId,
-  onAssignedToChange
+  propertyId,
+  onAssignedToChange,
+  onPropertyChange
 }: TodoAssignmentFieldsProps) {
   const [agents, setAgents] = useState<{id: string; full_name: string}[]>([]);
   
