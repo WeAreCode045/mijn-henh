@@ -60,7 +60,7 @@ export const addPropertyAgendaItem = async (
     event_date: date,
     event_time: time,
     end_date: endDate,
-    end_time: endTime,
+    end_time: endTime && endTime.trim() !== "" ? endTime : null,
     additional_users: additionalUsers || []
   };
 
@@ -108,16 +108,28 @@ export const updatePropertyAgendaItem = async (
   endTime: string | null = null,
   additionalUsers: string[] = []
 ) => {
-  // Ensure additionalUsers is properly formatted as a JSON array
-  const updates = {
+  // Create an update object with only the fields we want to update
+  const updates: any = {
     title,
     description,
     event_date: date,
     event_time: time,
-    end_date: endDate,
-    end_time: endTime,
     additional_users: additionalUsers || []
   };
+  
+  // Only include end_date if it's provided
+  if (endDate) {
+    updates.end_date = endDate;
+  } else {
+    updates.end_date = null;
+  }
+  
+  // Only include end_time if it's provided and not an empty string
+  if (endTime && endTime.trim() !== "") {
+    updates.end_time = endTime;
+  } else {
+    updates.end_time = null;
+  }
 
   const { data, error } = await supabase
     .from('property_agenda_items')

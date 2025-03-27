@@ -51,6 +51,9 @@ export function usePropertyAgenda(initialPropertyId?: string): UsePropertyAgenda
     if (!id || !user?.id) return null;
 
     try {
+      // Handle empty endTime
+      const safeEndTime = endTime && endTime.trim() !== "" ? endTime : null;
+      
       const newAgendaItem = await addPropertyAgendaItem(
         user.id,
         id,
@@ -59,7 +62,7 @@ export function usePropertyAgenda(initialPropertyId?: string): UsePropertyAgenda
         date,
         time,
         endDate,
-        endTime,
+        safeEndTime,
         additionalUsers
       );
       
@@ -92,6 +95,9 @@ export function usePropertyAgenda(initialPropertyId?: string): UsePropertyAgenda
     if (!user?.id) return null;
     
     try {
+      // Handle empty endTime
+      const safeEndTime = endTime && endTime.trim() !== "" ? endTime : null;
+      
       const updatedItem = await updatePropertyAgendaItem(
         id,
         title,
@@ -99,7 +105,7 @@ export function usePropertyAgenda(initialPropertyId?: string): UsePropertyAgenda
         date,
         time,
         endDate,
-        endTime,
+        safeEndTime,
         additionalUsers
       );
 
@@ -113,7 +119,7 @@ export function usePropertyAgenda(initialPropertyId?: string): UsePropertyAgenda
               event_date: date,
               event_time: time,
               end_date: endDate,
-              end_time: endTime,
+              end_time: safeEndTime,
               additional_users: additionalUsers
             } : item
           )

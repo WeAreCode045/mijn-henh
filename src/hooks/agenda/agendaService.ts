@@ -75,7 +75,7 @@ export const addAgendaItem = async (
       event_date: eventDate,
       event_time: eventTime,
       end_date: endDate,
-      end_time: endTime,
+      end_time: endTime || null,
       additional_users: additionalUsers
     });
 
@@ -102,18 +102,33 @@ export const updateAgendaItem = async (
   additionalUsers: string[] = [],
   propertyId?: string | null
 ) => {
+  // Create update object with required fields
+  const updateObj: any = {
+    property_id: propertyId,
+    title,
+    description,
+    event_date: eventDate,
+    event_time: eventTime,
+    additional_users: additionalUsers
+  };
+  
+  // Only add end_date if it has a value
+  if (endDate) {
+    updateObj.end_date = endDate;
+  } else {
+    updateObj.end_date = null;
+  }
+  
+  // Only add end_time if it has a value
+  if (endTime && endTime.trim() !== "") {
+    updateObj.end_time = endTime;
+  } else {
+    updateObj.end_time = null;
+  }
+
   const { error } = await supabase
     .from('property_agenda_items')
-    .update({
-      property_id: propertyId,
-      title,
-      description,
-      event_date: eventDate,
-      event_time: eventTime,
-      end_date: endDate,
-      end_time: endTime,
-      additional_users: additionalUsers
-    })
+    .update(updateObj)
     .eq('id', agendaItemId);
 
   if (error) throw error;

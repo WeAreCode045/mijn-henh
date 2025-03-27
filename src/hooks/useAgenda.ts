@@ -51,7 +51,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
         eventDate,
         eventTime,
         endDate,
-        endTime,
+        endTime && endTime.trim() !== "" ? endTime : null,
         additionalUsers,
         propertyId
       );
@@ -104,6 +104,9 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
     propertyId?: string | null
   ) => {
     try {
+      // Make sure empty string for endTime is converted to null
+      const safeEndTime = endTime && endTime.trim() !== "" ? endTime : null;
+      
       await updateItem(
         agendaItemId,
         title,
@@ -111,7 +114,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
         eventDate,
         eventTime,
         endDate,
-        endTime,
+        safeEndTime,
         additionalUsers,
         propertyId
       );
