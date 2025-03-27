@@ -1,62 +1,51 @@
+
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { PropertyData } from "@/types/property";
-import { transformSupabaseData } from "@/components/property/webview/utils/transformSupabaseData";
-import { useAuth } from "@/providers/AuthProvider";
-import { usePropertyDeletion } from "./usePropertyDeletion";
 
-export const useProperties = () => {
-  const { toast } = useToast();
-  const { profile, isAdmin } = useAuth();
-  const { deleteProperty } = usePropertyDeletion();
+export interface Property {
+  id: string;
+  title: string;
+  address?: string;
+  status?: string;
+  object_id?: string;
+}
 
-  const fetchProperties = async () => {
-    let query = supabase
-      .from('properties')
-      .select(`
-        *,
-        property_images(*),
-        agent:profiles(id, full_name, email, phone, avatar_url)
-      `);
+export function useProperties(searchTerm: string = "", limit: number = 10) {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    if (!isAdmin) {
-      query = query.eq('agent_id', profile.id);
-    }
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      try {
+        let query = supabase
+          .from('properties')
+          .select('id, title, address, status, object_id')
+          .eq('archived', false)
+          .order('title');
+          
+        if (searchTerm) {
+          query = query.ilike('title', `%${searchTerm}%`);
+        }
+        
+        query = query.limit(limit);
+        
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        if (data) {
+          setProperties(data);
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        setProperties([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    fetchProperties();
+  }, [searchTerm, limit]);
 
-    if (error) {
-      throw error;
-    }
-
-    return (data || []).map(item => {
-      const propertyWithAgent = {
-        ...item,
-        agent: item.agent || null
-      };
-      return transformSupabaseData(propertyWithAgent as any);
-    });
-  };
-
-  const { data: properties = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['properties', profile?.id, isAdmin],
-    queryFn: fetchProperties,
-  });
-
-  const handleDelete = async (id: string) => {
-    const success = await deleteProperty(id);
-    
-    if (success) {
-      refetch();
-    }
-  };
-
-  return {
-    properties,
-    isLoading,
-    error,
-    handleDelete,
-    refetch
-  };
-};
+  return { properties, isLoading };
+}
