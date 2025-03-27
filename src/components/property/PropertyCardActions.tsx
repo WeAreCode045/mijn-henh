@@ -34,7 +34,7 @@ export const PropertyCardActions = ({
         size="icon"
         onClick={(e) => {
           e.stopPropagation(); // Prevent card click propagation
-          navigate(`/property/${property.id}/dashboard`);
+          navigate(`/?tab=property&propertyId=${property.id}`);
         }}
         title="Dashboard"
       >
@@ -67,7 +67,7 @@ export const PropertyCardActions = ({
         size="icon"
         onClick={(e) => {
           e.stopPropagation(); // Prevent card click propagation
-          navigate(`/property/${property.id}/communications`);
+          onShowSubmissions();
         }}
         className="relative"
         title="Communications"

@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RecentProperties } from "./RecentProperties";
@@ -10,7 +9,7 @@ import { CommunicationsSection } from "./CommunicationsSection";
 import { UnderConstructionView } from "./UnderConstructionView";
 import { NotificationsSection } from "./NotificationsSection";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { PropertyFormContainer } from "@/pages/property/PropertyFormContainer";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { useProperties } from "@/hooks/useProperties";
@@ -23,12 +22,12 @@ export function DashboardTabs() {
   const [activeTab, setActiveTab] = useState("overview");
   const location = useLocation();
   const navigate = useNavigate();
-  const { id: propertyId } = useParams();
+  const [searchParams] = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
   const { properties, isLoading, handleDelete } = useProperties();
   
   // Check for tab parameter in URL
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get('tab');
     if (tabParam && ['overview', 'properties', 'agenda', 'todos', 'comms', 'analytics', 'notifications', 'property'].includes(tabParam)) {
       setActiveTab(tabParam);
@@ -36,17 +35,23 @@ export function DashboardTabs() {
       // If we have a property ID in the URL but no tab specified, we should show the property tab
       setActiveTab("property");
     }
-  }, [location, propertyId]);
+  }, [searchParams, propertyId]);
 
   // Handle tab changes, updating the URL
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     
     // Update URL with tab parameter
-    const searchParams = new URLSearchParams(location.search);
+    const newSearchParams = new URLSearchParams(searchParams);
     if (value !== "property") {
-      searchParams.set('tab', value);
-      navigate({ search: searchParams.toString() });
+      newSearchParams.set('tab', value);
+      // Keep propertyId if it exists
+      if (propertyId && value === "property") {
+        newSearchParams.set('propertyId', propertyId);
+      } else if (propertyId && value !== "property") {
+        newSearchParams.delete('propertyId');
+      }
+      navigate({ search: newSearchParams.toString() });
     }
   };
 
@@ -153,13 +158,11 @@ export function DashboardTabs() {
           </CardContent>
         </TabsContent>
 
-        {propertyId && (
-          <TabsContent value="property">
-            <CardContent className="p-6">
-              <PropertyFormContainer />
-            </CardContent>
-          </TabsContent>
-        )}
+        <TabsContent value="property">
+          <CardContent className="p-6">
+            <PropertyFormContainer />
+          </CardContent>
+        </TabsContent>
       </Tabs>
     </Card>
   );

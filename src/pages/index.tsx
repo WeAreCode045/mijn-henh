@@ -2,7 +2,7 @@
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { PropertyQuickNav } from "@/components/dashboard/PropertyQuickNav";
 import { ActivityIndicators } from "@/components/dashboard/ActivityIndicators";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 export default function Index() {
   const [searchParams] = useSearchParams();
