@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -150,7 +151,7 @@ export function AgendaSection() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-1">
             <AgendaCalendarView 
-              agendaItems={agendaItems} 
+              agendaItems={safeAgendaItems} 
               isLoading={isLoading}
               onDayClick={() => {}}
               className="w-full"
@@ -158,7 +159,7 @@ export function AgendaSection() {
             />
           </div>
           <div className="md:col-span-3">
-            {!isLoading && agendaItems.length === 0 ? (
+            {!isLoading && safeAgendaItems.length === 0 ? (
               <EmptyAgendaNotification />
             ) : (
               <div className="flex flex-col space-y-3">
@@ -177,7 +178,7 @@ export function AgendaSection() {
       </TabsContent>
       
       <TabsContent value="list" className="mt-0">
-        {!isLoading && agendaItems.length === 0 ? (
+        {!isLoading && safeAgendaItems.length === 0 ? (
           <EmptyAgendaNotification />
         ) : (
           <div className="flex flex-col space-y-3">

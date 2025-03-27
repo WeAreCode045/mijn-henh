@@ -282,6 +282,7 @@ export type Database = {
         Row: {
           additional_users: Json | null
           created_at: string
+          created_by: string | null
           creator_id: string
           description: string | null
           end_date: string | null
@@ -296,6 +297,7 @@ export type Database = {
         Insert: {
           additional_users?: Json | null
           created_at?: string
+          created_by?: string | null
           creator_id: string
           description?: string | null
           end_date?: string | null
@@ -310,6 +312,7 @@ export type Database = {
         Update: {
           additional_users?: Json | null
           created_at?: string
+          created_by?: string | null
           creator_id?: string
           description?: string | null
           end_date?: string | null
