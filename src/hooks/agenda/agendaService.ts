@@ -23,8 +23,8 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
     // 2. In the additional_users array OR
     // 3. The agent assigned to the property
     
-    // Fix the JSON syntax issue by properly formatting the contains operator
-    query = query.or(`agent_id.eq.${userId},additional_users.cs.{${userId}},property_id.in.(select id from properties where agent_id = '${userId}')`);
+    // Properly format the query with correct JSON syntax for the contains operator
+    query = query.or(`agent_id.eq.${userId},additional_users.cs.{"${userId}"},property_id.in.(select id from properties where agent_id = '${userId}')`);
   }
 
   const { data, error } = await query;
