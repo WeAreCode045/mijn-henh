@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAgentSelect } from "@/hooks/useAgentSelect";
 import { useAuth } from "@/providers/AuthProvider";
 import { useState, useEffect } from "react";
+import { PropertyData } from "@/types/property";
 
 export default function Properties() {
   const navigate = useNavigate();
@@ -119,6 +120,7 @@ export default function Properties() {
                 key={property.id}
                 property={{
                   ...property,
+                  price: property.price || "", // Ensure price is defined and required
                   bedrooms: "",
                   bathrooms: "",
                   sqft: "",
@@ -135,7 +137,7 @@ export default function Properties() {
                   map_image: null,
                   latitude: null,
                   longitude: null
-                }}
+                } as PropertyData}
                 onDelete={handleDelete}
               />
             ))}
