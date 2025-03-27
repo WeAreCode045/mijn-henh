@@ -28,6 +28,7 @@ export function PropertyFormContainer() {
     handleViewProperty
   } = usePropertyFormContainerData();
 
+  // Get property form data
   const { setFormData } = usePropertyForm(id);
 
   // Get the settings here directly
@@ -43,7 +44,7 @@ export function PropertyFormContainer() {
   } = {
     deleteProperty: async () => {},
     saveProperty: async () => {},
-    handleAgentChange: async (agentId: string) => {}, // Fixed type from 'any' to 'string'
+    handleAgentChange: async (agentId: string) => {}, 
     handleImageUpload: async () => {},
     handleRemoveImage: async () => {},
     images: []
@@ -60,7 +61,7 @@ export function PropertyFormContainer() {
       settings={settings}
       isAdmin={isAdmin}
       agents={agents}
-      selectedAgent={selectedAgent ? selectedAgent.id : ""} // Fixed by passing the ID string instead of the whole Agent object
+      selectedAgent={selectedAgent ? selectedAgent.id : ""}
       onAgentSelect={handleAgentChange}
       onDeleteProperty={deleteProperty}
       onSaveProperty={saveProperty}

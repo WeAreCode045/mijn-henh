@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/providers/AuthProvider";
 import { TodoItem } from "@/types/todo";
 
+// Use export type for re-export when isolatedModules is enabled
 export type { TodoItem };
 
 export function useTodoItems(propertyId?: string) {
@@ -46,7 +47,7 @@ export function useTodoItems(propertyId?: string) {
   
   const addTodoItem = async (todoItem: Omit<TodoItem, "id" | "created_at" | "updated_at">) => {
     try {
-      // Ensure date fields are converted to ISO strings for Supabase
+      // Ensure date fields are properly formatted for Supabase
       const formattedItem = {
         ...todoItem,
         due_date: todoItem.due_date instanceof Date ? todoItem.due_date.toISOString() : todoItem.due_date,
@@ -81,7 +82,7 @@ export function useTodoItems(propertyId?: string) {
   
   const updateTodoItem = async (id: string, todoItem: Partial<Omit<TodoItem, "id" | "created_at" | "updated_at">>) => {
     try {
-      // Ensure date fields are converted to ISO strings for Supabase
+      // Ensure date fields are properly formatted for Supabase
       const formattedItem = {
         ...todoItem,
         due_date: todoItem.due_date instanceof Date ? todoItem.due_date.toISOString() : todoItem.due_date,

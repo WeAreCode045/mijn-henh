@@ -129,6 +129,8 @@ export function TodoForm({ item, mode, onClose, onSave }: TodoFormProps) {
         <TodoNotificationPicker
           value={notifyAt}
           onChange={setNotifyAt}
+          timeValue={notifyTime}
+          onTimeChange={setNotifyTime}
         />
         
         <TodoAssignmentFields

@@ -12,7 +12,7 @@ export const usePropertyFormContainerData = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { formData, isLoading } = usePropertyForm(id);
+  const { formData, isLoading, error } = usePropertyForm(id);
   const { agents, selectedAgent, setSelectedAgent } = useAgentSelect();
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +53,7 @@ export const usePropertyFormContainerData = () => {
     id,
     formData,
     isLoading,
+    error,
     agents, 
     saving,
     setSaving,
