@@ -117,7 +117,25 @@ export default function Properties() {
             {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}
-                property={property}
+                property={{
+                  ...property,
+                  bedrooms: "",
+                  bathrooms: "",
+                  sqft: "",
+                  livingArea: "",
+                  buildYear: "",
+                  garages: "",
+                  energyLabel: "",
+                  hasGarden: false,
+                  description: "",
+                  location_description: "",
+                  features: [],
+                  areas: [],
+                  images: [],
+                  map_image: null,
+                  latitude: null,
+                  longitude: null
+                }}
                 onDelete={handleDelete}
               />
             ))}
