@@ -14,6 +14,7 @@ interface AgendaViewContentProps {
   setDateRange: (range: DateRange) => void;
   filteredAgendaItems: AgendaItem[];
   onItemClick: (item: AgendaItem) => void;
+  onAddClick?: (e: React.MouseEvent) => void;
 }
 
 export function AgendaViewContent({
@@ -23,7 +24,8 @@ export function AgendaViewContent({
   dateRange,
   setDateRange,
   filteredAgendaItems,
-  onItemClick
+  onItemClick,
+  onAddClick
 }: AgendaViewContentProps) {
   if (isLoading) {
     return (
@@ -42,7 +44,7 @@ export function AgendaViewContent({
   }
 
   if (!safeAgendaItems || safeAgendaItems.length === 0) {
-    return <EmptyAgendaNotification />;
+    return <EmptyAgendaNotification onAddClick={onAddClick || (() => {})} />;
   }
 
   return (
@@ -54,8 +56,9 @@ export function AgendaViewContent({
 
       {view === "calendar" ? (
         <AgendaCalendarView 
-          filteredAgendaItems={filteredAgendaItems} 
-          onItemClick={onItemClick} 
+          agendaItems={filteredAgendaItems} 
+          isLoading={false}
+          onDayClick={undefined}
         />
       ) : (
         <AgendaItemList 

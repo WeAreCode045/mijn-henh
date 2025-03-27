@@ -132,6 +132,7 @@ export function AgendaSection() {
           setDateRange={setDateRange}
           filteredAgendaItems={filteredAgendaItems}
           onItemClick={handleAgendaItemClick}
+          onAddClick={handleAddButtonClick}
         />
       </TabsContent>
       
@@ -144,6 +145,7 @@ export function AgendaSection() {
           setDateRange={setDateRange}
           filteredAgendaItems={filteredAgendaItems}
           onItemClick={handleAgendaItemClick}
+          onAddClick={handleAddButtonClick}
         />
       </TabsContent>
       
