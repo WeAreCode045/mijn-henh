@@ -217,4 +217,5 @@ export function AgendaDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  
+  );
+}
