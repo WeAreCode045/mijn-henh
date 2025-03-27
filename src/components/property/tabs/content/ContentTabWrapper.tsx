@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { ContentRouter } from './ContentRouter';
 import { usePropertyContentStepNavigation } from '@/hooks/usePropertyContentStepNavigation';
-import { useParams } from 'react-router-dom';
 
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
@@ -70,12 +69,17 @@ export function ContentTabWrapper({
       }
     },
     // Ensure isSaving is not undefined for ContentRouter
-    isSaving: handlers.isSaving || false
+    isSaving: handlers.isSaving || false,
+    // Add handleNext and handlePrevious to the handlers
+    handleNext,
+    handlePrevious
   };
 
+  // Pass both formData and property to ContentRouter
   return (
     <ContentRouter 
       formData={formData}
+      property={property}
       currentStep={handlers.currentStep}
       handlers={contentHandlers}
     />

@@ -16,6 +16,17 @@ export function GeneralPage({
   onFieldChange,
   setPendingChanges
 }: GeneralPageProps) {
+  // Log to help with debugging
+  console.log("GeneralPage - Form data:", {
+    title: formData?.title,
+    description: formData?.description ? formData.description.substring(0, 20) + '...' : 'N/A',
+    hasData: !!formData
+  });
+
+  if (!formData) {
+    return <div>Loading property data...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

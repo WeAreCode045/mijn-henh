@@ -22,8 +22,13 @@ interface PropertyContentTabProps {
     currentStep: number;
     handleStepClick: (step: number) => void;
     onFetchLocationData?: () => Promise<void>;
+    onFetchCategoryPlaces?: (category: string) => Promise<any>;
+    onFetchNearbyCities?: () => Promise<any>;
+    onGenerateLocationDescription?: () => Promise<void>;
+    onGenerateMap?: () => Promise<void>;
     onRemoveNearbyPlace?: (index: number) => void;
     isLoadingLocationData?: boolean;
+    isGeneratingMap?: boolean;
     setPendingChanges?: (pending: boolean) => void;
     isUpdateMode?: boolean;
     isUploading?: boolean;
@@ -45,6 +50,13 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
   const { step: stepSlug, id } = useParams<{ step: string; id: string }>();
   const navigate = useNavigate();
   
+  // Log to help with debugging
+  console.log("PropertyContentTab - Using property data:", {
+    id: property?.id,
+    title: property?.title,
+    description: property?.description ? property.description.substring(0, 20) + '...' : 'N/A'
+  });
+  
   // Update step based on URL when component mounts or URL changes
   useEffect(() => {
     if (stepSlug && stepSlugMap[stepSlug] !== undefined && handlers.currentStep !== stepSlugMap[stepSlug]) {
@@ -54,6 +66,14 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
       navigate(`/property/${id}/content/general`);
     }
   }, [stepSlug, handlers, id, navigate, handlers.currentStep]);
+
+  // Check that we have valid data
+  if (!formData || !property) {
+    console.error("PropertyContentTab - Missing required data", { 
+      hasFormData: !!formData, 
+      hasProperty: !!property 
+    });
+  }
 
   // Ensure all necessary props are passed to ContentTabWrapper
   const completeHandlers = {

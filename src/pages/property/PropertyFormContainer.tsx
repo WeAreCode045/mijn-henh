@@ -20,6 +20,9 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
   const propertyId = propPropertyId || searchParams.get("propertyId") || paramsId;
   const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
   
+  // Log to help with debugging
+  console.log("PropertyFormContainer - Using property ID:", propertyId);
+  
   const {
     id,
     formData,
@@ -33,10 +36,6 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
     setIsSubmitting,
     toast
   } = usePropertyFormContainerData(propertyId);
-
-  useEffect(() => {
-    console.log("PropertyFormContainer - Using property ID:", propertyId || id);
-  }, [propertyId, id]);
 
   const {
     deleteProperty,
@@ -59,6 +58,10 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
   useEffect(() => {
     if (formData?.title) {
       document.title = formData.title;
+      console.log("PropertyFormContainer - Property loaded:", {
+        id: formData.id,
+        title: formData.title
+      });
     } else {
       document.title = "Edit Property";
     }
@@ -75,7 +78,7 @@ export function PropertyFormContainer({ propertyId: propPropertyId }: PropertyFo
   return (
     <PropertyFormLayout
       title={formData.title || "Edit Property"}
-      propertyData={formData || { id: "" } as any}
+      propertyData={formData || { id: "" }}
       settings={settings}
       isAdmin={isAdmin}
       agents={agents}
