@@ -14,7 +14,8 @@ import {
   createTodoItem,
   updateTodoItem as updateTodoItemService,
   updateTodoOrder as updateTodoOrderService,
-  deleteTodoItem as deleteTodoItemService
+  deleteTodoItem as deleteTodoItemService,
+  addTodoItem
 } from "./todoService";
 
 export function useTodoItems(propertyId?: string): UseTodoItemsReturn {
@@ -122,7 +123,7 @@ export function useTodoItems(propertyId?: string): UseTodoItemsReturn {
   
   const updateTodoOrder = async (items: TodoItem[]) => {
     try {
-      // Create an array of updates with id and new sort_order
+      // Extract only the necessary properties for the update
       const updates = items.map((item, index) => ({
         id: item.id,
         sort_order: index

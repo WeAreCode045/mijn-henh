@@ -80,16 +80,19 @@ export const deleteTodoItem = async (id: string): Promise<void> => {
   }
 };
 
-// Update multiple todo items at once (used for reordering)
-export const updateTodoOrder = async (items: TodoItem[]): Promise<void> => {
-  // This would need to be implemented if batch updates are needed
-  // Supabase doesn't have a direct batch update, so we might need 
-  // to use transactions or multiple calls
+// Update the sort order of multiple todo items
+export const updateTodoOrder = async (items: { id: string; sort_order: number }[]): Promise<void> => {
+  // Update each item one by one since Supabase doesn't support batch updates
   for (const item of items) {
-    await supabase
+    const { error } = await supabase
       .from("todo_items")
       .update({ sort_order: item.sort_order })
       .eq("id", item.id);
+    
+    if (error) {
+      console.error("Error updating todo item sort order:", error);
+      throw error;
+    }
   }
 };
 

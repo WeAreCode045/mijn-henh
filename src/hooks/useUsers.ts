@@ -59,6 +59,6 @@ export function useUsers() {
     users,
     refetch,
     deleteUser,
-    isLoading // Add the isLoading property
+    isLoading // Make sure isLoading is included in the return value
   };
 }
