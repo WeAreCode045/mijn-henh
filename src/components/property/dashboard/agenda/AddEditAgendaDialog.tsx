@@ -12,24 +12,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { UserSelectionSection } from "@/components/dashboard/agenda/form/UserSelectionSection";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { AgendaAddEditDialogProps } from "./types";
-import { supabase } from "@/integrations/supabase/client";
+import { useUsers } from "@/hooks/useUsers";
 
 export function AddEditAgendaDialog({
   isOpen,
@@ -47,26 +40,12 @@ export function AddEditAgendaDialog({
   setEndDate,
   endTime,
   setEndTime,
-
   availableUsers,
   mode
 }: AgendaAddEditDialogProps) {
-   const [additionalUsers, setAdditionalUsers] = useState<{id: string; full_name: string}[]>([]);
-    const fetchAgents = async () => {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .order('full_name').limit(5);
-          console.log([data,error]);
-          if (!error && data) {
-            // Make sure all agents have valid ids
-            setAdditionalUsers(data.map(agent => ({
-              id: agent.id || ⁠ agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)} ⁠,
-              full_name: agent.full_name || "Unnamed Agent"
-            })));
-          }
-        };
-    fetchAgents();
+  const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
+  const { users, isLoading: usersLoading } = useUsers();
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -179,56 +158,12 @@ export function AddEditAgendaDialog({
             />
           </div>
           
-          <div className="grid grid-cols-4 items-start gap-4">
-            <label htmlFor="additionalUsers" className="text-right col-span-1 pt-2">
-              Share With
-            </label>
-            <div className="col-span-3">
-              <Select 
-                onValueChange={(value) => {
-                  if (!additionalUsers.includes(value)) {
-                    setAdditionalUsers([...additionalUsers, value]);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select users to share with" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUsers.map(user => (
-                    <SelectItem 
-                      key={user.id} 
-                      value={user.id}
-                      disabled={additionalUsers.includes(user.id)}
-                    >
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {additionalUsers.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {additionalUsers.map(userId => {
-                    const user = availableUsers.find(u => u.id === userId);
-                    return (
-                      <Badge key={userId} variant="secondary" className="flex items-center gap-1">
-                        {user?.name || "Unknown User"}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 p-0 hover:bg-transparent"
-                          onClick={() => handleRemoveUser(userId)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
+          <UserSelectionSection
+            additionalUsers={additionalUsers}
+            setAdditionalUsers={setAdditionalUsers}
+            availableUsers={availableUsers}
+            usersLoading={usersLoading}
+          />
           
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="description" className="text-right col-span-1">
