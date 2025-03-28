@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
+  console.log("agendaService - Fetching items for userId:", userId, "propertyId:", propertyId);
+  
   let query = supabase
     .from('property_agenda_items')
     .select(`
@@ -17,20 +19,27 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
   
   if (propertyId) {
     // If propertyId is provided, just filter by that property
+    console.log("agendaService - Filtering by property:", propertyId);
     query = query.eq('property_id', propertyId);
   } else {
     // Show items where the user is:
     // 1. The agent who created the item OR
     // 2. In the additional_users array
+    console.log("agendaService - Filtering by user:", userId);
     query = query.or(`agent_id.eq.${userId},additional_users.cs.["${userId}"]`);
   }
 
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    console.error("agendaService - Error fetching:", error);
+    throw error;
+  }
+  
+  console.log("agendaService - Fetched data:", data);
   
   if (data) {
-    return data.map(item => ({
+    const formattedData = data.map(item => ({
       id: item.id,
       agent_id: item.agent_id,
       property_id: item.property_id,
@@ -49,6 +58,9 @@ export const fetchAgendaItems = async (userId: string, propertyId?: string) => {
       updated_at: item.updated_at,
       property: item.property
     })) as AgendaItem[];
+    
+    console.log("agendaService - Formatted data:", formattedData);
+    return formattedData;
   }
   
   return [];

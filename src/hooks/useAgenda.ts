@@ -16,8 +16,11 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
     if (!user?.id) return;
     
     setIsLoading(true);
+    console.log("useAgenda - Fetching agenda items for userId:", user.id, "propertyId:", propertyId);
+    
     try {
       const data = await fetchAgendaItems(user.id, propertyId);
+      console.log("useAgenda - Fetched agenda items:", data);
       setAgendaItems(data);
     } catch (error: any) {
       console.error('Error fetching agenda items:', error);
@@ -137,6 +140,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
 
   useEffect(() => {
     if (user?.id) {
+      console.log("useAgenda - Initial fetch with userId:", user.id);
       fetchItems();
     }
   }, [user?.id, propertyId]);

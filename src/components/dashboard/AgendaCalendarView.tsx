@@ -1,5 +1,5 @@
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
@@ -18,25 +18,45 @@ export function AgendaCalendarView({
 }: AgendaCalendarViewProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
+  // Add debugging logs
+  useEffect(() => {
+    console.log("AgendaCalendarView - agendaItems:", agendaItems);
+  }, [agendaItems]);
+
   // Function to determine if a day has events
   const isDayWithEvents = useCallback((date: Date) => {
     if (!agendaItems || agendaItems.length === 0) return false;
     
     const formattedDateString = format(date, "yyyy-MM-dd");
     return agendaItems.some(item => {
-      const eventDate = item.event_date ? new Date(item.event_date) : null;
-      return eventDate && format(eventDate, "yyyy-MM-dd") === formattedDateString;
+      // Make sure we have a valid event_date
+      if (!item.event_date) return false;
+      
+      try {
+        const eventDate = new Date(item.event_date);
+        return format(eventDate, "yyyy-MM-dd") === formattedDateString;
+      } catch (error) {
+        console.error("Error formatting date:", error);
+        return false;
+      }
     });
   }, [agendaItems]);
 
   // Generate a list of events for the selected day
   const getEventsForDay = (date: Date) => {
-    if (!agendaItems) return [];
+    if (!agendaItems || agendaItems.length === 0) return [];
     
     const formattedDateString = format(date, "yyyy-MM-dd");
     return agendaItems.filter(item => {
-      const eventDate = item.event_date ? new Date(item.event_date) : null;
-      return eventDate && format(eventDate, "yyyy-MM-dd") === formattedDateString;
+      if (!item.event_date) return false;
+      
+      try {
+        const eventDate = new Date(item.event_date);
+        return format(eventDate, "yyyy-MM-dd") === formattedDateString;
+      } catch (error) {
+        console.error("Error filtering events:", error);
+        return false;
+      }
     });
   };
 
@@ -44,6 +64,14 @@ export function AgendaCalendarView({
   const selectedDayEvents = selectedDate ? 
     getEventsForDay(selectedDate) : 
     [];
+
+  // Log the events found for the selected day
+  useEffect(() => {
+    if (selectedDate) {
+      console.log("AgendaCalendarView - Selected date:", format(selectedDate, "yyyy-MM-dd"));
+      console.log("AgendaCalendarView - Events for selected date:", selectedDayEvents);
+    }
+  }, [selectedDate, selectedDayEvents]);
 
   return (
     <div className="grid md:grid-cols-2 gap-4">

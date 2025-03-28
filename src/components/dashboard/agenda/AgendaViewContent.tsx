@@ -34,6 +34,11 @@ export function AgendaViewContent({
   // Always check if safeAgendaItems exists before checking its length
   const hasItems = safeAgendaItems && safeAgendaItems.length > 0;
   
+  // Add console logs to debug the agenda items
+  console.log("AgendaViewContent - view:", view);
+  console.log("AgendaViewContent - itemsToDisplay:", itemsToDisplay);
+  console.log("AgendaViewContent - hasItems:", hasItems);
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-2">
