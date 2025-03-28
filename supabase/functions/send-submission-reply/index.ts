@@ -119,10 +119,6 @@ serve(async (req) => {
     // 4. Prepare email content
     const emailContent = {
       to: submission.email,
-      from: {
-        email: settings.smtp_from_email || replyingUser.email,
-        name: replyingUser.full_name
-      },
       subject: `Re: Your inquiry about ${submission.property?.title || 'our property'}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -147,8 +143,6 @@ serve(async (req) => {
           </p>
         </div>
       `,
-      // We'll use the Edge Function or EmailEngine if set up
-      // For now, we're just recording the reply in the database
     };
     
     // 5. Save the reply to the database

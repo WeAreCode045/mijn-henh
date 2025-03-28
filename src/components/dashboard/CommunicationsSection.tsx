@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -171,7 +172,8 @@ export function CommunicationsSection() {
     
     setIsSending(true);
     try {
-      const { error } = await supabase
+      // First, save the reply in the database
+      const { error: dbError } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: selectedSubmission.id,
@@ -179,8 +181,26 @@ export function CommunicationsSection() {
           agent_id: profile.id,
         });
 
-      if (error) throw error;
+      if (dbError) throw dbError;
       
+      // Send email via Edge Function
+      try {
+        const { error: fnError } = await supabase.functions.invoke('send-submission-reply', {
+          body: {
+            submissionId: selectedSubmission.id,
+            replyText: message,
+            propertyId: selectedSubmission.property_id
+          }
+        });
+        
+        if (fnError) {
+          console.warn('Edge function error (continuing):', fnError);
+        }
+      } catch (edgeFnError) {
+        console.warn('Edge function error (continuing):', edgeFnError);
+      }
+      
+      // Mark as read
       await supabase
         .from('property_contact_submissions')
         .update({ is_read: true })

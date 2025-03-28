@@ -16,15 +16,35 @@ export function useSendResponse() {
   ) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      // First, insert the reply into the database
+      const { error: dbError } = await supabase
         .from("property_submission_replies")
         .insert({
           submission_id: submissionId,
           reply_text: message
         });
 
-      if (error) {
-        throw error;
+      if (dbError) {
+        throw dbError;
+      }
+
+      // Then try to send email using the Edge Function
+      try {
+        const { error: fnError } = await supabase.functions.invoke('send-submission-reply', {
+          body: {
+            submissionId,
+            replyText: message,
+            propertyId
+          }
+        });
+        
+        if (fnError) {
+          console.warn('Edge function error:', fnError);
+          // We continue even if edge function fails since we saved to DB
+        }
+      } catch (edgeFnError) {
+        console.warn('Edge function error:', edgeFnError);
+        // We continue even if edge function fails since we saved to DB
       }
 
       toast({
