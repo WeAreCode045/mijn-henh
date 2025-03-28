@@ -1,5 +1,5 @@
 
-import { Calendar as CalendarIcon, Filter } from "lucide-react";
+import { Calendar as CalendarIcon, Filter, List } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
