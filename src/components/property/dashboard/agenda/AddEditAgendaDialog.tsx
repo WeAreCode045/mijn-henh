@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AgendaDialogHeader } from "./form/DialogHeader";
 import { AgendaDialogContent } from "./form/DialogContent";
@@ -27,7 +26,7 @@ export function AddEditAgendaDialog({
   availableUsers,
   mode
 }: AgendaAddEditDialogProps) {
-  const { isLoading: usersLoading } = useUsers();
+  const { isLoading: usersLoading, users: agents } = useUsers(); // Fetch all users
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -49,7 +48,7 @@ export function AddEditAgendaDialog({
           setEndTime={setEndTime}
           additionalUsers={additionalUsers}
           setAdditionalUsers={setAdditionalUsers}
-          availableUsers={availableUsers}
+          availableUsers={agents.map(agent => ({ id: agent.id, name: agent.full_name }))} // Transform agents to required format
           usersLoading={usersLoading}
         />
         
