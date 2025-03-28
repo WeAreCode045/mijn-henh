@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { useAuth } from "@/providers/AuthProvider";
+import { useUsers } from "@/hooks/useUsers";
 
 export function useAgendaDialog(
   item?: AgendaItem | null,
@@ -14,7 +15,19 @@ export function useAgendaDialog(
   const [time, setTime] = useState("09:00");
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
   const { user } = useAuth();
+  const { users } = useUsers();
+
+  // Transform users into a format suitable for selection
+  const availableUsers = users
+    ? users
+        .filter(u => u.id !== user?.id) // Filter out the current user
+        .map(u => ({
+          id: u.id,
+          name: u.full_name || u.email || `User ${u.id.substring(0, 8)}`
+        }))
+    : [];
 
   useEffect(() => {
     if (item && mode === "edit") {
@@ -23,11 +36,13 @@ export function useAgendaDialog(
       setDate(item.event_date ? new Date(item.event_date) : undefined);
       setTime(item.event_time ? item.event_time.substring(0, 5) : "09:00");
       setSelectedPropertyId(item.property_id || null);
+      setAdditionalUsers(item.additional_users || []);
     } else {
       setTitle("");
       setDescription("");
       setDate(new Date());
       setTime("09:00");
+      setAdditionalUsers([]);
       // Don't reset the selectedPropertyId here to preserve context
       // propertyId should be set by the parent component if needed
     }
@@ -54,7 +69,7 @@ export function useAgendaDialog(
         agent_id: user.id,
         end_date: null,
         end_time: null,
-        additional_users: []
+        additional_users: additionalUsers
       });
       return true;
     } catch (error) {
@@ -76,6 +91,9 @@ export function useAgendaDialog(
     setTime,
     selectedPropertyId,
     setSelectedPropertyId,
+    additionalUsers,
+    setAdditionalUsers,
+    availableUsers,
     isSaving,
     handleSave
   };

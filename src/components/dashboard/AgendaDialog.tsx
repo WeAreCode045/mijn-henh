@@ -40,6 +40,9 @@ export function AgendaDialog({
     setTime,
     selectedPropertyId,
     setSelectedPropertyId,
+    additionalUsers,
+    setAdditionalUsers,
+    availableUsers,
     isSaving,
     handleSave
   } = useAgendaDialog(item, mode);
@@ -81,6 +84,9 @@ export function AgendaDialog({
           setTime={setTime}
           selectedPropertyId={selectedPropertyId}
           setSelectedPropertyId={setSelectedPropertyId}
+          additionalUsers={additionalUsers}
+          setAdditionalUsers={setAdditionalUsers}
+          availableUsers={availableUsers}
         />
         
         <AgendaDialogFooter
