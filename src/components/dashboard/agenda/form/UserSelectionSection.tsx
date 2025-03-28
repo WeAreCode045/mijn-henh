@@ -1,4 +1,4 @@
-import { useState } from "react";
+hUsersimport { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -40,7 +40,7 @@ export function UserSelectionSection({
           })));
         }
       };
-
+fetchAgents();
   const handleRemoveUser = (userId: string) => {
     setAdditionalUsers(additionalUsers.filter(id => id !== userId));
   };
