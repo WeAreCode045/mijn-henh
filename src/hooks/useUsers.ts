@@ -10,15 +10,21 @@ type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export function useUsers() {
   const { toast } = useToast();
 
-  const { data: users, refetch, isLoading } = useQuery({
+  const { data: users, refetch, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
+      console.log("Fetching users in useUsers hook");
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching users:", error);
+        throw error;
+      }
+      
+      console.log("Users data from supabase:", data);
       
       // Transform the data to match the User type
       const transformedData: User[] = (data as ProfileRow[]).map(user => ({
@@ -31,6 +37,7 @@ export function useUsers() {
         avatar_url: user.avatar_url || null
       }));
 
+      console.log("Transformed users:", transformedData);
       return transformedData;
     },
   });
@@ -59,6 +66,7 @@ export function useUsers() {
     users: users || [],
     refetch,
     deleteUser,
-    isLoading
+    isLoading,
+    error
   };
 }

@@ -17,7 +17,11 @@ export function useAgendaDialog(
   const [isSaving, setIsSaving] = useState(false);
   const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
   const { user } = useAuth();
-  const { users } = useUsers();
+  const { users, isLoading: usersLoading, error: usersError } = useUsers();
+
+  console.log("useAgendaDialog - Users:", users);
+  console.log("useAgendaDialog - Users loading:", usersLoading);
+  console.log("useAgendaDialog - Users error:", usersError);
 
   // Transform users into a format suitable for selection
   const availableUsers = users
@@ -28,6 +32,8 @@ export function useAgendaDialog(
           name: u.full_name || u.email || `User ${u.id.substring(0, 8)}`
         }))
     : [];
+    
+  console.log("useAgendaDialog - Available users for selection:", availableUsers);
 
   useEffect(() => {
     if (item && mode === "edit") {
@@ -59,6 +65,7 @@ export function useAgendaDialog(
       const safePropertyId = selectedPropertyId || '00000000-0000-0000-0000-000000000000';
       
       console.log("Saving agenda item with propertyId:", safePropertyId);
+      console.log("Saving agenda item with additionalUsers:", additionalUsers);
       
       await onSave({
         title,
@@ -95,6 +102,7 @@ export function useAgendaDialog(
     setAdditionalUsers,
     availableUsers,
     isSaving,
-    handleSave
+    handleSave,
+    usersLoading
   };
 }

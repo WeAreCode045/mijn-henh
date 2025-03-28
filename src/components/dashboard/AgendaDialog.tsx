@@ -44,7 +44,8 @@ export function AgendaDialog({
     setAdditionalUsers,
     availableUsers,
     isSaving,
-    handleSave
+    handleSave,
+    usersLoading
   } = useAgendaDialog(item, mode);
 
   // Set the selectedPropertyId from prop if available
@@ -87,6 +88,7 @@ export function AgendaDialog({
           additionalUsers={additionalUsers}
           setAdditionalUsers={setAdditionalUsers}
           availableUsers={availableUsers}
+          usersLoading={usersLoading}
         />
         
         <AgendaDialogFooter
