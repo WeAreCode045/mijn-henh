@@ -1,10 +1,8 @@
-hUsersimport { useState } from "react";
+import { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-
 import {
   Select,
   SelectContent,
@@ -26,36 +24,10 @@ export function UserSelectionSection({
   availableUsers,
   usersLoading,
 }: UserSelectionSectionProps) {
-  const fetchAgents = async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .order('full_name');
-          console.log([data,error]);
-        if (!error && data) {
-          // Make sure all agents have valid ids
-          setAdditionalUsers(data.map(agent => ({
-            id: agent.id || ⁠ agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)} ⁠,
-            full_name: agent.full_name || "Unnamed Agent"
-          })));
-        }
-      };
-interface UserSelectionSectionProps {
-  additionalUsers: string[];
-  setAdditionalUsers: (value: value) => void;
-  availableUsers: { id: string; name: string }[];
-  usersLoading: boolean;
-}
-
-export function UserSelectionSection({
-  availableUsers,
-  usersLoading,
-}: UserSelectionSectionProps) {
-  const [additionalUsers, setAdditionalUsers] = useState<{id: string; full_name: string}[]>([]);
-fetchAgents();
   const handleRemoveUser = (userId: string) => {
     setAdditionalUsers(additionalUsers.filter(id => id !== userId));
   };
+
   return (
     <div className="grid grid-cols-4 items-start gap-4">
       <Label htmlFor="users" className="text-right">
