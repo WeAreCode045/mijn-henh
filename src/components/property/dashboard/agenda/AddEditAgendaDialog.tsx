@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -28,6 +29,7 @@ import { CalendarIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { AgendaAddEditDialogProps } from "./types";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AddEditAgendaDialog({
   isOpen,
@@ -45,15 +47,26 @@ export function AddEditAgendaDialog({
   setEndDate,
   endTime,
   setEndTime,
-  additionalUsers,
-  setAdditionalUsers,
+
   availableUsers,
   mode
 }: AgendaAddEditDialogProps) {
-  const handleRemoveUser = (userId: string) => {
-    setAdditionalUsers(additionalUsers.filter(id => id !== userId));
-  };
-
+   const [additionalUsers, setAdditionalUsers] = useState<{id: string; full_name: string}[]>([]);
+    const fetchAgents = async () => {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .order('full_name').limit(5);
+          console.log([data,error]);
+          if (!error && data) {
+            // Make sure all agents have valid ids
+            setAdditionalUsers(data.map(agent => ({
+              id: agent.id || ⁠ agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)} ⁠,
+              full_name: agent.full_name || "Unnamed Agent"
+            })));
+          }
+        };
+    fetchAgents();
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
