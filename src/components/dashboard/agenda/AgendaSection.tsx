@@ -39,8 +39,16 @@ export function AgendaSection() {
     selectedAgendaItem,
     resetForm,
     handleAgendaItemClick,
-    handleAddButtonClick
+    handleAddButtonClick,
+    setSelectedPropertyId
   } = agendaDialogProps;
+  
+  // Set the selected property ID from URL if available
+  useState(() => {
+    if (propertyId) {
+      setSelectedPropertyId(propertyId);
+    }
+  });
   
   const handleAddAgendaItem = () => {
     if (agendaDialogProps.selectedDate && agendaDialogProps.title) {
@@ -51,16 +59,17 @@ export function AgendaSection() {
         selectedTime, 
         endDate, 
         endTime, 
-        additionalUsers 
+        additionalUsers,
+        selectedPropertyId
       } = agendaDialogProps;
       
       const formattedDate = selectedDate.toISOString().split('T')[0];
       const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
       
-      // Use the property ID from the URL if available
-      const selectedPropertyId = propertyId || undefined;
+      // Use the property ID from the URL if available, otherwise use the one from the dialog
+      const finalPropertyId = propertyId || selectedPropertyId;
       
-      console.log("Adding agenda item with propertyId:", selectedPropertyId);
+      console.log("Adding agenda item with propertyId:", finalPropertyId);
       
       addAgendaItem(
         title, 
@@ -70,7 +79,7 @@ export function AgendaSection() {
         formattedEndDate,
         endTime,
         additionalUsers,
-        selectedPropertyId
+        finalPropertyId
       );
       
       setIsAddDialogOpen(false);
@@ -94,14 +103,15 @@ export function AgendaSection() {
         editTime, 
         editEndDate, 
         editEndTime, 
-        editAdditionalUsers
+        editAdditionalUsers,
+        selectedPropertyId
       } = agendaDialogProps;
       
       const formattedDate = editDate.toISOString().split('T')[0];
       const formattedEndDate = editEndDate ? editEndDate.toISOString().split('T')[0] : null;
       
-      // Use the property ID from the URL if available, otherwise use the one from the selected item
-      const finalPropertyId = propertyId || selectedAgendaItem.property_id || undefined;
+      // Use the property ID from the URL if available, otherwise use the one from the selected item or dialog
+      const finalPropertyId = propertyId || selectedAgendaItem.property_id || selectedPropertyId;
       
       updateAgendaItem(
         selectedAgendaItem.id, 
@@ -147,7 +157,7 @@ export function AgendaSection() {
       
       <TabsContent value="weekly" className="mt-0">
         <WeeklyCalendarView
-          agendaItems={filteredAgendaItems}
+          agendaItems={safeAgendaItems}
           isLoading={isLoading}
           onItemClick={handleAgendaItemClick}
         />
