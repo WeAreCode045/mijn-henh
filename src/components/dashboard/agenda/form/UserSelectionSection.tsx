@@ -31,7 +31,7 @@ export function UserSelectionSection({
           .from('profiles')
           .select('id, full_name')
           .order('full_name');
-          
+          console.log([data,error]);
         if (!error && data) {
           // Make sure all agents have valid ids
           setAdditionalUsers(data.map(agent => ({
