@@ -1,26 +1,9 @@
 
-import { format } from "date-fns";
-import { CalendarIcon, Loader2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { usePropertiesSelect } from "@/hooks/usePropertiesSelect";
+import { TitleSection } from "./form/TitleSection";
+import { DateTimeSection } from "./form/DateTimeSection";
+import { PropertySection } from "./form/PropertySection";
+import { UserSelectionSection } from "./form/UserSelectionSection";
+import { DescriptionSection } from "./form/DescriptionSection";
 
 interface AgendaDialogFormProps {
   title: string;
@@ -55,178 +38,40 @@ export function AgendaDialogForm({
   availableUsers = [],
   usersLoading = false
 }: AgendaDialogFormProps) {
-  const { properties, isLoading: isPropertiesLoading } = usePropertiesSelect();
   
-  // Ensure we have a safe value for the property id
-  const safeSelectedPropertyId = selectedPropertyId || "none";
-
-  const handleRemoveUser = (userId: string) => {
-    setAdditionalUsers(additionalUsers.filter(id => id !== userId));
-  };
-
   console.log("AgendaDialogForm - Available users:", availableUsers);
   console.log("AgendaDialogForm - Users loading:", usersLoading);
 
   return (
     <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="title" className="text-right">
-          Title
-        </Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="col-span-3"
-        />
-      </div>
+      <TitleSection 
+        title={title} 
+        setTitle={setTitle} 
+      />
+      
+      <DateTimeSection 
+        date={date}
+        setDate={setDate}
+        time={time}
+        setTime={setTime}
+      />
 
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="date" className="text-right">
-          Date
-        </Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "col-span-3 justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
+      <PropertySection 
+        selectedPropertyId={selectedPropertyId}
+        setSelectedPropertyId={setSelectedPropertyId}
+      />
 
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="time" className="text-right">
-          Time
-        </Label>
-        <Input
-          id="time"
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="col-span-3"
-        />
-      </div>
+      <UserSelectionSection 
+        additionalUsers={additionalUsers}
+        setAdditionalUsers={setAdditionalUsers}
+        availableUsers={availableUsers}
+        usersLoading={usersLoading}
+      />
 
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="property" className="text-right">
-          Property
-        </Label>
-        <Select
-          value={safeSelectedPropertyId}
-          onValueChange={(value) => setSelectedPropertyId(value === "none" ? null : value)}
-          defaultValue="none"
-        >
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="No property (optional)" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">No property</SelectItem>
-            {properties.map((property) => (
-              <SelectItem 
-                key={property.id} 
-                value={property.id || `property-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
-              >
-                {property.title || `Property ${property.id.substring(0, 8)}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Add users selection */}
-      <div className="grid grid-cols-4 items-start gap-4">
-        <Label htmlFor="users" className="text-right">
-          Share with
-        </Label>
-        <div className="col-span-3">
-          {usersLoading ? (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading users...</span>
-            </div>
-          ) : availableUsers.length > 0 ? (
-            <>
-              <Select
-                onValueChange={(value) => {
-                  if (!additionalUsers.includes(value)) {
-                    setAdditionalUsers([...additionalUsers, value]);
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select users to share with" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableUsers.map((user) => (
-                    <SelectItem 
-                      key={user.id} 
-                      value={user.id}
-                      disabled={additionalUsers.includes(user.id)}
-                    >
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Display selected users as badges */}
-              {additionalUsers.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {additionalUsers.map((userId) => {
-                    const user = availableUsers.find((u) => u.id === userId);
-                    return (
-                      <Badge key={userId} variant="secondary" className="flex items-center gap-1">
-                        {user?.name || "User"}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 p-0 hover:bg-transparent"
-                          onClick={() => handleRemoveUser(userId)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              No other users available to share with
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 items-start gap-4">
-        <Label htmlFor="description" className="text-right">
-          Description
-        </Label>
-        <Textarea
-          id="description"
-          value={description || ""}
-          onChange={(e) => setDescription(e.target.value)}
-          className="col-span-3"
-          rows={4}
-        />
-      </div>
+      <DescriptionSection 
+        description={description}
+        setDescription={setDescription}
+      />
     </div>
   );
 }
