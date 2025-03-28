@@ -40,6 +40,18 @@ export function UserSelectionSection({
           })));
         }
       };
+interface UserSelectionSectionProps {
+  additionalUsers: string[];
+  setAdditionalUsers: (value: value) => void;
+  availableUsers: { id: string; name: string }[];
+  usersLoading: boolean;
+}
+
+export function UserSelectionSection({
+  availableUsers,
+  usersLoading,
+}: UserSelectionSectionProps) {
+  const [additionalUsers, setAdditionalUsers] = useState<{id: string; full_name: string}[]>([]);
 fetchAgents();
   const handleRemoveUser = (userId: string) => {
     setAdditionalUsers(additionalUsers.filter(id => id !== userId));
