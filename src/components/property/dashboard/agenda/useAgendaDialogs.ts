@@ -1,91 +1,92 @@
 
 import { useState } from "react";
-import { format, parseISO } from "date-fns";
 import { AgendaItem } from "./types";
-import { useUsers } from "@/hooks/useUsers";
 
 export function useAgendaDialogs() {
+  // Dialog open states
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedAgendaItem, setSelectedAgendaItem] = useState<AgendaItem | null>(null);
   
-  // Form state
+  // Add form state
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [description, setDescription] = useState<string | null>("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState("09:00");
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [endTime, setEndTime] = useState("");
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<string | null>(null);
   const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   
   // Edit form state
   const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editDate, setEditDate] = useState<Date | undefined>(new Date());
+  const [editDescription, setEditDescription] = useState<string | null>("");
+  const [editDate, setEditDate] = useState<Date | null>(null);
   const [editTime, setEditTime] = useState("");
-  const [editEndDate, setEditEndDate] = useState<Date | undefined>(undefined);
-  const [editEndTime, setEditEndTime] = useState("");
+  const [editEndDate, setEditEndDate] = useState<Date | null>(null);
+  const [editEndTime, setEditEndTime] = useState<string | null>(null);
   const [editAdditionalUsers, setEditAdditionalUsers] = useState<string[]>([]);
-
-  // Get available users for the multi-select
-  const { users } = useUsers();
-  const availableUsers = users?.map(user => ({
-    id: user.id,
-    name: user.full_name || user.email || 'Unknown User'
-  })) || [];
-
+  
+  // Available users for selection
+  const availableUsers: { id: string; name: string }[] = [];
+  
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setSelectedDate(new Date());
     setSelectedTime("09:00");
-    setEndDate(undefined);
-    setEndTime("");
+    setEndDate(null);
+    setEndTime(null);
     setAdditionalUsers([]);
+    // Don't reset selectedPropertyId to preserve context
   };
-
+  
   const handleAgendaItemClick = (item: AgendaItem) => {
     setSelectedAgendaItem(item);
     setIsViewDialogOpen(true);
+    
+    // Also populate edit form
+    setEditTitle(item.title);
+    setEditDescription(item.description);
+    
+    if (item.event_date) {
+      setEditDate(new Date(item.event_date));
+    }
+    
+    setEditTime(item.event_time || "09:00");
+    
+    if (item.end_date) {
+      setEditEndDate(new Date(item.end_date));
+    } else {
+      setEditEndDate(null);
+    }
+    
+    setEditEndTime(item.end_time);
+    setEditAdditionalUsers(item.additional_users || []);
+    setSelectedPropertyId(item.property_id);
   };
-
+  
   const handleAddButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    resetForm();
     setIsAddDialogOpen(true);
   };
-
+  
   const handleEditButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (selectedAgendaItem) {
-      setEditTitle(selectedAgendaItem.title);
-      setEditDescription(selectedAgendaItem.description || "");
-      setEditDate(parseISO(selectedAgendaItem.event_date));
-      setEditTime(selectedAgendaItem.event_time.substring(0, 5));
-      
-      if (selectedAgendaItem.end_date) {
-        setEditEndDate(parseISO(selectedAgendaItem.end_date));
-      } else {
-        setEditEndDate(undefined);
-      }
-      
-      setEditEndTime(selectedAgendaItem.end_time?.substring(0, 5) || "");
-      setEditAdditionalUsers(selectedAgendaItem.additional_users || []);
-      
-      setIsViewDialogOpen(false);
-      setIsEditDialogOpen(true);
-    }
+    setIsViewDialogOpen(false);
+    setIsEditDialogOpen(true);
   };
-
+  
   return {
     isAddDialogOpen,
     setIsAddDialogOpen,
     isViewDialogOpen,
     setIsViewDialogOpen,
-    isEditDialogOpen,
+    isEditDialogOpen, 
     setIsEditDialogOpen,
     selectedAgendaItem,
-    setSelectedAgendaItem,
     title,
     setTitle,
     description,
@@ -100,6 +101,8 @@ export function useAgendaDialogs() {
     setEndTime,
     additionalUsers,
     setAdditionalUsers,
+    selectedPropertyId,
+    setSelectedPropertyId,
     editTitle,
     setEditTitle,
     editDescription,

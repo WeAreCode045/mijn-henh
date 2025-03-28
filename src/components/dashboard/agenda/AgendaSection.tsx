@@ -11,9 +11,10 @@ import { useAgendaDialogs } from "@/components/property/dashboard/agenda/useAgen
 import { AgendaViewContent } from "./AgendaViewContent";
 import { AgendaDialogs } from "./AgendaDialogs";
 import { DateRange } from "react-day-picker";
+import { WeeklyCalendarView } from "./WeeklyCalendarView";
 
 export function AgendaSection() {
-  const [activeTab, setActiveTab] = useState<string>("calendar");
+  const [activeTab, setActiveTab] = useState<string>("weekly");
   const [searchParams] = useSearchParams();
   const propertyId = searchParams.get('propertyId');
   
@@ -56,8 +57,8 @@ export function AgendaSection() {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
       
-      // Use the selected property ID from the dialog or fall back to the current propertyId from URL
-      const selectedPropertyId = agendaDialogProps.selectedPropertyId || propertyId || undefined;
+      // Use the property ID from the URL if available
+      const selectedPropertyId = propertyId || undefined;
       
       console.log("Adding agenda item with propertyId:", selectedPropertyId);
       
@@ -93,15 +94,14 @@ export function AgendaSection() {
         editTime, 
         editEndDate, 
         editEndTime, 
-        editAdditionalUsers,
-        selectedPropertyId: dialogPropertyId
+        editAdditionalUsers
       } = agendaDialogProps;
       
       const formattedDate = editDate.toISOString().split('T')[0];
       const formattedEndDate = editEndDate ? editEndDate.toISOString().split('T')[0] : null;
       
-      // Use the selected property ID from the dialog, the current one from the item, or fall back to URL
-      const finalPropertyId = dialogPropertyId || selectedAgendaItem.property_id || propertyId || undefined;
+      // Use the property ID from the URL if available, otherwise use the one from the selected item
+      const finalPropertyId = propertyId || selectedAgendaItem.property_id || undefined;
       
       updateAgendaItem(
         selectedAgendaItem.id, 
@@ -134,6 +134,7 @@ export function AgendaSection() {
       <div className="flex justify-between items-center mb-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
           <TabsList>
+            <TabsTrigger value="weekly">Weekly View</TabsTrigger>
             <TabsTrigger value="calendar">Calendar View</TabsTrigger>
             <TabsTrigger value="list">List View</TabsTrigger>
           </TabsList>
@@ -143,6 +144,14 @@ export function AgendaSection() {
           Add Event
         </Button>
       </div>
+      
+      <TabsContent value="weekly" className="mt-0">
+        <WeeklyCalendarView
+          agendaItems={filteredAgendaItems}
+          isLoading={isLoading}
+          onItemClick={handleAgendaItemClick}
+        />
+      </TabsContent>
       
       <TabsContent value="calendar" className="mt-0">
         <AgendaViewContent 
@@ -171,10 +180,7 @@ export function AgendaSection() {
       </TabsContent>
       
       <AgendaDialogs 
-        agendaDialogProps={{
-          ...agendaDialogProps,
-          selectedPropertyId: agendaDialogProps.selectedPropertyId || propertyId || null,
-        }}
+        agendaDialogProps={agendaDialogProps}
         onAddAgendaItem={handleAddAgendaItem}
         onDeleteAgendaItem={handleDeleteAgendaItem}
         onUpdateAgendaItem={handleUpdateAgendaItem}
