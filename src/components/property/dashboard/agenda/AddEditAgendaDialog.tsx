@@ -4,6 +4,7 @@ import { AgendaDialogContent } from "./form/DialogContent";
 import { AgendaDialogFooter } from "./form/DialogFooter";
 import { AgendaAddEditDialogProps } from "./types";
 import { useUsers } from "@/hooks/useUsers";
+import { useAuth } from "@/providers/AuthProvider";
 
 export function AddEditAgendaDialog({
   isOpen,
@@ -23,10 +24,20 @@ export function AddEditAgendaDialog({
   setEndTime,
   additionalUsers,
   setAdditionalUsers,
-  availableUsers,
+  availableUsers: externalAvailableUsers,
   mode
 }: AgendaAddEditDialogProps) {
-  const { isLoading: usersLoading, users: agents } = useUsers(); // Fetch all users
+  const { isLoading: usersLoading, users } = useUsers(); // Fetch all users
+  const { user: currentUser } = useAuth();
+  
+  // If external available users are provided, use them
+  // Otherwise, transform users from useUsers hook, excluding the current user
+  const availableUsers = externalAvailableUsers || users
+    .filter(agent => agent.id !== currentUser?.id) // Filter out current user
+    .map(agent => ({ 
+      id: agent.id, 
+      name: agent.full_name || agent.email || `User ${agent.id.substring(0, 8)}`
+    }));
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -48,7 +59,7 @@ export function AddEditAgendaDialog({
           setEndTime={setEndTime}
           additionalUsers={additionalUsers}
           setAdditionalUsers={setAdditionalUsers}
-          availableUsers={agents.map(agent => ({ id: agent.id, name: agent.full_name }))} // Transform agents to required format
+          availableUsers={availableUsers} 
           usersLoading={usersLoading}
         />
         

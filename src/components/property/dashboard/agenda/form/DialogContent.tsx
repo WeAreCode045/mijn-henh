@@ -1,5 +1,5 @@
 
-import { UserSelectionSection } from "@/components/dashboard/agenda/form/UserSelectionSection";
+import { UserSelectionSection } from "@/components/property/dashboard/agenda/form/UserSelectionSection";
 import { TitleSection } from "./TitleSection";
 import { DateTimeSection } from "./DateTimeSection";
 import { DescriptionSection } from "./DescriptionSection";
