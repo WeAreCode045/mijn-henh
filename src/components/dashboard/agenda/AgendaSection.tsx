@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ import { DateRange } from "react-day-picker";
 
 export function AgendaSection() {
   const [activeTab, setActiveTab] = useState<string>("calendar");
+  const [searchParams] = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
   
   const { 
     agendaItems, 
@@ -20,7 +23,7 @@ export function AgendaSection() {
     addAgendaItem, 
     updateAgendaItem, 
     deleteAgendaItem 
-  } = useAgenda();
+  } = useAgenda(propertyId || undefined);
   
   // Ensure we have a safe array of agenda items
   const safeAgendaItems = agendaItems || [];
@@ -53,6 +56,11 @@ export function AgendaSection() {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
       
+      // Use the selected property ID from the dialog or fall back to the current propertyId from URL
+      const selectedPropertyId = agendaDialogProps.selectedPropertyId || propertyId || undefined;
+      
+      console.log("Adding agenda item with propertyId:", selectedPropertyId);
+      
       addAgendaItem(
         title, 
         description, 
@@ -60,7 +68,8 @@ export function AgendaSection() {
         selectedTime,
         formattedEndDate,
         endTime,
-        additionalUsers
+        additionalUsers,
+        selectedPropertyId
       );
       
       setIsAddDialogOpen(false);
@@ -84,11 +93,15 @@ export function AgendaSection() {
         editTime, 
         editEndDate, 
         editEndTime, 
-        editAdditionalUsers 
+        editAdditionalUsers,
+        selectedPropertyId: dialogPropertyId
       } = agendaDialogProps;
       
       const formattedDate = editDate.toISOString().split('T')[0];
       const formattedEndDate = editEndDate ? editEndDate.toISOString().split('T')[0] : null;
+      
+      // Use the selected property ID from the dialog, the current one from the item, or fall back to URL
+      const finalPropertyId = dialogPropertyId || selectedAgendaItem.property_id || propertyId || undefined;
       
       updateAgendaItem(
         selectedAgendaItem.id, 
@@ -99,7 +112,7 @@ export function AgendaSection() {
         formattedEndDate,
         editEndTime,
         editAdditionalUsers,
-        selectedAgendaItem.property_id
+        finalPropertyId
       );
       
       agendaDialogProps.setIsEditDialogOpen(false);
@@ -158,7 +171,10 @@ export function AgendaSection() {
       </TabsContent>
       
       <AgendaDialogs 
-        agendaDialogProps={agendaDialogProps}
+        agendaDialogProps={{
+          ...agendaDialogProps,
+          selectedPropertyId: agendaDialogProps.selectedPropertyId || propertyId || null,
+        }}
         onAddAgendaItem={handleAddAgendaItem}
         onDeleteAgendaItem={handleDeleteAgendaItem}
         onUpdateAgendaItem={handleUpdateAgendaItem}

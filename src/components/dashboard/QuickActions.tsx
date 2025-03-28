@@ -1,15 +1,39 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, Home, Mail, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AgendaDialog } from "@/components/dashboard/AgendaDialog";
+import { useAgenda } from "@/hooks/useAgenda";
 
 export function QuickActions() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
   const [isAgendaDialogOpen, setIsAgendaDialogOpen] = useState(false);
+  
+  // Get the addAgendaItem function from useAgenda to handle the save
+  const { addAgendaItem } = useAgenda(propertyId || undefined);
+  
+  const handleSaveAgendaItem = async (data: any) => {
+    try {
+      await addAgendaItem(
+        data.title,
+        data.description,
+        data.event_date,
+        data.event_time,
+        data.end_date,
+        data.end_time,
+        data.additional_users,
+        data.property_id
+      );
+    } catch (error) {
+      console.error('Error in QuickActions when saving agenda item:', error);
+      throw error; // Re-throw to be handled by the dialog
+    }
+  };
   
   return (
     <Card className="h-full bg-transparent border-0 shadow-none">
@@ -72,12 +96,10 @@ export function QuickActions() {
           <AgendaDialog 
             isOpen={isAgendaDialogOpen} 
             onClose={() => setIsAgendaDialogOpen(false)}
-            onSave={(data) => {
-              setIsAgendaDialogOpen(false);
-              return Promise.resolve();
-            }}
+            onSave={handleSaveAgendaItem}
             mode="add"
             item={null}
+            propertyId={propertyId || undefined}
           />
         </DialogContent>
       </Dialog>

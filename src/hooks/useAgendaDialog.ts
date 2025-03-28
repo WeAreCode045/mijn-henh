@@ -28,7 +28,8 @@ export function useAgendaDialog(
       setDescription("");
       setDate(new Date());
       setTime("09:00");
-      setSelectedPropertyId(null);
+      // Don't reset the selectedPropertyId here to preserve context
+      // propertyId should be set by the parent component if needed
     }
   }, [item, mode]);
 
@@ -38,12 +39,18 @@ export function useAgendaDialog(
     setIsSaving(true);
     try {
       const formattedDate = date ? format(date, "yyyy-MM-dd") : "";
+      
+      // Use a placeholder property ID if none is provided to satisfy the not-null constraint
+      const safePropertyId = selectedPropertyId || '00000000-0000-0000-0000-000000000000';
+      
+      console.log("Saving agenda item with propertyId:", safePropertyId);
+      
       await onSave({
         title,
         description,
         event_date: formattedDate,
         event_time: time,
-        property_id: selectedPropertyId,
+        property_id: safePropertyId,
         agent_id: user.id,
         end_date: null,
         end_time: null,

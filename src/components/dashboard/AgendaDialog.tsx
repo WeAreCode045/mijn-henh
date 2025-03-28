@@ -17,6 +17,7 @@ interface AgendaDialogProps {
   onSave: (data: Omit<AgendaItem, "id" | "created_at" | "updated_at">) => Promise<void>;
   item?: AgendaItem | null;
   mode: "add" | "edit";
+  propertyId?: string; // Add propertyId prop to pass from parent
 }
 
 export function AgendaDialog({
@@ -25,6 +26,7 @@ export function AgendaDialog({
   onSave,
   item,
   mode,
+  propertyId,
 }: AgendaDialogProps) {
   const { user } = useAuth();
   const {
@@ -41,6 +43,13 @@ export function AgendaDialog({
     isSaving,
     handleSave
   } = useAgendaDialog(item, mode);
+
+  // Set the selectedPropertyId from prop if available
+  useEffect(() => {
+    if (propertyId && !selectedPropertyId) {
+      setSelectedPropertyId(propertyId);
+    }
+  }, [propertyId, selectedPropertyId, setSelectedPropertyId]);
 
   const handleSaveClick = async () => {
     const success = await handleSave(onSave);

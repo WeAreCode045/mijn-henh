@@ -75,12 +75,25 @@ export const addAgendaItem = async (
   endDate: string | null = null,
   endTime: string | null = null,
   additionalUsers: string[] = [],
-  propertyId?: string | null
+  propertyId: string
 ) => {
   // If this item is linked to a property, get the property's agent
   let allAdditionalUsers = [...additionalUsers];
   
-  if (propertyId) {
+  // Log what's being sent to the database for debugging
+  console.log("Adding agenda item with:", {
+    userId,
+    propertyId,
+    title,
+    description,
+    eventDate,
+    eventTime,
+    endDate,
+    endTime,
+    additionalUsers
+  });
+  
+  if (propertyId && propertyId !== '00000000-0000-0000-0000-000000000000') {
     const { data: propertyData } = await supabase
       .from('properties')
       .select('agent_id')
@@ -100,7 +113,7 @@ export const addAgendaItem = async (
     .from('property_agenda_items')
     .insert({
       agent_id: userId,
-      property_id: propertyId || null,
+      property_id: propertyId,
       title,
       description,
       event_date: eventDate,
@@ -110,7 +123,10 @@ export const addAgendaItem = async (
       additional_users: allAdditionalUsers
     });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error inserting agenda item:", error);
+    throw error;
+  }
 };
 
 export const deleteAgendaItem = async (agendaItemId: string) => {
@@ -131,12 +147,12 @@ export const updateAgendaItem = async (
   endDate: string | null = null,
   endTime: string | null = null,
   additionalUsers: string[] = [],
-  propertyId?: string | null
+  propertyId: string
 ) => {
   // If this item is linked to a property, get the property's agent
   let allAdditionalUsers = [...additionalUsers];
   
-  if (propertyId) {
+  if (propertyId && propertyId !== '00000000-0000-0000-0000-000000000000') {
     const { data: propertyData } = await supabase
       .from('properties')
       .select('agent_id')
