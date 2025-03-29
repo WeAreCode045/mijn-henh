@@ -28,6 +28,9 @@ export function UserSelectionSection({
     setAdditionalUsers(additionalUsers.filter(id => id !== userId));
   };
 
+  console.log("UserSelectionSection - Available users:", availableUsers);
+  console.log("UserSelectionSection - Users loading:", usersLoading);
+
   return (
     <div className="grid grid-cols-4 items-start gap-4">
       <Label htmlFor="users" className="text-right">
@@ -39,7 +42,7 @@ export function UserSelectionSection({
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Loading users...</span>
           </div>
-        ) : availableUsers.length > 0 ? (
+        ) : availableUsers && availableUsers.length > 0 ? (
           <>
             <Select
               onValueChange={(value) => {

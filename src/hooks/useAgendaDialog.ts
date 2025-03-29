@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { useAuth } from "@/providers/AuthProvider";
-import { useUsers } from "@/hooks/useUsers";
 
 export function useAgendaDialog(
   item?: AgendaItem | null,
@@ -17,23 +16,8 @@ export function useAgendaDialog(
   const [isSaving, setIsSaving] = useState(false);
   const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
   const { user } = useAuth();
-  const { users, isLoading: usersLoading, error: usersError } = useUsers();
-
-  console.log("useAgendaDialog - Users:", users);
-  console.log("useAgendaDialog - Users loading:", usersLoading);
-  console.log("useAgendaDialog - Users error:", usersError);
-
-  // Transform users into a format suitable for selection
-  const availableUsers = users
-    ? users
-        .filter(u => u.id !== user?.id) // Filter out the current user
-        .map(u => ({
-          id: u.id,
-          name: u.full_name || u.email || `User ${u.id.substring(0, 8)}`
-        }))
-    : [];
-    
-  console.log("useAgendaDialog - Available users for selection:", availableUsers);
+  
+  console.log("useAgendaDialog - AdditionalUsers:", additionalUsers);
 
   useEffect(() => {
     if (item && mode === "edit") {
@@ -100,9 +84,7 @@ export function useAgendaDialog(
     setSelectedPropertyId,
     additionalUsers,
     setAdditionalUsers,
-    availableUsers,
     isSaving,
     handleSave,
-    usersLoading
   };
 }

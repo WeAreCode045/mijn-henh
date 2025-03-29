@@ -14,32 +14,43 @@ export function useUsers() {
     queryKey: ["users"],
     queryFn: async () => {
       console.log("Fetching users in useUsers hook");
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching users:", error);
-        throw error;
+        if (error) {
+          console.error("Error fetching users:", error);
+          throw error;
+        }
+        
+        console.log("Users data from supabase:", data);
+        
+        if (!data || data.length === 0) {
+          console.log("No users found in database");
+          return [];
+        }
+        
+        // Transform the data to match the User type
+        const transformedData: User[] = (data as ProfileRow[]).map(user => ({
+          id: user.id,
+          email: user.email || null,
+          full_name: user.full_name || null,
+          phone: user.phone || null,
+          whatsapp_number: user.whatsapp_number || null,
+          role: user.role || null,
+          avatar_url: user.avatar_url || null
+        }));
+
+        console.log("Transformed users:", transformedData);
+        return transformedData;
+      } catch (err) {
+        console.error("Error in useUsers query function:", err);
+        return [];
       }
-      
-      console.log("Users data from supabase:", data);
-      
-      // Transform the data to match the User type
-      const transformedData: User[] = (data as ProfileRow[]).map(user => ({
-        id: user.id,
-        email: user.email || null,
-        full_name: user.full_name || null,
-        phone: user.phone || null,
-        whatsapp_number: user.whatsapp_number || null,
-        role: user.role || null,
-        avatar_url: user.avatar_url || null
-      }));
-
-      console.log("Transformed users:", transformedData);
-      return transformedData;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const deleteUser = async (userId: string) => {

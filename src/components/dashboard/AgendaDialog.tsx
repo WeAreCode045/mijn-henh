@@ -2,11 +2,11 @@
 import { useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { useAuth } from "@/providers/AuthProvider";
+import { useUsers } from "@/hooks/useUsers";
 import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { useAgendaDialog } from "@/hooks/useAgendaDialog";
 import { AgendaDialogHeader } from "./agenda/AgendaDialogHeader";
 import { AgendaDialogForm } from "./agenda/AgendaDialogForm";
 import { AgendaDialogFooter } from "./agenda/AgendaDialogFooter";
@@ -29,6 +29,21 @@ export function AgendaDialog({
   propertyId,
 }: AgendaDialogProps) {
   const { user } = useAuth();
+  const { users, isLoading: usersLoading } = useUsers();
+  
+  // Transform users from useUsers hook, excluding the current user
+  const availableUsers = users
+    .filter(u => u.id !== user?.id) // Filter out current user
+    .map(u => ({
+      id: u.id,
+      name: u.full_name || u.email || `User ${u.id.substring(0, 8)}`
+    }));
+    
+  console.log("AgendaDialog - Available users:", availableUsers);
+  console.log("AgendaDialog - Current user:", user?.id);
+  console.log("AgendaDialog - All users:", users);
+  console.log("AgendaDialog - Users loading:", usersLoading);
+
   const {
     title,
     setTitle,
@@ -42,10 +57,8 @@ export function AgendaDialog({
     setSelectedPropertyId,
     additionalUsers,
     setAdditionalUsers,
-    availableUsers,
     isSaving,
     handleSave,
-    usersLoading
   } = useAgendaDialog(item, mode);
 
   // Set the selectedPropertyId from prop if available

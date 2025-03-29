@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AgendaDialogHeader } from "./form/DialogHeader";
 import { AgendaDialogContent } from "./form/DialogContent";
@@ -30,14 +31,20 @@ export function AddEditAgendaDialog({
   const { isLoading: usersLoading, users } = useUsers(); // Fetch all users
   const { user: currentUser } = useAuth();
   
+  console.log("AddEditAgendaDialog - Users loading:", usersLoading);
+  console.log("AddEditAgendaDialog - All users:", users);
+  console.log("AddEditAgendaDialog - Current user:", currentUser?.id);
+  
   // If external available users are provided, use them
   // Otherwise, transform users from useUsers hook, excluding the current user
   const availableUsers = externalAvailableUsers || users
-    .filter(agent => agent.id !== currentUser?.id) // Filter out current user
-    .map(agent => ({ 
-      id: agent.id, 
-      name: agent.full_name || agent.email || `User ${agent.id.substring(0, 8)}`
+    .filter(user => user.id !== currentUser?.id) // Filter out current user
+    .map(user => ({ 
+      id: user.id, 
+      name: user.full_name || user.email || `User ${user.id.substring(0, 8)}`
     }));
+  
+  console.log("AddEditAgendaDialog - Available users for selection:", availableUsers);
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
