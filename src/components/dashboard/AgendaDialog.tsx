@@ -33,12 +33,14 @@ export function AgendaDialog({
   const { users, isLoading: usersLoading } = useUsers();
   
   // Transform users from useUsers hook, excluding the current user
-  const availableUsers = users
-    .filter(u => u.id !== user?.id) // Filter out current user
-    .map(u => ({
-      id: u.id,
-      name: u.full_name || u.email || `User ${u.id.substring(0, 8)}`
-    }));
+  const availableUsers = (users && users.length > 0 && user?.id)
+    ? users
+        .filter(u => u.id !== user.id) // Filter out current user
+        .map(u => ({
+          id: u.id,
+          name: u.full_name || u.email || `User ${u.id.substring(0, 8)}`
+        }))
+    : [];
     
   console.log("AgendaDialog - Available users:", availableUsers);
   console.log("AgendaDialog - Current user:", user?.id);

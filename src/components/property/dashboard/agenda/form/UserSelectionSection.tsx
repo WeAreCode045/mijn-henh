@@ -39,7 +39,7 @@ export function UserSelectionSection({
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Loading users...</span>
           </div>
-        ) : availableUsers.length > 0 ? (
+        ) : availableUsers && availableUsers.length > 0 ? (
           <>
             <Select
               onValueChange={(value) => {
