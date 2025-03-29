@@ -1,6 +1,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from "react";
 
 interface PropertyDescriptionProps {
   description: string;
@@ -13,6 +14,33 @@ export function PropertyDescription({
   location_description,
   onChange,
 }: PropertyDescriptionProps) {
+  // Use local state to maintain cursor position
+  const [localDescription, setLocalDescription] = useState(description);
+  const [localLocationDescription, setLocalLocationDescription] = useState(location_description || "");
+  
+  // Sync with props when they change externally
+  useEffect(() => {
+    setLocalDescription(description);
+  }, [description]);
+  
+  useEffect(() => {
+    setLocalLocationDescription(location_description || "");
+  }, [location_description]);
+  
+  const handleLocalChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    // Update local state immediately
+    if (name === "description") {
+      setLocalDescription(value);
+    } else if (name === "location_description") {
+      setLocalLocationDescription(value);
+    }
+    
+    // Pass the change up to parent
+    onChange(e);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -20,8 +48,8 @@ export function PropertyDescription({
         <Textarea
           id="description"
           name="description"
-          value={description}
-          onChange={onChange}
+          value={localDescription}
+          onChange={handleLocalChange}
           className="mt-1"
           placeholder="Voer hier een algemene beschrijving van de woning in..."
           required
@@ -34,8 +62,8 @@ export function PropertyDescription({
           <Textarea
             id="location_description"
             name="location_description"
-            value={location_description}
-            onChange={onChange}
+            value={localLocationDescription}
+            onChange={handleLocalChange}
             className="mt-1"
             placeholder="Beschrijving van de locatie..."
           />

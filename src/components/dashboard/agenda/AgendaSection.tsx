@@ -1,12 +1,8 @@
-<<<<<<< Updated upstream
 
-=======
-import { useState } from "react";
->>>>>>> Stashed changes
 import { CardContent } from "@/components/ui/card";
 import { useAgendaSection } from "./hooks/useAgendaSection";
 import { AgendaHeader } from "./components/AgendaHeader";
-import { AgendaTabContent } from "./components/AgendaTabContent";
+import { AgendaTabContent } from "../tabs/AgendaTabContent";
 import { AgendaDialogs } from "./AgendaDialogs";
 
 export function AgendaSection() {
@@ -35,7 +31,6 @@ export function AgendaSection() {
         onAddButtonClick={handleAddButtonClick}
       />
       
-<<<<<<< Updated upstream
       <AgendaTabContent 
         activeTab={activeTab}
         safeAgendaItems={safeAgendaItems}
@@ -46,33 +41,6 @@ export function AgendaSection() {
         onItemClick={handleAgendaItemClick}
         onAddClick={handleAddClick}
       />
-=======
-      <TabsContent value="calendar" className="mt-0">
-        <AgendaViewContent 
-          view="calendar"
-          safeAgendaItems={filteredAgendaItems} // Use filteredAgendaItems here
-          isLoading={isLoading}
-          dateRange={dateRange}
-          setDateRange={handleSetDateRange}
-          filteredAgendaItems={filteredAgendaItems}
-          onItemClick={handleAgendaItemClick}
-          onAddClick={handleAddClick}
-        />
-      </TabsContent>
-      
-      <TabsContent value="list" className="mt-0">
-        <AgendaViewContent 
-          view="list"
-          safeAgendaItems={filteredAgendaItems} // Use filteredAgendaItems here
-          isLoading={isLoading}
-          dateRange={dateRange}
-          setDateRange={handleSetDateRange}
-          filteredAgendaItems={filteredAgendaItems}
-          onItemClick={handleAgendaItemClick}
-          onAddClick={handleAddClick}
-        />
-      </TabsContent>
->>>>>>> Stashed changes
       
       <AgendaDialogs 
         agendaDialogProps={agendaDialogProps}

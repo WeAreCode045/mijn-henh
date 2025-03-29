@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -37,6 +38,49 @@ export function PropertyDetails({
   hasGarden,
   onChange,
 }: PropertyDetailsProps) {
+  // Local state to maintain cursor position
+  const [localValues, setLocalValues] = useState({
+    title,
+    price,
+    address,
+    buildYear,
+    sqft,
+    livingArea,
+    bedrooms,
+    bathrooms,
+    garages,
+    energyLabel
+  });
+  
+  // Sync with props when they change externally
+  useEffect(() => {
+    setLocalValues({
+      title,
+      price,
+      address,
+      buildYear,
+      sqft,
+      livingArea,
+      bedrooms,
+      bathrooms,
+      garages,
+      energyLabel
+    });
+  }, [title, price, address, buildYear, sqft, livingArea, bedrooms, bathrooms, garages, energyLabel]);
+  
+  const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    // Update local state immediately
+    setLocalValues(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Pass the change up to parent
+    onChange(e);
+  };
+
   const handleGardenChange = (checked: boolean) => {
     const event = new Event('change', { bubbles: true }) as unknown as React.ChangeEvent<HTMLInputElement>;
     Object.defineProperty(event, 'target', {
@@ -58,8 +102,8 @@ export function PropertyDetails({
         <Input
           id="title"
           name="title"
-          value={title}
-          onChange={onChange}
+          value={localValues.title}
+          onChange={handleLocalChange}
           className="mt-1"
         />
       </div>
@@ -71,8 +115,8 @@ export function PropertyDetails({
             id="price"
             name="price"
             type="text"
-            value={price}
-            onChange={onChange}
+            value={localValues.price}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -82,8 +126,8 @@ export function PropertyDetails({
             id="buildYear"
             name="buildYear"
             type="number"
-            value={buildYear}
-            onChange={onChange}
+            value={localValues.buildYear}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -94,8 +138,8 @@ export function PropertyDetails({
         <Input
           id="address"
           name="address"
-          value={address}
-          onChange={onChange}
+          value={localValues.address}
+          onChange={handleLocalChange}
           className="mt-1"
         />
       </div>
@@ -107,8 +151,8 @@ export function PropertyDetails({
             id="sqft"
             name="sqft"
             type="number"
-            value={sqft}
-            onChange={onChange}
+            value={localValues.sqft}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -118,8 +162,8 @@ export function PropertyDetails({
             id="livingArea"
             name="livingArea"
             type="number"
-            value={livingArea}
-            onChange={onChange}
+            value={localValues.livingArea}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -132,8 +176,8 @@ export function PropertyDetails({
             id="bedrooms"
             name="bedrooms"
             type="number"
-            value={bedrooms}
-            onChange={onChange}
+            value={localValues.bedrooms}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -143,8 +187,8 @@ export function PropertyDetails({
             id="bathrooms"
             name="bathrooms"
             type="number"
-            value={bathrooms}
-            onChange={onChange}
+            value={localValues.bathrooms}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -154,8 +198,8 @@ export function PropertyDetails({
             id="garages"
             name="garages"
             type="number"
-            value={garages}
-            onChange={onChange}
+            value={localValues.garages}
+            onChange={handleLocalChange}
             className="mt-1"
           />
         </div>
@@ -167,8 +211,8 @@ export function PropertyDetails({
           <select
             id="energyLabel"
             name="energyLabel"
-            value={energyLabel}
-            onChange={onChange}
+            value={localValues.energyLabel}
+            onChange={handleLocalChange}
             className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2"
           >
             <option value="">Selecteer label</option>
