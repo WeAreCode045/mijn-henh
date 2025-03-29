@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { useAuth } from "@/providers/AuthProvider";
 import { useUsers } from "@/hooks/useUsers";
+import { useAgendaDialog } from "@/hooks/useAgendaDialog";
 import {
   Dialog,
   DialogContent,
