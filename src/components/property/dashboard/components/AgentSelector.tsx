@@ -55,6 +55,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, [toast]);
 
   const handleAgentChange = async (agentId: string) => {
+    // Safety check to ensure onAgentChange is defined
     if (!onAgentChange || typeof onAgentChange !== 'function') {
       console.error("Error: onAgentChange is not a function", onAgentChange);
       toast({
@@ -70,6 +71,11 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
     try {
       setCurrentAgentId(agentId);
       await onAgentChange(finalAgentId);
+      
+      toast({
+        title: "Success",
+        description: "Agent updated successfully",
+      });
     } catch (error) {
       console.error("Error saving agent:", error);
       toast({

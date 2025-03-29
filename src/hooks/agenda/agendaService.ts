@@ -133,7 +133,7 @@ export const addAgendaItem = async (
     }
   }
   
-  // Remove duplicates
+  // Remove duplicates and ensure additionalUsers is a proper JSON array
   allAdditionalUsers = [...new Set(allAdditionalUsers)];
 
   const { error } = await supabase
@@ -181,30 +181,51 @@ export const updateAgendaItem = async (
     title,
     description,
     event_date: eventDate,
-    event_time: eventTime,
-    additional_users: additionalUsers
+    event_time: eventTime
   };
   
-  // Set propertyId to null if not provided or it's the dummy UUID
-  if (!propertyId || propertyId === '00000000-0000-0000-0000-000000000000') {
-    updateObj.property_id = null;
-  } else {
-    updateObj.property_id = propertyId;
+  // Only update propertyId if it's provided and not the dummy UUID
+  if (propertyId !== undefined) {
+    if (propertyId === null || propertyId === '00000000-0000-0000-0000-000000000000') {
+      // Fetch a default property ID if needed since property_id cannot be null
+      const { data: properties, error: propertiesError } = await supabase
+        .from('properties')
+        .select('id')
+        .limit(1);
+      
+      if (propertiesError) {
+        console.error("Error fetching default property:", propertiesError);
+        throw propertiesError;
+      }
+      
+      if (properties && properties.length > 0) {
+        updateObj.property_id = properties[0].id;
+      } else {
+        throw new Error("Cannot update agenda item: No property found and property_id cannot be null");
+      }
+    } else {
+      updateObj.property_id = propertyId;
+    }
     
     // If this item is linked to a property, get the property's agent
-    const { data: propertyData } = await supabase
-      .from('properties')
-      .select('agent_id')
-      .eq('id', propertyId)
-      .single();
-      
-    if (propertyData && propertyData.agent_id) {
-      // Add the property's agent to additional users if not already there
-      if (!additionalUsers.includes(propertyData.agent_id)) {
-        updateObj.additional_users = [...additionalUsers, propertyData.agent_id];
+    if (updateObj.property_id) {
+      const { data: propertyData } = await supabase
+        .from('properties')
+        .select('agent_id')
+        .eq('id', updateObj.property_id)
+        .single();
+        
+      if (propertyData && propertyData.agent_id) {
+        // Add the property's agent to additional users if not already there
+        if (!additionalUsers.includes(propertyData.agent_id)) {
+          additionalUsers = [...additionalUsers, propertyData.agent_id];
+        }
       }
     }
   }
+  
+  // Process additional users - ensure it's a proper JSON array
+  updateObj.additional_users = [...new Set(additionalUsers)];
   
   // Only add end_date if it has a value
   if (endDate) {
@@ -225,5 +246,8 @@ export const updateAgendaItem = async (
     .update(updateObj)
     .eq('id', agendaItemId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error updating agenda item:", error);
+    throw error;
+  }
 };

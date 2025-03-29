@@ -1,7 +1,7 @@
 
 import React from "react";
-import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { format } from "date-fns";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { EventItem } from "./EventItem";
 
 interface DayColumnProps {
@@ -9,8 +9,8 @@ interface DayColumnProps {
   events: AgendaItem[];
   getEventPosition: (time: string) => number;
   getEventDuration: (startTime: string, endTime: string | null) => number;
-  formatEventTime: (event: AgendaItem) => string;
   getEventColor: (event: AgendaItem) => string;
+  formatEventTime: (event: AgendaItem) => string;
   onItemClick: (item: AgendaItem) => void;
 }
 
@@ -19,40 +19,56 @@ export function DayColumn({
   events,
   getEventPosition,
   getEventDuration,
-  formatEventTime,
   getEventColor,
+  formatEventTime,
   onItemClick
 }: DayColumnProps) {
-  const isToday = new Date().toDateString() === date.toDateString();
+  const dayName = format(date, 'EEE');
+  const dayNumber = format(date, 'd');
+  const isToday = date.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
+  
+  // Generate time slots (1 hour intervals)
+  const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8 AM to 8 PM
   
   return (
-    <div className="flex-1 min-w-[150px] border-r relative">
-      {/* Column header with day */}
-      <div className={`h-12 border-b flex flex-col items-center justify-center ${isToday ? 'bg-primary/10' : 'bg-gray-50'}`}>
-        <div className="text-sm font-medium">{format(date, "EEE")}</div>
-        <div className={`text-xs ${isToday ? 'text-primary font-bold' : 'text-gray-500'}`}>
-          {format(date, "MMM d")}
-        </div>
+    <div className="flex-1 min-w-[120px] border-l">
+      {/* Day header */}
+      <div className={`p-2 text-center border-b ${isToday ? 'bg-primary/10 font-bold' : ''}`}>
+        <div className="text-sm font-medium">{dayName}</div>
+        <div className={`text-2xl ${isToday ? 'text-primary' : ''}`}>{dayNumber}</div>
       </div>
       
-      {/* Hour cells */}
-      <div className="relative">
-        {Array.from({ length: 12 }, (_, i) => (
-          <div key={i} className="h-[60px] border-b"></div>
+      {/* Day content with time slots */}
+      <div className="relative" style={{ height: '780px' }}> {/* 13 hours * 60px */}
+        {/* Time slot guidelines */}
+        {timeSlots.map(hour => (
+          <div 
+            key={hour} 
+            className="border-b h-[60px] flex items-end justify-end pr-1 text-[10px] text-muted-foreground"
+          >
+            {/* Empty slot */}
+          </div>
         ))}
         
-        {/* Events */}
-        {events.map((event) => (
-          <EventItem 
-            key={event.id}
-            event={event}
-            position={getEventPosition(event.event_time)}
-            duration={getEventDuration(event.event_time, event.end_time)} 
-            color={getEventColor(event)}
-            timeLabel={formatEventTime(event)}
-            onClick={() => onItemClick(event)}
-          />
-        ))}
+        {/* Event items */}
+        {events.map(event => {
+          const position = getEventPosition(event.event_time);
+          const duration = getEventDuration(event.event_time, event.end_time);
+          const color = getEventColor(event);
+          const timeLabel = formatEventTime(event);
+          
+          return (
+            <EventItem
+              key={event.id}
+              event={event}
+              position={position}
+              duration={duration}
+              color={color}
+              timeLabel={timeLabel}
+              onClick={() => onItemClick(event)}
+            />
+          );
+        })}
       </div>
     </div>
   );

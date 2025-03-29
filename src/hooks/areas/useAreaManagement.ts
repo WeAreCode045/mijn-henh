@@ -42,6 +42,12 @@ export function useAreaManagement(
     
     // Log after update
     console.log("Area added, new state requested");
+    
+    // Show success toast
+    toast({
+      title: "Area added",
+      description: "New area has been added successfully",
+    });
   };
 
   // Remove an area from the property
@@ -55,6 +61,12 @@ export function useAreaManagement(
         ...prevData,
         areas: prevAreas.filter(area => area.id !== id),
       };
+    });
+    
+    // Show success toast
+    toast({
+      title: "Area removed",
+      description: "Area has been removed successfully",
     });
   };
 

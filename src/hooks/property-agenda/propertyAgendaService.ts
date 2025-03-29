@@ -65,10 +65,10 @@ export const addPropertyAgendaItem = async (
     allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
   }
   
-  // Remove duplicates
+  // Remove duplicates and ensure it's a proper JSON array
   allAdditionalUsers = [...new Set(allAdditionalUsers)];
 
-  // Ensure additionalUsers is properly formatted as a JSON array
+  // Create the new item with properly formatted data
   const newItem = {
     agent_id: agentId,
     property_id: propertyId,
@@ -149,6 +149,9 @@ export const updatePropertyAgendaItem = async (
       }
     }
   }
+  
+  // Remove duplicates and ensure it's a proper JSON array
+  allAdditionalUsers = [...new Set(allAdditionalUsers)];
   
   // Create an update object with only the fields we want to update
   const updates: any = {

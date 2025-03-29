@@ -1,102 +1,80 @@
 
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { format } from "date-fns";
 
 export function useEventFormatting() {
-  // Calculate the position of an event in the calendar grid based on its time
+  // Convert time string to a position (pixels from top)
   const getEventPosition = (time: string): number => {
-    try {
-      // Handle different time formats (HH:MM:SS or HH:MM)
-      const timeParts = time.split(":");
-      const hours = parseInt(timeParts[0], 10);
-      const minutes = parseInt(timeParts[1], 10);
-      
-      // Calculate the top position based on hours and minutes
-      // Each hour is 60px tall
-      return (hours - 8) * 60 + (minutes / 60) * 60;
-    } catch (error) {
-      console.error("Error calculating position:", error, time);
-      return 0;
-    }
+    if (!time) return 0;
+    
+    const [hours, minutes] = time.split(':').map(Number);
+    const totalMinutes = (hours * 60) + minutes;
+    
+    // Start time for the calendar (8:00 AM = 480 minutes)
+    const startMinutes = 8 * 60;
+    
+    // Calculate position (20px per hour = 1/3 px per minute)
+    return (totalMinutes - startMinutes) * (1/3);
   };
   
-  // Calculate the event duration in pixels based on start and end time
+  // Calculate event duration in pixels
   const getEventDuration = (startTime: string, endTime: string | null): number => {
-    // Default 60 minutes if no end time
-    if (!endTime) return 60;
+    if (!startTime) return 30; // Default height
+    if (!endTime) return 30; // Default height for events without end time
     
-    try {
-      const startTimeParts = startTime.split(":");
-      const endTimeParts = endTime.split(":");
-      
-      const startHours = parseInt(startTimeParts[0], 10);
-      const startMinutes = parseInt(startTimeParts[1], 10);
-      
-      const endHours = parseInt(endTimeParts[0], 10);
-      const endMinutes = parseInt(endTimeParts[1], 10);
-      
-      // Calculate total minutes
-      const startTotalMinutes = startHours * 60 + startMinutes;
-      const endTotalMinutes = endHours * 60 + endMinutes;
-      
-      // Convert minutes to pixels (1 minute = 1px)
-      return endTotalMinutes - startTotalMinutes;
-    } catch (error) {
-      console.error("Error calculating duration:", error);
-      return 60; // Default 60 minutes
-    }
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    
+    const startTotalMinutes = (startHours * 60) + startMinutes;
+    const endTotalMinutes = (endHours * 60) + endMinutes;
+    
+    // Calculate duration in minutes, with a minimum of 30 minutes (10px)
+    const durationMinutes = Math.max(30, endTotalMinutes - startTotalMinutes);
+    
+    // Calculate height (20px per hour = 1/3 px per minute)
+    return durationMinutes * (1/3);
   };
   
   // Format event time for display
   const formatEventTime = (event: AgendaItem): string => {
-    try {
-      // Format the time for display (e.g., "9:00 AM - 10:00 AM")
-      const startTime = formatTimeString(event.event_time);
-      if (event.end_time) {
-        const endTime = formatTimeString(event.end_time);
-        return `${startTime} - ${endTime}`;
-      }
-      return startTime;
-    } catch (error) {
-      console.error("Error formatting event time:", error);
-      return event.event_time || "";
+    if (!event.event_time) return '';
+    
+    const timeString = event.event_time.substring(0, 5); // Get HH:MM
+    
+    if (event.end_time) {
+      const endTimeString = event.end_time.substring(0, 5);
+      return `${timeString} - ${endTimeString}`;
     }
+    
+    return timeString;
   };
   
-  // Helper function to format a time string
-  const formatTimeString = (time: string): string => {
-    try {
-      const [hours, minutes] = time.split(":").map(Number);
-      return `${hours % 12 || 12}:${minutes.toString().padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"}`;
-    } catch (error) {
-      return time;
-    }
-  };
-  
-  // Calculate colors for events based on property ID or title
+  // Get color for event based on some property
   const getEventColor = (event: AgendaItem): string => {
+    // Generate a deterministic color based on the event title or ID
+    const hash = event.id.split('').reduce((acc, char) => {
+      return acc + char.charCodeAt(0);
+    }, 0);
+    
     const colors = [
-      "#4F46E5", // indigo
-      "#10B981", // emerald
-      "#F59E0B", // amber
-      "#8B5CF6", // violet
-      "#EC4899", // pink
-      "#3B82F6", // blue
-      "#EF4444", // red
+      '#4338ca', // indigo-700
+      '#1d4ed8', // blue-700
+      '#0369a1', // sky-700
+      '#0e7490', // cyan-700
+      '#047857', // emerald-700
+      '#15803d', // green-700
+      '#4d7c0f', // lime-700
+      '#b45309', // amber-700
+      '#c2410c', // orange-700
+      '#b91c1c', // red-700
+      '#be185d', // pink-700
+      '#a21caf', // fuchsia-700
+      '#7e22ce', // purple-700
     ];
     
-    // Use the property ID or title as the hash source
-    const hashSource = event.property_id || event.title;
-    
-    // Create a hash from the string
-    let hash = 0;
-    for (let i = 0; i < hashSource.length; i++) {
-      hash = hashSource.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    
-    const index = Math.abs(hash) % colors.length;
-    return colors[index];
+    return colors[hash % colors.length];
   };
-
+  
   return {
     getEventPosition,
     getEventDuration,
