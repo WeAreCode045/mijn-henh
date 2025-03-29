@@ -74,7 +74,7 @@ serve(async (req) => {
         message, 
         property_id,
         property:properties(title, address),
-        agent:profiles(id, full_name, email, phone, agent_photo)
+        agent:profiles(id, full_name, email, phone, avatar_url)
       `)
       .eq("id", submissionId)
       .single();
@@ -90,7 +90,7 @@ serve(async (req) => {
     // 2. Get the user who is replying (could be an agent or admin)
     const { data: replyingUser, error: userError } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, email, phone, agent_photo")
+      .select("id, full_name, email, phone, avatar_url")
       .eq("id", userId)
       .single();
 
@@ -129,7 +129,7 @@ serve(async (req) => {
           </div>
           <div style="margin-top: 30px;">
             <div style="display: flex; align-items: center;">
-              ${replyingUser.agent_photo ? `<img src="${replyingUser.agent_photo}" alt="${replyingUser.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
+              ${replyingUser.avatar_url ? `<img src="${replyingUser.avatar_url}" alt="${replyingUser.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
               <div>
                 <p style="margin: 0; font-weight: bold;">${replyingUser.full_name}</p>
                 <p style="margin: 5px 0;">${replyingUser.email}</p>
