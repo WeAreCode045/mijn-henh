@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentSelector } from "../../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../../dashboard/components/PropertyDates";
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { FileText, Globe, Youtube, RotateCcw, Share2, Archive, Trash, History } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MediaViewModal } from "@/components/property/MediaViewModal";
-import { usePropertyActions } from "@/hooks/usePropertyActions";
 import { supabase } from "@/integrations/supabase/client";
 import { EditHistoryModal } from "../../../dashboard/components/EditHistoryModal";
 import { useLocation } from "react-router-dom";

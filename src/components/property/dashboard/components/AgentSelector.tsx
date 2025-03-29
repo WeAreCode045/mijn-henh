@@ -50,6 +50,16 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, []);
 
   const handleAgentChange = async (agentId: string) => {
+    if (!onAgentChange || typeof onAgentChange !== 'function') {
+      console.error("Error: onAgentChange is not a function", onAgentChange);
+      toast({
+        title: "Error",
+        description: "Cannot update agent - invalid handler",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const finalAgentId = agentId === "no-agent" ? "" : agentId;
     
     try {
@@ -87,7 +97,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
           {agents.map(agent => (
             <SelectItem 
               key={agent.id} 
-              value={agent.id || `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`}
+              value={agent.id}
             >
               {agent.full_name}
             </SelectItem>
