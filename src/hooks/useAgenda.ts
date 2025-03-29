@@ -46,15 +46,11 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
   ) => {
     if (!user?.id) return;
 
-    // If no property ID was provided for this specific item, use the one provided to the hook
-    const finalPropertyId = itemPropertyId !== undefined ? itemPropertyId : propertyId;
-    
-    // If we still don't have a propertyId, we need to provide a dummy value to satisfy the constraint
-    // as the database doesn't allow null property_id
-    const safePropertyId = finalPropertyId || '00000000-0000-0000-0000-000000000000';
-    
     try {
-      console.log(`Adding agenda item with propertyId: ${safePropertyId}`);
+      // If no property ID was provided for this specific item, use the one provided to the hook
+      const finalPropertyId = itemPropertyId !== undefined ? itemPropertyId : propertyId;
+      
+      console.log(`Adding agenda item with propertyId: ${finalPropertyId || 'none'}`);
       
       await addItem(
         user.id,
@@ -65,7 +61,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
         endDate,
         endTime && endTime.trim() !== "" ? endTime : null,
         additionalUsers,
-        safePropertyId
+        finalPropertyId
       );
       
       toast({
@@ -119,9 +115,6 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
       // Use the specific item property ID if provided, otherwise use the hook's property ID
       const finalPropertyId = itemPropertyId !== undefined ? itemPropertyId : propertyId;
       
-      // If we still don't have a propertyId, we need to provide a dummy value to satisfy the constraint
-      const safePropertyId = finalPropertyId || '00000000-0000-0000-0000-000000000000';
-      
       // Make sure empty string for endTime is converted to null
       const safeEndTime = endTime && endTime.trim() !== "" ? endTime : null;
       
@@ -134,7 +127,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
         endDate,
         safeEndTime,
         additionalUsers,
-        safePropertyId
+        finalPropertyId
       );
       
       toast({

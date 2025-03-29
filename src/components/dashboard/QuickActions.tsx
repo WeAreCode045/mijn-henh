@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, Home, Mail } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AgendaDialog } from "@/components/dashboard/AgendaDialog";
 import { useAgenda } from "@/hooks/useAgenda";
 
@@ -20,6 +19,12 @@ export function QuickActions() {
   const handleSaveAgendaItem = async (data: any) => {
     try {
       console.log("QuickActions - Saving agenda item:", data);
+      
+      // We need to handle property_id carefully
+      const finalPropertyId = data.property_id && data.property_id !== '00000000-0000-0000-0000-000000000000' 
+        ? data.property_id 
+        : propertyId || null; 
+      
       await addAgendaItem(
         data.title,
         data.description,
@@ -27,8 +32,8 @@ export function QuickActions() {
         data.event_time,
         data.end_date,
         data.end_time,
-        data.additional_users,
-        data.property_id
+        data.additional_users || [],
+        finalPropertyId
       );
     } catch (error) {
       console.error('Error in QuickActions when saving agenda item:', error);

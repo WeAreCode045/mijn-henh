@@ -75,10 +75,34 @@ export const addAgendaItem = async (
   endDate: string | null = null,
   endTime: string | null = null,
   additionalUsers: string[] = [],
-  propertyId: string
+  propertyId?: string | null
 ) => {
-  // If this item is linked to a property, get the property's agent
-  let allAdditionalUsers = [...additionalUsers];
+  // If no propertyId is provided, we don't attempt to link the item to a property
+  // We'll need to make this field NULLABLE in the database or provide a valid default
+  if (!propertyId || propertyId === '00000000-0000-0000-0000-000000000000') {
+    console.log("Adding agenda item without property link");
+    
+    const { error } = await supabase
+      .from('property_agenda_items')
+      .insert({
+        agent_id: userId,
+        property_id: null, // Set to null when no valid property is provided
+        title,
+        description,
+        event_date: eventDate,
+        event_time: eventTime,
+        end_date: endDate,
+        end_time: endTime && endTime.trim() !== "" ? endTime : null,
+        additional_users: additionalUsers
+      });
+
+    if (error) {
+      console.error("Error inserting agenda item:", error);
+      throw error;
+    }
+    
+    return;
+  }
   
   // Log what's being sent to the database for debugging
   console.log("Adding agenda item with:", {
@@ -93,17 +117,18 @@ export const addAgendaItem = async (
     additionalUsers
   });
   
-  if (propertyId && propertyId !== '00000000-0000-0000-0000-000000000000') {
-    const { data: propertyData } = await supabase
-      .from('properties')
-      .select('agent_id')
-      .eq('id', propertyId)
-      .single();
-      
-    if (propertyData && propertyData.agent_id && propertyData.agent_id !== userId) {
-      // Add the property's agent to additional users if they're not already the creating agent
-      allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
-    }
+  // If this item is linked to a property, get the property's agent
+  let allAdditionalUsers = [...additionalUsers];
+  
+  const { data: propertyData } = await supabase
+    .from('properties')
+    .select('agent_id')
+    .eq('id', propertyId)
+    .single();
+    
+  if (propertyData && propertyData.agent_id && propertyData.agent_id !== userId) {
+    // Add the property's agent to additional users if they're not already the creating agent
+    allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
   }
   
   // Remove duplicates
@@ -147,12 +172,24 @@ export const updateAgendaItem = async (
   endDate: string | null = null,
   endTime: string | null = null,
   additionalUsers: string[] = [],
-  propertyId: string
+  propertyId?: string | null
 ) => {
-  // If this item is linked to a property, get the property's agent
-  let allAdditionalUsers = [...additionalUsers];
+  // Create update object with required fields
+  const updateObj: any = {
+    title,
+    description,
+    event_date: eventDate,
+    event_time: eventTime,
+    additional_users: additionalUsers
+  };
   
-  if (propertyId && propertyId !== '00000000-0000-0000-0000-000000000000') {
+  // Set propertyId to null if not provided or it's the dummy UUID
+  if (!propertyId || propertyId === '00000000-0000-0000-0000-000000000000') {
+    updateObj.property_id = null;
+  } else {
+    updateObj.property_id = propertyId;
+    
+    // If this item is linked to a property, get the property's agent
     const { data: propertyData } = await supabase
       .from('properties')
       .select('agent_id')
@@ -161,21 +198,11 @@ export const updateAgendaItem = async (
       
     if (propertyData && propertyData.agent_id) {
       // Add the property's agent to additional users if not already there
-      if (!allAdditionalUsers.includes(propertyData.agent_id)) {
-        allAdditionalUsers.push(propertyData.agent_id);
+      if (!additionalUsers.includes(propertyData.agent_id)) {
+        updateObj.additional_users = [...additionalUsers, propertyData.agent_id];
       }
     }
   }
-  
-  // Create update object with required fields
-  const updateObj: any = {
-    property_id: propertyId,
-    title,
-    description,
-    event_date: eventDate,
-    event_time: eventTime,
-    additional_users: allAdditionalUsers
-  };
   
   // Only add end_date if it has a value
   if (endDate) {
