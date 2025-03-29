@@ -30,6 +30,15 @@ export function useAgendaSection() {
   const [endTime, setEndTime] = useState("");
   const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
   
+  // Edit form states
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>(new Date());
+  const [editTime, setEditTime] = useState("09:00");
+  const [editEndDate, setEditEndDate] = useState<Date | undefined>(undefined);
+  const [editEndTime, setEditEndTime] = useState("");
+  const [editAdditionalUsers, setEditAdditionalUsers] = useState<string[]>([]);
+  
   // Handler functions
   const handleSetDateRange = (range: DateRange | undefined) => {
     setDateRange(range);
@@ -38,6 +47,17 @@ export function useAgendaSection() {
   const handleAgendaItemClick = (item: AgendaItem) => {
     setSelectedAgendaItem(item);
     setIsViewDialogOpen(true);
+    
+    // Populate edit form with item data
+    if (item) {
+      setEditTitle(item.title);
+      setEditDescription(item.description || "");
+      setEditDate(item.event_date ? new Date(item.event_date) : undefined);
+      setEditTime(item.event_time || "09:00");
+      setEditEndDate(item.end_date ? new Date(item.end_date) : undefined);
+      setEditEndTime(item.end_time || "");
+      setEditAdditionalUsers(item.additional_users || []);
+    }
   };
 
   const handleAddButtonClick = () => {
@@ -46,6 +66,12 @@ export function useAgendaSection() {
 
   const handleAddClick = () => {
     setIsAddDialogOpen(true);
+  };
+  
+  const handleEditButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsViewDialogOpen(false);
+    setIsEditDialogOpen(true);
   };
 
   // Dialog props for the child components
@@ -71,6 +97,21 @@ export function useAgendaSection() {
     setEndTime,
     additionalUsers,
     setAdditionalUsers,
+    editTitle,
+    setEditTitle,
+    editDescription,
+    setEditDescription,
+    editDate,
+    setEditDate,
+    editTime,
+    setEditTime,
+    editEndDate,
+    setEditEndDate,
+    editEndTime,
+    setEditEndTime,
+    editAdditionalUsers,
+    setEditAdditionalUsers,
+    handleEditButtonClick
   };
 
   // Functions for CRUD operations
@@ -98,16 +139,16 @@ export function useAgendaSection() {
   };
 
   const handleUpdateAgendaItem = async () => {
-    if (selectedAgendaItem && selectedDate && title) {
+    if (selectedAgendaItem && editDate && editTitle) {
       await updateAgendaItem(
         selectedAgendaItem.id,
-        title,
-        description || null,
-        selectedDate.toISOString().split('T')[0],
-        selectedTime,
-        endDate ? endDate.toISOString().split('T')[0] : null,
-        endTime || null,
-        additionalUsers
+        editTitle,
+        editDescription || null,
+        editDate.toISOString().split('T')[0],
+        editTime,
+        editEndDate ? editEndDate.toISOString().split('T')[0] : null,
+        editEndTime || null,
+        editAdditionalUsers
       );
       
       setIsEditDialogOpen(false);

@@ -32,7 +32,7 @@ export function AgendaSection() {
       />
       
       <AgendaTabContent 
-        activeTab={activeTab}
+        onTabChange={setActiveTab}
         safeAgendaItems={safeAgendaItems}
         isLoading={isLoading}
         dateRange={dateRange}
@@ -43,7 +43,10 @@ export function AgendaSection() {
       />
       
       <AgendaDialogs 
-        agendaDialogProps={agendaDialogProps}
+        agendaDialogProps={{
+          ...agendaDialogProps,
+          handleEditButtonClick: agendaDialogProps.handleEditButtonClick || (() => {})
+        }}
         onAddAgendaItem={handleAddAgendaItem}
         onDeleteAgendaItem={handleDeleteAgendaItem}
         onUpdateAgendaItem={handleUpdateAgendaItem}

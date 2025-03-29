@@ -4,32 +4,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAgenda } from "@/hooks/useAgenda";
 import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
 import { useState } from "react";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { DateRange } from "react-day-picker";
 
-export function AgendaTabContent() {
-  const { agendaItems, isLoading } = useAgenda();
-  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems);
+interface AgendaTabContentProps {
+  onTabChange: (value: string) => void;
+  safeAgendaItems: AgendaItem[];
+  isLoading: boolean;
+  dateRange: DateRange;
+  setDateRange: (range: DateRange | undefined) => void;
+  filteredAgendaItems: AgendaItem[];
+  onItemClick?: (item: AgendaItem) => void;
+  onAddClick?: () => void;
+}
+
+export function AgendaTabContent(props?: AgendaTabContentProps) {
   const [activeTab, setActiveTab] = useState("calendar");
+  const { agendaItems, isLoading } = useAgenda();
+  
+  // If props are provided, use them; otherwise use local state
+  const { dateRange, setDateRange, filteredAgendaItems } = 
+    props || useAgendaFiltering(agendaItems);
+  
+  // Use provided safe items or create default
+  const safeAgendaItems = props?.safeAgendaItems || agendaItems || [];
 
   return (
     <>
-      <AgendaSection 
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        safeAgendaItems={agendaItems}
-        isLoading={isLoading}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        filteredAgendaItems={filteredAgendaItems}
-      />
-      <Select>
-        <SelectTrigger>
-          <SelectValue placeholder="Select an option" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="option1">Option 1</SelectItem>
-          <SelectItem value="option2">Option 2</SelectItem>
-        </SelectContent>
-      </Select>
+      {props ? (
+        <AgendaSection />
+      ) : (
+        <>
+          <AgendaSection />
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="option1">Option 1</SelectItem>
+              <SelectItem value="option2">Option 2</SelectItem>
+            </SelectContent>
+          </Select>
+        </>
+      )}
     </>
   );
 }

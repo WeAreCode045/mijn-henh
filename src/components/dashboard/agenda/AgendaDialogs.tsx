@@ -26,22 +26,22 @@ interface AgendaDialogsProps {
     setEndTime: (time: string) => void;
     additionalUsers: string[];
     setAdditionalUsers: (users: string[]) => void;
-    editTitle: string;
-    setEditTitle: (title: string) => void;
-    editDescription: string;
-    setEditDescription: (description: string) => void;
-    editDate: Date | undefined;
-    setEditDate: (date: Date | undefined) => void;
-    editTime: string;
-    setEditTime: (time: string) => void;
-    editEndDate: Date | undefined;
-    setEditEndDate: (date: Date | undefined) => void;
-    editEndTime: string;
-    setEditEndTime: (time: string) => void;
-    editAdditionalUsers: string[];
-    setEditAdditionalUsers: (users: string[]) => void;
-    availableUsers: { id: string; name: string }[];
-    handleEditButtonClick: (e: React.MouseEvent) => void;
+    editTitle?: string;
+    setEditTitle?: (title: string) => void;
+    editDescription?: string;
+    setEditDescription?: (description: string) => void;
+    editDate?: Date | undefined;
+    setEditDate?: (date: Date | undefined) => void;
+    editTime?: string;
+    setEditTime?: (time: string) => void;
+    editEndDate?: Date | undefined;
+    setEditEndDate?: (date: Date | undefined) => void;
+    editEndTime?: string;
+    setEditEndTime?: (time: string) => void;
+    editAdditionalUsers?: string[];
+    setEditAdditionalUsers?: (users: string[]) => void;
+    availableUsers?: { id: string; name: string }[];
+    handleEditButtonClick?: (e: React.MouseEvent) => void;
   };
   onAddAgendaItem: () => void;
   onDeleteAgendaItem: () => void;
@@ -76,22 +76,22 @@ export function AgendaDialogs({
     setEndTime,
     additionalUsers,
     setAdditionalUsers,
-    editTitle,
-    setEditTitle,
-    editDescription,
-    setEditDescription,
+    editTitle = "",
+    setEditTitle = () => {},
+    editDescription = "",
+    setEditDescription = () => {},
     editDate,
-    setEditDate,
-    editTime,
-    setEditTime,
+    setEditDate = () => {},
+    editTime = "",
+    setEditTime = () => {},
     editEndDate,
-    setEditEndDate,
-    editEndTime,
-    setEditEndTime,
-    editAdditionalUsers,
-    setEditAdditionalUsers,
-    availableUsers,
-    handleEditButtonClick
+    setEditEndDate = () => {},
+    editEndTime = "",
+    setEditEndTime = () => {},
+    editAdditionalUsers = [],
+    setEditAdditionalUsers = () => {},
+    availableUsers = [],
+    handleEditButtonClick = () => {}
   } = agendaDialogProps;
 
   return (
@@ -124,15 +124,7 @@ export function AgendaDialogs({
         <ViewAgendaItemDialog
           isOpen={isViewDialogOpen}
           onOpenChange={setIsViewDialogOpen}
-          selectedAgendaItem={selectedAgendaItem ? { 
-            ...selectedAgendaItem, 
-            property_id: "", 
-            agent_id: "", 
-            event_date: selectedAgendaItem.date.toISOString(), 
-            event_time: selectedAgendaItem.time, 
-            created_at: new Date().toISOString(), 
-            updated_at: new Date().toISOString() 
-          } : null}
+          selectedAgendaItem={selectedAgendaItem}
           onDelete={onDeleteAgendaItem}
           onEdit={handleEditButtonClick}
         />
