@@ -150,7 +150,7 @@ serve(async (req) => {
       .from("property_submission_replies")
       .insert({
         submission_id: submissionId,
-        user_id: userId, // Use the authenticated user's ID
+        agent_id: userId, // Use agent_id instead of user_id
         reply_text: replyText
       });
     
