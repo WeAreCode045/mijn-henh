@@ -541,6 +541,7 @@ export type Database = {
           reply_text: string
           submission_id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           agent_id?: string | null
@@ -549,6 +550,7 @@ export type Database = {
           reply_text: string
           submission_id: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           agent_id?: string | null
@@ -557,6 +559,7 @@ export type Database = {
           reply_text?: string
           submission_id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {

@@ -7,6 +7,181 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Create Supabase client
+const createSupabaseClient = (token?: string) => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  
+  const options = token ? { global: { headers: { Authorization: `Bearer ${token}` } } } : undefined;
+  
+  return createClient(supabaseUrl, supabaseKey, options);
+};
+
+// Authenticate user from request
+const authenticateUser = async (req: Request) => {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader) {
+    throw new Error("No authorization header");
+  }
+  
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseAdmin = createSupabaseClient();
+  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+  
+  if (authError || !user) {
+    throw new Error("Unauthorized");
+  }
+  
+  return { user, token };
+};
+
+// Validate request body
+const validateRequestBody = (body: any) => {
+  const { submissionId, replyText } = body;
+  
+  if (!submissionId || !replyText) {
+    throw new Error("Missing required data. Required: submissionId, replyText");
+  }
+  
+  return { submissionId, replyText };
+};
+
+// Fetch submission details
+const fetchSubmissionDetails = async (supabaseAdmin: any, submissionId: string) => {
+  const { data: submission, error: submissionError } = await supabaseAdmin
+    .from("property_contact_submissions")
+    .select(`
+      id, 
+      name, 
+      email, 
+      phone, 
+      message, 
+      property_id,
+      property:properties(title, address),
+      agent:profiles(id, full_name, email, phone, avatar_url)
+    `)
+    .eq("id", submissionId)
+    .single();
+
+  if (submissionError) {
+    throw new Error(`Error fetching submission: ${submissionError.message}`);
+  }
+
+  if (!submission) {
+    throw new Error(`Submission with ID ${submissionId} not found`);
+  }
+  
+  return submission;
+};
+
+// Fetch user details
+const fetchUserDetails = async (supabaseAdmin: any, userId: string) => {
+  const { data: user, error: userError } = await supabaseAdmin
+    .from("profiles")
+    .select("id, full_name, email, phone, avatar_url")
+    .eq("id", userId)
+    .single();
+
+  if (userError) {
+    throw new Error(`Error fetching user: ${userError.message}`);
+  }
+
+  if (!user) {
+    throw new Error(`User with ID ${userId} not found`);
+  }
+  
+  return user;
+};
+
+// Fetch agency settings
+const fetchAgencySettings = async (supabaseAdmin: any) => {
+  const { data: settings, error: settingsError } = await supabaseAdmin
+    .from("agency_settings")
+    .select("*")
+    .single();
+
+  if (settingsError) {
+    throw new Error(`Error fetching agency settings: ${settingsError.message}`);
+  }
+
+  if (!settings) {
+    throw new Error("Agency settings not found");
+  }
+  
+  return settings;
+};
+
+// Prepare email content
+const prepareEmailContent = (submission: any, replyText: string, replyingUser: any) => {
+  return {
+    to: submission.email,
+    subject: `Re: Your inquiry about ${submission.property?.title || 'our property'}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Hello ${submission.name},</h2>
+        <p>Thank you for your interest in ${submission.property?.title || 'our property'} at ${submission.property?.address || 'our location'}.</p>
+        <div style="margin: 20px 0; padding: 15px; background-color: #f7f7f7; border-left: 4px solid #3b82f6;">
+          <p style="white-space: pre-line;">${replyText}</p>
+        </div>
+        <div style="margin-top: 30px;">
+          <div style="display: flex; align-items: center;">
+            ${replyingUser.avatar_url ? `<img src="${replyingUser.avatar_url}" alt="${replyingUser.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
+            <div>
+              <p style="margin: 0; font-weight: bold;">${replyingUser.full_name}</p>
+              <p style="margin: 5px 0;">${replyingUser.email}</p>
+              ${replyingUser.phone ? `<p style="margin: 0;">${replyingUser.phone}</p>` : ''}
+            </div>
+          </div>
+        </div>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eaeaea;">
+        <p style="color: #666; font-size: 12px;">
+          This is in response to your inquiry sent on ${new Date(submission.created_at).toLocaleDateString()}.
+        </p>
+      </div>
+    `,
+  };
+};
+
+// Save reply to database
+const saveReplyToDatabase = async (supabaseAdmin: any, submissionId: string, userId: string, replyText: string) => {
+  const { error: replyError } = await supabaseAdmin
+    .from("property_submission_replies")
+    .insert({
+      submission_id: submissionId,
+      agent_id: userId,
+      reply_text: replyText
+    });
+  
+  if (replyError) {
+    throw new Error(`Error saving reply: ${replyError.message}`);
+  }
+};
+
+// Send email with SMTP
+const sendEmailWithSMTP = async (supabaseAdmin: any, settings: any, emailContent: any) => {
+  if (!settings.smtp_host || !settings.smtp_username || !settings.smtp_password) {
+    return null;
+  }
+  
+  try {
+    const { data: emailData, error: emailError } = await supabaseAdmin.functions.invoke(
+      'send-email-with-smtp', 
+      { body: emailContent }
+    );
+    
+    if (emailError) {
+      console.error("Error sending email:", emailError);
+      return null;
+    }
+    
+    return emailData;
+  } catch (error) {
+    console.error("Error invoking email function:", error);
+    return null;
+  }
+};
+
+// Main handler function
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -14,170 +189,30 @@ serve(async (req) => {
   }
 
   try {
-    const { submissionId, replyText } = await req.json();
+    // 1. Validate request body
+    const body = await req.json();
+    const { submissionId, replyText } = validateRequestBody(body);
 
-    if (!submissionId || !replyText) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Missing required data. Required: submissionId, replyText" 
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Create Supabase client
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
-    
-    // Extract the JWT token from the authorization header
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "No authorization header" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-    
-    const token = authHeader.replace('Bearer ', '');
-    
-    // Get the user from the JWT token
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-    
+    // 2. Authenticate user
+    const { user, token } = await authenticateUser(req);
     const userId = user.id;
-
-    // 1. Get the submission details
-    const { data: submission, error: submissionError } = await supabaseAdmin
-      .from("property_contact_submissions")
-      .select(`
-        id, 
-        name, 
-        email, 
-        phone, 
-        message, 
-        property_id,
-        property:properties(title, address),
-        agent:profiles(id, full_name, email, phone, avatar_url)
-      `)
-      .eq("id", submissionId)
-      .single();
-
-    if (submissionError) {
-      throw new Error(`Error fetching submission: ${submissionError.message}`);
-    }
-
-    if (!submission) {
-      throw new Error(`Submission with ID ${submissionId} not found`);
-    }
-
-    // 2. Get the user who is replying (could be an agent or admin)
-    const { data: replyingUser, error: userError } = await supabaseAdmin
-      .from("profiles")
-      .select("id, full_name, email, phone, avatar_url")
-      .eq("id", userId)
-      .single();
-
-    if (userError) {
-      throw new Error(`Error fetching user: ${userError.message}`);
-    }
-
-    if (!replyingUser) {
-      throw new Error(`User with ID ${userId} not found`);
-    }
-
-    // 3. Get agency settings for email configuration
-    const { data: settings, error: settingsError } = await supabaseAdmin
-      .from("agency_settings")
-      .select("*")
-      .single();
-
-    if (settingsError) {
-      throw new Error(`Error fetching agency settings: ${settingsError.message}`);
-    }
-
-    if (!settings) {
-      throw new Error("Agency settings not found");
-    }
-
-    // 4. Prepare email content
-    const emailContent = {
-      to: submission.email,
-      subject: `Re: Your inquiry about ${submission.property?.title || 'our property'}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Hello ${submission.name},</h2>
-          <p>Thank you for your interest in ${submission.property?.title || 'our property'} at ${submission.property?.address || 'our location'}.</p>
-          <div style="margin: 20px 0; padding: 15px; background-color: #f7f7f7; border-left: 4px solid #3b82f6;">
-            <p style="white-space: pre-line;">${replyText}</p>
-          </div>
-          <div style="margin-top: 30px;">
-            <div style="display: flex; align-items: center;">
-              ${replyingUser.avatar_url ? `<img src="${replyingUser.avatar_url}" alt="${replyingUser.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
-              <div>
-                <p style="margin: 0; font-weight: bold;">${replyingUser.full_name}</p>
-                <p style="margin: 5px 0;">${replyingUser.email}</p>
-                ${replyingUser.phone ? `<p style="margin: 0;">${replyingUser.phone}</p>` : ''}
-              </div>
-            </div>
-          </div>
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eaeaea;">
-          <p style="color: #666; font-size: 12px;">
-            This is in response to your inquiry sent on ${new Date(submission.created_at).toLocaleDateString()}.
-          </p>
-        </div>
-      `,
-    };
     
-    // 5. Save the reply to the database
-    const { error: replyError } = await supabaseAdmin
-      .from("property_submission_replies")
-      .insert({
-        submission_id: submissionId,
-        agent_id: userId, // Use agent_id instead of user_id
-        reply_text: replyText
-      });
+    // 3. Create Supabase client
+    const supabaseAdmin = createSupabaseClient();
     
-    if (replyError) {
-      throw new Error(`Error saving reply: ${replyError.message}`);
-    }
+    // 4. Fetch necessary data
+    const submission = await fetchSubmissionDetails(supabaseAdmin, submissionId);
+    const replyingUser = await fetchUserDetails(supabaseAdmin, userId);
+    const settings = await fetchAgencySettings(supabaseAdmin);
+    
+    // 5. Save the reply
+    await saveReplyToDatabase(supabaseAdmin, submissionId, userId, replyText);
+    
+    // 6. Send email if SMTP is configured
+    const emailContent = prepareEmailContent(submission, replyText, replyingUser);
+    const emailResult = await sendEmailWithSMTP(supabaseAdmin, settings, emailContent);
 
-    // 6. Call email sending function if it's available
-    let emailResult = null;
-    try {
-      if (settings.smtp_host && settings.smtp_username && settings.smtp_password) {
-        const { data: emailData, error: emailError } = await supabaseAdmin.functions.invoke('send-email-with-smtp', {
-          body: emailContent
-        });
-        
-        if (emailError) {
-          console.error("Error sending email:", emailError);
-          // Continue - we still saved the reply to the database
-        } else {
-          emailResult = emailData;
-        }
-      }
-    } catch (emailError) {
-      console.error("Error invoking email function:", emailError);
-      // Continue - we still saved the reply to the database
-    }
-
+    // 7. Return success response
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -191,6 +226,29 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Error in send-submission-reply function:", error);
+    
+    // Handle specific errors
+    if (error.message === "No authorization header" || error.message === "Unauthorized") {
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    if (error.message.includes("Missing required data")) {
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    // General error handling
     return new Response(
       JSON.stringify({ error: error.message || "An error occurred" }),
       {
