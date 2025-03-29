@@ -56,10 +56,7 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
   console.log("PropertyContentTab - Current step:", handlers.currentStep);
   console.log("PropertyContentTab - Step slug from URL:", stepSlug);
   console.log("PropertyContentTab - Property ID:", id);
-  console.log("PropertyContentTab - Has property data:", !!property);
-  console.log("PropertyContentTab - Has formData:", !!formData);
-  console.log("PropertyContentTab - Property title:", property?.title);
-  console.log("PropertyContentTab - FormData title:", formData?.title);
+  console.log("PropertyContentTab - onAddArea is function:", typeof handlers.onAddArea === 'function');
   
   // Update step based on URL when component mounts or URL changes
   useEffect(() => {
@@ -105,6 +102,10 @@ export function PropertyContentTab({ formData, property, handlers }: PropertyCon
         },
     // Make sure onAreaImageUpload exists or use handleAreaImageUpload as fallback
     onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
+    // Ensure onAddArea has a fallback
+    onAddArea: handlers.onAddArea || (() => {
+      console.warn("PropertyContentTab - No onAddArea handler provided");
+    }),
     // Ensure onFieldChange is always available
     onFieldChange: handlers.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
       console.log(`PropertyContentTab - Fallback onFieldChange: ${String(field)} =`, value);

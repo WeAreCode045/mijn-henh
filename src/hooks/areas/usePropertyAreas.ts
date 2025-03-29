@@ -19,9 +19,14 @@ export function usePropertyAreas(
   const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormState);
   const { handleAreaImageUpload } = useAreaImageUpload(formData, setFormState, setIsUploading);
 
+  const handleAddArea = useCallback(() => {
+    console.log("usePropertyAreas - Adding new area");
+    addArea();
+  }, [addArea]);
+
   return {
     // Area management
-    addArea,
+    addArea: handleAddArea,
     removeArea,
     updateArea,
     

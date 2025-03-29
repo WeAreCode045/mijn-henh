@@ -13,12 +13,14 @@ export function useAreaManagement(
 
   // Add a new area to the property
   const addArea = () => {
+    console.log("useAreaManagement - Adding new area");
+    
     const newArea: PropertyArea = {
       id: crypto.randomUUID(),
-      title: '',
+      title: 'New Area',
       description: '',
       columns: 2, // Default to 2 columns
-      name: '',
+      name: 'New Area',
       size: '',
       // Initialize with empty areaImages array
       areaImages: [],
@@ -29,20 +31,31 @@ export function useAreaManagement(
     
     console.log("Adding new area with default columns:", newArea);
     
-    setFormData(prevData => ({
-      ...prevData,
-      areas: [...(prevData.areas || []), newArea],
-    }));
+    setFormData(prevData => {
+      // Ensure areas is always an array
+      const prevAreas = Array.isArray(prevData.areas) ? prevData.areas : [];
+      return {
+        ...prevData,
+        areas: [...prevAreas, newArea],
+      };
+    });
+    
+    // Log after update
+    console.log("Area added, new state requested");
   };
 
   // Remove an area from the property
   const removeArea = (id: string) => {
     console.log(`Removing area ${id}`);
     
-    setFormData(prevData => ({
-      ...prevData,
-      areas: prevData.areas.filter(area => area.id !== id),
-    }));
+    setFormData(prevData => {
+      // Ensure areas is always an array
+      const prevAreas = Array.isArray(prevData.areas) ? prevData.areas : [];
+      return {
+        ...prevData,
+        areas: prevAreas.filter(area => area.id !== id),
+      };
+    });
   };
 
   // Update a specific field of an area
@@ -50,7 +63,9 @@ export function useAreaManagement(
     console.log(`Updating area ${id}, field ${String(field)}, value:`, value);
     
     setFormData(prevData => {
-      const updatedAreas = prevData.areas.map(area => 
+      // Ensure areas is always an array
+      const prevAreas = Array.isArray(prevData.areas) ? prevData.areas : [];
+      const updatedAreas = prevAreas.map(area => 
         area.id === id ? { ...area, [field]: value } : area
       );
       

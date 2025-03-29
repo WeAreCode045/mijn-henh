@@ -55,8 +55,6 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, [toast]);
 
   const handleAgentChange = async (agentId: string) => {
-    console.log("Agent change requested:", agentId, "onAgentChange:", typeof onAgentChange);
-    
     if (!onAgentChange || typeof onAgentChange !== 'function') {
       console.error("Error: onAgentChange is not a function", onAgentChange);
       toast({
@@ -72,11 +70,6 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
     try {
       setCurrentAgentId(agentId);
       await onAgentChange(finalAgentId);
-      
-      toast({
-        title: "Agent updated",
-        description: "The property agent has been updated",
-      });
     } catch (error) {
       console.error("Error saving agent:", error);
       toast({

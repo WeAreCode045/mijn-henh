@@ -1,5 +1,5 @@
 
-import { X, Star, Grid, Crown } from "lucide-react";
+import { X, Star, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

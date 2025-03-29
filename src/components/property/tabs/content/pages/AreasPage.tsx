@@ -33,16 +33,21 @@ export function AreasPage({
   isUploading = false,
   setPendingChanges
 }: AreasPageProps) {
+  // Make sure onAddArea is a function before using it
   const handleAddArea = () => {
-    console.log("Adding new area");
-    onAddArea();
-    if (setPendingChanges) {
-      setPendingChanges(true);
+    console.log("Adding new area", typeof onAddArea);
+    if (typeof onAddArea === 'function') {
+      onAddArea();
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    } else {
+      console.error("onAddArea is not a function", onAddArea);
     }
   };
   
   // Handle area reordering
-  const handleReorderAreas = (reorderedAreas) => {
+  const handleReorderAreas = (reorderedAreas: any) => {
     console.log("Reordering areas", reorderedAreas);
     onFieldChange("areas", reorderedAreas);
     if (setPendingChanges) {
@@ -59,6 +64,7 @@ export function AreasPage({
             size="sm"
             onClick={handleAddArea}
             className="flex items-center gap-1"
+            type="button"
           >
             <Plus className="h-4 w-4" />
             Add Area

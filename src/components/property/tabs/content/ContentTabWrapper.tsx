@@ -51,6 +51,7 @@ export function ContentTabWrapper({
   // Log handlers to help with debugging
   console.log("ContentTabWrapper - handleStepClick is function:", typeof handlers.handleStepClick === 'function');
   console.log("ContentTabWrapper - Current step:", handlers.currentStep);
+  console.log("ContentTabWrapper - onAddArea is function:", typeof handlers.onAddArea === 'function');
   
   // Create a centralized navigation handler with robust fallback mechanism
   const { 
@@ -92,6 +93,12 @@ export function ContentTabWrapper({
     // Add handleNext and handlePrevious to the handlers
     handleNext,
     handlePrevious,
+    // Ensure area image upload handler is always available
+    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
+    // Ensure onAddArea is always available with a fallback
+    onAddArea: handlers.onAddArea || (() => {
+      console.warn("ContentTabWrapper - No onAddArea handler provided");
+    }),
     // Ensure onFieldChange is always available
     onFieldChange: handlers.onFieldChange
   };
