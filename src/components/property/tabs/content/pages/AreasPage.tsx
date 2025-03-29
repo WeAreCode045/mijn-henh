@@ -35,11 +35,9 @@ export function AreasPage({
 }: AreasPageProps) {
   const handleAddArea = () => {
     console.log("Adding new area");
-    if (onAddArea) {
-      onAddArea();
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
+    onAddArea();
+    if (setPendingChanges) {
+      setPendingChanges(true);
     }
   };
   

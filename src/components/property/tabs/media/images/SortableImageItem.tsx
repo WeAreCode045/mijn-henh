@@ -3,7 +3,7 @@ import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import { Trash2Icon, StarIcon, GripVertical, Crown } from "lucide-react";
+import { Trash2, Star, GripVertical, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PropertyImage } from "@/types/property";
 
@@ -107,7 +107,7 @@ export function SortableImageItem({
             disabled={isUpdating}
             title={isFeatured ? "Remove from featured" : "Add to featured"}
           >
-            <StarIcon className={cn("h-4 w-4", isFeatured ? "fill-blue-500" : "")} />
+            <Star className={cn("h-4 w-4", isFeatured ? "fill-blue-500" : "")} />
           </Button>
         )}
         
@@ -120,7 +120,7 @@ export function SortableImageItem({
           disabled={isUpdating}
           title="Remove image"
         >
-          <Trash2Icon className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
       

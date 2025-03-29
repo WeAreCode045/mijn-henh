@@ -5,6 +5,7 @@ import { ActivityIndicators } from "@/components/dashboard/ActivityIndicators";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NotificationsBar } from "@/components/dashboard/NotificationsBar";
+import { UpcomingEvents } from "@/components/dashboard/agenda/UpcomingEvents";
 
 export default function Index() {
   const [searchParams] = useSearchParams();
