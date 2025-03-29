@@ -1,7 +1,7 @@
 
 import { TabsContent } from "@/components/ui/tabs";
 import { AgendaViewContent } from "../AgendaViewContent";
-import { WeeklyCalendarView } from "../WeeklyCalendarView";
+import { WeeklyCalendarView } from "../weekly-calendar";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { DateRange } from "react-day-picker";
 
