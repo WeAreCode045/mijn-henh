@@ -1,5 +1,5 @@
 
-import { Calendar as CalendarIcon, Filter, List } from "lucide-react";
+import { Filter } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
@@ -34,11 +34,6 @@ export function AgendaViewContent({
   // Always check if safeAgendaItems exists before checking its length
   const hasItems = safeAgendaItems && safeAgendaItems.length > 0;
   
-  // Add console logs to debug the agenda items
-  console.log("AgendaViewContent - view:", view);
-  console.log("AgendaViewContent - itemsToDisplay:", itemsToDisplay);
-  console.log("AgendaViewContent - hasItems:", hasItems);
-  
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-2">
@@ -55,11 +50,20 @@ export function AgendaViewContent({
       ) : !hasItems ? (
         <EmptyAgendaNotification onAddClick={onAddClick} />
       ) : view === "calendar" ? (
-        <AgendaCalendarView 
-          agendaItems={itemsToDisplay}
-          onItemClick={onItemClick}
-          isLoading={false}
-        />
+        <div className="space-y-4">
+          <AgendaCalendarView 
+            agendaItems={itemsToDisplay}
+            isLoading={false}
+            onItemClick={onItemClick}
+          />
+          <div className="mt-4">
+            <AgendaListView 
+              agendaItems={itemsToDisplay}
+              isLoading={false}
+              onItemClick={onItemClick}
+            />
+          </div>
+        </div>
       ) : (
         <AgendaListView 
           agendaItems={itemsToDisplay}

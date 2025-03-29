@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -39,6 +40,9 @@ export function QuickActions() {
         data.additional_users || [],
         finalPropertyId
       );
+      
+      // Close the dialog on successful save
+      setIsAgendaDialogOpen(false);
     } catch (error) {
       console.error('Error in QuickActions when saving agenda item:', error);
       toast({

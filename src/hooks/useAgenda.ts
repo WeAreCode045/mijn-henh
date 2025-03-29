@@ -76,6 +76,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
         description: error.message || "Failed to add agenda item",
         variant: "destructive",
       });
+      throw error; // Rethrow so caller can handle it
     }
   };
 

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
@@ -78,8 +79,10 @@ export const addAgendaItem = async (
 ) => {
   // IMPORTANT: We need to provide a default property ID if none is provided
   // since the database schema requires a non-null property_id
-  // Get the first property from the database as a fallback
-  if (!propertyId || propertyId === '00000000-0000-0000-0000-000000000000') {
+  let finalPropertyId = propertyId;
+  
+  // Only fetch a default property if propertyId is null, undefined, or the special dummy UUID
+  if (!finalPropertyId || finalPropertyId === '00000000-0000-0000-0000-000000000000') {
     console.log("No property ID provided, fetching a default property");
     
     const { data: properties, error: propertiesError } = await supabase
@@ -93,8 +96,8 @@ export const addAgendaItem = async (
     }
     
     if (properties && properties.length > 0) {
-      propertyId = properties[0].id;
-      console.log("Using default property ID:", propertyId);
+      finalPropertyId = properties[0].id;
+      console.log("Using default property ID:", finalPropertyId);
     } else {
       console.error("No properties found and property_id cannot be null");
       throw new Error("Cannot create agenda item: No property found and property_id cannot be null");
@@ -104,7 +107,7 @@ export const addAgendaItem = async (
   // Log what's being sent to the database for debugging
   console.log("Adding agenda item with:", {
     userId,
-    propertyId,
+    propertyId: finalPropertyId,
     title,
     description,
     eventDate,
@@ -117,15 +120,17 @@ export const addAgendaItem = async (
   // If this item is linked to a property, get the property's agent
   let allAdditionalUsers = [...additionalUsers];
   
-  const { data: propertyData } = await supabase
-    .from('properties')
-    .select('agent_id')
-    .eq('id', propertyId)
-    .single();
-    
-  if (propertyData && propertyData.agent_id && propertyData.agent_id !== userId) {
-    // Add the property's agent to additional users if they're not already the creating agent
-    allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
+  if (finalPropertyId) {
+    const { data: propertyData } = await supabase
+      .from('properties')
+      .select('agent_id')
+      .eq('id', finalPropertyId)
+      .single();
+      
+    if (propertyData && propertyData.agent_id && propertyData.agent_id !== userId) {
+      // Add the property's agent to additional users if they're not already the creating agent
+      allAdditionalUsers = [...allAdditionalUsers, propertyData.agent_id];
+    }
   }
   
   // Remove duplicates
@@ -135,7 +140,7 @@ export const addAgendaItem = async (
     .from('property_agenda_items')
     .insert({
       agent_id: userId,
-      property_id: propertyId,
+      property_id: finalPropertyId,
       title,
       description,
       event_date: eventDate,

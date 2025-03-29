@@ -42,7 +42,7 @@ export function PropertyActionsPanel({
       )}
       {isAdmin && (
         <AgentSelector
-          initialAgentId={selectedAgent || undefined}
+          initialAgentId={selectedAgent || ""}
           onAgentChange={onAgentSelect}
         />
       )}
