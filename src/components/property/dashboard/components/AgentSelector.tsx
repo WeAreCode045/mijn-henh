@@ -35,21 +35,28 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         
         if (data) {
           setAgents(data.map(agent => ({
-            id: agent.id || `id-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            id: agent.id || "",
             full_name: agent.full_name || 'Unnamed Agent'
           })));
         }
       } catch (error) {
         console.error("Error fetching agents:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load agents",
+          variant: "destructive",
+        });
       } finally {
         setIsLoadingAgents(false);
       }
     };
 
     fetchAgents();
-  }, []);
+  }, [toast]);
 
   const handleAgentChange = async (agentId: string) => {
+    console.log("Agent change requested:", agentId, "onAgentChange:", typeof onAgentChange);
+    
     if (!onAgentChange || typeof onAgentChange !== 'function') {
       console.error("Error: onAgentChange is not a function", onAgentChange);
       toast({
@@ -77,6 +84,9 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         description: "Failed to update the property agent",
         variant: "destructive",
       });
+      
+      // Reset to previous agent ID on error
+      setCurrentAgentId(initialAgentId || "no-agent");
     }
   };
 

@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -22,7 +21,6 @@ export default function Properties() {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string>("all-agents");
 
-  // Log properties for debugging
   useEffect(() => {
     console.log("Properties component - Properties loaded:", properties.length);
   }, [properties]);
@@ -39,7 +37,6 @@ export default function Properties() {
 
   const handleCreateNewProperty = async () => {
     try {
-      // Create a new empty property record first to get an ID
       const { data, error } = await supabase
         .from('properties')
         .insert({
@@ -54,7 +51,6 @@ export default function Properties() {
       }
       
       if (data && data.id) {
-        // Navigate to the property form with the new ID
         navigate(`/?tab=property&propertyId=${data.id}`);
       }
     } catch (error) {
@@ -88,7 +84,7 @@ export default function Properties() {
                     {agents.map((agent) => (
                       <SelectItem 
                         key={agent.id} 
-                        value={agent.id || `agent-${Date.now()}`}
+                        value={agent.id}
                       >
                         {agent.full_name || "Unnamed Agent"}
                       </SelectItem>

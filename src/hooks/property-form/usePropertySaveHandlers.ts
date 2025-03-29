@@ -46,6 +46,8 @@ export function usePropertySaveHandlers(
   };
 
   const handleSaveAgent = async (agentId: string): Promise<void> => {
+    console.log("usePropertySaveHandlers - Saving agent ID:", agentId, "Property ID:", formState.id);
+    
     if (!formState.id) {
       toast({
         title: "Error",
@@ -63,12 +65,16 @@ export function usePropertySaveHandlers(
       onFieldChange('agent_id', finalAgentId);
       
       // Save to database
+      console.log("Updating agent_id to:", finalAgentId, "for property:", formState.id);
       const { error } = await supabase
         .from('properties')
         .update({ agent_id: finalAgentId })
         .eq('id', formState.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
       
       toast({
         description: "Agent assigned successfully",

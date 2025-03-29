@@ -67,8 +67,18 @@ export function usePropertyFormContainerActions(
     }
   };
 
-  const handleAgentChange = async (agentId: string) => {
-    if (!formData) return;
+  const handleAgentChange = async (agentId: string): Promise<void> => {
+    console.log("usePropertyFormContainerActions - handleAgentChange called with:", agentId);
+    
+    if (!formData) {
+      console.error("FormData is null in handleAgentChange");
+      toast({
+        title: "Error",
+        description: "Cannot update agent - missing property data",
+        variant: "destructive",
+      });
+      return Promise.reject(new Error("Form data is missing"));
+    }
     
     // Set to null if it's an empty string or "no-agent"
     const finalAgentId = agentId === "no-agent" || agentId.trim() === '' ? null : agentId;
@@ -84,12 +94,16 @@ export function usePropertyFormContainerActions(
     // If we have a property ID, update it in the database
     if (formData.id) {
       try {
+        console.log("Updating agent_id to:", finalAgentId, "for property:", formData.id);
         const { error } = await supabase
           .from('properties')
           .update({ agent_id: finalAgentId })
           .eq('id', formData.id);
         
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
         
         // Find the agent info to display
         if (finalAgentId) {
@@ -107,6 +121,8 @@ export function usePropertyFormContainerActions(
           title: "Success",
           description: "Agent updated successfully",
         });
+        
+        return Promise.resolve();
       } catch (error) {
         console.error("Error updating agent:", error);
         toast({
@@ -114,8 +130,11 @@ export function usePropertyFormContainerActions(
           description: "Failed to update agent",
           variant: "destructive",
         });
+        return Promise.reject(error);
       }
     }
+    
+    return Promise.resolve();
   };
 
   return {

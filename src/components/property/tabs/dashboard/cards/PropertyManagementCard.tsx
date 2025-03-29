@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentSelector } from "../../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../../dashboard/components/PropertyDates";
@@ -54,6 +53,13 @@ export function PropertyManagementCard({
     youtubeUrl?: string;
   }>({});
   
+  // Ensure handleSaveAgent is a valid function
+  useEffect(() => {
+    if (!handleSaveAgent || typeof handleSaveAgent !== 'function') {
+      console.error("PropertyManagementCard: handleSaveAgent is not a function", handleSaveAgent);
+    }
+  }, [handleSaveAgent]);
+
   // Load virtual tour and youtube URLs
   useEffect(() => {
     const fetchPropertyMedia = async () => {

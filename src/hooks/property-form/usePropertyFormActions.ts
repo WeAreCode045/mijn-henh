@@ -1,97 +1,123 @@
 
-import { useCallback } from "react";
-import { PropertyFormData } from "@/types/property";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { PropertyFormData } from '@/types/property';
+import { usePropertyFormSubmit } from '@/hooks/usePropertyFormSubmit';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export function usePropertyFormActions(
-  formState: PropertyFormData,
+  formData: PropertyFormData,
   setPendingChanges: (pending: boolean) => void,
   setLastSaved: (date: Date | null) => void
 ) {
+  const { handleSubmit } = usePropertyFormSubmit();
   const { toast } = useToast();
-  
-  const handleSaveObjectId = useCallback(async (objectId: string) => {
-    if (!formState.id) {
+
+  // Handle saving object ID
+  const handleSaveObjectId = async (objectId: string): Promise<void> => {
+    console.log("Saving object ID:", objectId);
+    
+    if (!formData.id) {
       toast({
         title: "Error",
-        description: "Property ID missing. Cannot update object ID.",
+        description: "Property ID is missing",
         variant: "destructive",
       });
-      return Promise.reject("Property ID missing");
+      return Promise.reject(new Error("Property ID is missing"));
     }
     
     try {
       const { error } = await supabase
         .from('properties')
         .update({ object_id: objectId })
-        .eq('id', formState.id);
+        .eq('id', formData.id);
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       toast({
-        title: "Success",
-        description: "Object ID updated successfully",
+        description: "Object ID saved successfully",
       });
       
+      setPendingChanges(true);
       return Promise.resolve();
     } catch (error) {
-      console.error("Error updating object ID:", error);
+      console.error('Error saving object ID:', error);
       toast({
         title: "Error",
-        description: "Failed to update object ID",
+        description: "Failed to save object ID",
         variant: "destructive",
       });
       return Promise.reject(error);
     }
-  }, [formState.id, toast]);
-  
-  const handleSaveAgent = useCallback(async (agentId: string) => {
-    if (!formState.id) {
+  };
+
+  // Handle saving agent
+  const handleSaveAgent = async (agentId: string): Promise<void> => {
+    console.log("usePropertyFormActions - Saving agent ID:", agentId);
+    
+    if (!formData.id) {
       toast({
         title: "Error",
-        description: "Property ID missing. Cannot update agent.",
+        description: "Property ID is missing",
         variant: "destructive",
       });
-      return Promise.reject("Property ID missing");
+      return Promise.reject(new Error("Property ID is missing"));
     }
     
+    // If agentId is empty string, we want to set it to null in the database
+    const finalAgentId = agentId.trim() === '' ? null : agentId;
+    
     try {
+      console.log("Updating agent_id to:", finalAgentId);
       const { error } = await supabase
         .from('properties')
-        .update({ agent_id: agentId })
-        .eq('id', formState.id);
+        .update({ agent_id: finalAgentId })
+        .eq('id', formData.id);
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       toast({
-        title: "Success",
-        description: "Agent updated successfully",
+        description: "Agent assigned successfully",
       });
       
+      setPendingChanges(true);
       return Promise.resolve();
     } catch (error) {
       console.error("Error updating agent:", error);
       toast({
         title: "Error",
-        description: "Failed to update agent",
+        description: "Failed to assign agent",
         variant: "destructive",
       });
       return Promise.reject(error);
     }
-  }, [formState.id, toast]);
-  
-  const onSubmit = useCallback(() => {
-    // This is a placeholder for the actual submit function
-    // The real implementation would update the property in the database
-    setPendingChanges(false);
-    setLastSaved(new Date());
-  }, [setPendingChanges, setLastSaved]);
-  
+  };
+
+  const onSubmit = () => {
+    // Final save when clicking submit
+    if (formData.id) {
+      const formEvent = {} as React.FormEvent;
+      handleSubmit(formEvent, formData, false)
+        .then((success) => {
+          if (success) {
+            setLastSaved(new Date());
+            setPendingChanges(false);
+            toast({
+              title: "Success",
+              description: "All changes have been saved",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Final save failed:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save all changes",
+            variant: "destructive",
+          });
+        });
+    }
+  };
+
   return {
     handleSaveObjectId,
     handleSaveAgent,
