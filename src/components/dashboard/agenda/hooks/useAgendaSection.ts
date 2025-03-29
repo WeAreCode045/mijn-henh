@@ -1,138 +1,120 @@
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { DateRange } from "react-day-picker";
+import { useState } from "react";
 import { useAgenda } from "@/hooks/useAgenda";
-import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
-import { useAgendaDialogs } from "@/components/property/dashboard/agenda/useAgendaDialogs";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
+import { DateRange } from "react-day-picker";
 
 export function useAgendaSection() {
-  const [activeTab, setActiveTab] = useState<string>("weekly");
-  const [searchParams] = useSearchParams();
-  const propertyId = searchParams.get('propertyId');
+  const [activeTab, setActiveTab] = useState("calendar");
+  const { agendaItems, isLoading, addAgendaItem, deleteAgendaItem, updateAgendaItem } = useAgenda();
   
-  const { 
-    agendaItems, 
-    isLoading, 
-    addAgendaItem, 
-    updateAgendaItem, 
-    deleteAgendaItem 
-  } = useAgenda(propertyId || undefined);
+  // Safe access to agenda items
+  const safeAgendaItems: AgendaItem[] = agendaItems || [];
   
-  // Ensure we have a safe array of agenda items
-  const safeAgendaItems = agendaItems || [];
-  
+  // Date range filtering
   const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(safeAgendaItems);
   
-  const agendaDialogProps = useAgendaDialogs();
+  // Dialog states
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedAgendaItem, setSelectedAgendaItem] = useState<AgendaItem | null>(null);
   
-  const { 
-    isAddDialogOpen, 
-    setIsAddDialogOpen, 
-    selectedAgendaItem,
-    resetForm,
-    handleAgendaItemClick,
-    handleAddButtonClick,
-    setSelectedPropertyId
-  } = agendaDialogProps;
+  // Form states
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedTime, setSelectedTime] = useState("09:00");
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [endTime, setEndTime] = useState("");
+  const [additionalUsers, setAdditionalUsers] = useState<string[]>([]);
   
-  // Set the selected property ID from URL if available
-  useEffect(() => {
-    if (propertyId) {
-      setSelectedPropertyId(propertyId);
-    }
-  }, [propertyId, setSelectedPropertyId]);
-  
-  const handleAddAgendaItem = () => {
-    if (agendaDialogProps.selectedDate && agendaDialogProps.title) {
-      const { 
-        title, 
-        description, 
-        selectedDate, 
-        selectedTime, 
-        endDate, 
-        endTime, 
-        additionalUsers,
-        selectedPropertyId
-      } = agendaDialogProps;
-      
-      const formattedDate = selectedDate.toISOString().split('T')[0];
-      const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
-      
-      // Use the property ID from the URL if available, otherwise use the one from the dialog
-      const finalPropertyId = propertyId || selectedPropertyId;
-      
-      console.log("Adding agenda item with propertyId:", finalPropertyId);
-      
-      addAgendaItem(
-        title, 
-        description, 
-        formattedDate, 
-        selectedTime,
-        formattedEndDate,
-        endTime,
-        additionalUsers,
-        finalPropertyId
-      );
-      
-      setIsAddDialogOpen(false);
-      resetForm();
-    }
-  };
-  
-  const handleDeleteAgendaItem = () => {
-    if (selectedAgendaItem) {
-      deleteAgendaItem(selectedAgendaItem.id);
-      agendaDialogProps.setIsViewDialogOpen(false);
-    }
-  };
-  
-  const handleUpdateAgendaItem = () => {
-    if (selectedAgendaItem && agendaDialogProps.editDate) {
-      const { 
-        editTitle, 
-        editDescription, 
-        editDate, 
-        editTime, 
-        editEndDate, 
-        editEndTime, 
-        editAdditionalUsers,
-        selectedPropertyId
-      } = agendaDialogProps;
-      
-      const formattedDate = editDate.toISOString().split('T')[0];
-      const formattedEndDate = editEndDate ? editEndDate.toISOString().split('T')[0] : null;
-      
-      // Use the property ID from the URL if available, otherwise use the one from the selected item or dialog
-      const finalPropertyId = propertyId || selectedAgendaItem.property_id || selectedPropertyId;
-      
-      updateAgendaItem(
-        selectedAgendaItem.id, 
-        editTitle, 
-        editDescription, 
-        formattedDate, 
-        editTime,
-        formattedEndDate,
-        editEndTime,
-        editAdditionalUsers,
-        finalPropertyId
-      );
-      
-      agendaDialogProps.setIsEditDialogOpen(false);
-    }
-  };
-
-  // Create a wrapper function that matches the expected parameter types
+  // Handler functions
   const handleSetDateRange = (range: DateRange | undefined) => {
     setDateRange(range);
   };
 
-  // Create a parameter-less function for onAddClick
-  const handleAddClick = () => {
-    handleAddButtonClick(new Event('click') as unknown as React.MouseEvent);
+  const handleAgendaItemClick = (item: AgendaItem) => {
+    setSelectedAgendaItem(item);
+    setIsViewDialogOpen(true);
   };
-  
+
+  const handleAddButtonClick = () => {
+    setIsAddDialogOpen(true);
+  };
+
+  const handleAddClick = () => {
+    setIsAddDialogOpen(true);
+  };
+
+  // Dialog props for the child components
+  const agendaDialogProps = {
+    isAddDialogOpen,
+    setIsAddDialogOpen,
+    isViewDialogOpen,
+    setIsViewDialogOpen,
+    isEditDialogOpen, 
+    setIsEditDialogOpen,
+    selectedAgendaItem,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    endDate,
+    setEndDate,
+    endTime,
+    setEndTime,
+    additionalUsers,
+    setAdditionalUsers,
+  };
+
+  // Functions for CRUD operations
+  const handleAddAgendaItem = async () => {
+    if (selectedDate && title) {
+      await addAgendaItem(
+        title,
+        description || null,
+        selectedDate.toISOString().split('T')[0],
+        selectedTime,
+        endDate ? endDate.toISOString().split('T')[0] : null,
+        endTime || null,
+        additionalUsers
+      );
+      
+      setIsAddDialogOpen(false);
+    }
+  };
+
+  const handleDeleteAgendaItem = async () => {
+    if (selectedAgendaItem) {
+      await deleteAgendaItem(selectedAgendaItem.id);
+      setIsViewDialogOpen(false);
+    }
+  };
+
+  const handleUpdateAgendaItem = async () => {
+    if (selectedAgendaItem && selectedDate && title) {
+      await updateAgendaItem(
+        selectedAgendaItem.id,
+        title,
+        description || null,
+        selectedDate.toISOString().split('T')[0],
+        selectedTime,
+        endDate ? endDate.toISOString().split('T')[0] : null,
+        endTime || null,
+        additionalUsers
+      );
+      
+      setIsEditDialogOpen(false);
+      setIsViewDialogOpen(false);
+    }
+  };
+
   return {
     activeTab,
     setActiveTab,

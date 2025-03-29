@@ -1,14 +1,26 @@
 
 import { AgendaSection } from "../agenda/AgendaSection";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAgenda } from "@/hooks/useAgenda";
+import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
+import { useState } from "react";
 
 export function AgendaTabContent() {
-  const agendaItems = []; // Define or fetch agenda items here
-  const isLoading = false; // Define the loading state here
+  const { agendaItems, isLoading } = useAgenda();
+  const { dateRange, setDateRange, filteredAgendaItems } = useAgendaFiltering(agendaItems);
+  const [activeTab, setActiveTab] = useState("calendar");
 
   return (
     <>
-      <AgendaSection agendaItems={agendaItems} isLoading={isLoading} />
+      <AgendaSection 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        safeAgendaItems={agendaItems}
+        isLoading={isLoading}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        filteredAgendaItems={filteredAgendaItems}
+      />
       <Select>
         <SelectTrigger>
           <SelectValue placeholder="Select an option" />

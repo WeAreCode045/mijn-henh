@@ -1,9 +1,5 @@
 
-<<<<<<< Updated upstream
-import { useState, useEffect } from "react";
-=======
-import { useCallback, useState, useEffect, useMemo } from "react";
->>>>>>> Stashed changes
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
@@ -25,6 +21,7 @@ export function AgendaCalendarView({
 }: AgendaCalendarViewProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [markedDates, setMarkedDates] = useState<Record<string, boolean>>({});
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
   // Extract dates from agenda items
   useEffect(() => {
@@ -36,34 +33,19 @@ export function AgendaCalendarView({
         dates[formattedDate] = true;
       }
     });
-<<<<<<< Updated upstream
-=======
+    
+    setMarkedDates(dates);
   }, [agendaItems]);
 
   // Generate a list of events for the selected day
   const getEventsForDay = useCallback((date: Date) => {
     if (!agendaItems || agendaItems.length === 0) return [];
->>>>>>> Stashed changes
     
-    setMarkedDates(dates);
-  }, [agendaItems]);
-  
-  const handleSelect = (date: Date | undefined) => {
-    setDate(date);
-    if (date && onItemClick) {
-      // Find items for this date
-      const selectedDateStr = format(date, "yyyy-MM-dd");
-      const itemsForDate = agendaItems.filter(item => 
-        format(new Date(item.event_date), "yyyy-MM-dd") === selectedDateStr
-      );
-      
-      if (itemsForDate.length === 1 && onItemClick) {
-        // If only one item on this date, open it directly
-        onItemClick(itemsForDate[0]);
-      }
-<<<<<<< Updated upstream
-      // If multiple items, we could show a popup or list, but that's for a future enhancement
-=======
+    const selectedDateStr = format(date, "yyyy-MM-dd");
+    
+    return agendaItems.filter(item => {
+      if (!item.event_date) return false;
+      return format(new Date(item.event_date), "yyyy-MM-dd") === selectedDateStr;
     });
   }, [agendaItems]);
 
@@ -78,7 +60,25 @@ export function AgendaCalendarView({
     if (selectedDate) {
       console.log("AgendaCalendarView - Selected date:", format(selectedDate, "yyyy-MM-dd"));
       console.log("AgendaCalendarView - Events for selected date:", selectedDayEvents);
->>>>>>> Stashed changes
+    }
+  }, [selectedDate, selectedDayEvents]);
+  
+  const handleSelect = (date: Date | undefined) => {
+    setDate(date);
+    if (date) {
+      setSelectedDate(date);
+      
+      // Find items for this date
+      const selectedDateStr = format(date, "yyyy-MM-dd");
+      const itemsForDate = agendaItems.filter(item => 
+        format(new Date(item.event_date), "yyyy-MM-dd") === selectedDateStr
+      );
+      
+      if (itemsForDate.length === 1 && onItemClick) {
+        // If only one item on this date, open it directly
+        onItemClick(itemsForDate[0]);
+      }
+      // If multiple items, we could show a popup or list, but that's for a future enhancement
     }
   };
   

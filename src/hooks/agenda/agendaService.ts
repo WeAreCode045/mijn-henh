@@ -176,18 +176,28 @@ export const updateAgendaItem = async (
   additionalUsers: string[] = [],
   propertyId?: string | null
 ) => {
-<<<<<<< Updated upstream
+  // If this item is linked to a property, get the property's agent
+  const allAdditionalUsers = [...additionalUsers];
+  
   // Create update object with required fields
-  const updateObj: any = {
+  interface UpdateAgendaItem {
+    property_id?: string | null;
+    title: string;
+    description: string | null;
+    event_date: string;
+    event_time: string;
+    additional_users: string[];
+    end_date?: string | null;
+    end_time?: string | null;
+  }
+
+  const updateObj: UpdateAgendaItem = {
     title,
     description,
     event_date: eventDate,
-    event_time: eventTime
+    event_time: eventTime,
+    additional_users: allAdditionalUsers
   };
-=======
-  // If this item is linked to a property, get the property's agent
-  const allAdditionalUsers = [...additionalUsers];
->>>>>>> Stashed changes
   
   // Only update propertyId if it's provided and not the dummy UUID
   if (propertyId !== undefined) {
@@ -223,37 +233,11 @@ export const updateAgendaItem = async (
       if (propertyData && propertyData.agent_id) {
         // Add the property's agent to additional users if not already there
         if (!additionalUsers.includes(propertyData.agent_id)) {
-          additionalUsers = [...additionalUsers, propertyData.agent_id];
+          updateObj.additional_users.push(propertyData.agent_id);
         }
       }
     }
   }
-  
-<<<<<<< Updated upstream
-  // Process additional users - ensure it's a proper JSON array
-  updateObj.additional_users = [...new Set(additionalUsers)];
-=======
-  // Create update object with required fields
-  interface UpdateAgendaItem {
-    property_id?: string | null;
-    title: string;
-    description: string | null;
-    event_date: string;
-    event_time: string;
-    additional_users: string[];
-    end_date?: string | null;
-    end_time?: string | null;
-  }
-
-  const updateObj: UpdateAgendaItem = {
-    property_id: propertyId,
-    title,
-    description,
-    event_date: eventDate,
-    event_time: eventTime,
-    additional_users: allAdditionalUsers
-  };
->>>>>>> Stashed changes
   
   // Only add end_date if it has a value
   if (endDate) {
