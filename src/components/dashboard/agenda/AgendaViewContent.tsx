@@ -1,5 +1,9 @@
+<<<<<<< Updated upstream
 
 import { Filter } from "lucide-react";
+=======
+import { Calendar as CalendarIcon, Filter } from "lucide-react";
+>>>>>>> Stashed changes
 import { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
@@ -34,7 +38,18 @@ export function AgendaViewContent({
   
   // Always check if safeAgendaItems exists before checking its length
   const hasItems = safeAgendaItems && safeAgendaItems.length > 0;
+  console.log("AgendaViewContent - hasItems:", hasItems);
   
+<<<<<<< Updated upstream
+=======
+  // Add console logs to debug the agenda items
+  console.log("Parent Component - safeAgendaItems:", safeAgendaItems);
+  console.log("Parent Component - filteredAgendaItems:", filteredAgendaItems);
+  console.log("AgendaViewContent - view:", view);
+  console.log("AgendaViewContent - safeAgendaItems:", safeAgendaItems);
+  console.log("AgendaViewContent - filteredAgendaItems:", filteredAgendaItems);console.log("AgendaViewContent - itemsToDisplay:", itemsToDisplay);
+  
+>>>>>>> Stashed changes
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-2">
@@ -45,12 +60,13 @@ export function AgendaViewContent({
       </div>
       
       {isLoading ? (
-        <div className="flex items-center justify-center h-60">
-          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
-        </div>
+        // Loading spinner
+        <div>Loading...</div>
       ) : !hasItems ? (
+        // Empty agenda notification
         <EmptyAgendaNotification onAddClick={onAddClick} />
       ) : view === "calendar" ? (
+<<<<<<< Updated upstream
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-1">
             <Card>
@@ -110,7 +126,19 @@ export function AgendaViewContent({
             </Card>
           ))}
         </div>
+=======
+        <>
+          <AgendaCalendarView agendaItems={itemsToDisplay} isLoading={isLoading} onItemClick={onItemClick} />
+          {console.log("AgendaCalendarView - agendaItems:", itemsToDisplay)}
+        </>
+      ) : (
+        <>
+          <AgendaListView agendaItems={itemsToDisplay} isLoading={isLoading} onItemClick={onItemClick} />
+          {console.log("AgendaListView - agendaItems:", itemsToDisplay)}
+        </>
+>>>>>>> Stashed changes
       )}
     </div>
   );
 }
+

@@ -1,5 +1,9 @@
 
+<<<<<<< Updated upstream
 import { useState, useEffect } from "react";
+=======
+import { useCallback, useState, useEffect, useMemo } from "react";
+>>>>>>> Stashed changes
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
@@ -32,6 +36,14 @@ export function AgendaCalendarView({
         dates[formattedDate] = true;
       }
     });
+<<<<<<< Updated upstream
+=======
+  }, [agendaItems]);
+
+  // Generate a list of events for the selected day
+  const getEventsForDay = useCallback((date: Date) => {
+    if (!agendaItems || agendaItems.length === 0) return [];
+>>>>>>> Stashed changes
     
     setMarkedDates(dates);
   }, [agendaItems]);
@@ -49,7 +61,24 @@ export function AgendaCalendarView({
         // If only one item on this date, open it directly
         onItemClick(itemsForDate[0]);
       }
+<<<<<<< Updated upstream
       // If multiple items, we could show a popup or list, but that's for a future enhancement
+=======
+    });
+  }, [agendaItems]);
+
+  // Generate event list for the selected date
+  const selectedDayEvents = useMemo(() => 
+    selectedDate ? getEventsForDay(selectedDate) : [], 
+    [selectedDate, getEventsForDay]
+  );
+
+  // Log the events found for the selected day
+  useEffect(() => {
+    if (selectedDate) {
+      console.log("AgendaCalendarView - Selected date:", format(selectedDate, "yyyy-MM-dd"));
+      console.log("AgendaCalendarView - Events for selected date:", selectedDayEvents);
+>>>>>>> Stashed changes
     }
   };
   

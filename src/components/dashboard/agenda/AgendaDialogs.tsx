@@ -1,5 +1,6 @@
 
 import { ViewAgendaItemDialog } from "@/components/property/dashboard/agenda/ViewAgendaItemDialog";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { AddEditAgendaDialog } from "@/components/property/dashboard/agenda/AddEditAgendaDialog";
 
 interface AgendaDialogsProps {
@@ -10,7 +11,7 @@ interface AgendaDialogsProps {
     setIsViewDialogOpen: (open: boolean) => void;
     isEditDialogOpen: boolean;
     setIsEditDialogOpen: (open: boolean) => void;
-    selectedAgendaItem: any;
+    selectedAgendaItem: AgendaItem | null;
     title: string;
     setTitle: (title: string) => void;
     description: string;
@@ -123,7 +124,15 @@ export function AgendaDialogs({
         <ViewAgendaItemDialog
           isOpen={isViewDialogOpen}
           onOpenChange={setIsViewDialogOpen}
-          selectedAgendaItem={selectedAgendaItem}
+          selectedAgendaItem={selectedAgendaItem ? { 
+            ...selectedAgendaItem, 
+            property_id: "", 
+            agent_id: "", 
+            event_date: selectedAgendaItem.date.toISOString(), 
+            event_time: selectedAgendaItem.time, 
+            created_at: new Date().toISOString(), 
+            updated_at: new Date().toISOString() 
+          } : null}
           onDelete={onDeleteAgendaItem}
           onEdit={handleEditButtonClick}
         />

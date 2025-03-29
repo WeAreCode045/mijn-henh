@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -32,7 +31,8 @@ export function AgendaCalendarView({
         dates[formattedDate] = true;
       }
     });
-    
+
+    console.debug("Processed markedDates:", dates); // Debug log
     setMarkedDates(dates);
   }, [agendaItems]);
   
@@ -50,6 +50,17 @@ export function AgendaCalendarView({
       </div>
     );
   }
+
+  if (!agendaItems || !agendaItems.length) {
+    console.warn("Agenda items are empty or undefined:", agendaItems);
+    return (
+      <div className={`flex justify-center py-8 ${className}`}>
+        <p className="text-gray-500">No agenda items to display.</p>
+      </div>
+    );
+  }
+
+  console.debug("Agenda items passed to AgendaCalendarView:", agendaItems);
   
   return (
     <div className={`flex justify-center ${className}`}>
