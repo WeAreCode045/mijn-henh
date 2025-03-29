@@ -10,9 +10,8 @@ interface PropertyActionsPanelProps {
   propertyData: PropertyData;
   agencySettings: AgencySettings;
   isAdmin: boolean;
-  agents: any[];
   selectedAgent: string | null;
-  onAgentSelect: (agentId: string) => void;
+  onAgentSelect: (agentId: string) => Promise<void>;
   onDeleteProperty: () => Promise<void>;
   onSaveProperty: () => void;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -24,7 +23,6 @@ export function PropertyActionsPanel({
   propertyData,
   agencySettings,
   isAdmin,
-  agents,
   selectedAgent,
   onAgentSelect,
   onDeleteProperty,
@@ -44,9 +42,8 @@ export function PropertyActionsPanel({
       )}
       {isAdmin && (
         <AgentSelector
-          agents={agents}
-          selectedAgent={selectedAgent}
-          onAgentSelect={onAgentSelect}
+          initialAgentId={selectedAgent || undefined}
+          onAgentChange={onAgentSelect}
         />
       )}
       <PropertyMediaLibrary

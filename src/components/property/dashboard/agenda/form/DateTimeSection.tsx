@@ -19,7 +19,7 @@ interface DateTimeSectionProps {
   setSelectedTime: (time: string) => void;
   endDate: Date | undefined;
   setEndDate: (date: Date | undefined) => void;
-  endTime: string;
+  endTime: string | null;
   setEndTime: (time: string) => void;
 }
 
@@ -33,6 +33,9 @@ export function DateTimeSection({
   endTime,
   setEndTime
 }: DateTimeSectionProps) {
+  // Ensure we never pass null to the inputs
+  const safeEndTime = endTime || "";
+  
   return (
     <>
       <div className="grid grid-cols-4 items-center gap-4">
@@ -116,7 +119,7 @@ export function DateTimeSection({
         <Input
           id="endTime"
           type="time"
-          value={endTime}
+          value={safeEndTime}
           onChange={(e) => setEndTime(e.target.value)}
           className="col-span-3"
           placeholder="Optional"
