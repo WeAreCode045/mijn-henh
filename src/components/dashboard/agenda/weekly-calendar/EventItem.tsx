@@ -4,38 +4,34 @@ import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
 interface EventItemProps {
   event: AgendaItem;
-  position: { top: string };
-  height: number;
-  colorClass: string;
-  formatEventTime: (time: string) => string;
+  position: number;
+  duration: number;
+  color: string;
+  timeLabel: string;
   onClick: () => void;
 }
 
 export function EventItem({
   event,
   position,
-  height,
-  colorClass,
-  formatEventTime,
+  duration,
+  color,
+  timeLabel,
   onClick
 }: EventItemProps) {
-  const location = event.property?.title ? `@ ${event.property.title}` : '';
-  
   return (
     <div
-      className={`absolute left-1 right-1 p-1 rounded border text-xs cursor-pointer hover:opacity-90 ${colorClass}`}
-      style={{ 
-        top: position.top,
-        height: `${height}px`,
-        overflow: "hidden"
+      className="absolute left-1 right-1 rounded-md px-2 py-1 text-xs overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+      style={{
+        top: `${position}px`,
+        height: `${Math.max(duration, 25)}px`,
+        backgroundColor: color,
+        color: '#fff'
       }}
       onClick={onClick}
     >
       <div className="font-medium truncate">{event.title}</div>
-      <div className="truncate text-[10px]">{formatEventTime(event.event_time)}</div>
-      {location && (
-        <div className="truncate text-[10px] italic">{location}</div>
-      )}
+      <div className="text-xs opacity-90">{timeLabel}</div>
     </div>
   );
 }
