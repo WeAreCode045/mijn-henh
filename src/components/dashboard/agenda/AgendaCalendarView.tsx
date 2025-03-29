@@ -52,7 +52,7 @@ export function AgendaCalendarView({
   }
   
   return (
-    <div className={className}>
+    <div className={`flex justify-center ${className}`}>
       <Calendar
         mode="single"
         selected={date}
@@ -66,7 +66,7 @@ export function AgendaCalendarView({
         modifiersClassNames={{
           hasEvent: "bg-primary/20 font-bold text-primary"
         }}
-        className={compactMode ? "p-0" : ""}
+        className={`w-auto ${compactMode ? "p-0" : ""}`}
         styles={{
           cell: compactMode ? { height: '32px' } : undefined,
           day: compactMode ? { height: '28px', width: '28px', fontSize: '0.8rem' } : undefined,

@@ -75,7 +75,7 @@ export function AgendaCalendarView({
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
-      <div>
+      <div className="w-full flex justify-center">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -90,6 +90,7 @@ export function AgendaCalendarView({
               color: 'var(--primary)' 
             }
           }}
+          className="w-auto"
         />
       </div>
       <div>
