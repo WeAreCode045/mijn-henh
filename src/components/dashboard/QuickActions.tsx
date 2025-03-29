@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -6,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Calendar, FileText, Home, Mail } from "lucide-react";
 import { AgendaDialog } from "@/components/dashboard/AgendaDialog";
 import { useAgenda } from "@/hooks/useAgenda";
+import { useToast } from "@/components/ui/use-toast";
 
 export function QuickActions() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const propertyId = searchParams.get('propertyId');
   const [isAgendaDialogOpen, setIsAgendaDialogOpen] = useState(false);
+  const { toast } = useToast();
   
   // Get the addAgendaItem function from useAgenda to handle the save
   const { addAgendaItem } = useAgenda(propertyId || undefined);
@@ -20,10 +21,13 @@ export function QuickActions() {
     try {
       console.log("QuickActions - Saving agenda item:", data);
       
-      // We need to handle property_id carefully
-      const finalPropertyId = data.property_id && data.property_id !== '00000000-0000-0000-0000-000000000000' 
+      // Determine the final property ID
+      // If the dialog provides a property_id that's not the placeholder, use it
+      // Otherwise, use the propertyId from URL params
+      // If both are missing, the server-side handler will find a default property
+      const finalPropertyId = (data.property_id && data.property_id !== '00000000-0000-0000-0000-000000000000') 
         ? data.property_id 
-        : propertyId || null; 
+        : propertyId || null;
       
       await addAgendaItem(
         data.title,
@@ -37,6 +41,11 @@ export function QuickActions() {
       );
     } catch (error) {
       console.error('Error in QuickActions when saving agenda item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create agenda item. Please try adding a property first.",
+        variant: "destructive",
+      });
       throw error; // Re-throw to be handled by the dialog
     }
   };

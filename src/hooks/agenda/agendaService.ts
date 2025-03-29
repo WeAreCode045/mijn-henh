@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
@@ -77,31 +76,29 @@ export const addAgendaItem = async (
   additionalUsers: string[] = [],
   propertyId?: string | null
 ) => {
-  // If no propertyId is provided, we don't attempt to link the item to a property
-  // We'll need to make this field NULLABLE in the database or provide a valid default
+  // IMPORTANT: We need to provide a default property ID if none is provided
+  // since the database schema requires a non-null property_id
+  // Get the first property from the database as a fallback
   if (!propertyId || propertyId === '00000000-0000-0000-0000-000000000000') {
-    console.log("Adding agenda item without property link");
+    console.log("No property ID provided, fetching a default property");
     
-    const { error } = await supabase
-      .from('property_agenda_items')
-      .insert({
-        agent_id: userId,
-        property_id: null, // Set to null when no valid property is provided
-        title,
-        description,
-        event_date: eventDate,
-        event_time: eventTime,
-        end_date: endDate,
-        end_time: endTime && endTime.trim() !== "" ? endTime : null,
-        additional_users: additionalUsers
-      });
-
-    if (error) {
-      console.error("Error inserting agenda item:", error);
-      throw error;
+    const { data: properties, error: propertiesError } = await supabase
+      .from('properties')
+      .select('id')
+      .limit(1);
+    
+    if (propertiesError) {
+      console.error("Error fetching default property:", propertiesError);
+      throw propertiesError;
     }
     
-    return;
+    if (properties && properties.length > 0) {
+      propertyId = properties[0].id;
+      console.log("Using default property ID:", propertyId);
+    } else {
+      console.error("No properties found and property_id cannot be null");
+      throw new Error("Cannot create agenda item: No property found and property_id cannot be null");
+    }
   }
   
   // Log what's being sent to the database for debugging

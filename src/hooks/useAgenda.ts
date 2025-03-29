@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
@@ -26,7 +25,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
       console.error('Error fetching agenda items:', error);
       toast({
         title: "Error",
-        description: "Failed to load agenda items",
+        description: error.message || "Failed to load agenda items",
         variant: "destructive",
       });
     } finally {
@@ -74,7 +73,7 @@ export function useAgenda(propertyId?: string): UseAgendaReturn {
       console.error('Error adding agenda item:', error);
       toast({
         title: "Error",
-        description: "Failed to add agenda item",
+        description: error.message || "Failed to add agenda item",
         variant: "destructive",
       });
     }
