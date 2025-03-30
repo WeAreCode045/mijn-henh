@@ -1,5 +1,4 @@
-
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useMemo } from "react";
 import debounce from "lodash.debounce";
 
 interface DescriptionSectionProps {
@@ -13,15 +12,6 @@ export function DescriptionSection({
   onFieldChange,
   setPendingChanges,
 }: DescriptionSectionProps) {
-  const [localDescription, setLocalDescription] = useState(formData.description || "");
-
-  // Update local state when formData changes
-  useEffect(() => {
-    if (formData?.description !== undefined) {
-      setLocalDescription(formData.description);
-    }
-  }, [formData.description]);
-
   const debouncedOnFieldChange = useMemo(
     () =>
       debounce((field: string, value: string) => {
@@ -31,27 +21,19 @@ export function DescriptionSection({
     [onFieldChange, setPendingChanges]
   );
 
-  // Clean up debounce on unmount
-  useEffect(() => {
-    return () => {
-      debouncedOnFieldChange.cancel();
-    };
-  }, [debouncedOnFieldChange]);
-
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    setLocalDescription(value); // Update local state immediately
-    debouncedOnFieldChange("description", value); // Debounce the actual update
+    debouncedOnFieldChange("description", value);
   };
 
   return (
     <div>
       <label className="text-sm font-medium mb-1 block">Description</label>
       <textarea
-        value={localDescription}
+        defaultValue={formData.description} // Use defaultValue to avoid cursor jumping
         onChange={handleChange}
         placeholder="Enter property description"
-        className="w-full border rounded-md p-2 min-h-[150px]"
+        className="w-full border rounded-md p-2"
       />
     </div>
   );

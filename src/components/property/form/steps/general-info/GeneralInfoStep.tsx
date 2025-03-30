@@ -41,10 +41,7 @@ export function GeneralInfoStep({
         {/* 2. Key Information (1/3 width) */}
         <div className="lg:col-span-1">
           <PropertySpecs 
-            formData={{
-              price: formData.price || "",
-              object_id: formData.object_id || ""
-            }}
+            formData={formData} 
             onFieldChange={handleFieldChange} 
           />
         </div>
