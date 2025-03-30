@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { PropertyFormData } from "@/types/property";
 import { useToast } from "@/hooks/use-toast";
@@ -14,23 +13,37 @@ export function usePlaceRemoval({
   onRemoveNearbyPlace?: (index: number) => void;
   toast: ReturnType<typeof useToast>;
 }) {
-  const handleRemovePlace = useCallback((index: number) => {
-    if (onRemoveNearbyPlace) {
-      onRemoveNearbyPlace(index);
-      return;
-    }
-    
-    if (!formData.nearby_places) return;
-    
-    const updatedPlaces = formData.nearby_places.filter((_, i) => i !== index);
-    onFieldChange('nearby_places', updatedPlaces);
-    
-    toast.toast({
-      title: "Removed",
-      description: "Nearby place removed successfully",
-    });
-  }, [formData.nearby_places, onFieldChange, onRemoveNearbyPlace, toast]);
-
+  const handleRemovePlace = useCallback(
+    (index: number) => {
+      try {
+        // If there's a custom removal handler, use it
+        if (onRemoveNearbyPlace) {
+          onRemoveNearbyPlace(index);
+          return;
+        }
+        
+        // Otherwise, handle removal in the hook
+        const updatedPlaces = [...(formData.nearby_places || [])];
+        updatedPlaces.splice(index, 1);
+        
+        onFieldChange("nearby_places", updatedPlaces);
+        
+        toast.toast({
+          title: "Place removed",
+          description: "The selected place has been removed from nearby places."
+        });
+      } catch (error: any) {
+        console.error("Error removing place:", error);
+        toast.toast({
+          title: "Error removing place",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive"
+        });
+      }
+    },
+    [formData, onFieldChange, onRemoveNearbyPlace, toast]
+  );
+  
   return {
     handleRemovePlace
   };

@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from "react";
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+import { PropertyFormData } from "@/types/property";
 import { useToast } from "@/hooks/use-toast";
 
 export function usePlaceSearchResults({
@@ -14,135 +14,104 @@ export function usePlaceSearchResults({
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
   toast: ReturnType<typeof useToast>;
 }) {
-  const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSelectionModal, setShowSelectionModal] = useState(false);
 
-  // Function to fetch places by category
-  const fetchPlaces = useCallback(async (category: string) => {
-    if (!onFetchCategoryPlaces) return null;
-    
-    try {
-      console.log("Starting fetchPlaces for category:", category);
-      const result = await onFetchCategoryPlaces(category);
-      
-      console.log("API response for category:", category, result);
-      
-      if (result) {
-        console.log("Search results:", result);
-        // Flatten results if it's an object with category keys
-        let places: PropertyNearbyPlace[] = [];
-        if (typeof result === 'object' && !Array.isArray(result)) {
-          // If result is an object with category keys, flatten all places
-          Object.values(result).forEach(categoryPlaces => {
-            if (Array.isArray(categoryPlaces)) {
-              places = [...places, ...categoryPlaces as PropertyNearbyPlace[]];
-            }
-          });
-        } else if (Array.isArray(result)) {
-          places = result;
-        }
-        
-        // Only show results if we have places to show
-        if (places.length > 0) {
-          console.log("Places to display in modal:", places.length);
-          setSearchResults(places);
-          setShowSelectionModal(true);
-          
-          toast.toast({
-            title: "Success",
-            description: `Found ${places.length} nearby places`,
-          });
-          
-          return places;
-        } else {
-          console.log("No places found for category:", category);
-          toast.toast({
-            title: "Info",
-            description: "No nearby places found in this category",
-          });
-          return [];
-        }
-      }
-      
-      return null;
-    } catch (error) {
-      console.error("Error fetching places:", error);
-      toast.toast({
-        title: "Error",
-        description: "Failed to fetch nearby places",
-        variant: "destructive",
-      });
-      return null;
-    }
-  }, [onFetchCategoryPlaces, toast]);
-
-  // Function to handle search button click
-  const handleSearchClick = useCallback(async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
-    console.log("Search handler called for category:", category);
-    e.preventDefault();
-    e.stopPropagation();
-    
-    let results = null;
-    
-    try {
-      if (onSearchClick) {
-        // Use the parent component's search handler if provided
-        console.log("Using parent onSearchClick handler for category:", category);
-        results = await onSearchClick(e, category);
-        console.log("Results from parent search handler:", results);
-      } else if (onFetchCategoryPlaces) {
-        // Otherwise use the default fetch logic
-        console.log("Using default fetchPlaces for category:", category);
-        results = await fetchPlaces(category);
-        console.log("Results from fetchPlaces:", results);
-      }
-      
-      // Process the results
-      if (results) {
-        console.log("Processing search results:", results);
-        let places: PropertyNearbyPlace[] = [];
-        
-        // Handle different result formats
-        if (typeof results === 'object' && !Array.isArray(results)) {
-          console.log("Results are an object, flattening categories");
-          Object.entries(results).forEach(([categoryKey, categoryPlaces]) => {
-            console.log(`Processing category ${categoryKey} with ${Array.isArray(categoryPlaces) ? categoryPlaces.length : 0} places`);
-            if (Array.isArray(categoryPlaces)) {
-              places = [...places, ...categoryPlaces as PropertyNearbyPlace[]];
-            }
-          });
-        } else if (Array.isArray(results)) {
-          console.log("Results are already an array of length:", results.length);
-          places = results;
-        }
-        
-        if (places.length > 0) {
-          console.log(`Found ${places.length} places to display in modal`);
-          setSearchResults(places);
-          setShowSelectionModal(true);
-        } else {
-          console.log("No places found after processing results");
-          toast.toast({
-            title: "No results",
-            description: "No places found in this category. Try another category.",
-          });
-        }
-      } else {
-        console.log("No results returned from search");
+  const fetchPlaces = useCallback(
+    async (category: string) => {
+      if (!formData.latitude || !formData.longitude) {
         toast.toast({
-          title: "No results",
-          description: "The search did not return any places. Check your location settings or try another category.",
+          title: "Missing location",
+          description: "Please set the property location first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        let results;
+
+        if (onFetchCategoryPlaces) {
+          results = await onFetchCategoryPlaces(category);
+        } else {
+          // Default implementation if no custom fetch function is provided
+          setTimeout(() => {
+            toast.toast({
+              title: "No fetch function",
+              description: "No fetch function provided for places",
+              variant: "destructive",
+            });
+          }, 0);
+          return;
+        }
+
+        if (results && results.length > 0) {
+          setSearchResults(results);
+          setShowSelectionModal(true);
+        } else {
+          toast.toast({
+            title: "No places found",
+            description: "No places found for this category",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error fetching places:", error);
+        toast.toast({
+          title: "Error fetching places",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error("Error during search:", error);
-      toast.toast({
-        title: "Error",
-        description: "An error occurred while searching for places",
-        variant: "destructive",
-      });
-    }
-  }, [fetchPlaces, onFetchCategoryPlaces, onSearchClick, toast]);
+    },
+    [formData.latitude, formData.longitude, onFetchCategoryPlaces, toast]
+  );
+
+  const handleSearchClick = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
+      e.preventDefault();
+      
+      if (!formData.latitude || !formData.longitude) {
+        toast.toast({
+          title: "Missing location",
+          description: "Please set the property location first",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      try {
+        let results;
+        
+        if (onSearchClick) {
+          results = await onSearchClick(e, category);
+        } else {
+          results = await fetchPlaces(category);
+        }
+        
+        if (results && results.length > 0) {
+          setSearchResults(results);
+          setShowSelectionModal(true);
+        } else if (results === undefined) {
+          // Do nothing, this means the fetch function is handling the UI
+        } else {
+          toast.toast({
+            title: "No places found",
+            description: "No places found for the selected category",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error with search click:", error);
+        toast.toast({
+          title: "Error searching for places",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive",
+        });
+      }
+    },
+    [formData.latitude, formData.longitude, onSearchClick, fetchPlaces, toast]
+  );
 
   return {
     searchResults,
@@ -150,6 +119,6 @@ export function usePlaceSearchResults({
     showSelectionModal,
     setShowSelectionModal,
     fetchPlaces,
-    handleSearchClick
+    handleSearchClick,
   };
 }
