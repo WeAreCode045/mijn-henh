@@ -7,7 +7,8 @@ import {
   addWeeks,
   subWeeks,
   parseISO,
-  isSameDay
+  isSameDay,
+  isValid
 } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
@@ -18,11 +19,27 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   
   // Calculate the dates for the current week
   useEffect(() => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // 1 = Monday
-    const end = endOfWeek(currentDate, { weekStartsOn: 1 });
+    if (!isValid(currentDate)) {
+      setCurrentDate(new Date()); // Reset to valid date if current date is invalid
+      return;
+    }
     
-    const days = eachDayOfInterval({ start, end });
-    setCurrentWeek(days);
+    try {
+      const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // 1 = Monday
+      const end = endOfWeek(currentDate, { weekStartsOn: 1 });
+      
+      if (!isValid(start) || !isValid(end)) {
+        console.error("Invalid date range:", { start, end, currentDate });
+        setCurrentWeek([]); // Empty array to prevent rendering errors
+        return;
+      }
+      
+      const days = eachDayOfInterval({ start, end });
+      setCurrentWeek(days);
+    } catch (error) {
+      console.error("Error calculating week dates:", error);
+      setCurrentWeek([]); // Empty array to prevent rendering errors
+    }
   }, [currentDate]);
   
   // Navigate to previous week
@@ -48,7 +65,7 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
         if (!item.event_date) return false;
         try {
           const eventDate = parseISO(item.event_date);
-          return isSameDay(eventDate, day);
+          return isValid(eventDate) && isSameDay(eventDate, day);
         } catch (error) {
           console.error("Error parsing date:", error, item.event_date);
           return false;

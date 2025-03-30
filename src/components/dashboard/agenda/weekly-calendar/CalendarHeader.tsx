@@ -1,6 +1,6 @@
 
 import React from "react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -21,6 +21,12 @@ export function CalendarHeader({
   activeTab,
   onTabChange
 }: CalendarHeaderProps) {
+  // Ensure we have a valid date for formatting
+  const firstDayOfWeek = currentWeek?.[0];
+  const formattedDate = firstDayOfWeek && isValid(firstDayOfWeek) 
+    ? format(firstDayOfWeek, "MMMM yyyy") + " (Week " + format(firstDayOfWeek, "w") + ")"
+    : "Invalid date";
+
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center space-x-2">
@@ -53,7 +59,7 @@ export function CalendarHeader({
       </div>
       
       <h3 className="text-lg font-medium">
-        {format(currentWeek[0], "MMMM yyyy")} (Week {format(currentWeek[0], "w")})
+        {formattedDate}
       </h3>
       
       <div className="flex space-x-1">
