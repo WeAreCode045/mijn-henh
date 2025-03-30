@@ -79,14 +79,6 @@ export function CalendarHeader({
         >
           Week
         </Button>
-        <Button 
-          variant={activeTab === "month" ? "secondary" : "outline"} 
-          size="sm" 
-          className="h-8"
-          onClick={() => onTabChange && onTabChange("month")}
-        >
-          Month
-        </Button>
       </div>
     </div>
   );
