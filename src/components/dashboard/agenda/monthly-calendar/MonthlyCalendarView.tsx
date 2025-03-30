@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { Calendar } from "@/components/ui/calendar";
@@ -145,7 +146,7 @@ export function MonthlyCalendarView({
               day: "cursor-pointer"
             }}
             components={{
-              day: renderDay
+              Day: renderDay
             }}
             onDayClick={handleDayClick}
             showOutsideDays={true}
