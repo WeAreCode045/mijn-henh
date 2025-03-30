@@ -10,6 +10,7 @@ import { usePropertyDeletion } from "@/hooks/usePropertyDeletion";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Clock } from "lucide-react";
+import { usePropertyFormSteps } from "@/hooks/property-form/usePropertyFormSteps";
 
 interface PropertyFormProps {
   initialTab?: string;
@@ -29,6 +30,9 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
   
   // Use formData from props if available, otherwise use from hook
   const formData = propFormData || hookFormData;
+  
+  // Use the step navigation hook
+  const { currentStep, handleStepClick, handleNext, handlePrevious } = usePropertyFormSteps();
   
   console.log("PropertyForm - Initial tab:", initialTab);
   console.log("PropertyForm - Initial content step:", initialContentStep);
@@ -173,7 +177,10 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
                 }));
               }
             },
-            currentStep: initialContentStep || 0
+            currentStep: currentStep,
+            handleStepClick: handleStepClick,
+            handleNext: handleNext,
+            handlePrevious: handlePrevious
           }}
         />
       </form>

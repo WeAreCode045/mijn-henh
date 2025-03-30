@@ -53,10 +53,23 @@ export function ContentTabWrapper({
 }: ContentTabWrapperProps) {
   const [pendingChanges, setPendingChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [internalStep, setInternalStep] = useState(0);
   
-  // Use either the prop's currentStep or the handlers' currentStep or default to 0
+  // Use either the prop's currentStep or the handlers' currentStep or default to internal state
   const currentStep = propCurrentStep !== undefined ? propCurrentStep : 
-                     (handlers.currentStep !== undefined ? handlers.currentStep : 0);
+                     (handlers?.currentStep !== undefined ? handlers.currentStep : internalStep);
+  
+  // Create a local step click handler as fallback
+  const localHandleStepClick = (step: number) => {
+    console.log("ContentTabWrapper local step handler called with step:", step);
+    setInternalStep(step);
+  };
+  
+  // Choose the appropriate handleStepClick function with multiple fallbacks
+  const effectiveHandleStepClick = 
+    typeof propHandleStepClick === 'function' ? propHandleStepClick :
+    typeof handlers?.handleStepClick === 'function' ? handlers.handleStepClick :
+    localHandleStepClick;
   
   // Create a centralized navigation handler with robust fallback mechanism
   const { 
@@ -69,28 +82,14 @@ export function ContentTabWrapper({
     // Safe step click handler function with multiple fallbacks
     (step: number) => {
       console.log("ContentTabWrapper step click handler called with step:", step);
-      
-      // First try the prop's handleStepClick
-      if (typeof propHandleStepClick === 'function') {
-        propHandleStepClick(step);
-        return;
-      }
-      
-      // Then try the handlers.handleStepClick
-      if (typeof handlers.handleStepClick === 'function') {
-        handlers.handleStepClick(step);
-        return;
-      }
-      
-      // If no handler is provided, log a warning
-      console.warn("ContentTabWrapper - No step click handler provided");
+      effectiveHandleStepClick(step);
     },
     pendingChanges,
     setPendingChanges,
     setLastSaved,
-    propHandleStepClick || handlers.handleStepClick,
-    handlers.handleNext,
-    handlers.handlePrevious
+    propHandleStepClick || handlers?.handleStepClick,
+    handlers?.handleNext,
+    handlers?.handlePrevious
   );
 
   // Create a complete bundle of all handlers needed for content routing
@@ -100,27 +99,27 @@ export function ContentTabWrapper({
     currentStep: currentStep,
     setPendingChanges: (value: boolean) => {
       setPendingChanges(value);
-      if (handlers.setPendingChanges) {
+      if (handlers?.setPendingChanges) {
         handlers.setPendingChanges(value);
       }
     },
     // Ensure isSaving is not undefined for ContentRouter
-    isSaving: handlers.isSaving || false,
+    isSaving: handlers?.isSaving || false,
     // Add handleNext and handlePrevious to the handlers
     handleNext,
     handlePrevious,
     // Ensure area image upload handler is always available
-    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload || 
+    onAreaImageUpload: handlers?.onAreaImageUpload || handlers?.handleAreaImageUpload || 
       ((areaId: string, files: FileList) => {
         console.warn("ContentTabWrapper - No area image upload handler provided");
         return Promise.resolve();
       }),
     // Ensure onAddArea is always available with a fallback
-    onAddArea: handlers.onAddArea || (() => {
+    onAddArea: handlers?.onAddArea || (() => {
       console.warn("ContentTabWrapper - No onAddArea handler provided");
     }),
     // Ensure onFieldChange is always available
-    onFieldChange: handlers.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
+    onFieldChange: handlers?.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
       console.warn(`ContentTabWrapper - No onFieldChange handler provided. Would set ${String(field)} to:`, value);
     })
   };

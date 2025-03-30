@@ -51,7 +51,7 @@ export function PropertyTabContents({
     currentStep: handlers?.currentStep !== undefined ? handlers.currentStep : 0,
     handleStepClick: typeof handlers?.handleStepClick === 'function' 
       ? handlers.handleStepClick 
-      : (step: number) => { console.warn(`Step click handler called with ${step}, but no handler exists`); }
+      : (step: number) => { console.log(`Step click handler called with ${step}, fallback used in PropertyTabContents`); }
   };
 
   return (
