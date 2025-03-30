@@ -8,6 +8,7 @@ import { Loader2, Plus, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { prepareAreasForFormSubmission } from "@/hooks/property-form/preparePropertyData";
+import { v4 as uuidv4 } from "uuid";
 
 interface AreasPageProps {
   formData: PropertyFormData;
@@ -105,22 +106,32 @@ export function AreasPage({
   
   // Local handlers
   const handleAddArea = () => {
-    console.log("Adding new area", typeof onAddArea);
-    if (typeof onAddArea === 'function') {
-      onAddArea();
-      
-      // Update local state after a slight delay to allow the parent state to update
-      setTimeout(() => {
-        setLocalAreas(formData.areas || []);
-        setHasChanges(true);
-        
-        if (setPendingChanges) {
-          setPendingChanges(true);
-        }
-      }, 10);
-    } else {
-      console.error("onAddArea is not a function", onAddArea);
+    console.log("Adding new area");
+    
+    const newArea: PropertyArea = {
+      id: uuidv4(),
+      title: 'New Area',
+      name: 'New Area',
+      size: '',
+      description: '',
+      images: [],
+      imageIds: [],
+      columns: 2,
+      areaImages: []
+    };
+    
+    const updatedAreas = [...localAreas, newArea];
+    setLocalAreas(updatedAreas);
+    setHasChanges(true);
+    
+    if (setPendingChanges) {
+      setPendingChanges(true);
     }
+    
+    toast({
+      title: "Area added",
+      description: "New area has been added. Don't forget to save your changes."
+    });
   };
   
   const handleRemoveArea = (id: string) => {
@@ -166,6 +177,9 @@ export function AreasPage({
                 if (typeof img === 'string') return img !== imageId;
                 return img.id !== imageId;
               })
+            : [],
+          imageIds: Array.isArray(area.imageIds) 
+            ? area.imageIds.filter(id => id !== imageId)
             : []
         };
       }
@@ -188,18 +202,26 @@ export function AreasPage({
     
     console.log(`Selecting images for area ${areaId}:`, imageIds);
     
+    // Update local state
+    const updatedAreas = localAreas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          imageIds: imageIds
+        };
+      }
+      return area;
+    });
+    
+    setLocalAreas(updatedAreas);
+    setHasChanges(true);
+    
     // Call the original handler for actual selection
     onAreaImagesSelect(areaId, imageIds);
     
-    // Update local state after a delay to allow parent state to update
-    setTimeout(() => {
-      setLocalAreas(formData.areas || []);
-      setHasChanges(true);
-      
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
-    }, 10);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
   const handleReorderAreaImages = (areaId: string, reorderedImageIds: string[]) => {
@@ -207,18 +229,26 @@ export function AreasPage({
     
     console.log(`Reordering images for area ${areaId}:`, reorderedImageIds);
     
+    // Update local state
+    const updatedAreas = localAreas.map(area => {
+      if (area.id === areaId) {
+        return {
+          ...area,
+          imageIds: reorderedImageIds
+        };
+      }
+      return area;
+    });
+    
+    setLocalAreas(updatedAreas);
+    setHasChanges(true);
+    
     // Call the original handler for actual reordering
     onReorderAreaImages(areaId, reorderedImageIds);
     
-    // Update local state after a delay to allow parent state to update
-    setTimeout(() => {
-      setLocalAreas(formData.areas || []);
-      setHasChanges(true);
-      
-      if (setPendingChanges) {
-        setPendingChanges(true);
-      }
-    }, 10);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
   // Handle area reordering
