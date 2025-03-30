@@ -19,12 +19,38 @@ export function PropertyFeatures({
   onRemove,
   onUpdate,
 }: PropertyFeaturesProps) {
-  // Local state for form values
-  const [localFeatures, setLocalFeatures] = useState<PropertyFeature[]>(features);
+  // Local state for form values with proper typing
+  const [localFeatures, setLocalFeatures] = useState<{[key: string]: string}>(
+    features.reduce((acc, feature) => ({
+      ...acc,
+      [feature.id]: feature.description
+    }), {})
+  );
   
-  // Sync local state with props
+  // Sync local state with props, but only for new features
   useEffect(() => {
-    setLocalFeatures(features);
+    const newLocalFeatures = {...localFeatures};
+    let hasChanges = false;
+    
+    // Add any new features from props
+    features.forEach(feature => {
+      if (localFeatures[feature.id] === undefined) {
+        newLocalFeatures[feature.id] = feature.description;
+        hasChanges = true;
+      }
+    });
+    
+    // Remove any features that are no longer in props
+    Object.keys(localFeatures).forEach(id => {
+      if (!features.some(feature => feature.id === id)) {
+        delete newLocalFeatures[id];
+        hasChanges = true;
+      }
+    });
+    
+    if (hasChanges) {
+      setLocalFeatures(newLocalFeatures);
+    }
   }, [features]);
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -41,11 +67,10 @@ export function PropertyFeatures({
 
   const handleLocalUpdate = (id: string, value: string) => {
     // Update local state immediately for UI responsiveness
-    setLocalFeatures(prev => 
-      prev.map(feature => 
-        feature.id === id ? { ...feature, description: value } : feature
-      )
-    );
+    setLocalFeatures(prev => ({
+      ...prev,
+      [id]: value
+    }));
   };
   
   // Handle blur event to save changes only when the field loses focus
@@ -67,15 +92,15 @@ export function PropertyFeatures({
           Add Feature
         </Button>
       </div>
-      {localFeatures.length === 0 ? (
+      {features.length === 0 ? (
         <p className="text-sm text-muted-foreground italic">
           No features added yet. Click the button above to add features.
         </p>
       ) : (
-        localFeatures.map((feature) => (
+        features.map((feature) => (
           <div key={feature.id} className="flex items-center gap-2">
             <Input
-              value={feature.description}
+              value={localFeatures[feature.id] || ''}
               onChange={(e) => handleLocalUpdate(feature.id, e.target.value)}
               onBlur={(e) => handleBlur(feature.id, e.target.value)}
               placeholder="Enter feature"
