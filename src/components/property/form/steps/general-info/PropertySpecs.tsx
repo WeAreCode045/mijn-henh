@@ -3,7 +3,7 @@ import React, { useCallback, useState, useEffect } from "react";
 import debounce from "lodash.debounce";
 
 interface PropertySpecsProps {
-  formData: { price: string; objectId: string };
+  formData: { price: string; object_id: string };
   onFieldChange: (field: string, value: string) => void;
   setPendingChanges?: (pending: boolean) => void;
 }
@@ -14,17 +14,17 @@ export function PropertySpecs({
   setPendingChanges,
 }: PropertySpecsProps) {
   const [localPrice, setLocalPrice] = useState(formData.price || "");
-  const [localObjectId, setLocalObjectId] = useState(formData.objectId || "");
+  const [localObjectId, setLocalObjectId] = useState(formData.object_id || "");
 
   // Update local state when formData changes
   useEffect(() => {
     if (formData?.price !== undefined) {
       setLocalPrice(formData.price);
     }
-    if (formData?.objectId !== undefined) {
-      setLocalObjectId(formData.objectId);
+    if (formData?.object_id !== undefined) {
+      setLocalObjectId(formData.object_id);
     }
-  }, [formData.price, formData.objectId]);
+  }, [formData.price, formData.object_id]);
 
   const debouncedOnFieldChange = useCallback(
     debounce((field: string, value: string) => {
@@ -49,7 +49,7 @@ export function PropertySpecs({
   const handleObjectIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocalObjectId(value); // Update local state immediately
-    debouncedOnFieldChange("objectId", value); // Debounce the actual update
+    debouncedOnFieldChange("object_id", value); // Debounce the actual update
   };
 
   return (

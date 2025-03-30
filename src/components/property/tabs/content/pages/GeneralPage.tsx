@@ -81,8 +81,8 @@ export function GeneralPage({
               <div className="lg:col-span-1">
                 <PropertySpecs
                   formData={{
-                    ...formData,
-                    objectId: formData.object_id || "defaultObjectId", // Ensure objectId is provided
+                    price: formData.price || "",
+                    object_id: formData.object_id || ""
                   }}
                   onFieldChange={onFieldChange}
                   setPendingChanges={setPendingChanges}

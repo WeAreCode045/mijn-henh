@@ -38,7 +38,10 @@ export function GeneralInfoStep({
     <div className="space-y-6">
       {/* Property Specifications */}
       <PropertySpecs 
-        formData={formData} 
+        formData={{
+          price: formData.price || "",
+          object_id: formData.object_id || ""
+        }}
         onFieldChange={onFieldChange}
         setPendingChanges={setPendingChanges}
       />
