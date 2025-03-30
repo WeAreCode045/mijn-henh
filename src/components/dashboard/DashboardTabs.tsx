@@ -11,9 +11,15 @@ import { CommunicationsTabContent } from "./tabs/CommunicationsTabContent";
 import { AnalyticsTabContent } from "./tabs/AnalyticsTabContent";
 import { NotificationsTabContent } from "./tabs/NotificationsTabContent";
 import { PropertyDetailsTabContent } from "./tabs/PropertyDetailsTabContent";
+import { useState } from "react";
+import { DateRange } from "react-day-picker";
 
 export function DashboardTabs() {
   const { activeTab, handleTabChange, propertyId } = useDashboardTabs();
+  
+  // Add state and handlers for AgendaTabContent
+  const [agendaActiveTab, setAgendaActiveTab] = useState("calendar");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
   return (
     <Card>
@@ -29,7 +35,16 @@ export function DashboardTabs() {
         </TabsContent>
         
         <TabsContent value="agenda">
-          <AgendaTabContent />
+          <AgendaTabContent 
+            onTabChange={setAgendaActiveTab}
+            safeAgendaItems={[]}
+            isLoading={false}
+            dateRange={dateRange || { from: undefined, to: undefined }}
+            setDateRange={setDateRange}
+            filteredAgendaItems={[]}
+            onItemClick={() => {}}
+            onAddClick={() => {}}
+          />
         </TabsContent>
         
         <TabsContent value="todos">

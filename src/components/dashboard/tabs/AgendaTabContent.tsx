@@ -18,20 +18,21 @@ interface AgendaTabContentProps {
   onAddClick?: () => void;
 }
 
-export function AgendaTabContent(props?: AgendaTabContentProps) {
+export function AgendaTabContent({
+  onTabChange,
+  safeAgendaItems,
+  isLoading,
+  dateRange,
+  setDateRange,
+  filteredAgendaItems,
+  onItemClick = () => {},
+  onAddClick = () => {}
+}: AgendaTabContentProps) {
   const [activeTab, setActiveTab] = useState("calendar");
-  const { agendaItems, isLoading } = useAgenda();
   
-  // If props are provided, use them; otherwise use local state
-  const { dateRange, setDateRange, filteredAgendaItems } = 
-    props || useAgendaFiltering(agendaItems);
-  
-  // Use provided safe items or create default
-  const safeAgendaItems = props?.safeAgendaItems || agendaItems || [];
-
   return (
     <>
-      {props ? (
+      {safeAgendaItems ? (
         <AgendaSection />
       ) : (
         <>
