@@ -1,13 +1,19 @@
 
 import React, { useState } from "react";
-import { PropertyData } from "@/types/property";
+import { PropertyData, PropertyImage } from "@/types/property";
 import { VirtualTourCard } from "./VirtualTourCard";
+import { SortableImageGrid } from "./images/SortableImageGrid";
 
 interface MediaTabContentProps {
   property: PropertyData;
   handleVirtualTourUpdate?: (url: string) => void;
   handleYoutubeUrlUpdate?: (url: string) => void;
   handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+  handleImageUpload?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveImage?: (index: number) => void;
+  handleSetFeaturedImage?: (url: string | null) => void;
+  handleToggleFeaturedImage?: (url: string) => void;
+  isUploading?: boolean;
   isReadOnly?: boolean;
 }
 
@@ -16,6 +22,11 @@ export function MediaTabContent({
   handleVirtualTourUpdate,
   handleYoutubeUrlUpdate,
   handleFloorplanEmbedScriptUpdate,
+  handleImageUpload,
+  handleRemoveImage,
+  handleSetFeaturedImage,
+  handleToggleFeaturedImage,
+  isUploading = false,
   isReadOnly = false
 }: MediaTabContentProps) {
   // Create default handlers if none are provided
@@ -31,9 +42,85 @@ export function MediaTabContent({
     console.log("Floorplan embed script update not implemented:", script);
   });
 
+  // Ensure property.images is an array of PropertyImage objects
+  const normalizedImages = React.useMemo(() => {
+    if (!property.images || !Array.isArray(property.images)) return [];
+    
+    return property.images.map((img: any) => {
+      if (typeof img === 'string') {
+        return { id: img, url: img };
+      } else if (typeof img === 'object' && img.url) {
+        return { id: img.id || img.url, url: img.url };
+      }
+      return img;
+    }) as PropertyImage[];
+  }, [property.images]);
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Media</h2>
+      
+      {/* Property Images Section */}
+      {handleImageUpload && handleRemoveImage && (
+        <section className="mb-8">
+          <h3 className="text-lg font-medium mb-4">Property Images</h3>
+          <div className="bg-white p-4 rounded-lg border">
+            {normalizedImages.length > 0 ? (
+              <>
+                <SortableImageGrid 
+                  images={normalizedImages}
+                  onRemoveImage={handleRemoveImage}
+                  onSetFeaturedImage={handleSetFeaturedImage}
+                  onToggleFeaturedImage={handleToggleFeaturedImage}
+                  featuredImage={property.featuredImage}
+                  featuredImages={property.featuredImages || []}
+                  propertyId={property.id || ""}
+                />
+                
+                <div className="mt-4">
+                  <label className="block mb-2">Add More Images</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                    className="w-full border p-2 rounded"
+                  />
+                  {isUploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <div className="mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-400">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+                <p className="text-gray-500 mb-4">No images uploaded yet</p>
+                
+                <div>
+                  <label className="cursor-pointer inline-block">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                      className="hidden"
+                    />
+                    <div className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-center cursor-pointer">
+                      Upload Images
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
       
       <div className="grid gap-6">
         <VirtualTourCard

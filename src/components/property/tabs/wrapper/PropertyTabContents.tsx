@@ -82,6 +82,14 @@ export function PropertyTabContents({
       <TabsContent value="media" className="mt-4 space-y-4">
         <MediaTabContent
           property={property}
+          handleImageUpload={handlers.handleImageUpload}
+          handleRemoveImage={handlers.handleRemoveImage}
+          handleSetFeaturedImage={handlers.handleSetFeaturedImage}
+          handleToggleFeaturedImage={handlers.handleToggleFeaturedImage}
+          handleVirtualTourUpdate={handlers.handleVirtualTourUpdate}
+          handleYoutubeUrlUpdate={handlers.handleYoutubeUrlUpdate}
+          handleFloorplanEmbedScriptUpdate={handlers.handleFloorplanEmbedScriptUpdate}
+          isUploading={isUpdating}
         />
       </TabsContent>
       
