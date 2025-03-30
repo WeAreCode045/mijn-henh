@@ -22,7 +22,12 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   const [startHour, setStartHour] = useState<number>(8);
   const [endHour, setEndHour] = useState<number>(18);
   
-  const { formatEvents } = useEventFormatting();
+  const { 
+    getEventPosition, 
+    getEventDuration, 
+    formatEventTime, 
+    getEventColor 
+  } = useEventFormatting();
   
   // Navigation functions
   const goToPrevious = () => {
@@ -61,8 +66,16 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   
   // Format events for display in the calendar
   const formattedEvents = useMemo(() => {
-    return formatEvents(agendaItems);
-  }, [agendaItems, formatEvents]);
+    return agendaItems.map(event => ({
+      ...event,
+      start: event.event_date ? new Date(`${event.event_date}T${event.event_time || '00:00'}`) : new Date(),
+      end: event.end_date && event.end_time ? 
+        new Date(`${event.end_date}T${event.end_time}`) : 
+        event.event_date ? new Date(`${event.event_date}T${event.event_time || '00:00'}`) : new Date(),
+      color: getEventColor(event),
+      timeLabel: formatEventTime(event)
+    }));
+  }, [agendaItems, getEventColor, formatEventTime]);
   
   // Calculate visible hours for the calendar
   const visibleHours = useMemo(() => {
@@ -79,5 +92,9 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
     goToNext,
     goToToday,
     formattedEvents,
+    getEventPosition,
+    getEventDuration,
+    formatEventTime,
+    getEventColor
   };
 }

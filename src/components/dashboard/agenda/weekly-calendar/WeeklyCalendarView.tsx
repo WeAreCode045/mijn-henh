@@ -30,6 +30,10 @@ export function WeeklyCalendarView({
     goToNext,
     goToToday,
     formattedEvents,
+    getEventPosition,
+    getEventDuration,
+    formatEventTime,
+    getEventColor
   } = useWeeklyCalendar(agendaItems);
 
   // Get visible days based on viewMode
@@ -71,6 +75,10 @@ export function WeeklyCalendarView({
             endHour={endHour}
             events={formattedEvents.filter((event) => format(event.start, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))}
             onEventClick={onItemClick}
+            getEventPosition={getEventPosition}
+            getEventDuration={getEventDuration}
+            formatEventTime={formatEventTime}
+            getEventColor={getEventColor}
           />
         ))}
       </div>
