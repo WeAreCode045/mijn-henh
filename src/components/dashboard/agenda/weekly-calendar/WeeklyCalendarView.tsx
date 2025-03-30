@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarHeader } from './CalendarHeader';
 import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
 import { LoadingSpinner } from './LoadingSpinner';
-import { format, addDays, startOfWeek } from 'date-fns';
+import { format, addDays, startOfWeek, startOfDay } from 'date-fns';
 import { useWeeklyCalendar } from './useWeeklyCalendar';
 import { AgendaItem } from '@/components/property/dashboard/agenda/types';
 
@@ -30,10 +30,6 @@ export function WeeklyCalendarView({
     goToNext,
     goToToday,
     formattedEvents,
-    getEventPosition,
-    getEventDuration,
-    formatEventTime,
-    getEventColor
   } = useWeeklyCalendar(agendaItems);
 
   // Get visible days based on viewMode
@@ -44,7 +40,7 @@ export function WeeklyCalendarView({
     } else {
       // For week view, show the whole week
       const weekStart = startOfWeek(currentDate);
-      return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+      return Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
     }
   };
 
@@ -73,14 +69,8 @@ export function WeeklyCalendarView({
             day={day}
             startHour={startHour}
             endHour={endHour}
-            events={formattedEvents.filter((event) => 
-              format(event.start, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-            )}
+            events={formattedEvents.filter((event) => format(event.start, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))}
             onEventClick={onItemClick}
-            getEventPosition={getEventPosition}
-            getEventDuration={getEventDuration}
-            formatEventTime={formatEventTime}
-            getEventColor={getEventColor}
           />
         ))}
       </div>

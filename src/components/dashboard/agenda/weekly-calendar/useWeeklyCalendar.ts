@@ -22,7 +22,7 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   const [startHour, setStartHour] = useState<number>(8);
   const [endHour, setEndHour] = useState<number>(18);
   
-  const { getEventPosition, getEventDuration, formatEventTime, getEventColor } = useEventFormatting();
+  const { formatEvents } = useEventFormatting();
   
   // Navigation functions
   const goToPrevious = () => {
@@ -61,35 +61,8 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   
   // Format events for display in the calendar
   const formattedEvents = useMemo(() => {
-    // Instead of using a non-existent formatEvents function, 
-    // we'll transform the agenda items into formatted events here
-    return agendaItems.map(item => {
-      let start = new Date();
-      if (item.event_date) {
-        start = new Date(item.event_date);
-        if (item.event_time) {
-          const [hours, minutes] = item.event_time.split(':').map(Number);
-          start.setHours(hours || 0, minutes || 0, 0, 0);
-        }
-      }
-      
-      let end = new Date(start);
-      if (item.end_date && item.end_time) {
-        end = new Date(item.end_date);
-        const [hours, minutes] = item.end_time.split(':').map(Number);
-        end.setHours(hours || 0, minutes || 0, 0, 0);
-      } else {
-        // Default duration is 1 hour if no end time specified
-        end.setHours(end.getHours() + 1);
-      }
-      
-      return {
-        ...item,
-        start,
-        end
-      };
-    });
-  }, [agendaItems]);
+    return formatEvents(agendaItems);
+  }, [agendaItems, formatEvents]);
   
   // Calculate visible hours for the calendar
   const visibleHours = useMemo(() => {
@@ -106,10 +79,5 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
     goToNext,
     goToToday,
     formattedEvents,
-    // Return the event formatting functions so they can be used by child components
-    getEventPosition,
-    getEventDuration,
-    formatEventTime,
-    getEventColor
   };
 }

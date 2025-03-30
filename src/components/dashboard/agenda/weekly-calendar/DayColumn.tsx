@@ -5,34 +5,30 @@ import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { EventItem } from "./EventItem";
 
 interface DayColumnProps {
-  day: Date;
-  startHour: number;
-  endHour: number;
-  events: Array<AgendaItem & { start: Date; end: Date }>;
-  onEventClick: (item: AgendaItem) => void;
-  getEventPosition?: (time: string) => number;
-  getEventDuration?: (startTime: string, endTime: string | null) => number;
-  getEventColor?: (event: AgendaItem) => string;
-  formatEventTime?: (event: AgendaItem) => string;
+  date: Date;
+  events: AgendaItem[];
+  getEventPosition: (time: string) => number;
+  getEventDuration: (startTime: string, endTime: string | null) => number;
+  getEventColor: (event: AgendaItem) => string;
+  formatEventTime: (event: AgendaItem) => string;
+  onItemClick: (item: AgendaItem) => void;
 }
 
 export function DayColumn({
-  day,
-  startHour,
-  endHour,
+  date,
   events,
-  onEventClick,
-  getEventPosition = () => 0,
-  getEventDuration = () => 30,
-  getEventColor = () => '#4338ca',
-  formatEventTime = () => ''
+  getEventPosition,
+  getEventDuration,
+  getEventColor,
+  formatEventTime,
+  onItemClick
 }: DayColumnProps) {
-  const dayName = format(day, 'EEE');
-  const dayNumber = format(day, 'd');
-  const isToday = day.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
+  const dayName = format(date, 'EEE');
+  const dayNumber = format(date, 'd');
+  const isToday = date.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
   
-  // Generate time slots
-  const timeSlots = Array.from({ length: endHour - startHour + 1 }, (_, i) => i + startHour);
+  // Generate time slots (1 hour intervals)
+  const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8 AM to 8 PM
   
   return (
     <div className="flex-1 min-w-[120px] border-l">
@@ -43,7 +39,7 @@ export function DayColumn({
       </div>
       
       {/* Day content with time slots */}
-      <div className="relative" style={{ height: `${(endHour - startHour + 1) * 60}px` }}>
+      <div className="relative" style={{ height: '780px' }}> {/* 13 hours * 60px */}
         {/* Time slot guidelines */}
         {timeSlots.map(hour => (
           <div 
@@ -56,8 +52,8 @@ export function DayColumn({
         
         {/* Event items */}
         {events.map(event => {
-          const position = getEventPosition(event.event_time || '');
-          const duration = getEventDuration(event.event_time || '', event.end_time || null);
+          const position = getEventPosition(event.event_time);
+          const duration = getEventDuration(event.event_time, event.end_time);
           const color = getEventColor(event);
           const timeLabel = formatEventTime(event);
           
@@ -69,7 +65,7 @@ export function DayColumn({
               duration={duration}
               color={color}
               timeLabel={timeLabel}
-              onClick={() => onEventClick(event)}
+              onClick={() => onItemClick(event)}
             />
           );
         })}
