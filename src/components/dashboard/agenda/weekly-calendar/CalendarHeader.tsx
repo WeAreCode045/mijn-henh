@@ -64,14 +64,6 @@ export function CalendarHeader({
       
       <div className="flex space-x-1">
         <Button 
-          variant={activeTab === "day" ? "secondary" : "outline"} 
-          size="sm" 
-          className="h-8"
-          onClick={() => onTabChange && onTabChange("day")}
-        >
-          Day
-        </Button>
-        <Button 
           variant={activeTab === "week" ? "secondary" : "outline"} 
           size="sm" 
           className="h-8"
