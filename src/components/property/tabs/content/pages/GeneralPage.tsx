@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { preparePropertyDataForSubmission } from "@/hooks/property-form/utils/propertyDataFormatter";
 
 interface GeneralPageProps {
   formData: PropertyFormData;
@@ -61,11 +62,12 @@ export function GeneralPage({
     setIsSaving(true);
     try {
       // Extract fields that are different from the original formData
-      const changedFields: Partial<PropertyFormData> = {};
+      const changedFields: Record<string, any> = {};
+      
       Object.keys(localFormData).forEach((key) => {
         const typedKey = key as keyof PropertyFormData;
         if (JSON.stringify(localFormData[typedKey]) !== JSON.stringify(formData[typedKey])) {
-          changedFields[typedKey] = localFormData[typedKey];
+          changedFields[key] = localFormData[typedKey];
         }
       });
 
@@ -77,17 +79,20 @@ export function GeneralPage({
         return;
       }
 
+      // Prepare data for submission to avoid type mismatches
+      const dataToUpdate = preparePropertyDataForSubmission(changedFields);
+
       // Save changes to database
       const { error } = await supabase
         .from('properties')
-        .update(changedFields)
+        .update(dataToUpdate)
         .eq('id', localFormData.id);
 
       if (error) throw error;
 
       // Update parent state
       Object.keys(changedFields).forEach((key) => {
-        onFieldChange(key as keyof PropertyFormData, changedFields[key as keyof PropertyFormData]);
+        onFieldChange(key as keyof PropertyFormData, changedFields[key]);
       });
 
       // Notify success
