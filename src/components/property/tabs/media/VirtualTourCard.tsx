@@ -5,19 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface VirtualTourCardProps {
-  id?: string; // Added required id prop
+  id?: string;
   virtualTourUrl: string;
   youtubeUrl: string;
   onVirtualTourUpdate: (url: string) => void;
   onYoutubeUrlUpdate: (url: string) => void;
+  isReadOnly?: boolean; // Added isReadOnly prop
 }
 
 export function VirtualTourCard({
-  id = "", // Default value
+  id = "",
   virtualTourUrl = "",
   youtubeUrl = "",
   onVirtualTourUpdate,
-  onYoutubeUrlUpdate
+  onYoutubeUrlUpdate,
+  isReadOnly = false // Default to false to maintain backward compatibility
 }: VirtualTourCardProps) {
   const [localVirtualTourUrl, setLocalVirtualTourUrl] = useState(virtualTourUrl);
   const [localYoutubeUrl, setLocalYoutubeUrl] = useState(youtubeUrl);
@@ -40,8 +42,9 @@ export function VirtualTourCard({
               value={localVirtualTourUrl}
               onChange={(e) => setLocalVirtualTourUrl(e.target.value)}
               placeholder="Paste 3D tour embed URL here"
+              disabled={isReadOnly}
             />
-            <Button onClick={handleVirtualTourSubmit}>Save</Button>
+            <Button onClick={handleVirtualTourSubmit} disabled={isReadOnly}>Save</Button>
           </div>
           {virtualTourUrl && (
             <div className="mt-4 aspect-video w-full">
@@ -62,8 +65,9 @@ export function VirtualTourCard({
               value={localYoutubeUrl}
               onChange={(e) => setLocalYoutubeUrl(e.target.value)}
               placeholder="Paste YouTube video URL here"
+              disabled={isReadOnly}
             />
-            <Button onClick={handleYoutubeUrlSubmit}>Save</Button>
+            <Button onClick={handleYoutubeUrlSubmit} disabled={isReadOnly}>Save</Button>
           </div>
           {youtubeUrl && (
             <div className="mt-4 aspect-video w-full">
