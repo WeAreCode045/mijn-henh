@@ -1,5 +1,5 @@
 
-import { PropertyNearbyPlace } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 
 export function groupPlacesByCategory(places: PropertyNearbyPlace[]): Record<string, PropertyNearbyPlace[]> {
   return places.reduce((acc, place) => {

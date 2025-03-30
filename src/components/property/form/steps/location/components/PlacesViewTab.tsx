@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PropertyNearbyPlace } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 import { Badge } from "@/components/ui/badge";
 import { Trash2 } from "lucide-react";
 import { groupPlacesByCategory } from "../utils/placeUtils";
