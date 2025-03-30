@@ -22,6 +22,11 @@ export function DashboardTabContent({
   handleSaveObjectId,
   handleGeneratePDF
 }: DashboardTabContentProps) {
+  // Provide a fallback for handleSaveAgent if it's undefined
+  const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
+    ? handleSaveAgent 
+    : async () => { console.warn("handleSaveAgent not provided"); };
+
   return (
     <PropertyDashboardTab
       id={property.id}
@@ -35,7 +40,7 @@ export function DashboardTabContent({
       onSave={onSave}
       onDelete={onDelete}
       handleSaveObjectId={handleSaveObjectId}
-      handleSaveAgent={handleSaveAgent}
+      handleSaveAgent={safeHandleSaveAgent}
       handleGeneratePDF={handleGeneratePDF}
       handleWebView={onWebView}
     />

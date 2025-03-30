@@ -1,9 +1,7 @@
 
 import { AgendaSection } from "../agenda/AgendaSection";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAgenda } from "@/hooks/useAgenda";
 import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
-import { useState } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { DateRange } from "react-day-picker";
 
@@ -28,26 +26,7 @@ export function AgendaTabContent({
   onItemClick = () => {},
   onAddClick = () => {}
 }: AgendaTabContentProps) {
-  const [activeTab, setActiveTab] = useState("calendar");
-  
   return (
-    <>
-      {safeAgendaItems ? (
-        <AgendaSection />
-      ) : (
-        <>
-          <AgendaSection />
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="option1">Option 1</SelectItem>
-              <SelectItem value="option2">Option 2</SelectItem>
-            </SelectContent>
-          </Select>
-        </>
-      )}
-    </>
+    <AgendaSection />
   );
 }

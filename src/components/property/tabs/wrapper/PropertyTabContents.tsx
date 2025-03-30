@@ -1,17 +1,17 @@
 
+import React from "react";
 import { TabsContent } from "@/components/ui/tabs";
-import { PropertyData } from "@/types/property";
+import { DashboardTabContent } from "../content/DashboardTabContent";
 import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
-import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
-import { CommunicationsTabContent } from "./CommunicationsTabContent";
-import { useEffect } from "react";
+import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
+import { PropertyData, PropertyFormData } from "@/types/property";
 
 interface PropertyTabContentsProps {
   activeTab: string;
   property: PropertyData;
-  formData?: any; // For content tab
-  handlers?: any; // For content tab
+  formData: PropertyFormData;
+  handlers: any;
   onSave: () => void;
   onDelete: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
@@ -20,7 +20,6 @@ interface PropertyTabContentsProps {
   handleWebView: (e: React.MouseEvent) => void;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
-  [key: string]: any;
 }
 
 export function PropertyTabContents({
@@ -35,53 +34,51 @@ export function PropertyTabContents({
   handleGeneratePDF,
   handleWebView,
   isUpdating,
-  agentInfo,
-  ...props
+  agentInfo
 }: PropertyTabContentsProps) {
-  // Log the active tab for debugging
-  useEffect(() => {
-    console.log("PropertyTabContents - Active Tab:", activeTab);
-    console.log("PropertyTabContents - Property ID:", property.id);
-  }, [activeTab, property.id]);
+  // Provide fallbacks for required handler functions
+  const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
+    ? handleSaveAgent 
+    : async () => { console.warn("handleSaveAgent not provided in PropertyTabContents"); };
+  
+  const safeHandleSaveObjectId = typeof handleSaveObjectId === 'function'
+    ? handleSaveObjectId
+    : async () => { console.warn("handleSaveObjectId not provided in PropertyTabContents"); };
 
   return (
     <>
-      <TabsContent value="dashboard" className="space-y-6">
-        <PropertyDashboardTab 
-          id={property.id}
-          title={property.title}
-          objectId={property.object_id}
-          agentId={property.agent_id}
-          createdAt={property.created_at}
-          updatedAt={property.updated_at}
-          agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : agentInfo}
-          isUpdating={isUpdating}
-          onSave={onSave}
+      <TabsContent value="dashboard" className="mt-4 space-y-4">
+        <DashboardTabContent
+          property={property}
           onDelete={onDelete}
-          handleSaveObjectId={handleSaveObjectId}
-          handleSaveAgent={handleSaveAgent}
+          onSave={onSave}
+          onWebView={handleWebView}
+          handleSaveAgent={safeHandleSaveAgent}
+          handleSaveObjectId={safeHandleSaveObjectId}
           handleGeneratePDF={handleGeneratePDF}
-          handleWebView={handleWebView}
         />
       </TabsContent>
       
-      <TabsContent value="content" className="space-y-6">
-        <ContentTabWrapper 
-          property={property} 
-          formData={formData || property} 
-          handlers={handlers || {}} 
-          {...props} 
+      <TabsContent value="content" className="mt-4 space-y-4">
+        <ContentTabWrapper
+          property={property}
+          formData={formData}
+          currentStep={handlers.currentStep}
+          handleStepClick={handlers.handleStepClick}
+          handleSave={onSave}
         />
       </TabsContent>
       
-      <TabsContent value="media" className="space-y-6">
-        <MediaTabContent property={property} {...props} />
+      <TabsContent value="media" className="mt-4 space-y-4">
+        <MediaTabContent
+          property={property}
+          onSave={onSave}
+        />
       </TabsContent>
       
-      <TabsContent value="communications" className="space-y-6">
-        <CommunicationsTabContent 
-          propertyId={property.id} 
-          {...props} 
+      <TabsContent value="communications" className="mt-4 space-y-4">
+        <CommunicationsTabContent
+          property={property}
         />
       </TabsContent>
     </>

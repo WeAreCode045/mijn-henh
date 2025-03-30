@@ -55,8 +55,8 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, [toast]);
 
   const handleAgentChange = async (agentId: string) => {
-    // Safety check to ensure onAgentChange is defined
-    if (!onAgentChange || typeof onAgentChange !== 'function') {
+    // Safety check to ensure onAgentChange is defined and is a function
+    if (typeof onAgentChange !== 'function') {
       console.error("Error: onAgentChange is not a function", onAgentChange);
       toast({
         title: "Error",

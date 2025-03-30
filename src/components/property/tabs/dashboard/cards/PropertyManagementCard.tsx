@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentSelector } from "../../../dashboard/components/AgentSelector";
 import { PropertyDates } from "../../../dashboard/components/PropertyDates";
@@ -15,6 +16,7 @@ import { MediaViewModal } from "@/components/property/MediaViewModal";
 import { supabase } from "@/integrations/supabase/client";
 import { EditHistoryModal } from "../../../dashboard/components/EditHistoryModal";
 import { useLocation } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PropertyManagementCardProps {
   propertyId: string;
@@ -31,7 +33,7 @@ interface PropertyManagementCardProps {
 export function PropertyManagementCard({ 
   propertyId, 
   agentId, 
-  handleSaveAgent, 
+  handleSaveAgent = async () => {}, // Default to a no-op async function
   onGeneratePDF,
   onWebView,
   onDelete,
@@ -41,6 +43,7 @@ export function PropertyManagementCard({
 }: PropertyManagementCardProps) {
   // Get current location for page reloads
   const location = useLocation();
+  const { toast } = useToast();
 
   // Media view modal states
   const [showMediaModal, setShowMediaModal] = useState(false);
@@ -54,11 +57,17 @@ export function PropertyManagementCard({
   }>({});
   
   // Ensure handleSaveAgent is a valid function
-  useEffect(() => {
-    if (!handleSaveAgent || typeof handleSaveAgent !== 'function') {
-      console.error("PropertyManagementCard: handleSaveAgent is not a function", handleSaveAgent);
-    }
-  }, [handleSaveAgent]);
+  const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
+    ? handleSaveAgent 
+    : async () => {
+        console.warn("PropertyManagementCard: handleSaveAgent is not provided");
+        toast({
+          title: "Warning",
+          description: "Unable to update agent - handler not available",
+          variant: "destructive",
+        });
+        return Promise.reject(new Error("handleSaveAgent not provided"));
+      };
 
   // Load virtual tour and youtube URLs
   useEffect(() => {
@@ -244,7 +253,7 @@ export function PropertyManagementCard({
           
           <AgentSelector 
             initialAgentId={agentId} 
-            onAgentChange={handleSaveAgent}
+            onAgentChange={safeHandleSaveAgent}
           />
           
           <div className="mt-2">
