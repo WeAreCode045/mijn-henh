@@ -4,6 +4,7 @@ import { PropertyData, PropertyImage } from "@/types/property";
 import { VirtualTourCard } from "./VirtualTourCard";
 import { SortableImageGrid } from "./images/SortableImageGrid";
 import { ImageUploader } from "@/components/ui/ImageUploader";
+import { usePropertyImageHandlers } from "@/hooks/property/media/usePropertyImageHandlers";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -30,7 +31,23 @@ export function MediaTabContent({
   isUploading = false,
   isReadOnly = false
 }: MediaTabContentProps) {
-  // Create default handlers if none are provided
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // If no handlers are provided, create them using our hook
+  const {
+    handleSetFeaturedImage: defaultSetFeaturedImage,
+    handleToggleFeaturedImage: defaultToggleFeaturedImage,
+    handleRemoveImage: defaultRemoveImage,
+    handleImageUpload: defaultImageUpload
+  } = usePropertyImageHandlers(property, ((newState) => {}), setIsSaving, {});
+
+  // Use provided handlers or fall back to default handlers
+  const onSetFeaturedImage = handleSetFeaturedImage || defaultSetFeaturedImage;
+  const onToggleFeaturedImage = handleToggleFeaturedImage || defaultToggleFeaturedImage;
+  const onRemoveImage = handleRemoveImage || defaultRemoveImage;
+  const onImageUpload = handleImageUpload || defaultImageUpload;
+
+  // Create default handlers for other functions if none are provided
   const onVirtualTourUpdate = handleVirtualTourUpdate || ((url: string) => {
     console.log("Virtual tour URL update not implemented:", url);
   });
@@ -69,19 +86,19 @@ export function MediaTabContent({
             <>
               <SortableImageGrid 
                 images={normalizedImages}
-                onRemoveImage={handleRemoveImage || (() => {})}
-                onSetFeaturedImage={handleSetFeaturedImage}
-                onToggleFeaturedImage={handleToggleFeaturedImage}
+                onRemoveImage={onRemoveImage}
+                onSetFeaturedImage={onSetFeaturedImage}
+                onToggleFeaturedImage={onToggleFeaturedImage}
                 featuredImage={property.featuredImage}
                 featuredImages={property.featuredImages || []}
                 propertyId={property.id || ""}
               />
               
-              {handleImageUpload && (
+              {!isReadOnly && (
                 <div className="mt-4">
                   <ImageUploader
-                    onUpload={handleImageUpload}
-                    isUploading={isUploading}
+                    onUpload={onImageUpload}
+                    isUploading={isUploading || isSaving}
                     label="Add More Images"
                     multiple={true}
                   />
@@ -99,11 +116,11 @@ export function MediaTabContent({
               </div>
               <p className="text-gray-500 mb-4">No images uploaded yet</p>
               
-              {handleImageUpload && (
+              {!isReadOnly && (
                 <div>
                   <ImageUploader
-                    onUpload={handleImageUpload}
-                    isUploading={isUploading}
+                    onUpload={onImageUpload}
+                    isUploading={isUploading || isSaving}
                     label="Upload Images"
                     multiple={true}
                   />
@@ -120,6 +137,7 @@ export function MediaTabContent({
           youtubeUrl={property.youtubeUrl || ""}
           onVirtualTourUpdate={onVirtualTourUpdate}
           onYoutubeUrlUpdate={onYoutubeUrlUpdate}
+          isReadOnly={isReadOnly}
         />
         
         {/* Additional media cards can go here */}
