@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { PropertyFormData, PropertyFeature } from "@/types/property";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { PropertyFeatures } from "@/components/property/PropertyFeatures";
 import { GlobalFeaturesSelector } from "@/components/property/features/GlobalFeaturesSelector";
 import { useAvailableFeatures } from "@/hooks/useAvailableFeatures";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FeaturesPageProps {
   formData: PropertyFormData;
@@ -28,6 +30,17 @@ export function FeaturesPage({
   const { availableFeatures, isLoading } = useAvailableFeatures();
   const [globalFeatures, setGlobalFeatures] = useState<PropertyFeature[]>([]);
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+  
+  // Local state for features
+  const [localFeatures, setLocalFeatures] = useState<PropertyFeature[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  
+  // Initialize local state from formData
+  useEffect(() => {
+    setLocalFeatures(formData.features || []);
+  }, [formData.features]);
   
   // Fetch global features on component mount
   useEffect(() => {
@@ -55,85 +68,121 @@ export function FeaturesPage({
     fetchGlobalFeatures();
   }, []);
   
-  // Save feature changes directly to the database
-  const saveFeaturesField = async (features: PropertyFeature[]) => {
-    if (!formData.id) return;
+  // Save feature changes to the database
+  const saveFeatures = async () => {
+    if (!formData.id) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive"
+      });
+      return;
+    }
     
+    setIsSaving(true);
     try {
       const { error } = await supabase
         .from('properties')
-        .update({ features: JSON.stringify(features) })
+        .update({ features: JSON.stringify(localFeatures) })
         .eq('id', formData.id);
         
       if (error) {
         console.error("Error saving features:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save features",
+          variant: "destructive"
+        });
       } else {
         console.log("Features saved to database successfully");
+        toast({
+          title: "Success",
+          description: "Features updated successfully",
+        });
+        
+        // Update parent state
+        onFieldChange('features', localFeatures);
+        
         if (setPendingChanges) {
           setPendingChanges(false);
         }
+        
+        setHasChanges(false);
       }
     } catch (err) {
       console.error("Failed to save features:", err);
+      toast({
+        title: "Error",
+        description: "Failed to save features",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
   
-  const handleFeatureChange = async (id: string, description: string) => {
-    // Update in-memory state
-    onUpdateFeature(id, description);
+  // Local handlers
+  const handleFeatureChange = (id: string, description: string) => {
+    const updatedFeatures = localFeatures.map(feature => 
+      feature.id === id ? { ...feature, description } : feature
+    );
     
-    // Update features in the database directly - only the features field
-    if (formData.id) {
-      const updatedFeatures = formData.features.map(feature => 
-        feature.id === id ? { ...feature, description } : feature
-      );
-      
-      await saveFeaturesField(updatedFeatures);
+    setLocalFeatures(updatedFeatures);
+    setHasChanges(true);
+    
+    if (setPendingChanges) {
+      setPendingChanges(true);
     }
   };
   
-  const handleAddFeature = async (feature: PropertyFeature) => {
+  const handleAddFeature = () => {
+    // Call parent's add feature function but update local state
+    onAddFeature();
+    
+    // Update local state after a slight delay to allow the parent state to update
+    setTimeout(() => {
+      setLocalFeatures(formData.features || []);
+      setHasChanges(true);
+      
+      if (setPendingChanges) {
+        setPendingChanges(true);
+      }
+    }, 10);
+  };
+  
+  const handleRemoveFeature = (id: string) => {
+    const updatedFeatures = localFeatures.filter(feature => feature.id !== id);
+    setLocalFeatures(updatedFeatures);
+    setHasChanges(true);
+    
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
+  };
+  
+  const handleAddGlobalFeature = (feature: PropertyFeature) => {
     // If we already have this feature, don't add it again
-    if (formData.features?.some(f => f.id === feature.id)) {
+    if (localFeatures.some(f => f.id === feature.id)) {
       return;
     }
     
-    const updatedFeatures = [...(formData.features || []), feature];
+    const updatedFeatures = [...localFeatures, feature];
+    setLocalFeatures(updatedFeatures);
+    setHasChanges(true);
     
-    // Update in-memory state
-    onFieldChange('features', updatedFeatures);
-    
-    // Update features in the database
-    await saveFeaturesField(updatedFeatures);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
-  const handleRemoveSelectedFeature = async (id: string) => {
-    const updatedFeatures = formData.features?.filter(feature => feature.id !== id) || [];
+  const handleRemoveSelectedFeature = (id: string) => {
+    const updatedFeatures = localFeatures.filter(feature => feature.id !== id);
+    setLocalFeatures(updatedFeatures);
+    setHasChanges(true);
     
-    // Update in-memory state
-    onFieldChange('features', updatedFeatures);
-    
-    // Update features in the database
-    await saveFeaturesField(updatedFeatures);
-  };
-  
-  const handleAddClick = async () => {
-    // Add a new feature
-    onAddFeature();
-    
-    // Wait for state to update, then save to database
-    setTimeout(async () => {
-      await saveFeaturesField(formData.features);
-    }, 0);
-  };
-  
-  const handleRemoveClick = async (id: string) => {
-    // Remove the feature
-    onRemoveFeature(id);
-    
-    // Update features in the database - need to filter it manually since formData won't update yet
-    const updatedFeatures = formData.features.filter(feature => feature.id !== id);
-    await saveFeaturesField(updatedFeatures);
+    if (setPendingChanges) {
+      setPendingChanges(true);
+    }
   };
   
   return (
@@ -155,8 +204,8 @@ export function FeaturesPage({
               ) : (
                 <GlobalFeaturesSelector
                   globalFeatures={globalFeatures}
-                  propertyFeatures={formData.features || []}
-                  onSelect={handleAddFeature}
+                  propertyFeatures={localFeatures || []}
+                  onSelect={handleAddGlobalFeature}
                   onDeselect={handleRemoveSelectedFeature}
                 />
               )}
@@ -169,14 +218,33 @@ export function FeaturesPage({
                 These features are specific to this property and won't be added to the global list.
               </p>
               <PropertyFeatures
-                features={formData.features || []}
-                onAdd={handleAddClick}
-                onRemove={handleRemoveClick}
+                features={localFeatures || []}
+                onAdd={handleAddFeature}
+                onRemove={handleRemoveFeature}
                 onUpdate={handleFeatureChange}
               />
             </div>
           </div>
         </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button 
+            onClick={saveFeatures} 
+            disabled={isSaving || !hasChanges}
+            className="flex items-center gap-2"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save Features
+              </>
+            )}
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );
