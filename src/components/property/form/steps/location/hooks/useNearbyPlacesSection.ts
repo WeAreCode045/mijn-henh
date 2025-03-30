@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from "react";
 import { PropertyFormData } from "@/types/property";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { usePlaceSearchResults } from "./usePlaceSearchResults";
 import { usePlaceSaving } from "./usePlaceSaving";
 import { usePlaceRemoval } from "./usePlaceRemoval";
