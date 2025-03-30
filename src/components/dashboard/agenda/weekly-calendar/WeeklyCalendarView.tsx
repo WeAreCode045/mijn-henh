@@ -1,84 +1,73 @@
 
-import React, { useState, useEffect } from 'react';
-import { CalendarHeader } from './CalendarHeader';
-import { TimeColumn } from './TimeColumn';
-import { DayColumn } from './DayColumn';
-import { LoadingSpinner } from './LoadingSpinner';
-import { format, addDays, startOfWeek, startOfDay } from 'date-fns';
-import { useWeeklyCalendar } from './useWeeklyCalendar';
-import { AgendaItem } from '@/components/property/dashboard/agenda/types';
+import React from "react";
+import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { TimeColumn } from "./TimeColumn";
+import { CalendarHeader } from "./CalendarHeader";
+import { DayColumn } from "./DayColumn";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { useWeeklyCalendar } from "./useWeeklyCalendar";
+import { useEventFormatting } from "./useEventFormatting";
 
 interface WeeklyCalendarViewProps {
   agendaItems: AgendaItem[];
   isLoading: boolean;
   onItemClick: (item: AgendaItem) => void;
-  viewMode?: 'day' | 'week';
 }
 
 export function WeeklyCalendarView({
   agendaItems,
   isLoading,
-  onItemClick,
-  viewMode = 'week'
+  onItemClick
 }: WeeklyCalendarViewProps) {
   const {
-    currentDate,
-    startHour,
-    endHour,
-    visibleHours,
-    goToPrevious,
-    goToNext,
+    currentWeek,
+    goToPreviousWeek,
     goToToday,
-    formattedEvents,
+    goToNextWeek,
+    groupedEvents,
+    activeTab,
+    setActiveTab
+  } = useWeeklyCalendar(agendaItems);
+  
+  const {
     getEventPosition,
     getEventDuration,
     formatEventTime,
     getEventColor
-  } = useWeeklyCalendar(agendaItems);
-
-  // Get visible days based on viewMode
-  const getVisibleDays = () => {
-    if (viewMode === 'day') {
-      // For day view, just show the current date
-      return [currentDate];
-    } else {
-      // For week view, show the whole week
-      const weekStart = startOfWeek(currentDate);
-      return Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i));
-    }
-  };
-
-  const visibleDays = getVisibleDays();
-
+  } = useEventFormatting();
+  
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
+  
   return (
     <div className="flex flex-col h-full">
-      <CalendarHeader
-        currentDate={currentDate}
-        goToPrevious={goToPrevious}
-        goToNext={goToNext}
+      {/* Calendar navigation */}
+      <CalendarHeader 
+        currentWeek={currentWeek}
+        goToPreviousWeek={goToPreviousWeek}
         goToToday={goToToday}
-        viewMode={viewMode}
+        goToNextWeek={goToNextWeek}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
       
-      <div className="flex overflow-auto flex-1 border rounded-md mt-2">
-        <TimeColumn startHour={startHour} endHour={endHour} />
+      {/* Weekly calendar grid */}
+      <div className="flex border rounded-lg overflow-auto">
+        {/* Time column */}
+        <TimeColumn />
         
-        {visibleDays.map((day) => (
-          <DayColumn
-            key={format(day, 'yyyy-MM-dd')}
-            day={day}
-            startHour={startHour}
-            endHour={endHour}
-            events={formattedEvents.filter((event) => format(event.start, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'))}
-            onEventClick={onItemClick}
+        {/* Days columns */}
+        {groupedEvents.map(({ date, events }) => (
+          <DayColumn 
+            key={date.toISOString()}
+            date={date}
+            events={events}
             getEventPosition={getEventPosition}
             getEventDuration={getEventDuration}
-            formatEventTime={formatEventTime}
             getEventColor={getEventColor}
+            formatEventTime={formatEventTime}
+            onItemClick={onItemClick}
           />
         ))}
       </div>
