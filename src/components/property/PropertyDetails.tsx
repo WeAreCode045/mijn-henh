@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,7 +54,7 @@ export function PropertyDetails({
   
   // Sync with props when they change externally
   useEffect(() => {
-    setLocalValues({
+    const newValues = {
       title,
       price,
       address,
@@ -64,7 +65,12 @@ export function PropertyDetails({
       bathrooms,
       garages,
       energyLabel
-    });
+    };
+    
+    // Only update if props have changed
+    if (JSON.stringify(newValues) !== JSON.stringify(localValues)) {
+      setLocalValues(newValues);
+    }
   }, [title, price, address, buildYear, sqft, livingArea, bedrooms, bathrooms, garages, energyLabel]);
   
   const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
