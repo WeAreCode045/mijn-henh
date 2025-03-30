@@ -52,11 +52,12 @@ export function SelectCategoryModal({
 
   const handleSelect = (category: string) => {
     if (isLoading) return;
+    console.log(`Category selected: ${category}`);
     onSelect(category);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Select Category</DialogTitle>

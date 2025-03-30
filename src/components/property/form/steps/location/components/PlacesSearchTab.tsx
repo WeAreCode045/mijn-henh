@@ -70,7 +70,12 @@ export function PlacesSearchTab({
   };
 
   const handleSelectCategory = async (categoryName: string) => {
-    if (!onFetchPlaces) return;
+    console.log(`Selected category: ${categoryName}`);
+    
+    if (!onFetchPlaces && !onSearchClick) {
+      console.error("No handler provided for fetching places");
+      return;
+    }
 
     try {
       setLocalIsLoading(true);
@@ -83,8 +88,22 @@ export function PlacesSearchTab({
         throw new Error(`No types found for category: ${categoryName}`);
       }
       
-      // Use the category name to fetch (the hook will handle parsing the types)
-      await onFetchPlaces(categoryName);
+      if (onSearchClick) {
+        // Create a synthetic mouse event to pass to onSearchClick
+        const syntheticEvent = {
+          preventDefault: () => {},
+          stopPropagation: () => {},
+          currentTarget: {} as EventTarget & HTMLButtonElement,
+          target: {} as EventTarget
+        } as React.MouseEvent<HTMLButtonElement>;
+        
+        console.log("Using onSearchClick handler");
+        await onSearchClick(syntheticEvent, categoryName);
+      } else if (onFetchPlaces) {
+        // Use the category name to fetch (the hook will handle parsing the types)
+        console.log("Using onFetchPlaces handler");
+        await onFetchPlaces(categoryName);
+      }
       
       // Close the modal after fetch is complete
       setShowModal(false);
