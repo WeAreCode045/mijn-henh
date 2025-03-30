@@ -2,6 +2,7 @@
 import { TabsContent } from "@/components/ui/tabs";
 import { AgendaViewContent } from "../AgendaViewContent";
 import { WeeklyCalendarView } from "../weekly-calendar";
+import { MonthlyCalendarView } from "../monthly-calendar";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { DateRange } from "react-day-picker";
 
@@ -30,6 +31,14 @@ export function AgendaTabContent({
     <>
       <TabsContent value="weekly" className="mt-0">
         <WeeklyCalendarView
+          agendaItems={safeAgendaItems}
+          isLoading={isLoading}
+          onItemClick={onItemClick}
+        />
+      </TabsContent>
+      
+      <TabsContent value="month" className="mt-0">
+        <MonthlyCalendarView
           agendaItems={safeAgendaItems}
           isLoading={isLoading}
           onItemClick={onItemClick}

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AgendaViewContent } from "../agenda/AgendaViewContent";
 import { WeeklyCalendarView } from "../agenda/weekly-calendar";
+import { MonthlyCalendarView } from "../agenda/monthly-calendar";
 import { AgendaHeader } from "../agenda/components/AgendaHeader";
 
 interface AgendaTabContentProps {
@@ -30,8 +31,8 @@ export function AgendaTabContent({
   onItemClick = () => {},
   onAddClick = () => {}
 }: AgendaTabContentProps) {
-  // Set up state for active tab
-  const [activeTab, setActiveTab] = useState("calendar");
+  // Set up state for active tab (now defaulting to "month")
+  const [activeTab, setActiveTab] = useState("month");
   
   // Handle tab change and propagate to parent
   const handleTabChange = (value: string) => {
@@ -50,6 +51,14 @@ export function AgendaTabContent({
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsContent value="weekly" className="mt-0">
           <WeeklyCalendarView
+            agendaItems={safeAgendaItems}
+            isLoading={isLoading}
+            onItemClick={onItemClick}
+          />
+        </TabsContent>
+        
+        <TabsContent value="month" className="mt-0">
+          <MonthlyCalendarView
             agendaItems={safeAgendaItems}
             isLoading={isLoading}
             onItemClick={onItemClick}
