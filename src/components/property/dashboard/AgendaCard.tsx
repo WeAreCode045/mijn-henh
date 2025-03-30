@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { useAgendaCard } from "./agenda/useAgendaCard";
 import { AgendaCardHeader } from "./agenda/AgendaCardHeader";
