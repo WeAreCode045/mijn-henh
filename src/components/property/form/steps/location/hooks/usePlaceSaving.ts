@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
-import { ToastApi } from "@/components/ui/use-toast";
+import { useToast as UseToastReturnType } from "@/hooks/use-toast";
 
 export function usePlaceSaving({
   formData,
@@ -12,7 +12,7 @@ export function usePlaceSaving({
 }: {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  toast: ToastApi;
+  toast: ReturnType<typeof UseToastReturnType>;
   setShowSelectionModal: (show: boolean) => void;
   setSearchResults: (results: PropertyNearbyPlace[]) => void;
 }) {

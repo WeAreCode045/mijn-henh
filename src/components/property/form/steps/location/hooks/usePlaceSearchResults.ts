@@ -1,6 +1,7 @@
+
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
-import { ToastApi } from "@/components/ui/use-toast";
+import { useToast as UseToastReturnType } from "@/hooks/use-toast";
 
 export function usePlaceSearchResults({
   formData,
@@ -11,7 +12,7 @@ export function usePlaceSearchResults({
   formData: PropertyFormData;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
-  toast: ToastApi;
+  toast: ReturnType<typeof UseToastReturnType>;
 }) {
   const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
   const [showSelectionModal, setShowSelectionModal] = useState(false);

@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import { PropertyFormData } from "@/types/property";
-import { ToastApi } from "@/components/ui/use-toast";
+import { useToast as UseToastReturnType } from "@/hooks/use-toast";
 
 export function usePlaceRemoval({
   formData,
@@ -12,7 +12,7 @@ export function usePlaceRemoval({
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
   onRemoveNearbyPlace?: (index: number) => void;
-  toast: ToastApi;
+  toast: ReturnType<typeof UseToastReturnType>;
 }) {
   const handleRemovePlace = useCallback((index: number) => {
     if (onRemoveNearbyPlace) {
