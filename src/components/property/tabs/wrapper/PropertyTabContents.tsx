@@ -86,7 +86,9 @@ export function PropertyTabContents({
       </TabsContent>
       
       <TabsContent value="communications" className="mt-4 space-y-4">
-        <CommunicationsTabContent />
+        <CommunicationsTabContent
+          property={property}
+        />
       </TabsContent>
     </>
   );
