@@ -1,7 +1,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface PropertyDescriptionProps {
   description: string;
@@ -27,7 +27,7 @@ export function PropertyDescription({
     setLocalLocationDescription(location_description || "");
   }, [location_description]);
   
-  const handleLocalChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleLocalChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
     // Update local state immediately
@@ -39,7 +39,7 @@ export function PropertyDescription({
     
     // Pass the change up to parent
     onChange(e);
-  };
+  }, [onChange]);
 
   return (
     <div className="space-y-4">

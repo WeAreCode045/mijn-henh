@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,16 +81,15 @@ export function PropertyDetails({
   };
 
   const handleGardenChange = (checked: boolean) => {
-    const event = new Event('change', { bubbles: true }) as unknown as React.ChangeEvent<HTMLInputElement>;
-    Object.defineProperty(event, 'target', {
-      writable: false,
-      value: {
+    const event = {
+      target: {
         name: 'hasGarden',
         value: checked,
         type: 'checkbox',
         checked: checked,
       },
-    });
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
     onChange(event);
   };
 

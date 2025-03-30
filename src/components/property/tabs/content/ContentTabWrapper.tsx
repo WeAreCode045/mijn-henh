@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { ContentRouter } from './ContentRouter';
 import { usePropertyContentStepNavigation } from '@/hooks/usePropertyContentStepNavigation';
@@ -60,10 +60,10 @@ export function ContentTabWrapper({
                      (handlers?.currentStep !== undefined ? handlers.currentStep : internalStep);
   
   // Create a local step click handler as fallback
-  const localHandleStepClick = (step: number) => {
+  const localHandleStepClick = useCallback((step: number) => {
     console.log("ContentTabWrapper local step handler called with step:", step);
     setInternalStep(step);
-  };
+  }, []);
   
   // Choose the appropriate handleStepClick function with multiple fallbacks
   const effectiveHandleStepClick = 
@@ -80,14 +80,14 @@ export function ContentTabWrapper({
     formData,
     currentStep,
     // Safe step click handler function with multiple fallbacks
-    (step: number) => {
-      console.log("ContentTabWrapper step click handler called with step:", step);
-      effectiveHandleStepClick(step);
-    },
+    effectiveHandleStepClick,
     pendingChanges,
-    setPendingChanges,
+    (value: boolean) => {
+      setPendingChanges(value);
+      if (handlers?.setPendingChanges) handlers.setPendingChanges(value);
+    },
     setLastSaved,
-    propHandleStepClick || handlers?.handleStepClick,
+    undefined,  // Remove propHandleStepClick to avoid circular reference
     handlers?.handleNext,
     handlers?.handlePrevious
   );
@@ -103,6 +103,10 @@ export function ContentTabWrapper({
         handlers.setPendingChanges(value);
       }
     },
+    // Ensure safe handlers are available
+    onFieldChange: handlers?.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
+      console.warn(`ContentTabWrapper - No onFieldChange handler provided. Would set ${String(field)} to:`, value);
+    }),
     // Ensure isSaving is not undefined for ContentRouter
     isSaving: handlers?.isSaving || false,
     // Add handleNext and handlePrevious to the handlers
@@ -118,10 +122,6 @@ export function ContentTabWrapper({
     onAddArea: handlers?.onAddArea || (() => {
       console.warn("ContentTabWrapper - No onAddArea handler provided");
     }),
-    // Ensure onFieldChange is always available
-    onFieldChange: handlers?.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
-      console.warn(`ContentTabWrapper - No onFieldChange handler provided. Would set ${String(field)} to:`, value);
-    })
   };
 
   return (

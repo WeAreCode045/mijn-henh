@@ -1,88 +1,67 @@
 
-import { useToast } from "@/components/ui/use-toast";
-import { PropertyFormData } from "@/types/property";
-import { steps } from "@/components/property/form/formSteps";
 import { useCallback } from "react";
+import { PropertyFormData } from "@/types/property";
 
 export function usePropertyContentStepNavigation(
   formData: PropertyFormData,
   currentStep: number,
-  setCurrentStep: (step: number) => void,
+  handleStepClick: (step: number) => void,
   pendingChanges: boolean,
   setPendingChanges: (pending: boolean) => void,
   setLastSaved: (date: Date | null) => void,
-  externalHandleStepClick?: (step: number) => void,
-  externalHandleNext?: () => void,
-  externalHandlePrevious?: () => void
+  externalStepClick?: (step: number) => void,
+  externalNext?: () => void,
+  externalPrev?: () => void
 ) {
-  const { toast } = useToast();
-  const maxSteps = steps.length;
-
-  // Handle step clicks with robust error handling and fallbacks
-  const handleStepClick = useCallback((step: number) => {
-    console.log("usePropertyContentStepNavigation - handleStepClick with step:", step);
+  // Safe wrapper for the step click handler
+  const internalHandleStepClick = useCallback((step: number) => {
+    console.log("usePropertyContentStepNavigation - Step clicked:", step);
     
-    if (typeof externalHandleStepClick === 'function') {
-      console.log("usePropertyContentStepNavigation - using external handler");
-      externalHandleStepClick(step);
-      return true;
-    } 
-    
-    if (typeof setCurrentStep === 'function') {
-      console.log("usePropertyContentStepNavigation - using setCurrentStep directly");
-      setCurrentStep(step);
-      return true;
+    // Call the provided handler first
+    if (typeof handleStepClick === 'function') {
+      handleStepClick(step);
     }
     
-    console.error("usePropertyContentStepNavigation - No valid handler available");
-    toast({
-      title: "Navigation Error",
-      description: "Could not navigate to the selected step",
-      variant: "destructive"
-    });
-    return false;
-  }, [externalHandleStepClick, setCurrentStep, toast]);
+    // If there's an additional external handler, call it too
+    if (typeof externalStepClick === 'function') {
+      externalStepClick(step);
+    }
+  }, [handleStepClick, externalStepClick]);
   
-  // Handle next button click
+  // Next step handler
   const handleNext = useCallback(() => {
-    console.log("usePropertyContentStepNavigation - handleNext called, current step:", currentStep);
+    console.log("usePropertyContentStepNavigation - Next clicked, current step:", currentStep);
     
-    if (typeof externalHandleNext === 'function') {
-      console.log("usePropertyContentStepNavigation - using external next handler");
-      externalHandleNext();
-      return true;
-    } 
-    
-    if (currentStep < maxSteps - 1 && typeof setCurrentStep === 'function') {
-      console.log("usePropertyContentStepNavigation - using setCurrentStep directly for next");
-      setCurrentStep(currentStep + 1);
-      return true;
+    // Move to next step
+    const nextStep = currentStep + 1;
+    if (nextStep <= 3) { // Assuming max 4 steps (0-3)
+      internalHandleStepClick(nextStep);
     }
     
-    return false;
-  }, [currentStep, externalHandleNext, maxSteps, setCurrentStep]);
+    // If there's an external next handler, call it too
+    if (typeof externalNext === 'function') {
+      externalNext();
+    }
+  }, [currentStep, internalHandleStepClick, externalNext]);
   
-  // Handle previous button click
+  // Previous step handler
   const handlePrevious = useCallback(() => {
-    console.log("usePropertyContentStepNavigation - handlePrevious called, current step:", currentStep);
+    console.log("usePropertyContentStepNavigation - Previous clicked, current step:", currentStep);
     
-    if (typeof externalHandlePrevious === 'function') {
-      console.log("usePropertyContentStepNavigation - using external previous handler");
-      externalHandlePrevious();
-      return true;
-    } 
-    
-    if (currentStep > 0 && typeof setCurrentStep === 'function') {
-      console.log("usePropertyContentStepNavigation - using setCurrentStep directly for previous");
-      setCurrentStep(currentStep - 1);
-      return true;
+    // Move to previous step
+    const prevStep = currentStep - 1;
+    if (prevStep >= 0) {
+      internalHandleStepClick(prevStep);
     }
     
-    return false;
-  }, [currentStep, externalHandlePrevious, setCurrentStep]);
+    // If there's an external previous handler, call it too
+    if (typeof externalPrev === 'function') {
+      externalPrev();
+    }
+  }, [currentStep, internalHandleStepClick, externalPrev]);
 
   return {
-    handleStepClick,
+    handleStepClick: internalHandleStepClick,
     handleNext,
     handlePrevious
   };
