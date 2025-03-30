@@ -4,6 +4,7 @@ import { useAgenda } from "@/hooks/useAgenda";
 import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAgendaFiltering";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { DateRange } from "react-day-picker";
+import { useState } from "react";
 
 interface AgendaTabContentProps {
   onTabChange: (value: string) => void;
@@ -26,6 +27,12 @@ export function AgendaTabContent({
   onItemClick = () => {},
   onAddClick = () => {}
 }: AgendaTabContentProps) {
+  // Use the agenda hook to get the data needed for the AgendaSection
+  const { agendaItems, addAgendaItem, deleteAgendaItem, updateAgendaItem } = useAgenda();
+  
+  // Set up state for active tab
+  const [activeTab, setActiveTab] = useState("calendar");
+  
   return (
     <AgendaSection />
   );
