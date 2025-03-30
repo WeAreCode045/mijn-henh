@@ -20,7 +20,7 @@ export function useNearbyPlacesSection({
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }) {
   const [activeTab, setActiveTab] = useState("view");
-  const { toast } = useToast();
+  const toast = useToast();
   
   // Extract search results functionality to a separate hook
   const {
