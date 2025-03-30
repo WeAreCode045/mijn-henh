@@ -70,13 +70,13 @@ export function SortableImageItem({
         {...listeners}
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                   opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing
-                  bg-white bg-opacity-60 rounded-full p-1"
+                  bg-white bg-opacity-60 rounded-full p-1 transition-opacity"
       >
         <GripVertical className="h-6 w-6 text-gray-600" />
       </div>
 
       {/* Action buttons in the top right corner */}
-      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         {onSetMain && (
           <Button
             type="button"
@@ -84,8 +84,8 @@ export function SortableImageItem({
             size="icon"
             onClick={onSetMain}
             className={cn(
-              "h-8 w-8 bg-white/80 hover:bg-white",
-              isMain ? "text-yellow-500" : "text-gray-700"
+              "h-8 w-8 bg-white/90 hover:bg-white backdrop-blur-sm",
+              isMain ? "text-yellow-500 border-yellow-500" : "text-gray-700"
             )}
             disabled={isUpdating}
             title={isMain ? "Main image" : "Set as main"}
@@ -101,8 +101,8 @@ export function SortableImageItem({
             size="icon"
             onClick={onToggleFeatured}
             className={cn(
-              "h-8 w-8 bg-white/80 hover:bg-white",
-              isFeatured ? "text-blue-500" : "text-gray-700"
+              "h-8 w-8 bg-white/90 hover:bg-white backdrop-blur-sm",
+              isFeatured ? "text-blue-500 border-blue-500" : "text-gray-700"
             )}
             disabled={isUpdating}
             title={isFeatured ? "Remove from featured" : "Add to featured"}
@@ -116,7 +116,7 @@ export function SortableImageItem({
           variant="outline"
           size="icon"
           onClick={onRemove}
-          className="h-8 w-8 bg-white/80 hover:bg-white text-red-500 hover:bg-red-50"
+          className="h-8 w-8 bg-white/90 hover:bg-white backdrop-blur-sm text-red-500 hover:bg-red-50 hover:border-red-500"
           disabled={isUpdating}
           title="Remove image"
         >
