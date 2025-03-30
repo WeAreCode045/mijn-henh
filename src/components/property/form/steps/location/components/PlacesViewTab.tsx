@@ -1,54 +1,65 @@
 
 import React from "react";
-import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { PlacesList } from "./PlacesList";
+import { PropertyNearbyPlace } from "@/types/property";
+import { Badge } from "@/components/ui/badge";
+import { Trash2 } from "lucide-react";
 import { groupPlacesByCategory } from "../utils/placeUtils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PlacesViewTabProps {
   places: PropertyNearbyPlace[];
   onRemove?: (index: number) => void;
-  isDisabled?: boolean;
 }
 
-export function PlacesViewTab({ places, onRemove, isDisabled }: PlacesViewTabProps) {
-  // Group the places by category
-  const placesByCategory = React.useMemo(() => {
-    // Cast to appropriate type to satisfy both type systems
-    return groupPlacesByCategory(places);
-  }, [places]);
-
-  // Get all categories from the grouped places
-  const categories = Object.keys(placesByCategory);
-
-  if (places.length === 0) {
+export function PlacesViewTab({ places, onRemove }: PlacesViewTabProps) {
+  // Group places by type/category
+  const groupedPlaces = groupPlacesByCategory(places);
+  const placeTypes = Object.keys(groupedPlaces);
+  
+  if (!places || places.length === 0) {
     return (
-      <Alert variant="default" className="bg-gray-50">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          No places have been saved to this property. Use the "Search" tab to find and save nearby places.
-        </AlertDescription>
-      </Alert>
+      <div className="text-center py-4">
+        <p className="text-muted-foreground">No nearby places found</p>
+      </div>
     );
   }
-
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {categories.map((category) => (
-        <Card key={category} className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg capitalize">{category}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PlacesList
-              places={placesByCategory[category]}
-              onRemove={onRemove}
-              isDisabled={isDisabled}
-            />
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      {placeTypes.map(type => (
+        <div key={type} className="space-y-2">
+          <h3 className="font-medium capitalize">{type}</h3>
+          <div className="flex flex-wrap gap-2">
+            {groupedPlaces[type].map((place, idx) => {
+              // Find the original index in the full places array for removal
+              const originalIndex = places.findIndex(p => p.id === place.id);
+              
+              return (
+                <Badge 
+                  key={place.id || idx} 
+                  variant="secondary"
+                  className="flex items-center gap-1"
+                >
+                  {place.name}
+                  {place.distance && (
+                    <span className="text-xs opacity-70 ml-1">
+                      {typeof place.distance === 'number' 
+                        ? `${place.distance.toFixed(1)} km` 
+                        : place.distance}
+                    </span>
+                  )}
+                  {onRemove && (
+                    <button 
+                      onClick={() => onRemove(originalIndex)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
       ))}
     </div>
   );

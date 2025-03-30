@@ -1,17 +1,13 @@
 
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin, Book, Coffee, Film, Building, ShoppingBag, Dumbbell } from "lucide-react";
 
-// Category definitions with their included types
-const categoryConfig = {
-  "Food & Drinks": ["restaurant", "bar", "cafe"],
-  "Nightlife & Entertainment": ["casino", "concert_hall", "event_venue", "night_club", "movie_theater"],
-  "Education": ["school", "university", "library", "preschool", "primary_school", "secondary_school"],
-  "Sports": ["gym", "arena", "fitness_center", "golf_course", "ski_resort", "sports_club", "sports_complex", "stadium", "swimming_pool"],
-  "Shopping": ["supermarket", "shopping_mall"]
-};
+interface CategoryOption {
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+}
 
 interface SelectCategoryModalProps {
   isOpen: boolean;
@@ -20,41 +16,71 @@ interface SelectCategoryModalProps {
   isLoading?: boolean;
 }
 
-export function SelectCategoryModal({
-  isOpen,
-  onClose,
-  onSelect,
-  isLoading = false
+export function SelectCategoryModal({ 
+  isOpen, 
+  onClose, 
+  onSelect, 
+  isLoading = false 
 }: SelectCategoryModalProps) {
-  const handleCategoryClick = (categoryName: string) => {
-    // Get all types for this category
-    const types = categoryConfig[categoryName as keyof typeof categoryConfig];
-    console.log(`Searching for category: ${categoryName} with types:`, types);
-    
-    // For API, we'll use the first type as the category identifier, but pass all types
-    if (types && types.length > 0) {
-      onSelect(categoryName);
+  const categories: CategoryOption[] = [
+    {
+      name: "Food & Drinks",
+      icon: <Coffee className="h-8 w-8" />,
+      description: "Restaurants, cafes, bars and more"
+    },
+    {
+      name: "Nightlife & Entertainment",
+      icon: <Film className="h-8 w-8" />,
+      description: "Movie theaters, night clubs, event venues"
+    },
+    {
+      name: "Education",
+      icon: <Book className="h-8 w-8" />,
+      description: "Schools, universities, libraries"
+    },
+    {
+      name: "Sports",
+      icon: <Dumbbell className="h-8 w-8" />,
+      description: "Gyms, sports complexes, swimming pools"
+    },
+    {
+      name: "Shopping",
+      icon: <ShoppingBag className="h-8 w-8" />,
+      description: "Supermarkets, shopping malls"
     }
+  ];
+
+  const handleSelect = (category: string) => {
+    if (isLoading) return;
+    onSelect(category);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Select Category to Search</DialogTitle>
+          <DialogTitle>Select Category</DialogTitle>
         </DialogHeader>
-        
-        <div className="grid grid-cols-1 gap-3 py-4">
-          {Object.keys(categoryConfig).map((category) => (
-            <Button
-              key={category}
-              variant="outline"
-              className="justify-start text-left h-auto py-3"
-              disabled={isLoading}
-              onClick={() => handleCategoryClick(category)}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {categories.map((category) => (
+            <div
+              key={category.name}
+              onClick={() => handleSelect(category.name)}
+              className={`
+                p-4 border rounded-lg flex flex-col items-center text-center gap-2 cursor-pointer 
+                transition-all duration-200 hover:bg-slate-50
+                ${isLoading ? 'opacity-50 pointer-events-none' : ''}
+              `}
             >
-              {category}
-            </Button>
+              {isLoading ? (
+                <Loader2 className="h-8 w-8 animate-spin" />
+              ) : (
+                category.icon
+              )}
+              <h3 className="font-medium">{category.name}</h3>
+              <p className="text-xs text-muted-foreground">{category.description}</p>
+            </div>
           ))}
         </div>
       </DialogContent>

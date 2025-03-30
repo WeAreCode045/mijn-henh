@@ -1,22 +1,21 @@
 
-import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
+import { PropertyNearbyPlace } from "@/types/property";
 
-/**
- * Groups places by their category for display purposes
- */
 export function groupPlacesByCategory(places: PropertyNearbyPlace[]): Record<string, PropertyNearbyPlace[]> {
-  const grouped = places.reduce((acc, place) => {
-    // Use the category if available, otherwise use the type as fallback
+  return places.reduce((acc, place) => {
     const category = place.category || place.type || 'Other';
-    const categoryKey = category as string;
-    
-    if (!acc[categoryKey]) {
-      acc[categoryKey] = [];
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    
-    acc[categoryKey].push(place);
+    acc[category].push(place);
     return acc;
   }, {} as Record<string, PropertyNearbyPlace[]>);
-  
-  return grouped;
+}
+
+export function getCategoriesWithCounts(places: PropertyNearbyPlace[]): { name: string; count: number }[] {
+  const grouped = groupPlacesByCategory(places);
+  return Object.keys(grouped).map(category => ({
+    name: category,
+    count: grouped[category].length
+  }));
 }
