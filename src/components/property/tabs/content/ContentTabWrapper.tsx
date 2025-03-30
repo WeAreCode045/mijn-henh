@@ -8,8 +8,8 @@ import { ContentTabNavigation } from './ContentTabNavigation';
 interface ContentTabWrapperProps {
   formData: PropertyFormData;
   property: PropertyData;
-  handlers: {
-    onFieldChange: (field: keyof PropertyFormData, value: any) => void;
+  handlers?: {
+    onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
     onAddFeature?: () => void;
     onRemoveFeature?: (id: string) => void;
     onUpdateFeature?: (id: string, description: string) => void;
@@ -20,7 +20,7 @@ interface ContentTabWrapperProps {
     onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
     onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
     handleAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
-    currentStep: number;
+    currentStep?: number;
     handleStepClick?: (step: number) => void;
     handleNext?: () => void;
     handlePrevious?: () => void;
@@ -38,20 +38,25 @@ interface ContentTabWrapperProps {
     onSubmit?: () => void;
     isSaving?: boolean;
   };
+  currentStep?: number;
+  handleStepClick?: (step: number) => void;
+  handleSave?: () => void;
 }
 
 export function ContentTabWrapper({ 
   formData,
   property,
-  handlers
+  handlers = {},
+  currentStep: propCurrentStep,
+  handleStepClick: propHandleStepClick,
+  handleSave
 }: ContentTabWrapperProps) {
   const [pendingChanges, setPendingChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
-  // Log handlers to help with debugging
-  console.log("ContentTabWrapper - handleStepClick is function:", typeof handlers.handleStepClick === 'function');
-  console.log("ContentTabWrapper - Current step:", handlers.currentStep);
-  console.log("ContentTabWrapper - onAddArea is function:", typeof handlers.onAddArea === 'function');
+  // Use either the prop's currentStep or the handlers' currentStep or default to 0
+  const currentStep = propCurrentStep !== undefined ? propCurrentStep : 
+                     (handlers.currentStep !== undefined ? handlers.currentStep : 0);
   
   // Create a centralized navigation handler with robust fallback mechanism
   const { 
@@ -60,20 +65,30 @@ export function ContentTabWrapper({
     handlePrevious
   } = usePropertyContentStepNavigation(
     formData,
-    handlers.currentStep,
-    // Pass a safe step click handler function
+    currentStep,
+    // Safe step click handler function with multiple fallbacks
     (step: number) => {
-      console.log("ContentTabWrapper fallback handler called with step:", step);
+      console.log("ContentTabWrapper step click handler called with step:", step);
+      
+      // First try the prop's handleStepClick
+      if (typeof propHandleStepClick === 'function') {
+        propHandleStepClick(step);
+        return;
+      }
+      
+      // Then try the handlers.handleStepClick
       if (typeof handlers.handleStepClick === 'function') {
         handlers.handleStepClick(step);
-      } else {
-        console.warn("ContentTabWrapper - No external step click handler provided");
+        return;
       }
+      
+      // If no handler is provided, log a warning
+      console.warn("ContentTabWrapper - No step click handler provided");
     },
     pendingChanges,
     setPendingChanges,
     setLastSaved,
-    handlers.handleStepClick, // Pass the original handler function
+    propHandleStepClick || handlers.handleStepClick,
     handlers.handleNext,
     handlers.handlePrevious
   );
@@ -82,6 +97,7 @@ export function ContentTabWrapper({
   const contentHandlers = {
     ...handlers,
     handleStepClick: internalHandleStepClick,
+    currentStep: currentStep,
     setPendingChanges: (value: boolean) => {
       setPendingChanges(value);
       if (handlers.setPendingChanges) {
@@ -94,26 +110,32 @@ export function ContentTabWrapper({
     handleNext,
     handlePrevious,
     // Ensure area image upload handler is always available
-    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload,
+    onAreaImageUpload: handlers.onAreaImageUpload || handlers.handleAreaImageUpload || 
+      ((areaId: string, files: FileList) => {
+        console.warn("ContentTabWrapper - No area image upload handler provided");
+        return Promise.resolve();
+      }),
     // Ensure onAddArea is always available with a fallback
     onAddArea: handlers.onAddArea || (() => {
       console.warn("ContentTabWrapper - No onAddArea handler provided");
     }),
     // Ensure onFieldChange is always available
-    onFieldChange: handlers.onFieldChange
+    onFieldChange: handlers.onFieldChange || ((field: keyof PropertyFormData, value: any) => {
+      console.warn(`ContentTabWrapper - No onFieldChange handler provided. Would set ${String(field)} to:`, value);
+    })
   };
 
   return (
     <div className="space-y-6">
       <ContentTabNavigation 
-        currentStep={handlers.currentStep} 
+        currentStep={currentStep} 
         onStepClick={internalHandleStepClick}
       />
       
       <ContentRouter 
         formData={formData}
         property={property}
-        currentStep={handlers.currentStep}
+        currentStep={currentStep}
         handlers={contentHandlers}
       />
     </div>

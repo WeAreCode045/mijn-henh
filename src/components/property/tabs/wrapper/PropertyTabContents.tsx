@@ -45,6 +45,15 @@ export function PropertyTabContents({
     ? handleSaveObjectId
     : async () => { console.warn("handleSaveObjectId not provided in PropertyTabContents"); };
 
+  // Ensure we have handlers.currentStep and handlers.handleStepClick
+  const safeHandlers = {
+    ...handlers,
+    currentStep: handlers?.currentStep !== undefined ? handlers.currentStep : 0,
+    handleStepClick: typeof handlers?.handleStepClick === 'function' 
+      ? handlers.handleStepClick 
+      : (step: number) => { console.warn(`Step click handler called with ${step}, but no handler exists`); }
+  };
+
   return (
     <>
       <TabsContent value="dashboard" className="mt-4 space-y-4">
@@ -63,8 +72,9 @@ export function PropertyTabContents({
         <ContentTabWrapper
           property={property}
           formData={formData}
-          currentStep={handlers.currentStep}
-          handleStepClick={handlers.handleStepClick}
+          handlers={safeHandlers}
+          currentStep={safeHandlers.currentStep}
+          handleStepClick={safeHandlers.handleStepClick}
           handleSave={onSave}
         />
       </TabsContent>
@@ -72,14 +82,11 @@ export function PropertyTabContents({
       <TabsContent value="media" className="mt-4 space-y-4">
         <MediaTabContent
           property={property}
-          onSave={onSave}
         />
       </TabsContent>
       
       <TabsContent value="communications" className="mt-4 space-y-4">
-        <CommunicationsTabContent
-          property={property}
-        />
+        <CommunicationsTabContent />
       </TabsContent>
     </>
   );
