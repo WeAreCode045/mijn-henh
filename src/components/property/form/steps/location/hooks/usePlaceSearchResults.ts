@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
-import { useToast as UseToastReturnType } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function usePlaceSearchResults({
   formData,
@@ -12,7 +12,7 @@ export function usePlaceSearchResults({
   formData: PropertyFormData;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
-  toast: ReturnType<typeof UseToastReturnType>;
+  toast: ReturnType<typeof useToast>;
 }) {
   const [searchResults, setSearchResults] = useState<PropertyNearbyPlace[]>([]);
   const [showSelectionModal, setShowSelectionModal] = useState(false);
@@ -48,7 +48,7 @@ export function usePlaceSearchResults({
           setSearchResults(places);
           setShowSelectionModal(true);
           
-          toast({
+          toast.toast({
             title: "Success",
             description: `Found ${places.length} nearby places`,
           });
@@ -56,7 +56,7 @@ export function usePlaceSearchResults({
           return places;
         } else {
           console.log("No places found for category:", category);
-          toast({
+          toast.toast({
             title: "Info",
             description: "No nearby places found in this category",
           });
@@ -67,7 +67,7 @@ export function usePlaceSearchResults({
       return null;
     } catch (error) {
       console.error("Error fetching places:", error);
-      toast({
+      toast.toast({
         title: "Error",
         description: "Failed to fetch nearby places",
         variant: "destructive",
@@ -122,21 +122,21 @@ export function usePlaceSearchResults({
           setShowSelectionModal(true);
         } else {
           console.log("No places found after processing results");
-          toast({
+          toast.toast({
             title: "No results",
             description: "No places found in this category. Try another category.",
           });
         }
       } else {
         console.log("No results returned from search");
-        toast({
+        toast.toast({
           title: "No results",
           description: "The search did not return any places. Check your location settings or try another category.",
         });
       }
     } catch (error) {
       console.error("Error during search:", error);
-      toast({
+      toast.toast({
         title: "Error",
         description: "An error occurred while searching for places",
         variant: "destructive",

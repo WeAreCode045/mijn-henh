@@ -1,7 +1,7 @@
 
 import { useCallback } from "react";
 import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
-import { useToast as UseToastReturnType } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function usePlaceSaving({
   formData,
@@ -12,7 +12,7 @@ export function usePlaceSaving({
 }: {
   formData: PropertyFormData;
   onFieldChange: (field: keyof PropertyFormData, value: any) => void;
-  toast: ReturnType<typeof UseToastReturnType>;
+  toast: ReturnType<typeof useToast>;
   setShowSelectionModal: (show: boolean) => void;
   setSearchResults: (results: PropertyNearbyPlace[]) => void;
 }) {
@@ -36,7 +36,7 @@ export function usePlaceSaving({
     setSearchResults([]);
     
     // Show toast
-    toast({
+    toast.toast({
       title: "Success",
       description: `Added ${newPlaces.length} places to the property`,
     });
