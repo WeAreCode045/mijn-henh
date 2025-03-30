@@ -1,5 +1,4 @@
 
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlacesSearchTab } from "./PlacesSearchTab";
@@ -8,6 +7,8 @@ import { useState, useEffect } from "react";
 import { useNearbyPlacesSection } from "../hooks/useNearbyPlacesSection";
 import { getCategoriesWithCounts } from "../utils/placeUtils";
 import { CategoryFilters } from "./CategoryFilters";
+import { PropertyFormData } from "@/types/property";
+import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
@@ -46,10 +47,10 @@ export function NearbyPlacesSection({
   });
 
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [filteredPlaces, setFilteredPlaces] = useState<PropertyNearbyPlace[]>(formData.nearby_places || []);
+  const [filteredPlaces, setFilteredPlaces] = useState<PropertyNearbyPlace[]>([]);
   
   // Get categories with counts for the filter
-  const categories = getCategoriesWithCounts(formData.nearby_places || []);
+  const categories = getCategoriesWithCounts(formData.nearby_places as PropertyNearbyPlace[] || []);
   
   // Update filtered places when formData changes or filters change
   useEffect(() => {
@@ -59,11 +60,11 @@ export function NearbyPlacesSection({
     }
     
     if (activeFilters.length === 0) {
-      setFilteredPlaces(formData.nearby_places);
+      setFilteredPlaces(formData.nearby_places as PropertyNearbyPlace[]);
       return;
     }
     
-    const filtered = formData.nearby_places.filter(place => {
+    const filtered = (formData.nearby_places as PropertyNearbyPlace[]).filter(place => {
       const category = place.category || place.type || 'Other';
       return activeFilters.includes(category);
     });
