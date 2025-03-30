@@ -53,12 +53,14 @@ export function MonthlyCalendarView({
 
   const datesWithEvents = getDaysWithEvents();
   
-  // Render calendar day with event indicator
-  const renderDay = (day: Date) => {
+  // Custom day component for the calendar
+  const CustomDay = (props: any) => {
+    const { day, ...otherProps } = props;
+    
     const hasEvent = datesWithEvents.some(eventDate => isSameDay(day, eventDate));
     
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative w-full h-full flex items-center justify-center" {...otherProps}>
         {day.getDate()}
         {hasEvent && (
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>
@@ -146,7 +148,7 @@ export function MonthlyCalendarView({
               day: "cursor-pointer"
             }}
             components={{
-              Day: renderDay
+              Day: CustomDay
             }}
             onDayClick={handleDayClick}
             showOutsideDays={true}

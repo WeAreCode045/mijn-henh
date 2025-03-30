@@ -10,7 +10,9 @@ export function AgendaTabs({ activeTab, onTabChange }: AgendaTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-[400px]">
       <TabsList>
-        <TabsTrigger value="weekly">Weekly View</TabsTrigger>
+        <TabsTrigger value="day">Day View</TabsTrigger>
+        <TabsTrigger value="weekly">Week View</TabsTrigger>
+        <TabsTrigger value="monthly">Month View</TabsTrigger>
         <TabsTrigger value="list">List View</TabsTrigger>
       </TabsList>
     </Tabs>

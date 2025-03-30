@@ -6,7 +6,7 @@ import { useAgendaFiltering } from "@/components/property/dashboard/agenda/useAg
 import { DateRange } from "react-day-picker";
 
 export function useAgendaSection() {
-  const [activeTab, setActiveTab] = useState("calendar");
+  const [activeTab, setActiveTab] = useState("weekly");
   const { agendaItems, isLoading, addAgendaItem, deleteAgendaItem, updateAgendaItem } = useAgenda();
   
   // Safe access to agenda items

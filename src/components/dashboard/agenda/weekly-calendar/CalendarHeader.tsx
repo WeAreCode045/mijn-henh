@@ -1,93 +1,52 @@
 
-import React from "react";
-import { format, isValid } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { format, addDays, startOfWeek } from "date-fns";
 
 interface CalendarHeaderProps {
-  currentWeek: Date[];
-  goToPreviousWeek: () => void;
+  currentDate: Date;
+  goToPrevious: () => void;
+  goToNext: () => void;
   goToToday: () => void;
-  goToNextWeek: () => void;
-  activeTab: string;
-  onTabChange?: (tab: string) => void;
+  viewMode?: 'day' | 'week';
 }
 
 export function CalendarHeader({
-  currentWeek,
-  goToPreviousWeek,
+  currentDate,
+  goToPrevious,
+  goToNext,
   goToToday,
-  goToNextWeek,
-  activeTab,
-  onTabChange
+  viewMode = 'week'
 }: CalendarHeaderProps) {
-  // Ensure we have a valid date for formatting
-  const firstDayOfWeek = currentWeek?.[0];
-  const formattedDate = firstDayOfWeek && isValid(firstDayOfWeek) 
-    ? format(firstDayOfWeek, "MMMM yyyy") + " (Week " + format(firstDayOfWeek, "w") + ")"
-    : "Invalid date";
+  // Format header title based on view mode
+  const getHeaderTitle = () => {
+    if (viewMode === 'day') {
+      return format(currentDate, "EEEE, MMMM d, yyyy");
+    } else {
+      // For week view, show the week range
+      const weekStart = startOfWeek(currentDate);
+      const weekEnd = addDays(weekStart, 6);
+      return `${format(weekStart, "MMMM d")} - ${format(weekEnd, "MMMM d, yyyy")}`;
+    }
+  };
 
   return (
-    <div className="flex justify-between items-center mb-4">
-      <div className="flex items-center space-x-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={goToPreviousWeek}
-          className="h-8 w-8 p-0"
-        >
+    <div className="flex justify-between items-center py-2">
+      <div className="flex items-center gap-2">
+        <Button onClick={goToPrevious} variant="outline" size="icon" className="h-8 w-8">
           <ChevronLeft className="h-4 w-4" />
         </Button>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={goToToday}
-          className="h-8"
-        >
+        <Button onClick={goToToday} variant="outline" className="h-8">
           Today
         </Button>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={goToNextWeek}
-          className="h-8 w-8 p-0"
-        >
+        <Button onClick={goToNext} variant="outline" size="icon" className="h-8 w-8">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
       
-      <h3 className="text-lg font-medium">
-        {formattedDate}
-      </h3>
-      
-      <div className="flex space-x-1">
-        <Button 
-          variant={activeTab === "day" ? "secondary" : "outline"} 
-          size="sm" 
-          className="h-8"
-          onClick={() => onTabChange && onTabChange("day")}
-        >
-          Day
-        </Button>
-        <Button 
-          variant={activeTab === "week" ? "secondary" : "outline"} 
-          size="sm" 
-          className="h-8"
-          onClick={() => onTabChange && onTabChange("week")}
-        >
-          Week
-        </Button>
-        <Button 
-          variant={activeTab === "month" ? "secondary" : "outline"} 
-          size="sm" 
-          className="h-8"
-          onClick={() => onTabChange && onTabChange("month")}
-        >
-          Month
-        </Button>
-      </div>
+      <h2 className="text-lg font-semibold">{getHeaderTitle()}</h2>
     </div>
   );
 }

@@ -1,91 +1,83 @@
 
-import { useState, useEffect } from "react";
-import { 
-  startOfWeek, 
-  endOfWeek, 
-  eachDayOfInterval, 
-  addWeeks,
-  subWeeks,
+import { useState, useEffect, useMemo } from 'react';
+import {
+  format,
+  addDays,
+  subDays,
+  startOfWeek,
+  endOfWeek,
+  startOfDay,
+  endOfDay,
   parseISO,
   isSameDay,
-  isValid
-} from "date-fns";
-import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+  isWithinInterval,
+  addWeeks,
+  subWeeks,
+} from 'date-fns';
+import { AgendaItem } from '@/components/property/dashboard/agenda/types';
+import { useEventFormatting } from './useEventFormatting';
 
 export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("week");
+  const [startHour, setStartHour] = useState<number>(8);
+  const [endHour, setEndHour] = useState<number>(18);
   
-  // Calculate the dates for the current week
-  useEffect(() => {
-    if (!isValid(currentDate)) {
-      setCurrentDate(new Date()); // Reset to valid date if current date is invalid
-      return;
-    }
-    
-    try {
-      const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // 1 = Monday
-      const end = endOfWeek(currentDate, { weekStartsOn: 1 });
-      
-      if (!isValid(start) || !isValid(end)) {
-        console.error("Invalid date range:", { start, end, currentDate });
-        setCurrentWeek([]); // Empty array to prevent rendering errors
-        return;
-      }
-      
-      const days = eachDayOfInterval({ start, end });
-      setCurrentWeek(days);
-    } catch (error) {
-      console.error("Error calculating week dates:", error);
-      setCurrentWeek([]); // Empty array to prevent rendering errors
-    }
-  }, [currentDate]);
+  const { formatEvents } = useEventFormatting();
   
-  // Navigate to previous week
-  const goToPreviousWeek = () => {
-    setCurrentDate(prevDate => subWeeks(prevDate, 1));
+  // Navigation functions
+  const goToPrevious = () => {
+    setCurrentDate(prev => subDays(prev, 1));
   };
   
-  // Navigate to next week
-  const goToNextWeek = () => {
-    setCurrentDate(prevDate => addWeeks(prevDate, 1));
+  const goToNext = () => {
+    setCurrentDate(prev => addDays(prev, 1));
   };
   
-  // Go to today
   const goToToday = () => {
     setCurrentDate(new Date());
   };
-  
-  // Group events by day and time
-  const groupedEvents = currentWeek.map(day => {
-    return {
-      date: day,
-      events: agendaItems.filter(item => {
-        if (!item.event_date) return false;
-        try {
-          const eventDate = parseISO(item.event_date);
-          return isValid(eventDate) && isSameDay(eventDate, day);
-        } catch (error) {
-          console.error("Error parsing date:", error, item.event_date);
-          return false;
-        }
-      }).sort((a, b) => {
-        // Sort by time
-        if (!a.event_time || !b.event_time) return 0;
-        return a.event_time.localeCompare(b.event_time);
-      })
-    };
-  });
 
+  // Calculate visible hours based on events
+  useEffect(() => {
+    if (agendaItems.length === 0) return;
+    
+    let earliestHour = 8;
+    let latestHour = 18;
+    
+    agendaItems.forEach(item => {
+      if (item.event_time) {
+        const [hours] = item.event_time.split(':').map(Number);
+        if (!isNaN(hours)) {
+          earliestHour = Math.min(earliestHour, hours);
+          latestHour = Math.max(latestHour, hours + 1); // Add 1 hour for event duration
+        }
+      }
+    });
+    
+    // Adjust boundaries for better visibility
+    setStartHour(Math.max(0, earliestHour - 1));
+    setEndHour(Math.min(23, latestHour + 1));
+  }, [agendaItems]);
+  
+  // Format events for display in the calendar
+  const formattedEvents = useMemo(() => {
+    return formatEvents(agendaItems);
+  }, [agendaItems, formatEvents]);
+  
+  // Calculate visible hours for the calendar
+  const visibleHours = useMemo(() => {
+    return Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
+  }, [startHour, endHour]);
+  
   return {
     currentDate,
-    currentWeek,
-    goToPreviousWeek,
+    setCurrentDate,
+    startHour,
+    endHour,
+    visibleHours,
+    goToPrevious,
+    goToNext,
     goToToday,
-    goToNextWeek,
-    groupedEvents,
-    activeTab,
-    setActiveTab
+    formattedEvents,
   };
 }
