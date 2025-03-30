@@ -20,6 +20,6 @@ export interface PropertyNearbyPlace {
   longitude?: number | null;
   visible_in_webview?: boolean;
   icon?: string;
-  category?: string;
+  category?: string; // Added category property
   [key: string]: unknown; // Add index signature to allow arbitrary properties
 }
