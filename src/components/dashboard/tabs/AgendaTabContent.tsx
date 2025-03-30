@@ -7,7 +7,6 @@ import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AgendaViewContent } from "../agenda/AgendaViewContent";
 import { WeeklyCalendarView } from "../agenda/weekly-calendar";
-import { MonthlyCalendarView } from "../agenda/monthly-calendar";
 import { AgendaHeader } from "../agenda/components/AgendaHeader";
 
 interface AgendaTabContentProps {
@@ -31,8 +30,8 @@ export function AgendaTabContent({
   onItemClick = () => {},
   onAddClick = () => {}
 }: AgendaTabContentProps) {
-  // Set up state for active tab (now defaulting to "month")
-  const [activeTab, setActiveTab] = useState("month");
+  // Set up state for active tab (now defaulting to "weekly")
+  const [activeTab, setActiveTab] = useState("weekly");
   
   // Handle tab change and propagate to parent
   const handleTabChange = (value: string) => {
@@ -54,27 +53,6 @@ export function AgendaTabContent({
             agendaItems={safeAgendaItems}
             isLoading={isLoading}
             onItemClick={onItemClick}
-          />
-        </TabsContent>
-        
-        <TabsContent value="month" className="mt-0">
-          <MonthlyCalendarView
-            agendaItems={safeAgendaItems}
-            isLoading={isLoading}
-            onItemClick={onItemClick}
-          />
-        </TabsContent>
-        
-        <TabsContent value="calendar" className="mt-0">
-          <AgendaViewContent 
-            view="calendar"
-            safeAgendaItems={safeAgendaItems}
-            isLoading={isLoading}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            filteredAgendaItems={filteredAgendaItems}
-            onItemClick={onItemClick}
-            onAddClick={onAddClick}
           />
         </TabsContent>
         
