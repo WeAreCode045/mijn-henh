@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PropertyFormData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { MapSection } from "@/components/property/form/steps/location/MapSection
 import { NearbyPlacesSection } from "@/components/property/form/steps/location/components/NearbyPlacesSection";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Wand2 } from "lucide-react";
+import { Loader2, Wand2, Save } from "lucide-react";
 
 interface LocationPageProps {
   formData: PropertyFormData;
@@ -38,63 +38,36 @@ export function LocationPage({
   isGeneratingMap = false,
   setPendingChanges
 }: LocationPageProps) {
+  // Create local state to track changes without saving immediately
+  const [localFormData, setLocalFormData] = useState<PropertyFormData>(formData);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const { toast } = useToast();
-  const [isGeneratingDescription, setIsGeneratingDescription] = React.useState(false);
   
-  const handleLocationDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onFieldChange('location_description', e.target.value);
+  // Update local state when parent formData changes (e.g. initial load)
+  useEffect(() => {
+    setLocalFormData(formData);
+  }, [formData]);
+
+  // Handle local field changes without saving to DB
+  const handleLocalFieldChange = (field: keyof PropertyFormData, value: any) => {
+    setLocalFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Notify parent component that there are pending changes
     if (setPendingChanges) {
       setPendingChanges(true);
     }
   };
-
-  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleBlur = async (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    
-    saveTimeoutRef.current = setTimeout(async () => {
-      if (!formData.id) return;
-      
-      try {
-        const { error } = await supabase
-          .from('properties')
-          .update({ location_description: formData.location_description })
-          .eq('id', formData.id);
-          
-        if (error) throw error;
-        
-        toast({
-          title: "Saved",
-          description: "Location description updated successfully",
-        });
-        
-        if (setPendingChanges) {
-          setPendingChanges(false);
-        }
-      } catch (error) {
-        console.error("Error saving location description:", error);
-        toast({
-          title: "Error",
-          description: "Failed to save location description",
-          variant: "destructive",
-        });
-      }
-    }, 2000);
+  
+  const handleLocationDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    handleLocalFieldChange('location_description', e.target.value);
   };
 
-  React.useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const handleGenerateDescription = async () => {
-    if (!formData.id || !formData.address) {
+    if (!localFormData.id || !localFormData.address) {
       toast({
         title: "Error",
         description: "Property ID and address are required to generate a description",
@@ -132,9 +105,9 @@ export function LocationPage({
       // Call the edge function to generate the description
       const { data, error } = await supabase.functions.invoke('generate-location-description', {
         body: { 
-          address: formData.address,
-          nearbyPlaces: formData.nearby_places || [],
-          description: formData.description,
+          address: localFormData.address,
+          nearbyPlaces: localFormData.nearby_places || [],
+          description: localFormData.description,
           language: 'nl',
           maxLength: 1000
         }
@@ -143,25 +116,13 @@ export function LocationPage({
       if (error) throw error;
       
       if (data?.description) {
-        // Update the form state
-        onFieldChange('location_description', data.description);
-        
-        // Save to database
-        const { error: updateError } = await supabase
-          .from('properties')
-          .update({ location_description: data.description })
-          .eq('id', formData.id);
-          
-        if (updateError) throw updateError;
+        // Update only the local state
+        handleLocalFieldChange('location_description', data.description);
         
         toast({
           title: "Success",
-          description: "Location description generated successfully",
+          description: "Location description generated successfully. Don't forget to save your changes!",
         });
-        
-        if (setPendingChanges) {
-          setPendingChanges(false);
-        }
       } else {
         throw new Error("No description was generated");
       }
@@ -189,6 +150,65 @@ export function LocationPage({
     return null;
   };
 
+  // Save all changes to the database when save button is clicked
+  const handleSaveChanges = async () => {
+    if (!localFormData.id) return;
+
+    setIsSaving(true);
+    try {
+      // Extract fields that are different from the original formData
+      const changedFields: Record<string, any> = {};
+      
+      Object.keys(localFormData).forEach((key) => {
+        const typedKey = key as keyof PropertyFormData;
+        if (JSON.stringify(localFormData[typedKey]) !== JSON.stringify(formData[typedKey])) {
+          changedFields[key] = localFormData[typedKey];
+        }
+      });
+
+      if (Object.keys(changedFields).length === 0) {
+        toast({
+          description: "No changes to save",
+        });
+        setIsSaving(false);
+        return;
+      }
+      
+      // Save changes to database
+      const { error } = await supabase
+        .from('properties')
+        .update(changedFields)
+        .eq('id', localFormData.id);
+
+      if (error) throw error;
+
+      // Update parent state
+      Object.keys(changedFields).forEach((key) => {
+        onFieldChange(key as keyof PropertyFormData, changedFields[key]);
+      });
+
+      // Notify success
+      toast({
+        title: "Saved",
+        description: "All changes have been saved successfully",
+      });
+
+      // Reset pending changes flag
+      if (setPendingChanges) {
+        setPendingChanges(false);
+      }
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save changes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -207,7 +227,7 @@ export function LocationPage({
                     variant="outline" 
                     size="sm"
                     onClick={handleGenerateDescription}
-                    disabled={isGeneratingDescription || !formData.address}
+                    disabled={isGeneratingDescription || !localFormData.address}
                     className="flex gap-2 items-center"
                   >
                     {isGeneratingDescription ? (
@@ -227,9 +247,8 @@ export function LocationPage({
                 <Textarea
                   id="location_description"
                   name="location_description"
-                  value={formData.location_description || ''}
+                  value={localFormData.location_description || ''}
                   onChange={handleLocationDescriptionChange}
-                  onBlur={handleBlur}
                   placeholder="Describe the location and surrounding area..."
                   className="min-h-[300px]"
                 />
@@ -238,8 +257,8 @@ export function LocationPage({
             
             <div className="col-span-1">
               <MapSection 
-                formData={formData}
-                onFieldChange={onFieldChange}
+                formData={localFormData}
+                onFieldChange={handleLocalFieldChange}
                 onFetchLocationData={onFetchLocationData}
                 onGenerateMap={onGenerateMap}
                 isLoadingLocationData={isLoadingLocationData}
@@ -253,13 +272,25 @@ export function LocationPage({
       </Card>
       
       <NearbyPlacesSection 
-        formData={formData}
-        onFieldChange={onFieldChange}
+        formData={localFormData}
+        onFieldChange={handleLocalFieldChange}
         onFetchCategoryPlaces={onFetchCategoryPlaces}
         isLoadingNearbyPlaces={isLoadingLocationData}
         onRemoveNearbyPlace={onRemoveNearbyPlace}
         onSearchClick={handleCategorySearch}
       />
+      
+      {/* Save Button */}
+      <div className="flex justify-end mt-6">
+        <Button 
+          onClick={handleSaveChanges} 
+          disabled={isSaving}
+          className="flex items-center gap-2"
+        >
+          <Save className="h-4 w-4" />
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
+      </div>
     </div>
   );
 }

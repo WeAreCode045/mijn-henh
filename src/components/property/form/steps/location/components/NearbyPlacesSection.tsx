@@ -1,21 +1,38 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { PropertyFormData, PropertyNearbyPlace } from "@/types/property";
+
+import { PropertyFormData, PropertyPlaceType } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlacesSearchTab } from "./PlacesSearchTab";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, Star, Trash2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Trash2, Search, Star, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useNearbyPlaces } from "@/hooks/location/useNearbyPlaces";
+import { useState } from "react";
+
+const PLACE_CATEGORIES = [
+  { id: "restaurant", label: "Restaurants" },
+  { id: "supermarket", label: "Supermarkets" },
+  { id: "school", label: "Schools" },
+  { id: "hospital", label: "Hospitals" },
+  { id: "park", label: "Parks" },
+  { id: "gym", label: "Gyms" },
+  { id: "pharmacy", label: "Pharmacies" },
+  { id: "train_station", label: "Train Stations" },
+  { id: "bus_station", label: "Bus Stations" },
+  { id: "shopping_mall", label: "Shopping Malls" }
+];
 
 interface NearbyPlacesSectionProps {
   formData: PropertyFormData;
   onFieldChange?: (field: keyof PropertyFormData, value: any) => void;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
-  onRemoveNearbyPlace?: (index: number) => void;
   isLoadingNearbyPlaces?: boolean;
+  onRemoveNearbyPlace?: (index: number) => void;
   onSearchClick?: (e: React.MouseEvent<HTMLButtonElement>, category: string) => Promise<any>;
 }
 
@@ -23,61 +40,56 @@ export function NearbyPlacesSection({
   formData,
   onFieldChange,
   onFetchCategoryPlaces,
-  onRemoveNearbyPlace,
   isLoadingNearbyPlaces = false,
+  onRemoveNearbyPlace,
   onSearchClick
 }: NearbyPlacesSectionProps) {
-  const [activeTab, setActiveTab] = useState("view");
-  const [selectedPlaces, setSelectedPlaces] = useState<PropertyNearbyPlace[]>([]);
-  const [showResultsModal, setShowResultsModal] = useState(false);
-
-  const {
-    fetchPlaces: hookFetchPlaces,
-    removePlaceAtIndex: hookRemovePlaceAtIndex,
-    saveSelectedPlaces,
-    searchResults,
-    isLoading: hookIsLoading
-  } = onFieldChange ? useNearbyPlaces(formData, onFieldChange) : { 
-    fetchPlaces: null, 
-    removePlaceAtIndex: null,
-    saveSelectedPlaces: null,
-    searchResults: [],
-    isLoading: false 
-  };
-
-  const fetchPlaces = onFetchCategoryPlaces || hookFetchPlaces;
-  const removePlaceAtIndex = onRemoveNearbyPlace || hookRemovePlaceAtIndex;
-  const isLoading = isLoadingNearbyPlaces || hookIsLoading;
-
-  const handlePlaceClick = (place: PropertyNearbyPlace) => {
-    setSelectedPlaces(prev => {
-      const isSelected = prev.some(p => p.id === place.id);
-      return isSelected 
-        ? prev.filter(p => p.id !== place.id) 
-        : [...prev, place];
-    });
-  };
-
-  const handleSaveSelectedPlaces = () => {
-    if (saveSelectedPlaces) {
-      saveSelectedPlaces(selectedPlaces);
-      setShowResultsModal(false);
-      setSelectedPlaces([]);
+  const [activeCategorySearch, setActiveCategorySearch] = useState<string | null>(null);
+  
+  const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>, category: string) => {
+    e.preventDefault();
+    
+    if (onSearchClick) {
+      setActiveCategorySearch(category);
+      try {
+        const results = await onSearchClick(e, category);
+        setActiveCategorySearch(null);
+        
+        if (results && results[category] && onFieldChange) {
+          // Merge new places with existing places, avoiding duplicates
+          const existingPlaces = formData.nearby_places || [];
+          const newPlaces = results[category];
+          
+          // Filter out duplicates by ID
+          const existingIds = new Set(existingPlaces.map(place => place.id));
+          const uniqueNewPlaces = newPlaces.filter(place => !existingIds.has(place.id));
+          
+          const updatedPlaces = [...existingPlaces, ...uniqueNewPlaces];
+          onFieldChange('nearby_places', updatedPlaces);
+        }
+      } catch (error) {
+        console.error(`Error searching for ${category}:`, error);
+        setActiveCategorySearch(null);
+      }
+    } else if (onFetchCategoryPlaces) {
+      setActiveCategorySearch(category);
+      try {
+        const results = await onFetchCategoryPlaces(category);
+        setActiveCategorySearch(null);
+      } catch (error) {
+        console.error(`Error fetching ${category}:`, error);
+        setActiveCategorySearch(null);
+      }
     }
   };
 
-  const handleSearchResults = useCallback((places: PropertyNearbyPlace[]) => {
-    if (places && places.length > 0) {
-      setSelectedPlaces([]);
-      setShowResultsModal(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (searchResults && searchResults.length > 0) {
-      handleSearchResults(searchResults);
-    }
-  }, [searchResults, handleSearchResults]);
+  const handleRemovePlace = (index: number) => {
+    if (!onFieldChange) return;
+    
+    const updatedPlaces = [...(formData.nearby_places || [])];
+    updatedPlaces.splice(index, 1);
+    onFieldChange('nearby_places', updatedPlaces);
+  };
 
   return (
     <Card>
@@ -85,134 +97,91 @@ export function NearbyPlacesSection({
         <CardTitle>Nearby Places</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="view" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="view">View Places</TabsTrigger>
-            <TabsTrigger value="add">Add Places</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          {/* Category buttons */}
+          <div className="flex flex-wrap gap-2">
+            {PLACE_CATEGORIES.map(category => (
+              <Button
+                key={category.id}
+                variant="outline"
+                size="sm"
+                onClick={(e) => handleSearch(e, category.id)}
+                disabled={isLoadingNearbyPlaces || activeCategorySearch === category.id}
+                className="mb-2"
+              >
+                {activeCategorySearch === category.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="mr-2 h-4 w-4" />
+                    {category.label}
+                  </>
+                )}
+              </Button>
+            ))}
+          </div>
           
-          <TabsContent value="view" className="pt-4">
-            {formData.nearby_places?.length ? (
-              <ScrollArea className="h-[300px] pr-4">
-                <div className="space-y-2">
+          {/* Table of nearby places */}
+          {formData.nearby_places && formData.nearby_places.length > 0 ? (
+            <div className="border rounded-md">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[250px]">Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Rating</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {formData.nearby_places.map((place, index) => (
-                    <div key={place.id} className="border rounded-md p-3 relative group">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium">{place.name}</h4>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <MapPin className="h-3.5 w-3.5 mr-1" />
-                            <span>{place.vicinity || "No address available"}</span>
+                    <TableRow key={place.id}>
+                      <TableCell className="font-medium">{place.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {place.type?.replace(/_/g, ' ') || 'Unknown'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {place.rating ? (
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                            <span>{place.rating}</span>
                           </div>
-
-                          <div className="flex items-center space-x-2 mt-1">
-                            {place.rating && (
-                              <div className="flex items-center">
-                                <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                                <span className="text-sm">
-                                  {place.rating} ({place.user_ratings_total || 0})
-                                </span>
-                              </div>
-                            )}
-                            
-                            <Badge variant="outline">{place.type}</Badge>
-                          </div>
-                        </div>
-                        
-                        {removePlaceAtIndex && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removePlaceAtIndex(index)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                        ) : (
+                          'N/A'
                         )}
-                      </div>
-                    </div>
+                      </TableCell>
+                      <TableCell className="truncate max-w-[200px]">
+                        {place.vicinity || 'No address'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleRemovePlace(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Remove place</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="border border-dashed rounded-md p-8 text-center">
-                <p className="text-muted-foreground">No nearby places added yet.</p>
-                <Button
-                  variant="link"
-                  className="mt-2"
-                  onClick={() => setActiveTab("add")}
-                >
-                  Add places
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="add" className="pt-4">
-            <PlacesSearchTab
-              formData={formData}
-              onFieldChange={onFieldChange}
-              onFetchPlaces={fetchPlaces}
-              isLoading={isLoading}
-              onSearchClick={onSearchClick}
-            />
-          </TabsContent>
-        </Tabs>
-
-        <Dialog open={showResultsModal} onOpenChange={setShowResultsModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Select Places to Add</DialogTitle>
-            </DialogHeader>
-            
-            <ScrollArea className="max-h-[400px] pr-4">
-              <div className="space-y-2">
-                {searchResults.map((place) => (
-                  <div 
-                    key={place.id} 
-                    className={`p-3 border rounded-md cursor-pointer transition-colors ${
-                      selectedPlaces.some(p => p.id === place.id) ? 'bg-primary/10 border-primary' : 'hover:bg-muted'
-                    }`}
-                    onClick={() => handlePlaceClick(place)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{place.name}</h4>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5 mr-1" />
-                          <span>{place.vicinity || "No address available"}</span>
-                        </div>
-                        {place.rating && (
-                          <div className="flex items-center mt-1">
-                            <Star className="h-3.5 w-3.5 text-yellow-500 mr-1" />
-                            <span className="text-sm">
-                              {place.rating} ({place.user_ratings_total || 0} reviews)
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowResultsModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveSelectedPlaces}
-                disabled={selectedPlaces.length === 0}
-              >
-                Add {selectedPlaces.length} Selected
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-12 border rounded-md bg-muted/20">
+              <p className="text-sm text-muted-foreground">
+                No nearby places added yet. Use the buttons above to search for places.
+              </p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
