@@ -14,10 +14,10 @@ interface AreasListProps {
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImageUpload?: (areaId: string, files: FileList) => Promise<void>;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  onReorderAreaImages?: (areaId: string, reorderedImageIds: string[]) => void;
   propertyImages?: PropertyImage[];
   isUploading?: boolean;
   onReorder?: (reorderedAreas: PropertyArea[]) => void;
-  onReorderAreaImages?: (areaId: string, reorderedImageIds: string[]) => void;
 }
 
 export function AreasList({
@@ -27,10 +27,10 @@ export function AreasList({
   onAreaImageRemove,
   onAreaImageUpload,
   onAreaImagesSelect,
+  onReorderAreaImages,
   propertyImages = [],
   isUploading = false,
-  onReorder,
-  onReorderAreaImages
+  onReorder
 }: AreasListProps) {
   const [expandedAreas, setExpandedAreas] = useState<string[]>(
     areas.length > 0 ? [areas[0].id] : []
@@ -80,7 +80,7 @@ export function AreasList({
                 {areas.map((area, index) => (
                   <Draggable 
                     key={area.id} 
-                    draggableId={area.id || `area-${index}`} // Ensure we always have a draggableId
+                    draggableId={area.id} 
                     index={index}
                     isDragDisabled={!onReorder}
                   >
@@ -119,10 +119,7 @@ export function AreasList({
                                 onUpdate={(field, value) => onUpdate(area.id, field, value)}
                                 onAreaImageRemove={
                                   onAreaImageRemove 
-                                    ? (imageId) => {
-                                        console.log(`Removing image ${imageId} from area ${area.id}`);
-                                        onAreaImageRemove(area.id, imageId);
-                                      }
+                                    ? (imageId) => onAreaImageRemove(area.id, imageId)
                                     : undefined
                                 }
                                 onAreaImageUpload={
@@ -132,18 +129,12 @@ export function AreasList({
                                 }
                                 onAreaImagesSelect={
                                   onAreaImagesSelect
-                                    ? (imageIds) => {
-                                        console.log(`Selecting images for area ${area.id}:`, imageIds);
-                                        onAreaImagesSelect(area.id, imageIds);
-                                      }
+                                    ? (imageIds) => onAreaImagesSelect(area.id, imageIds)
                                     : undefined
                                 }
                                 onReorderImages={
                                   onReorderAreaImages
-                                    ? (imageIds) => {
-                                        console.log(`Reordering images for area ${area.id}:`, imageIds);
-                                        onReorderAreaImages(area.id, imageIds);
-                                      }
+                                    ? (imageIds) => onReorderAreaImages(area.id, imageIds)
                                     : undefined
                                 }
                                 propertyImages={propertyImages}

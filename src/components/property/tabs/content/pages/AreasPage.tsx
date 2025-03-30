@@ -225,8 +225,6 @@ export function AreasPage({
   };
   
   const handleReorderAreaImages = (areaId: string, reorderedImageIds: string[]) => {
-    if (!onReorderAreaImages) return;
-    
     console.log(`Reordering images for area ${areaId}:`, reorderedImageIds);
     
     // Update local state
@@ -243,8 +241,10 @@ export function AreasPage({
     setLocalAreas(updatedAreas);
     setHasChanges(true);
     
-    // Call the original handler for actual reordering
-    onReorderAreaImages(areaId, reorderedImageIds);
+    // Call the original handler for actual reordering if provided
+    if (onReorderAreaImages) {
+      onReorderAreaImages(areaId, reorderedImageIds);
+    }
     
     if (setPendingChanges) {
       setPendingChanges(true);
@@ -285,7 +285,7 @@ export function AreasPage({
             onAreaImageRemove={onAreaImageRemove ? handleAreaImageRemove : undefined}
             onAreaImageUpload={onAreaImageUpload}
             onAreaImagesSelect={onAreaImagesSelect ? handleAreaImagesSelect : undefined}
-            onReorderAreaImages={onReorderAreaImages ? handleReorderAreaImages : undefined}
+            onReorderAreaImages={handleReorderAreaImages}
             propertyImages={formData.images as PropertyImage[]}
             isUploading={isUploading}
             onReorder={handleReorderAreas}

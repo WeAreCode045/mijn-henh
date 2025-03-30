@@ -24,6 +24,7 @@ interface AreaCardProps {
   onUpdate: (id: string, field: keyof PropertyArea, value: string | string[] | number) => void;
   onImageRemove: (id: string, imageId: string) => void;
   onImagesSelect?: (id: string, imageIds: string[]) => void;
+  onReorderImages?: (id: string, reorderedImageIds: string[]) => void;
 }
 
 export function AreaCard({
@@ -35,6 +36,7 @@ export function AreaCard({
   onUpdate,
   onImageRemove,
   onImagesSelect,
+  onReorderImages,
 }: AreaCardProps) {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(isFirstArea);
@@ -104,6 +106,11 @@ export function AreaCard({
           
           setAreaImages(newOrderedImages);
         }
+        
+        // Call the parent handler if provided
+        if (onReorderImages) {
+          onReorderImages(areaId, reorderedImageIds);
+        }
       } catch (err) {
         console.error("Error updating image order:", err);
         toast({
@@ -112,6 +119,9 @@ export function AreaCard({
           variant: "destructive",
         });
       }
+    } else if (onReorderImages) {
+      // If no propertyId but we have a handler, call it directly
+      onReorderImages(areaId, reorderedImageIds);
     }
   };
 

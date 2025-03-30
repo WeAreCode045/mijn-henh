@@ -114,7 +114,7 @@ export function AreaEditor({
             <div className="mt-2 text-sm text-muted-foreground">
               {area.imageIds ? area.imageIds.length : 0} of {maxImageSelect} images selected.
               {onReorderImages && area.imageIds && area.imageIds.length > 1 && 
-                " Drag to reorder images."
+                " Drag images to reorder them."
               }
             </div>
             
@@ -170,8 +170,14 @@ export function AreaEditor({
                                     </svg>
                                   </Button>
                                 )}
-                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1">
-                                  Position: {index + 1}
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center">
+                                  <span className="flex items-center justify-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                                      <rect x="9" y="5" width="6" height="6" />
+                                      <rect x="9" y="13" width="6" height="6" />
+                                    </svg>
+                                    Drag to reorder
+                                  </span>
                                 </div>
                               </div>
                             )}

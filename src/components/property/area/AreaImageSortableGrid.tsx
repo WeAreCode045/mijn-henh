@@ -52,6 +52,13 @@ function SortableImageItem({ image, onRemove }: SortableImageItemProps) {
       >
         <X className="h-3 w-3" />
       </Button>
+      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 flex items-center justify-center">
+        <span className="mr-1">Drag to reorder</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="9" y="5" width="6" height="6" />
+          <rect x="9" y="13" width="6" height="6" />
+        </svg>
+      </div>
     </div>
   );
 }
