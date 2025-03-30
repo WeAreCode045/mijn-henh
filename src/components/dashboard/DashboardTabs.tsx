@@ -20,7 +20,7 @@ import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 export function DashboardTabs() {
   const { activeTab, handleTabChange, propertyId } = useDashboardTabs();
   
-  // Change default agenda tab from "calendar" to "weekly"
+  // Default to weekly view
   const [agendaActiveTab, setAgendaActiveTab] = useState("weekly");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   

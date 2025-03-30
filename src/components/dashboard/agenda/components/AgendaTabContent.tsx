@@ -36,19 +36,6 @@ export function AgendaTabContent({
         />
       </TabsContent>
       
-      <TabsContent value="calendar" className="mt-0">
-        <AgendaViewContent 
-          view="calendar"
-          safeAgendaItems={safeAgendaItems}
-          isLoading={isLoading}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          filteredAgendaItems={filteredAgendaItems}
-          onItemClick={onItemClick}
-          onAddClick={onAddClick}
-        />
-      </TabsContent>
-      
       <TabsContent value="list" className="mt-0">
         <AgendaViewContent 
           view="list"

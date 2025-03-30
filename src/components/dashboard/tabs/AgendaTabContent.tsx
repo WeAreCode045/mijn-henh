@@ -30,7 +30,7 @@ export function AgendaTabContent({
   onItemClick = () => {},
   onAddClick = () => {}
 }: AgendaTabContentProps) {
-  // Set up state for active tab (now defaulting to "weekly" instead of "month")
+  // Set up state for active tab (defaulting to "weekly")
   const [activeTab, setActiveTab] = useState("weekly");
   
   // Handle tab change and propagate to parent
@@ -53,19 +53,6 @@ export function AgendaTabContent({
             agendaItems={safeAgendaItems}
             isLoading={isLoading}
             onItemClick={onItemClick}
-          />
-        </TabsContent>
-        
-        <TabsContent value="calendar" className="mt-0">
-          <AgendaViewContent 
-            view="calendar"
-            safeAgendaItems={safeAgendaItems}
-            isLoading={isLoading}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            filteredAgendaItems={filteredAgendaItems}
-            onItemClick={onItemClick}
-            onAddClick={onAddClick}
           />
         </TabsContent>
         
