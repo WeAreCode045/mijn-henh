@@ -4,6 +4,13 @@ import { useDateNavigation } from "./hooks/useDateNavigation";
 import { FilterToggleGroup } from "./components/FilterToggleGroup";
 import { PastEventsPresets } from "./components/PastEventsPresets";
 import { UpcomingEventsPresets } from "./components/UpcomingEventsPresets";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 interface DateNavigationProps {
   selectedDate: Date;
@@ -26,133 +33,152 @@ export function DateNavigation({
     showPastPresets,
     showUpcomingPresets,
     handleFilterChange,
-    handlePresetClick
+    handlePresetClick,
+    getFilterDisplayText,
+    filterPresets,
   } = useDateNavigation(filterValue);
+  
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
+  
+  // Handler for custom date range selection
+  const handleCustomRangeSelect = (range: DateRange | undefined) => {
+    if (range?.from && range?.to) {
+      setCustomDateRange(range);
+      setDateRange(range);
+      setFilterValue("customRange");
+    }
+  };
+
+  // Handler for preset selection
+  const handlePresetSelect = (value: string) => {
+    if (value === "customRange") {
+      if (customDateRange?.from && customDateRange?.to) {
+        setDateRange(customDateRange);
+      }
+    } else {
+      handlePresetClick(value);
+    }
+  };
   
   return (
     <div className="space-y-4">
-      {/* Main filter toggle group */}
-      <FilterToggleGroup 
-        filterValue={filterValue} 
-        onFilterChange={(value) => {
-          // Call the local handler first to update UI state
-          handleFilterChange(value);
-          
-          // Then update parent state
-          setFilterValue(value);
-          
-          // Update date range in parent component
-          if (value === "past") {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            const farPast = new Date(1970, 0, 1);
-            setDateRange({ from: farPast, to: yesterday });
-          } else if (value === "upcoming") {
-            const today = new Date();
-            const farFuture = new Date();
-            farFuture.setFullYear(farFuture.getFullYear() + 100);
-            setDateRange({ from: today, to: farFuture });
-          }
-        }} 
-      />
+      {/* Display the current filter information */}
+      <div className="text-lg font-medium">
+        {getFilterDisplayText(filterValue)}
+      </div>
       
-      {/* Past event presets */}
+      {/* Quick filters row */}
+      <div className="flex items-center space-x-2">
+        <Button 
+          variant={filterValue === "past" ? "default" : "outline"} 
+          onClick={() => handleFilterChange("past")}
+        >
+          All Past Events
+        </Button>
+        <Button 
+          variant={filterValue === "thisWeek" ? "default" : "outline"} 
+          onClick={() => handleFilterChange("thisWeek")}
+        >
+          This Week
+        </Button>
+        <Button 
+          variant={filterValue === "upcoming" ? "default" : "outline"} 
+          onClick={() => handleFilterChange("upcoming")}
+        >
+          All Upcoming Events
+        </Button>
+      </div>
+      
+      {/* Combined presets dropdown select */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium">Quick filter:</span>
+        <Select value={filterValue} onValueChange={handlePresetSelect}>
+          <SelectTrigger className="w-[240px]">
+            <SelectValue placeholder="Select filter" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="thisWeek">This Week</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="pastSection" disabled className="font-semibold">Past Events</SelectItem>
+            <SelectItem value="yesterday">Yesterday</SelectItem>
+            <SelectItem value="lastWeek">Last Week</SelectItem>
+            <SelectItem value="lastMonth">Last Month</SelectItem>
+            <SelectItem value="last30Days">Last 30 Days</SelectItem>
+            <SelectItem value="pastThisMonth">This Month (Past)</SelectItem>
+            <SelectItem value="past">All Past Events</SelectItem>
+            <SelectItem value="upcomingSection" disabled className="font-semibold">Upcoming Events</SelectItem>
+            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+            <SelectItem value="nextWeek">Next Week</SelectItem>
+            <SelectItem value="upcomingThisMonth">This Month (Upcoming)</SelectItem>
+            <SelectItem value="next30Days">Next 30 Days</SelectItem>
+            <SelectItem value="upcoming">All Upcoming Events</SelectItem>
+            <SelectItem value="customRange">Custom Date Range</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {/* Custom Date Range Picker */}
+      <div className="flex items-center space-x-2">
+        <span className="text-sm font-medium">Custom Range:</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-[300px] justify-start text-left font-normal"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {customDateRange?.from ? (
+                customDateRange.to ? (
+                  <>
+                    {format(customDateRange.from, "PPP")} - {format(customDateRange.to, "PPP")}
+                  </>
+                ) : (
+                  format(customDateRange.from, "PPP")
+                )
+              ) : (
+                <span>Select date range</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={customDateRange?.from}
+              selected={customDateRange}
+              onSelect={handleCustomRangeSelect}
+              numberOfMonths={2}
+            />
+          </PopoverContent>
+        </Popover>
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            if (customDateRange?.from && customDateRange?.to) {
+              setDateRange(customDateRange);
+              setFilterValue("customRange");
+            }
+          }}
+        >
+          Apply Range
+        </Button>
+      </div>
+      
+      {/* Past event presets - still useful for quick access */}
       <PastEventsPresets 
         visible={showPastPresets}
         onPresetClick={(preset) => {
           // Call the local handler first
           handlePresetClick(preset);
-          
-          // Then update parent state
-          setFilterValue(preset);
-          
-          // Update parent's date range directly based on preset
-          const today = new Date();
-          if (preset === "yesterday") {
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            setDateRange({ from: yesterday, to: yesterday });
-          } else if (preset === "lastWeek") {
-            const lastMonday = new Date(today);
-            lastMonday.setDate(today.getDate() - today.getDay() - 6);
-            const lastSunday = new Date(today);
-            lastSunday.setDate(today.getDate() - today.getDay());
-            setDateRange({ from: lastMonday, to: lastSunday });
-          } else if (preset === "thisMonth") {
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            setDateRange({ from: firstDay, to: yesterday });
-          } else if (preset === "lastMonth") {
-            const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-            const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-            setDateRange({ from: firstDay, to: lastDay });
-          } else if (preset === "last30Days") {
-            const thirtyDaysAgo = new Date(today);
-            thirtyDaysAgo.setDate(today.getDate() - 30);
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            setDateRange({ from: thirtyDaysAgo, to: yesterday });
-          } else if (preset === "past") {
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            const farPast = new Date(1970, 0, 1);
-            setDateRange({ from: farPast, to: yesterday });
-          }
         }}
       />
       
-      {/* Upcoming event presets */}
+      {/* Upcoming event presets - still useful for quick access */}
       <UpcomingEventsPresets 
         visible={showUpcomingPresets}
         onPresetClick={(preset) => {
           // Call the local handler first
           handlePresetClick(preset);
-          
-          // Then update parent state
-          setFilterValue(preset);
-          
-          // Update parent's date range directly based on preset
-          const today = new Date();
-          if (preset === "tomorrow") {
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            setDateRange({ from: tomorrow, to: tomorrow });
-          } else if (preset === "thisWeek") {
-            // This function is defined in useDateNavigation, we need to replicate it here
-            const getWeekStart = (date: Date): Date => {
-              const monday = new Date(date);
-              monday.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
-              return monday;
-            };
-            
-            const getWeekEnd = (date: Date): Date => {
-              const sunday = new Date(date);
-              const monday = getWeekStart(date);
-              sunday.setDate(monday.getDate() + 6);
-              return sunday;
-            };
-            
-            setDateRange({ from: getWeekStart(today), to: getWeekEnd(today) });
-          } else if (preset === "nextWeek") {
-            const nextMonday = new Date(today);
-            nextMonday.setDate(today.getDate() - today.getDay() + 8);
-            const nextSunday = new Date(nextMonday);
-            nextSunday.setDate(nextMonday.getDate() + 6);
-            setDateRange({ from: nextMonday, to: nextSunday });
-          } else if (preset === "thisMonth") {
-            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            setDateRange({ from: today, to: lastDay });
-          } else if (preset === "next30Days") {
-            const thirtyDaysLater = new Date(today);
-            thirtyDaysLater.setDate(today.getDate() + 30);
-            setDateRange({ from: today, to: thirtyDaysLater });
-          } else if (preset === "upcoming") {
-            const farFuture = new Date(today);
-            farFuture.setFullYear(farFuture.getFullYear() + 100);
-            setDateRange({ from: today, to: farFuture });
-          }
         }}
       />
     </div>

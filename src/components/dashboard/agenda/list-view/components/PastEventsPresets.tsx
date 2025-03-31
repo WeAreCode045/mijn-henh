@@ -11,7 +11,7 @@ export function PastEventsPresets({ onPresetClick, visible }: PastEventsPresetsP
   
   return (
     <div className="border rounded-lg p-3">
-      <h3 className="text-sm font-medium mb-2">Past Events:</h3>
+      <h3 className="text-sm font-medium mb-2">Past Events Quick Filters:</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <Button 
           variant="outline" 
@@ -44,7 +44,7 @@ export function PastEventsPresets({ onPresetClick, visible }: PastEventsPresetsP
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={() => onPresetClick("thisMonth")}
+          onClick={() => onPresetClick("pastThisMonth")}
         >
           This Month
         </Button>

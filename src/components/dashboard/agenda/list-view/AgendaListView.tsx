@@ -29,6 +29,7 @@ export function AgendaListView({
   } = useAgendaListView(agendaItems, isLoading);
   
   console.log("AgendaListView - Items count:", agendaItems?.length || 0, "Displayed count:", displayedItems?.length || 0);
+  console.log("AgendaListView - Current filter:", filterValue, "Date range:", dateRange);
   
   if (isLoading) {
     return <LoadingIndicator />;

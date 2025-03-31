@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 
 export function useDateNavigation(initialFilterValue: string = "thisWeek") {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -15,6 +15,87 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
   const [filterValue, setFilterValue] = useState<string>(initialFilterValue);
   const [showPastPresets, setShowPastPresets] = useState(false);
   const [showUpcomingPresets, setShowUpcomingPresets] = useState(false);
+  
+  // Define all available filter presets
+  const filterPresets = {
+    past: ["yesterday", "lastWeek", "lastMonth", "last30Days", "pastThisMonth", "past"],
+    upcoming: ["tomorrow", "nextWeek", "upcomingThisMonth", "next30Days", "upcoming"],
+    general: ["today", "thisWeek", "customRange"]
+  };
+  
+  // Get display text for the current filter
+  const getFilterDisplayText = (filter: string): string => {
+    switch (filter) {
+      case "today":
+        return `Events for Today (${format(today, "MMMM d, yyyy")})`;
+      case "yesterday": {
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        return `Past Events for Yesterday (${format(yesterday, "MMMM d, yyyy")})`;
+      }
+      case "tomorrow": {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        return `Upcoming Events for Tomorrow (${format(tomorrow, "MMMM d, yyyy")})`;
+      }
+      case "thisWeek":
+        return `Events for This Week (${format(getWeekStart(today), "MMM d")} - ${format(getWeekEnd(today), "MMM d, yyyy")})`;
+      case "lastWeek": {
+        const lastMonday = new Date(today);
+        lastMonday.setDate(today.getDate() - today.getDay() - 6);
+        const lastSunday = new Date(today);
+        lastSunday.setDate(today.getDate() - today.getDay());
+        return `Past Events for Last Week (${format(lastMonday, "MMM d")} - ${format(lastSunday, "MMM d, yyyy")})`;
+      }
+      case "nextWeek": {
+        const nextMonday = new Date(today);
+        nextMonday.setDate(today.getDate() - today.getDay() + 8);
+        const nextSunday = new Date(nextMonday);
+        nextSunday.setDate(nextMonday.getDate() + 6);
+        return `Upcoming Events for Next Week (${format(nextMonday, "MMM d")} - ${format(nextSunday, "MMM d, yyyy")})`;
+      }
+      case "pastThisMonth": {
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        return `Past Events for This Month (${format(firstDay, "MMM d")} - ${format(yesterday, "MMM d, yyyy")})`;
+      }
+      case "upcomingThisMonth": {
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        return `Upcoming Events for This Month (${format(today, "MMM d")} - ${format(lastDay, "MMM d, yyyy")})`;
+      }
+      case "lastMonth": {
+        const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+        return `Past Events for Last Month (${format(firstDay, "MMM d")} - ${format(lastDay, "MMM d, yyyy")})`;
+      }
+      case "last30Days": {
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        return `Past Events for Last 30 Days (${format(thirtyDaysAgo, "MMM d")} - ${format(yesterday, "MMM d, yyyy")})`;
+      }
+      case "next30Days": {
+        const thirtyDaysLater = new Date(today);
+        thirtyDaysLater.setDate(today.getDate() + 30);
+        return `Upcoming Events for Next 30 Days (${format(today, "MMM d")} - ${format(thirtyDaysLater, "MMM d, yyyy")})`;
+      }
+      case "past": {
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        return "All Past Events";
+      }
+      case "upcoming":
+        return "All Upcoming Events";
+      case "customRange": {
+        // This will be handled by the component directly
+        return "Custom Date Range";
+      }
+      default:
+        return "Events";
+    }
+  };
   
   // Toggle preset sections and set appropriate date ranges
   const handleFilterChange = (value: string) => {
@@ -75,18 +156,18 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         setDateRange({ from: lastMonday, to: lastSunday });
         break;
       }
-      case "thisMonth": {
-        if (showPastPresets) {
-          // For past events, show from beginning of month to yesterday
-          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-          const yesterday = new Date(today);
-          yesterday.setDate(today.getDate() - 1);
-          setDateRange({ from: firstDay, to: yesterday });
-        } else {
-          // For upcoming events, show from today to end of month
-          const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-          setDateRange({ from: today, to: lastDay });
-        }
+      case "pastThisMonth": {
+        // For past events, show from beginning of month to yesterday
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        setDateRange({ from: firstDay, to: yesterday });
+        break;
+      }
+      case "upcomingThisMonth": {
+        // For upcoming events, show from today to end of month
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        setDateRange({ from: today, to: lastDay });
         break;
       }
       case "lastMonth": {
@@ -142,15 +223,23 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         setDateRange({ from: farPast, to: yesterday });
         break;
       }
+      case "today": {
+        setDateRange({ from: today, to: today });
+        break;
+      }
     }
     
     // Keep preset menus visible based on the category
-    if (["yesterday", "lastWeek", "lastMonth", "last30Days", "thisMonth"].includes(presetValue)) {
+    if (filterPresets.past.includes(presetValue)) {
       setShowPastPresets(true);
       setShowUpcomingPresets(false);
-    } else if (["tomorrow", "nextWeek", "next30Days", "thisMonth"].includes(presetValue)) {
+    } else if (filterPresets.upcoming.includes(presetValue)) {
       setShowPastPresets(false);
       setShowUpcomingPresets(true);
+    } else {
+      // For general filters like "today", "thisWeek"
+      setShowPastPresets(false);
+      setShowUpcomingPresets(false);
     }
     
     // Update the filter value
@@ -188,6 +277,8 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
     showPastPresets,
     showUpcomingPresets,
     handleFilterChange,
-    handlePresetClick
+    handlePresetClick,
+    getFilterDisplayText,
+    filterPresets
   };
 }
