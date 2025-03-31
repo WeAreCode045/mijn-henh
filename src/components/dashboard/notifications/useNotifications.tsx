@@ -5,6 +5,8 @@ import { useTodoItems } from "@/hooks/useTodoItems";
 import { useAgenda } from "@/hooks/useAgenda";
 import { isPast, isToday, addDays } from "date-fns";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/providers/AuthProvider";
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -13,120 +15,196 @@ export function useNotifications() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { todoItems } = useTodoItems();
   const { agendaItems } = useAgenda();
+  const { user } = useAuth();
 
-  // Load read notifications from localStorage
-  const getReadNotifications = (): Record<string, boolean> => {
+  // Fetch notifications from database
+  const fetchNotifications = async () => {
     try {
-      const stored = localStorage.getItem('readNotifications');
-      return stored ? JSON.parse(stored) : {};
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        return [];
+      }
+      
+      return data || [];
     } catch (err) {
-      console.error('Error loading read notifications from storage:', err);
+      console.error('Error in fetchNotifications:', err);
+      return [];
+    }
+  };
+
+  // Fetch user's read notification states
+  const fetchUserReadStates = async () => {
+    if (!user) {
+      return {};
+    }
+    
+    try {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('user_notifications')
+        .eq('id', user.id)
+        .single();
+      
+      if (userProfile?.user_notifications) {
+        return userProfile.user_notifications.reduce((acc: Record<string, boolean>, item: any) => {
+          acc[item.id] = item.read || false;
+          return acc;
+        }, {});
+      }
+      return {};
+    } catch (err) {
+      console.error('Error loading read notifications from database:', err);
       return {};
     }
   };
 
-  // Save read notifications to localStorage
-  const saveReadNotifications = (readMap: Record<string, boolean>) => {
+  // Save read notifications to database
+  const saveReadNotifications = async (readMap: Record<string, boolean>) => {
+    if (!user) {
+      return;
+    }
+    
     try {
-      localStorage.setItem('readNotifications', JSON.stringify(readMap));
+      // Convert read state map to array format for storage
+      const notificationArray = Object.entries(readMap).map(([id, read]) => ({
+        id,
+        read
+      }));
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          user_notifications: notificationArray 
+        })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error('Error saving read notifications to database:', error);
+      }
     } catch (err) {
-      console.error('Error saving read notifications to storage:', err);
+      console.error('Error in saveReadNotifications:', err);
     }
   };
 
-  // Generate notifications from todo items and agenda items
+  // Generate notifications from todo items, agenda items, and database
   useEffect(() => {
-    const newNotifications: Notification[] = [];
-    const readNotifications = getReadNotifications();
-    
-    // Process todo items
-    todoItems.forEach(todo => {
-      // Add notification for due items
-      if (todo.due_date && !todo.completed) {
-        const dueDate = new Date(todo.due_date);
-        if (isPast(dueDate) && !isToday(dueDate)) {
-          const notificationId = `todo-due-${todo.id}`;
+    const loadNotifications = async () => {
+      // Load read states from database
+      const readNotifications = await fetchUserReadStates();
+      const dbNotifications = await fetchNotifications();
+      const newNotifications: Notification[] = [];
+      
+      // Process todo items
+      todoItems.forEach(todo => {
+        // Add notification for due items
+        if (todo.due_date && !todo.completed) {
+          const dueDate = new Date(todo.due_date);
+          if (isPast(dueDate) && !isToday(dueDate)) {
+            const notificationId = `todo-due-${todo.id}`;
+            newNotifications.push({
+              id: notificationId,
+              title: "Overdue Task",
+              message: `Task "${todo.title}" is overdue`,
+              type: "todo",
+              date: new Date(),
+              read: readNotifications[notificationId] || false
+            });
+          }
+        }
+        
+        // Add notification for upcoming notification times
+        if (todo.notify_at && !todo.notification_sent) {
+          const notifyDate = new Date(todo.notify_at);
+          if (isPast(notifyDate) || isToday(notifyDate)) {
+            const notificationId = `todo-notify-${todo.id}`;
+            newNotifications.push({
+              id: notificationId,
+              title: "Task Reminder",
+              message: `Reminder for "${todo.title}"`,
+              type: "todo",
+              date: notifyDate,
+              read: readNotifications[notificationId] || false
+            });
+          }
+        }
+      });
+      
+      // Process agenda items
+      agendaItems.forEach(agenda => {
+        const eventDate = new Date(`${agenda.event_date}T${agenda.event_time}`);
+        const today = new Date();
+        const threeDaysFromNow = addDays(today, 3);
+        
+        // Only show notifications for upcoming events in the next 3 days
+        if (eventDate > today && eventDate <= threeDaysFromNow) {
+          const notificationId = `agenda-${agenda.id}`;
           newNotifications.push({
             id: notificationId,
-            title: "Overdue Task",
-            message: `Task "${todo.title}" is overdue`,
-            type: "todo",
-            date: new Date(),
+            title: "Upcoming Event",
+            message: `${agenda.title} on ${format(eventDate, "PPP")} at ${format(eventDate, "p")}`,
+            type: "agenda",
+            date: eventDate,
             read: readNotifications[notificationId] || false
           });
         }
-      }
+      });
       
-      // Add notification for upcoming notification times
-      if (todo.notify_at && !todo.notification_sent) {
-        const notifyDate = new Date(todo.notify_at);
-        if (isPast(notifyDate) || isToday(notifyDate)) {
-          const notificationId = `todo-notify-${todo.id}`;
-          newNotifications.push({
-            id: notificationId,
-            title: "Task Reminder",
-            message: `Reminder for "${todo.title}"`,
-            type: "todo",
-            date: notifyDate,
-            read: readNotifications[notificationId] || false
-          });
-        }
-      }
-    });
-    
-    // Process agenda items
-    agendaItems.forEach(agenda => {
-      const eventDate = new Date(`${agenda.event_date}T${agenda.event_time}`);
-      const today = new Date();
-      const threeDaysFromNow = addDays(today, 3);
-      
-      // Only show notifications for upcoming events in the next 3 days
-      if (eventDate > today && eventDate <= threeDaysFromNow) {
-        const notificationId = `agenda-${agenda.id}`;
+      // Process database notifications
+      dbNotifications.forEach(notification => {
+        const notificationId = notification.id;
         newNotifications.push({
           id: notificationId,
-          title: "Upcoming Event",
-          message: `${agenda.title} on ${format(eventDate, "PPP")} at ${format(eventDate, "p")}`,
-          type: "agenda",
-          date: eventDate,
-          read: readNotifications[notificationId] || false
+          title: notification.title,
+          message: notification.message,
+          type: notification.type as NotificationType,
+          date: new Date(notification.created_at),
+          read: readNotifications[notificationId] || false,
+          propertyId: notification.property_id,
+          propertyTitle: notification.property_title
         });
-      }
-    });
-    
-    // Add some sample mock notifications for demonstration (can be removed in production)
-    if (newNotifications.length < 2) {
-      const mockNotifications = [
-        {
-          id: 'assignment-1',
-          type: 'assignment' as NotificationType,
-          message: 'You have been assigned to Property #12345',
-          title: 'Property Assignment',
-          date: new Date('2023-08-15T10:30:00Z'),
-          read: readNotifications['assignment-1'] || false,
-          propertyId: '12345',
-          propertyTitle: 'Luxury Villa'
-        },
-        {
-          id: 'change-2',
-          type: 'change' as NotificationType,
-          message: 'Property #54321 has been updated',
-          title: 'Property Update',
-          date: new Date('2023-08-14T14:20:00Z'),
-          read: readNotifications['change-2'] || false,
-          propertyId: '54321',
-          propertyTitle: 'City Apartment'
-        }
-      ];
+      });
       
-      newNotifications.push(...mockNotifications);
-    }
+      // Add some sample mock notifications for demonstration if needed
+      if (newNotifications.length < 2) {
+        const mockNotifications = [
+          {
+            id: 'assignment-1',
+            type: 'assignment' as NotificationType,
+            message: 'You have been assigned to Property #12345',
+            title: 'Property Assignment',
+            date: new Date('2023-08-15T10:30:00Z'),
+            read: readNotifications['assignment-1'] || false,
+            propertyId: '12345',
+            propertyTitle: 'Luxury Villa'
+          },
+          {
+            id: 'change-2',
+            type: 'change' as NotificationType,
+            message: 'Property #54321 has been updated',
+            title: 'Property Update',
+            date: new Date('2023-08-14T14:20:00Z'),
+            read: readNotifications['change-2'] || false,
+            propertyId: '54321',
+            propertyTitle: 'City Apartment'
+          }
+        ];
+        
+        newNotifications.push(...mockNotifications);
+      }
+      
+      // Sort notifications based on current sort order preference
+      const sortedNotifications = sortNotifications(newNotifications, sortOrder);
+      
+      setNotifications(sortedNotifications);
+    };
     
-    // Sort notifications based on current sort order preference
-    const sortedNotifications = sortNotifications(newNotifications, sortOrder);
-    
-    setNotifications(sortedNotifications);
-  }, [todoItems, agendaItems, sortOrder]);
+    loadNotifications();
+  }, [todoItems, agendaItems, sortOrder, user]);
 
   // Apply filtering and sorting whenever notifications, filterType, or sortOrder change
   useEffect(() => {
@@ -155,26 +233,41 @@ export function useNotifications() {
   };
 
   // Function to mark notification as read
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
     // Update notifications in state
-    setNotifications(notifications.map(notification => 
+    const updatedNotifications = notifications.map(notification => 
       notification.id === id ? { ...notification, read: true } : notification
-    ));
+    );
+    setNotifications(updatedNotifications);
     
-    // Update localStorage
-    const readNotifications = getReadNotifications();
-    readNotifications[id] = true;
-    saveReadNotifications(readNotifications);
+    // Update read states
+    const readStates = await fetchUserReadStates();
+    readStates[id] = true;
+    await saveReadNotifications(readStates);
   };
 
   // Function to delete a notification
-  const deleteNotification = (id: string) => {
+  const deleteNotification = async (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
     
-    // Remove from localStorage
-    const readNotifications = getReadNotifications();
-    delete readNotifications[id];
-    saveReadNotifications(readNotifications);
+    // Update read states in database
+    const readStates = await fetchUserReadStates();
+    delete readStates[id];
+    await saveReadNotifications(readStates);
+    
+    // If it's a database notification, delete it
+    if (id.includes('-')) {
+      // This is likely a dynamically generated notification (todo/agenda), no need to delete from DB
+    } else {
+      try {
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('id', id);
+      } catch (err) {
+        console.error('Error deleting notification from database:', err);
+      }
+    }
   };
 
   // Get notification type counts for filter selector

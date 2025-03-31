@@ -4,7 +4,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, ChevronUp, ChevronDown, Bell } from "lucide-react";
 import { NotificationIcon } from "./notifications/NotificationIcon";
-import { Notification } from "./notifications/NotificationTypes";
 import { useNotifications } from "./notifications/useNotifications";
 import { format } from "date-fns";
 

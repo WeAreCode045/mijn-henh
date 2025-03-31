@@ -117,6 +117,57 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_read_states: {
+        Row: {
+          created_at: string
+          id: string
+          notification_id: string
+          read: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notification_id: string
+          read?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notification_id?: string
+          read?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -127,6 +178,7 @@ export type Database = {
           phone: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
+          user_notifications: Json | null
           whatsapp_number: string | null
         }
         Insert: {
@@ -138,6 +190,7 @@ export type Database = {
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          user_notifications?: Json | null
           whatsapp_number?: string | null
         }
         Update: {
@@ -149,6 +202,7 @@ export type Database = {
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          user_notifications?: Json | null
           whatsapp_number?: string | null
         }
         Relationships: []
