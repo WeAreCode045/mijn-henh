@@ -14,9 +14,30 @@ export function useNotifications() {
   const { todoItems } = useTodoItems();
   const { agendaItems } = useAgenda();
 
+  // Load read notifications from localStorage
+  const getReadNotifications = (): Record<string, boolean> => {
+    try {
+      const stored = localStorage.getItem('readNotifications');
+      return stored ? JSON.parse(stored) : {};
+    } catch (err) {
+      console.error('Error loading read notifications from storage:', err);
+      return {};
+    }
+  };
+
+  // Save read notifications to localStorage
+  const saveReadNotifications = (readMap: Record<string, boolean>) => {
+    try {
+      localStorage.setItem('readNotifications', JSON.stringify(readMap));
+    } catch (err) {
+      console.error('Error saving read notifications to storage:', err);
+    }
+  };
+
   // Generate notifications from todo items and agenda items
   useEffect(() => {
     const newNotifications: Notification[] = [];
+    const readNotifications = getReadNotifications();
     
     // Process todo items
     todoItems.forEach(todo => {
@@ -24,13 +45,14 @@ export function useNotifications() {
       if (todo.due_date && !todo.completed) {
         const dueDate = new Date(todo.due_date);
         if (isPast(dueDate) && !isToday(dueDate)) {
+          const notificationId = `todo-due-${todo.id}`;
           newNotifications.push({
-            id: `todo-due-${todo.id}`,
+            id: notificationId,
             title: "Overdue Task",
             message: `Task "${todo.title}" is overdue`,
             type: "todo",
             date: new Date(),
-            read: false
+            read: readNotifications[notificationId] || false
           });
         }
       }
@@ -39,13 +61,14 @@ export function useNotifications() {
       if (todo.notify_at && !todo.notification_sent) {
         const notifyDate = new Date(todo.notify_at);
         if (isPast(notifyDate) || isToday(notifyDate)) {
+          const notificationId = `todo-notify-${todo.id}`;
           newNotifications.push({
-            id: `todo-notify-${todo.id}`,
+            id: notificationId,
             title: "Task Reminder",
             message: `Reminder for "${todo.title}"`,
             type: "todo",
             date: notifyDate,
-            read: false
+            read: readNotifications[notificationId] || false
           });
         }
       }
@@ -59,41 +82,44 @@ export function useNotifications() {
       
       // Only show notifications for upcoming events in the next 3 days
       if (eventDate > today && eventDate <= threeDaysFromNow) {
+        const notificationId = `agenda-${agenda.id}`;
         newNotifications.push({
-          id: `agenda-${agenda.id}`,
+          id: notificationId,
           title: "Upcoming Event",
           message: `${agenda.title} on ${format(eventDate, "PPP")} at ${format(eventDate, "p")}`,
           type: "agenda",
           date: eventDate,
-          read: false
+          read: readNotifications[notificationId] || false
         });
       }
     });
     
     // Add some sample mock notifications for demonstration (can be removed in production)
     if (newNotifications.length < 2) {
-      newNotifications.push(
+      const mockNotifications = [
         {
           id: 'assignment-1',
-          type: 'assignment',
+          type: 'assignment' as NotificationType,
           message: 'You have been assigned to Property #12345',
           title: 'Property Assignment',
           date: new Date('2023-08-15T10:30:00Z'),
-          read: false,
+          read: readNotifications['assignment-1'] || false,
           propertyId: '12345',
           propertyTitle: 'Luxury Villa'
         },
         {
           id: 'change-2',
-          type: 'change',
+          type: 'change' as NotificationType,
           message: 'Property #54321 has been updated',
           title: 'Property Update',
           date: new Date('2023-08-14T14:20:00Z'),
-          read: false,
+          read: readNotifications['change-2'] || false,
           propertyId: '54321',
           propertyTitle: 'City Apartment'
         }
-      );
+      ];
+      
+      newNotifications.push(...mockNotifications);
     }
     
     // Sort notifications based on current sort order preference
@@ -130,14 +156,25 @@ export function useNotifications() {
 
   // Function to mark notification as read
   const markAsRead = (id: string) => {
+    // Update notifications in state
     setNotifications(notifications.map(notification => 
       notification.id === id ? { ...notification, read: true } : notification
     ));
+    
+    // Update localStorage
+    const readNotifications = getReadNotifications();
+    readNotifications[id] = true;
+    saveReadNotifications(readNotifications);
   };
 
   // Function to delete a notification
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
+    
+    // Remove from localStorage
+    const readNotifications = getReadNotifications();
+    delete readNotifications[id];
+    saveReadNotifications(readNotifications);
   };
 
   // Get notification type counts for filter selector
