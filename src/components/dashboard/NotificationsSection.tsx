@@ -6,13 +6,20 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Bell, Calendar, CheckSquare, MessageSquare, Users, Edit, X } from "lucide-react";
+import { Bell, Calendar, CheckSquare, MessageSquare, Users, Edit, X, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useTodoItems } from "@/hooks/useTodoItems";
 import { useAgenda } from "@/hooks/useAgenda";
 import { isPast, isToday, addDays } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Define notification type
 export type NotificationType = 'agenda' | 'todo' | 'communication' | 'system' | 'assignment' | 'change';
@@ -30,6 +37,9 @@ export interface Notification {
 
 export function NotificationsSection() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
+  const [filterType, setFilterType] = useState<NotificationType | 'all'>('all');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const { todoItems } = useTodoItems();
   const { agendaItems } = useAgenda();
   
@@ -115,11 +125,37 @@ export function NotificationsSection() {
       );
     }
     
-    // Sort notifications by date - most recent first
-    newNotifications.sort((a, b) => b.date.getTime() - a.date.getTime());
+    // Sort notifications based on current sort order preference
+    const sortedNotifications = sortNotifications(newNotifications, sortOrder);
     
-    setNotifications(newNotifications);
+    setNotifications(sortedNotifications);
   }, [todoItems, agendaItems]);
+
+  // Apply filtering and sorting whenever notifications, filterType, or sortOrder change
+  useEffect(() => {
+    // Apply filters
+    let filtered = notifications;
+    
+    if (filterType !== 'all') {
+      filtered = notifications.filter(notification => notification.type === filterType);
+    }
+    
+    // Apply sorting
+    filtered = sortNotifications([...filtered], sortOrder);
+    
+    setFilteredNotifications(filtered);
+  }, [notifications, filterType, sortOrder]);
+
+  // Helper function to sort notifications
+  const sortNotifications = (notifs: Notification[], order: 'newest' | 'oldest') => {
+    return [...notifs].sort((a, b) => {
+      if (order === 'newest') {
+        return b.date.getTime() - a.date.getTime();
+      } else {
+        return a.date.getTime() - b.date.getTime();
+      }
+    });
+  }
 
   // Function to mark notification as read
   const markAsRead = (id: string) => {
@@ -151,24 +187,70 @@ export function NotificationsSection() {
     }
   };
 
+  // Get notification type counts for filter selector
+  const getTypeCount = (type: NotificationType | 'all') => {
+    if (type === 'all') return notifications.length;
+    return notifications.filter(n => n.type === type).length;
+  };
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="h-5 w-5" /> All Notifications
-        </CardTitle>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" /> All Notifications
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {/* Type Filter Dropdown */}
+            <Select 
+              value={filterType} 
+              onValueChange={(value) => setFilterType(value as NotificationType | 'all')}
+            >
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Filter by Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types ({getTypeCount('all')})</SelectItem>
+                <SelectItem value="todo">Tasks ({getTypeCount('todo')})</SelectItem>
+                <SelectItem value="agenda">Events ({getTypeCount('agenda')})</SelectItem>
+                <SelectItem value="assignment">Assignments ({getTypeCount('assignment')})</SelectItem>
+                <SelectItem value="change">Updates ({getTypeCount('change')})</SelectItem>
+                <SelectItem value="communication">Messages ({getTypeCount('communication')})</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {/* Sort Order Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  {sortOrder === 'newest' ? 'Newest' : 'Oldest'} <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSortOrder('newest')}>
+                  Newest First
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortOrder('oldest')}>
+                  Oldest First
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
         <CardDescription>
           Stay updated with property changes and assignments
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {notifications.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No notifications to display
+            {filterType !== 'all' 
+              ? `No ${filterType} notifications to display` 
+              : 'No notifications to display'}
           </div>
         ) : (
           <div className="space-y-4">
-            {notifications.map(notification => (
+            {filteredNotifications.map(notification => (
               <div 
                 key={notification.id}
                 className={`p-4 rounded-lg border relative ${notification.read ? 'bg-background' : 'bg-muted/30 border-muted'}`}
