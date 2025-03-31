@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { TimeColumn } from "./TimeColumn";
@@ -64,7 +65,10 @@ export function WeeklyCalendarView({
   };
   
   // Handle day selection in month view
-  const handleDaySelect = (day: Date) => {
+  const handleDaySelect = (day: Date | undefined) => {
+    // If day is undefined, return early
+    if (!day) return;
+    
     // Find events for the selected day and show a modal or navigate to that day
     const dayEvents = agendaItems.filter(item => {
       if (!item.event_date) return false;
@@ -118,12 +122,12 @@ export function WeeklyCalendarView({
           <Calendar
             mode="single"
             selected={currentDate}
-            onSelect={(date) => date && handleDaySelect(date)}
+            onSelect={handleDaySelect}
             className="w-full"
             components={{
               Day: ({ day, ...props }) => {
                 // Get events for this day
-                const dayStr = format(day, 'yyyy-MM-dd');
+                const dayStr = format(day.date, 'yyyy-MM-dd');
                 const events = agendaItems.filter(item => {
                   if (!item.event_date) return false;
                   return format(parseISO(item.event_date), 'yyyy-MM-dd') === dayStr;
@@ -131,7 +135,7 @@ export function WeeklyCalendarView({
                 
                 return (
                   <div className="relative" {...props}>
-                    <div>{format(day, "d")}</div>
+                    <div>{format(day.date, "d")}</div>
                     {events.length > 0 && (
                       <div className="absolute bottom-0 left-0 right-0 flex justify-center">
                         <div className="h-1 w-1 bg-primary rounded-full"></div>
