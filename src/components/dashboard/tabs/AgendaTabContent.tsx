@@ -58,7 +58,9 @@ export function AgendaTabContent({
   
   // Handle add button click
   const handleAddClick = () => {
-    handleAddButtonClick(new Event('click') as React.MouseEvent<Element, MouseEvent>);
+    // Fix: Use a properly typed MouseEvent or just call the function directly
+    // The error was here - we were passing a raw Event object to a function expecting React.MouseEvent
+    handleAddButtonClick();
     if (onAddClick) onAddClick();
   };
   
