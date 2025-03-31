@@ -18,6 +18,21 @@ export function MailTab({ settings, onChange }: MailTabProps) {
   const hasMailjetConfig = !!settings.mailjetApiKey && !!settings.mailjetApiSecret;
   const hasSmtpConfig = !!settings.smtpHost && !!settings.smtpUsername && !!settings.smtpPassword;
   
+  // Create a handler specifically for Switch components
+  const handleSwitchChange = (name: string, checked: boolean) => {
+    // Create a synthetic event that matches what onChange expects
+    const syntheticEvent = {
+      target: {
+        name,
+        value: checked,
+        type: 'checkbox',
+        checked
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    
+    onChange(syntheticEvent);
+  };
+  
   return (
     <div className="space-y-6">
       <Tabs defaultValue="mailjet" className="w-full">
@@ -116,17 +131,7 @@ export function MailTab({ settings, onChange }: MailTabProps) {
           <SmtpSettings 
             settings={settings} 
             onChange={onChange} 
-            onSwitchChange={(name, checked) => {
-              const e = {
-                target: {
-                  name,
-                  value: checked,
-                  type: 'checkbox',
-                  checked
-                }
-              } as React.ChangeEvent<HTMLInputElement>;
-              onChange(e);
-            }} 
+            onSwitchChange={handleSwitchChange} 
           />
         </TabsContent>
       </Tabs>
