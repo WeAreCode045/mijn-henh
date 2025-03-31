@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
@@ -99,15 +100,11 @@ const fetchAgencySettings = async (supabaseAdmin: any) => {
     .select("*")
     .single();
 
-  if (settingsError) {
+  if (settingsError && settingsError.code !== 'PGRST116') {
     throw new Error(`Error fetching agency settings: ${settingsError.message}`);
   }
 
-  if (!settings) {
-    throw new Error("Agency settings not found");
-  }
-  
-  return settings;
+  return settings || {};
 };
 
 // Prepare email content
@@ -123,7 +120,7 @@ const prepareEmailContent = (submission: any, replyText: string, replyingUser: a
           <p style="white-space: pre-line;">${replyText}</p>
         </div>
         <div style="margin-top: 30px;">
-          <div style="display: flex; align-items: center;">
+          <div>
             ${replyingUser.avatar_url ? `<img src="${replyingUser.avatar_url}" alt="${replyingUser.full_name}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">` : ''}
             <div>
               <p style="margin: 0; font-weight: bold;">${replyingUser.full_name}</p>
@@ -138,6 +135,7 @@ const prepareEmailContent = (submission: any, replyText: string, replyingUser: a
         </p>
       </div>
     `,
+    text: `Hello ${submission.name},\n\nThank you for your interest in ${submission.property?.title || 'our property'} at ${submission.property?.address || 'our location'}.\n\n${replyText}\n\nBest regards,\n${replyingUser.full_name}\n${replyingUser.email}\n${replyingUser.phone || ''}`
   };
 };
 
@@ -159,13 +157,28 @@ const saveReplyToDatabase = async (supabaseAdmin: any, submissionId: string, use
 // Send email with SMTP
 const sendEmailWithSMTP = async (supabaseAdmin: any, settings: any, emailContent: any) => {
   if (!settings.smtp_host || !settings.smtp_username || !settings.smtp_password) {
+    console.log("SMTP not configured, skipping email send");
     return null;
   }
   
   try {
+    console.log("Sending email with content:", JSON.stringify({
+      to: emailContent.to,
+      subject: emailContent.subject,
+      hasHtml: !!emailContent.html,
+      hasText: !!emailContent.text
+    }));
+    
     const { data: emailData, error: emailError } = await supabaseAdmin.functions.invoke(
       'send-email-with-smtp', 
-      { body: emailContent }
+      { 
+        body: {
+          to: emailContent.to,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text
+        }
+      }
     );
     
     if (emailError) {
@@ -190,11 +203,13 @@ serve(async (req) => {
   try {
     // 1. Validate request body
     const body = await req.json();
+    console.log("Request body:", JSON.stringify(body));
     const { submissionId, replyText, recipientEmail } = validateRequestBody(body);
 
     // 2. Authenticate user
     const { user, token } = await authenticateUser(req);
     const userId = user.id;
+    console.log("Authenticated user ID:", userId);
     
     // 3. Create Supabase client
     const supabaseAdmin = createSupabaseClient();
@@ -203,13 +218,16 @@ serve(async (req) => {
     const submission = await fetchSubmissionDetails(supabaseAdmin, submissionId);
     const replyingUser = await fetchUserDetails(supabaseAdmin, userId);
     const settings = await fetchAgencySettings(supabaseAdmin);
+    console.log("Fetched all required data");
     
     // 5. Save the reply
     await saveReplyToDatabase(supabaseAdmin, submissionId, userId, replyText);
+    console.log("Saved reply to database");
     
     // 6. Send email if SMTP is configured
     const emailContent = prepareEmailContent(submission, replyText, replyingUser, recipientEmail);
     const emailResult = await sendEmailWithSMTP(supabaseAdmin, settings, emailContent);
+    console.log("Email send result:", emailResult ? "Success" : "Not sent");
 
     // 7. Return success response
     return new Response(

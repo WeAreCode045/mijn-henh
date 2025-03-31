@@ -6,7 +6,7 @@ import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 interface EmailRequestBody {
   to: string | string[];
   subject: string;
-  html: string;
+  html?: string;
   text?: string;
   cc?: string | string[];
   bcc?: string | string[];
@@ -38,6 +38,39 @@ serve(async (req) => {
   }
 
   try {
+    // Parse request body
+    let requestBody: EmailRequestBody;
+    try {
+      requestBody = await req.json();
+      console.log("Request body received:", JSON.stringify({
+        to: requestBody.to,
+        subject: requestBody.subject, 
+        hasHtml: !!requestBody.html,
+        hasText: !!requestBody.text
+      }));
+    } catch (e) {
+      console.error("Failed to parse request body:", e);
+      return new Response(
+        JSON.stringify({ error: "Invalid request body format" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    const { to, subject, html, text, cc, bcc, replyTo } = requestBody;
+
+    if (!to || !subject || (!html && !text)) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: to, subject, and either html or text are required" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
     // Get SMTP configuration from the database
     const supabaseClient = createSupabaseClient(req);
     const { data: smtpData, error: smtpError } = await supabaseClient
@@ -71,57 +104,79 @@ serve(async (req) => {
       secure: smtpData.smtp_secure === true,
     };
 
-    // Parse request body
-    const { to, subject, html, text, cc, bcc, replyTo }: EmailRequestBody = await req.json();
+    console.log("SMTP configuration:", JSON.stringify({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      username: smtpConfig.username,
+      from_email: smtpConfig.from_email,
+      from_name: smtpConfig.from_name,
+      secure: smtpConfig.secure
+    }));
 
-    if (!to || !subject || !html) {
+    // Configure SMTP client
+    try {
+      const client = new SMTPClient({
+        connection: {
+          hostname: smtpConfig.host,
+          port: smtpConfig.port,
+          tls: smtpConfig.secure,
+          auth: {
+            username: smtpConfig.username,
+            password: smtpConfig.password,
+          },
+        },
+        debug: {
+          log: true
+        }
+      });
+
+      // Prepare email content
+      const emailContent = {
+        from: smtpConfig.from_name 
+          ? `${smtpConfig.from_name} <${smtpConfig.from_email}>` 
+          : smtpConfig.from_email,
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        content: text,
+        html: html,
+        cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
+        bcc: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : undefined,
+        replyTo: replyTo,
+      };
+
+      console.log("Sending email with content:", JSON.stringify({
+        from: emailContent.from,
+        to: emailContent.to,
+        subject: emailContent.subject,
+        hasHtml: !!emailContent.html,
+        hasContent: !!emailContent.content
+      }));
+
+      // Send email
+      await client.send(emailContent);
+      await client.close();
+
+      console.log("Email sent successfully");
+
       return new Response(
-        JSON.stringify({ error: "Missing required fields: to, subject, and html are required" }),
+        JSON.stringify({ success: true, message: "Email sent successfully" }),
         { 
-          status: 400, 
+          status: 200, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    } catch (emailError) {
+      console.error("Error sending email:", emailError);
+      return new Response(
+        JSON.stringify({ error: `Error sending email: ${emailError.message}` }),
+        { 
+          status: 500, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
         }
       );
     }
-
-    // Configure SMTP client
-    const client = new SMTPClient({
-      connection: {
-        hostname: smtpConfig.host,
-        port: smtpConfig.port,
-        tls: smtpConfig.secure,
-        auth: {
-          username: smtpConfig.username,
-          password: smtpConfig.password,
-        },
-      }
-    });
-
-    // Send email
-    await client.send({
-      from: smtpConfig.from_name 
-        ? `${smtpConfig.from_name} <${smtpConfig.from_email}>` 
-        : smtpConfig.from_email,
-      to: Array.isArray(to) ? to : [to],
-      subject,
-      content: text ? text : undefined,
-      html: html,
-      cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
-      bcc: bcc ? (Array.isArray(bcc) ? bcc : [bcc]) : undefined,
-      replyTo: replyTo,
-    });
-
-    await client.close();
-
-    return new Response(
-      JSON.stringify({ success: true, message: "Email sent successfully" }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
-      }
-    );
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error in send-email-with-smtp function:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Unknown error occurred" }),
       { 
