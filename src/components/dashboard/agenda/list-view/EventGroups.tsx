@@ -1,5 +1,5 @@
 
-import { format, parseISO, isPast, isToday, isSameDay } from "date-fns";
+import { parseISO, format } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { groupEventsByDay } from "./utils";
 import { EventItem } from "./EventItem";
@@ -10,26 +10,22 @@ interface EventGroupsProps {
 }
 
 export function EventGroups({ filteredItems, onItemClick }: EventGroupsProps) {
-  // Group events by day
   const groupedEvents = groupEventsByDay(filteredItems);
   
   return (
-    <div className="space-y-4">
-      {groupedEvents.map((group, groupIndex) => (
-        <div key={group.date.toString()} className="space-y-2">
-          {/* Date header */}
-          <h3 className="text-sm font-medium pt-2 pb-1 border-b">
+    <div className="space-y-6">
+      {groupedEvents.map(group => (
+        <div key={group.date.toISOString()} className="space-y-3">
+          <h3 className="font-medium text-sm text-muted-foreground">
             {format(group.date, "EEEE, MMMM d, yyyy")}
           </h3>
-          
-          {/* Events for this day */}
           <div className="space-y-2">
             {group.items.map(item => (
               <EventItem 
                 key={item.id} 
                 item={item} 
                 onItemClick={onItemClick}
-                showPastEvents={true} // Add the missing prop
+                showPastEvents={true}
               />
             ))}
           </div>

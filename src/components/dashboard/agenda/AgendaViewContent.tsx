@@ -1,12 +1,8 @@
 
-import { Filter } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
-import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaItemList";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { AgendaListView } from "./list-view";
-import { useState } from "react";
 
 interface AgendaViewContentProps {
   view: "list";
@@ -52,6 +48,7 @@ export function AgendaViewContent({
           agendaItems={itemsToDisplay}
           isLoading={isLoading}
           onItemClick={onItemClick}
+          onAddClick={onAddClick}
         />
       )}
     </div>

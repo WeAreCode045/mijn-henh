@@ -14,12 +14,14 @@ interface AgendaListViewProps {
   agendaItems: AgendaItem[];
   isLoading: boolean;
   onItemClick: (item: AgendaItem) => void;
+  onAddClick?: () => void;
 }
 
 export function AgendaListView({ 
   agendaItems, 
   isLoading,
-  onItemClick
+  onItemClick,
+  onAddClick
 }: AgendaListViewProps) {
   const [filterValue, setFilterValue] = useState<string | undefined>("all");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -41,7 +43,7 @@ export function AgendaListView({
           dateRange={dateRange}
           setDateRange={setDateRange}
         />
-        <NoEventsMessage />
+        <NoEventsMessage onAddClick={onAddClick} />
       </div>
     );
   }
@@ -87,7 +89,7 @@ export function AgendaListView({
           filterValue={filterValue}
           setFilterValue={setFilterValue}
         />
-        <NoEventsMessage isFiltered />
+        <NoEventsMessage isFiltered onAddClick={onAddClick} />
       </div>
     );
   }

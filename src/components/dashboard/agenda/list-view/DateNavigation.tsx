@@ -1,12 +1,10 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, addDays, subDays, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
-import { ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
-import { DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils";
+import { DateRange, DayPicker } from "react-day-picker";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { ChevronLeft, ChevronRight, Calendar, CalendarDays } from "lucide-react";
+import { addDays, addMonths, format, isToday, subDays, subMonths } from "date-fns";
+import { useState } from "react";
 
 interface DateNavigationProps {
   selectedDate: Date;
@@ -15,190 +13,119 @@ interface DateNavigationProps {
   setDateRange: (range: DateRange | undefined) => void;
 }
 
-export function DateNavigation({ 
-  selectedDate, 
+export function DateNavigation({
+  selectedDate,
   setSelectedDate,
   dateRange,
   setDateRange
 }: DateNavigationProps) {
-  const [navigationMode, setNavigationMode] = useState<"day" | "month">("day");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
-  // Day navigation
   const goToPreviousDay = () => {
-    setSelectedDate(subDays(selectedDate, 1));
-    // Also update the date range to focus on this day
-    setDateRange({ from: subDays(selectedDate, 1), to: subDays(selectedDate, 1) });
+    const prevDay = subDays(selectedDate, 1);
+    setSelectedDate(prevDay);
+    setDateRange({ from: prevDay, to: prevDay });
   };
   
   const goToNextDay = () => {
-    setSelectedDate(addDays(selectedDate, 1));
-    // Also update the date range to focus on this day
-    setDateRange({ from: addDays(selectedDate, 1), to: addDays(selectedDate, 1) });
+    const nextDay = addDays(selectedDate, 1);
+    setSelectedDate(nextDay);
+    setDateRange({ from: nextDay, to: nextDay });
   };
   
   const goToToday = () => {
     const today = new Date();
     setSelectedDate(today);
-    // Also update the date range to focus on today
     setDateRange({ from: today, to: today });
   };
   
-  // Month navigation
   const goToPreviousMonth = () => {
     const prevMonth = subMonths(selectedDate, 1);
-    const firstDayOfMonth = startOfMonth(prevMonth);
-    
-    setSelectedDate(firstDayOfMonth);
-    setDateRange({ from: firstDayOfMonth, to: endOfMonth(prevMonth) });
-    
-    // Switch navigation mode to month
-    setNavigationMode("month");
+    setSelectedDate(prevMonth);
+    setDateRange({ from: prevMonth, to: prevMonth });
   };
   
   const goToNextMonth = () => {
     const nextMonth = addMonths(selectedDate, 1);
-    const firstDayOfMonth = startOfMonth(nextMonth);
-    
-    setSelectedDate(firstDayOfMonth);
-    setDateRange({ from: firstDayOfMonth, to: endOfMonth(nextMonth) });
-    
-    // Switch navigation mode to month
-    setNavigationMode("month");
+    setSelectedDate(nextMonth);
+    setDateRange({ from: nextMonth, to: nextMonth });
   };
   
-  // Date picker change handler
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date);
-      setDateRange({ from: date, to: date });
-      
-      // Switch navigation mode to day when selecting a specific date
-      setNavigationMode("day");
-    }
-  };
-  
-  // Date range picker change handler
-  const handleDateRangeSelect = (range: DateRange | undefined) => {
-    if (range && range.from) {
+  const handleSelectRange = (range: DateRange | undefined) => {
+    if (range) {
       setDateRange(range);
-      setSelectedDate(range.from);
+      if (range.from) {
+        setSelectedDate(range.from);
+      }
+      setIsCalendarOpen(false);
     }
   };
   
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">
-          {navigationMode === "day" 
-            ? format(selectedDate, "EEEE, MMMM d, yyyy") 
-            : format(selectedDate, "MMMM yyyy")}
-        </h3>
-        
-        <div className="flex items-center space-x-4">
-          {/* Day navigation */}
-          <div className="border rounded-md flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-9 w-9 rounded-l-md"
-              onClick={goToPreviousDay}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-9 font-normal hover:bg-transparent"
-              onClick={goToToday}
-            >
-              Today
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-9 w-9 rounded-r-md"
-              onClick={goToNextDay}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          {/* Month navigation */}
-          <div className="border rounded-md flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-9 w-9 rounded-l-md"
-              onClick={goToPreviousMonth}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-9 font-normal hover:bg-transparent"
-              onClick={() => {
-                const firstDayOfMonth = startOfMonth(new Date());
-                setSelectedDate(firstDayOfMonth);
-                setDateRange({ from: firstDayOfMonth, to: endOfMonth(firstDayOfMonth) });
-                setNavigationMode("month");
-              }}
-            >
-              This Month
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="h-9 w-9 rounded-r-md"
-              onClick={goToNextMonth}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+    <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center">
+      {/* Day navigation */}
+      <div className="flex items-center space-x-2">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={goToPreviousDay}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button 
+          variant="outline" 
+          className={isToday(selectedDate) ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
+          onClick={goToToday}
+        >
+          {format(selectedDate, "EEEE, d MMM")}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={goToNextDay}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
       
-      {/* Date picker for manual selection */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <CalendarIcon className="h-4 w-4" />
-                {dateRange?.from ? (
-                  dateRange.to && dateRange.from !== dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
-                    </>
-                  ) : (
-                    format(dateRange.from, "LLL dd, y")
-                  )
-                ) : (
-                  "Select date"
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={selectedDate}
-                selected={dateRange}
-                onSelect={handleDateRangeSelect}
-                numberOfMonths={2}
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+      {/* Month navigation and calendar picker */}
+      <div className="flex items-center space-x-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={goToPreviousMonth}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        
+        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              <span>{format(selectedDate, "MMMM yyyy")}</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <DayPicker
+              mode="range"
+              selected={dateRange}
+              onSelect={handleSelectRange}
+              initialFocus
+              numberOfMonths={2}
+            />
+          </PopoverContent>
+        </Popover>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={goToNextMonth}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
