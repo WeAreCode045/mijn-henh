@@ -10,7 +10,7 @@ import { format } from "date-fns";
 
 export function CompactNotificationsBar() {
   const [startIndex, setStartIndex] = useState(0);
-  const { notifications } = useNotifications();
+  const { notifications, deleteNotification, markAsRead } = useNotifications();
   
   // Reset start index when notifications change
   useEffect(() => {
@@ -19,7 +19,12 @@ export function CompactNotificationsBar() {
   
   // Delete a notification
   const handleDeleteNotification = (id: string) => {
-    // This will be handled by the useNotifications hook now
+    deleteNotification(id);
+  };
+
+  // Mark a notification as read
+  const handleMarkAsRead = (id: string) => {
+    markAsRead(id);
   };
 
   const handlePrevious = () => {
@@ -76,13 +81,17 @@ export function CompactNotificationsBar() {
         ) : (
           <div 
             key={currentNotification.id} 
-            className="p-3 bg-white/10 rounded-md relative border border-white/20"
+            className="p-3 bg-white/10 rounded-md relative border border-white/20 cursor-pointer"
+            onClick={() => handleMarkAsRead(currentNotification.id)}
           >
             <Button
               variant="ghost"
               size="icon"
               className="h-6 w-6 absolute top-1 right-1 text-white/70 hover:text-white hover:bg-white/10"
-              onClick={() => handleDeleteNotification(currentNotification.id)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the markAsRead
+                handleDeleteNotification(currentNotification.id);
+              }}
             >
               <X className="h-3 w-3" />
             </Button>
@@ -97,6 +106,9 @@ export function CompactNotificationsBar() {
             <p className="text-xs text-white/50 mt-1">
               {format(currentNotification.date, "PPp")}
             </p>
+            {!currentNotification.read && (
+              <div className="absolute top-3 right-8 h-2 w-2 rounded-full bg-blue-400"></div>
+            )}
           </div>
         )}
       </CardContent>
