@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useSubmissions } from "../communications/hooks";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -29,23 +30,34 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
 
+  // Use the property ID to fetch submissions for this specific property only
   useEffect(() => {
     fetchContactSubmissions();
   }, [property.id]);
 
   const fetchContactSubmissions = async () => {
-    if (!property.id) return;
+    // Validate that we have a valid property ID before making the query
+    if (!property.id || property.id.trim() === '') {
+      setLoading(false);
+      setContacts([]);
+      return;
+    }
     
     setLoading(true);
     try {
+      console.log("Fetching submissions for property ID:", property.id);
       const { data, error } = await supabase
         .from('property_contact_submissions')
         .select('*')
-        .eq('property_id', property.id)
+        .eq('property_id', property.id) // Filter by the property ID
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching contact submissions:', error);
+        throw error;
+      }
       
+      console.log(`Found ${data?.length || 0} submissions for property ID: ${property.id}`);
       setContacts(data as ContactSubmission[]);
     } catch (error) {
       console.error('Error fetching contact submissions:', error);
