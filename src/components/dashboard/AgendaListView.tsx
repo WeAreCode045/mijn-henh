@@ -1,5 +1,4 @@
-
-import { format, isToday, parseISO } from "date-fns";
+import { format, isToday, parseISO, isPast } from "date-fns";
 import { CalendarIcon, Clock, Home } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
@@ -35,8 +34,23 @@ export function AgendaListView({
     );
   }
 
+  // Filter out past items, keeping today's items
+  const currentAndFutureItems = agendaItems.filter(item => {
+    if (!item.event_date) return true;
+    const eventDate = parseISO(item.event_date);
+    return isToday(eventDate) || !isPast(eventDate);
+  });
+
+  if (currentAndFutureItems.length === 0) {
+    return (
+      <div className="text-center py-6 text-muted-foreground">
+        No upcoming events scheduled
+      </div>
+    );
+  }
+
   // Sort by date and time
-  const sortedItems = [...agendaItems].sort((a, b) => {
+  const sortedItems = [...currentAndFutureItems].sort((a, b) => {
     try {
       if (!a.event_date || !b.event_date) return 0;
       

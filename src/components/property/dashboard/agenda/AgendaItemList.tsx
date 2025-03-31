@@ -1,5 +1,4 @@
-
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isPast, isToday } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgendaItem } from "./types";
@@ -26,7 +25,14 @@ export function AgendaItemList({
     );
   }
 
-  if (filteredAgendaItems.length === 0) {
+  const currentAndFutureItems = filteredAgendaItems.filter(item => {
+    if (!item.event_date) return true; // Keep items without a date
+    
+    const eventDate = parseISO(item.event_date);
+    return isToday(eventDate) || !isPast(eventDate); // Keep today's and future items
+  });
+
+  if (currentAndFutureItems.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         No agenda items found for the selected period.
@@ -36,7 +42,7 @@ export function AgendaItemList({
 
   return (
     <div className="space-y-2">
-      {filteredAgendaItems.map((item) => {
+      {currentAndFutureItems.map((item) => {
         const eventDate = parseISO(item.event_date);
         const formattedDate = format(eventDate, "MMM d, yyyy");
         
