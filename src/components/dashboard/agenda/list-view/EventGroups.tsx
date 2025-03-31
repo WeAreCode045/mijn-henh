@@ -23,7 +23,7 @@ export function EventGroups({
         groupedEvents.map(group => (
           <div key={group.date.toISOString()} className="space-y-3">
             <h3 className="font-medium text-sm text-muted-foreground">
-              {format(group.date, "EEEE, MMMM d, yyyy")}
+              {format(group.date, "EEEE, d MMMM, yyyy")}
             </h3>
             <div className="space-y-2">
               {group.items.map(item => (
