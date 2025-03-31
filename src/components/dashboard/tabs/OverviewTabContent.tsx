@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecentProperties } from "../RecentProperties";
 import { TodoSection } from "../TodoSection";
 import { RecentSubmissions } from "../RecentSubmissions";
-import { NotificationsBar } from "../NotificationsBar";
+import { CompactNotificationsBar } from "../CompactNotificationsBar";
 
 export function OverviewTabContent() {
   return (
@@ -35,14 +35,7 @@ export function OverviewTabContent() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-          </CardHeader>
-          <CardContent className="max-h-[300px] overflow-y-auto">
-            <NotificationsBar />
-          </CardContent>
-        </Card>
+        <CompactNotificationsBar />
       </div>
 
       {/* Original content */}
