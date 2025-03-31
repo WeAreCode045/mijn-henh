@@ -3,6 +3,7 @@ import React from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { EventItem } from "./EventItem";
 import { format } from "date-fns";
+import { Draggable } from "@hello-pangea/dnd";
 
 interface DayColumnProps {
   date: Date;
@@ -12,6 +13,8 @@ interface DayColumnProps {
   formatEventTime: (startTime: string, endTime?: string | null) => string;
   getEventColor: (eventType: string) => string;
   onItemClick: (item: AgendaItem) => void;
+  itemBeingDragged: string | null;
+  setItemBeingDragged: (id: string | null) => void;
 }
 
 export function DayColumn({
@@ -21,7 +24,9 @@ export function DayColumn({
   getEventDuration,
   formatEventTime,
   getEventColor,
-  onItemClick
+  onItemClick,
+  itemBeingDragged,
+  setItemBeingDragged
 }: DayColumnProps) {
   const isToday = new Date().toDateString() === date.toDateString();
   const dayName = format(date, "EEE");
@@ -47,22 +52,46 @@ export function DayColumn({
         ))}
         
         {/* Events */}
-        {events.map((event) => {
+        {events.map((event, index) => {
           const position = getEventPosition(event.event_time);
           const duration = getEventDuration(event.event_time, event.end_time);
           const timeLabel = formatEventTime(event.event_time, event.end_time);
           const color = getEventColor(event.title); // Using title as a simple way to get color variation
           
           return (
-            <EventItem 
+            <Draggable
               key={event.id}
-              event={event}
-              position={position}
-              duration={duration}
-              color={color}
-              timeLabel={timeLabel}
-              onClick={() => onItemClick(event)}
-            />
+              draggableId={event.id}
+              index={index}
+            >
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  style={{
+                    ...provided.draggableProps.style,
+                    position: 'absolute',
+                    top: `${position}px`,
+                    height: `${Math.max(duration, 25)}px`,
+                    left: 1,
+                    right: 1,
+                  }}
+                  onMouseDown={() => setItemBeingDragged(event.id)}
+                  onMouseUp={() => setItemBeingDragged(null)}
+                >
+                  <EventItem 
+                    event={event}
+                    position={0}
+                    duration={duration}
+                    color={color}
+                    timeLabel={timeLabel}
+                    onClick={() => onItemClick(event)}
+                    isDragging={snapshot.isDragging || itemBeingDragged === event.id}
+                  />
+                </div>
+              )}
+            </Draggable>
           );
         })}
       </div>

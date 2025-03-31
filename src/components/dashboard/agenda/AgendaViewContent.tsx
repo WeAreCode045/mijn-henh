@@ -7,7 +7,7 @@ import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaIte
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
-import { isToday, parseISO, isPast, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { isToday, parseISO, isPast, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay } from "date-fns";
 
 interface AgendaViewContentProps {
   view: "list";
@@ -43,6 +43,9 @@ export function AgendaViewContent({
   if (timeFilter) {
     itemsToDisplay = filterByTimeRange(itemsToDisplay, timeFilter);
   }
+  
+  // Group events by day for the list view
+  const groupedEvents = groupEventsByDay(itemsToDisplay);
   
   // Handle time filter change
   const handleTimeFilterChange = (value: string) => {
@@ -89,6 +92,7 @@ export function AgendaViewContent({
           filteredAgendaItems={itemsToDisplay}
           isLoading={isLoading}
           onItemClick={onItemClick}
+          groupedEvents={groupedEvents}
         />
       )}
     </div>
@@ -130,4 +134,38 @@ function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
         return true;
     }
   });
+}
+
+// Helper function to group events by day
+function groupEventsByDay(events: AgendaItem[]) {
+  const groupedEvents: { date: Date; items: AgendaItem[] }[] = [];
+  
+  // Sort events chronologically first
+  const sortedEvents = [...events].sort((a, b) => {
+    if (!a.event_date || !b.event_date) return 0;
+    const dateA = parseISO(a.event_date);
+    const dateB = parseISO(b.event_date);
+    return dateA.getTime() - dateB.getTime();
+  });
+  
+  // Group by day
+  sortedEvents.forEach(event => {
+    if (!event.event_date) return;
+    
+    const eventDate = parseISO(event.event_date);
+    const existingGroup = groupedEvents.find(group => 
+      isSameDay(group.date, eventDate)
+    );
+    
+    if (existingGroup) {
+      existingGroup.items.push(event);
+    } else {
+      groupedEvents.push({
+        date: eventDate,
+        items: [event]
+      });
+    }
+  });
+  
+  return groupedEvents;
 }

@@ -1,5 +1,5 @@
 
-import { format, isToday, parseISO, isPast } from "date-fns";
+import { format, isToday, parseISO, isPast, isSameDay } from "date-fns";
 import { CalendarIcon, Clock, Home, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
@@ -111,7 +111,28 @@ export function AgendaListView({
     }
   });
 
-  console.log("AgendaListView - sortedItems:", sortedItems);
+  // Group events by date for the selected filter
+  const groupedEvents: { date: Date; items: AgendaItem[] }[] = [];
+  
+  sortedItems.forEach(item => {
+    if (!item.event_date) return;
+    
+    const itemDate = parseISO(item.event_date);
+    
+    // Find if we already have a group for this date
+    const existingGroup = groupedEvents.find(group => 
+      isSameDay(group.date, itemDate)
+    );
+    
+    if (existingGroup) {
+      existingGroup.items.push(item);
+    } else {
+      groupedEvents.push({
+        date: itemDate,
+        items: [item]
+      });
+    }
+  });
 
   return (
     <div className="space-y-4">
@@ -146,69 +167,76 @@ export function AgendaListView({
         </div>
       </div>
     
-      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-        {sortedItems.map((item) => {
-          try {
-            const eventDate = parseISO(item.event_date);
-            const isCurrentDay = isToday(eventDate);
-            const isPastEvent = isPast(eventDate) && !isCurrentDay;
+      <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+        {groupedEvents.map((group, groupIndex) => (
+          <div key={group.date.toString()} className="space-y-2">
+            {/* Date header */}
+            {(groupIndex === 0 || !isSameDay(group.date, groupedEvents[groupIndex - 1]?.date)) && (
+              <h3 className="text-sm font-medium pt-2 pb-1 border-b">
+                {format(group.date, "EEEE, MMMM d, yyyy")}
+              </h3>
+            )}
             
-            return (
-              <div 
-                key={item.id} 
-                className={`p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${isPastEvent ? 'opacity-70' : ''}`}
-                onClick={() => onItemClick(item)}
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="flex flex-col items-center justify-center min-w-[40px] h-10 bg-accent rounded-md">
-                    <span className="text-xs font-medium">{format(eventDate, "dd")}</span>
-                    <span className="text-xs">{format(eventDate, "MMM")}</span>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <div className="flex items-center">
-                      <h4 className="font-medium">{item.title}</h4>
-                      {isCurrentDay && (
-                        <Badge variant="outline" className="ml-2 text-xs bg-primary/10">Today</Badge>
-                      )}
-                      {isPastEvent && showPastEvents && (
-                        <Badge variant="outline" className="ml-2 text-xs bg-muted/30">Past</Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center text-xs text-muted-foreground gap-2">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{item.event_time?.substring(0, 5) || "00:00"}</span>
+            {/* Events list */}
+            {group.items.map((item) => {
+              try {
+                const eventDate = parseISO(item.event_date);
+                const isCurrentDay = isToday(eventDate);
+                const isPastEvent = isPast(eventDate) && !isCurrentDay;
+                
+                return (
+                  <div 
+                    key={item.id} 
+                    className={`p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${isPastEvent ? 'opacity-70' : ''}`}
+                    onClick={() => onItemClick(item)}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="flex flex-col items-center justify-center min-w-[48px] h-12 bg-accent rounded-md">
+                        <span className="text-base font-medium">{format(eventDate, "dd")}</span>
+                        <span className="text-xs">{format(eventDate, "MMM")}</span>
                       </div>
                       
-                      <div className="flex items-center gap-1">
-                        <CalendarIcon className="h-3 w-3" />
-                        <span>{format(eventDate, "EEEE, MMM d")}</span>
-                      </div>
-                      
-                      {item.property && (
-                        <div className="flex items-center gap-1">
-                          <Home className="h-3 w-3" />
-                          <span className="truncate max-w-[100px]">{item.property.title}</span>
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center">
+                          <h4 className="font-medium">{item.title}</h4>
+                          {isCurrentDay && (
+                            <Badge variant="outline" className="ml-2 text-xs bg-primary/10">Today</Badge>
+                          )}
+                          {isPastEvent && showPastEvents && (
+                            <Badge variant="outline" className="ml-2 text-xs bg-muted/30">Past</Badge>
+                          )}
                         </div>
-                      )}
+                        
+                        <div className="flex items-center text-xs text-muted-foreground gap-2">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{item.event_time?.substring(0, 5) || "00:00"}</span>
+                          </div>
+                          
+                          {item.property && (
+                            <div className="flex items-center gap-1">
+                              <Home className="h-3 w-3" />
+                              <span className="truncate max-w-[100px]">{item.property.title}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    
-                    {item.description && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                        {item.description}
-                      </p>
-                    )}
                   </div>
-                </div>
-              </div>
-            );
-          } catch (error) {
-            console.error("Error rendering item:", error, item);
-            return null;
-          }
-        }).filter(Boolean)}
+                );
+              } catch (error) {
+                console.error("Error rendering item:", error, item);
+                return null;
+              }
+            }).filter(Boolean)}
+          </div>
+        ))}
       </div>
     </div>
   );

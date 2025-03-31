@@ -12,6 +12,7 @@ import { ViewAgendaItemDialog } from "@/components/property/dashboard/agenda/Vie
 import { AddEditAgendaDialog } from "@/components/property/dashboard/agenda/AddEditAgendaDialog";
 import { useAgendaDialogs } from "@/components/property/dashboard/agenda/useAgendaDialogs";
 import { AgendaDialogs } from "../agenda/AgendaDialogs";
+import { format } from "date-fns";
 
 interface AgendaTabContentProps {
   onTabChange: (value: string) => void;
@@ -66,6 +67,28 @@ export function AgendaTabContent({
     
     handleAddButtonClick(mockEvent);
     if (onAddClick) onAddClick();
+  };
+  
+  // Handle event update from drag and drop
+  const handleEventUpdate = async (item: AgendaItem, newDate: string, newTime: string) => {
+    if (item) {
+      try {
+        await updateAgendaItem(
+          item.id,
+          item.title,
+          item.description,
+          newDate,
+          newTime,
+          item.end_date,
+          item.end_time,
+          item.additional_users
+        );
+        
+        console.log(`Event updated via drag & drop: ${item.title} moved to ${format(new Date(`${newDate}T${newTime}`), 'PPpp')}`);
+      } catch (error) {
+        console.error("Error updating event via drag & drop:", error);
+      }
+    }
   };
   
   // Handle CRUD operations
@@ -127,6 +150,7 @@ export function AgendaTabContent({
             agendaItems={safeAgendaItems}
             isLoading={isLoading}
             onItemClick={handleItemClick}
+            onEventUpdate={handleEventUpdate}
           />
         </TabsContent>
         
