@@ -17,9 +17,7 @@ export function useDndContext(
     setItemBeingDragged(null);
     
     // If there's no destination or it's the same as source, do nothing
-    if (!destination || 
-        (destination.droppableId === source.droppableId && 
-         destination.index === source.index)) {
+    if (!destination) {
       return;
     }
     

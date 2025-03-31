@@ -35,8 +35,8 @@ export function AgendaTabContent({
   onItemClick = () => {},
   onAddClick = () => {}
 }: AgendaTabContentProps) {
-  // Set up state for active tab (defaulting to "weekly")
-  const [activeTab, setActiveTab] = useState("weekly");
+  // Set up state for active tab (defaulting to "list" instead of "weekly")
+  const [activeTab, setActiveTab] = useState("list");
   
   // Use the dialog hooks to manage agenda item dialogs
   const dialogProps = useAgendaDialogs();
@@ -145,7 +145,7 @@ export function AgendaTabContent({
       />
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsContent value="weekly" className="mt-0">
+        <TabsContent value="agenda" className="mt-0">
           <WeeklyCalendarView
             agendaItems={safeAgendaItems}
             isLoading={isLoading}

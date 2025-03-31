@@ -1,15 +1,28 @@
 
-import { format, parseISO, isToday, isSameDay } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { format, isToday, parseISO, isPast, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay } from "date-fns";
 
 // Filter events based on time range
 export function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
-  if (range === 'all') {
-    return items; // Return all items without filtering when "all" is selected
-  }
-  
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  // Special case for "all" - return only upcoming events
+  if (range === 'all') {
+    return items.filter(item => {
+      if (!item.event_date) return false;
+      const eventDate = parseISO(item.event_date);
+      return eventDate >= startOfDay(now);
+    });
+  }
+
+  // Special case for "past" - return only past events
+  if (range === 'past') {
+    return items.filter(item => {
+      if (!item.event_date) return false;
+      const eventDate = parseISO(item.event_date);
+      return eventDate < startOfDay(now);
+    });
+  }
   
   return items.filter(item => {
     if (!item.event_date) return false;
@@ -20,22 +33,21 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
       case 'day':
         return isToday(eventDate);
       case 'week': {
-        // Calculate start of week (Sunday) and end of week (Saturday)
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay()); // Go to Sunday
+        // Get start of week (Monday) and end of week (Sunday)
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
         
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6); // Go to Saturday
-        
-        return eventDate >= startOfWeek && eventDate <= endOfWeek;
+        return eventDate >= weekStart && eventDate <= weekEnd;
       }
       case 'month': {
-        // Check if in current month
-        return eventDate.getMonth() === today.getMonth() && 
-               eventDate.getFullYear() === today.getFullYear();
+        // Get start and end of month
+        const monthStart = startOfMonth(now);
+        const monthEnd = endOfMonth(now);
+        
+        return eventDate >= monthStart && eventDate <= monthEnd;
       }
       default:
-        return true;
+        return !isPast(eventDate);
     }
   });
 }
@@ -72,4 +84,11 @@ export function groupEventsByDay(events: AgendaItem[]) {
   });
   
   return groupedEvents;
+}
+
+// Get start of current day
+export function startOfDay(date: Date): Date {
+  const newDate = new Date(date);
+  newDate.setHours(0, 0, 0, 0);
+  return newDate;
 }

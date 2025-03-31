@@ -19,21 +19,12 @@ export function FilterControls({
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-2">
       <div className="flex items-center gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1"
-          onClick={() => setShowPastEvents(!showPastEvents)}
-        >
-          <History className="h-4 w-4" />
-          {showPastEvents ? "Hide past events" : "Show past events"}
-        </Button>
-        
         <ToggleGroup type="single" value={filterValue} onValueChange={setFilterValue}>
-          <ToggleGroupItem value="day" size="sm">Day</ToggleGroupItem>
-          <ToggleGroupItem value="week" size="sm">Week</ToggleGroupItem>
-          <ToggleGroupItem value="month" size="sm">Month</ToggleGroupItem>
-          <ToggleGroupItem value="all" size="sm">All</ToggleGroupItem>
+          <ToggleGroupItem value="past" size="sm">Past</ToggleGroupItem>
+          <ToggleGroupItem value="day" size="sm">Today</ToggleGroupItem>
+          <ToggleGroupItem value="week" size="sm">This Week</ToggleGroupItem>
+          <ToggleGroupItem value="month" size="sm">This Month</ToggleGroupItem>
+          <ToggleGroupItem value="all" size="sm">Upcoming</ToggleGroupItem>
         </ToggleGroup>
         
         {filterValue && (

@@ -16,26 +16,31 @@ export function EventGroups({ filteredItems, onItemClick, showPastEvents }: Even
   
   return (
     <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
-      {groupedEvents.map((group, groupIndex) => (
-        <div key={group.date.toString()} className="space-y-2">
-          {/* Date header */}
-          {(groupIndex === 0 || !isSameDay(group.date, groupedEvents[groupIndex - 1]?.date)) && (
-            <h3 className="text-sm font-medium pt-2 pb-1 border-b">
-              {format(group.date, "EEEE, MMMM d, yyyy")}
-            </h3>
-          )}
-          
-          {/* Events list */}
-          {group.items.map((item) => (
-            <EventItem 
-              key={item.id}
-              item={item}
-              onItemClick={onItemClick}
-              showPastEvents={showPastEvents}
-            />
-          ))}
-        </div>
-      ))}
+      {groupedEvents.map((group, groupIndex) => {
+        const isPastGroup = isPast(group.date) && !isToday(group.date);
+        
+        return (
+          <div key={group.date.toString()} className="space-y-2">
+            {/* Date header - only show for future events or if explicitly showing past events */}
+            {(!isPastGroup || showPastEvents) && 
+              (groupIndex === 0 || !isSameDay(group.date, groupedEvents[groupIndex - 1]?.date)) && (
+                <h3 className="text-sm font-medium pt-2 pb-1 border-b">
+                  {format(group.date, "EEEE, MMMM d, yyyy")}
+                </h3>
+            )}
+            
+            {/* Events list */}
+            {group.items.map((item) => (
+              <EventItem 
+                key={item.id}
+                item={item}
+                onItemClick={onItemClick}
+                showPastEvents={showPastEvents}
+              />
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
