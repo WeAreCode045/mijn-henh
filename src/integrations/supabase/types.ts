@@ -29,6 +29,10 @@ export type Database = {
           id: string
           instagram_url: string | null
           logo_url: string | null
+          mailjet_api_key: string | null
+          mailjet_api_secret: string | null
+          mailjet_from_email: string | null
+          mailjet_from_name: string | null
           name: string
           openai_api_key: string | null
           phone: string | null
@@ -64,6 +68,10 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           logo_url?: string | null
+          mailjet_api_key?: string | null
+          mailjet_api_secret?: string | null
+          mailjet_from_email?: string | null
+          mailjet_from_name?: string | null
           name: string
           openai_api_key?: string | null
           phone?: string | null
@@ -99,6 +107,10 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           logo_url?: string | null
+          mailjet_api_key?: string | null
+          mailjet_api_secret?: string | null
+          mailjet_from_email?: string | null
+          mailjet_from_name?: string | null
           name?: string
           openai_api_key?: string | null
           phone?: string | null

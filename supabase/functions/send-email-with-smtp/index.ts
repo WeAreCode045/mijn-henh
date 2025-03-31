@@ -1,232 +1,219 @@
 
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
 
-// Define the expected request body structure
-interface EmailRequestBody {
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+import { createTransport } from "https://esm.sh/nodemailer@6.9.1"
+import * as Mailjet from "https://esm.sh/node-mailjet@3.3.1"
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+interface EmailMessage {
   to: string | string[];
+  cc?: string | string[];
   subject: string;
   html?: string;
   text?: string;
-  cc?: string | string[];
-  bcc?: string | string[];
-  replyTo?: string;
+  from?: string;
+  fromName?: string;
 }
 
-// Define the Mailjet configuration structure
-interface MailjetConfig {
-  api_key: string;
-  api_secret: string;
-  from_email: string;
-  from_name: string;
+interface Settings {
+  smtpHost?: string;
+  smtpPort?: string;
+  smtpUsername?: string;
+  smtpPassword?: string;
+  smtpFromEmail?: string;
+  smtpFromName?: string;
+  smtpSecure?: boolean;
+  mailjetApiKey?: string;
+  mailjetApiSecret?: string;
+  mailjetFromEmail?: string;
+  mailjetFromName?: string;
 }
 
-// CORS headers for cross-origin requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-};
+async function sendWithMailjet(settings: Settings, message: EmailMessage) {
+  if (!settings.mailjetApiKey || !settings.mailjetApiSecret) {
+    throw new Error('Mailjet API key or secret missing');
+  }
+
+  const fromEmail = message.from || settings.mailjetFromEmail;
+  const fromName = message.fromName || settings.mailjetFromName;
+
+  if (!fromEmail) {
+    throw new Error('From email is required for Mailjet');
+  }
+
+  const mailjet = Mailjet.connect(
+    settings.mailjetApiKey,
+    settings.mailjetApiSecret
+  );
+
+  // Prepare recipients
+  let recipients = [];
+  if (Array.isArray(message.to)) {
+    recipients = message.to.map(email => ({ Email: email }));
+  } else {
+    recipients = [{ Email: message.to }];
+  }
+
+  // Prepare CC recipients if they exist
+  let ccRecipients = [];
+  if (message.cc) {
+    if (Array.isArray(message.cc)) {
+      ccRecipients = message.cc.map(email => ({ Email: email }));
+    } else {
+      ccRecipients = [{ Email: message.cc }];
+    }
+  }
+
+  const request = mailjet.post("send", { version: "v3.1" }).request({
+    Messages: [
+      {
+        From: {
+          Email: fromEmail,
+          Name: fromName || fromEmail
+        },
+        To: recipients,
+        Cc: ccRecipients.length > 0 ? ccRecipients : undefined,
+        Subject: message.subject,
+        TextPart: message.text || "",
+        HTMLPart: message.html || message.text || ""
+      }
+    ]
+  });
+
+  const response = await request;
+  console.log('Mailjet response:', response);
+  return response;
+}
+
+async function sendWithSMTP(settings: Settings, message: EmailMessage) {
+  if (!settings.smtpHost || !settings.smtpPort || !settings.smtpUsername || !settings.smtpPassword) {
+    throw new Error('SMTP credentials missing');
+  }
+
+  const fromEmail = message.from || settings.smtpFromEmail;
+  const fromName = message.fromName || settings.smtpFromName;
+
+  if (!fromEmail) {
+    throw new Error('From email is required for SMTP');
+  }
+
+  // Create SMTP transporter
+  const transporter = createTransport({
+    host: settings.smtpHost,
+    port: parseInt(settings.smtpPort),
+    secure: settings.smtpSecure || false,
+    auth: {
+      user: settings.smtpUsername,
+      pass: settings.smtpPassword,
+    },
+  });
+
+  // Send email
+  const info = await transporter.sendMail({
+    from: fromName ? `"${fromName}" <${fromEmail}>` : fromEmail,
+    to: message.to,
+    cc: message.cc,
+    subject: message.subject,
+    text: message.text,
+    html: message.html,
+  });
+
+  console.log('SMTP Message sent: %s', info.messageId);
+  return info;
+}
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders, status: 204 });
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
   }
 
   try {
     // Parse request body
-    let requestBody: EmailRequestBody;
-    try {
-      requestBody = await req.json();
-      console.log("Request body received:", JSON.stringify({
-        to: requestBody.to,
-        subject: requestBody.subject, 
-        hasHtml: !!requestBody.html,
-        hasText: !!requestBody.text
-      }));
-    } catch (e) {
-      console.error("Failed to parse request body:", e);
-      return new Response(
-        JSON.stringify({ error: "Invalid request body format" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
-    }
+    const requestData = await req.json();
+    const { message, settings } = requestData;
 
-    const { to, subject, html, text, cc, bcc, replyTo } = requestBody;
+    console.log('Received email request:', {
+      to: message.to,
+      subject: message.subject
+    });
+    console.log('Available settings:', {
+      smtp: !!settings.smtpHost,
+      mailjet: !!settings.mailjetApiKey
+    });
 
-    if (!to || !subject || (!html && !text)) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: to, subject, and either html or text are required" }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
-    }
-
-    // Get Mailjet configuration from the database
-    const supabaseClient = createSupabaseClient(req);
-    const { data: mailjetData, error: mailjetError } = await supabaseClient
-      .from('agency_settings')
-      .select('mailjet_api_key, mailjet_api_secret, mailjet_from_email, mailjet_from_name')
-      .maybeSingle();
-
-    if (mailjetError) {
-      throw new Error(`Error fetching Mailjet settings: ${mailjetError.message}`);
-    }
-
-    if (!mailjetData || !mailjetData.mailjet_api_key || !mailjetData.mailjet_api_secret) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Mailjet is not configured. Please set up Mailjet settings in the Mail tab of Settings." 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
-    }
-
-    const mailjetConfig: MailjetConfig = {
-      api_key: mailjetData.mailjet_api_key,
-      api_secret: mailjetData.mailjet_api_secret,
-      from_email: mailjetData.mailjet_from_email || "",
-      from_name: mailjetData.mailjet_from_name || "",
-    };
-
-    console.log("Mailjet configuration:", JSON.stringify({
-      api_key_length: mailjetConfig.api_key.length,
-      api_secret_length: mailjetConfig.api_secret.length,
-      from_email: mailjetConfig.from_email,
-      from_name: mailjetConfig.from_name
-    }));
-    
-    // Send email using Mailjet API directly with fetch
-    try {
-      const recipients = Array.isArray(to) ? to.map(email => ({ Email: email })) : [{ Email: to }];
-      
-      const ccRecipients = cc ? (Array.isArray(cc) ? cc.map(email => ({ Email: email })) : [{ Email: cc }]) : [];
-      const bccRecipients = bcc ? (Array.isArray(bcc) ? bcc.map(email => ({ Email: email })) : [{ Email: bcc }]) : [];
-      
-      const fromEmail = mailjetConfig.from_email;
-      const fromName = mailjetConfig.from_name || "";
-      
-      const mailjetPayload = {
-        Messages: [
+    // First try Mailjet if configured
+    if (settings.mailjetApiKey && settings.mailjetApiSecret) {
+      try {
+        console.log('Attempting to send via Mailjet');
+        const result = await sendWithMailjet(settings, message);
+        return new Response(
+          JSON.stringify({ success: true, provider: 'mailjet', result }),
           {
-            From: {
-              Email: fromEmail,
-              Name: fromName
-            },
-            To: recipients,
-            Cc: ccRecipients,
-            Bcc: bccRecipients,
-            Subject: subject,
-            TextPart: text || undefined,
-            HTMLPart: html || undefined,
-            Headers: replyTo ? { "Reply-To": replyTo } : undefined
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
-        ]
-      };
-
-      console.log("Sending email via Mailjet with payload:", JSON.stringify({
-        from: `${fromName} <${fromEmail}>`,
-        to: Array.isArray(to) ? to : [to],
-        subject: subject,
-        hasHtml: !!html,
-        hasText: !!text
-      }));
-
-      const mailjetResponse = await fetch("https://api.mailjet.com/v3.1/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Basic ${btoa(`${mailjetConfig.api_key}:${mailjetConfig.api_secret}`)}`
-        },
-        body: JSON.stringify(mailjetPayload)
-      });
-      
-      const mailjetResponseData = await mailjetResponse.json();
-      
-      if (!mailjetResponse.ok) {
-        console.error("Mailjet API error:", mailjetResponseData);
-        throw new Error(`Mailjet API error: ${JSON.stringify(mailjetResponseData)}`);
+        );
+      } catch (mailjetError) {
+        console.error('Mailjet error:', mailjetError);
+        
+        // If we have SMTP configured as fallback, try that
+        if (settings.smtpHost) {
+          console.log('Falling back to SMTP');
+          try {
+            const result = await sendWithSMTP(settings, message);
+            return new Response(
+              JSON.stringify({ success: true, provider: 'smtp', result }),
+              {
+                status: 200,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              }
+            );
+          } catch (smtpError) {
+            console.error('SMTP error:', smtpError);
+            throw smtpError; // Re-throw to be caught by outer handler
+          }
+        } else {
+          throw mailjetError; // Re-throw if no fallback
+        }
       }
-      
-      console.log("Email sent successfully via Mailjet:", mailjetResponseData);
-
+    } 
+    // If no Mailjet, try SMTP
+    else if (settings.smtpHost) {
+      console.log('Attempting to send via SMTP');
+      const result = await sendWithSMTP(settings, message);
       return new Response(
-        JSON.stringify({ success: true, message: "Email sent successfully", data: mailjetResponseData }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        JSON.stringify({ success: true, provider: 'smtp', result }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
-    } catch (emailError) {
-      console.error("Error sending email via Mailjet:", emailError);
-      return new Response(
-        JSON.stringify({ error: `Error sending email: ${emailError.message}` }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
+    } else {
+      throw new Error('No email service configured');
     }
   } catch (error) {
-    console.error("Error in send-email-with-smtp function:", error);
+    console.error('Email sending error:', error);
     return new Response(
-      JSON.stringify({ error: error.message || "Unknown error occurred" }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      JSON.stringify({
+        success: false,
+        error: error.message,
+        stack: error.stack,
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }
 });
-
-// Helper function to create a Supabase client from the request
-function createSupabaseClient(req: Request) {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-  
-  // Create a custom fetch function that includes the authorization header
-  const supabaseFetch = (url: string, options: RequestInit = {}) => {
-    const headers = new Headers(options.headers);
-    headers.set("apikey", supabaseKey);
-    headers.set("Authorization", `Bearer ${supabaseKey}`);
-    
-    return fetch(url, {
-      ...options,
-      headers,
-    });
-  };
-  
-  // Simple implementation of the Supabase client for this edge function
-  return {
-    from: (table: string) => ({
-      select: (columns: string) => ({
-        maybeSingle: async () => {
-          try {
-            const response = await supabaseFetch(
-              `${supabaseUrl}/rest/v1/${table}?select=${columns}`,
-              { method: "GET" }
-            );
-            
-            if (!response.ok) {
-              const error = await response.json();
-              return { data: null, error };
-            }
-            
-            const data = await response.json();
-            return { data: data[0] || null, error: null };
-          } catch (error) {
-            return { data: null, error };
-          }
-        }
-      })
-    })
-  };
-}
