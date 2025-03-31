@@ -18,8 +18,7 @@ export function AgendaListView({
   isLoading,
   onItemClick
 }: AgendaListViewProps) {
-  const [showPastEvents, setShowPastEvents] = useState(false);
-  const [filterValue, setFilterValue] = useState<string | undefined>(undefined);
+  const [filterValue, setFilterValue] = useState<string | undefined>("all");
   
   if (isLoading) {
     return <LoadingIndicator />;
@@ -29,18 +28,14 @@ export function AgendaListView({
     return <NoEventsMessage />;
   }
 
-  // Apply time filter (past, day, week, month, all)
-  const filteredItems = filterValue 
-    ? filterByTimeRange(agendaItems, filterValue) 
-    : filterByTimeRange(agendaItems, showPastEvents ? 'past' : 'all');
+  // Apply time filter
+  const filteredItems = filterByTimeRange(agendaItems, filterValue || "all");
 
   // If no items match the filter criteria
   if (filteredItems.length === 0) {
     return (
       <div className="space-y-4">
         <FilterControls 
-          showPastEvents={showPastEvents}
-          setShowPastEvents={setShowPastEvents}
           filterValue={filterValue}
           setFilterValue={setFilterValue}
         />
@@ -52,15 +47,12 @@ export function AgendaListView({
   return (
     <div className="space-y-4">
       <FilterControls 
-        showPastEvents={showPastEvents}
-        setShowPastEvents={setShowPastEvents}
         filterValue={filterValue}
         setFilterValue={setFilterValue}
       />
       <EventGroups 
         filteredItems={filteredItems} 
         onItemClick={onItemClick}
-        showPastEvents={showPastEvents}
       />
     </div>
   );

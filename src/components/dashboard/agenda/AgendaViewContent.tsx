@@ -74,6 +74,8 @@ export function AgendaViewContent({
             <ToggleGroupItem value="week" size="sm">This Week</ToggleGroupItem>
             <ToggleGroupItem value="month" size="sm">This Month</ToggleGroupItem>
             <ToggleGroupItem value="all" size="sm">All</ToggleGroupItem>
+            <ToggleGroupItem value="lastWeek" size="sm">Last Week</ToggleGroupItem>
+            <ToggleGroupItem value="lastMonth" size="sm">Last Month</ToggleGroupItem>
           </ToggleGroup>
         </div>
       </div>
@@ -103,9 +105,13 @@ export function AgendaViewContent({
 function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
   const now = new Date();
   
-  // If "all" is selected, return all items without filtering
-  if (range === 'all') {
-    return items;
+  // Default case: Return only upcoming events
+  if (range === 'all' || !range) {
+    return items.filter(item => {
+      if (!item.event_date) return false;
+      const eventDate = parseISO(item.event_date);
+      return !isPast(eventDate) || isToday(eventDate);
+    });
   }
   
   return items.filter(item => {
@@ -116,22 +122,41 @@ function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
     switch (range) {
       case 'day':
         return isToday(eventDate);
+        
       case 'week': {
         // Get start of week (Monday) and end of week (Sunday)
         const weekStart = startOfWeek(now, { weekStartsOn: 1 });
         const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
         
-        return eventDate >= weekStart && eventDate <= weekEnd;
+        return eventDate >= weekStart && eventDate <= weekEnd && (!isPast(eventDate) || isToday(eventDate));
       }
+      
       case 'month': {
         // Get start and end of month
         const monthStart = startOfMonth(now);
         const monthEnd = endOfMonth(now);
         
-        return eventDate >= monthStart && eventDate <= monthEnd;
+        return eventDate >= monthStart && eventDate <= monthEnd && (!isPast(eventDate) || isToday(eventDate));
       }
+      
+      case 'lastWeek': {
+        // Last week
+        const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+        const lastWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+        
+        return eventDate >= lastWeekStart && eventDate <= lastWeekEnd;
+      }
+      
+      case 'lastMonth': {
+        // Last month
+        const lastMonthStart = startOfMonth(subMonths(now, 1));
+        const lastMonthEnd = endOfMonth(subMonths(now, 1));
+        
+        return eventDate >= lastMonthStart && eventDate <= lastMonthEnd;
+      }
+      
       default:
-        return true;
+        return !isPast(eventDate) || isToday(eventDate);
     }
   });
 }
