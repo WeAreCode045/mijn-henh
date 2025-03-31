@@ -34,12 +34,29 @@ export function useSendResponse() {
 
       // Then try to send email using the Edge Function
       try {
+        // First, get the submission details to include in the response
+        const { data: submission } = await supabase
+          .from("property_contact_submissions")
+          .select("*")
+          .eq("id", submissionId)
+          .single();
+
+        // Get the current user profile for sender information
+        const { data: userProfile } = await supabase.auth.getUser();
+        
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userProfile.user?.id)
+          .single();
+          
+        // Directly call the send-submission-reply function instead
         const { error: fnError } = await supabase.functions.invoke('send-submission-reply', {
           body: {
             submissionId,
             replyText: message,
             propertyId,
-            recipientEmail // Pass recipient email to the edge function
+            recipientEmail: recipientEmail || submission?.email // Use provided email or fall back to submission email
           }
         });
         
