@@ -8,6 +8,10 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AgendaViewContent } from "../agenda/AgendaViewContent";
 import { WeeklyCalendarView } from "../agenda/weekly-calendar";
 import { AgendaHeader } from "../agenda/components/AgendaHeader";
+import { ViewAgendaItemDialog } from "@/components/property/dashboard/agenda/ViewAgendaItemDialog";
+import { AddEditAgendaDialog } from "@/components/property/dashboard/agenda/AddEditAgendaDialog";
+import { useAgendaDialogs } from "@/components/property/dashboard/agenda/useAgendaDialogs";
+import { AgendaDialogs } from "../agenda/AgendaDialogs";
 
 interface AgendaTabContentProps {
   onTabChange: (value: string) => void;
@@ -33,10 +37,74 @@ export function AgendaTabContent({
   // Set up state for active tab (defaulting to "weekly")
   const [activeTab, setActiveTab] = useState("weekly");
   
+  // Use the dialog hooks to manage agenda item dialogs
+  const dialogProps = useAgendaDialogs();
+  const { handleAgendaItemClick, handleAddButtonClick } = dialogProps;
+  
+  // Add state for CRUD operations
+  const { addAgendaItem, updateAgendaItem, deleteAgendaItem } = useAgenda();
+  
   // Handle tab change and propagate to parent
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     onTabChange(value);
+  };
+  
+  // Handle click on agenda item
+  const handleItemClick = (item: AgendaItem) => {
+    handleAgendaItemClick(item);
+    if (onItemClick) onItemClick(item);
+  };
+  
+  // Handle add button click
+  const handleAddClick = () => {
+    handleAddButtonClick(new Event('click') as React.MouseEvent<Element, MouseEvent>);
+    if (onAddClick) onAddClick();
+  };
+  
+  // Handle CRUD operations
+  const handleAddAgendaItem = async () => {
+    if (dialogProps.selectedDate && dialogProps.title) {
+      try {
+        await addAgendaItem(
+          dialogProps.title,
+          dialogProps.description || null,
+          dialogProps.selectedDate.toISOString().split('T')[0],
+          dialogProps.selectedTime,
+          dialogProps.endDate ? dialogProps.endDate.toISOString().split('T')[0] : null,
+          dialogProps.endTime || null,
+          dialogProps.additionalUsers
+        );
+        dialogProps.setIsAddDialogOpen(false);
+      } catch (error) {
+        console.error("Error adding agenda item:", error);
+      }
+    }
+  };
+  
+  const handleDeleteAgendaItem = async () => {
+    if (dialogProps.selectedAgendaItem) {
+      await deleteAgendaItem(dialogProps.selectedAgendaItem.id);
+      dialogProps.setIsViewDialogOpen(false);
+    }
+  };
+  
+  const handleUpdateAgendaItem = async () => {
+    if (dialogProps.selectedAgendaItem && dialogProps.editDate && dialogProps.editTitle) {
+      await updateAgendaItem(
+        dialogProps.selectedAgendaItem.id,
+        dialogProps.editTitle,
+        dialogProps.editDescription || null,
+        dialogProps.editDate.toISOString().split('T')[0],
+        dialogProps.editTime,
+        dialogProps.editEndDate ? dialogProps.editEndDate.toISOString().split('T')[0] : null,
+        dialogProps.editEndTime || null,
+        dialogProps.editAdditionalUsers
+      );
+      
+      dialogProps.setIsEditDialogOpen(false);
+      dialogProps.setIsViewDialogOpen(false);
+    }
   };
   
   return (
@@ -44,7 +112,7 @@ export function AgendaTabContent({
       <AgendaHeader 
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onAddButtonClick={onAddClick}
+        onAddButtonClick={handleAddClick}
       />
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
@@ -52,7 +120,7 @@ export function AgendaTabContent({
           <WeeklyCalendarView
             agendaItems={safeAgendaItems}
             isLoading={isLoading}
-            onItemClick={onItemClick}
+            onItemClick={handleItemClick}
           />
         </TabsContent>
         
@@ -64,11 +132,18 @@ export function AgendaTabContent({
             dateRange={dateRange}
             setDateRange={setDateRange}
             filteredAgendaItems={filteredAgendaItems}
-            onItemClick={onItemClick}
-            onAddClick={onAddClick}
+            onItemClick={handleItemClick}
+            onAddClick={handleAddClick}
           />
         </TabsContent>
       </Tabs>
+      
+      <AgendaDialogs
+        agendaDialogProps={dialogProps}
+        onAddAgendaItem={handleAddAgendaItem}
+        onDeleteAgendaItem={handleDeleteAgendaItem}
+        onUpdateAgendaItem={handleUpdateAgendaItem}
+      />
     </div>
   );
 }
