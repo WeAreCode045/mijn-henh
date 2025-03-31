@@ -57,6 +57,7 @@ export const useAgencySubmit = ({
           icon_build_year: settings.iconBuildYear,
           icon_garages: settings.iconGarages,
           icon_energy_class: settings.iconEnergyClass,
+          // SMTP settings
           smtp_host: settings.smtpHost,
           smtp_port: settings.smtpPort,
           smtp_username: settings.smtpUsername,
@@ -64,6 +65,12 @@ export const useAgencySubmit = ({
           smtp_from_email: settings.smtpFromEmail,
           smtp_from_name: settings.smtpFromName,
           smtp_secure: settings.smtpSecure,
+          // Mailjet settings
+          mailjet_api_key: settings.mailjetApiKey,
+          mailjet_api_secret: settings.mailjetApiSecret,
+          mailjet_from_email: settings.mailjetFromEmail,
+          mailjet_from_name: settings.mailjetFromName,
+          // OpenAI API key
           openai_api_key: settings.openaiApiKey,
           // Make sure we're sending a properly formatted array
           global_features: featureDescriptions
@@ -130,6 +137,7 @@ export const useAgencySubmit = ({
           iconBuildYear: latestSettings.icon_build_year,
           iconGarages: latestSettings.icon_garages,
           iconEnergyClass: latestSettings.icon_energy_class,
+          // SMTP settings
           smtpHost: latestSettings.smtp_host,
           smtpPort: latestSettings.smtp_port,
           smtpUsername: latestSettings.smtp_username,
@@ -137,6 +145,12 @@ export const useAgencySubmit = ({
           smtpFromEmail: latestSettings.smtp_from_email,
           smtpFromName: latestSettings.smtp_from_name,
           smtpSecure: latestSettings.smtp_secure,
+          // Mailjet settings
+          mailjetApiKey: latestSettings.mailjet_api_key,
+          mailjetApiSecret: latestSettings.mailjet_api_secret,
+          mailjetFromEmail: latestSettings.mailjet_from_email,
+          mailjetFromName: latestSettings.mailjet_from_name,
+          // OpenAI API key
           openaiApiKey: latestSettings.openai_api_key,
           globalFeatures: globalFeaturesList
         };

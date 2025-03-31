@@ -8,6 +8,7 @@ import { DesignTab } from "@/components/settings/DesignTab";
 import { AdvancedTab } from "@/components/settings/AdvancedTab";
 import { IconSettings } from "@/components/settings/IconSettings";
 import { GlobalTab } from "@/components/settings/GlobalTab";
+import { MailTab } from "@/components/settings/MailTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>("agency");
@@ -51,6 +52,12 @@ const Settings = () => {
           Advanced
         </Button>
         <Button 
+          onClick={() => setActiveTab("mail")} 
+          variant={activeTab === "mail" ? "default" : "outline"}
+        >
+          Mail
+        </Button>
+        <Button 
           onClick={() => setActiveTab("icons")} 
           variant={activeTab === "icons" ? "default" : "outline"}
         >
@@ -89,6 +96,13 @@ const Settings = () => {
             settings={settings}
             onChange={handleChange}
             onSwitchChange={handleSwitchChange}
+          />
+        )}
+
+        {activeTab === "mail" && (
+          <MailTab
+            settings={settings}
+            onChange={handleChange}
           />
         )}
 

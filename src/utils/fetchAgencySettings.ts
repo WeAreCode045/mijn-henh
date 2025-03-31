@@ -71,6 +71,11 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtpFromEmail: data.smtp_from_email || null,
     smtpFromName: data.smtp_from_name || null,
     smtpSecure: data.smtp_secure || false,
+    // Mailjet settings
+    mailjetApiKey: data.mailjet_api_key || null,
+    mailjetApiSecret: data.mailjet_api_secret || null,
+    mailjetFromEmail: data.mailjet_from_email || null,
+    mailjetFromName: data.mailjet_from_name || null,
     // OpenAI API key
     openaiApiKey: data.openai_api_key || null,
   };

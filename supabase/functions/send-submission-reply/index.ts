@@ -154,15 +154,54 @@ const saveReplyToDatabase = async (supabaseAdmin: any, submissionId: string, use
   }
 };
 
-// Send email with SMTP
+// Send email with Mailjet
+const sendEmailWithMailjet = async (supabaseAdmin: any, settings: any, emailContent: any) => {
+  if (!settings.mailjet_api_key || !settings.mailjet_api_secret) {
+    // Try SMTP if Mailjet is not configured
+    return await sendEmailWithSMTP(supabaseAdmin, settings, emailContent);
+  }
+  
+  try {
+    console.log("Sending email with Mailjet, content:", JSON.stringify({
+      to: emailContent.to,
+      subject: emailContent.subject,
+      hasHtml: !!emailContent.html,
+      hasText: !!emailContent.text
+    }));
+    
+    const { data: emailData, error: emailError } = await supabaseAdmin.functions.invoke(
+      'send-email-with-smtp', 
+      { 
+        body: {
+          to: emailContent.to,
+          subject: emailContent.subject,
+          html: emailContent.html,
+          text: emailContent.text
+        }
+      }
+    );
+    
+    if (emailError) {
+      console.error("Error sending email:", emailError);
+      return null;
+    }
+    
+    return emailData;
+  } catch (error) {
+    console.error("Error invoking email function:", error);
+    return null;
+  }
+};
+
+// Send email with SMTP (fallback)
 const sendEmailWithSMTP = async (supabaseAdmin: any, settings: any, emailContent: any) => {
   if (!settings.smtp_host || !settings.smtp_username || !settings.smtp_password) {
-    console.log("SMTP not configured, skipping email send");
+    console.log("Email sending not configured (no Mailjet or SMTP settings)");
     return null;
   }
   
   try {
-    console.log("Sending email with content:", JSON.stringify({
+    console.log("Sending email with SMTP, content:", JSON.stringify({
       to: emailContent.to,
       subject: emailContent.subject,
       hasHtml: !!emailContent.html,
@@ -224,9 +263,9 @@ serve(async (req) => {
     await saveReplyToDatabase(supabaseAdmin, submissionId, userId, replyText);
     console.log("Saved reply to database");
     
-    // 6. Send email if SMTP is configured
+    // 6. Send email with Mailjet if configured, or fall back to SMTP
     const emailContent = prepareEmailContent(submission, replyText, replyingUser, recipientEmail);
-    const emailResult = await sendEmailWithSMTP(supabaseAdmin, settings, emailContent);
+    const emailResult = await sendEmailWithMailjet(supabaseAdmin, settings, emailContent);
     console.log("Email send result:", emailResult ? "Success" : "Not sent");
 
     // 7. Return success response

@@ -1,5 +1,5 @@
 
-export type SettingsTab = "agency" | "design" | "advanced" | "icons" | "global";
+export type SettingsTab = "agency" | "design" | "advanced" | "icons" | "global" | "mail";
 
 export interface Settings {
   name: string;
@@ -33,10 +33,22 @@ export interface Settings {
   smtp_from_name?: string | null;
   smtp_secure?: boolean | null;
   
+  // Mailjet settings
+  mailjet_api_key?: string | null;
+  mailjet_api_secret?: string | null;
+  mailjet_from_email?: string | null;
+  mailjet_from_name?: string | null;
+  
   // OpenAI API key
   openai_api_key?: string | null;
   
   // Add property aliases to match AgencySettings expected properties
   primaryColor?: string;
   secondaryColor?: string;
+  
+  // Mailjet aliases
+  mailjetApiKey?: string;
+  mailjetApiSecret?: string;
+  mailjetFromEmail?: string;
+  mailjetFromName?: string;
 }

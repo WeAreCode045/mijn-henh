@@ -38,6 +38,12 @@ export interface AgencySettings {
   smtpFromName?: string;
   smtpSecure?: boolean;
   
+  // Mailjet settings
+  mailjetApiKey?: string;
+  mailjetApiSecret?: string;
+  mailjetFromEmail?: string;
+  mailjetFromName?: string;
+  
   // OpenAI API key
   openaiApiKey?: string;
   
