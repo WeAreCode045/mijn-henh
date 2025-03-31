@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { formatDistanceToNow } from 'date-fns';
 import { SubmissionReply } from '@/types/submission';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface SubmissionRepliesProps {
   replies: SubmissionReply[];
@@ -16,40 +15,41 @@ export function SubmissionReplies({ replies }: SubmissionRepliesProps) {
 
   return (
     <div className="space-y-4">
-      <h4 className="font-medium">Previous Replies</h4>
-      <div className="space-y-4">
+      <h3 className="text-sm font-medium">Previous Replies</h3>
+      
+      <div className="space-y-3">
         {replies.map((reply) => {
-          const replyDate = new Date(reply.created_at);
-          // Handle both agent and user properties for the reply creator
-          const replyCreator = reply.agent || reply.user;
-          const creatorName = replyCreator 
-            ? (reply.agent?.full_name || reply.user?.name || 'Agent') 
-            : 'Agent';
-          const creatorAvatar = replyCreator 
-            ? (reply.agent?.avatar_url || reply.user?.avatar_url) 
-            : undefined;
+          const initials = reply.agent?.full_name 
+            ? reply.agent.full_name.split(' ').map(name => name[0]).join('')
+            : reply.user?.name
+              ? reply.user.name.split(' ').map(name => name[0]).join('')
+              : 'U';
           
-          // Handle both message and text properties
-          const replyContent = reply.message || reply.text || '';
+          const displayName = reply.agent?.full_name || reply.user?.name || "User";
+          const message = reply.message || reply.text || "";
+          const avatarUrl = reply.agent?.avatar_url || reply.user?.avatar_url;
           
           return (
-            <div key={reply.id} className="border rounded-lg p-3">
-              <div className="flex items-center gap-2 mb-2">
+            <div key={reply.id} className="p-3 bg-muted/50 rounded-md">
+              <div className="flex items-start gap-3">
                 <Avatar className="h-8 w-8">
-                  {creatorAvatar && <AvatarImage src={creatorAvatar} alt={creatorName} />}
-                  <AvatarFallback>
-                    {creatorName.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <div className="font-medium">{creatorName}</div>
-                  <div className="text-xs text-gray-500">
-                    {format(replyDate, 'PPP p')}
+                
+                <div className="flex-1">
+                  <div className="flex justify-between">
+                    <p className="text-sm font-medium">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                  
+                  <div className="mt-1 text-sm whitespace-pre-line">
+                    {message}
                   </div>
                 </div>
               </div>
-              <Separator className="my-2" />
-              <div className="whitespace-pre-wrap">{replyContent}</div>
             </div>
           );
         })}

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils/dateUtils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSubmissions } from "../communications/hooks";
+import { EmailReplyModal } from "../communications/EmailReplyModal";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -29,6 +30,8 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
   const [loading, setLoading] = useState<boolean>(true);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<ContactSubmission | null>(null);
 
   // Use the property ID to fetch submissions for this specific property only
   useEffect(() => {
@@ -95,6 +98,16 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
       default:
         return contacts;
     }
+  };
+
+  const handleOpenEmailModal = (contact: ContactSubmission) => {
+    setSelectedContact(contact);
+    setEmailModalOpen(true);
+  };
+
+  const handleCloseEmailModal = () => {
+    setEmailModalOpen(false);
+    fetchContactSubmissions(); // Refresh the data after sending an email
   };
 
   const filteredContacts = filterContactsByTab(contacts);
@@ -196,11 +209,9 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
                 </div>
                 
                 <div className="mt-4 flex space-x-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={`mailto:${contact.email}?subject=RE: Inquiry about ${property.title}`}>
-                      <MailIcon className="h-4 w-4 mr-2" />
-                      Reply by Email
-                    </a>
+                  <Button variant="outline" size="sm" onClick={() => handleOpenEmailModal(contact)}>
+                    <MailIcon className="h-4 w-4 mr-2" />
+                    Reply by Email
                   </Button>
                   {contact.phone && (
                     <Button variant="outline" size="sm" asChild>
@@ -215,6 +226,19 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Email Reply Modal */}
+      {selectedContact && (
+        <EmailReplyModal
+          isOpen={emailModalOpen}
+          onClose={handleCloseEmailModal}
+          recipientEmail={selectedContact.email}
+          recipientName={selectedContact.name}
+          propertyId={property.id}
+          propertyTitle={property.title || "Property"}
+          submissionId={selectedContact.id}
+        />
       )}
     </div>
   );
