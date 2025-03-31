@@ -1,13 +1,24 @@
 
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
-import { format, isToday, parseISO, isPast, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay, addDays, subDays, subWeeks, subMonths } from "date-fns";
+import { 
+  isSameDay, 
+  parseISO, 
+  isPast, 
+  isToday, 
+  startOfWeek, 
+  endOfWeek, 
+  startOfMonth, 
+  endOfMonth,
+  subWeeks,
+  subMonths
+} from "date-fns";
 
-// Filter events based on time range
+// Helper function to filter events based on time range
 export function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
   const now = new Date();
   
   // Default case: Return only upcoming events
-  if (!range || range === 'all') {
+  if (range === 'all' || !range) {
     return items.filter(item => {
       if (!item.event_date) return false;
       const eventDate = parseISO(item.event_date);
@@ -42,8 +53,8 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
       
       case 'lastWeek': {
         // Last week
-        const lastWeekStart = subWeeks(startOfWeek(now, { weekStartsOn: 1 }), 1);
-        const lastWeekEnd = subDays(startOfWeek(now, { weekStartsOn: 1 }), 1);
+        const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+        const lastWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
         
         return eventDate >= lastWeekStart && eventDate <= lastWeekEnd;
       }
@@ -62,7 +73,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
   });
 }
 
-// Group events by day
+// Helper function to group events by day
 export function groupEventsByDay(events: AgendaItem[]) {
   const groupedEvents: { date: Date; items: AgendaItem[] }[] = [];
   
@@ -94,11 +105,4 @@ export function groupEventsByDay(events: AgendaItem[]) {
   });
   
   return groupedEvents;
-}
-
-// Get start of current day
-export function startOfDay(date: Date): Date {
-  const newDate = new Date(date);
-  newDate.setHours(0, 0, 0, 0);
-  return newDate;
 }
