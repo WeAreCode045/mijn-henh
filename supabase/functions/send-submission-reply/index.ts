@@ -83,6 +83,13 @@ serve(async (req) => {
     const { replyId } = await req.json();
     console.log('Processing reply:', replyId);
 
+    if (!replyId) {
+      return new Response(
+        JSON.stringify({ error: `Reply ID is required` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Fetch the reply details
     const { data: reply, error: replyError } = await supabaseClient
       .from('property_submission_replies')
@@ -111,6 +118,18 @@ serve(async (req) => {
         JSON.stringify({ error: `Submission not found: ${submissionError?.message}` }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Get property details
+    const { data: property, error: propertyError } = await supabaseClient
+      .from('properties')
+      .select('title, id')
+      .eq('id', submission.property_id)
+      .single();
+
+    if (propertyError) {
+      console.error('Error fetching property:', propertyError);
+      // Continue without property info
     }
 
     // Get agent profile information
@@ -167,12 +186,14 @@ serve(async (req) => {
                     agentProfile?.full_name || 
                     'Property Agent';
 
+    const propertyTitle = property?.title || 'Property';
+
     // Prepare the email content
     const emailData: EmailData = {
       to: submission.email,
-      subject: `RE: Your property inquiry`,
+      subject: `RE: Your inquiry about ${propertyTitle}`,
       html: `
-        <div>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <p>Dear ${submission.name},</p>
           <p>Thank you for your inquiry about our property.</p>
           <p>${reply.reply_text}</p>
@@ -183,6 +204,12 @@ serve(async (req) => {
       from: fromEmail,
       fromName: fromName
     };
+
+    console.log('Sending email with:', { 
+      to: emailData.to,
+      subject: emailData.subject,
+      from: fromEmail
+    });
 
     // Call the send-email-with-smtp edge function
     const emailResponse = await supabaseClient.functions.invoke('send-email-with-smtp', {
@@ -199,6 +226,8 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Email sent successfully:', emailResponse.data);
 
     // Update the submission as read
     const { error: updateError } = await supabaseClient

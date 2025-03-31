@@ -48,48 +48,59 @@ async function sendWithMailjet(settings: Settings, message: EmailMessage) {
     throw new Error('From email is required for Mailjet');
   }
 
-  const mailjet = Mailjet.connect(
-    settings.mailjetApiKey,
-    settings.mailjetApiSecret
-  );
+  try {
+    const mailjet = Mailjet.connect(
+      settings.mailjetApiKey,
+      settings.mailjetApiSecret
+    );
 
-  // Prepare recipients
-  let recipients = [];
-  if (Array.isArray(message.to)) {
-    recipients = message.to.map(email => ({ Email: email }));
-  } else {
-    recipients = [{ Email: message.to }];
-  }
-
-  // Prepare CC recipients if they exist
-  let ccRecipients = [];
-  if (message.cc) {
-    if (Array.isArray(message.cc)) {
-      ccRecipients = message.cc.map(email => ({ Email: email }));
+    // Prepare recipients
+    let recipients = [];
+    if (Array.isArray(message.to)) {
+      recipients = message.to.map(email => ({ Email: email }));
     } else {
-      ccRecipients = [{ Email: message.cc }];
+      recipients = [{ Email: message.to }];
     }
-  }
 
-  const request = mailjet.post("send", { version: "v3.1" }).request({
-    Messages: [
-      {
-        From: {
-          Email: fromEmail,
-          Name: fromName || fromEmail
-        },
-        To: recipients,
-        Cc: ccRecipients.length > 0 ? ccRecipients : undefined,
-        Subject: message.subject,
-        TextPart: message.text || "",
-        HTMLPart: message.html || message.text || ""
+    // Prepare CC recipients if they exist
+    let ccRecipients = [];
+    if (message.cc) {
+      if (Array.isArray(message.cc)) {
+        ccRecipients = message.cc.map(email => ({ Email: email }));
+      } else {
+        ccRecipients = [{ Email: message.cc }];
       }
-    ]
-  });
+    }
 
-  const response = await request;
-  console.log('Mailjet response:', response);
-  return response;
+    const request = mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [
+        {
+          From: {
+            Email: fromEmail,
+            Name: fromName || fromEmail
+          },
+          To: recipients,
+          Cc: ccRecipients.length > 0 ? ccRecipients : undefined,
+          Subject: message.subject,
+          TextPart: message.text || "",
+          HTMLPart: message.html || message.text || ""
+        }
+      ]
+    });
+
+    console.log('Sending email via Mailjet:', {
+      from: fromEmail,
+      to: message.to,
+      subject: message.subject
+    });
+
+    const response = await request;
+    console.log('Mailjet response:', response.body);
+    return response.body;
+  } catch (error) {
+    console.error('Mailjet error:', error);
+    throw error;
+  }
 }
 
 async function sendWithSMTP(settings: Settings, message: EmailMessage) {
@@ -104,29 +115,40 @@ async function sendWithSMTP(settings: Settings, message: EmailMessage) {
     throw new Error('From email is required for SMTP');
   }
 
-  // Create SMTP transporter
-  const transporter = createTransport({
-    host: settings.smtpHost,
-    port: parseInt(settings.smtpPort),
-    secure: settings.smtpSecure || false,
-    auth: {
-      user: settings.smtpUsername,
-      pass: settings.smtpPassword,
-    },
-  });
+  try {
+    // Create SMTP transporter
+    const transporter = createTransport({
+      host: settings.smtpHost,
+      port: parseInt(settings.smtpPort),
+      secure: settings.smtpSecure || false,
+      auth: {
+        user: settings.smtpUsername,
+        pass: settings.smtpPassword,
+      },
+    });
 
-  // Send email
-  const info = await transporter.sendMail({
-    from: fromName ? `"${fromName}" <${fromEmail}>` : fromEmail,
-    to: message.to,
-    cc: message.cc,
-    subject: message.subject,
-    text: message.text,
-    html: message.html,
-  });
+    console.log('Sending email via SMTP:', {
+      from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
+      to: message.to,
+      subject: message.subject
+    });
 
-  console.log('SMTP Message sent: %s', info.messageId);
-  return info;
+    // Send email
+    const info = await transporter.sendMail({
+      from: fromName ? `"${fromName}" <${fromEmail}>` : fromEmail,
+      to: message.to,
+      cc: message.cc,
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
+    });
+
+    console.log('SMTP Message sent: %s', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('SMTP error:', error);
+    throw error;
+  }
 }
 
 serve(async (req) => {
@@ -145,25 +167,25 @@ serve(async (req) => {
 
     console.log('Received email request:', {
       to: message.to,
-      subject: message.subject
+      subject: message.subject,
+      hasHtml: !!message.html,
+      hasText: !!message.text
     });
+
     console.log('Available settings:', {
       smtp: !!settings.smtpHost,
       mailjet: !!settings.mailjetApiKey
     });
 
+    let result;
+    let provider;
+
     // First try Mailjet if configured
     if (settings.mailjetApiKey && settings.mailjetApiSecret) {
       try {
         console.log('Attempting to send via Mailjet');
-        const result = await sendWithMailjet(settings, message);
-        return new Response(
-          JSON.stringify({ success: true, provider: 'mailjet', result }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
+        result = await sendWithMailjet(settings, message);
+        provider = 'mailjet';
       } catch (mailjetError) {
         console.error('Mailjet error:', mailjetError);
         
@@ -171,44 +193,44 @@ serve(async (req) => {
         if (settings.smtpHost) {
           console.log('Falling back to SMTP');
           try {
-            const result = await sendWithSMTP(settings, message);
-            return new Response(
-              JSON.stringify({ success: true, provider: 'smtp', result }),
-              {
-                status: 200,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              }
-            );
+            result = await sendWithSMTP(settings, message);
+            provider = 'smtp';
           } catch (smtpError) {
             console.error('SMTP error:', smtpError);
-            throw smtpError; // Re-throw to be caught by outer handler
+            throw new Error(`Email sending failed: ${smtpError.message}`);
           }
         } else {
-          throw mailjetError; // Re-throw if no fallback
+          throw new Error(`Mailjet error: ${mailjetError.message}`);
         }
       }
     } 
     // If no Mailjet, try SMTP
     else if (settings.smtpHost) {
       console.log('Attempting to send via SMTP');
-      const result = await sendWithSMTP(settings, message);
-      return new Response(
-        JSON.stringify({ success: true, provider: 'smtp', result }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      try {
+        result = await sendWithSMTP(settings, message);
+        provider = 'smtp';
+      } catch (smtpError) {
+        console.error('SMTP error:', smtpError);
+        throw new Error(`SMTP error: ${smtpError.message}`);
+      }
     } else {
       throw new Error('No email service configured');
     }
+
+    return new Response(
+      JSON.stringify({ success: true, provider, result }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error) {
     console.error('Email sending error:', error);
     return new Response(
       JSON.stringify({
         success: false,
         error: error.message,
-        stack: error.stack,
       }),
       {
         status: 500,

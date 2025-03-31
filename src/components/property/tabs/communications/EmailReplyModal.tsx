@@ -15,6 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface EmailReplyModalProps {
   isOpen: boolean;
@@ -40,7 +42,9 @@ export function EmailReplyModal({
   const [cc, setCc] = useState('');
   const [to, setTo] = useState(recipientEmail);
   const [isSending, setIsSending] = useState(false);
-  const [smtpConfigured, setSmtpConfigured] = useState(true);
+  const [smtpConfigured, setSmtpConfigured] = useState(false);
+  const [mailjetConfigured, setMailjetConfigured] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, profile } = useAuth();
 
@@ -49,92 +53,78 @@ export function EmailReplyModal({
     setTo(recipientEmail);
   }, [recipientEmail]);
 
-  // Check if SMTP is configured
+  // Check if email sending is configured
   useEffect(() => {
-    const checkSmtpSettings = async () => {
-      const { data, error } = await supabase
-        .from('agency_settings')
-        .select('smtp_host, smtp_username, smtp_password')
-        .single();
+    const checkEmailSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('agency_settings')
+          .select('smtp_host, smtp_username, smtp_password, mailjet_api_key, mailjet_api_secret')
+          .single();
+          
+        if (error) {
+          console.error('Error checking email settings:', error);
+          return;
+        }
         
-      if (error) {
-        console.error('Error checking SMTP settings:', error);
-        return;
-      }
-      
-      if (!data?.smtp_host || !data?.smtp_username || !data?.smtp_password) {
-        setSmtpConfigured(false);
+        setSmtpConfigured(!!(data?.smtp_host && data?.smtp_username && data?.smtp_password));
+        setMailjetConfigured(!!(data?.mailjet_api_key && data?.mailjet_api_secret));
+      } catch (err) {
+        console.error('Failed to check email settings:', err);
       }
     };
     
-    checkSmtpSettings();
+    checkEmailSettings();
   }, []);
 
   const handleSendEmail = async () => {
-    if (!smtpConfigured) {
-      toast({
-        title: "SMTP Not Configured",
-        description: "Please configure SMTP settings in the Advanced tab of Settings first.",
-        variant: "destructive",
-      });
+    if (!smtpConfigured && !mailjetConfigured) {
+      setError("Email sending is not configured. Please configure SMTP or Mailjet settings in the Mail tab of Settings first.");
       return;
     }
     
     if (!message.trim()) {
-      toast({
-        title: "Empty Message",
-        description: "Please enter a message before sending.",
-        variant: "destructive",
-      });
+      setError("Please enter a message before sending.");
       return;
     }
     
     if (!to.trim()) {
-      toast({
-        title: "No Recipient",
-        description: "Please enter at least one recipient email address.",
-        variant: "destructive",
-      });
+      setError("Please enter at least one recipient email address.");
       return;
     }
     
     setIsSending(true);
+    setError(null);
     
     try {
       // First save the reply to the database
-      const { error: replyError } = await supabase
+      const { data: replyData, error: replyError } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
           reply_text: message,
-          user_id: user?.id
-        });
+          user_id: user?.id,
+          agent_id: user?.id
+        })
+        .select()
+        .single();
         
       if (replyError) throw replyError;
       
       // Call edge function to send email
-      const { error: sendError } = await supabase.functions.invoke('send-email-with-smtp', {
+      const { error: sendError, data: sendData } = await supabase.functions.invoke('send-submission-reply', {
         body: {
-          to: to,
-          subject: subject,
-          html: `<div style="font-family: Arial, sans-serif; max-width: 600px;">
-            <p>Hello ${recipientName},</p>
-            <div style="white-space: pre-wrap;">${message}</div>
-            <p style="margin-top: 20px; color: #666;">Regarding your inquiry about ${propertyTitle}</p>
-            ${profile?.full_name ? `<p style="margin-top: 10px;">Best regards,<br>${profile.full_name}</p>` : ''}
-          </div>`,
-          cc: cc ? cc.split(',').map(email => email.trim()).filter(email => email) : undefined
+          replyId: replyData.id
         }
       });
       
-      if (sendError) throw new Error('Failed to send email. Please try again.');
+      if (sendError) {
+        console.error('Edge function error:', sendError);
+        throw new Error('Failed to send email. Please try again.');
+      }
       
-      // Mark submission as read
-      await supabase
-        .from('property_contact_submissions')
-        .update({ is_read: true })
-        .eq('id', submissionId);
-        
+      console.log('Email sent successfully:', sendData);
+      
       toast({
         title: "Success",
         description: "Your reply has been sent successfully.",
@@ -146,15 +136,13 @@ export function EmailReplyModal({
       setCc('');
     } catch (error: any) {
       console.error('Error sending email:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send email. Please try again.",
-        variant: "destructive",
-      });
+      setError(error.message || "Failed to send email. Please try again.");
     } finally {
       setIsSending(false);
     }
   };
+
+  const isEmailConfigured = smtpConfigured || mailjetConfigured;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -166,11 +154,22 @@ export function EmailReplyModal({
           </DialogDescription>
         </DialogHeader>
         
-        {!smtpConfigured && (
-          <div className="bg-amber-50 text-amber-800 p-3 rounded-md mb-4">
-            <p className="text-sm font-medium">SMTP is not configured</p>
-            <p className="text-xs">Go to Settings &gt; Advanced tab to configure your SMTP settings.</p>
-          </div>
+        {!isEmailConfigured && (
+          <Alert variant="warning">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Email sending is not configured</AlertTitle>
+            <AlertDescription>
+              Go to Settings &gt; Mail tab to configure your email settings.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         
         <div className="grid gap-4 py-4">
@@ -232,7 +231,7 @@ export function EmailReplyModal({
           </Button>
           <Button 
             onClick={handleSendEmail} 
-            disabled={isSending || !smtpConfigured || !message.trim() || !to.trim()}
+            disabled={isSending || !isEmailConfigured || !message.trim() || !to.trim()}
           >
             {isSending ? "Sending..." : "Send Email"}
           </Button>
