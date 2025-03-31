@@ -19,13 +19,13 @@ export function EventGroups({ filteredItems, onItemClick, showPastEvents }: Even
       {groupedEvents.map((group, groupIndex) => {
         const isPastGroup = isPast(group.date) && !isToday(group.date);
         
-        // Only show headers for upcoming events or today, or when specifically showing past events
-        const showHeader = !isPastGroup || isToday(group.date) || showPastEvents;
-        
         // Skip rendering the entire group if it's a past group and we're not showing past events
         if (isPastGroup && !showPastEvents) {
           return null;
         }
+
+        // Only show headers for upcoming events or today, or when specifically showing past events
+        const showHeader = !isPastGroup || isToday(group.date) || showPastEvents;
 
         return (
           <div key={group.date.toString()} className="space-y-2">
