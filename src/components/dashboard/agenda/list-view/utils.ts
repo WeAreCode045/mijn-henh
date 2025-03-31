@@ -11,7 +11,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
     return items.filter(item => {
       if (!item.event_date) return false;
       const eventDate = parseISO(item.event_date);
-      return eventDate >= startOfDay(now);
+      return !isPast(eventDate) || isToday(eventDate);
     });
   }
 
@@ -20,7 +20,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
     return items.filter(item => {
       if (!item.event_date) return false;
       const eventDate = parseISO(item.event_date);
-      return eventDate < startOfDay(now);
+      return isPast(eventDate) && !isToday(eventDate);
     });
   }
   
@@ -47,7 +47,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
         return eventDate >= monthStart && eventDate <= monthEnd;
       }
       default:
-        return !isPast(eventDate);
+        return !isPast(eventDate) || isToday(eventDate);
     }
   });
 }
