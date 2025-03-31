@@ -11,8 +11,10 @@ export function FilterControls({
   setFilterValue
 }: FilterControlsProps) {
   const handleFilterChange = (value: string) => {
+    console.log("Filter changed to:", value);
+    
+    // If clicking the same button, toggle it off
     if (value === filterValue) {
-      // Toggle off if clicking the same button
       setFilterValue(undefined);
     } else {
       setFilterValue(value);
@@ -21,9 +23,9 @@ export function FilterControls({
   
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-2 border-t border-b py-2">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Filter:</span>
-        <ToggleGroup type="single" value={filterValue} onValueChange={handleFilterChange}>
+      <div className="flex items-center gap-2 overflow-x-auto">
+        <span className="text-sm font-medium whitespace-nowrap">Filter:</span>
+        <ToggleGroup type="single" value={filterValue || ""} onValueChange={handleFilterChange}>
           <ToggleGroupItem value="today" size="sm">Today</ToggleGroupItem>
           <ToggleGroupItem value="week" size="sm">This Week</ToggleGroupItem>
           <ToggleGroupItem value="month" size="sm">This Month</ToggleGroupItem>

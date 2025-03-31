@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { FilterControls } from "./FilterControls";
 import { EventGroups } from "./EventGroups";
@@ -29,6 +29,52 @@ export function AgendaListView({
     from: new Date(), 
     to: new Date() 
   });
+  const [displayedItems, setDisplayedItems] = useState<AgendaItem[]>([]);
+  
+  // Apply filters whenever dependencies change
+  useEffect(() => {
+    if (isLoading || !agendaItems || agendaItems.length === 0) {
+      setDisplayedItems([]);
+      return;
+    }
+    
+    // First filter by date range
+    let filteredItems = agendaItems;
+    
+    if (dateRange && dateRange.from) {
+      filteredItems = agendaItems.filter(item => {
+        if (!item.event_date) return false;
+        
+        try {
+          const eventDate = parseISO(item.event_date);
+          
+          if (dateRange.to) {
+            // If we have a date range, check if the event is within it
+            return isWithinInterval(eventDate, {
+              start: startOfDay(dateRange.from),
+              end: endOfDay(dateRange.to)
+            });
+          } else {
+            // If we only have a from date, check if the event is on that day
+            return isSameDay(eventDate, dateRange.from);
+          }
+        } catch (error) {
+          console.error("Error filtering by date range:", error);
+          return false;
+        }
+      });
+    }
+    
+    // Then apply time filter if selected
+    if (filterValue && filterValue !== "all") {
+      filteredItems = filterByTimeRange(filteredItems, filterValue);
+    }
+    
+    console.log(`Displaying ${filteredItems.length} items after filtering`);
+    
+    setDisplayedItems(filteredItems);
+    
+  }, [agendaItems, dateRange, filterValue, isLoading]);
   
   if (isLoading) {
     return <LoadingIndicator />;
@@ -48,35 +94,8 @@ export function AgendaListView({
     );
   }
 
-  // Filter items based on the selected date range
-  let filteredItems = agendaItems;
-  
-  if (dateRange && dateRange.from) {
-    filteredItems = agendaItems.filter(item => {
-      if (!item.event_date) return false;
-      
-      const eventDate = parseISO(item.event_date);
-      
-      if (dateRange.to) {
-        // If we have a date range, check if the event is within it
-        return isWithinInterval(eventDate, {
-          start: startOfDay(dateRange.from),
-          end: endOfDay(dateRange.to)
-        });
-      } else {
-        // If we only have a from date, check if the event is on that day
-        return isSameDay(eventDate, dateRange.from);
-      }
-    });
-  }
-  
-  // Apply time filter if selected
-  if (filterValue && filterValue !== "all") {
-    filteredItems = filterByTimeRange(filteredItems, filterValue);
-  }
-
   // If no items match the filter criteria
-  if (filteredItems.length === 0) {
+  if (displayedItems.length === 0) {
     return (
       <div className="space-y-4">
         <DateNavigation
@@ -107,8 +126,9 @@ export function AgendaListView({
         setFilterValue={setFilterValue}
       />
       <EventGroups 
-        filteredItems={filteredItems} 
+        filteredItems={displayedItems} 
         onItemClick={onItemClick}
+        showPastEvents={true}
       />
     </div>
   );
