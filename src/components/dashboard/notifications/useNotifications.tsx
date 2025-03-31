@@ -51,10 +51,16 @@ export function useNotifications() {
         .single();
       
       if (userProfile?.user_notifications) {
-        return userProfile.user_notifications.reduce((acc: Record<string, boolean>, item: any) => {
-          acc[item.id] = item.read || false;
-          return acc;
-        }, {});
+        // Check if user_notifications is an array before using reduce
+        if (Array.isArray(userProfile.user_notifications)) {
+          return userProfile.user_notifications.reduce((acc: Record<string, boolean>, item: any) => {
+            acc[item.id] = item.read || false;
+            return acc;
+          }, {});
+        } else {
+          console.error('user_notifications is not an array:', userProfile.user_notifications);
+          return {};
+        }
       }
       return {};
     } catch (err) {
@@ -155,19 +161,22 @@ export function useNotifications() {
       });
       
       // Process database notifications
-      dbNotifications.forEach(notification => {
-        const notificationId = notification.id;
-        newNotifications.push({
-          id: notificationId,
-          title: notification.title,
-          message: notification.message,
-          type: notification.type as NotificationType,
-          date: new Date(notification.created_at),
-          read: readNotifications[notificationId] || false,
-          propertyId: notification.property_id,
-          propertyTitle: notification.property_title
+      if (dbNotifications.length > 0) {
+        dbNotifications.forEach(notification => {
+          const notificationId = notification.id;
+          newNotifications.push({
+            id: notificationId,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type as NotificationType,
+            date: new Date(notification.created_at),
+            read: readNotifications[notificationId] || false,
+            // Add optional properties only if they exist in the notification
+            ...(notification.property_id && { propertyId: notification.property_id }),
+            ...(notification.property_title && { propertyTitle: notification.property_title })
+          });
         });
-      });
+      }
       
       // Add some sample mock notifications for demonstration if needed
       if (newNotifications.length < 2) {
