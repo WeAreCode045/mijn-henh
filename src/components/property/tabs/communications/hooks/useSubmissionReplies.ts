@@ -20,33 +20,44 @@ export function useSubmissionReplies(submissionId: string) {
       setError(null);
 
       try {
+        // First get replies
         const { data, error } = await supabase
           .from('property_submission_replies')
-          .select(`
-            id,
-            submission_id,
-            reply_text,
-            created_at,
-            user_id,
-            user:profiles(id, full_name, email, avatar_url)
-          `)
+          .select('*')
           .eq('submission_id', submissionId)
           .order('created_at', { ascending: true });
 
         if (error) throw error;
 
-        const formattedReplies = data.map(reply => ({
-          id: reply.id,
-          submission_id: reply.submission_id,
-          agent_id: reply.user_id,
-          message: reply.reply_text,
-          created_at: reply.created_at,
-          agent: reply.user ? {
-            id: reply.user.id,
-            full_name: reply.user.full_name,
-            email: reply.user.email,
-            avatar_url: reply.user.avatar_url
-          } : undefined
+        // Process replies and fetch user info separately to avoid relation issues
+        const formattedReplies = await Promise.all(data.map(async (reply) => {
+          let userInfo = null;
+          
+          if (reply.user_id) {
+            const { data: userData, error: userError } = await supabase
+              .from('profiles')
+              .select('id, full_name, email, avatar_url')
+              .eq('id', reply.user_id)
+              .single();
+              
+            if (!userError && userData) {
+              userInfo = userData;
+            }
+          }
+          
+          return {
+            id: reply.id,
+            submission_id: reply.submission_id,
+            agent_id: reply.user_id,
+            message: reply.reply_text,
+            created_at: reply.created_at,
+            agent: userInfo ? {
+              id: userInfo.id,
+              full_name: userInfo.full_name,
+              email: userInfo.email,
+              avatar_url: userInfo.avatar_url
+            } : undefined
+          };
         }));
 
         setReplies(formattedReplies);
