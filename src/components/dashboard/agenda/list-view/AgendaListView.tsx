@@ -41,12 +41,13 @@ export function AgendaListView({
       return;
     }
     
-    console.log(`Filtering ${agendaItems.length} agenda items`);
+    console.log(`Filtering ${agendaItems.length} agenda items with filter: ${filterValue} and date range: ${dateRange?.from} to ${dateRange?.to}`);
     
     // Apply time filter if selected
     let filteredItems = agendaItems;
     
     if (filterValue) {
+      // First filter by time range (past, upcoming, today, etc.)
       filteredItems = filterByTimeRange(filteredItems, filterValue);
       console.log(`After time filter (${filterValue}): ${filteredItems.length} items`);
     }
@@ -75,7 +76,7 @@ export function AgendaListView({
         }
       });
       
-      console.log(`After date range filter: ${filteredItems.length} items with range: ${dateRange?.from} to ${dateRange?.to}`);
+      console.log(`After date range filter: ${filteredItems.length} items with range: ${dateRange?.from?.toISOString().split('T')[0]} to ${dateRange?.to?.toISOString().split('T')[0]}`);
     }
     
     setDisplayedItems(filteredItems);

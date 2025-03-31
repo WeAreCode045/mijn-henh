@@ -43,9 +43,9 @@ export function AgendaViewContent({
         // Empty agenda notification
         <EmptyAgendaNotification onAddClick={onAddClick} />
       ) : (
-        // Use the AgendaListView component
+        // Use the AgendaListView component - Pass all available agenda items
         <AgendaListView 
-          agendaItems={safeAgendaItems} // Pass all items and let the AgendaListView handle filtering
+          agendaItems={safeAgendaItems}
           isLoading={isLoading}
           onItemClick={onItemClick}
           onAddClick={onAddClick}

@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface DateNavigationProps {
@@ -91,8 +91,104 @@ export function DateNavigation({
     } else {
       setShowPastPresets(false);
       setShowUpcomingPresets(false);
+      
+      // For "today", automatically update date range
+      if (value === "today") {
+        const today = new Date();
+        setDateRange({ from: today, to: today });
+      } else if (value === "thisWeek") {
+        // For thisWeek, set date range to current week
+        const today = new Date();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Get Monday
+        const sunday = new Date(today);
+        sunday.setDate(monday.getDate() + 6); // Get Sunday
+        setDateRange({ from: monday, to: sunday });
+      }
     }
   };
+  
+  // Update date range when preset is clicked
+  const handlePresetClick = (presetValue: string) => {
+    const today = new Date();
+    
+    switch (presetValue) {
+      case "yesterday": {
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        setDateRange({ from: yesterday, to: yesterday });
+        break;
+      }
+      case "lastWeek": {
+        const lastMonday = new Date(today);
+        lastMonday.setDate(today.getDate() - today.getDay() - 6);
+        const lastSunday = new Date(today);
+        lastSunday.setDate(today.getDate() - today.getDay());
+        setDateRange({ from: lastMonday, to: lastSunday });
+        break;
+      }
+      case "thisMonth": {
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        setDateRange({ from: firstDay, to: lastDay });
+        break;
+      }
+      case "lastMonth": {
+        const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+        setDateRange({ from: firstDay, to: lastDay });
+        break;
+      }
+      case "last30Days": {
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        setDateRange({ from: thirtyDaysAgo, to: today });
+        break;
+      }
+      case "tomorrow": {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        setDateRange({ from: tomorrow, to: tomorrow });
+        break;
+      }
+      case "thisWeek": {
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+        const sunday = new Date(today);
+        sunday.setDate(monday.getDate() + 6);
+        setDateRange({ from: monday, to: sunday });
+        break;
+      }
+      case "nextWeek": {
+        const nextMonday = new Date(today);
+        nextMonday.setDate(today.getDate() - today.getDay() + 8);
+        const nextSunday = new Date(today);
+        nextSunday.setDate(nextMonday.getDate() + 6);
+        setDateRange({ from: nextMonday, to: nextSunday });
+        break;
+      }
+      case "next30Days": {
+        const thirtyDaysLater = new Date(today);
+        thirtyDaysLater.setDate(today.getDate() + 30);
+        setDateRange({ from: today, to: thirtyDaysLater });
+        break;
+      }
+    }
+    
+    // Close the preset menus
+    setShowPastPresets(false);
+    setShowUpcomingPresets(false);
+    
+    // Update the filter value
+    setFilterValue(presetValue);
+  };
+  
+  // Initialize with thisWeek preset
+  useEffect(() => {
+    if (!dateRange?.from && !dateRange?.to) {
+      handlePresetClick("thisWeek");
+    }
+  }, []);
   
   return (
     <div className="space-y-4">
@@ -170,28 +266,28 @@ export function DateNavigation({
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("yesterday"); setShowPastPresets(false); }}
+              onClick={() => handlePresetClick("yesterday")}
             >
               Yesterday
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("lastWeek"); setShowPastPresets(false); }}
+              onClick={() => handlePresetClick("lastWeek")}
             >
               Last Week
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("lastMonth"); setShowPastPresets(false); }}
+              onClick={() => handlePresetClick("lastMonth")}
             >
               Last Month
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("last30Days"); setShowPastPresets(false); }}
+              onClick={() => handlePresetClick("last30Days")}
             >
               Last 30 Days
             </Button>
@@ -207,35 +303,35 @@ export function DateNavigation({
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("tomorrow"); setShowUpcomingPresets(false); }}
+              onClick={() => handlePresetClick("tomorrow")}
             >
               Tomorrow
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("thisWeek"); setShowUpcomingPresets(false); }}
+              onClick={() => handlePresetClick("thisWeek")}
             >
               This Week
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("nextWeek"); setShowUpcomingPresets(false); }}
+              onClick={() => handlePresetClick("nextWeek")}
             >
               Next Week
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("thisMonth"); setShowUpcomingPresets(false); }}
+              onClick={() => handlePresetClick("thisMonth")}
             >
               This Month
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => { setFilterValue("next30Days"); setShowUpcomingPresets(false); }}
+              onClick={() => handlePresetClick("next30Days")}
             >
               Next 30 Days
             </Button>
