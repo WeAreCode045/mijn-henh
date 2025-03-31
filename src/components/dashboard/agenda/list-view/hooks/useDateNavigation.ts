@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
 
@@ -15,7 +16,7 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
   const [showPastPresets, setShowPastPresets] = useState(false);
   const [showUpcomingPresets, setShowUpcomingPresets] = useState(false);
   
-  // Toggle preset sections
+  // Toggle preset sections and set appropriate date ranges
   const handleFilterChange = (value: string) => {
     // If clicking the current filter, don't change anything
     if (value === filterValue) {
@@ -42,17 +43,16 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
       const farFuture = new Date();
       farFuture.setFullYear(farFuture.getFullYear() + 100);
       setDateRange({ from: today, to: farFuture });
-    } else {
+    } else if (value === "today") {
       setShowPastPresets(false);
       setShowUpcomingPresets(false);
-      
-      // For "today", automatically update date range
-      if (value === "today") {
-        setDateRange({ from: today, to: today });
-      } else if (value === "thisWeek") {
-        // For thisWeek, set date range to current week
-        setDateRange({ from: getWeekStart(today), to: getWeekEnd(today) });
-      }
+      // For "today", set date range to today only
+      setDateRange({ from: today, to: today });
+    } else if (value === "thisWeek") {
+      setShowPastPresets(false);
+      setShowUpcomingPresets(false);
+      // For thisWeek, set date range to current week
+      setDateRange({ from: getWeekStart(today), to: getWeekEnd(today) });
     }
   };
   
