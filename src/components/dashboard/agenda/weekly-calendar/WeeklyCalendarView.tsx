@@ -127,26 +127,35 @@ export function WeeklyCalendarView({
             components={{
               Day: ({ day, ...props }) => {
                 // Get events for this day
-                const dayStr = format(day.date, 'yyyy-MM-dd');
-                const events = agendaItems.filter(item => {
-                  if (!item.event_date) return false;
-                  return format(parseISO(item.event_date), 'yyyy-MM-dd') === dayStr;
-                });
+                const dayEvents = getEventsForDay(day.date);
+                const eventCount = dayEvents.length;
                 
                 return (
-                  <div className="relative" {...props}>
-                    <div>{format(day.date, "d")}</div>
-                    {events.length > 0 && (
-                      <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-                        <div className="h-1 w-1 bg-primary rounded-full"></div>
-                        {events.length > 1 && (
-                          <>
-                            <div className="h-1 w-1 bg-primary rounded-full mx-0.5"></div>
-                            {events.length > 2 && (
-                              <div className="h-1 w-1 bg-primary rounded-full"></div>
-                            )}
-                          </>
-                        )}
+                  <div className="relative w-full h-full" {...props}>
+                    <div className="flex justify-center items-center h-9">
+                      {format(day.date, "d")}
+                    </div>
+                    
+                    {/* Event indicators - show colored dots for each event (up to 3) */}
+                    {eventCount > 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-1">
+                        <div className="flex gap-1">
+                          <div className="h-2 w-2 bg-primary rounded-full"></div>
+                          {eventCount > 1 && (
+                            <>
+                              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                              {eventCount > 2 && (
+                                <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
+                              )}
+                            </>
+                          )}
+                          {/* Show count if more than 3 events */}
+                          {eventCount > 3 && (
+                            <span className="text-[10px] text-muted-foreground">
+                              +{eventCount - 3}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
