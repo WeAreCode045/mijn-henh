@@ -17,7 +17,13 @@ export function CompactNotificationsBar() {
   
   // Reset start index when notifications change
   useEffect(() => {
-    setStartIndex(0);
+    setStartIndex(prev => {
+      // Reset to 0 if we're past the end after filtering
+      if (prev >= unreadNotifications.length) {
+        return Math.max(0, unreadNotifications.length - 1);
+      }
+      return prev;
+    });
   }, [unreadNotifications.length]);
   
   // Delete a notification
@@ -28,6 +34,13 @@ export function CompactNotificationsBar() {
   // Mark a notification as read
   const handleMarkAsRead = (id: string) => {
     markAsRead(id);
+    
+    // If we just marked the last notification as read, we need to adjust the index
+    if (unreadNotifications.length === 1) {
+      setStartIndex(0);
+    } else if (startIndex >= unreadNotifications.length - 1) {
+      setStartIndex(Math.max(0, unreadNotifications.length - 2));
+    }
   };
 
   const handlePrevious = () => {
