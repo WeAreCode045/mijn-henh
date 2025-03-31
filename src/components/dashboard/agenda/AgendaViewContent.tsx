@@ -70,6 +70,7 @@ export function AgendaViewContent({
             <ToggleGroupItem value="day" size="sm">Today</ToggleGroupItem>
             <ToggleGroupItem value="week" size="sm">This Week</ToggleGroupItem>
             <ToggleGroupItem value="month" size="sm">This Month</ToggleGroupItem>
+            <ToggleGroupItem value="all" size="sm">All</ToggleGroupItem>
           </ToggleGroup>
         </div>
       </div>
@@ -97,6 +98,11 @@ export function AgendaViewContent({
 // Helper function to filter events based on time range
 function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
   const now = new Date();
+  
+  // If "all" is selected, return all items without filtering
+  if (range === 'all') {
+    return items;
+  }
   
   return items.filter(item => {
     if (!item.event_date) return false;

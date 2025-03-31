@@ -53,7 +53,7 @@ export function AgendaListView({
     }
   });
   
-  // Apply time filter (day, week, month)
+  // Apply time filter (day, week, month, all)
   const filteredItems = filterValue ? filterByTimeRange(filteredByPast, filterValue) : filteredByPast;
 
   if (filteredItems.length === 0) {
@@ -75,6 +75,7 @@ export function AgendaListView({
               <ToggleGroupItem value="day" size="sm">Day</ToggleGroupItem>
               <ToggleGroupItem value="week" size="sm">Week</ToggleGroupItem>
               <ToggleGroupItem value="month" size="sm">Month</ToggleGroupItem>
+              <ToggleGroupItem value="all" size="sm">All</ToggleGroupItem>
             </ToggleGroup>
             
             {filterValue && (
@@ -130,6 +131,7 @@ export function AgendaListView({
             <ToggleGroupItem value="day" size="sm">Day</ToggleGroupItem>
             <ToggleGroupItem value="week" size="sm">Week</ToggleGroupItem>
             <ToggleGroupItem value="month" size="sm">Month</ToggleGroupItem>
+            <ToggleGroupItem value="all" size="sm">All</ToggleGroupItem>
           </ToggleGroup>
           
           {filterValue && (
@@ -214,6 +216,10 @@ export function AgendaListView({
 
 // Helper function to filter events based on time range
 function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
+  if (range === 'all') {
+    return items; // Return all items without filtering when "all" is selected
+  }
+  
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   
