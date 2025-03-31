@@ -12,10 +12,13 @@ export function CompactNotificationsBar() {
   const [startIndex, setStartIndex] = useState(0);
   const { notifications, deleteNotification, markAsRead } = useNotifications();
   
+  // Filter out read notifications for the compact view only
+  const unreadNotifications = notifications.filter(notification => !notification.read);
+  
   // Reset start index when notifications change
   useEffect(() => {
     setStartIndex(0);
-  }, [notifications.length]);
+  }, [unreadNotifications.length]);
   
   // Delete a notification
   const handleDeleteNotification = (id: string) => {
@@ -32,15 +35,15 @@ export function CompactNotificationsBar() {
   };
 
   const handleNext = () => {
-    setStartIndex(prev => Math.min(notifications.length - 1, prev + 1));
+    setStartIndex(prev => Math.min(unreadNotifications.length - 1, prev + 1));
   };
 
   // Get the current notification to display (just 1)
-  const currentNotification = notifications[startIndex];
+  const currentNotification = unreadNotifications[startIndex];
   
   // Calculate if navigation buttons should be enabled
   const canGoUp = startIndex > 0;
-  const canGoDown = startIndex < notifications.length - 1;
+  const canGoDown = startIndex < unreadNotifications.length - 1;
 
   return (
     <Card className="h-full bg-primary text-white">
@@ -49,7 +52,7 @@ export function CompactNotificationsBar() {
           <Bell className="h-5 w-5" />
           <span>Notifications</span>
           <span className="text-xs bg-white text-primary rounded-full px-2 py-0.5">
-            {notifications.length}
+            {unreadNotifications.length}
           </span>
         </CardTitle>
         <div className="flex gap-1">
@@ -106,9 +109,7 @@ export function CompactNotificationsBar() {
             <p className="text-xs text-white/50 mt-1">
               {format(currentNotification.date, "PPp")}
             </p>
-            {!currentNotification.read && (
-              <div className="absolute top-3 right-8 h-2 w-2 rounded-full bg-blue-400"></div>
-            )}
+            <div className="absolute top-3 right-8 h-2 w-2 rounded-full bg-blue-400"></div>
           </div>
         )}
       </CardContent>
