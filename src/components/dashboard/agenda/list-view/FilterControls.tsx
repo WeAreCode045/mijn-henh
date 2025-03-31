@@ -24,14 +24,13 @@ export function FilterControls({
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-2 border-t border-b py-2">
       <div className="flex items-center gap-2 overflow-x-auto">
-        <span className="text-sm font-medium whitespace-nowrap">Filter:</span>
+        <span className="text-sm font-medium whitespace-nowrap">Additional Filter:</span>
         <ToggleGroup type="single" value={filterValue || ""} onValueChange={handleFilterChange}>
           <ToggleGroupItem value="today" size="sm">Today</ToggleGroupItem>
           <ToggleGroupItem value="week" size="sm">This Week</ToggleGroupItem>
           <ToggleGroupItem value="month" size="sm">This Month</ToggleGroupItem>
-          <ToggleGroupItem value="lastWeek" size="sm">Last Week</ToggleGroupItem>
-          <ToggleGroupItem value="lastMonth" size="sm">Last Month</ToggleGroupItem>
-          <ToggleGroupItem value="all" size="sm">All</ToggleGroupItem>
+          <ToggleGroupItem value="upcoming" size="sm">Upcoming</ToggleGroupItem>
+          <ToggleGroupItem value="past" size="sm">Past</ToggleGroupItem>
         </ToggleGroup>
       </div>
     </div>

@@ -23,7 +23,7 @@ export function AgendaListView({
   onItemClick,
   onAddClick
 }: AgendaListViewProps) {
-  const [filterValue, setFilterValue] = useState<string | undefined>("all");
+  const [filterValue, setFilterValue] = useState<string | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dateRange, setDateRange] = useState<DateRange | undefined>({ 
     from: new Date(), 
@@ -66,11 +66,11 @@ export function AgendaListView({
     }
     
     // Then apply time filter if selected
-    if (filterValue && filterValue !== "all") {
+    if (filterValue) {
       filteredItems = filterByTimeRange(filteredItems, filterValue);
     }
     
-    console.log(`Displaying ${filteredItems.length} items after filtering`);
+    console.log(`Displaying ${filteredItems.length} items after filtering with range: ${dateRange?.from} to ${dateRange?.to} and filter: ${filterValue}`);
     
     setDisplayedItems(filteredItems);
     
@@ -94,25 +94,6 @@ export function AgendaListView({
     );
   }
 
-  // If no items match the filter criteria
-  if (displayedItems.length === 0) {
-    return (
-      <div className="space-y-4">
-        <DateNavigation
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-        />
-        <FilterControls 
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-        />
-        <NoEventsMessage isFiltered onAddClick={onAddClick} />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <DateNavigation
@@ -125,11 +106,16 @@ export function AgendaListView({
         filterValue={filterValue}
         setFilterValue={setFilterValue}
       />
-      <EventGroups 
-        filteredItems={displayedItems} 
-        onItemClick={onItemClick}
-        showPastEvents={true}
-      />
+      
+      {displayedItems.length > 0 ? (
+        <EventGroups 
+          filteredItems={displayedItems} 
+          onItemClick={onItemClick}
+          showPastEvents={true}
+        />
+      ) : (
+        <NoEventsMessage isFiltered onAddClick={onAddClick} />
+      )}
     </div>
   );
 }

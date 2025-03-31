@@ -1,10 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { DateRange, DayPicker } from "react-day-picker";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { ChevronLeft, ChevronRight, Calendar, CalendarDays } from "lucide-react";
-import { addDays, addMonths, format, isToday, subDays, subMonths } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
+import { PredefinedDateRanges } from "./PredefinedDateRanges";
 
 interface DateNavigationProps {
   selectedDate: Date;
@@ -19,114 +21,130 @@ export function DateNavigation({
   dateRange,
   setDateRange
 }: DateNavigationProps) {
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [fromCalendarOpen, setFromCalendarOpen] = useState(false);
+  const [tillCalendarOpen, setTillCalendarOpen] = useState(false);
+  const [showPredefined, setShowPredefined] = useState(false);
   
-  const goToPreviousDay = () => {
-    const prevDay = subDays(selectedDate, 1);
-    setSelectedDate(prevDay);
-    setDateRange({ from: prevDay, to: prevDay });
+  // Format a date for display
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return "Select...";
+    return format(date, "dd MMM yyyy");
   };
-  
-  const goToNextDay = () => {
-    const nextDay = addDays(selectedDate, 1);
-    setSelectedDate(nextDay);
-    setDateRange({ from: nextDay, to: nextDay });
-  };
-  
-  const goToToday = () => {
-    const today = new Date();
-    setSelectedDate(today);
-    setDateRange({ from: today, to: today });
-  };
-  
-  const goToPreviousMonth = () => {
-    const prevMonth = subMonths(selectedDate, 1);
-    setSelectedDate(prevMonth);
-    setDateRange({ from: prevMonth, to: prevMonth });
-  };
-  
-  const goToNextMonth = () => {
-    const nextMonth = addMonths(selectedDate, 1);
-    setSelectedDate(nextMonth);
-    setDateRange({ from: nextMonth, to: nextMonth });
-  };
-  
-  const handleSelectRange = (range: DateRange | undefined) => {
-    if (range) {
-      setDateRange(range);
-      if (range.from) {
-        setSelectedDate(range.from);
+
+  // Handle from date selection
+  const handleFromDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    
+    setSelectedDate(date);
+    
+    // Update the date range
+    setDateRange(prev => {
+      const to = prev?.to;
+      
+      // If the selected from date is after the to date, set to date to the from date
+      if (to && date > to) {
+        return { from: date, to: date };
       }
-      setIsCalendarOpen(false);
-    }
+      
+      return { from: date, to: to || date };
+    });
+    
+    setFromCalendarOpen(false);
+  };
+  
+  // Handle till date selection
+  const handleTillDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    
+    // Update the date range
+    setDateRange(prev => {
+      const from = prev?.from || new Date();
+      
+      // If the selected to date is before the from date, set from date to the to date
+      if (date < from) {
+        return { from: date, to: date };
+      }
+      
+      return { from: from, to: date };
+    });
+    
+    setTillCalendarOpen(false);
+  };
+  
+  // Toggle the predefined ranges dropdown
+  const togglePredefined = () => {
+    setShowPredefined(!showPredefined);
   };
   
   return (
-    <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-center">
-      {/* Day navigation */}
-      <div className="flex items-center space-x-2">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={goToPreviousDay}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button 
-          variant="outline" 
-          className={isToday(selectedDate) ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
-          onClick={goToToday}
-        >
-          {format(selectedDate, "EEEE, d MMM")}
-        </Button>
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={goToNextDay}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        {/* From date selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium whitespace-nowrap">From:</span>
+          <Popover open={fromCalendarOpen} onOpenChange={setFromCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 w-[140px] justify-start"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                <span>{formatDate(dateRange?.from)}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateRange?.from}
+                onSelect={handleFromDateSelect}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        {/* Till date selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium whitespace-nowrap">Till:</span>
+          <Popover open={tillCalendarOpen} onOpenChange={setTillCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 w-[140px] justify-start"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                <span>{formatDate(dateRange?.to)}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateRange?.to}
+                onSelect={handleTillDateSelect}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+          
+          {/* Button to toggle predefined ranges */}
+          <Button 
+            variant="outline"
+            size="sm" 
+            onClick={togglePredefined}
+          >
+            Presets
+          </Button>
+        </div>
       </div>
       
-      {/* Month navigation and calendar picker */}
-      <div className="flex items-center space-x-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={goToPreviousMonth}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        
-        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              <span>{format(selectedDate, "MMMM yyyy")}</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="center">
-            <DayPicker
-              mode="range"
-              selected={dateRange}
-              onSelect={handleSelectRange}
-              initialFocus
-              numberOfMonths={2}
-            />
-          </PopoverContent>
-        </Popover>
-        
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={goToNextMonth}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+      {/* Show predefined date range options if toggled */}
+      {showPredefined && (
+        <div className="p-3 border rounded-lg">
+          <PredefinedDateRanges setDateRange={setDateRange} />
+        </div>
+      )}
     </div>
   );
 }

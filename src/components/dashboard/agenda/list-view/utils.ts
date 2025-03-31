@@ -10,7 +10,8 @@ import {
   startOfMonth, 
   endOfMonth,
   subWeeks,
-  subMonths
+  subMonths,
+  isFuture
 } from "date-fns";
 
 // Helper function to filter events based on time range
@@ -20,7 +21,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
   const now = new Date();
   
   // Special case: All events (no filtering)
-  if (!range || range === 'all') {
+  if (!range) {
     return items;
   }
   
@@ -52,6 +53,14 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
           return eventDate >= monthStart && eventDate <= monthEnd;
         }
         
+        case 'upcoming':
+          // Future events
+          return isFuture(eventDate);
+          
+        case 'past':
+          // Past events
+          return isPast(eventDate) && !isToday(eventDate);
+          
         case 'lastWeek': {
           // Last week
           const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
