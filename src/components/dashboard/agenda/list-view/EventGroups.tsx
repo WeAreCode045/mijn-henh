@@ -22,6 +22,11 @@ export function EventGroups({ filteredItems, onItemClick, showPastEvents }: Even
         // Only show headers for upcoming events or today, or when specifically showing past events
         const showHeader = !isPastGroup || isToday(group.date) || showPastEvents;
         
+        // Skip rendering the entire group if it's a past group and we're not showing past events
+        if (isPastGroup && !showPastEvents) {
+          return null;
+        }
+
         return (
           <div key={group.date.toString()} className="space-y-2">
             {/* Date header - only show for future events or today, or if explicitly showing past events */}
@@ -32,7 +37,7 @@ export function EventGroups({ filteredItems, onItemClick, showPastEvents }: Even
                 </h3>
             )}
             
-            {/* Events list - we still render all events, just without headers for past ones */}
+            {/* Events list */}
             {group.items.map((item) => (
               <EventItem 
                 key={item.id}
