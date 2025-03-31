@@ -194,7 +194,18 @@ serve(async (req) => {
   try {
     // Parse request body
     const requestData = await req.json();
+    
+    // Ensure message and settings are defined
+    if (!requestData || !requestData.message || !requestData.settings) {
+      throw new Error('Invalid request: message or settings missing');
+    }
+    
     const { message, settings } = requestData;
+
+    // Validate that message.to exists
+    if (!message.to) {
+      throw new Error('Recipient (to) is required');
+    }
 
     console.log('Received email request:', {
       to: message.to,

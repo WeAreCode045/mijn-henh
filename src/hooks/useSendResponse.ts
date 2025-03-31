@@ -7,7 +7,7 @@ interface UseSendResponseProps {
   submissionId: string;
   agentId: string;
   propertyId: string;
-  recipientEmail?: string; // Added recipient email parameter
+  recipientEmail?: string;
   onSuccess?: () => void;
 }
 
@@ -15,7 +15,7 @@ export function useSendResponse({
   submissionId, 
   agentId,
   propertyId,
-  recipientEmail, // Added recipient email parameter
+  recipientEmail,
   onSuccess 
 }: UseSendResponseProps) {
   const [isSending, setIsSending] = useState(false);
@@ -34,24 +34,30 @@ export function useSendResponse({
     setIsSending(true);
     try {
       // First, save the reply in the database
-      const { error: dbError } = await supabase
+      const { data: replyData, error: dbError } = await supabase
         .from('property_submission_replies')
         .insert({
           submission_id: submissionId,
           reply_text: text,
-          user_id: agentId
-        });
+          user_id: agentId,
+          agent_id: agentId
+        })
+        .select();
 
       if (dbError) throw dbError;
+
+      // Get the reply ID from the response
+      const replyId = replyData?.[0]?.id;
+      
+      if (!replyId) {
+        throw new Error('Failed to get reply ID from database');
+      }
 
       // Then try to send via Edge Function if available
       try {
         const { error: fnError } = await supabase.functions.invoke('send-submission-reply', {
           body: {
-            submissionId,
-            replyText: text,
-            propertyId,
-            recipientEmail // Passing recipient email to the edge function
+            replyId: replyId
           }
         });
 
@@ -80,7 +86,7 @@ export function useSendResponse({
       });
 
       if (onSuccess) onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending reply:', error);
       toast({
         title: "Error",

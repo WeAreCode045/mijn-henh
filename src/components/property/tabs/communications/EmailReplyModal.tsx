@@ -50,7 +50,9 @@ export function EmailReplyModal({
 
   // Update recipient whenever props change
   useEffect(() => {
-    setTo(recipientEmail);
+    if (recipientEmail) {
+      setTo(recipientEmail);
+    }
   }, [recipientEmail]);
 
   // Check if email sending is configured
@@ -182,6 +184,7 @@ export function EmailReplyModal({
               value={to}
               onChange={(e) => setTo(e.target.value)}
               className="col-span-3"
+              required
             />
           </div>
           
@@ -194,6 +197,7 @@ export function EmailReplyModal({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="col-span-3"
+              required
             />
           </div>
           
@@ -221,6 +225,7 @@ export function EmailReplyModal({
               className="col-span-3"
               rows={8}
               placeholder="Type your reply here..."
+              required
             />
           </div>
         </div>

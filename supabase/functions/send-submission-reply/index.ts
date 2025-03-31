@@ -80,7 +80,8 @@ serve(async (req) => {
       );
     }
 
-    const { replyId } = await req.json();
+    const requestBody = await req.json();
+    const { replyId } = requestBody;
     console.log('Processing reply:', replyId);
 
     if (!replyId) {
@@ -188,6 +189,11 @@ serve(async (req) => {
 
     const propertyTitle = property?.title || 'Property';
 
+    // Make sure we have recipient email
+    if (!submission.email) {
+      throw new Error("Recipient email is missing from the submission");
+    }
+
     // Prepare the email content
     const emailData: EmailData = {
       to: submission.email,
@@ -248,7 +254,7 @@ serve(async (req) => {
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({ error: `Unexpected error: ${error.message}` }),
