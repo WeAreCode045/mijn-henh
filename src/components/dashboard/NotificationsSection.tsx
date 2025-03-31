@@ -21,7 +21,7 @@ export function NotificationsSection() {
     setFilterType, 
     sortOrder, 
     setSortOrder, 
-    markAsRead, 
+    toggleReadStatus, 
     deleteNotification,
     getTypeCount
   } = useNotifications();
@@ -49,7 +49,7 @@ export function NotificationsSection() {
         <NotificationsList 
           notifications={notifications}
           filterType={filterType}
-          onMarkAsRead={markAsRead}
+          onToggleRead={toggleReadStatus}
           onDelete={deleteNotification}
         />
       </CardContent>

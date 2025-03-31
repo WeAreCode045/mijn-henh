@@ -7,16 +7,16 @@ import { format } from "date-fns";
 
 interface NotificationItemProps {
   notification: Notification;
-  onMarkAsRead: (id: string) => void;
+  onToggleRead: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export function NotificationItem({ notification, onMarkAsRead, onDelete }: NotificationItemProps) {
+export function NotificationItem({ notification, onToggleRead, onDelete }: NotificationItemProps) {
   return (
     <div 
       key={notification.id}
       className={`p-4 rounded-lg border relative ${notification.read ? 'bg-background' : 'bg-muted/30 border-muted'}`}
-      onClick={() => onMarkAsRead(notification.id)}
+      onClick={() => onToggleRead(notification.id)}
     >
       <div className="flex items-start gap-3">
         <div className="mt-1">
@@ -30,7 +30,7 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
               size="icon"
               className="h-6 w-6 -mt-1 -mr-2 text-muted-foreground hover:text-foreground"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the markAsRead
+                e.stopPropagation(); // Prevent triggering the toggleRead
                 onDelete(notification.id);
               }}
             >

@@ -9,7 +9,7 @@ import { format } from "date-fns";
 
 export function CompactNotificationsBar() {
   const [startIndex, setStartIndex] = useState(0);
-  const { notifications, deleteNotification, markAsRead } = useNotifications();
+  const { notifications, deleteNotification, toggleReadStatus } = useNotifications();
   
   // Filter out read notifications for the compact view only
   const unreadNotifications = notifications.filter(notification => !notification.read);
@@ -30,9 +30,9 @@ export function CompactNotificationsBar() {
     deleteNotification(id);
   };
 
-  // Mark a notification as read
-  const handleMarkAsRead = (id: string) => {
-    markAsRead(id);
+  // Toggle read status for a notification
+  const handleToggleRead = (id: string) => {
+    toggleReadStatus(id);
     
     // If we just marked the last notification as read, we need to adjust the index
     if (unreadNotifications.length === 1) {
@@ -97,14 +97,14 @@ export function CompactNotificationsBar() {
           <div 
             key={currentNotification.id} 
             className="p-3 bg-white/10 rounded-md relative border border-white/20 cursor-pointer"
-            onClick={() => handleMarkAsRead(currentNotification.id)}
+            onClick={() => handleToggleRead(currentNotification.id)}
           >
             <Button
               variant="ghost"
               size="icon"
               className="h-6 w-6 absolute top-1 right-1 text-white/70 hover:text-white hover:bg-white/10"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the markAsRead
+                e.stopPropagation(); // Prevent triggering the toggleRead
                 handleDeleteNotification(currentNotification.id);
               }}
             >

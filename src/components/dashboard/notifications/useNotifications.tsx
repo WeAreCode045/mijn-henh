@@ -258,15 +258,15 @@ export function useNotifications() {
     });
   };
 
-  // Function to mark notification as read
-  const markAsRead = async (id: string) => {
-    // Update notifications in state
+  // Function to toggle notification read status
+  const toggleReadStatus = async (id: string) => {
+    // Find the notification and toggle its read status
     const updatedNotifications = notifications.map(notification => 
-      notification.id === id ? { ...notification, read: true } : notification
+      notification.id === id ? { ...notification, read: !notification.read } : notification
     );
     setNotifications(updatedNotifications);
     
-    // Update read states
+    // Update read states in database
     const readStates = await fetchUserReadStates();
     // Create a new ReadStateMap with the correct type
     const updatedReadStates: ReadStateMap = {};
@@ -279,7 +279,12 @@ export function useNotifications() {
       });
     }
     
-    updatedReadStates[id] = true;
+    // Get the notification to find its current read state
+    const notification = updatedNotifications.find(n => n.id === id);
+    if (notification) {
+      updatedReadStates[id] = notification.read;
+    }
+    
     await saveReadNotifications(updatedReadStates);
   };
 
@@ -330,7 +335,7 @@ export function useNotifications() {
     setFilterType,
     sortOrder,
     setSortOrder,
-    markAsRead,
+    toggleReadStatus,
     deleteNotification,
     getTypeCount
   };
