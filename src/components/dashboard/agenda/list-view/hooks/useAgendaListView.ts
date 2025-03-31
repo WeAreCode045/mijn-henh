@@ -22,7 +22,7 @@ export function useAgendaListView(
   
   // Apply filters whenever dependencies change
   useEffect(() => {
-    if (isLoading || !agendaItems) {
+    if (isLoading || !agendaItems || agendaItems.length === 0) {
       setDisplayedItems([]);
       return;
     }
@@ -30,7 +30,7 @@ export function useAgendaListView(
     console.log(`Filtering ${agendaItems.length} agenda items with filter: ${filterValue} and date range:`, dateRange);
     
     // Apply date range filter if it's set
-    let filteredItems = agendaItems;
+    let filteredItems = [...agendaItems];
     
     if (dateRange && dateRange.from) {
       filteredItems = filteredItems.filter(item => {

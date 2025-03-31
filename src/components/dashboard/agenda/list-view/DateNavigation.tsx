@@ -62,6 +62,7 @@ export function DateNavigation({
       }
     } else {
       handlePresetClick(value);
+      setDateRange(handlePresetClick(value));
     }
   };
   
@@ -76,19 +77,28 @@ export function DateNavigation({
       <div className="flex items-center space-x-2">
         <Button 
           variant={filterValue === "past" ? "default" : "outline"} 
-          onClick={() => handleFilterChange("past")}
+          onClick={() => {
+            const newRange = handleFilterChange("past");
+            setDateRange(newRange);
+          }}
         >
           All Past Events
         </Button>
         <Button 
           variant={filterValue === "thisWeek" ? "default" : "outline"} 
-          onClick={() => handleFilterChange("thisWeek")}
+          onClick={() => {
+            const newRange = handleFilterChange("thisWeek");
+            setDateRange(newRange);
+          }}
         >
           This Week
         </Button>
         <Button 
           variant={filterValue === "upcoming" ? "default" : "outline"} 
-          onClick={() => handleFilterChange("upcoming")}
+          onClick={() => {
+            const newRange = handleFilterChange("upcoming");
+            setDateRange(newRange);
+          }}
         >
           All Upcoming Events
         </Button>

@@ -100,41 +100,50 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
   const handleFilterChange = (value: string) => {
     // If clicking the current filter, don't change anything
     if (value === filterValue) {
-      return;
+      return dateRange;
     }
     
     setFilterValue(value);
     
     // Show appropriate preset options based on filter selection
+    let newDateRange;
+    
     if (value === "past") {
       // For "past", set date range to all past events (from far past to yesterday)
       const yesterday = new Date(today);
       yesterday.setDate(today.getDate() - 1);
       const farPast = new Date(1970, 0, 1); // Start from a very old date
-      setDateRange({ from: farPast, to: yesterday });
+      newDateRange = { from: farPast, to: yesterday };
+      setDateRange(newDateRange);
     } else if (value === "upcoming") {
       // For "upcoming", set date range to all future events (from today to far future)
       const farFuture = new Date();
       farFuture.setFullYear(farFuture.getFullYear() + 100);
-      setDateRange({ from: today, to: farFuture });
+      newDateRange = { from: today, to: farFuture };
+      setDateRange(newDateRange);
     } else if (value === "today") {
       // For "today", set date range to today only
-      setDateRange({ from: today, to: today });
+      newDateRange = { from: today, to: today };
+      setDateRange(newDateRange);
     } else if (value === "thisWeek") {
       // For thisWeek, set date range to current week
-      setDateRange({ from: getWeekStart(today), to: getWeekEnd(today) });
+      newDateRange = { from: getWeekStart(today), to: getWeekEnd(today) };
+      setDateRange(newDateRange);
     }
+    
+    return newDateRange;
   };
   
   // Update date range when preset is clicked
   const handlePresetClick = (presetValue: string) => {
     const today = new Date();
+    let newDateRange;
     
     switch (presetValue) {
       case "yesterday": {
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-        setDateRange({ from: yesterday, to: yesterday });
+        newDateRange = { from: yesterday, to: yesterday };
         break;
       }
       case "lastWeek": {
@@ -142,7 +151,7 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         lastMonday.setDate(today.getDate() - today.getDay() - 6);
         const lastSunday = new Date(today);
         lastSunday.setDate(today.getDate() - today.getDay());
-        setDateRange({ from: lastMonday, to: lastSunday });
+        newDateRange = { from: lastMonday, to: lastSunday };
         break;
       }
       case "pastThisMonth": {
@@ -150,19 +159,19 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-        setDateRange({ from: firstDay, to: yesterday });
+        newDateRange = { from: firstDay, to: yesterday };
         break;
       }
       case "upcomingThisMonth": {
         // For upcoming events, show from today to end of month
         const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        setDateRange({ from: today, to: lastDay });
+        newDateRange = { from: today, to: lastDay };
         break;
       }
       case "lastMonth": {
         const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
-        setDateRange({ from: firstDay, to: lastDay });
+        newDateRange = { from: firstDay, to: lastDay };
         break;
       }
       case "last30Days": {
@@ -170,17 +179,17 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         thirtyDaysAgo.setDate(today.getDate() - 30);
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-        setDateRange({ from: thirtyDaysAgo, to: yesterday });
+        newDateRange = { from: thirtyDaysAgo, to: yesterday };
         break;
       }
       case "tomorrow": {
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
-        setDateRange({ from: tomorrow, to: tomorrow });
+        newDateRange = { from: tomorrow, to: tomorrow };
         break;
       }
       case "thisWeek": {
-        setDateRange({ from: getWeekStart(today), to: getWeekEnd(today) });
+        newDateRange = { from: getWeekStart(today), to: getWeekEnd(today) };
         break;
       }
       case "nextWeek": {
@@ -188,20 +197,20 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         nextMonday.setDate(today.getDate() - today.getDay() + 8); // This gets next Monday
         const nextSunday = new Date(nextMonday);
         nextSunday.setDate(nextMonday.getDate() + 6); // This gets next Sunday
-        setDateRange({ from: nextMonday, to: nextSunday });
+        newDateRange = { from: nextMonday, to: nextSunday };
         break;
       }
       case "next30Days": {
         const thirtyDaysLater = new Date(today);
         thirtyDaysLater.setDate(today.getDate() + 30);
-        setDateRange({ from: today, to: thirtyDaysLater });
+        newDateRange = { from: today, to: thirtyDaysLater };
         break;
       }
       case "upcoming": {
         // For upcoming, we want all future events starting from today
         const futureEnd = new Date(today);
         futureEnd.setFullYear(futureEnd.getFullYear() + 100); // Set a far future date
-        setDateRange({ from: today, to: futureEnd });
+        newDateRange = { from: today, to: futureEnd };
         break;
       }
       case "past": {
@@ -209,17 +218,25 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
         const farPast = new Date(1970, 0, 1); // Start from a very old date
-        setDateRange({ from: farPast, to: yesterday });
+        newDateRange = { from: farPast, to: yesterday };
         break;
       }
       case "today": {
-        setDateRange({ from: today, to: today });
+        newDateRange = { from: today, to: today };
         break;
       }
     }
     
     // Update the filter value
     setFilterValue(presetValue);
+    
+    // Return the new date range
+    if (newDateRange) {
+      setDateRange(newDateRange);
+      return newDateRange;
+    }
+    
+    return dateRange;
   };
   
   // Initialize with thisWeek preset
