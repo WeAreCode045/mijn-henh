@@ -2,6 +2,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Send } from "lucide-react";
 
 interface SubmissionReplyFormProps {
@@ -10,6 +12,7 @@ interface SubmissionReplyFormProps {
   onSubmit: () => void;
   isSubmitting: boolean;
   placeholder?: string;
+  recipientEmail?: string;
 }
 
 export function SubmissionReplyForm({
@@ -17,7 +20,8 @@ export function SubmissionReplyForm({
   onChange,
   onSubmit,
   isSubmitting,
-  placeholder = "Type your reply here..."
+  placeholder = "Type your reply here...",
+  recipientEmail
 }: SubmissionReplyFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +32,18 @@ export function SubmissionReplyForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {recipientEmail && (
+        <div className="space-y-2">
+          <Label htmlFor="recipient">To:</Label>
+          <Input 
+            id="recipient"
+            value={recipientEmail}
+            readOnly
+            className="bg-muted"
+          />
+        </div>
+      )}
+      
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

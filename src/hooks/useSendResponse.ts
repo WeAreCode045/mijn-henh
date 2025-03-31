@@ -7,6 +7,7 @@ interface UseSendResponseProps {
   submissionId: string;
   agentId: string;
   propertyId: string;
+  recipientEmail?: string; // Added recipient email parameter
   onSuccess?: () => void;
 }
 
@@ -14,6 +15,7 @@ export function useSendResponse({
   submissionId, 
   agentId,
   propertyId,
+  recipientEmail, // Added recipient email parameter
   onSuccess 
 }: UseSendResponseProps) {
   const [isSending, setIsSending] = useState(false);
@@ -48,7 +50,8 @@ export function useSendResponse({
           body: {
             submissionId,
             replyText: text,
-            propertyId
+            propertyId,
+            recipientEmail // Passing recipient email to the edge function
           }
         });
 

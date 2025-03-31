@@ -12,10 +12,13 @@ export function useSendResponse() {
   const sendResponse = async (
     propertyId: string,
     submissionId: string,
-    message: string
+    message: string,
+    recipientEmail?: string // Added recipient email parameter
   ) => {
     setIsLoading(true);
     try {
+      console.log("Sending response with recipientEmail:", recipientEmail);
+      
       // First, insert the reply into the database
       const { error: dbError } = await supabase
         .from("property_submission_replies")
@@ -25,6 +28,7 @@ export function useSendResponse() {
         });
 
       if (dbError) {
+        console.error("Database error:", dbError);
         throw dbError;
       }
 
@@ -34,7 +38,8 @@ export function useSendResponse() {
           body: {
             submissionId,
             replyText: message,
-            propertyId
+            propertyId,
+            recipientEmail // Pass recipient email to the edge function
           }
         });
         
@@ -54,6 +59,7 @@ export function useSendResponse() {
 
       await logPropertyChange(propertyId, "submission", `Sent response to submission ${submissionId}`);
     } catch (error: any) {
+      console.error("Send response error:", error);
       toast({
         variant: "destructive",
         title: "Error",

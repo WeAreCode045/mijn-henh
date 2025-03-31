@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
@@ -37,13 +36,13 @@ const authenticateUser = async (req: Request) => {
 
 // Validate request body
 const validateRequestBody = (body: any) => {
-  const { submissionId, replyText } = body;
+  const { submissionId, replyText, recipientEmail } = body;
   
   if (!submissionId || !replyText) {
     throw new Error("Missing required data. Required: submissionId, replyText");
   }
   
-  return { submissionId, replyText };
+  return { submissionId, replyText, recipientEmail };
 };
 
 // Fetch submission details
@@ -112,9 +111,9 @@ const fetchAgencySettings = async (supabaseAdmin: any) => {
 };
 
 // Prepare email content
-const prepareEmailContent = (submission: any, replyText: string, replyingUser: any) => {
+const prepareEmailContent = (submission: any, replyText: string, replyingUser: any, recipientEmail?: string) => {
   return {
-    to: submission.email,
+    to: recipientEmail || submission.email,
     subject: `Re: Your inquiry about ${submission.property?.title || 'our property'}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -191,7 +190,7 @@ serve(async (req) => {
   try {
     // 1. Validate request body
     const body = await req.json();
-    const { submissionId, replyText } = validateRequestBody(body);
+    const { submissionId, replyText, recipientEmail } = validateRequestBody(body);
 
     // 2. Authenticate user
     const { user, token } = await authenticateUser(req);
@@ -209,7 +208,7 @@ serve(async (req) => {
     await saveReplyToDatabase(supabaseAdmin, submissionId, userId, replyText);
     
     // 6. Send email if SMTP is configured
-    const emailContent = prepareEmailContent(submission, replyText, replyingUser);
+    const emailContent = prepareEmailContent(submission, replyText, replyingUser, recipientEmail);
     const emailResult = await sendEmailWithSMTP(supabaseAdmin, settings, emailContent);
 
     // 7. Return success response

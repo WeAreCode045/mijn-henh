@@ -75,6 +75,7 @@ export function SubmissionDetail({
           onChange={setReplyText}
           onSubmit={handleReplySubmit}
           isSubmitting={isSending}
+          recipientEmail={submission.email} // Pass the sender's email as recipient
         />
       </div>
     </div>

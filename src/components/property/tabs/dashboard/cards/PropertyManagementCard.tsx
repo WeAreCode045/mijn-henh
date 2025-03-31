@@ -70,12 +70,17 @@ export function PropertyManagementCard({
     
     setIsLoading(true);
     try {
+      console.log("Updating property status to:", newStatus);
+      
       const { error } = await supabase
         .from('properties')
         .update({ status: newStatus })
         .eq('id', propertyId);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error from Supabase:", error);
+        throw error;
+      }
       
       setStatus(newStatus);
       toast({
@@ -93,6 +98,28 @@ export function PropertyManagementCard({
       return Promise.reject(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAgentChange = async (selectedAgentId: string) => {
+    if (selectedAgentId === agentId) {
+      console.log("Agent unchanged, skipping update");
+      return;
+    }
+    
+    console.log("Saving agent:", selectedAgentId);
+    try {
+      await handleSaveAgent(selectedAgentId);
+      toast({
+        description: "Agent updated successfully",
+      });
+    } catch (error) {
+      console.error("Error saving agent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update agent",
+        variant: "destructive",
+      });
     }
   };
 
@@ -146,7 +173,7 @@ export function PropertyManagementCard({
         <div className="mt-4">
           <AgentSelector 
             initialAgentId={agentId} 
-            onAgentChange={handleSaveAgent} 
+            onAgentChange={handleAgentChange} 
           />
         </div>
         
