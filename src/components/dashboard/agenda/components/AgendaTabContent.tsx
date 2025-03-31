@@ -1,9 +1,9 @@
 
 import { TabsContent } from "@/components/ui/tabs";
-import { AgendaViewContent } from "../AgendaViewContent";
-import { WeeklyCalendarView } from "../weekly-calendar";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { DateRange } from "react-day-picker";
+import { WeeklyViewContent } from "./WeeklyViewContent";
+import { ListViewContent } from "./ListViewContent";
 
 interface AgendaTabContentProps {
   activeTab: string;
@@ -14,6 +14,7 @@ interface AgendaTabContentProps {
   filteredAgendaItems: AgendaItem[];
   onItemClick: (item: AgendaItem) => void;
   onAddClick: () => void;
+  onEventUpdate?: (item: AgendaItem, newDate: string, newTime: string) => void;
 }
 
 export function AgendaTabContent({
@@ -24,22 +25,23 @@ export function AgendaTabContent({
   setDateRange,
   filteredAgendaItems,
   onItemClick,
-  onAddClick
+  onAddClick,
+  onEventUpdate
 }: AgendaTabContentProps) {
   return (
     <>
       <TabsContent value="weekly" className="mt-0">
-        <WeeklyCalendarView
+        <WeeklyViewContent
           agendaItems={safeAgendaItems}
           isLoading={isLoading}
           onItemClick={onItemClick}
+          onEventUpdate={onEventUpdate}
         />
       </TabsContent>
       
       <TabsContent value="list" className="mt-0">
-        <AgendaViewContent 
-          view="list"
-          safeAgendaItems={safeAgendaItems}
+        <ListViewContent 
+          agendaItems={safeAgendaItems}
           isLoading={isLoading}
           dateRange={dateRange}
           setDateRange={setDateRange}
