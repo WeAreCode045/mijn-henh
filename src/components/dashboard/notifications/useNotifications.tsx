@@ -268,7 +268,17 @@ export function useNotifications() {
     
     // Update read states
     const readStates = await fetchUserReadStates();
-    const updatedReadStates: ReadStateMap = typeof readStates === 'object' ? { ...readStates } : {};
+    // Create a new ReadStateMap with the correct type
+    const updatedReadStates: ReadStateMap = {};
+    
+    // Convert the read states to the correct type
+    if (readStates && typeof readStates === 'object') {
+      Object.keys(readStates).forEach(key => {
+        // Make sure we're only adding boolean values
+        updatedReadStates[key] = Boolean(readStates[key]);
+      });
+    }
+    
     updatedReadStates[id] = true;
     await saveReadNotifications(updatedReadStates);
   };
@@ -279,8 +289,20 @@ export function useNotifications() {
     
     // Update read states in database
     const readStates = await fetchUserReadStates();
-    const updatedReadStates: ReadStateMap = typeof readStates === 'object' ? { ...readStates } : {};
-    delete updatedReadStates[id];
+    // Create a new ReadStateMap with the correct type
+    const updatedReadStates: ReadStateMap = {};
+    
+    // Convert the read states to the correct type
+    if (readStates && typeof readStates === 'object') {
+      Object.keys(readStates).forEach(key => {
+        // Skip the notification being deleted
+        if (key !== id) {
+          // Make sure we're only adding boolean values
+          updatedReadStates[key] = Boolean(readStates[key]);
+        }
+      });
+    }
+    
     await saveReadNotifications(updatedReadStates);
     
     // If it's a database notification, delete it
