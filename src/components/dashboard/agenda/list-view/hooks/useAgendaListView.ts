@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { filterByTimeRange } from "../utils";
@@ -29,16 +30,10 @@ export function useAgendaListView(
     
     console.log(`Filtering ${agendaItems.length} agenda items with filter: ${filterValue} and date range:`, dateRange);
     
-    // Apply time filter if selected
+    // Apply date range filter if it's set
     let filteredItems = agendaItems;
     
-    // For specific presets like upcoming, past, today, etc., use the time-based filter
-    if (["upcoming", "past", "today", "yesterday", "tomorrow"].includes(filterValue)) {
-      filteredItems = filterByTimeRange(filteredItems, filterValue);
-      console.log(`After time filter (${filterValue}): ${filteredItems.length} items`);
-    } 
-    // Otherwise, filter by the date range if it's set
-    else if (dateRange && dateRange.from) {
+    if (dateRange && dateRange.from) {
       filteredItems = filteredItems.filter(item => {
         if (!item.event_date) return false;
         

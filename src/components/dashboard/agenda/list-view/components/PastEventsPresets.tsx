@@ -41,6 +41,13 @@ export function PastEventsPresets({ onPresetClick, visible }: PastEventsPresetsP
         >
           Last 30 Days
         </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onPresetClick("thisMonth")}
+        >
+          This Month
+        </Button>
       </div>
     </div>
   );

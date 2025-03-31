@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
 
@@ -61,20 +60,29 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
     if (value === "past") {
       setShowPastPresets(true);
       setShowUpcomingPresets(false);
+      
+      // For "past", set date range to all past events (from far past to yesterday)
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      const farPast = new Date(1970, 0, 1); // Start from a very old date
+      setDateRange({ from: farPast, to: yesterday });
     } else if (value === "upcoming") {
       setShowPastPresets(false);
       setShowUpcomingPresets(true);
+      
+      // For "upcoming", set date range to all future events (from today to far future)
+      const farFuture = new Date();
+      farFuture.setFullYear(farFuture.getFullYear() + 100);
+      setDateRange({ from: today, to: farFuture });
     } else {
       setShowPastPresets(false);
       setShowUpcomingPresets(false);
       
       // For "today", automatically update date range
       if (value === "today") {
-        const today = new Date();
         setDateRange({ from: today, to: today });
       } else if (value === "thisWeek") {
         // For thisWeek, set date range to current week
-        const today = new Date();
         setDateRange({ from: getWeekStart(today), to: getWeekEnd(today) });
       }
     }
@@ -100,9 +108,17 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         break;
       }
       case "thisMonth": {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        setDateRange({ from: firstDay, to: lastDay });
+        if (showPastPresets) {
+          // For past events, show from beginning of month to today (not inclusive)
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+          setDateRange({ from: firstDay, to: yesterday });
+        } else {
+          // For upcoming events, show from today to end of month
+          const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          setDateRange({ from: today, to: lastDay });
+        }
         break;
       }
       case "lastMonth": {
@@ -150,11 +166,24 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         setDateRange({ from: today, to: futureEnd });
         break;
       }
+      case "past": {
+        // For past events, show all past events up to yesterday
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        const farPast = new Date(1970, 0, 1); // Start from a very old date
+        setDateRange({ from: farPast, to: yesterday });
+        break;
+      }
     }
     
-    // Close the preset menus
-    setShowPastPresets(false);
-    setShowUpcomingPresets(false);
+    // Keep preset menus visible based on the category
+    if (["yesterday", "lastWeek", "lastMonth", "last30Days"].includes(presetValue)) {
+      setShowPastPresets(true);
+      setShowUpcomingPresets(false);
+    } else if (["tomorrow", "nextWeek", "next30Days"].includes(presetValue)) {
+      setShowPastPresets(false);
+      setShowUpcomingPresets(true);
+    }
     
     // Update the filter value
     setFilterValue(presetValue);
