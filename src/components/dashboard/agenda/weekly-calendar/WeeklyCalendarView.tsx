@@ -78,8 +78,8 @@ export function WeeklyCalendarView({
             events={events}
             getEventPosition={getEventPosition}
             getEventDuration={getEventDuration}
-            getEventColor={getEventColor}
             formatEventTime={formatEventTime}
+            getEventColor={getEventColor}
             onItemClick={onItemClick}
           />
         ))}

@@ -1,6 +1,5 @@
 
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
-import { format } from "date-fns";
 
 export function useEventFormatting() {
   // Convert time string to a position (pixels from top)
@@ -10,15 +9,12 @@ export function useEventFormatting() {
     const [hours, minutes] = time.split(':').map(Number);
     const totalMinutes = (hours * 60) + minutes;
     
-    // Start time for the calendar (8:00 AM = 480 minutes)
-    const startMinutes = 8 * 60;
-    
-    // Calculate position (20px per hour = 1/3 px per minute)
-    return (totalMinutes - startMinutes) * (1/3);
+    // Each hour is 60px high
+    return totalMinutes;
   };
   
   // Calculate event duration in pixels
-  const getEventDuration = (startTime: string, endTime: string | null): number => {
+  const getEventDuration = (startTime: string, endTime?: string | null): number => {
     if (!startTime) return 30; // Default height
     if (!endTime) return 30; // Default height for events without end time
     
@@ -28,31 +24,32 @@ export function useEventFormatting() {
     const startTotalMinutes = (startHours * 60) + startMinutes;
     const endTotalMinutes = (endHours * 60) + endMinutes;
     
-    // Calculate duration in minutes, with a minimum of 30 minutes (10px)
+    // Calculate duration in minutes, with a minimum of 30 minutes
     const durationMinutes = Math.max(30, endTotalMinutes - startTotalMinutes);
     
-    // Calculate height (20px per hour = 1/3 px per minute)
-    return durationMinutes * (1/3);
+    // Return duration in pixels (1 minute = 1px)
+    return durationMinutes;
   };
   
   // Format event time for display
-  const formatEventTime = (event: AgendaItem): string => {
-    if (!event.event_time) return '';
+  const formatEventTime = (startTime: string, endTime?: string | null): string => {
+    if (!startTime) return '';
     
-    const timeString = event.event_time.substring(0, 5); // Get HH:MM
+    // Format to display only hours and minutes (HH:MM)
+    const timeString = startTime.substring(0, 5);
     
-    if (event.end_time) {
-      const endTimeString = event.end_time.substring(0, 5);
+    if (endTime) {
+      const endTimeString = endTime.substring(0, 5);
       return `${timeString} - ${endTimeString}`;
     }
     
     return timeString;
   };
   
-  // Get color for event based on some property
-  const getEventColor = (event: AgendaItem): string => {
-    // Generate a deterministic color based on the event title or ID
-    const hash = event.id.split('').reduce((acc, char) => {
+  // Get color for event based on event type
+  const getEventColor = (eventType: string): string => {
+    // Generate a deterministic color based on the string
+    const hash = eventType.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);
     }, 0);
     
