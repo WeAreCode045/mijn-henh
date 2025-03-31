@@ -92,7 +92,7 @@ export function CompactNotificationsBar() {
       const newNotifications = prev.filter(notification => notification.id !== id);
       // Adjust startIndex if necessary
       if (startIndex >= newNotifications.length && startIndex > 0) {
-        setStartIndex(Math.max(0, newNotifications.length - 3));
+        setStartIndex(Math.max(0, newNotifications.length - 1));
       }
       return newNotifications;
     });
@@ -106,12 +106,12 @@ export function CompactNotificationsBar() {
     setStartIndex(prev => Math.min(notifications.length - 1, prev + 1));
   };
 
-  // Get the current slice of notifications to display (max 3)
-  const displayedNotifications = notifications.slice(startIndex, startIndex + 3);
+  // Get the current notification to display (just 1)
+  const currentNotification = notifications[startIndex];
   
   // Calculate if navigation buttons should be enabled
   const canGoUp = startIndex > 0;
-  const canGoDown = startIndex + 3 < notifications.length;
+  const canGoDown = startIndex < notifications.length - 1;
 
   return (
     <Card className="h-full bg-primary text-white">
@@ -145,37 +145,35 @@ export function CompactNotificationsBar() {
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        {displayedNotifications.length === 0 ? (
+        {!currentNotification ? (
           <div className="text-center text-white/70 p-4">
             No notifications
           </div>
         ) : (
-          displayedNotifications.map(notification => (
-            <div 
-              key={notification.id} 
-              className="p-3 bg-white/10 rounded-md relative border border-white/20"
+          <div 
+            key={currentNotification.id} 
+            className="p-3 bg-white/10 rounded-md relative border border-white/20"
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 absolute top-1 right-1 text-white/70 hover:text-white hover:bg-white/10"
+              onClick={() => handleDeleteNotification(currentNotification.id)}
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 absolute top-1 right-1 text-white/70 hover:text-white hover:bg-white/10"
-                onClick={() => handleDeleteNotification(notification.id)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-              
-              <div className="flex items-start mb-1">
-                {notification.type === "agenda" && <Calendar className="h-4 w-4 mr-2 text-blue-300" />}
-                {notification.type === "todo" && <CheckSquare className="h-4 w-4 mr-2 text-green-300" />}
-                {notification.type === "communication" && <MessageSquare className="h-4 w-4 mr-2 text-amber-300" />}
-                <span className="font-medium">{notification.title}</span>
-              </div>
-              <p className="text-sm text-white/70">{notification.message}</p>
-              <p className="text-xs text-white/50 mt-1">
-                {format(notification.date, "PPp")}
-              </p>
+              <X className="h-3 w-3" />
+            </Button>
+            
+            <div className="flex items-start mb-1">
+              {currentNotification.type === "agenda" && <Calendar className="h-4 w-4 mr-2 text-blue-300" />}
+              {currentNotification.type === "todo" && <CheckSquare className="h-4 w-4 mr-2 text-green-300" />}
+              {currentNotification.type === "communication" && <MessageSquare className="h-4 w-4 mr-2 text-amber-300" />}
+              <span className="font-medium">{currentNotification.title}</span>
             </div>
-          ))
+            <p className="text-sm text-white/70">{currentNotification.message}</p>
+            <p className="text-xs text-white/50 mt-1">
+              {format(currentNotification.date, "PPp")}
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
