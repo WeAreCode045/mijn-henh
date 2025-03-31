@@ -2,10 +2,18 @@
 import { useState, useEffect } from "react";
 import { 
   startOfWeek, 
-  endOfWeek, 
+  endOfWeek,
+  startOfDay,
+  endOfDay,
+  startOfMonth,
+  endOfMonth,
   eachDayOfInterval, 
   addWeeks,
+  addDays,
+  addMonths,
   subWeeks,
+  subDays,
+  subMonths,
   parseISO,
   isSameDay,
   isValid
@@ -17,7 +25,7 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
   const [currentWeek, setCurrentWeek] = useState<Date[]>([]);
   const [activeTab, setActiveTab] = useState<string>("week");
   
-  // Calculate the dates for the current week
+  // Calculate the dates for the current view (day, week, or month)
   useEffect(() => {
     if (!isValid(currentDate)) {
       setCurrentDate(new Date()); // Reset to valid date if current date is invalid
@@ -25,31 +33,52 @@ export function useWeeklyCalendar(agendaItems: AgendaItem[]) {
     }
     
     try {
-      const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // 1 = Monday
-      const end = endOfWeek(currentDate, { weekStartsOn: 1 });
+      let days: Date[] = [];
       
-      if (!isValid(start) || !isValid(end)) {
-        console.error("Invalid date range:", { start, end, currentDate });
+      if (activeTab === "day") {
+        // For day view, just include the current day
+        days = [currentDate];
+      } else if (activeTab === "week") {
+        // For week view, include all days in the week
+        const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // 1 = Monday
+        const end = endOfWeek(currentDate, { weekStartsOn: 1 });
+        days = eachDayOfInterval({ start, end });
+      } else if (activeTab === "month") {
+        // For month view, include all days in the month
+        const start = startOfMonth(currentDate);
+        const end = endOfMonth(currentDate);
+        days = eachDayOfInterval({ start, end });
+      }
+      
+      if (days.some(d => !isValid(d))) {
+        console.error("Invalid date range:", { currentDate, activeTab });
         setCurrentWeek([]); // Empty array to prevent rendering errors
         return;
       }
       
-      const days = eachDayOfInterval({ start, end });
       setCurrentWeek(days);
     } catch (error) {
-      console.error("Error calculating week dates:", error);
+      console.error("Error calculating dates:", error);
       setCurrentWeek([]); // Empty array to prevent rendering errors
     }
-  }, [currentDate]);
+  }, [currentDate, activeTab]);
   
-  // Navigate to previous week
+  // Navigate to previous period
   const goToPreviousWeek = () => {
-    setCurrentDate(prevDate => subWeeks(prevDate, 1));
+    setCurrentDate(prevDate => {
+      if (activeTab === "day") return subDays(prevDate, 1);
+      if (activeTab === "month") return subMonths(prevDate, 1);
+      return subWeeks(prevDate, 1); // default for week
+    });
   };
   
-  // Navigate to next week
+  // Navigate to next period
   const goToNextWeek = () => {
-    setCurrentDate(prevDate => addWeeks(prevDate, 1));
+    setCurrentDate(prevDate => {
+      if (activeTab === "day") return addDays(prevDate, 1);
+      if (activeTab === "month") return addMonths(prevDate, 1);
+      return addWeeks(prevDate, 1); // default for week
+    });
   };
   
   // Go to today

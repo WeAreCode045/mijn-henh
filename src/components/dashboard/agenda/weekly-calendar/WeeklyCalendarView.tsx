@@ -7,6 +7,7 @@ import { DayColumn } from "./DayColumn";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useWeeklyCalendar } from "./useWeeklyCalendar";
 import { useEventFormatting } from "./useEventFormatting";
+import { format } from "date-fns";
 
 interface WeeklyCalendarViewProps {
   agendaItems: AgendaItem[];
@@ -20,6 +21,7 @@ export function WeeklyCalendarView({
   onItemClick
 }: WeeklyCalendarViewProps) {
   const {
+    currentDate,
     currentWeek,
     goToPreviousWeek,
     goToToday,
@@ -40,6 +42,17 @@ export function WeeklyCalendarView({
     return <LoadingSpinner />;
   }
   
+  // Adjust header title based on active view
+  const getHeaderTitle = () => {
+    if (activeTab === "day") {
+      return format(currentDate, "MMMM d, yyyy");
+    } else if (activeTab === "month") {
+      return format(currentDate, "MMMM yyyy");
+    }
+    // Default to week format
+    return format(currentWeek[0], "MMMM yyyy") + " (Week " + format(currentWeek[0], "w") + ")";
+  };
+  
   return (
     <div className="flex flex-col h-full">
       {/* Calendar navigation */}
@@ -52,7 +65,7 @@ export function WeeklyCalendarView({
         onTabChange={setActiveTab}
       />
       
-      {/* Weekly calendar grid */}
+      {/* Calendar grid */}
       <div className="flex border rounded-lg overflow-auto">
         {/* Time column */}
         <TimeColumn />
