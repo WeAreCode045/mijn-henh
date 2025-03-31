@@ -1,16 +1,16 @@
 
 import React from "react";
-import { format } from "date-fns";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { EventItem } from "./EventItem";
+import { format } from "date-fns";
 
 interface DayColumnProps {
   date: Date;
   events: AgendaItem[];
   getEventPosition: (time: string) => number;
-  getEventDuration: (startTime: string, endTime: string | null) => number;
-  getEventColor: (event: AgendaItem) => string;
-  formatEventTime: (event: AgendaItem) => string;
+  getEventDuration: (startTime: string, endTime?: string | null) => number;
+  formatEventTime: (startTime: string, endTime?: string | null) => string;
+  getEventColor: (eventType: string) => string;
   onItemClick: (item: AgendaItem) => void;
 }
 
@@ -19,46 +19,42 @@ export function DayColumn({
   events,
   getEventPosition,
   getEventDuration,
-  getEventColor,
   formatEventTime,
+  getEventColor,
   onItemClick
 }: DayColumnProps) {
-  const dayName = format(date, 'EEE');
-  const dayNumber = format(date, 'd');
-  const isToday = date.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
-  
-  // Generate time slots (1 hour intervals)
-  const timeSlots = Array.from({ length: 13 }, (_, i) => i + 8); // 8 AM to 8 PM
+  const isToday = new Date().toDateString() === date.toDateString();
+  const dayName = format(date, "EEE");
+  const dayNumber = format(date, "d");
   
   return (
-    <div className="flex-1 min-w-[120px] border-l">
+    <div className="flex-1 min-w-[120px] relative border-l">
       {/* Day header */}
-      <div className={`p-2 text-center border-b ${isToday ? 'bg-primary/10 font-bold' : ''}`}>
-        <div className="text-sm font-medium">{dayName}</div>
-        <div className={`text-2xl ${isToday ? 'text-primary' : ''}`}>{dayNumber}</div>
+      <div className={`text-center py-2 border-b ${isToday ? 'bg-primary/10' : ''}`}>
+        <div className="font-medium">{dayName}</div>
+        <div className={`text-sm ${isToday ? 'text-primary font-bold' : 'text-muted-foreground'}`}>{dayNumber}</div>
       </div>
       
-      {/* Day content with time slots */}
-      <div className="relative" style={{ height: '780px' }}> {/* 13 hours * 60px */}
-        {/* Time slot guidelines */}
-        {timeSlots.map(hour => (
+      {/* Time slots */}
+      <div className="relative h-[1440px]"> {/* 24h * 60px = 1440px */}
+        {/* Hour markers */}
+        {Array.from({ length: 24 }).map((_, hour) => (
           <div 
             key={hour} 
-            className="border-b h-[60px] flex items-end justify-end pr-1 text-[10px] text-muted-foreground"
-          >
-            {/* Empty slot */}
-          </div>
+            className="border-b border-gray-100 absolute w-full" 
+            style={{ top: `${hour * 60}px` }}
+          />
         ))}
         
-        {/* Event items */}
-        {events.map(event => {
+        {/* Events */}
+        {events.map((event) => {
           const position = getEventPosition(event.event_time);
           const duration = getEventDuration(event.event_time, event.end_time);
-          const color = getEventColor(event);
-          const timeLabel = formatEventTime(event);
+          const timeLabel = formatEventTime(event.event_time, event.end_time);
+          const color = getEventColor(event.title); // Using title as a simple way to get color variation
           
           return (
-            <EventItem
+            <EventItem 
               key={event.id}
               event={event}
               position={position}
