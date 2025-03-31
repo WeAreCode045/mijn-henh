@@ -160,10 +160,12 @@ export function DateNavigation({
         break;
       }
       case "nextWeek": {
+        // Fix for next week date range calculation
         const nextMonday = new Date(today);
-        nextMonday.setDate(today.getDate() - today.getDay() + 8);
-        const nextSunday = new Date(today);
-        nextSunday.setDate(nextMonday.getDate() + 6);
+        nextMonday.setDate(today.getDate() - today.getDay() + 8); // This gets next Monday
+        const nextSunday = new Date(nextMonday);
+        nextSunday.setDate(nextMonday.getDate() + 6); // This gets next Sunday
+        console.log("Next week date range:", { from: nextMonday, to: nextSunday });
         setDateRange({ from: nextMonday, to: nextSunday });
         break;
       }
@@ -171,6 +173,14 @@ export function DateNavigation({
         const thirtyDaysLater = new Date(today);
         thirtyDaysLater.setDate(today.getDate() + 30);
         setDateRange({ from: today, to: thirtyDaysLater });
+        break;
+      }
+      case "upcoming": {
+        // For upcoming, we want all future events starting from today
+        const futureEnd = new Date(today);
+        futureEnd.setFullYear(futureEnd.getFullYear() + 100); // Set a far future date
+        console.log("Upcoming date range:", { from: today, to: futureEnd });
+        setDateRange({ from: today, to: futureEnd });
         break;
       }
     }
@@ -334,6 +344,13 @@ export function DateNavigation({
               onClick={() => handlePresetClick("next30Days")}
             >
               Next 30 Days
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePresetClick("upcoming")}
+            >
+              All Upcoming
             </Button>
           </div>
         </div>

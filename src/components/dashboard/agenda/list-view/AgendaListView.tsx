@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { EventGroups } from "./EventGroups";
@@ -41,19 +40,18 @@ export function AgendaListView({
       return;
     }
     
-    console.log(`Filtering ${agendaItems.length} agenda items with filter: ${filterValue} and date range: ${dateRange?.from} to ${dateRange?.to}`);
+    console.log(`Filtering ${agendaItems.length} agenda items with filter: ${filterValue} and date range:`, dateRange);
     
     // Apply time filter if selected
     let filteredItems = agendaItems;
     
-    if (filterValue) {
-      // First filter by time range (past, upcoming, today, etc.)
+    // For specific presets like upcoming, past, today, etc., use the time-based filter
+    if (["upcoming", "past", "today", "yesterday", "tomorrow"].includes(filterValue)) {
       filteredItems = filterByTimeRange(filteredItems, filterValue);
       console.log(`After time filter (${filterValue}): ${filteredItems.length} items`);
-    }
-    
-    // Then filter by date range if set
-    if (dateRange && dateRange.from) {
+    } 
+    // Otherwise, filter by the date range if it's set
+    else if (dateRange && dateRange.from) {
       filteredItems = filteredItems.filter(item => {
         if (!item.event_date) return false;
         
@@ -76,7 +74,11 @@ export function AgendaListView({
         }
       });
       
-      console.log(`After date range filter: ${filteredItems.length} items with range: ${dateRange?.from?.toISOString().split('T')[0]} to ${dateRange?.to?.toISOString().split('T')[0]}`);
+      console.log(`After date range filter: ${filteredItems.length} items with range:`, 
+        dateRange?.from ? dateRange.from.toISOString().split('T')[0] : 'none',
+        "to",
+        dateRange?.to ? dateRange.to.toISOString().split('T')[0] : 'none'
+      );
     }
     
     setDisplayedItems(filteredItems);
