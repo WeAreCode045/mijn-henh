@@ -7,7 +7,19 @@ import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaIte
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useState } from "react";
-import { isToday, parseISO, isPast, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameDay } from "date-fns";
+import { 
+  isToday, 
+  parseISO, 
+  isPast, 
+  endOfDay, 
+  startOfWeek, 
+  endOfWeek, 
+  startOfMonth, 
+  endOfMonth, 
+  isSameDay,
+  subWeeks,
+  subMonths 
+} from "date-fns";
 
 interface AgendaViewContentProps {
   view: "list";

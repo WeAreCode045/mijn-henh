@@ -29,6 +29,7 @@ export function EventGroups({ filteredItems, onItemClick }: EventGroupsProps) {
                 key={item.id} 
                 item={item} 
                 onItemClick={onItemClick}
+                showPastEvents={true} // Add the missing prop
               />
             ))}
           </div>
