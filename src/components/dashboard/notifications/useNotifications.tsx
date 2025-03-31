@@ -8,6 +8,23 @@ import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 
+// Define the database notification type
+interface DbNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
+  property_id?: string;
+  property_title?: string;
+}
+
+// Define the read state map
+interface ReadStateMap {
+  [key: string]: boolean;
+}
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
@@ -30,7 +47,7 @@ export function useNotifications() {
         return [];
       }
       
-      return data || [];
+      return (data || []) as DbNotification[];
     } catch (err) {
       console.error('Error in fetchNotifications:', err);
       return [];
@@ -171,7 +188,7 @@ export function useNotifications() {
             type: notification.type as NotificationType,
             date: new Date(notification.created_at),
             read: readNotifications[notificationId] || false,
-            // Add optional properties only if they exist in the notification
+            // Only add these properties if they exist in the notification
             ...(notification.property_id && { propertyId: notification.property_id }),
             ...(notification.property_title && { propertyTitle: notification.property_title })
           });
@@ -251,8 +268,9 @@ export function useNotifications() {
     
     // Update read states
     const readStates = await fetchUserReadStates();
-    readStates[id] = true;
-    await saveReadNotifications(readStates);
+    const updatedReadStates: ReadStateMap = typeof readStates === 'object' ? { ...readStates } : {};
+    updatedReadStates[id] = true;
+    await saveReadNotifications(updatedReadStates);
   };
 
   // Function to delete a notification
@@ -261,13 +279,12 @@ export function useNotifications() {
     
     // Update read states in database
     const readStates = await fetchUserReadStates();
-    delete readStates[id];
-    await saveReadNotifications(readStates);
+    const updatedReadStates: ReadStateMap = typeof readStates === 'object' ? { ...readStates } : {};
+    delete updatedReadStates[id];
+    await saveReadNotifications(updatedReadStates);
     
     // If it's a database notification, delete it
-    if (id.includes('-')) {
-      // This is likely a dynamically generated notification (todo/agenda), no need to delete from DB
-    } else {
+    if (!id.includes('-')) {
       try {
         await supabase
           .from('notifications')
