@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { EmptyAgendaNotification } from "./EmptyAgendaNotification";
 import { AgendaItemList } from "@/components/property/dashboard/agenda/AgendaItemList";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useState } from "react";
+import { isToday, parseISO, isPast, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
 interface AgendaViewContentProps {
   view: "list";
@@ -27,25 +30,55 @@ export function AgendaViewContent({
   onItemClick,
   onAddClick,
 }: AgendaViewContentProps) {
+  const [timeFilter, setTimeFilter] = useState<string | undefined>(undefined);
+  
   // Make sure we always have an array, even if filteredAgendaItems is undefined
-  const itemsToDisplay = filteredAgendaItems || [];
+  let itemsToDisplay = filteredAgendaItems || [];
   
   // Always check if safeAgendaItems exists before checking its length
   const hasItems = safeAgendaItems && safeAgendaItems.length > 0;
   console.log("AgendaViewContent - hasItems:", hasItems);
   
+  // Apply time filter if selected (day, week, month)
+  if (timeFilter) {
+    itemsToDisplay = filterByTimeRange(itemsToDisplay, timeFilter);
+  }
+  
+  // Handle time filter change
+  const handleTimeFilterChange = (value: string) => {
+    if (value === timeFilter) {
+      setTimeFilter(undefined); // Toggle off if clicking the same button
+    } else {
+      setTimeFilter(value);
+      setDateRange(undefined); // Clear date range when using time filter
+    }
+  };
+  
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between gap-2">
-        <Button variant="outline" className="flex items-center gap-2" onClick={() => setDateRange(undefined)}>
-          <Filter className="h-4 w-4" />
-          {dateRange ? "Clear Filter" : "All Events"}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2" onClick={() => {
+            setDateRange(undefined);
+            setTimeFilter(undefined);
+          }}>
+            <Filter className="h-4 w-4" />
+            {dateRange || timeFilter ? "Clear Filter" : "All Events"}
+          </Button>
+          
+          <ToggleGroup type="single" value={timeFilter} onValueChange={handleTimeFilterChange}>
+            <ToggleGroupItem value="day" size="sm">Today</ToggleGroupItem>
+            <ToggleGroupItem value="week" size="sm">This Week</ToggleGroupItem>
+            <ToggleGroupItem value="month" size="sm">This Month</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
       
       {isLoading ? (
         // Loading spinner
-        <div>Loading...</div>
+        <div className="flex justify-center py-6">
+          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+        </div>
       ) : !hasItems ? (
         // Empty agenda notification
         <EmptyAgendaNotification onAddClick={onAddClick} />
@@ -59,4 +92,36 @@ export function AgendaViewContent({
       )}
     </div>
   );
+}
+
+// Helper function to filter events based on time range
+function filterByTimeRange(items: AgendaItem[], range: string): AgendaItem[] {
+  const now = new Date();
+  
+  return items.filter(item => {
+    if (!item.event_date) return false;
+    
+    const eventDate = parseISO(item.event_date);
+    
+    switch (range) {
+      case 'day':
+        return isToday(eventDate);
+      case 'week': {
+        // Get start of week (Monday) and end of week (Sunday)
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+        
+        return eventDate >= weekStart && eventDate <= weekEnd;
+      }
+      case 'month': {
+        // Get start and end of month
+        const monthStart = startOfMonth(now);
+        const monthEnd = endOfMonth(now);
+        
+        return eventDate >= monthStart && eventDate <= monthEnd;
+      }
+      default:
+        return true;
+    }
+  });
 }

@@ -1,8 +1,11 @@
+
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgendaItem } from "./types";
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, History } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface AgendaItemListProps {
   filteredAgendaItems: AgendaItem[];
@@ -15,6 +18,8 @@ export function AgendaItemList({
   isLoading, 
   onItemClick 
 }: AgendaItemListProps) {
+  const [showPastEvents, setShowPastEvents] = useState(false);
+  
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -25,31 +30,64 @@ export function AgendaItemList({
     );
   }
 
-  const currentAndFutureItems = filteredAgendaItems.filter(item => {
+  // Filter based on past event toggle
+  const displayItems = filteredAgendaItems.filter(item => {
     if (!item.event_date) return true; // Keep items without a date
     
     const eventDate = parseISO(item.event_date);
-    return isToday(eventDate) || !isPast(eventDate); // Keep today's and future items
+    if (showPastEvents) {
+      return true; // Show all events when toggle is on
+    } else {
+      return isToday(eventDate) || !isPast(eventDate); // Keep today's and future items by default
+    }
   });
 
-  if (currentAndFutureItems.length === 0) {
+  if (displayItems.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No agenda items found for the selected period.
-      </div>
+      <>
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2"
+            onClick={() => setShowPastEvents(!showPastEvents)}
+          >
+            <History className="h-4 w-4" />
+            {showPastEvents ? "Hide past events" : "Show past events"}
+          </Button>
+        </div>
+        <div className="text-center py-8 text-muted-foreground">
+          {showPastEvents 
+            ? "No agenda items found for the selected period."
+            : "No upcoming events. Try showing past events."}
+        </div>
+      </>
     );
   }
 
   return (
     <div className="space-y-2">
-      {currentAndFutureItems.map((item) => {
+      <div className="mb-4">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-2"
+          onClick={() => setShowPastEvents(!showPastEvents)}
+        >
+          <History className="h-4 w-4" />
+          {showPastEvents ? "Hide past events" : "Show past events"}
+        </Button>
+      </div>
+      
+      {displayItems.map((item) => {
         const eventDate = parseISO(item.event_date);
         const formattedDate = format(eventDate, "MMM d, yyyy");
+        const isPastEvent = isPast(eventDate) && !isToday(eventDate);
         
         return (
           <div 
             key={item.id} 
-            className="border rounded-md p-3 hover:bg-accent cursor-pointer transition-colors"
+            className={`border rounded-md p-3 hover:bg-accent cursor-pointer transition-colors ${isPastEvent ? 'opacity-70' : ''}`}
             onClick={() => onItemClick(item)}
           >
             <div className="flex justify-between items-start">
@@ -61,9 +99,14 @@ export function AgendaItemList({
                   </p>
                 )}
               </div>
-              <Badge variant="outline" className="ml-2">
-                {item.event_time}
-              </Badge>
+              <div className="flex items-center gap-2">
+                {isPastEvent && showPastEvents && (
+                  <Badge variant="outline" className="ml-2 text-xs">Past</Badge>
+                )}
+                <Badge variant="outline" className="ml-2">
+                  {item.event_time}
+                </Badge>
+              </div>
             </div>
             
             <div className="flex items-center mt-2 text-xs text-muted-foreground">
