@@ -38,10 +38,16 @@ export function EmailReplyModal({
   const [subject, setSubject] = useState(`RE: Inquiry about ${propertyTitle}`);
   const [message, setMessage] = useState('');
   const [cc, setCc] = useState('');
+  const [to, setTo] = useState(recipientEmail);
   const [isSending, setIsSending] = useState(false);
   const [smtpConfigured, setSmtpConfigured] = useState(true);
   const { toast } = useToast();
   const { user, profile } = useAuth();
+
+  // Update recipient whenever props change
+  useEffect(() => {
+    setTo(recipientEmail);
+  }, [recipientEmail]);
 
   // Check if SMTP is configured
   useEffect(() => {
@@ -83,6 +89,15 @@ export function EmailReplyModal({
       return;
     }
     
+    if (!to.trim()) {
+      toast({
+        title: "No Recipient",
+        description: "Please enter at least one recipient email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSending(true);
     
     try {
@@ -100,7 +115,7 @@ export function EmailReplyModal({
       // Call edge function to send email
       const { error: sendError } = await supabase.functions.invoke('send-email-with-smtp', {
         body: {
-          to: recipientEmail,
+          to: to,
           subject: subject,
           html: `<div style="font-family: Arial, sans-serif; max-width: 600px;">
             <p>Hello ${recipientName},</p>
@@ -160,6 +175,18 @@ export function EmailReplyModal({
         
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="to" className="text-right">
+              To
+            </Label>
+            <Input
+              id="to"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="subject" className="text-right">
               Subject
             </Label>
@@ -205,7 +232,7 @@ export function EmailReplyModal({
           </Button>
           <Button 
             onClick={handleSendEmail} 
-            disabled={isSending || !smtpConfigured || !message.trim()}
+            disabled={isSending || !smtpConfigured || !message.trim() || !to.trim()}
           >
             {isSending ? "Sending..." : "Send Email"}
           </Button>

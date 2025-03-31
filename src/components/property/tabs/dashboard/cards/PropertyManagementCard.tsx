@@ -1,430 +1,238 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AgentSelector } from "../../../dashboard/components/AgentSelector";
-import { PropertyDates } from "../../../dashboard/components/PropertyDates";
-import { StatusSelector } from "@/components/property/dashboard/components/StatusSelector";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { FileText, Globe, Youtube, RotateCcw, Share2, Archive, Trash, History } from "lucide-react";
 import { useState, useEffect } from "react";
-import { MediaViewModal } from "@/components/property/MediaViewModal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Settings, FileText, MonitorSmartphone, Trash2, ArrowUpToLine, ArrowDownToLine } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/utils/dateUtils";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AgentSelector } from "../../../dashboard/components/AgentSelector";
+import { StatusSelector } from "../../../dashboard/components/StatusSelector";
 import { supabase } from "@/integrations/supabase/client";
-import { EditHistoryModal } from "../../../dashboard/components/EditHistoryModal";
-import { useLocation } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PropertyManagementCardProps {
   propertyId: string;
   agentId?: string;
+  isArchived?: boolean;
   handleSaveAgent: (agentId: string) => Promise<void>;
   onGeneratePDF: () => void;
   onWebView: (e: React.MouseEvent) => void;
   onDelete: () => Promise<void>;
-  isArchived: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export function PropertyManagementCard({ 
-  propertyId, 
-  agentId, 
-  handleSaveAgent = async () => {}, // Default to a no-op async function
+export function PropertyManagementCard({
+  propertyId,
+  agentId,
+  isArchived = false,
+  handleSaveAgent,
   onGeneratePDF,
   onWebView,
   onDelete,
-  isArchived,
   createdAt,
   updatedAt
 }: PropertyManagementCardProps) {
-  // Get current location for page reloads
-  const location = useLocation();
+  const [status, setStatus] = useState<string>('draft');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Media view modal states
-  const [showMediaModal, setShowMediaModal] = useState(false);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [mediaType, setMediaType] = useState<"virtualTour" | "youtube">("virtualTour");
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [mediaTitle, setMediaTitle] = useState("");
-  const [propertyMedia, setPropertyMedia] = useState<{
-    virtualTourUrl?: string;
-    youtubeUrl?: string;
-  }>({});
-  
-  // Ensure handleSaveAgent is a valid function
-  const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
-    ? handleSaveAgent 
-    : async () => {
-        console.warn("PropertyManagementCard: handleSaveAgent is not provided");
-        toast({
-          title: "Warning",
-          description: "Unable to update agent - handler not available",
-          variant: "destructive",
-        });
-        return Promise.reject(new Error("handleSaveAgent not provided"));
-      };
-
-  // Load virtual tour and youtube URLs
   useEffect(() => {
-    const fetchPropertyMedia = async () => {
-      if (!propertyId) return;
-      
+    // Fetch current property status when component mounts
+    if (propertyId) {
+      fetchPropertyStatus();
+    }
+  }, [propertyId]);
+
+  const fetchPropertyStatus = async () => {
+    if (!propertyId) return;
+    
+    try {
       const { data, error } = await supabase
         .from('properties')
-        .select('virtualTourUrl, youtubeUrl')
+        .select('status')
         .eq('id', propertyId)
         .single();
         
-      if (!error && data) {
-        setPropertyMedia({
-          virtualTourUrl: data.virtualTourUrl,
-          youtubeUrl: data.youtubeUrl
-        });
-      }
-    };
-    
-    fetchPropertyMedia();
-  }, [propertyId]);
-  
-  // Handle opening virtual tour modal
-  const handleOpenVirtualTour = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (propertyMedia.virtualTourUrl) {
-      setMediaType("virtualTour");
-      setMediaUrl(propertyMedia.virtualTourUrl);
-      setMediaTitle("Virtual Tour");
-      setShowMediaModal(true);
-    }
-  };
-
-  // Handle opening YouTube video modal
-  const handleOpenYoutubeVideo = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (propertyMedia.youtubeUrl) {
-      setMediaType("youtube");
-      setMediaUrl(propertyMedia.youtubeUrl);
-      setMediaTitle("Property Video");
-      setShowMediaModal(true);
-    }
-  };
-  
-  // Handle share property
-  const handleShareProperty = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const url = `${window.location.origin}/property/${propertyId}`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: 'Property Details',
-        url: url
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(url);
-      // TODO: Add toast notification
-    }
-  };
-
-  // Handle toggle archive
-  const handleToggleArchive = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    try {
-      const newArchivedStatus = !isArchived;
+      if (error) throw error;
       
+      if (data && data.status) {
+        setStatus(data.status.toLowerCase());
+      }
+    } catch (error) {
+      console.error("Error fetching property status:", error);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!propertyId) return Promise.reject("Property ID is missing");
+    
+    setIsLoading(true);
+    try {
       const { error } = await supabase
         .from('properties')
-        .update({ archived: newArchivedStatus })
+        .update({ status: newStatus })
         .eq('id', propertyId);
         
       if (error) throw error;
       
-      // Reload the current page instead of the entire app
-      window.location.href = location.pathname;
+      setStatus(newStatus);
+      toast({
+        description: `Status updated to ${newStatus}`,
+      });
+      
+      return Promise.resolve();
     } catch (error) {
-      console.error("Error toggling archive status:", error);
+      console.error("Error updating status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update property status",
+        variant: "destructive",
+      });
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleOpenHistory = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowHistoryModal(true);
-  };
-
-  // Handle PDF generation with stopPropagation
-  const handleGeneratePDF = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onGeneratePDF();
-  };
-
-  const handleStatusChange = async (status: string): Promise<void> => {
+  const handleArchiveToggle = async () => {
     if (!propertyId) return;
     
-    const { error } = await supabase
-      .from('properties')
-      .update({ status })
-      .eq('id', propertyId);
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ archived: !isArchived })
+        .eq('id', propertyId);
+        
+      if (error) throw error;
       
-    if (error) {
-      throw error;
+      toast({
+        description: isArchived ? "Property unarchived" : "Property archived",
+      });
+      
+      // Reload the page to reflect the changes
+      window.location.reload();
+    } catch (error) {
+      console.error("Error toggling archive status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update archive status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="pb-3 flex flex-row justify-between items-center">
-          <CardTitle className="text-lg font-medium">Property Management</CardTitle>
-          <div className="flex space-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant={isArchived ? "default" : "outline"} 
-                    size="icon" 
-                    onClick={handleToggleArchive}
-                    type="button"
-                  >
-                    <Archive className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{isArchived ? "Unarchive Property" : "Archive Property"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={handleOpenHistory}
-                    type="button"
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Edit History</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    size="icon" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onDelete();
-                    }}
-                    type="button"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Delete Property</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <PropertyDates createdAt={createdAt} updatedAt={updatedAt} />
-          
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="h-5 w-5" />
+          Property Management
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Status selector */}
+        <StatusSelector 
+          propertyId={propertyId}
+          initialStatus={status}
+          onStatusChange={handleStatusChange}
+        />
+        
+        {/* Agent selector */}
+        <div className="mt-4">
           <AgentSelector 
             initialAgentId={agentId} 
-            onAgentChange={safeHandleSaveAgent}
+            onAgentChange={handleSaveAgent} 
           />
+        </div>
+        
+        <Separator className="my-4" />
+        
+        {/* Publication buttons */}
+        <div className="space-y-2">
+          <Button 
+            onClick={onGeneratePDF} 
+            variant="outline" 
+            className="w-full justify-start" 
+            disabled={isArchived}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Generate PDF
+          </Button>
           
-          <div className="mt-2">
-            <StatusSelector 
-              propertyId={propertyId} 
-              initialStatus={""} 
-              onStatusChange={handleStatusChange}
-            />
+          <Button 
+            onClick={onWebView} 
+            variant="outline" 
+            className="w-full justify-start" 
+            disabled={isArchived}
+          >
+            <MonitorSmartphone className="mr-2 h-4 w-4" />
+            Web View
+          </Button>
+        </div>
+        
+        <Separator className="my-4" />
+        
+        {/* Property info timestamps */}
+        {(createdAt || updatedAt) && (
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {createdAt && (
+              <p>Created: {formatDate(createdAt)}</p>
+            )}
+            {updatedAt && (
+              <p>Last updated: {formatDate(updatedAt)}</p>
+            )}
           </div>
-          
-          <div className="mt-4">
-            <p className="font-semibold mb-3">Actions</p>
-            <div className="flex flex-wrap gap-3">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={onWebView} 
-                      className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                        !isArchived
-                          ? "bg-gray-100 hover:bg-gray-200" 
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      } transition-colors`}
-                      disabled={isArchived}
-                      type="button"
-                    >
-                      <Globe className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {isArchived 
-                        ? "Unarchive property first" 
-                        : "Web View"
-                      }
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={handleGeneratePDF}
-                      disabled={isArchived} 
-                      className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                        !isArchived
-                          ? "bg-gray-100 hover:bg-gray-200"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      } transition-colors`}
-                      type="button"
-                    >
-                      <FileText className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {isArchived 
-                        ? "Unarchive property first" 
-                        : "Generate PDF"
-                      }
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      onClick={handleOpenVirtualTour}
-                      disabled={!propertyMedia.virtualTourUrl || isArchived}
-                      className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                        propertyMedia.virtualTourUrl && !isArchived
-                          ? "bg-blue-100 text-blue-600 hover:bg-blue-200" 
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      } transition-colors`}
-                      type="button"
-                    >
-                      <RotateCcw className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {!propertyMedia.virtualTourUrl 
-                        ? "No Virtual Tour" 
-                        : isArchived 
-                          ? "Unarchive property first" 
-                          : "Open Tour"
-                      }
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={handleOpenYoutubeVideo}
-                      disabled={!propertyMedia.youtubeUrl || isArchived}
-                      className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                        propertyMedia.youtubeUrl && !isArchived
-                          ? "bg-red-100 text-red-600 hover:bg-red-200" 
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      } transition-colors`}
-                      type="button"
-                    >
-                      <Youtube className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {!propertyMedia.youtubeUrl 
-                        ? "No Video" 
-                        : isArchived 
-                          ? "Unarchive property first" 
-                          : "Watch Video"
-                      }
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={handleShareProperty}
-                      disabled={isArchived}
-                      className={`flex items-center justify-center rounded-md w-10 h-10 ${
-                        !isArchived
-                          ? "bg-gray-100 hover:bg-gray-200" 
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      } transition-colors`}
-                      type="button"
-                    >
-                      <Share2 className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {isArchived 
-                        ? "Unarchive property first" 
-                        : "Share Property"
-                      }
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Media View Modal */}
-      <MediaViewModal
-        open={showMediaModal}
-        onOpenChange={setShowMediaModal}
-        url={mediaUrl}
-        title={mediaTitle}
-        type={mediaType}
-      />
-      
-      {/* Edit History Modal */}
-      <EditHistoryModal
-        open={showHistoryModal}
-        onOpenChange={setShowHistoryModal}
-        propertyId={propertyId}
-      />
-    </div>
+        )}
+        
+        <Separator className="my-4" />
+        
+        {/* Archive/Unarchive button */}
+        <Button
+          variant="outline"
+          className="w-full justify-start"
+          onClick={handleArchiveToggle}
+          disabled={isLoading}
+        >
+          {isArchived ? (
+            <>
+              <ArrowUpToLine className="mr-2 h-4 w-4" />
+              Unarchive Property
+            </>
+          ) : (
+            <>
+              <ArrowDownToLine className="mr-2 h-4 w-4" />
+              Archive Property
+            </>
+          )}
+        </Button>
+        
+        {/* Delete Property button */}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="w-full justify-start">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Property
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this property and all associated data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardContent>
+    </Card>
   );
 }
