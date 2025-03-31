@@ -13,11 +13,11 @@ export function NoEventsMessage({ isFiltered = false, onAddClick }: NoEventsMess
       <div className="flex flex-col items-center justify-center">
         <CalendarPlus className="h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">
-          {isFiltered ? "No events match your filter" : "No events scheduled"}
+          {isFiltered ? "You have no events scheduled" : "No events scheduled"}
         </h3>
         <p className="text-muted-foreground mb-4">
           {isFiltered 
-            ? "Try adjusting your filter criteria" 
+            ? "Want to see other dates? Edit your date-range" 
             : "You don't have any events scheduled yet"}
         </p>
         {onAddClick && (
