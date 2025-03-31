@@ -23,7 +23,8 @@ export function NotificationsSection() {
     setSortOrder, 
     toggleReadStatus, 
     deleteNotification,
-    getTypeCount
+    getTypeCount,
+    unreadCount
   } = useNotifications();
 
   return (

@@ -9,7 +9,7 @@ import { format } from "date-fns";
 
 export function CompactNotificationsBar() {
   const [startIndex, setStartIndex] = useState(0);
-  const { notifications, deleteNotification, toggleReadStatus } = useNotifications();
+  const { notifications, deleteNotification, toggleReadStatus, unreadCount } = useNotifications();
   
   // Filter out read notifications for the compact view only
   const unreadNotifications = notifications.filter(notification => !notification.read);
@@ -64,7 +64,7 @@ export function CompactNotificationsBar() {
           <Bell className="h-5 w-5" />
           <span>Notifications</span>
           <span className="text-xs bg-white text-primary rounded-full px-2 py-0.5">
-            {unreadNotifications.length}
+            {unreadCount}
           </span>
         </CardTitle>
         <div className="flex gap-1">

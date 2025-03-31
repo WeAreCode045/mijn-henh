@@ -7,119 +7,32 @@ import { isPast, isToday, addDays } from "date-fns";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
-
-// Define the database notification type
-interface DbNotification {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-  created_at: string;
-  updated_at: string;
-  property_id?: string;
-  property_title?: string;
-}
-
-// Define the read state map
-interface ReadStateMap {
-  [key: string]: boolean;
-}
+import { useNotificationStore } from "./useNotificationStore";
+import { useReadStateManager } from "./useReadStateManager";
+import { useDatabaseNotifications } from "./useDatabaseNotifications";
+import { useEventEmitter } from "./useEventEmitter";
 
 export function useNotifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [filterType, setFilterType] = useState<NotificationType | 'all'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  
+  const { notifications, setNotifications, filteredNotifications } = useNotificationStore(sortOrder, filterType);
+  const { loadReadStates, toggleReadStatus, deleteNotification } = useReadStateManager(setNotifications);
+  const { fetchDatabaseNotifications } = useDatabaseNotifications();
+  const { emitNotificationUpdate } = useEventEmitter();
+  
   const { todoItems } = useTodoItems();
   const { agendaItems } = useAgenda();
   const { user } = useAuth();
 
-  // Fetch notifications from database
-  const fetchNotifications = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching notifications:', error);
-        return [];
-      }
-      
-      return (data || []) as DbNotification[];
-    } catch (err) {
-      console.error('Error in fetchNotifications:', err);
-      return [];
-    }
-  };
-
-  // Fetch user's read notification states
-  const fetchUserReadStates = async () => {
-    if (!user) {
-      return {};
-    }
-    
-    try {
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('user_notifications')
-        .eq('id', user.id)
-        .single();
-      
-      if (userProfile?.user_notifications) {
-        // Check if user_notifications is an array before using reduce
-        if (Array.isArray(userProfile.user_notifications)) {
-          return userProfile.user_notifications.reduce((acc: Record<string, boolean>, item: any) => {
-            acc[item.id] = item.read || false;
-            return acc;
-          }, {});
-        } else {
-          console.error('user_notifications is not an array:', userProfile.user_notifications);
-          return {};
-        }
-      }
-      return {};
-    } catch (err) {
-      console.error('Error loading read notifications from database:', err);
-      return {};
-    }
-  };
-
-  // Save read notifications to database
-  const saveReadNotifications = async (readMap: Record<string, boolean>) => {
-    if (!user) {
-      return;
-    }
-    
-    try {
-      // Convert read state map to array format for storage
-      const notificationArray = Object.entries(readMap).map(([id, read]) => ({
-        id,
-        read
-      }));
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          user_notifications: notificationArray 
-        })
-        .eq('id', user.id);
-      
-      if (error) {
-        console.error('Error saving read notifications to database:', error);
-      }
-    } catch (err) {
-      console.error('Error in saveReadNotifications:', err);
-    }
-  };
+  // Calculate unread count
+  const unreadCount = notifications.filter(notification => !notification.read).length;
 
   // Generate notifications from todo items, agenda items, and database
   useEffect(() => {
     const loadNotifications = async () => {
-      // Load read states from database
-      const readNotifications = await fetchUserReadStates();
-      const dbNotifications = await fetchNotifications();
+      const readStates = await loadReadStates();
+      const dbNotifications = await fetchDatabaseNotifications();
       const newNotifications: Notification[] = [];
       
       // Process todo items
@@ -135,7 +48,7 @@ export function useNotifications() {
               message: `Task "${todo.title}" is overdue`,
               type: "todo",
               date: new Date(),
-              read: readNotifications[notificationId] || false
+              read: readStates[notificationId] || false
             });
           }
         }
@@ -151,7 +64,7 @@ export function useNotifications() {
               message: `Reminder for "${todo.title}"`,
               type: "todo",
               date: notifyDate,
-              read: readNotifications[notificationId] || false
+              read: readStates[notificationId] || false
             });
           }
         }
@@ -172,7 +85,7 @@ export function useNotifications() {
             message: `${agenda.title} on ${format(eventDate, "PPP")} at ${format(eventDate, "p")}`,
             type: "agenda",
             date: eventDate,
-            read: readNotifications[notificationId] || false
+            read: readStates[notificationId] || false
           });
         }
       });
@@ -187,7 +100,7 @@ export function useNotifications() {
             message: notification.message,
             type: notification.type as NotificationType,
             date: new Date(notification.created_at),
-            read: readNotifications[notificationId] || false,
+            read: readStates[notificationId] || false,
             // Only add these properties if they exist in the notification
             ...(notification.property_id && { propertyId: notification.property_id }),
             ...(notification.property_title && { propertyTitle: notification.property_title })
@@ -204,7 +117,7 @@ export function useNotifications() {
             message: 'You have been assigned to Property #12345',
             title: 'Property Assignment',
             date: new Date('2023-08-15T10:30:00Z'),
-            read: readNotifications['assignment-1'] || false,
+            read: readStates['assignment-1'] || false,
             propertyId: '12345',
             propertyTitle: 'Luxury Villa'
           },
@@ -214,7 +127,7 @@ export function useNotifications() {
             message: 'Property #54321 has been updated',
             title: 'Property Update',
             date: new Date('2023-08-14T14:20:00Z'),
-            read: readNotifications['change-2'] || false,
+            read: readStates['change-2'] || false,
             propertyId: '54321',
             propertyTitle: 'City Apartment'
           }
@@ -223,29 +136,16 @@ export function useNotifications() {
         newNotifications.push(...mockNotifications);
       }
       
-      // Sort notifications based on current sort order preference
+      // Sort and set notifications
       const sortedNotifications = sortNotifications(newNotifications, sortOrder);
-      
       setNotifications(sortedNotifications);
+      
+      // Emit the unread count for the ActivityIndicators component
+      emitNotificationUpdate(sortedNotifications.filter(n => !n.read).length);
     };
     
     loadNotifications();
   }, [todoItems, agendaItems, sortOrder, user]);
-
-  // Apply filtering and sorting whenever notifications, filterType, or sortOrder change
-  useEffect(() => {
-    // Apply filters
-    let filtered = notifications;
-    
-    if (filterType !== 'all') {
-      filtered = notifications.filter(notification => notification.type === filterType);
-    }
-    
-    // Apply sorting
-    filtered = sortNotifications([...filtered], sortOrder);
-    
-    setFilteredNotifications(filtered);
-  }, [notifications, filterType, sortOrder]);
 
   // Helper function to sort notifications
   const sortNotifications = (notifs: Notification[], order: 'newest' | 'oldest') => {
@@ -258,69 +158,18 @@ export function useNotifications() {
     });
   };
 
-  // Function to toggle notification read status
-  const toggleReadStatus = async (id: string) => {
-    // Find the notification and toggle its read status
-    const updatedNotifications = notifications.map(notification => 
-      notification.id === id ? { ...notification, read: !notification.read } : notification
-    );
-    setNotifications(updatedNotifications);
-    
-    // Update read states in database
-    const readStates = await fetchUserReadStates();
-    // Create a new ReadStateMap with the correct type
-    const updatedReadStates: ReadStateMap = {};
-    
-    // Convert the read states to the correct type
-    if (readStates && typeof readStates === 'object') {
-      Object.keys(readStates).forEach(key => {
-        // Make sure we're only adding boolean values
-        updatedReadStates[key] = Boolean(readStates[key]);
-      });
-    }
-    
-    // Get the notification to find its current read state
-    const notification = updatedNotifications.find(n => n.id === id);
-    if (notification) {
-      updatedReadStates[id] = notification.read;
-    }
-    
-    await saveReadNotifications(updatedReadStates);
+  // Enhanced toggle function that emits the updated unread count
+  const handleToggleReadStatus = async (id: string) => {
+    await toggleReadStatus(id);
+    // After toggle, emit the updated count
+    emitNotificationUpdate(notifications.filter(n => !n.read).length);
   };
 
-  // Function to delete a notification
-  const deleteNotification = async (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
-    
-    // Update read states in database
-    const readStates = await fetchUserReadStates();
-    // Create a new ReadStateMap with the correct type
-    const updatedReadStates: ReadStateMap = {};
-    
-    // Convert the read states to the correct type
-    if (readStates && typeof readStates === 'object') {
-      Object.keys(readStates).forEach(key => {
-        // Skip the notification being deleted
-        if (key !== id) {
-          // Make sure we're only adding boolean values
-          updatedReadStates[key] = Boolean(readStates[key]);
-        }
-      });
-    }
-    
-    await saveReadNotifications(updatedReadStates);
-    
-    // If it's a database notification, delete it
-    if (!id.includes('-')) {
-      try {
-        await supabase
-          .from('notifications')
-          .delete()
-          .eq('id', id);
-      } catch (err) {
-        console.error('Error deleting notification from database:', err);
-      }
-    }
+  // Enhanced delete function that emits the updated unread count
+  const handleDeleteNotification = async (id: string) => {
+    await deleteNotification(id);
+    // After deletion, emit the updated count
+    emitNotificationUpdate(notifications.filter(n => !n.read).length);
   };
 
   // Get notification type counts for filter selector
@@ -335,8 +184,9 @@ export function useNotifications() {
     setFilterType,
     sortOrder,
     setSortOrder,
-    toggleReadStatus,
-    deleteNotification,
-    getTypeCount
+    toggleReadStatus: handleToggleReadStatus,
+    deleteNotification: handleDeleteNotification,
+    getTypeCount,
+    unreadCount
   };
 }

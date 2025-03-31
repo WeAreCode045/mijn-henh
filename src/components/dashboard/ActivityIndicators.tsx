@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Calendar, CheckSquare, Bell } from "lucide-react";
 import { 
   Tooltip, 
@@ -13,6 +13,7 @@ import { useAgenda } from "@/hooks/useAgenda";
 import { useTodoItems } from "@/hooks/useTodoItems";
 import { isToday, parseISO } from "date-fns";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNotificationListener } from "./notifications/useEventEmitter";
 
 export function ActivityIndicators() {
   const navigate = useNavigate();
@@ -35,6 +36,21 @@ export function ActivityIndicators() {
   const todayAgendaItems = agendaItems.filter(item => 
     item.event_date && isToday(parseISO(item.event_date))
   ).length;
+  
+  // Subscribe to notification updates
+  const notificationListener = useNotificationListener((count) => {
+    setNotifications(count);
+  });
+  
+  useEffect(() => {
+    // Subscribe to notification updates when component mounts
+    const unsubscribe = notificationListener.subscribe();
+    
+    // Unsubscribe when component unmounts
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // Handle icon clicks to navigate to respective tabs
   const handleTabClick = (tabName: string) => {
