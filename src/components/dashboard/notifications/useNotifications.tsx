@@ -1,11 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { Notification, NotificationType } from "./NotificationTypes";
+import { NotificationType } from "./NotificationTypes";
 import { useTodoItems } from "@/hooks/useTodoItems";
 import { useAgenda } from "@/hooks/useAgenda";
-import { isPast, isToday, addDays } from "date-fns";
-import { format } from "date-fns";
-import { supabase } from "@/integrations/supabase/client";
+import { isPast, isToday, addDays, format } from "date-fns";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNotificationStore } from "./useNotificationStore";
 import { useReadStateManager } from "./useReadStateManager";
@@ -33,7 +31,7 @@ export function useNotifications() {
     const loadNotifications = async () => {
       const readStates = await loadReadStates();
       const dbNotifications = await fetchDatabaseNotifications();
-      const newNotifications: Notification[] = [];
+      const newNotifications = [];
       
       // Process todo items
       todoItems.forEach(todo => {
@@ -148,7 +146,7 @@ export function useNotifications() {
   }, [todoItems, agendaItems, sortOrder, user]);
 
   // Helper function to sort notifications
-  const sortNotifications = (notifs: Notification[], order: 'newest' | 'oldest') => {
+  const sortNotifications = (notifs, order) => {
     return [...notifs].sort((a, b) => {
       if (order === 'newest') {
         return b.date.getTime() - a.date.getTime();
@@ -159,21 +157,21 @@ export function useNotifications() {
   };
 
   // Enhanced toggle function that emits the updated unread count
-  const handleToggleReadStatus = async (id: string) => {
+  const handleToggleReadStatus = async (id) => {
     await toggleReadStatus(id);
     // After toggle, emit the updated count
     emitNotificationUpdate(notifications.filter(n => !n.read).length);
   };
 
   // Enhanced delete function that emits the updated unread count
-  const handleDeleteNotification = async (id: string) => {
+  const handleDeleteNotification = async (id) => {
     await deleteNotification(id);
     // After deletion, emit the updated count
     emitNotificationUpdate(notifications.filter(n => !n.read).length);
   };
 
   // Get notification type counts for filter selector
-  const getTypeCount = (type: NotificationType | 'all') => {
+  const getTypeCount = (type) => {
     if (type === 'all') return notifications.length;
     return notifications.filter(n => n.type === type).length;
   };
