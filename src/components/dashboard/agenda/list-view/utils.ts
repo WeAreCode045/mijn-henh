@@ -11,7 +11,14 @@ import {
   endOfMonth,
   subWeeks,
   subMonths,
-  isFuture
+  isFuture,
+  addDays,
+  addWeeks,
+  addMonths,
+  isYesterday,
+  isTomorrow,
+  isWithinInterval,
+  subDays
 } from "date-fns";
 
 // Helper function to filter events based on time range
@@ -37,7 +44,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
         case 'today':
           return isToday(eventDate);
           
-        case 'week': {
+        case 'thisWeek': {
           // Get start of week (Monday) and end of week (Sunday)
           const weekStart = startOfWeek(now, { weekStartsOn: 1 });
           const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
@@ -45,7 +52,7 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
           return eventDate >= weekStart && eventDate <= weekEnd;
         }
         
-        case 'month': {
+        case 'thisMonth': {
           // Get start and end of month
           const monthStart = startOfMonth(now);
           const monthEnd = endOfMonth(now);
@@ -61,12 +68,28 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
           // Past events
           return isPast(eventDate) && !isToday(eventDate);
           
+        case 'yesterday':
+          // Yesterday
+          return isYesterday(eventDate);
+          
+        case 'tomorrow':
+          // Tomorrow
+          return isTomorrow(eventDate);
+          
         case 'lastWeek': {
           // Last week
           const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
           const lastWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
           
           return eventDate >= lastWeekStart && eventDate <= lastWeekEnd;
+        }
+          
+        case 'nextWeek': {
+          // Next week
+          const nextWeekStart = startOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+          const nextWeekEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+          
+          return eventDate >= nextWeekStart && eventDate <= nextWeekEnd;
         }
         
         case 'lastMonth': {
@@ -75,6 +98,22 @@ export function filterByTimeRange(items: AgendaItem[], range: string): AgendaIte
           const lastMonthEnd = endOfMonth(subMonths(now, 1));
           
           return eventDate >= lastMonthStart && eventDate <= lastMonthEnd;
+        }
+          
+        case 'next30Days': {
+          // Next 30 days
+          return isWithinInterval(eventDate, {
+            start: now,
+            end: addDays(now, 30)
+          });
+        }
+          
+        case 'last30Days': {
+          // Last 30 days
+          return isWithinInterval(eventDate, {
+            start: subDays(now, 30),
+            end: now
+          });
         }
         
         default:

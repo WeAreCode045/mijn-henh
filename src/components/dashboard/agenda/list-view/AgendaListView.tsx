@@ -1,14 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
-import { FilterControls } from "./FilterControls";
 import { EventGroups } from "./EventGroups";
 import { NoEventsMessage } from "./NoEventsMessage";
 import { LoadingIndicator } from "./LoadingIndicator";
 import { filterByTimeRange } from "./utils";
 import { DateNavigation } from "./DateNavigation";
 import { DateRange } from "react-day-picker";
-import { isSameDay, isWithinInterval, parseISO, startOfDay, endOfDay } from "date-fns";
+import { isSameDay, isWithinInterval, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 
 interface AgendaListViewProps {
   agendaItems: AgendaItem[];
@@ -23,12 +22,16 @@ export function AgendaListView({
   onItemClick,
   onAddClick
 }: AgendaListViewProps) {
-  const [filterValue, setFilterValue] = useState<string | undefined>(undefined);
+  const [filterValue, setFilterValue] = useState<string>("thisWeek"); // Default to "thisWeek"
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  
+  // Initialize with the current week
+  const today = new Date();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({ 
-    from: new Date(), 
-    to: new Date() 
+    from: startOfWeek(today, { weekStartsOn: 1 }), 
+    to: endOfWeek(today, { weekStartsOn: 1 }) 
   });
+  
   const [displayedItems, setDisplayedItems] = useState<AgendaItem[]>([]);
   
   // Apply filters whenever dependencies change
@@ -88,6 +91,8 @@ export function AgendaListView({
           setSelectedDate={setSelectedDate}
           dateRange={dateRange}
           setDateRange={setDateRange}
+          filterValue={filterValue}
+          setFilterValue={setFilterValue}
         />
         <NoEventsMessage onAddClick={onAddClick} />
       </div>
@@ -101,8 +106,6 @@ export function AgendaListView({
         setSelectedDate={setSelectedDate}
         dateRange={dateRange}
         setDateRange={setDateRange}
-      />
-      <FilterControls 
         filterValue={filterValue}
         setFilterValue={setFilterValue}
       />

@@ -6,24 +6,29 @@ import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
-import { PredefinedDateRanges } from "./PredefinedDateRanges";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface DateNavigationProps {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
   dateRange: DateRange | undefined;
   setDateRange: (range: DateRange | undefined) => void;
+  filterValue: string;
+  setFilterValue: (value: string) => void;
 }
 
 export function DateNavigation({
   selectedDate,
   setSelectedDate,
   dateRange,
-  setDateRange
+  setDateRange,
+  filterValue,
+  setFilterValue
 }: DateNavigationProps) {
   const [fromCalendarOpen, setFromCalendarOpen] = useState(false);
   const [tillCalendarOpen, setTillCalendarOpen] = useState(false);
-  const [showPredefined, setShowPredefined] = useState(false);
+  const [showPastPresets, setShowPastPresets] = useState(false);
+  const [showUpcomingPresets, setShowUpcomingPresets] = useState(false);
   
   // Format a date for display
   const formatDate = (date: Date | undefined) => {
@@ -67,13 +72,31 @@ export function DateNavigation({
     setTillCalendarOpen(false);
   };
   
-  // Toggle the predefined ranges dropdown
-  const togglePredefined = () => {
-    setShowPredefined(!showPredefined);
+  // Toggle preset sections
+  const handleFilterChange = (value: string) => {
+    // If clicking the current filter, don't change anything
+    if (value === filterValue) {
+      return;
+    }
+    
+    setFilterValue(value);
+    
+    // Show appropriate preset options based on filter selection
+    if (value === "past") {
+      setShowPastPresets(true);
+      setShowUpcomingPresets(false);
+    } else if (value === "upcoming") {
+      setShowPastPresets(false);
+      setShowUpcomingPresets(true);
+    } else {
+      setShowPastPresets(false);
+      setShowUpcomingPresets(false);
+    }
   };
   
   return (
     <div className="space-y-4">
+      {/* Main date range selection */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         {/* From date selector */}
         <div className="flex items-center gap-2">
@@ -123,22 +146,100 @@ export function DateNavigation({
               />
             </PopoverContent>
           </Popover>
-          
-          {/* Button to toggle predefined ranges */}
-          <Button 
-            variant="outline"
-            size="sm" 
-            onClick={togglePredefined}
-          >
-            Presets
-          </Button>
         </div>
       </div>
       
-      {/* Show predefined date range options if toggled */}
-      {showPredefined && (
-        <div className="p-3 border rounded-lg">
-          <PredefinedDateRanges setDateRange={setDateRange} />
+      {/* Main filter toggle group */}
+      <div className="flex items-center justify-between gap-2 border-t border-b py-2">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <span className="text-sm font-medium whitespace-nowrap">View:</span>
+          <ToggleGroup type="single" value={filterValue} onValueChange={handleFilterChange}>
+            <ToggleGroupItem value="past" size="sm">Past</ToggleGroupItem>
+            <ToggleGroupItem value="today" size="sm">Today</ToggleGroupItem>
+            <ToggleGroupItem value="upcoming" size="sm">Upcoming</ToggleGroupItem>
+            <ToggleGroupItem value="thisWeek" size="sm">This Week</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      </div>
+      
+      {/* Past event presets */}
+      {showPastPresets && (
+        <div className="border rounded-lg p-3">
+          <h3 className="text-sm font-medium mb-2">Past Events:</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("yesterday"); setShowPastPresets(false); }}
+            >
+              Yesterday
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("lastWeek"); setShowPastPresets(false); }}
+            >
+              Last Week
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("lastMonth"); setShowPastPresets(false); }}
+            >
+              Last Month
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("last30Days"); setShowPastPresets(false); }}
+            >
+              Last 30 Days
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {/* Upcoming event presets */}
+      {showUpcomingPresets && (
+        <div className="border rounded-lg p-3">
+          <h3 className="text-sm font-medium mb-2">Upcoming Events:</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("tomorrow"); setShowUpcomingPresets(false); }}
+            >
+              Tomorrow
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("thisWeek"); setShowUpcomingPresets(false); }}
+            >
+              This Week
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("nextWeek"); setShowUpcomingPresets(false); }}
+            >
+              Next Week
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("thisMonth"); setShowUpcomingPresets(false); }}
+            >
+              This Month
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => { setFilterValue("next30Days"); setShowUpcomingPresets(false); }}
+            >
+              Next 30 Days
+            </Button>
+          </div>
         </div>
       )}
     </div>
