@@ -37,17 +37,15 @@ export function DateNavigation({
     
     setSelectedDate(date);
     
-    // Update the date range
-    setDateRange(prev => {
-      const to = prev?.to;
-      
-      // If the selected from date is after the to date, set to date to the from date
-      if (to && date > to) {
-        return { from: date, to: date };
-      }
-      
-      return { from: date, to: to || date };
-    });
+    // Update the date range - FIX: Use a direct object instead of a function
+    const to = dateRange?.to || date;
+    
+    // If the selected from date is after the to date, set to date to the from date
+    if (to && date > to) {
+      setDateRange({ from: date, to: date });
+    } else {
+      setDateRange({ from: date, to: to });
+    }
     
     setFromCalendarOpen(false);
   };
@@ -56,17 +54,15 @@ export function DateNavigation({
   const handleTillDateSelect = (date: Date | undefined) => {
     if (!date) return;
     
-    // Update the date range
-    setDateRange(prev => {
-      const from = prev?.from || new Date();
-      
-      // If the selected to date is before the from date, set from date to the to date
-      if (date < from) {
-        return { from: date, to: date };
-      }
-      
-      return { from: from, to: date };
-    });
+    // Update the date range - FIX: Use a direct object instead of a function
+    const from = dateRange?.from || new Date();
+    
+    // If the selected to date is before the from date, set from date to the to date
+    if (date < from) {
+      setDateRange({ from: date, to: date });
+    } else {
+      setDateRange({ from: from, to: date });
+    }
     
     setTillCalendarOpen(false);
   };
