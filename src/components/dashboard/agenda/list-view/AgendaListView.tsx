@@ -36,16 +36,24 @@ export function AgendaListView({
   
   // Apply filters whenever dependencies change
   useEffect(() => {
-    if (isLoading || !agendaItems || agendaItems.length === 0) {
+    if (isLoading || !agendaItems) {
       setDisplayedItems([]);
       return;
     }
     
-    // First filter by date range
+    console.log(`Filtering ${agendaItems.length} agenda items`);
+    
+    // Apply time filter if selected
     let filteredItems = agendaItems;
     
+    if (filterValue) {
+      filteredItems = filterByTimeRange(filteredItems, filterValue);
+      console.log(`After time filter (${filterValue}): ${filteredItems.length} items`);
+    }
+    
+    // Then filter by date range if set
     if (dateRange && dateRange.from) {
-      filteredItems = agendaItems.filter(item => {
+      filteredItems = filteredItems.filter(item => {
         if (!item.event_date) return false;
         
         try {
@@ -66,14 +74,9 @@ export function AgendaListView({
           return false;
         }
       });
+      
+      console.log(`After date range filter: ${filteredItems.length} items with range: ${dateRange?.from} to ${dateRange?.to}`);
     }
-    
-    // Then apply time filter if selected
-    if (filterValue) {
-      filteredItems = filterByTimeRange(filteredItems, filterValue);
-    }
-    
-    console.log(`Displaying ${filteredItems.length} items after filtering with range: ${dateRange?.from} to ${dateRange?.to} and filter: ${filterValue}`);
     
     setDisplayedItems(filteredItems);
     
@@ -81,22 +84,6 @@ export function AgendaListView({
   
   if (isLoading) {
     return <LoadingIndicator />;
-  }
-
-  if (!agendaItems || agendaItems.length === 0) {
-    return (
-      <div className="space-y-4">
-        <DateNavigation
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-        />
-        <NoEventsMessage onAddClick={onAddClick} />
-      </div>
-    );
   }
 
   return (
@@ -110,7 +97,9 @@ export function AgendaListView({
         setFilterValue={setFilterValue}
       />
       
-      {displayedItems.length > 0 ? (
+      {!agendaItems || agendaItems.length === 0 ? (
+        <NoEventsMessage onAddClick={onAddClick} />
+      ) : displayedItems.length > 0 ? (
         <EventGroups 
           filteredItems={displayedItems} 
           onItemClick={onItemClick}

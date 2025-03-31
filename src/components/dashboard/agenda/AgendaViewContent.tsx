@@ -30,7 +30,7 @@ export function AgendaViewContent({
   
   // Always check if safeAgendaItems exists before checking its length
   const hasItems = safeAgendaItems && safeAgendaItems.length > 0;
-  console.log("AgendaViewContent - hasItems:", hasItems);
+  console.log("AgendaViewContent - hasItems:", hasItems, "itemsToDisplay:", itemsToDisplay.length);
   
   return (
     <div className="space-y-4">
@@ -45,7 +45,7 @@ export function AgendaViewContent({
       ) : (
         // Use the AgendaListView component
         <AgendaListView 
-          agendaItems={itemsToDisplay}
+          agendaItems={safeAgendaItems} // Pass all items and let the AgendaListView handle filtering
           isLoading={isLoading}
           onItemClick={onItemClick}
           onAddClick={onAddClick}
