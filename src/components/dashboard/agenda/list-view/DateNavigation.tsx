@@ -1,7 +1,6 @@
 
 import { DateRange } from "react-day-picker";
 import { useDateNavigation } from "./hooks/useDateNavigation";
-import { DateRangePickers } from "./components/DateRangePickers";
 import { FilterToggleGroup } from "./components/FilterToggleGroup";
 import { PastEventsPresets } from "./components/PastEventsPresets";
 import { UpcomingEventsPresets } from "./components/UpcomingEventsPresets";
@@ -26,30 +25,12 @@ export function DateNavigation({
   const {
     showPastPresets,
     showUpcomingPresets,
-    handleFromDateSelect,
-    handleTillDateSelect,
     handleFilterChange,
     handlePresetClick
   } = useDateNavigation(filterValue);
   
   return (
     <div className="space-y-4">
-      {/* Main date range selection */}
-      <DateRangePickers 
-        dateRange={dateRange}
-        onFromDateSelect={(date) => {
-          if (date) {
-            setSelectedDate(date);
-            handleFromDateSelect(date);
-          }
-        }}
-        onTillDateSelect={(date) => {
-          if (date) {
-            handleTillDateSelect(date);
-          }
-        }}
-      />
-      
       {/* Main filter toggle group */}
       <FilterToggleGroup 
         filterValue={filterValue} 

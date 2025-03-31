@@ -12,7 +12,7 @@ export function UpcomingEventsPresets({ onPresetClick, visible }: UpcomingEvents
   return (
     <div className="border rounded-lg p-3">
       <h3 className="text-sm font-medium mb-2">Upcoming Events:</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <Button 
           variant="outline" 
           size="sm" 

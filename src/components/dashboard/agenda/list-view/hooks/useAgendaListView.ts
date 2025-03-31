@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
-import { filterByTimeRange } from "../utils";
 import { DateRange } from "react-day-picker";
 import { isSameDay, isWithinInterval, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 
@@ -47,8 +46,8 @@ export function useAgendaListView(
               end: endOfDay(dateRange.to)
             });
           } else {
-            // If we only have a from date, check if the event is on that day
-            return isSameDay(eventDate, dateRange.from);
+            // If we only have a from date, check if the event is on that day or after
+            return eventDate >= startOfDay(dateRange.from);
           }
         } catch (error) {
           console.error("Error filtering by date range:", error);

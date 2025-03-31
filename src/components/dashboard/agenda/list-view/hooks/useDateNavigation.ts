@@ -15,38 +15,6 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
   const [showPastPresets, setShowPastPresets] = useState(false);
   const [showUpcomingPresets, setShowUpcomingPresets] = useState(false);
   
-  // Handle from date selection
-  const handleFromDateSelect = (date: Date | undefined) => {
-    if (!date) return;
-    
-    setSelectedDate(date);
-    
-    // Update the date range - Using a direct object instead of a function
-    const to = dateRange?.to || date;
-    
-    // If the selected from date is after the to date, set to date to the from date
-    if (to && date > to) {
-      setDateRange({ from: date, to: date });
-    } else {
-      setDateRange({ from: date, to: to });
-    }
-  };
-  
-  // Handle till date selection
-  const handleTillDateSelect = (date: Date | undefined) => {
-    if (!date) return;
-    
-    // Update the date range - Using a direct object instead of a function
-    const from = dateRange?.from || new Date();
-    
-    // If the selected to date is before the from date, set from date to the to date
-    if (date < from) {
-      setDateRange({ from: date, to: date });
-    } else {
-      setDateRange({ from: from, to: date });
-    }
-  };
-  
   // Toggle preset sections
   const handleFilterChange = (value: string) => {
     // If clicking the current filter, don't change anything
@@ -109,7 +77,7 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
       }
       case "thisMonth": {
         if (showPastPresets) {
-          // For past events, show from beginning of month to today (not inclusive)
+          // For past events, show from beginning of month to yesterday
           const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
           const yesterday = new Date(today);
           yesterday.setDate(today.getDate() - 1);
@@ -130,7 +98,9 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
       case "last30Days": {
         const thirtyDaysAgo = new Date(today);
         thirtyDaysAgo.setDate(today.getDate() - 30);
-        setDateRange({ from: thirtyDaysAgo, to: today });
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        setDateRange({ from: thirtyDaysAgo, to: yesterday });
         break;
       }
       case "tomorrow": {
@@ -148,7 +118,6 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         nextMonday.setDate(today.getDate() - today.getDay() + 8); // This gets next Monday
         const nextSunday = new Date(nextMonday);
         nextSunday.setDate(nextMonday.getDate() + 6); // This gets next Sunday
-        console.log("Next week date range:", { from: nextMonday, to: nextSunday });
         setDateRange({ from: nextMonday, to: nextSunday });
         break;
       }
@@ -162,7 +131,6 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
         // For upcoming, we want all future events starting from today
         const futureEnd = new Date(today);
         futureEnd.setFullYear(futureEnd.getFullYear() + 100); // Set a far future date
-        console.log("Upcoming date range:", { from: today, to: futureEnd });
         setDateRange({ from: today, to: futureEnd });
         break;
       }
@@ -177,10 +145,10 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
     }
     
     // Keep preset menus visible based on the category
-    if (["yesterday", "lastWeek", "lastMonth", "last30Days"].includes(presetValue)) {
+    if (["yesterday", "lastWeek", "lastMonth", "last30Days", "thisMonth"].includes(presetValue)) {
       setShowPastPresets(true);
       setShowUpcomingPresets(false);
-    } else if (["tomorrow", "nextWeek", "next30Days"].includes(presetValue)) {
+    } else if (["tomorrow", "nextWeek", "next30Days", "thisMonth"].includes(presetValue)) {
       setShowPastPresets(false);
       setShowUpcomingPresets(true);
     }
@@ -219,8 +187,6 @@ export function useDateNavigation(initialFilterValue: string = "thisWeek") {
     setFilterValue,
     showPastPresets,
     showUpcomingPresets,
-    handleFromDateSelect,
-    handleTillDateSelect,
     handleFilterChange,
     handlePresetClick
   };

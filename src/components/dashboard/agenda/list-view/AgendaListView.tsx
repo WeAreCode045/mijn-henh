@@ -28,6 +28,8 @@ export function AgendaListView({
     displayedItems
   } = useAgendaListView(agendaItems, isLoading);
   
+  console.log("AgendaListView - Items count:", agendaItems?.length || 0, "Displayed count:", displayedItems?.length || 0);
+  
   if (isLoading) {
     return <LoadingIndicator />;
   }
