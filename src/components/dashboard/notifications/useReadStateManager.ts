@@ -129,7 +129,10 @@ export function useReadStateManager(
     
     await saveReadNotifications(updatedReadStates);
     
-    // If it's a database notification, delete it
+    // If it's a database notification, delete it - but since we don't have a notifications table,
+    // we'll just skip this part for now
+    // The actual deletion would be uncommented when the notifications table is created
+    /*
     if (!id.includes('-')) {
       try {
         await supabase
@@ -140,6 +143,7 @@ export function useReadStateManager(
         console.error('Error deleting notification from database:', err);
       }
     }
+    */
   };
 
   return {

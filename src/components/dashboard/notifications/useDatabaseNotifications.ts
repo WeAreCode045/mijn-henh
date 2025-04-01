@@ -2,7 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 // Define the database notification type
-interface DbNotification {
+export interface DbNotification {
   id: string;
   title: string;
   message: string;
@@ -14,23 +14,16 @@ interface DbNotification {
 }
 
 export function useDatabaseNotifications() {
-  // Fetch notifications from database
+  // Since there's no "notifications" table in the database schema, 
+  // we'll just return an empty array for now
   const fetchDatabaseNotifications = async () => {
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching notifications:', error);
-        return [];
-      }
-      
-      return (data || []) as DbNotification[];
+      // Note: This would need to be updated once a proper notifications table is created
+      // For now, return an empty array to prevent TypeScript errors
+      return [] as DbNotification[];
     } catch (err) {
       console.error('Error in fetchNotifications:', err);
-      return [];
+      return [] as DbNotification[];
     }
   };
 

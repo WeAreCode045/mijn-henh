@@ -55,7 +55,7 @@ export const useEmails = () => {
         console.log(`Fetched ${data.emails.length} emails`);
         setEmails(data.emails);
         
-        // Ensure isTroubleshooting is explicitly set as a boolean
+        // Make sure isTroubleshooting is explicitly a boolean
         const showTroubleshooting = data.emails.length === 1 && data.emails[0].id === "mock-1";
         setIsTroubleshooting(Boolean(showTroubleshooting));
       } else {
