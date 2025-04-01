@@ -27,6 +27,12 @@ export type Database = {
           icon_living_space: string | null
           icon_sqft: string | null
           id: string
+          imap_host: string | null
+          imap_mailbox: string | null
+          imap_password: string | null
+          imap_port: string | null
+          imap_tls: boolean | null
+          imap_username: string | null
           instagram_url: string | null
           logo_url: string | null
           mailjet_api_key: string | null
@@ -66,6 +72,12 @@ export type Database = {
           icon_living_space?: string | null
           icon_sqft?: string | null
           id?: string
+          imap_host?: string | null
+          imap_mailbox?: string | null
+          imap_password?: string | null
+          imap_port?: string | null
+          imap_tls?: boolean | null
+          imap_username?: string | null
           instagram_url?: string | null
           logo_url?: string | null
           mailjet_api_key?: string | null
@@ -105,6 +117,12 @@ export type Database = {
           icon_living_space?: string | null
           icon_sqft?: string | null
           id?: string
+          imap_host?: string | null
+          imap_mailbox?: string | null
+          imap_password?: string | null
+          imap_port?: string | null
+          imap_tls?: boolean | null
+          imap_username?: string | null
           instagram_url?: string | null
           logo_url?: string | null
           mailjet_api_key?: string | null
