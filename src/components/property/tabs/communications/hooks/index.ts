@@ -5,6 +5,7 @@ import { useSendResponse } from './useSendResponse';
 import { useFetchSubmissions } from './useFetchSubmissions';
 import { useSubmissionReplies } from './useSubmissionReplies';
 import { useDeleteSubmissionItem } from './useDeleteSubmissionItem';
+import { usePropertySubmissions } from './usePropertySubmissions';
 
 export {
   useSubmissions,
@@ -12,5 +13,6 @@ export {
   useSendResponse,
   useFetchSubmissions,
   useSubmissionReplies,
-  useDeleteSubmissionItem
+  useDeleteSubmissionItem,
+  usePropertySubmissions
 };

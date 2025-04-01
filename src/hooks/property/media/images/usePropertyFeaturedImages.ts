@@ -1,47 +1,11 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormData } from '@/types/property';
 import { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
 
-// Define the submission type for this custom hook
-export interface Submission {
-  id: string;
-  propertyId: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  inquiryType: string;
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
-  agentId: string | null;
-  agent?: {
-    id: string;
-    fullName: string;
-    email: string;
-    phone: string;
-    avatarUrl: string | null;
-  } | null;
-  replies: SubmissionReply[];
-}
-
-export interface SubmissionReply {
-  id: string;
-  submissionId: string;
-  replyText: string;
-  createdAt: string;
-  updatedAt: string;
-  agentId: string | null;
-  userId: string | null;
-  userName: string | null;
-  userEmail: string | null;
-  userPhone: string | null;
-  userAvatar: string | null;
-}
-
-export function usePropertyMainImages(
+export function usePropertyFeaturedImages(
   formData: PropertyFormData,
   setFormData: Dispatch<SetStateAction<PropertyFormData>>
 ) {
@@ -172,30 +136,9 @@ export function usePropertyMainImages(
     }
   };
 
-  // Handle reply data safely
-  const processReplyData = (reply: any): SubmissionReply => {
-    // Safely extract user data, providing defaults for missing properties
-    const userData = reply.user || {};
-    
-    return {
-      id: reply.id,
-      submissionId: reply.submission_id,
-      replyText: reply.reply_text,
-      createdAt: reply.created_at,
-      updatedAt: reply.updated_at,
-      agentId: reply.agent_id,
-      userId: reply.user_id || null,
-      userName: userData.full_name || "Unknown User",
-      userEmail: userData.email || "no-email@example.com",
-      userPhone: userData.phone || "N/A",
-      userAvatar: userData.avatar_url || null
-    };
-  };
-
   return {
     handleSetFeaturedImage,
     handleToggleFeaturedImage,
-    isUpdating,
-    processReplyData
+    isUpdating
   };
 }
