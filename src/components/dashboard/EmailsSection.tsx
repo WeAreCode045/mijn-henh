@@ -29,8 +29,7 @@ export function EmailsSection() {
         isConfigured={hasImapConfig}
       />
 
-      {/* Ensure isTroubleshooting is treated as a boolean */}
-      {isTroubleshooting === true && <TroubleshootingInfo settings={settings} />}
+      {isTroubleshooting && <TroubleshootingInfo settings={settings} />}
 
       {error && !isTroubleshooting ? (
         <ErrorDisplay errorMessage={error} />

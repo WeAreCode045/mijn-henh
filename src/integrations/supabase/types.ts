@@ -147,57 +147,6 @@ export type Database = {
         }
         Relationships: []
       }
-      notification_read_states: {
-        Row: {
-          created_at: string
-          id: string
-          notification_id: string
-          read: boolean
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          notification_id: string
-          read?: boolean
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          notification_id?: string
-          read?: boolean
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          created_at: string
-          id: string
-          message: string
-          title: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message: string
-          title: string
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string
-          title?: string
-          type?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
