@@ -2,7 +2,6 @@
 import { CardContent } from "@/components/ui/card";
 import { EmailDetail } from "./emails/EmailDetail";
 import { EmailList } from "./emails/EmailList";
-import { TroubleshootingInfo } from "./emails/TroubleshootingInfo";
 import { ErrorDisplay } from "./emails/ErrorDisplay";
 import { EmailHeader } from "./emails/EmailHeader";
 import { useEmails } from "./emails/useEmails";
@@ -16,10 +15,12 @@ export function EmailsSection() {
     error, 
     selectedEmail, 
     setSelectedEmail, 
-    isTroubleshooting, 
     fetchEmails, 
     hasImapConfig 
   } = useEmails();
+
+  // Check if we have a mock email (single email with id "mock-1")
+  const hasMockEmail = emails.length === 1 && emails[0]?.id === "mock-1";
 
   return (
     <CardContent>
@@ -29,9 +30,18 @@ export function EmailsSection() {
         isConfigured={hasImapConfig}
       />
 
-      {isTroubleshooting && <TroubleshootingInfo settings={settings} />}
+      {hasMockEmail && (
+        <div className="mb-4 p-4 border border-yellow-400 bg-yellow-50 rounded-md">
+          <h3 className="font-bold flex items-center text-yellow-800">
+            Troubleshooting Mode
+          </h3>
+          <p className="mt-2 text-sm">
+            We're showing you a test email. Please verify your IMAP settings in the Settings page.
+          </p>
+        </div>
+      )}
 
-      {error && !isTroubleshooting ? (
+      {error && !hasMockEmail ? (
         <ErrorDisplay errorMessage={error} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

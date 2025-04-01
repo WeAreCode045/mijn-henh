@@ -10,7 +10,6 @@ export const useEmails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isTroubleshooting, setIsTroubleshooting] = useState<boolean>(false);
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   
@@ -26,7 +25,6 @@ export const useEmails = () => {
     try {
       setIsLoading(true);
       setError(null);
-      setIsTroubleshooting(false);
       
       console.log("Fetching emails with settings:", {
         host: settings.imapHost,
@@ -54,10 +52,6 @@ export const useEmails = () => {
       if (data && data.emails) {
         console.log(`Fetched ${data.emails.length} emails`);
         setEmails(data.emails);
-        
-        // Explicitly ensure isTroubleshooting is a boolean
-        const hasSingleMockEmail = data.emails.length === 1 && data.emails[0].id === "mock-1";
-        setIsTroubleshooting(hasSingleMockEmail);
       } else {
         console.log("No emails found");
         setEmails([]);
@@ -91,7 +85,6 @@ export const useEmails = () => {
     error,
     selectedEmail,
     setSelectedEmail,
-    isTroubleshooting,
     fetchEmails,
     hasImapConfig
   };
