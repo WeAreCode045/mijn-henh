@@ -68,4 +68,4 @@ export const EmailDetail = ({ email }: EmailDetailProps) => {
       </CardContent>
     </Card>
   );
-}
+};

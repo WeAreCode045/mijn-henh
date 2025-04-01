@@ -33,36 +33,33 @@ export const useEmails = () => {
         // password intentionally omitted
       });
 
-      const { data, error } = await supabase.functions.invoke("fetch-imap-emails", {
-        body: {
-          imapHost: settings.imapHost,
-          imapPort: settings.imapPort || "993",
-          imapUsername: settings.imapUsername,
-          imapPassword: settings.imapPassword,
-          imapTls: settings.imapTls !== false,
-          imapMailbox: settings.imapMailbox || "INBOX"
+      // Provide a mock email while we work on a more compatible solution
+      const mockEmails: Email[] = [
+        {
+          id: "mock-1",
+          subject: "Test Email - IMAP Connection Issue",
+          from: "System <system@example.com>",
+          to: settings.imapUsername || "user@example.com",
+          date: new Date().toISOString(),
+          textBody: "We're experiencing an issue with the IMAP connection. Our team is working on a solution. In the meantime, please check your email directly through your email provider.",
+          htmlBody: "<p>We're experiencing an issue with the IMAP connection. Our team is working on a solution.</p><p>In the meantime, please check your email directly through your email provider.</p>",
+          body: "We're experiencing an issue with the IMAP connection. Our team is working on a solution. In the meantime, please check your email directly through your email provider.",
+          isRead: false
         }
+      ];
+      
+      setEmails(mockEmails);
+      setSelectedEmail(null);
+      
+      toast({
+        title: "IMAP Connection Issue",
+        description: "We're experiencing technical difficulties with the IMAP connection. We're showing you test data for now.",
+        variant: "destructive",
       });
-
-      if (error) {
-        console.error("Error fetching emails:", error);
-        throw new Error(error.message || "Failed to fetch emails");
-      }
-
-      if (data && data.emails) {
-        console.log(`Fetched ${data.emails.length} emails`);
-        setEmails(data.emails);
-        
-        // If we had a selected email, update it or clear it if it no longer exists
-        if (selectedEmail) {
-          const updatedSelectedEmail = data.emails.find(email => email.id === selectedEmail.id);
-          setSelectedEmail(updatedSelectedEmail || null);
-        }
-      } else {
-        console.log("No emails found");
-        setEmails([]);
-        setSelectedEmail(null);
-      }
+      
+      // Log the error for reference
+      console.error("Note: The current implementation using ImapFlow is not compatible with the Edge Function environment. Consider implementing an EmailEngine API integration.");
+      
     } catch (error: any) {
       console.error("Error fetching emails:", error);
       setError("Failed to fetch emails. Please check your IMAP settings and ensure the Edge Function is deployed correctly.");
