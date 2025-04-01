@@ -44,6 +44,14 @@ export interface AgencySettings {
   mailjetFromEmail?: string;
   mailjetFromName?: string;
   
+  // IMAP settings
+  imapHost?: string;
+  imapPort?: string;
+  imapUsername?: string;
+  imapPassword?: string;
+  imapTls?: boolean;
+  imapMailbox?: string;
+  
   // OpenAI API key
   openaiApiKey?: string;
   

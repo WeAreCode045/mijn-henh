@@ -37,6 +37,13 @@ interface AgencySettingsData {
   mailjet_api_secret?: string;
   mailjet_from_email?: string;
   mailjet_from_name?: string;
+  // IMAP settings
+  imap_host?: string;
+  imap_port?: string;
+  imap_username?: string;
+  imap_password?: string;
+  imap_tls?: boolean;
+  imap_mailbox?: string;
   // OpenAI API key
   openai_api_key?: string;
 }
@@ -106,6 +113,13 @@ export const agencySettingsService = {
       mailjet_api_secret: data.mailjetApiSecret || null,
       mailjet_from_email: data.mailjetFromEmail || null,
       mailjet_from_name: data.mailjetFromName || null,
+      // IMAP settings
+      imap_host: data.imapHost || null,
+      imap_port: data.imapPort || null,
+      imap_username: data.imapUsername || null,
+      imap_password: data.imapPassword || null,
+      imap_tls: data.imapTls !== undefined ? data.imapTls : true,
+      imap_mailbox: data.imapMailbox || "INBOX",
       // OpenAI API key
       openai_api_key: data.openaiApiKey || null,
     };

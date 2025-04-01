@@ -70,6 +70,13 @@ export const useAgencySubmit = ({
           mailjet_api_secret: settings.mailjetApiSecret,
           mailjet_from_email: settings.mailjetFromEmail,
           mailjet_from_name: settings.mailjetFromName,
+          // IMAP settings
+          imap_host: settings.imapHost,
+          imap_port: settings.imapPort,
+          imap_username: settings.imapUsername,
+          imap_password: settings.imapPassword,
+          imap_tls: settings.imapTls,
+          imap_mailbox: settings.imapMailbox || "INBOX",
           // OpenAI API key
           openai_api_key: settings.openaiApiKey,
           // Make sure we're sending a properly formatted array
@@ -150,6 +157,13 @@ export const useAgencySubmit = ({
           mailjetApiSecret: latestSettings.mailjet_api_secret,
           mailjetFromEmail: latestSettings.mailjet_from_email,
           mailjetFromName: latestSettings.mailjet_from_name,
+          // IMAP settings
+          imapHost: latestSettings.imap_host,
+          imapPort: latestSettings.imap_port,
+          imapUsername: latestSettings.imap_username,
+          imapPassword: latestSettings.imap_password,
+          imapTls: latestSettings.imap_tls,
+          imapMailbox: latestSettings.imap_mailbox,
           // OpenAI API key
           openaiApiKey: latestSettings.openai_api_key,
           globalFeatures: globalFeaturesList

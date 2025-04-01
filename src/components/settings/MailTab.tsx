@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { AgencySettings } from '@/types/agency';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SmtpSettings } from './SmtpSettings';
+import { ImapSettings } from './ImapSettings';
 import { AlertCircle, Check } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -17,6 +18,7 @@ interface MailTabProps {
 export function MailTab({ settings, onChange }: MailTabProps) {
   const hasMailjetConfig = !!settings.mailjetApiKey && !!settings.mailjetApiSecret;
   const hasSmtpConfig = !!settings.smtpHost && !!settings.smtpUsername && !!settings.smtpPassword;
+  const hasImapConfig = !!settings.imapHost && !!settings.imapUsername && !!settings.imapPassword;
   
   // Create a handler specifically for Switch components
   const handleSwitchChange = (name: string, checked: boolean) => {
@@ -36,9 +38,10 @@ export function MailTab({ settings, onChange }: MailTabProps) {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="mailjet" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full">
+        <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="mailjet">Mailjet</TabsTrigger>
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
+          <TabsTrigger value="imap">IMAP</TabsTrigger>
         </TabsList>
         
         <TabsContent value="mailjet" className="pt-4">
@@ -134,13 +137,30 @@ export function MailTab({ settings, onChange }: MailTabProps) {
             onSwitchChange={handleSwitchChange} 
           />
         </TabsContent>
+        
+        <TabsContent value="imap" className="pt-4">
+          <ImapSettings
+            settings={settings}
+            onChange={onChange}
+            onSwitchChange={handleSwitchChange}
+          />
+        </TabsContent>
       </Tabs>
 
       {!hasMailjetConfig && !hasSmtpConfig && (
         <Alert variant="warning">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            No email service is configured. Please configure either Mailjet or SMTP to enable email sending functionality.
+            No email service is configured for sending. Please configure either Mailjet or SMTP to enable email sending functionality.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {!hasImapConfig && (
+        <Alert variant="warning">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            No IMAP service is configured for receiving. Please configure IMAP settings to enable email receiving functionality.
           </AlertDescription>
         </Alert>
       )}

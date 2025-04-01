@@ -39,6 +39,14 @@ export interface Settings {
   mailjet_from_email?: string | null;
   mailjet_from_name?: string | null;
   
+  // IMAP settings
+  imap_host?: string | null;
+  imap_port?: string | null;
+  imap_username?: string | null;
+  imap_password?: string | null;
+  imap_tls?: boolean | null;
+  imap_mailbox?: string | null;
+  
   // OpenAI API key
   openai_api_key?: string | null;
   
@@ -51,4 +59,12 @@ export interface Settings {
   mailjetApiSecret?: string;
   mailjetFromEmail?: string;
   mailjetFromName?: string;
+
+  // IMAP aliases
+  imapHost?: string;
+  imapPort?: string;
+  imapUsername?: string;
+  imapPassword?: string;
+  imapTls?: boolean;
+  imapMailbox?: string;
 }
