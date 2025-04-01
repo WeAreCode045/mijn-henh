@@ -8,6 +8,8 @@ export interface Email {
   to: string;
   date: string;
   body?: string;
+  textBody?: string;
+  htmlBody?: string;
   isRead: boolean;
 }
 
