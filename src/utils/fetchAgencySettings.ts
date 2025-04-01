@@ -76,6 +76,13 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     mailjetApiSecret: data.mailjet_api_secret || null,
     mailjetFromEmail: data.mailjet_from_email || null,
     mailjetFromName: data.mailjet_from_name || null,
+    // IMAP settings
+    imapHost: data.imap_host || null,
+    imapPort: data.imap_port || null,
+    imapUsername: data.imap_username || null,
+    imapPassword: data.imap_password || null,
+    imapTls: data.imap_tls !== undefined ? data.imap_tls : true,
+    imapMailbox: data.imap_mailbox || "INBOX",
     // OpenAI API key
     openaiApiKey: data.openai_api_key || null,
   };
