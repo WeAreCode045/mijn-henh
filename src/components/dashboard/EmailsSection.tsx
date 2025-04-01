@@ -27,7 +27,7 @@ export function EmailsSection() {
       <EmailHeader 
         fetchEmails={fetchEmails} 
         isLoading={isLoading} 
-        isConfigured={hasImapConfig}
+        isConfigured={!!hasImapConfig}
       />
 
       {hasMockEmail && (

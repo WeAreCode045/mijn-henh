@@ -13,7 +13,7 @@ export const useEmails = () => {
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   
-  const hasImapConfig = settings.imapHost && settings.imapUsername && settings.imapPassword;
+  const hasImapConfig = Boolean(settings.imapHost && settings.imapUsername && settings.imapPassword);
 
   const fetchEmails = async () => {
     if (!hasImapConfig) {
