@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, RefreshCw, Inbox, AlertCircle } from "lucide-react";
+import { Mail, RefreshCw, Inbox, AlertCircle, Settings } from "lucide-react";
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 
 interface Email {
@@ -63,7 +63,7 @@ const EmailDetail = ({ email }: { email: Email | null }) => {
   const date = new Date(email.date).toLocaleString();
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border rounded-lg p-4 h-[400px] overflow-y-auto">
       <div className="mb-4 pb-2 border-b">
         <h2 className="text-xl font-bold mb-2">{email.subject}</h2>
         <div className="flex justify-between items-center text-sm">
@@ -90,6 +90,7 @@ export function EmailsSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isTroubleshooting, setIsTroubleshooting] = useState(false);
   const { toast } = useToast();
   const { settings } = useAgencySettings();
 
@@ -103,6 +104,7 @@ export function EmailsSection() {
     try {
       setIsLoading(true);
       setError(null);
+      setIsTroubleshooting(false);
       
       console.log("Fetching emails with settings:", {
         host: settings.imapHost,
@@ -130,6 +132,11 @@ export function EmailsSection() {
       if (data && data.emails) {
         console.log(`Fetched ${data.emails.length} emails`);
         setEmails(data.emails);
+        
+        // If we received a mock email, show the troubleshooting info
+        if (data.emails.length === 1 && data.emails[0].id === "mock-1") {
+          setIsTroubleshooting(true);
+        }
       } else {
         console.log("No emails found");
         setEmails([]);
@@ -164,18 +171,58 @@ export function EmailsSection() {
           <Inbox className="mr-2 h-5 w-5" />
           Email Inbox
         </h2>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={fetchEmails}
-          disabled={isLoading || !settings.imapHost || !settings.imapUsername || !settings.imapPassword}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.location.href = "/settings"}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            IMAP Settings
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={fetchEmails}
+            disabled={isLoading || !settings.imapHost || !settings.imapUsername || !settings.imapPassword}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {error ? (
+      {isTroubleshooting && (
+        <div className="mb-4 p-4 border border-yellow-400 bg-yellow-50 rounded-md">
+          <h3 className="font-bold flex items-center text-yellow-800">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            Troubleshooting Mode
+          </h3>
+          <p className="mt-2 text-sm">
+            We're showing you a test email because there might be an issue with your IMAP settings or 
+            connectivity. Please verify your IMAP settings in the Settings page:
+          </p>
+          <ul className="mt-2 text-sm list-disc list-inside space-y-1 ml-2">
+            <li>Host: {settings.imapHost}</li>
+            <li>Port: {settings.imapPort || "993"}</li>
+            <li>Username: {settings.imapUsername}</li>
+            <li>TLS Enabled: {settings.imapTls !== false ? "Yes" : "No"}</li>
+            <li>Mailbox: {settings.imapMailbox || "INBOX"}</li>
+          </ul>
+          <p className="mt-2 text-sm">
+            Common issues include:
+          </p>
+          <ul className="mt-1 text-sm list-disc list-inside space-y-1 ml-2">
+            <li>Incorrect password</li>
+            <li>IMAP not enabled on your email account</li>
+            <li>Port restrictions on the server</li>
+            <li>Two-factor authentication requiring an app password</li>
+            <li>Email provider security settings blocking external access</li>
+          </ul>
+        </div>
+      )}
+
+      {error && !isTroubleshooting ? (
         <div className="flex flex-col items-center justify-center p-6 border rounded-md text-center">
           <AlertCircle className="mx-auto h-10 w-10 mb-4 text-destructive" />
           <p className="mb-4">{error}</p>
@@ -213,7 +260,7 @@ export function EmailsSection() {
           </div>
           
           {/* Email Detail - Right Side */}
-          <div className="md:col-span-2 h-[400px] overflow-y-auto">
+          <div className="md:col-span-2">
             <EmailDetail email={selectedEmail} />
           </div>
         </div>
