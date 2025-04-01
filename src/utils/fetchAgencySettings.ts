@@ -76,7 +76,7 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     mailjetApiSecret: data.mailjet_api_secret || null,
     mailjetFromEmail: data.mailjet_from_email || null,
     mailjetFromName: data.mailjet_from_name || null,
-    // IMAP settings
+    // IMAP settings - Add these fields from data
     imapHost: data.imap_host || null,
     imapPort: data.imap_port || null,
     imapUsername: data.imap_username || null,

@@ -70,7 +70,7 @@ export const useAgencySubmit = ({
           mailjet_api_secret: settings.mailjetApiSecret,
           mailjet_from_email: settings.mailjetFromEmail,
           mailjet_from_name: settings.mailjetFromName,
-          // IMAP settings
+          // IMAP settings - Add these fields to the update
           imap_host: settings.imapHost,
           imap_port: settings.imapPort,
           imap_username: settings.imapUsername,
@@ -157,7 +157,7 @@ export const useAgencySubmit = ({
           mailjetApiSecret: latestSettings.mailjet_api_secret,
           mailjetFromEmail: latestSettings.mailjet_from_email,
           mailjetFromName: latestSettings.mailjet_from_name,
-          // IMAP settings
+          // IMAP settings - Add these fields
           imapHost: latestSettings.imap_host,
           imapPort: latestSettings.imap_port,
           imapUsername: latestSettings.imap_username,

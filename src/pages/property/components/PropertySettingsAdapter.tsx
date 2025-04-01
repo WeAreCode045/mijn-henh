@@ -54,6 +54,13 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     facebookUrl: settings.facebook_url || "",
     instagramUrl: settings.instagram_url || "",
     youtubeUrl: settings.youtube_url || "",
-    globalFeatures: globalFeaturesList
+    globalFeatures: globalFeaturesList,
+    // IMAP settings
+    imapHost: settings.imap_host || "",
+    imapPort: settings.imap_port || "",
+    imapUsername: settings.imap_username || "",
+    imapPassword: settings.imap_password || "",
+    imapTls: settings.imap_tls !== null ? settings.imap_tls : true,
+    imapMailbox: settings.imap_mailbox || "INBOX",
   };
 }
