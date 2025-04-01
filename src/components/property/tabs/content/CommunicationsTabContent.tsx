@@ -10,6 +10,8 @@ import { formatDate } from "@/utils/dateUtils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSubmissions } from "../communications/hooks";
 import { EmailReplyModal } from "../communications/EmailReplyModal";
+import { SubmissionReplies } from "../communications/SubmissionReplies";
+import { useSubmissionReplies } from "../communications/hooks/useSubmissionReplies";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -32,6 +34,7 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
   const [activeTab, setActiveTab] = useState<string>("all");
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<ContactSubmission | null>(null);
+  const [expandedSubmission, setExpandedSubmission] = useState<string | null>(null);
 
   // Use the property ID to fetch submissions for this specific property only
   useEffect(() => {
@@ -110,6 +113,10 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
     fetchContactSubmissions(); // Refresh the data after sending an email
   };
 
+  const toggleExpandSubmission = (id: string) => {
+    setExpandedSubmission(expandedSubmission === id ? null : id);
+  };
+
   const filteredContacts = filterContactsByTab(contacts);
 
   return (
@@ -151,80 +158,97 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredContacts.map(contact => (
-            <Card key={contact.id} className={contact.is_read ? "" : "border-l-4 border-l-blue-500"}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center">
-                    <UserIcon className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <CardTitle className="text-lg">{contact.name}</CardTitle>
-                    <Badge className="ml-3" variant={
-                      contact.inquiry_type === 'viewing' ? "default" : 
-                      contact.inquiry_type === 'question' ? "secondary" : "outline"
-                    }>
-                      {contact.inquiry_type.charAt(0).toUpperCase() + contact.inquiry_type.slice(1)}
-                    </Badge>
+          {filteredContacts.map(contact => {
+            const isExpanded = expandedSubmission === contact.id;
+            
+            return (
+              <Card key={contact.id} className={contact.is_read ? "" : "border-l-4 border-l-blue-500"}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center">
+                      <UserIcon className="h-5 w-5 mr-2 text-muted-foreground" />
+                      <CardTitle className="text-lg">
+                        <button 
+                          onClick={() => toggleExpandSubmission(contact.id)}
+                          className="text-left hover:underline focus:outline-none"
+                        >
+                          {contact.name}
+                        </button>
+                      </CardTitle>
+                      <Badge className="ml-3" variant={
+                        contact.inquiry_type === 'viewing' ? "default" : 
+                        contact.inquiry_type === 'question' ? "secondary" : "outline"
+                      }>
+                        {contact.inquiry_type.charAt(0).toUpperCase() + contact.inquiry_type.slice(1)}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => markAsRead(contact.id, !contact.is_read)}
+                      >
+                        {contact.is_read ? (
+                          <XIcon className="h-4 w-4 mr-1" />
+                        ) : (
+                          <CheckIcon className="h-4 w-4 mr-1" />
+                        )}
+                        {contact.is_read ? 'Mark Unread' : 'Mark Read'}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => markAsRead(contact.id, !contact.is_read)}
-                    >
-                      {contact.is_read ? (
-                        <XIcon className="h-4 w-4 mr-1" />
-                      ) : (
-                        <CheckIcon className="h-4 w-4 mr-1" />
-                      )}
-                      {contact.is_read ? 'Mark Unread' : 'Mark Read'}
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="flex items-center">
-                    <MailIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">
-                      {contact.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center">
-                    <PhoneIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <a href={`tel:${contact.phone}`} className="text-blue-600 hover:underline">
-                      {contact.phone}
-                    </a>
-                  </div>
-                  <div className="flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {formatDate(contact.created_at)}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="mt-4 bg-muted p-4 rounded-md">
-                  <h4 className="font-semibold mb-2">Message:</h4>
-                  <p className="whitespace-pre-line">{contact.message}</p>
-                </div>
-                
-                <div className="mt-4 flex space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => handleOpenEmailModal(contact)}>
-                    <MailIcon className="h-4 w-4 mr-2" />
-                    Reply by Email
-                  </Button>
-                  {contact.phone && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={`tel:${contact.phone}`}>
-                        <PhoneIcon className="h-4 w-4 mr-2" />
-                        Call
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="flex items-center">
+                      <MailIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">
+                        {contact.email}
                       </a>
-                    </Button>
+                    </div>
+                    <div className="flex items-center">
+                      <PhoneIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <a href={`tel:${contact.phone}`} className="text-blue-600 hover:underline">
+                        {contact.phone}
+                      </a>
+                    </div>
+                    <div className="flex items-center">
+                      <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {formatDate(contact.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 bg-muted p-4 rounded-md">
+                    <h4 className="font-semibold mb-2">Message:</h4>
+                    <p className="whitespace-pre-line">{contact.message}</p>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div className="mt-4">
+                      <SubmissionRepliesSection submissionId={contact.id} />
+                    </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  
+                  <div className="mt-4 flex space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => handleOpenEmailModal(contact)}>
+                      <MailIcon className="h-4 w-4 mr-2" />
+                      Reply by Email
+                    </Button>
+                    {contact.phone && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={`tel:${contact.phone}`}>
+                          <PhoneIcon className="h-4 w-4 mr-2" />
+                          Call
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -240,6 +264,30 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
           submissionId={selectedContact.id}
         />
       )}
+    </div>
+  );
+}
+
+// New component to display replies for a submission
+function SubmissionRepliesSection({ submissionId }: { submissionId: string }) {
+  const { replies, isLoading, error } = useSubmissionReplies(submissionId);
+  
+  if (isLoading) {
+    return <div className="text-center py-2">Loading replies...</div>;
+  }
+  
+  if (error) {
+    return <div className="text-red-500 py-2">Error loading replies: {error}</div>;
+  }
+  
+  if (!replies || replies.length === 0) {
+    return <div className="text-muted-foreground py-2">No replies yet</div>;
+  }
+  
+  return (
+    <div className="space-y-2">
+      <h4 className="font-semibold">Replies:</h4>
+      <SubmissionReplies replies={replies} />
     </div>
   );
 }
