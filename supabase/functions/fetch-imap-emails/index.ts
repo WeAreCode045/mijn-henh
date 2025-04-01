@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { ImapFlow } from "https://esm.sh/imapflow@1.0.148";
 
 // CORS headers for the function
 const corsHeaders = {
@@ -51,20 +52,107 @@ serve(async (req) => {
 
     console.log(`Connecting to IMAP server: ${imapHost}:${imapPort} with user ${imapUsername}`);
     
-    // If this is just a test connection request, return a simplified response
-    if (testConnection) {
-      console.log("Testing IMAP connection only");
+    // Create IMAP client
+    const client = new ImapFlow({
+      host: imapHost,
+      port: parseInt(imapPort),
+      secure: imapTls,
+      auth: {
+        user: imapUsername,
+        pass: imapPassword
+      },
+      logger: false
+    });
+
+    try {
+      // Connect to the server
+      await client.connect();
       
-      // In a real implementation, you would attempt to connect to the IMAP server
-      // and return success/failure based on the connection result
+      // If this is just a test connection request, return a simplified response
+      if (testConnection) {
+        console.log("Testing IMAP connection only");
+        await client.logout();
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: "Connection test successful" 
+          }),
+          { 
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json" 
+            } 
+          }
+        );
+      }
+
+      // Select mailbox
+      const mailbox = await client.mailboxOpen(imapMailbox);
+      console.log(`Selected mailbox: ${mailbox.path}, contains ${mailbox.exists} messages`);
       
-      // For this mock implementation, we'll simulate a successful connection
-      // In production, you would actually test the connection here
+      const emails: EmailResponse[] = [];
+      
+      // Get emails (latest 20)
+      const messageCount = mailbox.exists;
+      const startIndex = Math.max(1, messageCount - 19); // Get up to the last 20 messages
+      
+      // Only fetch messages if there are any
+      if (messageCount > 0) {
+        // Fetch the last 20 messages
+        for await (const message of client.fetch(`${startIndex}:*`, {
+          envelope: true,
+          bodyStructure: true,
+          source: true,
+          flags: true
+        })) {
+          const isRead = message.flags.includes("\\Seen");
+          const from = message.envelope.from 
+            ? message.envelope.from.map(addr => `${addr.name || ''} <${addr.address}>`).join(", ")
+            : "Unknown";
+          const to = message.envelope.to 
+            ? message.envelope.to.map(addr => `${addr.name || ''} <${addr.address}>`).join(", ")
+            : "Unknown";
+          
+          // Parse message body for display
+          let body = "";
+          let textBody = "";
+          let htmlBody = "";
+          
+          // Try to extract body content if available
+          if (message.source) {
+            try {
+              // Get text content from message
+              const bodyParts = await extractBodyParts(message.source.toString());
+              textBody = bodyParts.text || "";
+              htmlBody = bodyParts.html || "";
+              
+              // Prefer HTML, fallback to text
+              body = htmlBody || textBody || "No message content";
+            } catch (bodyError) {
+              console.error("Error extracting body:", bodyError);
+              body = "Unable to extract message content";
+            }
+          }
+
+          emails.push({
+            id: message.uid.toString(),
+            subject: message.envelope.subject || "(No Subject)",
+            from,
+            to,
+            date: message.envelope.date?.toISOString() || new Date().toISOString(),
+            body,
+            textBody,
+            htmlBody,
+            isRead
+          });
+        }
+      }
+
+      // Disconnect from the server
+      await client.logout();
+      
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: "Connection test successful" 
-        }),
+        JSON.stringify({ emails }),
         { 
           headers: { 
             ...corsHeaders, 
@@ -72,47 +160,33 @@ serve(async (req) => {
           } 
         }
       );
-    }
-    
-    // Since we need to replace ImapFlow with a simpler solution, let's use the Deno.connect API directly
-    // This is a simplified implementation showing a successful response
-    // to prevent the UI from showing an error while you fix your IMAP settings
-    
-    // Note: For a production-ready implementation, you would need to use a proper
-    // IMAP library compatible with Deno or implement the IMAP protocol directly
-    
-    // For now, return a mock successful response
-    const emails: EmailResponse[] = [{
-      id: "mock-1",
-      subject: "IMAP Connectivity Test",
-      from: "System <system@example.com>",
-      to: imapUsername,
-      date: new Date().toISOString(),
-      body: `<div>
-        <p>This is a mock email to show that the edge function is working.</p>
-        <p>Please check your IMAP settings if you're not seeing your actual emails:</p>
-        <ul>
-          <li>Host: ${imapHost}</li>
-          <li>Port: ${imapPort}</li>
-          <li>Username: ${imapUsername}</li>
-          <li>TLS Enabled: ${imapTls ? "Yes" : "No"}</li>
-          <li>Mailbox: ${imapMailbox}</li>
-        </ul>
-        <p>If these settings are correct, there may be a connectivity issue or your IMAP provider may be blocking the connection.</p>
-      </div>`,
-      isRead: false
-    }];
-
-    // Return the mock email
-    return new Response(
-      JSON.stringify({ emails }),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "application/json" 
-        } 
+    } catch (imapError: any) {
+      // Handle IMAP-specific errors
+      console.error("IMAP connection error:", imapError);
+      
+      // Clean up if client was created
+      if (client && client.usable) {
+        await client.logout().catch(e => console.error("Error during logout:", e));
       }
-    );
+      
+      // If this was just a connection test, provide detailed error
+      if (testConnection) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: `Connection failed: ${imapError.message || "Unknown error"}` 
+          }),
+          { 
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json" 
+            } 
+          }
+        );
+      }
+      
+      throw imapError;
+    }
   } catch (error: any) {
     console.error("Error fetching emails:", error);
     
@@ -128,3 +202,23 @@ serve(async (req) => {
     );
   }
 });
+
+// Helper function to extract body parts from a message
+async function extractBodyParts(message: string): Promise<{ text: string | null; html: string | null }> {
+  // This is a simplified parser that attempts to extract text and HTML parts
+  const result = { text: null, html: null };
+  
+  // Look for text/plain content
+  const textMatch = message.match(/Content-Type: text\/plain[\s\S]*?\r\n\r\n([\s\S]*?)(?=\r\n--|\r\n\r\nContent-Type:|\r\n\r\n$)/i);
+  if (textMatch && textMatch[1]) {
+    result.text = textMatch[1].trim();
+  }
+  
+  // Look for text/html content
+  const htmlMatch = message.match(/Content-Type: text\/html[\s\S]*?\r\n\r\n([\s\S]*?)(?=\r\n--|\r\n\r\nContent-Type:|\r\n\r\n$)/i);
+  if (htmlMatch && htmlMatch[1]) {
+    result.html = htmlMatch[1].trim();
+  }
+  
+  return result;
+}

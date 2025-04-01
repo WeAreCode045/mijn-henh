@@ -52,9 +52,16 @@ export const useEmails = () => {
       if (data && data.emails) {
         console.log(`Fetched ${data.emails.length} emails`);
         setEmails(data.emails);
+        
+        // If we had a selected email, update it or clear it if it no longer exists
+        if (selectedEmail) {
+          const updatedSelectedEmail = data.emails.find(email => email.id === selectedEmail.id);
+          setSelectedEmail(updatedSelectedEmail || null);
+        }
       } else {
         console.log("No emails found");
         setEmails([]);
+        setSelectedEmail(null);
       }
     } catch (error: any) {
       console.error("Error fetching emails:", error);
