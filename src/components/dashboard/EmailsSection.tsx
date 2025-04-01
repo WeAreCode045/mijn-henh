@@ -107,7 +107,7 @@ export function EmailsSection() {
       const { data, error } = await supabase.functions.invoke("fetch-imap-emails", {
         body: {
           imapHost: settings.imapHost,
-          imapPort: settings.imapPort,
+          imapPort: settings.imapPort || "993",
           imapUsername: settings.imapUsername,
           imapPassword: settings.imapPassword,
           imapTls: settings.imapTls !== false,
@@ -116,15 +116,18 @@ export function EmailsSection() {
       });
 
       if (error) {
-        throw new Error(error.message);
+        console.error("Error fetching emails:", error);
+        throw new Error(error.message || "Failed to fetch emails");
       }
 
       if (data && data.emails) {
         setEmails(data.emails);
+      } else {
+        setEmails([]);
       }
     } catch (error: any) {
       console.error("Error fetching emails:", error);
-      setError(error.message || "Failed to fetch emails");
+      setError("Failed to fetch emails. Please check your IMAP settings.");
       toast({
         title: "Error",
         description: "Failed to fetch emails. Please check your IMAP settings.",
@@ -138,7 +141,7 @@ export function EmailsSection() {
   // Load emails when the component mounts
   useEffect(() => {
     fetchEmails();
-  }, [settings]);
+  }, [settings.imapHost, settings.imapUsername, settings.imapPassword]);
 
   return (
     <CardContent>

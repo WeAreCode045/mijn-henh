@@ -52,6 +52,7 @@ serve(async (req) => {
       password: imapPassword,
       tls: imapTls,
       autotls: "always",
+      debug: true, // Enable debug mode to see what's happening
     });
 
     try {
@@ -63,10 +64,35 @@ serve(async (req) => {
       await client.selectMailbox(imapMailbox);
       console.log(`Selected mailbox: ${imapMailbox}`);
 
+      // Get the total message count
+      const status = await client.status(imapMailbox, ["messages"]);
+      const totalMessages = status.messages || 0;
+      console.log(`Total messages in mailbox: ${totalMessages}`);
+
+      if (totalMessages === 0) {
+        await client.disconnect();
+        return new Response(
+          JSON.stringify({ emails: [] }),
+          { 
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json" 
+            } 
+          }
+        );
+      }
+
+      // Calculate the range for the most recent 20 emails
+      const startIndex = Math.max(1, totalMessages - 19);
+      const endIndex = totalMessages;
+      const range = `${startIndex}:${endIndex}`;
+      
+      console.log(`Fetching email range: ${range}`);
+
       // Fetch the most recent 20 emails
       const messages = await client.listMessages(
         imapMailbox,
-        "1:20",
+        range,
         ["uid", "flags", "envelope", "body[]"]
       );
       console.log(`Found ${messages.length} messages`);
@@ -120,11 +146,13 @@ serve(async (req) => {
       // Make sure to disconnect if there's an error
       try {
         await client.disconnect();
-      } catch {}
+      } catch (disconnectError) {
+        console.error("Error disconnecting:", disconnectError);
+      }
       
       throw error;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching emails:", error);
     
     return new Response(
