@@ -113,10 +113,11 @@ export function EmailReplyModal({
         
       if (replyError) throw replyError;
       
-      // Call edge function to send email
+      // Call edge function to send email with custom recipient
       const { error: sendError, data: sendData } = await supabase.functions.invoke('send-submission-reply', {
         body: {
-          replyId: replyData.id
+          replyId: replyData.id,
+          recipientEmail: to // Pass the custom recipient email
         }
       });
       

@@ -81,8 +81,9 @@ serve(async (req) => {
     }
 
     const requestBody = await req.json();
-    const { replyId } = requestBody;
+    const { replyId, recipientEmail } = requestBody;
     console.log('Processing reply:', replyId);
+    console.log('Custom recipient email:', recipientEmail);
 
     if (!replyId) {
       return new Response(
@@ -189,14 +190,19 @@ serve(async (req) => {
 
     const propertyTitle = property?.title || 'Property';
 
+    // Use custom recipient email if provided, otherwise fallback to submission email
+    const toEmail = recipientEmail || submission.email;
+
     // Make sure we have recipient email
-    if (!submission.email) {
-      throw new Error("Recipient email is missing from the submission");
+    if (!toEmail) {
+      throw new Error("Recipient email is missing");
     }
+
+    console.log(`Sending email to: ${toEmail} (${recipientEmail ? 'custom' : 'original submission'})`);
 
     // Prepare the email content
     const emailData: EmailData = {
-      to: submission.email,
+      to: toEmail,
       subject: `RE: Your inquiry about ${propertyTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

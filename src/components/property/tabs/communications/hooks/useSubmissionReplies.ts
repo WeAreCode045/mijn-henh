@@ -20,6 +20,8 @@ export function useSubmissionReplies(submissionId: string) {
       setError(null);
 
       try {
+        console.log(`Fetching replies for submission ID: ${submissionId}`);
+        
         // First get replies
         const { data, error } = await supabase
           .from('property_submission_replies')
@@ -28,6 +30,8 @@ export function useSubmissionReplies(submissionId: string) {
           .order('created_at', { ascending: true });
 
         if (error) throw error;
+        
+        console.log(`Found ${data?.length || 0} replies for submission ID: ${submissionId}`);
 
         // Process replies and fetch user info separately to avoid relation issues
         const formattedReplies = await Promise.all(data.map(async (reply) => {
