@@ -1,5 +1,5 @@
 
-import { SubmissionReply } from '@/types/submission';
+import { SubmissionReply } from '../types/submissionTypes';
 
 export const processReplyData = (reply: any): SubmissionReply => {
   // Safely extract user data, providing defaults for missing properties

@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircleIcon } from "lucide-react";
 import { useDeleteSubmissionItem } from "../communications/hooks/useDeleteSubmissionItem";
 import { TabFilter } from "../communications/components/TabFilter";
 import { SubmissionsList } from "../communications/components/SubmissionsList";
@@ -191,14 +189,14 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
                 onDeleteReply={handleDeleteReply}
               />
             ) : (
-              <Card>
-                <CardContent className="p-6 flex items-center justify-center h-[300px]">
-                  <div className="text-center text-muted-foreground">
-                    <MessageCircleIcon className="mx-auto h-10 w-10 mb-4" />
-                    <p>Select a submission to view details</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex items-center justify-center h-[300px] p-6 border rounded-md text-center text-muted-foreground">
+                <div>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 mb-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  <p>Select a submission to view details</p>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -228,7 +226,3 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
     </div>
   );
 }
-
-// Add the missing import
-import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircleIcon } from "lucide-react";
