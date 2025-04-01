@@ -55,9 +55,9 @@ export const useEmails = () => {
         console.log(`Fetched ${data.emails.length} emails`);
         setEmails(data.emails);
         
-        // Make sure isTroubleshooting is explicitly a boolean
-        const showTroubleshooting = data.emails.length === 1 && data.emails[0].id === "mock-1";
-        setIsTroubleshooting(Boolean(showTroubleshooting));
+        // Explicitly ensure isTroubleshooting is a boolean
+        const hasSingleMockEmail = data.emails.length === 1 && data.emails[0].id === "mock-1";
+        setIsTroubleshooting(hasSingleMockEmail);
       } else {
         console.log("No emails found");
         setEmails([]);
