@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircleIcon, MailIcon, PhoneIcon, UserIcon, CalendarIcon, CheckIcon, XIcon, ArrowLeftIcon } from "lucide-react";
+import { MessageCircleIcon, MailIcon, PhoneIcon, UserIcon, CalendarIcon, CheckIcon, XIcon, ArrowLeftIcon, Trash2Icon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils/dateUtils";
@@ -14,6 +14,18 @@ import { SubmissionReplies } from "../communications/SubmissionReplies";
 import { useSubmissionReplies } from "../communications/hooks/useSubmissionReplies";
 import { Submission } from "@/types/submission";
 import { Separator } from "@/components/ui/separator";
+import { useDeleteSubmissionItem } from "../communications/hooks/useDeleteSubmissionItem";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -37,6 +49,8 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<ContactSubmission | null>(null);
   const [expandedSubmission, setExpandedSubmission] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'submission' | 'reply' } | null>(null);
 
   // Use the property ID to fetch submissions for this specific property only
   useEffect(() => {
@@ -119,6 +133,32 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
     setSelectedContact(contacts.find(contact => contact.id === id) || null);
   };
 
+  const { deleteSubmission, deleteReply, isDeleting } = useDeleteSubmissionItem({
+    onSuccess: fetchContactSubmissions
+  });
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    if (itemToDelete.type === 'submission') {
+      await deleteSubmission(itemToDelete.id);
+      if (selectedContact?.id === itemToDelete.id) {
+        setSelectedContact(null);
+      }
+    } else {
+      await deleteReply(itemToDelete.id);
+    }
+
+    setDeleteDialogOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleDeleteSubmission = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent selecting the submission
+    setItemToDelete({ id, type: 'submission' });
+    setDeleteDialogOpen(true);
+  };
+
   const filteredContacts = filterContactsByTab(contacts);
 
   return (
@@ -180,6 +220,14 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
                         {contact.inquiry_type.charAt(0).toUpperCase() + contact.inquiry_type.slice(1)}
                       </Badge>
                     </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="text-red-500 hover:text-red-700 h-8 w-8"
+                      onClick={(e) => handleDeleteSubmission(e, contact.id)}
+                    >
+                      <Trash2Icon className="h-4 w-4" />
+                    </Button>
                   </div>
                   
                   <div className="mt-2">
@@ -222,6 +270,10 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
                 onReplyEmail={() => handleOpenEmailModal(selectedContact)}
                 onBack={() => setSelectedContact(null)}
                 onRefresh={fetchContactSubmissions}
+                onDeleteReply={(replyId) => {
+                  setItemToDelete({ id: replyId, type: 'reply' });
+                  setDeleteDialogOpen(true);
+                }}
               />
             ) : (
               <Card>
@@ -249,6 +301,30 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
           submissionId={selectedContact.id}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {itemToDelete?.type === 'submission' 
+                ? 'This will permanently delete this submission and all its replies.' 
+                : 'This will permanently delete this reply.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -259,10 +335,31 @@ interface SubmissionDetailViewProps {
   onReplyEmail: () => void;
   onBack: () => void;
   onRefresh: () => void;
+  onDeleteReply: (replyId: string) => void;
 }
 
-function SubmissionDetailView({ submission, onMarkAsRead, onReplyEmail, onBack, onRefresh }: SubmissionDetailViewProps) {
+function SubmissionDetailView({ 
+  submission, 
+  onMarkAsRead, 
+  onReplyEmail, 
+  onBack, 
+  onRefresh,
+  onDeleteReply 
+}: SubmissionDetailViewProps) {
   const { replies, isLoading, error } = useSubmissionReplies(submission.id);
+  const [expandedReplyIds, setExpandedReplyIds] = useState<Set<string>>(new Set());
+
+  const toggleReplyExpansion = (replyId: string) => {
+    setExpandedReplyIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(replyId)) {
+        newSet.delete(replyId);
+      } else {
+        newSet.add(replyId);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <Card>
@@ -332,7 +429,49 @@ function SubmissionDetailView({ submission, onMarkAsRead, onReplyEmail, onBack, 
           ) : error ? (
             <div className="text-red-500 py-2">Error loading replies: {error}</div>
           ) : replies && replies.length > 0 ? (
-            <SubmissionReplies replies={replies} />
+            <div className="space-y-4">
+              {replies.map(reply => (
+                <Collapsible 
+                  key={reply.id} 
+                  open={expandedReplyIds.has(reply.id)}
+                  onOpenChange={() => toggleReplyExpansion(reply.id)}
+                  className="border rounded-md bg-muted/50"
+                >
+                  <div className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">
+                        {reply.agent?.full_name || reply.user?.name || "Agent"}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(reply.created_at)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="text-red-500 h-8 w-8 hover:bg-red-100 hover:text-red-700"
+                        onClick={() => onDeleteReply(reply.id)}
+                      >
+                        <Trash2Icon className="h-4 w-4" />
+                      </Button>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 p-0 w-8">
+                          {expandedReplyIds.has(reply.id) ? (
+                            <ChevronUpIcon className="h-4 w-4" />
+                          ) : (
+                            <ChevronDownIcon className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                    </div>
+                  </div>
+                  <CollapsibleContent className="px-3 pb-3">
+                    <div className="whitespace-pre-line">{reply.message || reply.text}</div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
           ) : (
             <div className="text-muted-foreground py-2 italic">No replies yet</div>
           )}
