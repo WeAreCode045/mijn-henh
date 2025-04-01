@@ -10,7 +10,7 @@ export const useEmails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isTroubleshooting, setIsTroubleshooting] = useState(false); // Changed from string to boolean
+  const [isTroubleshooting, setIsTroubleshooting] = useState<boolean>(false);
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   
