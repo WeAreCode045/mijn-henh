@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { Client } from "https://deno.land/x/imap@v2.1.0/mod.ts";
+import { ImapFlow } from "https://esm.sh/imapflow@1.0.157";
 
 // CORS headers for the function
 const corsHeaders = {
@@ -45,14 +45,15 @@ serve(async (req) => {
     console.log(`Connecting to IMAP server: ${imapHost}:${imapPort} with user ${imapUsername}`);
     
     // Create IMAP client
-    const client = new Client({
+    const client = new ImapFlow({
       host: imapHost,
       port: parseInt(imapPort),
-      username: imapUsername,
-      password: imapPassword,
-      tls: imapTls,
-      autotls: "always",
-      debug: true, // Enable debug mode to see what's happening
+      secure: imapTls,
+      auth: {
+        user: imapUsername,
+        pass: imapPassword
+      },
+      logger: true
     });
 
     try {
@@ -61,73 +62,58 @@ serve(async (req) => {
       console.log("Connected to IMAP server");
 
       // Open the mailbox
-      await client.selectMailbox(imapMailbox);
-      console.log(`Selected mailbox: ${imapMailbox}`);
+      const mailbox = await client.mailboxOpen(imapMailbox);
+      console.log(`Selected mailbox: ${imapMailbox}, message count: ${mailbox.exists}`);
 
-      // Get the total message count
-      const status = await client.status(imapMailbox, ["messages"]);
-      const totalMessages = status.messages || 0;
-      console.log(`Total messages in mailbox: ${totalMessages}`);
-
-      if (totalMessages === 0) {
-        await client.disconnect();
-        return new Response(
-          JSON.stringify({ emails: [] }),
-          { 
-            headers: { 
-              ...corsHeaders, 
-              "Content-Type": "application/json" 
-            } 
-          }
-        );
-      }
-
-      // Calculate the range for the most recent 20 emails
-      const startIndex = Math.max(1, totalMessages - 19);
-      const endIndex = totalMessages;
-      const range = `${startIndex}:${endIndex}`;
+      const emails: EmailResponse[] = [];
       
-      console.log(`Fetching email range: ${range}`);
-
-      // Fetch the most recent 20 emails
-      const messages = await client.listMessages(
-        imapMailbox,
-        range,
-        ["uid", "flags", "envelope", "body[]"]
-      );
-      console.log(`Found ${messages.length} messages`);
-
-      // Transform messages into a more usable format
-      const emails: EmailResponse[] = messages.map(message => {
-        // Check if the email has been read
-        const isRead = message.flags && message.flags.includes("\\Seen");
+      if (mailbox.exists > 0) {
+        // Calculate the range for the most recent 20 emails
+        const startSeq = Math.max(1, mailbox.exists - 19);
+        const endSeq = mailbox.exists;
         
-        // Extract envelope data
-        const envelope = message.envelope;
-        const from = envelope.from?.[0] ? 
-          `${envelope.from[0].name || ''} <${envelope.from[0].mailbox}@${envelope.from[0].host}>` : 
-          "Unknown Sender";
+        console.log(`Fetching emails from sequence range: ${startSeq}:${endSeq}`);
+        
+        // Fetch the most recent 20 emails
+        for await (const message of client.fetch(`${startSeq}:${endSeq}`, { 
+          uid: true, 
+          flags: true, 
+          envelope: true, 
+          bodyStructure: true, 
+          source: true 
+        })) {
+          console.log(`Processing message ${message.seq} with UID ${message.uid}`);
           
-        const to = envelope.to?.[0] ? 
-          `${envelope.to[0].name || ''} <${envelope.to[0].mailbox}@${envelope.to[0].host}>` : 
-          "Unknown Recipient";
+          // Extract envelope data
+          const envelope = message.envelope;
+          const isRead = message.flags.includes("\\Seen");
+          
+          const from = envelope.from?.[0] ? 
+            `${envelope.from[0].name || ''} <${envelope.from[0].address}>` : 
+            "Unknown Sender";
+            
+          const to = envelope.to?.[0] ? 
+            `${envelope.to[0].name || ''} <${envelope.to[0].address}>` : 
+            "Unknown Recipient";
 
-        // Get the body content (may be HTML or plain text)
-        const body = message["body[]"];
-        
-        return {
-          id: message.uid || String(Math.random()),
-          subject: envelope.subject || "(No Subject)",
-          from,
-          to,
-          date: new Date(envelope.date || Date.now()).toISOString(),
-          body,
-          isRead
-        };
-      });
-
+          // Get the raw source of the message
+          const source = message.source.toString();
+          
+          // Create the email response object
+          emails.push({
+            id: message.uid.toString(),
+            subject: envelope.subject || "(No Subject)",
+            from,
+            to,
+            date: new Date(envelope.date || Date.now()).toISOString(),
+            body: source,
+            isRead
+          });
+        }
+      }
+      
       // Close the connection
-      await client.disconnect();
+      await client.logout();
       console.log("Disconnected from IMAP server");
 
       // Return the emails
@@ -145,7 +131,7 @@ serve(async (req) => {
       
       // Make sure to disconnect if there's an error
       try {
-        await client.disconnect();
+        await client.logout();
       } catch (disconnectError) {
         console.error("Error disconnecting:", disconnectError);
       }

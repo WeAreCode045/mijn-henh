@@ -103,6 +103,13 @@ export function EmailsSection() {
     try {
       setIsLoading(true);
       setError(null);
+      
+      console.log("Fetching emails with settings:", {
+        host: settings.imapHost,
+        port: settings.imapPort || "993",
+        username: settings.imapUsername,
+        // password intentionally omitted
+      });
 
       const { data, error } = await supabase.functions.invoke("fetch-imap-emails", {
         body: {
@@ -121,13 +128,15 @@ export function EmailsSection() {
       }
 
       if (data && data.emails) {
+        console.log(`Fetched ${data.emails.length} emails`);
         setEmails(data.emails);
       } else {
+        console.log("No emails found");
         setEmails([]);
       }
     } catch (error: any) {
       console.error("Error fetching emails:", error);
-      setError("Failed to fetch emails. Please check your IMAP settings.");
+      setError("Failed to fetch emails. Please check your IMAP settings and ensure the Edge Function is deployed correctly.");
       toast({
         title: "Error",
         description: "Failed to fetch emails. Please check your IMAP settings.",
@@ -138,9 +147,14 @@ export function EmailsSection() {
     }
   };
 
-  // Load emails when the component mounts
+  // Load emails when the component mounts and when IMAP settings change
   useEffect(() => {
-    fetchEmails();
+    if (settings.imapHost && settings.imapUsername && settings.imapPassword) {
+      fetchEmails();
+    } else {
+      setError("IMAP settings are not configured. Please configure IMAP settings in the Settings page.");
+      setIsLoading(false);
+    }
   }, [settings.imapHost, settings.imapUsername, settings.imapPassword]);
 
   return (
@@ -154,7 +168,7 @@ export function EmailsSection() {
           variant="outline" 
           size="sm"
           onClick={fetchEmails}
-          disabled={isLoading}
+          disabled={isLoading || !settings.imapHost || !settings.imapUsername || !settings.imapPassword}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
           Refresh
@@ -162,11 +176,16 @@ export function EmailsSection() {
       </div>
 
       {error ? (
-        <div className="flex items-center justify-center p-6 border rounded-md text-center text-muted-foreground">
-          <div>
-            <AlertCircle className="mx-auto h-10 w-10 mb-4 text-destructive" />
-            <p>{error}</p>
-          </div>
+        <div className="flex flex-col items-center justify-center p-6 border rounded-md text-center">
+          <AlertCircle className="mx-auto h-10 w-10 mb-4 text-destructive" />
+          <p className="mb-4">{error}</p>
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = "/settings"}
+          >
+            Go to Settings
+          </Button>
         </div>
       ) : isLoading ? (
         <div className="h-64 flex items-center justify-center">
