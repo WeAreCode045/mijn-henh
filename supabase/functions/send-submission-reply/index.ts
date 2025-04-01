@@ -217,7 +217,7 @@ serve(async (req) => {
       from: fromEmail
     });
 
-    // Call the send-email-with-smtp edge function
+    // Call the send-email-with-smtp edge function with the explicitly structured message and settings
     const emailResponse = await supabaseClient.functions.invoke('send-email-with-smtp', {
       body: JSON.stringify({
         message: emailData,
