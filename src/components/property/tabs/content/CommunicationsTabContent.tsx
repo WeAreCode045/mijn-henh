@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { PropertyData } from "@/types/property";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircleIcon, MailIcon, PhoneIcon, UserIcon, CalendarIcon, CheckIcon, XIcon } from "lucide-react";
+import { MessageCircleIcon, MailIcon, PhoneIcon, UserIcon, CalendarIcon, CheckIcon, XIcon, ArrowLeftIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/utils/dateUtils";
@@ -12,6 +12,8 @@ import { useSubmissions } from "../communications/hooks";
 import { EmailReplyModal } from "../communications/EmailReplyModal";
 import { SubmissionReplies } from "../communications/SubmissionReplies";
 import { useSubmissionReplies } from "../communications/hooks/useSubmissionReplies";
+import { Submission } from "@/types/submission";
+import { Separator } from "@/components/ui/separator";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -113,8 +115,8 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
     fetchContactSubmissions(); // Refresh the data after sending an email
   };
 
-  const toggleExpandSubmission = (id: string) => {
-    setExpandedSubmission(expandedSubmission === id ? null : id);
+  const handleSelectSubmission = (id: string) => {
+    setSelectedContact(contacts.find(contact => contact.id === id) || null);
   };
 
   const filteredContacts = filterContactsByTab(contacts);
@@ -157,24 +159,20 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {filteredContacts.map(contact => {
-            const isExpanded = expandedSubmission === contact.id;
-            
-            return (
-              <Card key={contact.id} className={contact.is_read ? "" : "border-l-4 border-l-blue-500"}>
-                <CardHeader className="pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Submissions List - Left Side */}
+          <div className="md:col-span-1 space-y-4">
+            {filteredContacts.map(contact => (
+              <Card 
+                key={contact.id} 
+                className={`${contact.is_read ? "" : "border-l-4 border-l-blue-500"} 
+                           ${selectedContact?.id === contact.id ? "ring-2 ring-primary" : ""}`}
+              >
+                <CardContent className="p-4 cursor-pointer" onClick={() => handleSelectSubmission(contact.id)}>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center">
                       <UserIcon className="h-5 w-5 mr-2 text-muted-foreground" />
-                      <CardTitle className="text-lg">
-                        <button 
-                          onClick={() => toggleExpandSubmission(contact.id)}
-                          className="text-left hover:underline focus:outline-none"
-                        >
-                          {contact.name}
-                        </button>
-                      </CardTitle>
+                      <h3 className="text-lg font-medium">{contact.name}</h3>
                       <Badge className="ml-3" variant={
                         contact.inquiry_type === 'viewing' ? "default" : 
                         contact.inquiry_type === 'question' ? "secondary" : "outline"
@@ -182,73 +180,60 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
                         {contact.inquiry_type.charAt(0).toUpperCase() + contact.inquiry_type.slice(1)}
                       </Badge>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => markAsRead(contact.id, !contact.is_read)}
-                      >
-                        {contact.is_read ? (
-                          <XIcon className="h-4 w-4 mr-1" />
-                        ) : (
-                          <CheckIcon className="h-4 w-4 mr-1" />
-                        )}
-                        {contact.is_read ? 'Mark Unread' : 'Mark Read'}
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center">
-                      <MailIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">
-                        {contact.email}
-                      </a>
-                    </div>
-                    <div className="flex items-center">
-                      <PhoneIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <a href={`tel:${contact.phone}`} className="text-blue-600 hover:underline">
-                        {contact.phone}
-                      </a>
-                    </div>
-                    <div className="flex items-center">
-                      <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        {formatDate(contact.created_at)}
-                      </span>
-                    </div>
                   </div>
                   
-                  <div className="mt-4 bg-muted p-4 rounded-md">
-                    <h4 className="font-semibold mb-2">Message:</h4>
-                    <p className="whitespace-pre-line">{contact.message}</p>
+                  <div className="mt-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2">{contact.message}</p>
                   </div>
                   
-                  {isExpanded && (
-                    <div className="mt-4">
-                      <SubmissionRepliesSection submissionId={contact.id} />
-                    </div>
-                  )}
-                  
-                  <div className="mt-4 flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => handleOpenEmailModal(contact)}>
-                      <MailIcon className="h-4 w-4 mr-2" />
-                      Reply by Email
+                  <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center">
+                      <CalendarIcon className="h-3 w-3 mr-1" />
+                      {formatDate(contact.created_at)}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation(); 
+                        markAsRead(contact.id, !contact.is_read);
+                      }}
+                      className="h-6 text-xs"
+                    >
+                      {contact.is_read ? (
+                        <XIcon className="h-3 w-3 mr-1" />
+                      ) : (
+                        <CheckIcon className="h-3 w-3 mr-1" />
+                      )}
+                      {contact.is_read ? 'Unread' : 'Read'}
                     </Button>
-                    {contact.phone && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={`tel:${contact.phone}`}>
-                          <PhoneIcon className="h-4 w-4 mr-2" />
-                          Call
-                        </a>
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
+            ))}
+          </div>
+          
+          {/* Submission Detail - Right Side */}
+          <div className="md:col-span-2">
+            {selectedContact ? (
+              <SubmissionDetailView 
+                submission={selectedContact} 
+                onMarkAsRead={(isRead) => markAsRead(selectedContact.id, isRead)}
+                onReplyEmail={() => handleOpenEmailModal(selectedContact)}
+                onBack={() => setSelectedContact(null)}
+                onRefresh={fetchContactSubmissions}
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-6 flex items-center justify-center h-[300px]">
+                  <div className="text-center text-muted-foreground">
+                    <MessageCircleIcon className="mx-auto h-10 w-10 mb-4" />
+                    <p>Select a submission to view details</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )}
 
@@ -268,26 +253,109 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
   );
 }
 
-// New component to display replies for a submission
-function SubmissionRepliesSection({ submissionId }: { submissionId: string }) {
-  const { replies, isLoading, error } = useSubmissionReplies(submissionId);
-  
-  if (isLoading) {
-    return <div className="text-center py-2">Loading replies...</div>;
-  }
-  
-  if (error) {
-    return <div className="text-red-500 py-2">Error loading replies: {error}</div>;
-  }
-  
-  if (!replies || replies.length === 0) {
-    return <div className="text-muted-foreground py-2">No replies yet</div>;
-  }
-  
+interface SubmissionDetailViewProps {
+  submission: ContactSubmission;
+  onMarkAsRead: (isRead: boolean) => void;
+  onReplyEmail: () => void;
+  onBack: () => void;
+  onRefresh: () => void;
+}
+
+function SubmissionDetailView({ submission, onMarkAsRead, onReplyEmail, onBack, onRefresh }: SubmissionDetailViewProps) {
+  const { replies, isLoading, error } = useSubmissionReplies(submission.id);
+
   return (
-    <div className="space-y-2">
-      <h4 className="font-semibold">Replies:</h4>
-      <SubmissionReplies replies={replies} />
-    </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
+              <ArrowLeftIcon className="h-4 w-4" />
+            </Button>
+            <CardTitle>{submission.name}</CardTitle>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onMarkAsRead(!submission.is_read)}
+            >
+              {submission.is_read ? (
+                <>
+                  <XIcon className="h-4 w-4 mr-1" />
+                  Mark as Unread
+                </>
+              ) : (
+                <>
+                  <CheckIcon className="h-4 w-4 mr-1" />
+                  Mark as Read
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Contact Information */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="flex items-center">
+            <MailIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+            <a href={`mailto:${submission.email}`} className="text-blue-600 hover:underline">
+              {submission.email}
+            </a>
+          </div>
+          <div className="flex items-center">
+            <PhoneIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+            <a href={`tel:${submission.phone}`} className="text-blue-600 hover:underline">
+              {submission.phone}
+            </a>
+          </div>
+          <div className="flex items-center">
+            <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              {formatDate(submission.created_at)}
+            </span>
+          </div>
+        </div>
+        
+        {/* Original Message */}
+        <div className="mt-4 bg-muted p-4 rounded-md">
+          <h4 className="font-semibold mb-2">Message:</h4>
+          <p className="whitespace-pre-line">{submission.message}</p>
+        </div>
+        
+        {/* Replies Section */}
+        <div className="mt-6">
+          <h4 className="font-semibold mb-3">Replies</h4>
+          {isLoading ? (
+            <div className="text-center py-4">Loading replies...</div>
+          ) : error ? (
+            <div className="text-red-500 py-2">Error loading replies: {error}</div>
+          ) : replies && replies.length > 0 ? (
+            <SubmissionReplies replies={replies} />
+          ) : (
+            <div className="text-muted-foreground py-2 italic">No replies yet</div>
+          )}
+        </div>
+        
+        <Separator className="my-6" />
+        
+        {/* Action Buttons */}
+        <div className="flex space-x-2">
+          <Button onClick={onReplyEmail}>
+            <MailIcon className="h-4 w-4 mr-2" />
+            Reply by Email
+          </Button>
+          {submission.phone && (
+            <Button variant="outline" asChild>
+              <a href={`tel:${submission.phone}`}>
+                <PhoneIcon className="h-4 w-4 mr-2" />
+                Call
+              </a>
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
