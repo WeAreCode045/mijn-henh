@@ -39,22 +39,22 @@ export function EmailSection({
           <div className="space-y-4 mt-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="smtp_host">SMTP Host</Label>
+                <Label htmlFor="smtpHost">SMTP Host</Label>
                 <Input
-                  id="smtp_host"
-                  name="smtp_host"
+                  id="smtpHost"
+                  name="smtpHost"
                   placeholder="smtp.example.com"
-                  value={settings.smtp_host || ""}
+                  value={settings.smtpHost || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="smtp_port">SMTP Port</Label>
+                <Label htmlFor="smtpPort">SMTP Port</Label>
                 <Input
-                  id="smtp_port"
-                  name="smtp_port"
+                  id="smtpPort"
+                  name="smtpPort"
                   placeholder="587"
-                  value={settings.smtp_port || ""}
+                  value={settings.smtpPort || ""}
                   onChange={onChange}
                 />
               </div>
@@ -62,23 +62,23 @@ export function EmailSection({
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="smtp_username">SMTP Username</Label>
+                <Label htmlFor="smtpUsername">SMTP Username</Label>
                 <Input
-                  id="smtp_username"
-                  name="smtp_username"
+                  id="smtpUsername"
+                  name="smtpUsername"
                   placeholder="user@example.com"
-                  value={settings.smtp_username || ""}
+                  value={settings.smtpUsername || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="smtp_password">SMTP Password</Label>
+                <Label htmlFor="smtpPassword">SMTP Password</Label>
                 <Input
-                  id="smtp_password"
-                  name="smtp_password"
+                  id="smtpPassword"
+                  name="smtpPassword"
                   type="password"
                   placeholder="••••••••"
-                  value={settings.smtp_password || ""}
+                  value={settings.smtpPassword || ""}
                   onChange={onChange}
                 />
               </div>
@@ -86,22 +86,22 @@ export function EmailSection({
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="smtp_from_email">From Email</Label>
+                <Label htmlFor="smtpFromEmail">From Email</Label>
                 <Input
-                  id="smtp_from_email"
-                  name="smtp_from_email"
+                  id="smtpFromEmail"
+                  name="smtpFromEmail"
                   placeholder="noreply@example.com"
-                  value={settings.smtp_from_email || ""}
+                  value={settings.smtpFromEmail || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="smtp_from_name">From Name</Label>
+                <Label htmlFor="smtpFromName">From Name</Label>
                 <Input
-                  id="smtp_from_name"
-                  name="smtp_from_name"
+                  id="smtpFromName"
+                  name="smtpFromName"
                   placeholder="Your Company"
-                  value={settings.smtp_from_name || ""}
+                  value={settings.smtpFromName || ""}
                   onChange={onChange}
                 />
               </div>
@@ -109,11 +109,11 @@ export function EmailSection({
 
             <div className="flex items-center space-x-2">
               <Switch
-                id="smtp_secure"
-                checked={settings.smtp_secure || false}
-                onCheckedChange={onSwitchChange("smtp_secure")}
+                id="smtpSecure"
+                checked={settings.smtpSecure || false}
+                onCheckedChange={onSwitchChange("smtpSecure")}
               />
-              <Label htmlFor="smtp_secure">Use SSL/TLS</Label>
+              <Label htmlFor="smtpSecure">Use SSL/TLS</Label>
             </div>
           </div>
         </TabsContent>
@@ -122,22 +122,22 @@ export function EmailSection({
           <div className="space-y-4 mt-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="imap_host">IMAP Host</Label>
+                <Label htmlFor="imapHost">IMAP Host</Label>
                 <Input
-                  id="imap_host"
-                  name="imap_host"
+                  id="imapHost"
+                  name="imapHost"
                   placeholder="imap.example.com"
-                  value={settings.imap_host || ""}
+                  value={settings.imapHost || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="imap_port">IMAP Port</Label>
+                <Label htmlFor="imapPort">IMAP Port</Label>
                 <Input
-                  id="imap_port"
-                  name="imap_port"
+                  id="imapPort"
+                  name="imapPort"
                   placeholder="993"
-                  value={settings.imap_port || ""}
+                  value={settings.imapPort || ""}
                   onChange={onChange}
                 />
               </div>
@@ -145,23 +145,23 @@ export function EmailSection({
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="imap_username">IMAP Username</Label>
+                <Label htmlFor="imapUsername">IMAP Username</Label>
                 <Input
-                  id="imap_username"
-                  name="imap_username"
+                  id="imapUsername"
+                  name="imapUsername"
                   placeholder="user@example.com"
-                  value={settings.imap_username || ""}
+                  value={settings.imapUsername || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="imap_password">IMAP Password</Label>
+                <Label htmlFor="imapPassword">IMAP Password</Label>
                 <Input
-                  id="imap_password"
-                  name="imap_password"
+                  id="imapPassword"
+                  name="imapPassword"
                   type="password"
                   placeholder="••••••••"
-                  value={settings.imap_password || ""}
+                  value={settings.imapPassword || ""}
                   onChange={onChange}
                 />
               </div>
@@ -169,22 +169,22 @@ export function EmailSection({
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="imap_mailbox">IMAP Mailbox</Label>
+                <Label htmlFor="imapMailbox">IMAP Mailbox</Label>
                 <Input
-                  id="imap_mailbox"
-                  name="imap_mailbox"
+                  id="imapMailbox"
+                  name="imapMailbox"
                   placeholder="INBOX"
-                  value={settings.imap_mailbox || ""}
+                  value={settings.imapMailbox || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="flex items-center space-x-2 pt-8">
                 <Switch
-                  id="imap_tls"
-                  checked={settings.imap_tls !== false}
-                  onCheckedChange={onSwitchChange("imap_tls")}
+                  id="imapTls"
+                  checked={settings.imapTls !== false}
+                  onCheckedChange={onSwitchChange("imapTls")}
                 />
-                <Label htmlFor="imap_tls">Use SSL/TLS</Label>
+                <Label htmlFor="imapTls">Use SSL/TLS</Label>
               </div>
             </div>
           </div>
@@ -202,36 +202,36 @@ export function EmailSection({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="nylas_client_id">Nylas Client ID</Label>
+              <Label htmlFor="nylasClientId">Nylas Client ID</Label>
               <Input
-                id="nylas_client_id"
-                name="nylas_client_id"
+                id="nylasClientId"
+                name="nylasClientId"
                 placeholder="Nylas Client ID"
-                value={settings.nylas_client_id || ""}
+                value={settings.nylasClientId || ""}
                 onChange={onChange}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="nylas_client_secret">Nylas Client Secret</Label>
+              <Label htmlFor="nylasClientSecret">Nylas Client Secret</Label>
               <Input
-                id="nylas_client_secret"
-                name="nylas_client_secret"
+                id="nylasClientSecret"
+                name="nylasClientSecret"
                 type="password"
                 placeholder="Nylas Client Secret"
-                value={settings.nylas_client_secret || ""}
+                value={settings.nylasClientSecret || ""}
                 onChange={onChange}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="nylas_access_token">Nylas Access Token</Label>
+              <Label htmlFor="nylasAccessToken">Nylas Access Token</Label>
               <Input
-                id="nylas_access_token"
-                name="nylas_access_token"
+                id="nylasAccessToken"
+                name="nylasAccessToken"
                 type="password"
                 placeholder="Nylas Access Token"
-                value={settings.nylas_access_token || ""}
+                value={settings.nylasAccessToken || ""}
                 onChange={onChange}
               />
               <p className="text-xs text-muted-foreground mt-1">
@@ -245,23 +245,23 @@ export function EmailSection({
           <div className="space-y-4 mt-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="mailjet_api_key">Mailjet API Key</Label>
+                <Label htmlFor="mailjetApiKey">Mailjet API Key</Label>
                 <Input
-                  id="mailjet_api_key"
-                  name="mailjet_api_key"
+                  id="mailjetApiKey"
+                  name="mailjetApiKey"
                   placeholder="Mailjet API Key"
-                  value={settings.mailjet_api_key || ""}
+                  value={settings.mailjetApiKey || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="mailjet_api_secret">Mailjet API Secret</Label>
+                <Label htmlFor="mailjetApiSecret">Mailjet API Secret</Label>
                 <Input
-                  id="mailjet_api_secret"
-                  name="mailjet_api_secret"
+                  id="mailjetApiSecret"
+                  name="mailjetApiSecret"
                   type="password"
                   placeholder="Mailjet API Secret"
-                  value={settings.mailjet_api_secret || ""}
+                  value={settings.mailjetApiSecret || ""}
                   onChange={onChange}
                 />
               </div>
@@ -269,22 +269,22 @@ export function EmailSection({
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="mailjet_from_email">From Email</Label>
+                <Label htmlFor="mailjetFromEmail">From Email</Label>
                 <Input
-                  id="mailjet_from_email"
-                  name="mailjet_from_email"
+                  id="mailjetFromEmail"
+                  name="mailjetFromEmail"
                   placeholder="noreply@example.com"
-                  value={settings.mailjet_from_email || ""}
+                  value={settings.mailjetFromEmail || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="mailjet_from_name">From Name</Label>
+                <Label htmlFor="mailjetFromName">From Name</Label>
                 <Input
-                  id="mailjet_from_name"
-                  name="mailjet_from_name"
+                  id="mailjetFromName"
+                  name="mailjetFromName"
                   placeholder="Your Company"
-                  value={settings.mailjet_from_name || ""}
+                  value={settings.mailjetFromName || ""}
                   onChange={onChange}
                 />
               </div>

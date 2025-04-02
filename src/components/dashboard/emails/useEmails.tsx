@@ -13,8 +13,8 @@ export const useEmails = () => {
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   
-  const hasNylasConfig = Boolean(settings.nylas_access_token || settings.nylasAccessToken);
-  const hasImapConfig = Boolean(settings.imap_host || settings.imapHost);
+  const hasNylasConfig = Boolean(settings.nylasAccessToken);
+  const hasImapConfig = Boolean(settings.imapHost);
 
   const fetchEmails = async () => {
     if (!hasNylasConfig) {
@@ -31,7 +31,7 @@ export const useEmails = () => {
 
       const { data, error } = await supabase.functions.invoke("fetch-nylas-emails", {
         body: {
-          nylasAccessToken: settings.nylas_access_token || settings.nylasAccessToken,
+          nylasAccessToken: settings.nylasAccessToken,
           limit: 20
         }
       });
@@ -89,7 +89,7 @@ export const useEmails = () => {
       setError("Nylas API is not configured. Please configure Nylas API in the Settings page.");
       setIsLoading(false);
     }
-  }, [settings.nylas_access_token, settings.nylasAccessToken]);
+  }, [settings.nylasAccessToken]);
 
   return {
     emails,
