@@ -37,7 +37,7 @@ serve(async (req) => {
     // Validate required parameters
     if (!nylasAccessToken) {
       return new Response(
-        JSON.stringify({ error: "Missing Nylas access token" }),
+        JSON.stringify({ error: "Missing Nylas access token or grant ID" }),
         { 
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -45,7 +45,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Connecting to Nylas API with access token`);
+    console.log(`Connecting to Nylas API with access token/grant ID`);
     
     // Fetch emails from Nylas API
     const response = await fetch(`https://api.nylas.com/messages?limit=${limit}`, {

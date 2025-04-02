@@ -79,6 +79,10 @@ export const useAgencySubmit = ({
           imap_mailbox: settings.imapMailbox || "INBOX",
           // OpenAI API key
           openai_api_key: settings.openaiApiKey,
+          // Nylas settings with new field names
+          nylas_client_id: settings.nylasClientId,
+          nylas_client_secret: settings.nylasApiKey || settings.nylasClientSecret,
+          nylas_access_token: settings.nylasGrantId || settings.nylasAccessToken,
           // Make sure we're sending a properly formatted array
           global_features: featureDescriptions
         })
@@ -166,6 +170,13 @@ export const useAgencySubmit = ({
           imapMailbox: latestSettings.imap_mailbox,
           // OpenAI API key
           openaiApiKey: latestSettings.openai_api_key,
+          // Nylas settings with new field names
+          nylasClientId: latestSettings.nylas_client_id,
+          nylasApiKey: latestSettings.nylas_client_secret,
+          nylasGrantId: latestSettings.nylas_access_token,
+          // For backwards compatibility
+          nylasClientSecret: latestSettings.nylas_client_secret,
+          nylasAccessToken: latestSettings.nylas_access_token,
           globalFeatures: globalFeaturesList
         };
         

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -232,7 +231,7 @@ export function MailTab({
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="nylasClientId">Nylas Client ID</Label>
+                    <Label htmlFor="nylasClientId">Client ID</Label>
                     <Input
                       id="nylasClientId"
                       name="nylasClientId"
@@ -243,29 +242,29 @@ export function MailTab({
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="nylasClientSecret">Nylas Client Secret</Label>
+                    <Label htmlFor="nylasApiKey">API Key</Label>
                     <Input
-                      id="nylasClientSecret"
-                      name="nylasClientSecret"
+                      id="nylasApiKey"
+                      name="nylasApiKey"
                       type="password"
-                      placeholder="Nylas Client Secret"
-                      value={settings.nylasClientSecret || ""}
+                      placeholder="Nylas API Key"
+                      value={settings.nylasApiKey || settings.nylasClientSecret || ""}
                       onChange={onChange}
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="nylasAccessToken">Nylas Access Token</Label>
+                    <Label htmlFor="nylasGrantId">Grant ID</Label>
                     <Input
-                      id="nylasAccessToken"
-                      name="nylasAccessToken"
+                      id="nylasGrantId"
+                      name="nylasGrantId"
                       type="password"
-                      placeholder="Nylas Access Token"
-                      value={settings.nylasAccessToken || ""}
+                      placeholder="Nylas Grant ID"
+                      value={settings.nylasGrantId || settings.nylasAccessToken || ""}
                       onChange={onChange}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      You can get an access token by authenticating your user through Nylas' hosted authentication flow.
+                      You can get a Grant ID by authenticating your user through Nylas' hosted authentication flow.
                     </p>
                   </div>
                 </div>
