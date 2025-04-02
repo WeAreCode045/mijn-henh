@@ -34,6 +34,13 @@ export const useAgencySubmit = ({
       // Convert globalFeatures to string array for database
       const featureDescriptions = globalFeatures.map(f => f.description);
       
+      // Log the values before sending to the database
+      console.log("Saving Nylas settings:", {
+        clientId: settings.nylasClientId,
+        apiKey: settings.nylasApiKey,
+        grantId: settings.nylasGrantId,
+      });
+      
       const { data, error } = await supabase
         .from('agency_settings')
         .update({
@@ -79,7 +86,7 @@ export const useAgencySubmit = ({
           imap_mailbox: settings.imapMailbox || "INBOX",
           // OpenAI API key
           openai_api_key: settings.openaiApiKey,
-          // Nylas settings with new field names
+          // Nylas settings with updated field names that match database columns
           nylas_client_id: settings.nylasClientId,
           nylas_client_secret: settings.nylasApiKey || settings.nylasClientSecret,
           nylas_access_token: settings.nylasGrantId || settings.nylasAccessToken,
@@ -89,6 +96,7 @@ export const useAgencySubmit = ({
         .eq('id', settings.id);
 
       if (error) {
+        console.error("Error updating settings:", error);
         throw error;
       }
 
@@ -170,7 +178,7 @@ export const useAgencySubmit = ({
           imapMailbox: latestSettings.imap_mailbox,
           // OpenAI API key
           openaiApiKey: latestSettings.openai_api_key,
-          // Nylas settings with new field names
+          // Nylas settings with new field names that match UI
           nylasClientId: latestSettings.nylas_client_id,
           nylasApiKey: latestSettings.nylas_client_secret,
           nylasGrantId: latestSettings.nylas_access_token,
