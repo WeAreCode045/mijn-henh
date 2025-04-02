@@ -56,7 +56,12 @@ export function EmailsSection() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="overflow-auto pr-1">
-              <EmailList emails={emails} isLoading={isLoading} selectedEmail={selectedEmail} onSelectEmail={setSelectedEmail} />
+              <EmailList 
+                emails={emails} 
+                isLoading={isLoading} 
+                selectedEmail={selectedEmail} 
+                setSelectedEmail={setSelectedEmail} 
+              />
             </div>
             <div>
               <EmailDetail email={selectedEmail} />

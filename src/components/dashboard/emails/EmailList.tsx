@@ -1,41 +1,37 @@
 
 import { Email, EmailItem } from "./EmailItem";
-import { Inbox } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dispatch, SetStateAction } from "react";
 
-interface EmailListProps {
+export interface EmailListProps {
   emails: Email[];
-  selectedEmail: Email | null;
-  setSelectedEmail: (email: Email) => void;
   isLoading: boolean;
+  selectedEmail: Email | null;
+  setSelectedEmail: Dispatch<SetStateAction<Email | null>>;
 }
 
-export const EmailList = ({ emails, selectedEmail, setSelectedEmail, isLoading }: EmailListProps) => {
+export const EmailList = ({ emails, isLoading, selectedEmail, setSelectedEmail }: EmailListProps) => {
   if (isLoading) {
     return (
-      <div className="h-64 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="w-full h-20" />
+        ))}
       </div>
     );
   }
 
   if (emails.length === 0) {
-    return (
-      <div className="h-64 flex items-center justify-center text-muted-foreground">
-        <div>
-          <Inbox className="mx-auto h-10 w-10 mb-4" />
-          <p>No emails found</p>
-        </div>
-      </div>
-    );
+    return <div className="text-center py-4">No emails found</div>;
   }
 
   return (
-    <div className="space-y-2 h-[400px] overflow-y-auto pr-2">
-      {emails.map(email => (
-        <EmailItem 
-          key={email.id} 
-          email={email} 
-          onSelect={setSelectedEmail} 
+    <div className="space-y-2">
+      {emails.map((email) => (
+        <EmailItem
+          key={email.id}
+          email={email}
+          onSelect={setSelectedEmail}
           isSelected={selectedEmail?.id === email.id}
         />
       ))}

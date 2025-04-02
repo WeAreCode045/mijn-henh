@@ -1,3 +1,4 @@
+
 export interface Agency {
   id: string;
   created_at: string;
@@ -50,6 +51,45 @@ export interface AgencySettings {
   nylas_client_id?: string;
   nylas_client_secret?: string;
   nylas_access_token?: string;
+  
+  // Camel case aliases for consistency in code
+  logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  iconBedrooms?: string;
+  iconBathrooms?: string;
+  iconSqft?: string;
+  iconGarages?: string;
+  iconBuildYear?: string;
+  iconLivingSpace?: string;
+  iconEnergyClass?: string;
+  descriptionBackgroundUrl?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  xmlImportUrl?: string;
+  googleMapsApiKey?: string;
+  smtpHost?: string;
+  smtpPort?: string;
+  smtpUsername?: string;
+  smtpPassword?: string;
+  smtpFromEmail?: string;
+  smtpFromName?: string;
+  smtpSecure?: boolean;
+  imapHost?: string;
+  imapPort?: string;
+  imapUsername?: string;
+  imapPassword?: string;
+  imapTls?: boolean;
+  imapMailbox?: string;
+  mailjetApiKey?: string;
+  mailjetApiSecret?: string;
+  mailjetFromEmail?: string;
+  mailjetFromName?: string;
+  openaiApiKey?: string;
+  nylasClientId?: string;
+  nylasClientSecret?: string;
+  nylasAccessToken?: string;
 }
 
 export interface Profile {

@@ -16,7 +16,8 @@ export function EmailsSection() {
     selectedEmail, 
     setSelectedEmail, 
     fetchEmails, 
-    hasImapConfig 
+    hasNylasConfig,
+    hasImapConfig
   } = useEmails();
 
   // Check if we have a mock email (single email with id "mock-1")
@@ -27,7 +28,7 @@ export function EmailsSection() {
       <EmailHeader 
         fetchEmails={fetchEmails} 
         isLoading={isLoading} 
-        isConfigured={!!hasImapConfig}
+        isConfigured={!!hasNylasConfig}
       />
 
       {hasMockEmail && (
@@ -36,7 +37,7 @@ export function EmailsSection() {
             Troubleshooting Mode
           </h3>
           <p className="mt-2 text-sm">
-            We're showing you a test email. Please verify your IMAP settings in the Settings page.
+            We're showing you a test email. Please verify your Nylas settings in the Settings page.
           </p>
         </div>
       )}
