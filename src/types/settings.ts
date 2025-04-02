@@ -50,6 +50,11 @@ export interface Settings {
   // OpenAI API key
   openai_api_key?: string | null;
   
+  // Nylas settings - add these fields to match database columns
+  nylas_client_id?: string | null;
+  nylas_client_secret?: string | null;
+  nylas_access_token?: string | null;
+  
   // Add property aliases to match AgencySettings expected properties
   primaryColor?: string;
   secondaryColor?: string;

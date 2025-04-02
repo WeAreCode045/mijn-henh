@@ -30,14 +30,14 @@ serve(async (req) => {
     // Get the Nylas settings from the request body
     const requestData = await req.json();
     const { 
-      nylasAccessToken,
+      nylasGrantId, // Updated to use the renamed field
       limit = 20
     } = requestData;
 
     // Validate required parameters
-    if (!nylasAccessToken) {
+    if (!nylasGrantId) {
       return new Response(
-        JSON.stringify({ error: "Missing Nylas access token or grant ID" }),
+        JSON.stringify({ error: "Missing Nylas Grant ID" }),
         { 
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -45,12 +45,12 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Connecting to Nylas API with access token/grant ID`);
+    console.log(`Connecting to Nylas API with Grant ID`);
     
     // Fetch emails from Nylas API
     const response = await fetch(`https://api.nylas.com/messages?limit=${limit}`, {
       headers: {
-        "Authorization": `Bearer ${nylasAccessToken}`,
+        "Authorization": `Bearer ${nylasGrantId}`,
         "Content-Type": "application/json",
         "Accept": "application/json"
       }
