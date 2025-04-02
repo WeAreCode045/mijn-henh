@@ -13,11 +13,11 @@ export const useEmails = () => {
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   
-  const hasImapConfig = Boolean(settings.imapHost && settings.imapUsername && settings.imapPassword);
+  const hasNylasConfig = Boolean(settings.nylas_access_token);
 
   const fetchEmails = async () => {
-    if (!hasImapConfig) {
-      setError("IMAP settings are not configured. Please configure IMAP settings in the Settings page.");
+    if (!hasNylasConfig) {
+      setError("Nylas API is not configured. Please configure Nylas API in the Settings page.");
       setIsLoading(false);
       return;
     }
@@ -26,46 +26,53 @@ export const useEmails = () => {
       setIsLoading(true);
       setError(null);
       
-      console.log("Fetching emails with settings:", {
-        host: settings.imapHost,
-        port: settings.imapPort || "993",
-        username: settings.imapUsername,
-        // password intentionally omitted
+      console.log("Fetching emails using Nylas API");
+
+      const { data, error } = await supabase.functions.invoke("fetch-nylas-emails", {
+        body: {
+          nylasAccessToken: settings.nylas_access_token,
+          limit: 20
+        }
       });
 
-      // Provide a mock email while we work on a more compatible solution
+      if (error) {
+        console.error("Error fetching emails:", error);
+        throw new Error(error.message || "Failed to fetch emails");
+      }
+
+      if (data && data.emails) {
+        console.log(`Fetched ${data.emails.length} emails`);
+        setEmails(data.emails);
+        setSelectedEmail(null);
+      } else {
+        console.log("No emails found");
+        setEmails([]);
+        setSelectedEmail(null);
+      }
+    } catch (error: any) {
+      console.error("Error fetching emails:", error);
+      
+      // Provide a fallback experience with a mock email
       const mockEmails: Email[] = [
         {
           id: "mock-1",
-          subject: "Test Email - IMAP Connection Issue",
+          subject: "Nylas API Connection Issue",
           from: "System <system@example.com>",
           to: settings.imapUsername || "user@example.com",
           date: new Date().toISOString(),
-          textBody: "We're experiencing an issue with the IMAP connection. Our team is working on a solution. In the meantime, please check your email directly through your email provider.",
-          htmlBody: "<p>We're experiencing an issue with the IMAP connection. Our team is working on a solution.</p><p>In the meantime, please check your email directly through your email provider.</p>",
-          body: "We're experiencing an issue with the IMAP connection. Our team is working on a solution. In the meantime, please check your email directly through your email provider.",
+          textBody: "We're experiencing an issue with the Nylas API connection. Please check your API key and settings.",
+          htmlBody: "<p>We're experiencing an issue with the Nylas API connection.</p><p>Please check your API key and settings in the Settings page.</p>",
+          body: "We're experiencing an issue with the Nylas API connection. Please check your API key and settings.",
           isRead: false
         }
       ];
       
       setEmails(mockEmails);
-      setSelectedEmail(null);
       
-      toast({
-        title: "IMAP Connection Issue",
-        description: "We're experiencing technical difficulties with the IMAP connection. We're showing you test data for now.",
-        variant: "destructive",
-      });
-      
-      // Log the error for reference
-      console.error("Note: The current implementation using ImapFlow is not compatible with the Edge Function environment. Consider implementing an EmailEngine API integration.");
-      
-    } catch (error: any) {
-      console.error("Error fetching emails:", error);
-      setError("Failed to fetch emails. Please check your IMAP settings and ensure the Edge Function is deployed correctly.");
+      setError("Failed to fetch emails. Please check your Nylas API settings.");
       toast({
         title: "Error",
-        description: "Failed to fetch emails. Please check your IMAP settings.",
+        description: "Failed to fetch emails. Please check your Nylas API settings.",
         variant: "destructive",
       });
     } finally {
@@ -73,15 +80,15 @@ export const useEmails = () => {
     }
   };
 
-  // Load emails when the component mounts and when IMAP settings change
+  // Load emails when the component mounts and when API settings change
   useEffect(() => {
-    if (hasImapConfig) {
+    if (hasNylasConfig) {
       fetchEmails();
     } else {
-      setError("IMAP settings are not configured. Please configure IMAP settings in the Settings page.");
+      setError("Nylas API is not configured. Please configure Nylas API in the Settings page.");
       setIsLoading(false);
     }
-  }, [settings.imapHost, settings.imapUsername, settings.imapPassword]);
+  }, [settings.nylas_access_token]);
 
   return {
     emails,
@@ -90,6 +97,6 @@ export const useEmails = () => {
     selectedEmail,
     setSelectedEmail,
     fetchEmails,
-    hasImapConfig
+    hasNylasConfig
   };
 };

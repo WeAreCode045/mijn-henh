@@ -40,6 +40,9 @@ export type Database = {
           mailjet_from_email: string | null
           mailjet_from_name: string | null
           name: string
+          nylas_access_token: string | null
+          nylas_client_id: string | null
+          nylas_client_secret: string | null
           openai_api_key: string | null
           phone: string | null
           primary_color: string | null
@@ -85,6 +88,9 @@ export type Database = {
           mailjet_from_email?: string | null
           mailjet_from_name?: string | null
           name: string
+          nylas_access_token?: string | null
+          nylas_client_id?: string | null
+          nylas_client_secret?: string | null
           openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -130,6 +136,9 @@ export type Database = {
           mailjet_from_email?: string | null
           mailjet_from_name?: string | null
           name?: string
+          nylas_access_token?: string | null
+          nylas_client_id?: string | null
+          nylas_client_secret?: string | null
           openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null

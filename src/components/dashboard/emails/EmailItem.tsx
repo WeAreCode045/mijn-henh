@@ -34,7 +34,7 @@ export const EmailItem = ({ email, onSelect, isSelected }: EmailItemProps) => {
       </div>
       <p className={`text-sm mb-1 line-clamp-1 ${!email.isRead ? 'font-semibold' : ''}`}>{email.subject}</p>
       <div className="flex justify-between items-center">
-        <span className="text-xs text-muted-foreground line-clamp-1">{email.body ? (email.body.substring(0, 50) + "...") : ""}</span>
+        <span className="text-xs text-muted-foreground line-clamp-1">{email.textBody ? (email.textBody.substring(0, 50) + "...") : ""}</span>
         {!email.isRead && (
           <Badge variant="default" className="ml-2">New</Badge>
         )}

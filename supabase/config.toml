@@ -21,3 +21,6 @@ enabled = true
 [functions]
 [functions.fetch-imap-emails]
 verify_jwt = true
+
+[functions.fetch-nylas-emails]
+verify_jwt = true
