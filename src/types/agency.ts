@@ -55,12 +55,12 @@ export interface AgencySettings {
   // OpenAI API key
   openaiApiKey?: string;
   
-  // Nylas settings - renamed to match actual credentials
-  nylasClientId?: string;  // Client ID
-  nylasApiKey?: string;    // API Key (previously clientSecret)
-  nylasGrantId?: string;   // Grant ID (previously accessToken)
+  // Nylas settings - using consistent naming
+  nylasClientId?: string;  // Mapped from nylas_client_id
+  nylasApiKey?: string;    // Mapped from nylas_client_secret
+  nylasGrantId?: string;   // Mapped from nylas_access_token
   
-  // For backwards compatibility
+  // For backwards compatibility - will be deprecated
   nylasClientSecret?: string; // Alias for nylasApiKey
   nylasAccessToken?: string;  // Alias for nylasGrantId
   

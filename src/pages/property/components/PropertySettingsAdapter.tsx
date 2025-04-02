@@ -41,6 +41,7 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     }
   }
 
+  // Ensure consistent naming between database fields and UI fields
   return {
     id: "",
     name: settings.name || "",
@@ -62,7 +63,7 @@ export function createAgencySettingsFromSettings(settings: Settings | null | und
     imapPassword: settings.imap_password || "",
     imapTls: settings.imap_tls !== null ? settings.imap_tls : true,
     imapMailbox: settings.imap_mailbox || "INBOX",
-    // Nylas settings with proper mapping
+    // Nylas settings with consistent naming
     nylasClientId: settings.nylas_client_id || "",
     nylasApiKey: settings.nylas_client_secret || "",
     nylasGrantId: settings.nylas_access_token || "",

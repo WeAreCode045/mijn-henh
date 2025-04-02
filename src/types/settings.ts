@@ -50,7 +50,7 @@ export interface Settings {
   // OpenAI API key
   openai_api_key?: string | null;
   
-  // Nylas settings - add these fields to match database columns
+  // Nylas settings - make sure these match the database column names exactly
   nylas_client_id?: string | null;
   nylas_client_secret?: string | null;
   nylas_access_token?: string | null;

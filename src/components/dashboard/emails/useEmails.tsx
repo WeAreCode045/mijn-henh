@@ -13,6 +13,7 @@ export const useEmails = () => {
   const { toast } = useToast();
   const { settings } = useAgencySettings();
   
+  // Check for both field names to ensure backwards compatibility
   const hasNylasConfig = Boolean(settings.nylasGrantId || settings.nylasAccessToken);
   const hasImapConfig = Boolean(settings.imapHost);
 
@@ -28,10 +29,16 @@ export const useEmails = () => {
       setError(null);
       
       console.log("Fetching emails using Nylas API");
+      console.log("Nylas config:", { 
+        grantId: settings.nylasGrantId,
+        accessToken: settings.nylasAccessToken
+      });
 
+      // Send both parameter names for compatibility
       const { data, error } = await supabase.functions.invoke("fetch-nylas-emails", {
         body: {
           nylasGrantId: settings.nylasGrantId || settings.nylasAccessToken,
+          nylasAccessToken: settings.nylasAccessToken || settings.nylasGrantId,
           limit: 20
         }
       });
@@ -70,7 +77,7 @@ export const useEmails = () => {
       
       setEmails(mockEmails);
       
-      setError("Failed to fetch emails. Please check your Nylas API settings.");
+      setError(`Failed to fetch emails: ${error.message || "Unknown error"}. Please check your Nylas API settings.`);
       toast({
         title: "Error",
         description: "Failed to fetch emails. Please check your Nylas API settings.",
