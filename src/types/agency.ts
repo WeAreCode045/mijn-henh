@@ -55,6 +55,11 @@ export interface AgencySettings {
   // OpenAI API key
   openaiApiKey?: string;
   
+  // Nylas settings
+  nylasClientId?: string;
+  nylasClientSecret?: string;
+  nylasAccessToken?: string;
+  
   // Database field aliases
   primary_color?: string;
   secondary_color?: string;
