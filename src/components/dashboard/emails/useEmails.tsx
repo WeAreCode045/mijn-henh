@@ -31,7 +31,7 @@ export const useEmails = () => {
 
       const { data, error } = await supabase.functions.invoke("fetch-nylas-emails", {
         body: {
-          nylasAccessToken: settings.nylasGrantId || settings.nylasAccessToken,
+          nylasGrantId: settings.nylasGrantId || settings.nylasAccessToken,
           limit: 20
         }
       });
