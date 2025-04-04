@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ export function PropertyManagementCard({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch current property status when component mounts
     if (propertyId) {
       fetchPropertyStatus();
     }
@@ -139,7 +137,6 @@ export function PropertyManagementCard({
         description: isArchived ? "Property unarchived" : "Property archived",
       });
       
-      // Reload the page to reflect the changes
       window.location.reload();
     } catch (error) {
       console.error("Error toggling archive status:", error);
@@ -153,6 +150,10 @@ export function PropertyManagementCard({
     }
   };
 
+  console.log("PropertyManagementCard - propertyId:", propertyId);
+  console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
+  console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
+
   return (
     <Card>
       <CardHeader>
@@ -162,14 +163,12 @@ export function PropertyManagementCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Status selector */}
         <StatusSelector 
           propertyId={propertyId}
           initialStatus={status}
           onStatusChange={handleStatusChange}
         />
         
-        {/* Agent selector */}
         <div className="mt-4">
           <AgentSelector 
             initialAgentId={agentId} 
@@ -179,10 +178,17 @@ export function PropertyManagementCard({
         
         <Separator className="my-4" />
         
-        {/* Publication buttons */}
         <div className="space-y-2">
           <Button 
-            onClick={onGeneratePDF} 
+            onClick={(e) => {
+              e.preventDefault();
+              console.log("Generate PDF button clicked");
+              if (typeof onGeneratePDF === 'function') {
+                onGeneratePDF();
+              } else {
+                console.error("onGeneratePDF is not a function");
+              }
+            }} 
             variant="outline" 
             className="w-full justify-start" 
             disabled={isArchived}
@@ -192,7 +198,15 @@ export function PropertyManagementCard({
           </Button>
           
           <Button 
-            onClick={onWebView} 
+            onClick={(e) => {
+              e.preventDefault();
+              console.log("Web View button clicked");
+              if (typeof onWebView === 'function') {
+                onWebView(e);
+              } else {
+                console.error("onWebView is not a function");
+              }
+            }} 
             variant="outline" 
             className="w-full justify-start" 
             disabled={isArchived}
@@ -202,9 +216,6 @@ export function PropertyManagementCard({
           </Button>
         </div>
         
-        <Separator className="my-4" />
-        
-        {/* Property info timestamps */}
         {(createdAt || updatedAt) && (
           <div className="space-y-2 text-sm text-muted-foreground">
             {createdAt && (
@@ -218,7 +229,6 @@ export function PropertyManagementCard({
         
         <Separator className="my-4" />
         
-        {/* Archive/Unarchive button */}
         <Button
           variant="outline"
           className="w-full justify-start"
@@ -238,7 +248,6 @@ export function PropertyManagementCard({
           )}
         </Button>
         
-        {/* Delete Property button */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="w-full justify-start">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { useGeneratePDF } from "@/hooks/useGeneratePDF";
+import { useToast } from "@/hooks/use-toast";
 
 interface PropertyTabActionsHandlerProps {
   propertyId: string;
@@ -28,14 +29,34 @@ export function PropertyTabActionsHandler({
   const [webViewOpen, setWebViewOpen] = useState(false);
   const { handleWebView } = usePropertyActions(propertyId);
   const { generatePDF } = useGeneratePDF();
+  const { toast } = useToast();
 
   // Web view functions - opens in new tab
   const handleOpenWebView = (e: React.MouseEvent) => {
+    console.log('PropertyTabActionsHandler: handleOpenWebView called');
+    
     if (isArchived) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
+      
+      toast({
+        title: "Error",
+        description: "Cannot open web view for archived property",
+        variant: "destructive",
+      });
+      
+      return false;
+    }
+    
+    if (!propertyId) {
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
+      
       return false;
     }
     
@@ -43,6 +64,9 @@ export function PropertyTabActionsHandler({
       e.preventDefault();
       e.stopPropagation();
     }
+    
+    // Call the handleWebView function from usePropertyActions
+    console.log('Opening web view for property:', propertyId);
     return handleWebView(e);
   };
 
@@ -52,13 +76,43 @@ export function PropertyTabActionsHandler({
     
     if (isArchived) {
       console.log('Cannot generate PDF for archived property');
+      toast({
+        title: "Error",
+        description: "Cannot generate PDF for archived property",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!propertyId) {
+      console.log('Cannot generate PDF: Property ID is missing');
+      toast({
+        title: "Error",
+        description: "Property ID is missing",
+        variant: "destructive",
+      });
       return;
     }
     
     if (propertyData) {
-      await generatePDF(propertyData);
+      try {
+        console.log('Generating PDF for property:', propertyId);
+        await generatePDF(propertyData);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate PDF",
+          variant: "destructive",
+        });
+      }
     } else {
       console.error('Cannot generate PDF: propertyData is undefined');
+      toast({
+        title: "Error",
+        description: "Property data is missing",
+        variant: "destructive",
+      });
     }
   };
 

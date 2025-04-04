@@ -17,6 +17,28 @@ interface PropertyActionsProps {
 export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: PropertyActionsProps) {
   const navigate = useNavigate();
   
+  const handleGeneratePDF = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("PropertyActions - Generate PDF button clicked");
+    if (typeof onGeneratePDF === 'function') {
+      onGeneratePDF();
+    } else {
+      console.error("onGeneratePDF is not a function");
+    }
+  };
+  
+  const handleWebView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("PropertyActions - Web View button clicked");
+    if (typeof onShowWebView === 'function') {
+      onShowWebView();
+    } else {
+      console.error("onShowWebView is not a function");
+    }
+  };
+  
   return (
     <div className="flex flex-wrap gap-2">
       <Button 
@@ -32,7 +54,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
       <Button 
         variant="outline"
         size="sm"
-        onClick={onShowWebView}
+        onClick={handleWebView}
         className="flex items-center gap-1"
       >
         <ArrowUpRight className="h-4 w-4" />
@@ -42,7 +64,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
       <Button 
         variant="outline"
         size="sm"
-        onClick={onGeneratePDF}
+        onClick={handleGeneratePDF}
         className="flex items-center gap-1"
       >
         <FileText className="h-4 w-4" />
