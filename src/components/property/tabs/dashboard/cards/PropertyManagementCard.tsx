@@ -154,6 +154,26 @@ export function PropertyManagementCard({
   console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
 
+  const handlePDFClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Generate PDF button clicked");
+    if (typeof onGeneratePDF === 'function') {
+      onGeneratePDF();
+    } else {
+      console.error("onGeneratePDF is not a function");
+    }
+  };
+  
+  const handleWebViewClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Web View button clicked");
+    if (typeof onWebView === 'function') {
+      onWebView(e);
+    } else {
+      console.error("onWebView is not a function");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -180,15 +200,7 @@ export function PropertyManagementCard({
         
         <div className="space-y-2">
           <Button 
-            onClick={(e) => {
-              e.preventDefault();
-              console.log("Generate PDF button clicked");
-              if (typeof onGeneratePDF === 'function') {
-                onGeneratePDF();
-              } else {
-                console.error("onGeneratePDF is not a function");
-              }
-            }} 
+            onClick={handlePDFClick}
             variant="outline" 
             className="w-full justify-start" 
             disabled={isArchived}
@@ -198,15 +210,7 @@ export function PropertyManagementCard({
           </Button>
           
           <Button 
-            onClick={(e) => {
-              e.preventDefault();
-              console.log("Web View button clicked");
-              if (typeof onWebView === 'function') {
-                onWebView(e);
-              } else {
-                console.error("onWebView is not a function");
-              }
-            }} 
+            onClick={handleWebViewClick}
             variant="outline" 
             className="w-full justify-start" 
             disabled={isArchived}

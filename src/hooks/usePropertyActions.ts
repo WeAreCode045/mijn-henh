@@ -2,7 +2,6 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PropertyData } from "@/types/property";
-import { getOrCreateWebViewUrl } from "@/utils/webViewUtils";
 
 export function usePropertyActions(propertyId: string) {
   const navigate = useNavigate();
@@ -38,7 +37,9 @@ export function usePropertyActions(propertyId: string) {
     
     try {
       // Open in a new tab with simplified URL structure
-      window.open(`/property/${propertyId}/webview`, '_blank', 'noopener,noreferrer');
+      const url = `/property/${propertyId}/webview`;
+      console.log("Opening WebView URL:", url);
+      window.open(url, '_blank', 'noopener,noreferrer');
       return true;
     } catch (error) {
       console.error("Error opening WebView:", error);

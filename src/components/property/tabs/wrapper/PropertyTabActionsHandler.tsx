@@ -60,11 +60,6 @@ export function PropertyTabActionsHandler({
       return false;
     }
     
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
     // Call the handleWebView function from usePropertyActions
     console.log('Opening web view for property:', propertyId);
     return handleWebView(e);

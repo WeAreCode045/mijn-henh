@@ -10,8 +10,8 @@ import {
 
 interface PropertyActionsProps {
   propertyId: string;
-  onGeneratePDF: () => void;
-  onShowWebView: () => void;
+  onGeneratePDF: (e: React.MouseEvent) => void;
+  onShowWebView: (e: React.MouseEvent) => void;
 }
 
 export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: PropertyActionsProps) {
@@ -22,7 +22,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
     e.stopPropagation();
     console.log("PropertyActions - Generate PDF button clicked");
     if (typeof onGeneratePDF === 'function') {
-      onGeneratePDF();
+      onGeneratePDF(e);
     } else {
       console.error("onGeneratePDF is not a function");
     }
@@ -33,7 +33,7 @@ export function PropertyActions({ propertyId, onGeneratePDF, onShowWebView }: Pr
     e.stopPropagation();
     console.log("PropertyActions - Web View button clicked");
     if (typeof onShowWebView === 'function') {
-      onShowWebView();
+      onShowWebView(e);
     } else {
       console.error("onShowWebView is not a function");
     }
