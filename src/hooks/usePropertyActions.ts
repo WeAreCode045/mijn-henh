@@ -39,9 +39,7 @@ export function usePropertyActions(propertyId: string) {
       // Open in a new tab with simplified URL structure
       const url = `/property/${propertyId}/webview`;
       console.log("Opening WebView URL:", url);
-      
-      // Fixed: Use window.location.origin to ensure full URL path
-      window.open(`${window.location.origin}${url}`, '_blank', 'noopener,noreferrer');
+      window.open(url, '_blank', 'noopener,noreferrer');
       return true;
     } catch (error) {
       console.error("Error opening WebView:", error);
