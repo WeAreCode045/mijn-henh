@@ -41,8 +41,8 @@ export function usePropertyActions(propertyId: string) {
       const url = `${baseUrl}/property/${propertyId}/webview`;
       console.log("Opening WebView URL:", url);
       
-      // Open in a new tab with the full URL
-      window.open(url, '_blank');
+      // Use window.open directly with specific parameters
+      window.open(url, '_blank', 'noopener,noreferrer');
       return true;
     } catch (error) {
       console.error("Error opening WebView:", error);

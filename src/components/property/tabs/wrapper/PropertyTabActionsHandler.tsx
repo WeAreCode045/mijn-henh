@@ -60,7 +60,7 @@ export function PropertyTabActionsHandler({
       return false;
     }
     
-    // Call the handleWebView function from usePropertyActions
+    // Call the handleWebView function from usePropertyActions and pass the event
     console.log('Opening web view for property:', propertyId);
     return handleWebView(e);
   };
