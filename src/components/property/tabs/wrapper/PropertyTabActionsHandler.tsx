@@ -14,7 +14,7 @@ interface PropertyTabActionsHandlerProps {
   children: (props: {
     webViewOpen: boolean;
     setWebViewOpen: (open: boolean) => void;
-    handleGeneratePDF: () => void;
+    handleGeneratePDF: (e: React.MouseEvent) => void;
     handleOpenWebView: (e: React.MouseEvent) => void;
   }) => React.ReactNode;
 }
@@ -33,13 +33,11 @@ export function PropertyTabActionsHandler({
 
   // Web view function - directly opens in new tab
   const handleOpenWebView = (e: React.MouseEvent) => {
-    console.log('PropertyTabActionsHandler: handleOpenWebView called');
+    console.log('PropertyTabActionsHandler: handleOpenWebView called for property', propertyId);
     
     if (isArchived) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      e.preventDefault();
+      e.stopPropagation();
       
       toast({
         title: "Error",
@@ -66,8 +64,10 @@ export function PropertyTabActionsHandler({
   };
 
   // PDF generation function - simplified for direct usage
-  const handleGeneratePDF = async () => {
-    console.log('PropertyTabActionsHandler: handleGeneratePDF called');
+  const handleGeneratePDF = (e: React.MouseEvent) => {
+    console.log('PropertyTabActionsHandler: handleGeneratePDF called for property', propertyId);
+    e.preventDefault();
+    e.stopPropagation();
     
     if (isArchived) {
       console.log('Cannot generate PDF for archived property');
@@ -92,7 +92,7 @@ export function PropertyTabActionsHandler({
     if (propertyData) {
       try {
         console.log('Calling generatePDF for property:', propertyId);
-        await generatePDF(propertyData);
+        generatePDF(propertyData);
       } catch (error) {
         console.error('Error generating PDF:', error);
         toast({

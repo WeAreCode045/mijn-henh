@@ -1,13 +1,11 @@
 
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 export function usePropertyActions(propertyId: string) {
-  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleGeneratePDF = useCallback(async (e?: React.MouseEvent) => {
+  const handleGeneratePDF = useCallback((e?: React.MouseEvent) => {
     // Prevent default form submission if event is provided
     if (e) {
       e.preventDefault();
@@ -20,7 +18,14 @@ export function usePropertyActions(propertyId: string) {
       // Navigate to the PDF route in a new tab
       const url = `/property/${propertyId}/pdf`;
       console.log("Opening PDF URL:", url);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      
+      // Ensure we use window.open correctly
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      
+      // Check if window was opened successfully
+      if (!newWindow) {
+        throw new Error("Unable to open new window, possibly blocked by popup blocker");
+      }
       
       toast({
         title: "PDF Generation",
@@ -41,7 +46,7 @@ export function usePropertyActions(propertyId: string) {
     }
   }, [propertyId, toast]);
 
-  const handleWebView = useCallback(async (e?: React.MouseEvent) => {
+  const handleWebView = useCallback((e?: React.MouseEvent) => {
     // Prevent default form submission if event is provided
     if (e) {
       e.preventDefault();
@@ -59,12 +64,17 @@ export function usePropertyActions(propertyId: string) {
       // Open in a new tab and return the window object for testing
       const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
       
+      // Check if window was opened successfully
+      if (!newWindow) {
+        throw new Error("Unable to open new window, possibly blocked by popup blocker");
+      }
+      
       toast({
         title: "Web View",
         description: "Opening web view in a new tab",
       });
       
-      return !!newWindow;
+      return true;
     } catch (error) {
       console.error("Error opening WebView:", error);
       

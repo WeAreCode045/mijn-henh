@@ -16,7 +16,7 @@ interface PropertyManagementCardProps {
   agentId?: string;
   isArchived?: boolean;
   handleSaveAgent: (agentId: string) => Promise<void>;
-  onGeneratePDF: () => void;
+  onGeneratePDF: (e: React.MouseEvent) => void;
   onWebView: (e: React.MouseEvent) => void;
   onDelete: () => Promise<void>;
   createdAt?: string;
@@ -34,29 +34,9 @@ export function PropertyManagementCard({
   createdAt,
   updatedAt
 }: PropertyManagementCardProps) {
-  // Log to verify props are received correctly
   console.log("PropertyManagementCard - propertyId:", propertyId);
   console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
-
-  // Simple wrapper handlers to log actions and ensure proper execution
-  const handleGeneratePDF = (e: React.MouseEvent) => {
-    console.log("PropertyManagementCard - handleGeneratePDF executing");
-    if (typeof onGeneratePDF === 'function') {
-      onGeneratePDF();
-    } else {
-      console.error("PropertyManagementCard - onGeneratePDF is not a function");
-    }
-  };
-
-  const handleWebView = (e: React.MouseEvent) => {
-    console.log("PropertyManagementCard - handleWebView executing with event:", e.type);
-    if (typeof onWebView === 'function') {
-      onWebView(e);
-    } else {
-      console.error("PropertyManagementCard - onWebView is not a function");
-    }
-  };
 
   return (
     <Card>
@@ -80,9 +60,10 @@ export function PropertyManagementCard({
         <Separator className="my-4" />
         
         <ActionButtons 
-          onGeneratePDF={handleGeneratePDF}
-          onWebView={handleWebView}
+          onGeneratePDF={onGeneratePDF}
+          onWebView={onWebView}
           isArchived={isArchived}
+          propertyId={propertyId}
         />
         
         <DateInfoSection 

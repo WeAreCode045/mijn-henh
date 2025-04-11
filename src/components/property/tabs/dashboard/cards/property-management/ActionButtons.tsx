@@ -1,28 +1,35 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
+import { useCallback } from "react";
 
 interface ActionButtonsProps {
   onGeneratePDF: (e: React.MouseEvent) => void;
   onWebView: (e: React.MouseEvent) => void;
   isArchived?: boolean;
+  propertyId: string;
 }
 
-export function ActionButtons({ onGeneratePDF, onWebView, isArchived = false }: ActionButtonsProps) {
-  // Simple wrapper functions that log the action and call the parent handler
-  const handlePDFClick = (e: React.MouseEvent) => {
+export function ActionButtons({ 
+  onGeneratePDF, 
+  onWebView, 
+  isArchived = false,
+  propertyId
+}: ActionButtonsProps) {
+  // Create standalone handlers that won't be affected by other components
+  const handlePDFClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Generate PDF button clicked - calling parent handler");
+    console.log(`ActionButtons: Generate PDF button clicked for property ${propertyId}`);
     onGeneratePDF(e);
-  };
+  }, [onGeneratePDF, propertyId]);
   
-  const handleWebViewClick = (e: React.MouseEvent) => {
+  const handleWebViewClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Web View button clicked - calling parent handler");
+    console.log(`ActionButtons: Web View button clicked for property ${propertyId}`);
     onWebView(e);
-  };
+  }, [onWebView, propertyId]);
 
   return (
     <div className="space-y-2">
