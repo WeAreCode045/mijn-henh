@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -156,6 +157,7 @@ export function PropertyManagementCard({
 
   const handlePDFClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     console.log("Generate PDF button clicked");
     if (typeof onGeneratePDF === 'function') {
       onGeneratePDF();
@@ -166,6 +168,7 @@ export function PropertyManagementCard({
   
   const handleWebViewClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     console.log("Web View button clicked");
     if (typeof onWebView === 'function') {
       onWebView(e);

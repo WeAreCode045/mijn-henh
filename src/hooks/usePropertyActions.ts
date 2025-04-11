@@ -36,10 +36,13 @@ export function usePropertyActions(propertyId: string) {
     console.log("Opening WebView for property:", propertyId);
     
     try {
-      // Open in a new tab with simplified URL structure
-      const url = `/property/${propertyId}/webview`;
+      // Get full URL including origin to avoid issues with relative paths
+      const baseUrl = window.location.origin;
+      const url = `${baseUrl}/property/${propertyId}/webview`;
       console.log("Opening WebView URL:", url);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      
+      // Open in a new tab with the full URL
+      window.open(url, '_blank');
       return true;
     } catch (error) {
       console.error("Error opening WebView:", error);
