@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { FileText, MonitorSmartphone } from "lucide-react";
+import { FileText, ExternalLink } from "lucide-react";
 
 interface ActionButtonsProps {
   onGeneratePDF: (e: React.MouseEvent) => void;
@@ -9,17 +9,18 @@ interface ActionButtonsProps {
 }
 
 export function ActionButtons({ onGeneratePDF, onWebView, isArchived = false }: ActionButtonsProps) {
+  // Simple wrapper functions that log the action and call the parent handler
   const handlePDFClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Generate PDF button clicked");
+    console.log("Generate PDF button clicked - calling parent handler");
     onGeneratePDF(e);
   };
   
   const handleWebViewClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Web View button clicked");
+    console.log("Web View button clicked - calling parent handler");
     onWebView(e);
   };
 
@@ -30,6 +31,7 @@ export function ActionButtons({ onGeneratePDF, onWebView, isArchived = false }: 
         variant="outline" 
         className="w-full justify-start" 
         disabled={isArchived}
+        type="button"
       >
         <FileText className="mr-2 h-4 w-4" />
         Generate PDF
@@ -40,8 +42,9 @@ export function ActionButtons({ onGeneratePDF, onWebView, isArchived = false }: 
         variant="outline" 
         className="w-full justify-start" 
         disabled={isArchived}
+        type="button"
       >
-        <MonitorSmartphone className="mr-2 h-4 w-4" />
+        <ExternalLink className="mr-2 h-4 w-4" />
         Web View
       </Button>
     </div>

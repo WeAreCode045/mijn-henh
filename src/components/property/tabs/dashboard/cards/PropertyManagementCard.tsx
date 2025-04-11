@@ -34,23 +34,28 @@ export function PropertyManagementCard({
   createdAt,
   updatedAt
 }: PropertyManagementCardProps) {
+  // Log to verify props are received correctly
   console.log("PropertyManagementCard - propertyId:", propertyId);
   console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
 
-  // Create wrapper functions to match the expected signature
+  // Simple wrapper handlers to log actions and ensure proper execution
   const handleGeneratePDF = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("PropertyManagementCard - handleGeneratePDF called");
-    onGeneratePDF();
+    console.log("PropertyManagementCard - handleGeneratePDF executing");
+    if (typeof onGeneratePDF === 'function') {
+      onGeneratePDF();
+    } else {
+      console.error("PropertyManagementCard - onGeneratePDF is not a function");
+    }
   };
 
   const handleWebView = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("PropertyManagementCard - handleWebView called");
-    onWebView(e);
+    console.log("PropertyManagementCard - handleWebView executing with event:", e.type);
+    if (typeof onWebView === 'function') {
+      onWebView(e);
+    } else {
+      console.error("PropertyManagementCard - onWebView is not a function");
+    }
   };
 
   return (

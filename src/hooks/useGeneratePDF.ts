@@ -45,34 +45,51 @@ export function useGeneratePDF() {
         throw new Error("No PDF data returned from server");
       }
       
-      console.log("PDF generated successfully");
+      console.log("PDF generated successfully, opening in new window");
       toast({
         title: "Success",
         description: "PDF generated successfully",
       });
       
-      // Open PDF in new tab
+      // Open PDF in new tab with improved reliability
+      const pdfDataUri = data.pdf;
       const pdfWindow = window.open('', '_blank');
+      
       if (pdfWindow) {
         pdfWindow.document.write(`
           <html>
             <head>
               <title>${property.title || 'Property'} - PDF</title>
+              <style>
+                body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+                embed { width: 100%; height: 100%; display: block; }
+              </style>
             </head>
-            <body style="margin:0;padding:0;">
-              <embed width="100%" height="100%" src="${data.pdf}" type="application/pdf" />
+            <body>
+              <embed src="${pdfDataUri}" type="application/pdf" />
             </body>
           </html>
         `);
+        pdfWindow.document.close();
       } else {
-        // If popup is blocked, provide direct download link
+        // Fallback for popup blockers
+        console.log("PDF window was blocked, creating direct download link");
+        
+        // Create temporary link for download
         const link = document.createElement('a');
-        link.href = data.pdf;
+        link.href = pdfDataUri;
         link.download = `${property.title || 'property'}-brochure.pdf`;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        
+        toast({
+          title: "PDF Download",
+          description: "Downloading PDF (popup was blocked)",
+        });
       }
       
-      return data.pdf;
+      return pdfDataUri;
     } catch (error: any) {
       console.error("Error in generatePDF:", error);
       toast({

@@ -31,7 +31,7 @@ export function PropertyTabActionsHandler({
   const { generatePDF } = useGeneratePDF();
   const { toast } = useToast();
 
-  // Web view functions - opens in new tab
+  // Web view function - directly opens in new tab
   const handleOpenWebView = (e: React.MouseEvent) => {
     console.log('PropertyTabActionsHandler: handleOpenWebView called');
     
@@ -65,7 +65,7 @@ export function PropertyTabActionsHandler({
     return handleWebView(e);
   };
 
-  // PDF generation function
+  // PDF generation function - simplified for direct usage
   const handleGeneratePDF = async () => {
     console.log('PropertyTabActionsHandler: handleGeneratePDF called');
     
@@ -91,7 +91,7 @@ export function PropertyTabActionsHandler({
     
     if (propertyData) {
       try {
-        console.log('Generating PDF for property:', propertyId);
+        console.log('Calling generatePDF for property:', propertyId);
         await generatePDF(propertyData);
       } catch (error) {
         console.error('Error generating PDF:', error);
