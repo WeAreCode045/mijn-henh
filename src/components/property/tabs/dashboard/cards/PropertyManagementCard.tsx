@@ -38,6 +38,21 @@ export function PropertyManagementCard({
   console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
 
+  // Create wrapper functions to match the expected signature
+  const handleGeneratePDF = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("PropertyManagementCard - handleGeneratePDF called");
+    onGeneratePDF();
+  };
+
+  const handleWebView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("PropertyManagementCard - handleWebView called");
+    onWebView(e);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -60,8 +75,8 @@ export function PropertyManagementCard({
         <Separator className="my-4" />
         
         <ActionButtons 
-          onGeneratePDF={onGeneratePDF}
-          onWebView={onWebView}
+          onGeneratePDF={handleGeneratePDF}
+          onWebView={handleWebView}
           isArchived={isArchived}
         />
         
