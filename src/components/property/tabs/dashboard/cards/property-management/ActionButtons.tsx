@@ -20,7 +20,6 @@ export function ActionButtons({ onGeneratePDF, onWebView, isArchived = false }: 
     e.preventDefault();
     e.stopPropagation();
     console.log("Web View button clicked");
-    // Directly call the parent handler to trigger the webview
     onWebView(e);
   };
 
