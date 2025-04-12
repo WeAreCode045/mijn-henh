@@ -20,7 +20,7 @@ interface PropertyDashboardTabProps {
   updatedAt?: string;
   onSave: () => void;
   onDelete: () => Promise<void>;
-  handleGeneratePDF: () => void;
+  handleGeneratePDF: (e: React.MouseEvent) => void;
   handleWebView: (e: React.MouseEvent) => void;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;

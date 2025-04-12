@@ -156,8 +156,12 @@ export function PropertyTabsWrapper({
         onDelete={onDelete}
         handleSaveObjectId={props.handleSaveObjectId}
         handleSaveAgent={props.handleSaveAgent}
-        handleGeneratePDF={props.handleGeneratePDF || (() => {})}
-        handleWebView={props.handleWebView || (() => {})}
+        handleGeneratePDF={props.handleGeneratePDF || ((e: React.MouseEvent) => {
+          console.log("Default handleGeneratePDF called");
+        })}
+        handleWebView={props.handleWebView || ((e: React.MouseEvent) => {
+          console.log("Default handleWebView called");
+        })}
         isUpdating={props.isUpdating || false}
         agentInfo={agentInfo}
       />

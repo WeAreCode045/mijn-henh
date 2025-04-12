@@ -16,7 +16,7 @@ interface PropertyTabContentsProps {
   onDelete: () => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
-  handleGeneratePDF: () => void;
+  handleGeneratePDF: (e: React.MouseEvent) => void;
   handleWebView: (e: React.MouseEvent) => void;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
