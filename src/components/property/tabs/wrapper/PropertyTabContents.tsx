@@ -5,9 +5,10 @@ import { DashboardTabContent } from "../content/DashboardTabContent";
 import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyFeature, PropertyArea, PropertyNearbyPlace } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
+import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -59,26 +60,32 @@ export function PropertyTabContents({
         if (error) throw error;
         
         if (data) {
+          console.log("Fetched property data:", data);
+          
           // Transform property data to include images property
           const propertyImages = Array.isArray(data.property_images) ? data.property_images : [];
+          
+          // Transform complex JSON fields using our helper functions
+          const transformedFeatures = transformFeatures(data.features || []);
+          const transformedAreas = transformAreas(data.areas || []);
+          const transformedNearbyPlaces = transformNearbyPlaces(data.nearby_places || []);
+          const transformedImages = transformImages(propertyImages);
           
           // Create properly formatted PropertyData with images
           const transformedData: PropertyData = {
             ...data,
-            images: propertyImages.map(img => ({
-              id: img.id,
-              url: img.url,
-              property_id: img.property_id,
-              is_main: img.is_main,
-              is_featured_image: img.is_featured_image,
-              type: img.type,
-              area: img.area
-            })),
-            // Ensure other required properties are present
-            features: Array.isArray(data.features) ? data.features : [],
-            areas: Array.isArray(data.areas) ? data.areas : [],
-            nearby_places: Array.isArray(data.nearby_places) ? data.nearby_places : []
+            images: transformedImages,
+            features: transformedFeatures,
+            areas: transformedAreas,
+            nearby_places: transformedNearbyPlaces
           };
+          
+          console.log("Transformed property data:", {
+            featuresCount: transformedFeatures.length,
+            areasCount: transformedAreas.length,
+            placesCount: transformedNearbyPlaces.length,
+            imagesCount: transformedImages.length
+          });
           
           setFullPropertyData(transformedData);
         }
