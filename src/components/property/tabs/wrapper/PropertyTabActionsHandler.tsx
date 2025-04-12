@@ -31,36 +31,44 @@ export function PropertyTabActionsHandler({
   const { generatePDF } = useGeneratePDF();
   const { toast } = useToast();
 
-  // Web view function - directly opens in new tab
+  // Web view function - directly opens in new tab with improved handling
   const handleOpenWebView = (e: React.MouseEvent) => {
     console.log('PropertyTabActionsHandler: handleOpenWebView called for property', propertyId);
     
-    if (isArchived) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      toast({
-        title: "Error",
-        description: "Cannot open web view for archived property",
-        variant: "destructive",
-      });
-      
-      return false;
-    }
-    
+    // Simple validation
     if (!propertyId) {
+      console.error('Cannot open web view: Property ID is missing');
       toast({
         title: "Error",
         description: "Property ID is missing",
         variant: "destructive",
       });
-      
       return false;
     }
     
-    // Call the handleWebView function from usePropertyActions and pass the event
-    console.log('Opening web view for property:', propertyId);
-    return handleWebView(e);
+    if (isArchived) {
+      console.error('Cannot open web view: Property is archived');
+      toast({
+        title: "Error",
+        description: "Cannot open web view for archived property",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    // Call the handleWebView function directly
+    try {
+      console.log('Calling handleWebView for property:', propertyId);
+      return handleWebView(e);
+    } catch (error) {
+      console.error('Error opening web view:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open web view",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   // PDF generation function - simplified for direct usage

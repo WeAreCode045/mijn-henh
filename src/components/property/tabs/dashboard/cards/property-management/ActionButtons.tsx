@@ -16,7 +16,7 @@ export function ActionButtons({
   isArchived = false,
   propertyId
 }: ActionButtonsProps) {
-  // Create standalone handlers that won't be affected by other components
+  // Create standalone handlers with improved logging
   const handlePDFClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();

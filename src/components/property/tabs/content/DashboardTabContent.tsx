@@ -10,7 +10,7 @@ interface DashboardTabContentProps {
   onWebView: (e: React.MouseEvent) => void;
   handleSaveAgent: (agentId: string) => Promise<void>;
   handleSaveObjectId: (objectId: string) => Promise<void>;
-  handleGeneratePDF: () => void;
+  handleGeneratePDF: (e: React.MouseEvent) => void;
 }
 
 export function DashboardTabContent({
@@ -22,6 +22,10 @@ export function DashboardTabContent({
   handleSaveObjectId,
   handleGeneratePDF
 }: DashboardTabContentProps) {
+  console.log("DashboardTabContent - Property ID:", property.id);
+  console.log("DashboardTabContent - onWebView is function:", typeof onWebView === 'function');
+  console.log("DashboardTabContent - handleGeneratePDF is function:", typeof handleGeneratePDF === 'function');
+  
   // Provide a fallback for handleSaveAgent if it's undefined
   const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
     ? handleSaveAgent 
