@@ -53,6 +53,10 @@ export function PropertyDashboardTab({
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
+  console.log("PropertyDashboardTab - Property ID:", id);
+  console.log("PropertyDashboardTab - handleWebView is function:", typeof handleWebView === 'function');
+  console.log("PropertyDashboardTab - handleGeneratePDF is function:", typeof handleGeneratePDF === 'function');
+
   useEffect(() => {
     const fetchSubmissions = async () => {
       // Validate id is present and valid

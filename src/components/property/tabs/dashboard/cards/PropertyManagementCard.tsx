@@ -10,7 +10,7 @@ import {
   ArchiveButton, 
   DeleteButton 
 } from "./property-management";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface PropertyManagementCardProps {
@@ -41,7 +41,6 @@ export function PropertyManagementCard({
   youtubeUrl
 }: PropertyManagementCardProps) {
   const { toast } = useToast();
-  const [showTextButtons, setShowTextButtons] = useState(true);
   
   console.log("PropertyManagementCard - propertyId:", propertyId);
   console.log("PropertyManagementCard - isArchived:", isArchived);
@@ -163,7 +162,7 @@ export function PropertyManagementCard({
           isArchived={isArchived}
           propertyId={propertyId}
           virtualTourUrl={virtualTourUrl}
-          showTextButtons={showTextButtons}
+          showTextButtons={true}
         />
         
         <DateInfoSection 

@@ -1,7 +1,16 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
-import { useCallback } from "react";
+import { Separator } from "@/components/ui/separator";
+import { 
+  StatusSection, 
+  AgentSection, 
+  DateInfoSection, 
+  ArchiveButton, 
+  DeleteButton 
+} from "./property-management";
+import { useCallback, useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { IconActionButtons } from "./IconActionButtons";
 
 interface ActionButtonsProps {
@@ -11,7 +20,12 @@ interface ActionButtonsProps {
   onViewTour?: (e: React.MouseEvent) => void;
   isArchived?: boolean;
   propertyId: string;
+  agentId?: string;
+  handleSaveAgent: (agentId: string) => Promise<void>;
+  createdAt?: string;
+  updatedAt?: string;
   virtualTourUrl?: string;
+  youtubeUrl?: string;
   showTextButtons?: boolean;
 }
 
@@ -22,23 +36,20 @@ export function ActionButtons({
   onViewTour = () => {},
   isArchived = false,
   propertyId,
-  virtualTourUrl = "",
+  agentId,
+  handleSaveAgent,
+  createdAt,
+  updatedAt,
+  virtualTourUrl,
+  youtubeUrl,
   showTextButtons = true
 }: ActionButtonsProps) {
-  // Create standalone handlers with improved logging
-  const handlePDFClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log(`ActionButtons: Generate PDF button clicked for property ${propertyId}`);
-    onGeneratePDF(e);
-  }, [onGeneratePDF, propertyId]);
+  const { toast } = useToast();
   
-  const handleWebViewClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log(`ActionButtons: Web View button clicked for property ${propertyId}`);
-    onWebView(e);
-  }, [onWebView, propertyId]);
+  console.log("ActionButtons - propertyId:", propertyId);
+  console.log("ActionButtons - isArchived:", isArchived);
+  console.log("ActionButtons - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
+  console.log("ActionButtons - onWebView is function:", typeof onWebView === 'function');
 
   return (
     <div className="space-y-4">
@@ -57,7 +68,12 @@ export function ActionButtons({
       {showTextButtons && (
         <div className="space-y-2">
           <Button 
-            onClick={handlePDFClick}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(`ActionButtons: Generate PDF button clicked for property ${propertyId}`);
+              onGeneratePDF(e);
+            }}
             variant="outline" 
             className="w-full justify-start" 
             disabled={isArchived}
@@ -68,7 +84,12 @@ export function ActionButtons({
           </Button>
           
           <Button 
-            onClick={handleWebViewClick}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(`ActionButtons: Web View button clicked for property ${propertyId}`);
+              onWebView(e);
+            }}
             variant="outline" 
             className="w-full justify-start" 
             disabled={isArchived}
