@@ -57,6 +57,8 @@ export function DashboardTabContent({
       handleSaveAgent={safeHandleSaveAgent}
       handleGeneratePDF={handlePDFGeneration}
       handleWebView={onWebView}
+      virtualTourUrl={property.virtualTourUrl}
+      youtubeUrl={property.youtubeUrl}
     />
   );
 }

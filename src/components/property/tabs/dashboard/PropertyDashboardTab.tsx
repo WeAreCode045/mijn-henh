@@ -26,6 +26,8 @@ interface PropertyDashboardTabProps {
   handleSaveObjectId: (objectId: string) => Promise<void>;
   isUpdating: boolean;
   agentInfo?: { id: string; name: string } | null;
+  virtualTourUrl?: string;
+  youtubeUrl?: string;
 }
 
 export function PropertyDashboardTab({
@@ -42,7 +44,9 @@ export function PropertyDashboardTab({
   handleSaveAgent,
   handleSaveObjectId,
   isUpdating,
-  agentInfo
+  agentInfo,
+  virtualTourUrl,
+  youtubeUrl
 }: PropertyDashboardTabProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isArchived, setIsArchived] = useState(false);
@@ -159,6 +163,8 @@ export function PropertyDashboardTab({
             isArchived={isArchived}
             createdAt={createdAt}
             updatedAt={updatedAt}
+            virtualTourUrl={virtualTourUrl}
+            youtubeUrl={youtubeUrl}
           />
         </div>
       </div>
