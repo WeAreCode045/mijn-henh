@@ -92,6 +92,27 @@ export function PropertyTabContents({
             distance: city.distance
           }));
           
+          // Process metadata to ensure it has the correct structure
+          let transformedMetadata: { status?: string; [key: string]: unknown } = {};
+          
+          if (data.metadata) {
+            if (typeof data.metadata === 'string') {
+              // If metadata is a string, try to parse it
+              try {
+                transformedMetadata = JSON.parse(data.metadata);
+              } catch (e) {
+                console.warn("Failed to parse metadata string:", e);
+                transformedMetadata = { status: data.status || 'Draft' };
+              }
+            } else if (typeof data.metadata === 'object' && data.metadata !== null) {
+              // If metadata is already an object, use it directly
+              transformedMetadata = data.metadata as Record<string, unknown>;
+            }
+          } else {
+            // Default metadata with status from the property if available
+            transformedMetadata = { status: data.status || 'Draft' };
+          }
+          
           // Create properly formatted PropertyData with images
           const transformedData: PropertyData = {
             ...data,
@@ -99,7 +120,8 @@ export function PropertyTabContents({
             features: transformedFeatures,
             areas: transformedAreas,
             nearby_places: transformedNearbyPlaces,
-            nearby_cities: transformedNearbyCities
+            nearby_cities: transformedNearbyCities,
+            metadata: transformedMetadata
           };
           
           console.log("Transformed property data:", {
@@ -107,7 +129,8 @@ export function PropertyTabContents({
             areasCount: transformedAreas.length,
             placesCount: transformedNearbyPlaces.length,
             imagesCount: transformedImages.length,
-            citiesCount: transformedNearbyCities.length
+            citiesCount: transformedNearbyCities.length,
+            metadata: transformedMetadata
           });
           
           setFullPropertyData(transformedData);
