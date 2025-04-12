@@ -103,6 +103,7 @@ const Settings = () => {
           <MailTab
             settings={settings}
             onChange={handleChange}
+            onSwitchChange={handleSwitchChange}
           />
         )}
 
