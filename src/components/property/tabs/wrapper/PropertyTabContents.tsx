@@ -49,12 +49,39 @@ export function PropertyTabContents({
       try {
         const { data, error } = await supabase
           .from('properties')
-          .select('*')
+          .select(`
+            *,
+            property_images(*)
+          `)
           .eq('id', property.id)
           .single();
           
         if (error) throw error;
-        if (data) setFullPropertyData(data as PropertyData);
+        
+        if (data) {
+          // Transform property data to include images property
+          const propertyImages = Array.isArray(data.property_images) ? data.property_images : [];
+          
+          // Create properly formatted PropertyData with images
+          const transformedData: PropertyData = {
+            ...data,
+            images: propertyImages.map(img => ({
+              id: img.id,
+              url: img.url,
+              property_id: img.property_id,
+              is_main: img.is_main,
+              is_featured_image: img.is_featured_image,
+              type: img.type,
+              area: img.area
+            })),
+            // Ensure other required properties are present
+            features: Array.isArray(data.features) ? data.features : [],
+            areas: Array.isArray(data.areas) ? data.areas : [],
+            nearby_places: Array.isArray(data.nearby_places) ? data.nearby_places : []
+          };
+          
+          setFullPropertyData(transformedData);
+        }
       } catch (error) {
         console.error('Error fetching property data:', error);
       }
@@ -135,7 +162,7 @@ export function PropertyTabContents({
         />
       </TabsContent>
       
-      {/* Web View Modal Dialog */}
+      {/* Web View Modal Dialog - Only render when we have full property data with images */}
       {fullPropertyData && (
         <PropertyWebViewDialog
           propertyData={fullPropertyData}
