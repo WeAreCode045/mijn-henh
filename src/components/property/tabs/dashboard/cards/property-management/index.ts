@@ -1,8 +1,8 @@
 
-export * from './ActionButtons';
-export * from './AgentSection';
-export * from './ArchiveButton';
-export * from './DateInfoSection';
-export * from './DeleteButton';
-export * from './StatusSection';
-export * from './IconActionButtons';
+export { ActionButtons } from './ActionButtons';
+export { AgentSection } from './AgentSection';
+export { ArchiveButton } from './ArchiveButton';
+export { DateInfoSection } from './DateInfoSection';
+export { DeleteButton } from './DeleteButton';
+export { StatusSection } from './StatusSection';
+export { IconActionButtons } from './IconActionButtons';

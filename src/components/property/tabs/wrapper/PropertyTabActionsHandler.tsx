@@ -5,6 +5,7 @@ import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { useGeneratePDF } from "@/hooks/useGeneratePDF";
 import { useToast } from "@/hooks/use-toast";
+import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 
 interface PropertyTabActionsHandlerProps {
   propertyId: string;
@@ -31,7 +32,9 @@ export function PropertyTabActionsHandler({
   const { generatePDF } = useGeneratePDF();
   const { toast } = useToast();
 
-  // Web view function - directly opens in new tab with improved handling
+  console.log("PropertyTabActionsHandler: Component rendering with open state:", webViewOpen);
+
+  // Web view function that opens the dialog
   const handleOpenWebView = (e: React.MouseEvent) => {
     console.log('PropertyTabActionsHandler: handleOpenWebView called for property', propertyId);
     e.preventDefault(); // Prevent default navigation
@@ -58,22 +61,13 @@ export function PropertyTabActionsHandler({
       return false;
     }
     
-    // Call the handleWebView function directly
-    try {
-      console.log('Calling handleWebView for property:', propertyId);
-      return handleWebView(e);
-    } catch (error) {
-      console.error('Error opening web view:', error);
-      toast({
-        title: "Error",
-        description: "Failed to open web view",
-        variant: "destructive",
-      });
-      return false;
-    }
+    // Set the state to open the dialog
+    console.log('Opening WebView dialog for property:', propertyId);
+    setWebViewOpen(true);
+    return true;
   };
 
-  // PDF generation function - simplified for direct usage
+  // PDF generation function
   const handleGeneratePDF = (e: React.MouseEvent) => {
     console.log('PropertyTabActionsHandler: handleGeneratePDF called for property', propertyId);
     e.preventDefault();
@@ -121,10 +115,23 @@ export function PropertyTabActionsHandler({
     }
   };
 
-  return children({
-    webViewOpen,
-    setWebViewOpen,
-    handleGeneratePDF,
-    handleOpenWebView
-  });
+  return (
+    <>
+      {children({
+        webViewOpen,
+        setWebViewOpen,
+        handleGeneratePDF,
+        handleOpenWebView
+      })}
+      
+      {/* Web View Modal */}
+      {propertyData && (
+        <PropertyWebViewDialog
+          propertyData={propertyData}
+          isOpen={webViewOpen}
+          onOpenChange={setWebViewOpen}
+        />
+      )}
+    </>
+  );
 }

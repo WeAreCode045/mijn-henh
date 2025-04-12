@@ -1,14 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
-import { StatusSection } from "./StatusSection";
-import { AgentSection } from "./AgentSection";
-import { DateInfoSection } from "./DateInfoSection";
-import { ArchiveButton } from "./ArchiveButton";
-import { DeleteButton } from "./DeleteButton";
-import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { IconActionButtons } from "./IconActionButtons";
+import { useState } from "react";
+import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
+import { useCallback } from "react";
 
 interface ActionButtonsProps {
   onGeneratePDF: (e: React.MouseEvent) => void;
@@ -24,6 +21,7 @@ interface ActionButtonsProps {
   virtualTourUrl?: string;
   youtubeUrl?: string;
   showTextButtons?: boolean;
+  propertyData?: any;
 }
 
 export function ActionButtons({ 
@@ -39,21 +37,38 @@ export function ActionButtons({
   updatedAt,
   virtualTourUrl,
   youtubeUrl,
-  showTextButtons = true
+  showTextButtons = true,
+  propertyData
 }: ActionButtonsProps) {
   const { toast } = useToast();
+  const [webViewOpen, setWebViewOpen] = useState(false);
   
   console.log("ActionButtons - propertyId:", propertyId);
   console.log("ActionButtons - isArchived:", isArchived);
   console.log("ActionButtons - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("ActionButtons - onWebView is function:", typeof onWebView === 'function');
 
+  const handleWebViewClick = useCallback((e: React.MouseEvent) => {
+    console.log("ActionButtons: handleWebViewClick called");
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Open the modal instead of navigating to a new page
+    setWebViewOpen(true);
+    
+    // Also call the original handler if it exists (for analytics, etc.)
+    if (typeof onWebView === 'function') {
+      // We don't want the default behavior, which is opening in a new tab
+      // onWebView(e);
+    }
+  }, [onWebView]);
+
   return (
     <div className="space-y-4">
       {/* Icon-only buttons */}
       <IconActionButtons
         onGeneratePDF={onGeneratePDF}
-        onWebView={onWebView}
+        onWebView={handleWebViewClick} // Use our new handler that opens the modal
         onShare={onShare}
         onViewTour={onViewTour}
         isArchived={isArchived}
@@ -85,7 +100,7 @@ export function ActionButtons({
               console.log(`ActionButtons: Web View button clicked for property ${propertyId}`);
               e.preventDefault();
               e.stopPropagation();
-              onWebView(e);
+              handleWebViewClick(e);
             }}
             variant="outline" 
             className="w-full justify-start" 
@@ -96,6 +111,15 @@ export function ActionButtons({
             Web View
           </Button>
         </div>
+      )}
+      
+      {/* WebView Modal Dialog */}
+      {propertyData && (
+        <PropertyWebViewDialog
+          propertyData={propertyData}
+          isOpen={webViewOpen}
+          onOpenChange={setWebViewOpen}
+        />
       )}
     </div>
   );

@@ -10,8 +10,10 @@ import {
   ArchiveButton, 
   DeleteButton 
 } from "./property-management";
-import { useCallback } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useCallback, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 
 interface PropertyManagementCardProps {
   propertyId: string;
@@ -41,11 +43,29 @@ export function PropertyManagementCard({
   youtubeUrl
 }: PropertyManagementCardProps) {
   const { toast } = useToast();
+  const [propertyData, setPropertyData] = useState<any>(null);
+  const [webViewOpen, setWebViewOpen] = useState(false);
   
   console.log("PropertyManagementCard - propertyId:", propertyId);
   console.log("PropertyManagementCard - isArchived:", isArchived);
   console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
+
+  // Fetch property data for the modal
+  useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', propertyId)
+        .single();
+        
+      if (error) throw error;
+      if (data) setPropertyData(data);
+    } catch (error) {
+      console.error('Error fetching property data:', error);
+    }
+  }, [propertyId]);
 
   // Handle sharing the property link
   const handleShare = useCallback((e: React.MouseEvent) => {
@@ -133,6 +153,21 @@ export function PropertyManagementCard({
     }
   }, [virtualTourUrl, toast]);
 
+  // Handle web view
+  const handleWebView = useCallback((e: React.MouseEvent) => {
+    console.log("PropertyManagementCard: handleWebView called");
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Open the modal
+    setWebViewOpen(true);
+    
+    // Also call the original handler if needed
+    // if (typeof onWebView === 'function') {
+    //   onWebView(e);
+    // }
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -156,7 +191,7 @@ export function PropertyManagementCard({
         
         <ActionButtons 
           onGeneratePDF={onGeneratePDF}
-          onWebView={onWebView}
+          onWebView={handleWebView}
           onShare={handleShare}
           onViewTour={handleViewTour}
           isArchived={isArchived}
@@ -168,6 +203,7 @@ export function PropertyManagementCard({
           virtualTourUrl={virtualTourUrl}
           youtubeUrl={youtubeUrl}
           showTextButtons={true}
+          propertyData={propertyData}
         />
         
         <DateInfoSection 
@@ -184,6 +220,15 @@ export function PropertyManagementCard({
         
         <DeleteButton onDelete={onDelete} />
       </CardContent>
+      
+      {/* WebView Modal Dialog directly in the card for initial property load */}
+      {propertyData && (
+        <PropertyWebViewDialog
+          propertyData={propertyData}
+          isOpen={webViewOpen}
+          onOpenChange={setWebViewOpen}
+        />
+      )}
     </Card>
   );
 }

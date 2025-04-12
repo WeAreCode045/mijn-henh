@@ -9,6 +9,7 @@ import { PropertyData } from "@/types/property";
 import { WebViewDialogContent } from "./WebViewDialogContent";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
+import { useEffect } from "react";
 
 interface PropertyWebViewDialogProps {
   propertyData: PropertyData;
@@ -25,6 +26,10 @@ export function PropertyWebViewDialog({
   const slug = propertyData.object_id || propertyData.id;
   const shareUrl = `/share/${slug}`;
   const viewUrl = `/property/${slug}/webview`;
+  
+  useEffect(() => {
+    console.log("PropertyWebViewDialog - dialog open state:", isOpen);
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

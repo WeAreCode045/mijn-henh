@@ -1,9 +1,10 @@
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export function usePropertyActions(propertyId: string) {
   const { toast } = useToast();
+  const [isWebViewOpen, setIsWebViewOpen] = useState(false);
 
   const handleGeneratePDF = useCallback((e?: React.MouseEvent) => {
     // Prevent default form submission if event is provided
@@ -55,41 +56,22 @@ export function usePropertyActions(propertyId: string) {
     
     console.log("usePropertyActions - Opening WebView for property:", propertyId);
     
-    try {
-      // Get full URL including origin to avoid issues with relative paths
-      const baseUrl = window.location.origin;
-      const url = `${baseUrl}/property/${propertyId}/webview`;
-      console.log("Opening WebView URL:", url);
-      
-      // Open in a new tab and return the window object for testing
-      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-      
-      // Check if window was opened successfully
-      if (!newWindow) {
-        throw new Error("Unable to open new window, possibly blocked by popup blocker");
-      }
-      
-      toast({
-        title: "Web View",
-        description: "Opening web view in a new tab",
-      });
-      
-      return true;
-    } catch (error) {
-      console.error("Error opening WebView:", error);
-      
-      toast({
-        title: "Error",
-        description: "Failed to open web view",
-        variant: "destructive",
-      });
-      
-      return false;
-    }
+    // Set state to open modal instead of navigating
+    setIsWebViewOpen(true);
+    
+    // We will handle this in the component with a modal dialog
+    toast({
+      title: "Web View",
+      description: "Opening web view",
+    });
+    
+    return true;
   }, [propertyId, toast]);
 
   return {
     handleGeneratePDF,
-    handleWebView
+    handleWebView,
+    isWebViewOpen,
+    setIsWebViewOpen
   };
 }

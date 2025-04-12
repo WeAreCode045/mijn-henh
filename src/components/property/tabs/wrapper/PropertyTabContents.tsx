@@ -1,11 +1,13 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { DashboardTabContent } from "../content/DashboardTabContent";
 import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { PropertyData, PropertyFormData } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
+import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -36,6 +38,40 @@ export function PropertyTabContents({
   isUpdating,
   agentInfo
 }: PropertyTabContentsProps) {
+  const [webViewOpen, setWebViewOpen] = useState(false);
+  const [fullPropertyData, setFullPropertyData] = useState<PropertyData | null>(null);
+  
+  // Fetch full property data when needed
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      if (!property || !property.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', property.id)
+          .single();
+          
+        if (error) throw error;
+        if (data) setFullPropertyData(data as PropertyData);
+      } catch (error) {
+        console.error('Error fetching property data:', error);
+      }
+    };
+    
+    fetchPropertyData();
+  }, [property]);
+  
+  // Custom WebView handler that opens the modal
+  const handleOpenWebView = (e: React.MouseEvent) => {
+    console.log('PropertyTabContents: handleOpenWebView called for property', property.id);
+    e.preventDefault();
+    e.stopPropagation();
+    setWebViewOpen(true);
+    return true;
+  };
+
   // Provide fallbacks for required handler functions
   const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
     ? handleSaveAgent 
@@ -61,7 +97,7 @@ export function PropertyTabContents({
           property={property}
           onDelete={onDelete}
           onSave={onSave}
-          onWebView={handleWebView}
+          onWebView={handleOpenWebView}
           handleSaveAgent={safeHandleSaveAgent}
           handleSaveObjectId={safeHandleSaveObjectId}
           handleGeneratePDF={handleGeneratePDF}
@@ -98,6 +134,15 @@ export function PropertyTabContents({
           property={property}
         />
       </TabsContent>
+      
+      {/* Web View Modal Dialog */}
+      {fullPropertyData && (
+        <PropertyWebViewDialog
+          propertyData={fullPropertyData}
+          isOpen={webViewOpen}
+          onOpenChange={setWebViewOpen}
+        />
+      )}
     </>
   );
 }
