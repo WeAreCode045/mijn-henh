@@ -1,13 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { StatusSection } from "./StatusSection";
 import { AgentSection } from "./AgentSection";
 import { DateInfoSection } from "./DateInfoSection";
 import { ArchiveButton } from "./ArchiveButton";
 import { DeleteButton } from "./DeleteButton";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { IconActionButtons } from "./IconActionButtons";
 
@@ -67,9 +66,9 @@ export function ActionButtons({
         <div className="space-y-2">
           <Button 
             onClick={(e) => {
+              console.log(`ActionButtons: Generate PDF button clicked for property ${propertyId}`);
               e.preventDefault();
               e.stopPropagation();
-              console.log(`ActionButtons: Generate PDF button clicked for property ${propertyId}`);
               onGeneratePDF(e);
             }}
             variant="outline" 
@@ -83,9 +82,9 @@ export function ActionButtons({
           
           <Button 
             onClick={(e) => {
+              console.log(`ActionButtons: Web View button clicked for property ${propertyId}`);
               e.preventDefault();
               e.stopPropagation();
-              console.log(`ActionButtons: Web View button clicked for property ${propertyId}`);
               onWebView(e);
             }}
             variant="outline" 

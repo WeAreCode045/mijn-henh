@@ -34,6 +34,8 @@ export function PropertyTabActionsHandler({
   // Web view function - directly opens in new tab with improved handling
   const handleOpenWebView = (e: React.MouseEvent) => {
     console.log('PropertyTabActionsHandler: handleOpenWebView called for property', propertyId);
+    e.preventDefault(); // Prevent default navigation
+    e.stopPropagation(); // Stop event propagation
     
     // Simple validation
     if (!propertyId) {

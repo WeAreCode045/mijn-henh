@@ -28,18 +28,24 @@ export function IconActionButtons({
   propertyId,
   virtualTourUrl,
 }: IconActionButtonsProps) {
+  const handleButtonClick = (
+    e: React.MouseEvent,
+    handlerFunction: (e: React.MouseEvent) => void,
+    buttonName: string
+  ) => {
+    console.log(`IconActionButtons: ${buttonName} button clicked for property ${propertyId}`);
+    e.preventDefault();
+    e.stopPropagation();
+    handlerFunction(e);
+  };
+
   return (
     <div className="flex flex-wrap gap-2 justify-center">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log(`IconActionButtons: Generate PDF button clicked for property ${propertyId}`);
-                onGeneratePDF(e);
-              }}
+              onClick={(e) => handleButtonClick(e, onGeneratePDF, "Generate PDF")}
               variant="outline"
               size="icon"
               className="h-9 w-9"
@@ -59,12 +65,7 @@ export function IconActionButtons({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log(`IconActionButtons: Web View button clicked for property ${propertyId}`);
-                onWebView(e);
-              }}
+              onClick={(e) => handleButtonClick(e, onWebView, "Web View")}
               variant="outline"
               size="icon"
               className="h-9 w-9"
@@ -84,12 +85,7 @@ export function IconActionButtons({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log(`IconActionButtons: Share button clicked for property ${propertyId}`);
-                onShare(e);
-              }}
+              onClick={(e) => handleButtonClick(e, onShare, "Share")}
               variant="outline"
               size="icon"
               className="h-9 w-9"
@@ -109,12 +105,7 @@ export function IconActionButtons({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log(`IconActionButtons: Virtual Tour button clicked for property ${propertyId}`);
-                onViewTour(e);
-              }}
+              onClick={(e) => handleButtonClick(e, onViewTour, "Virtual Tour")}
               variant="outline"
               size="icon"
               className="h-9 w-9"
