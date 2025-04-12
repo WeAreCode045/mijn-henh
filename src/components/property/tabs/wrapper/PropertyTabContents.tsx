@@ -5,7 +5,7 @@ import { DashboardTabContent } from "../content/DashboardTabContent";
 import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
-import { PropertyData, PropertyFormData, PropertyFeature, PropertyArea, PropertyNearbyPlace } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyCity } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
@@ -65,10 +65,24 @@ export function PropertyTabContents({
           // Transform property data to include images property
           const propertyImages = Array.isArray(data.property_images) ? data.property_images : [];
           
-          // Transform complex JSON fields using our helper functions
-          const transformedFeatures = transformFeatures(data.features || []);
-          const transformedAreas = transformAreas(data.areas || []);
-          const transformedNearbyPlaces = transformNearbyPlaces(data.nearby_places || []);
+          // Safely handle features, areas, and nearby_places to ensure they're arrays before transforming
+          const featuresArray = Array.isArray(data.features) ? data.features : 
+                              (typeof data.features === 'object' && data.features !== null ? [data.features] : []);
+          
+          const areasArray = Array.isArray(data.areas) ? data.areas : 
+                          (typeof data.areas === 'object' && data.areas !== null ? [data.areas] : []);
+          
+          const nearbyPlacesArray = Array.isArray(data.nearby_places) ? data.nearby_places : 
+                                  (typeof data.nearby_places === 'object' && data.nearby_places !== null ? [data.nearby_places] : []);
+          
+          // Handle nearby_cities to ensure it's properly typed
+          const nearbyCitiesArray = Array.isArray(data.nearby_cities) ? data.nearby_cities : 
+                                (typeof data.nearby_cities === 'object' && data.nearby_cities !== null ? [data.nearby_cities] : []);
+          
+          // Transform fields using helper functions after ensuring they're arrays
+          const transformedFeatures = transformFeatures(featuresArray);
+          const transformedAreas = transformAreas(areasArray);
+          const transformedNearbyPlaces = transformNearbyPlaces(nearbyPlacesArray);
           const transformedImages = transformImages(propertyImages);
           
           // Create properly formatted PropertyData with images
@@ -77,14 +91,18 @@ export function PropertyTabContents({
             images: transformedImages,
             features: transformedFeatures,
             areas: transformedAreas,
-            nearby_places: transformedNearbyPlaces
+            nearby_places: transformedNearbyPlaces,
+            nearby_cities: nearbyCitiesArray as PropertyCity[],
+            // Remove property_images as it's not part of the PropertyData type
+            property_images: undefined
           };
           
           console.log("Transformed property data:", {
             featuresCount: transformedFeatures.length,
             areasCount: transformedAreas.length,
             placesCount: transformedNearbyPlaces.length,
-            imagesCount: transformedImages.length
+            imagesCount: transformedImages.length,
+            citiesCount: nearbyCitiesArray.length
           });
           
           setFullPropertyData(transformedData);
