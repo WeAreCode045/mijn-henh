@@ -2,13 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { 
-  StatusSection, 
-  AgentSection, 
-  DateInfoSection, 
-  ArchiveButton, 
-  DeleteButton 
-} from "./property-management";
+import { StatusSection } from "./StatusSection";
+import { AgentSection } from "./AgentSection";
+import { DateInfoSection } from "./DateInfoSection";
+import { ArchiveButton } from "./ArchiveButton";
+import { DeleteButton } from "./DeleteButton";
 import { useCallback, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { IconActionButtons } from "./IconActionButtons";

@@ -5,3 +5,4 @@ export * from './ArchiveButton';
 export * from './DateInfoSection';
 export * from './DeleteButton';
 export * from './StatusSection';
+export * from './IconActionButtons';
