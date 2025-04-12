@@ -31,16 +31,6 @@ export function DashboardTabContent({
     ? handleSaveAgent 
     : async () => { console.warn("handleSaveAgent not provided"); };
 
-  // Create a wrapper for handleGeneratePDF to match the expected signature
-  const handlePDFGeneration = (e: React.MouseEvent) => {
-    console.log("DashboardTabContent - Wrapper for handleGeneratePDF called");
-    if (typeof handleGeneratePDF === 'function') {
-      handleGeneratePDF(e);
-    } else {
-      console.warn("handleGeneratePDF not provided");
-    }
-  };
-
   return (
     <PropertyDashboardTab
       id={property.id}
@@ -55,7 +45,7 @@ export function DashboardTabContent({
       onDelete={onDelete}
       handleSaveObjectId={handleSaveObjectId}
       handleSaveAgent={safeHandleSaveAgent}
-      handleGeneratePDF={handlePDFGeneration}
+      handleGeneratePDF={handleGeneratePDF}
       handleWebView={onWebView}
       virtualTourUrl={property.virtualTourUrl}
       youtubeUrl={property.youtubeUrl}
