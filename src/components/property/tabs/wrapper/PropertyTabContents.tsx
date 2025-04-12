@@ -85,6 +85,13 @@ export function PropertyTabContents({
           const transformedNearbyPlaces = transformNearbyPlaces(nearbyPlacesArray);
           const transformedImages = transformImages(propertyImages);
           
+          // Process nearby_cities to ensure it matches PropertyCity structure
+          const transformedNearbyCities: PropertyCity[] = nearbyCitiesArray.map((city: any) => ({
+            id: city.id || `city-${Date.now()}-${Math.random()}`,
+            name: city.name || "Unknown City",
+            distance: city.distance
+          }));
+          
           // Create properly formatted PropertyData with images
           const transformedData: PropertyData = {
             ...data,
@@ -92,9 +99,7 @@ export function PropertyTabContents({
             features: transformedFeatures,
             areas: transformedAreas,
             nearby_places: transformedNearbyPlaces,
-            nearby_cities: nearbyCitiesArray as PropertyCity[],
-            // Remove property_images as it's not part of the PropertyData type
-            property_images: undefined
+            nearby_cities: transformedNearbyCities
           };
           
           console.log("Transformed property data:", {
@@ -102,7 +107,7 @@ export function PropertyTabContents({
             areasCount: transformedAreas.length,
             placesCount: transformedNearbyPlaces.length,
             imagesCount: transformedImages.length,
-            citiesCount: nearbyCitiesArray.length
+            citiesCount: transformedNearbyCities.length
           });
           
           setFullPropertyData(transformedData);
