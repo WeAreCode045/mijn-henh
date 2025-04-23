@@ -10,7 +10,7 @@ import {
   ArchiveButton, 
   DeleteButton 
 } from "./property-management";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
@@ -52,19 +52,25 @@ export function PropertyManagementCard({
   console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
 
   // Fetch property data for the modal
-  useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .single();
-        
-      if (error) throw error;
-      if (data) setPropertyData(data);
-    } catch (error) {
-      console.error('Error fetching property data:', error);
-    }
+  useEffect(() => {
+    if (!propertyId) return;
+    
+    const fetchPropertyData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', propertyId)
+          .single();
+          
+        if (error) throw error;
+        if (data) setPropertyData(data);
+      } catch (error) {
+        console.error('Error fetching property data:', error);
+      }
+    };
+    
+    fetchPropertyData();
   }, [propertyId]);
 
   // Handle sharing the property link

@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { IconActionButtons } from "./IconActionButtons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 import { useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ActionButtonsProps {
   onGeneratePDF: (e: React.MouseEvent) => void;
@@ -38,22 +39,61 @@ export function ActionButtons({
   virtualTourUrl,
   youtubeUrl,
   showTextButtons = true,
-  propertyData
+  propertyData: initialPropertyData
 }: ActionButtonsProps) {
   const { toast } = useToast();
   const [webViewOpen, setWebViewOpen] = useState(false);
+  const [propertyData, setPropertyData] = useState<any>(initialPropertyData);
   
   console.log("ActionButtons - propertyId:", propertyId);
   console.log("ActionButtons - isArchived:", isArchived);
   console.log("ActionButtons - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
   console.log("ActionButtons - onWebView is function:", typeof onWebView === 'function');
 
+  // Fetch property data when needed
+  useEffect(() => {
+    // If we already have property data or the dialog isn't open, don't fetch
+    if (propertyData || !webViewOpen) return;
+    
+    const fetchPropertyData = async () => {
+      try {
+        console.log("ActionButtons - Fetching property data for:", propertyId);
+        const { data, error } = await supabase
+          .from('properties')
+          .select(`
+            *,
+            property_images(*)
+          `)
+          .eq('id', propertyId)
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          console.log("ActionButtons - Fetched property data successfully");
+          setPropertyData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching property data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load property data",
+          variant: "destructive",
+        });
+        // Close the dialog on error
+        setWebViewOpen(false);
+      }
+    };
+    
+    fetchPropertyData();
+  }, [propertyId, webViewOpen, propertyData, toast]);
+
   const handleWebViewClick = useCallback((e: React.MouseEvent) => {
     console.log("ActionButtons: handleWebViewClick called");
     e.preventDefault();
     e.stopPropagation();
     
-    // Open the modal instead of navigating to a new page
+    // Open the modal
     setWebViewOpen(true);
     
     // Also call the original handler if it exists (for analytics, etc.)
@@ -113,8 +153,8 @@ export function ActionButtons({
         </div>
       )}
       
-      {/* WebView Modal Dialog */}
-      {propertyData && (
+      {/* WebView Modal Dialog - Only render when webViewOpen is true and we have property data */}
+      {webViewOpen && propertyData && (
         <PropertyWebViewDialog
           propertyData={propertyData}
           isOpen={webViewOpen}
