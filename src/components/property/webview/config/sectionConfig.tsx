@@ -8,6 +8,7 @@ import { FloorplanSection } from "../sections/FloorplanSection";
 import { NeighborhoodSection } from "../sections/NeighborhoodSection";
 import { ContactSection } from "../sections/ContactSection";
 import { VirtualTourSection } from "../sections/VirtualTourSection";
+import { FeaturesSection } from "../sections/FeaturesSection";
 import React from "react";
 
 interface SectionConfigProps {
@@ -51,6 +52,10 @@ export function getSections({
     {
       title: "Details",
       content: <DetailsSection property={property} />
+    },
+    {
+      title: "Features",
+      content: <FeaturesSection property={property} settings={settings} />
     }
   ];
   
