@@ -56,16 +56,36 @@ export function usePropertyActions(propertyId: string) {
     
     console.log("usePropertyActions - Opening WebView for property:", propertyId);
     
-    // Set state to open modal instead of navigating
-    setIsWebViewOpen(true);
-    
-    // We will handle this in the component with a modal dialog
-    toast({
-      title: "Web View",
-      description: "Opening web view",
-    });
-    
-    return true;
+    try {
+      // Open in a new tab instead of dialog
+      const url = `/property/${propertyId}/webview`;
+      console.log("Opening WebView URL:", url);
+      
+      // Ensure we use window.open correctly
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      
+      // Check if window was opened successfully
+      if (!newWindow) {
+        throw new Error("Unable to open new window, possibly blocked by popup blocker");
+      }
+      
+      toast({
+        title: "Web View",
+        description: "Opening web view in a new tab",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error opening WebView:", error);
+      
+      toast({
+        title: "Error",
+        description: "Failed to open web view",
+        variant: "destructive",
+      });
+      
+      return false;
+    }
   }, [propertyId, toast]);
 
   return {

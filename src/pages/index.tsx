@@ -3,10 +3,18 @@ import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { PropertyQuickNav } from "@/components/dashboard/PropertyQuickNav";
 import { ActivityIndicators } from "@/components/dashboard/ActivityIndicators";
 import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Index() {
   const [searchParams] = useSearchParams();
   const propertyId = searchParams.get('propertyId');
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    // Mark component as loaded to avoid issues with dynamic imports
+    setIsLoaded(true);
+    console.log("Index page loaded successfully");
+  }, []);
   
   return (
     <div className="container mx-auto pt-4 pb-8">

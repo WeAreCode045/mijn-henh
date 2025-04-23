@@ -1,7 +1,7 @@
 
 import React, { lazy } from "react";
 import { Route } from "react-router-dom";
-import { LoadingSpinner } from "../common/LoadingSpinner";
+import { WebViewLoading } from "../property/webview/WebViewLoading";
 
 // Lazy-loaded component
 const PropertyWebView = lazy(() => import("../property/PropertyWebView").then(module => ({ default: module.PropertyWebView })));
@@ -11,7 +11,7 @@ export const WebViewRoutes = [
     key="property-webview"
     path="/property/:id/webview" 
     element={
-      <React.Suspense fallback={<LoadingSpinner />}>
+      <React.Suspense fallback={<WebViewLoading />}>
         <PropertyWebView isAdminView={true} />
       </React.Suspense>
     } 
@@ -21,7 +21,7 @@ export const WebViewRoutes = [
     key="share-webview"
     path="/share/:id" 
     element={
-      <React.Suspense fallback={<LoadingSpinner />}>
+      <React.Suspense fallback={<WebViewLoading />}>
         <PropertyWebView isAdminView={false} />
       </React.Suspense>
     } 
@@ -31,7 +31,7 @@ export const WebViewRoutes = [
     key="property-view-legacy"
     path="/property/view/:id" 
     element={
-      <React.Suspense fallback={<LoadingSpinner />}>
+      <React.Suspense fallback={<WebViewLoading />}>
         <PropertyWebView isAdminView={true} />
       </React.Suspense>
     } 
