@@ -1,17 +1,15 @@
 
+import React from "react";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { OverviewSection } from "../sections/OverviewSection";
 import { DetailsSection } from "../sections/DetailsSection";
-import { AreasSection } from "../sections/AreasSection";
 import { SingleAreaSection } from "../sections/SingleAreaSection";
 import { FloorplanSection } from "../sections/FloorplanSection";
 import { NeighborhoodSection } from "../sections/NeighborhoodSection";
-import { ContactSection } from "../sections/ContactSection";
 import { VirtualTourSection } from "../sections/VirtualTourSection";
-import React from "react";
 
-interface SectionConfigProps {
+interface SectionConfigOptions {
   property: PropertyData;
   settings: AgencySettings;
   currentPage: number;
@@ -19,91 +17,74 @@ interface SectionConfigProps {
   isPrintView?: boolean;
 }
 
-interface Section {
+interface SectionConfig {
   title: string;
   content: React.ReactNode;
+  key: string;
 }
 
-export function getSections({
-  property,
-  settings,
+export function getSections({ 
+  property, 
+  settings, 
   currentPage,
   waitForPlaces = false,
   isPrintView = false
-}: SectionConfigProps): Section[] {
-  // Debug logs for troubleshooting
-  console.log('getSections called with currentPage:', currentPage, {
-    propertyId: property.id,
-    areaCount: property.areas?.length || 0,
-    hasFloorplan: !!property.floorplanEmbedScript || (property.floorplans && property.floorplans.length > 0),
-    hasVirtualTour: !!property.virtualTourUrl,
-    hasYoutubeVideo: !!property.youtubeUrl
-  });
+}: SectionConfigOptions): SectionConfig[] {
+  // Safety check
+  if (!property) return [];
   
-  // Always create sections in fixed order
-  const sections: Section[] = [];
-
-  // 0: Overview (Home)
+  const sections: SectionConfig[] = [];
+  
+  // Fixed sections
   sections.push({
     title: "Overview",
-    content: <OverviewSection property={property} settings={settings} />
+    content: <OverviewSection property={property} settings={settings} />,
+    key: "overview"
   });
   
-  // 1: Details (Introduction)
   sections.push({
     title: "Details",
-    content: <DetailsSection property={property} settings={settings} />
+    content: <DetailsSection property={property} settings={settings} />,
+    key: "details"
   });
   
-  // 2..N: Individual area sections
+  // Dynamic area sections
   if (property.areas && property.areas.length > 0) {
     property.areas.forEach((area, index) => {
       sections.push({
-        title: `Area: ${area.title || area.name || `Area ${index + 1}`}`,
-        content: <SingleAreaSection property={property} settings={settings} areaIndex={index} />
+        title: area.title || area.name || `Area ${index + 1}`,
+        content: <SingleAreaSection property={property} settings={settings} areaIndex={index} />,
+        key: `area-${index}`
       });
     });
   }
-
-  // Next: Floorplan section (if applicable)
-  if (property.floorplanEmbedScript || 
+  
+  // Floorplan section (if available)
+  if ((property.floorplanEmbedScript && property.floorplanEmbedScript.trim() !== '') ||
       (property.floorplans && property.floorplans.length > 0)) {
     sections.push({
-      title: "Floorplan",
-      content: <FloorplanSection property={property} settings={settings} />
+      title: "Floorplans",
+      content: <FloorplanSection property={property} settings={settings} />,
+      key: "floorplan"
     });
   }
   
-  // Next: Neighborhood section (always present)
+  // Neighborhood section
   sections.push({
     title: "Location",
-    content: <NeighborhoodSection 
-      property={property} 
-      waitForPlaces={waitForPlaces}
-      settings={settings}
-    />
+    content: <NeighborhoodSection property={property} settings={settings} waitForPlaces={waitForPlaces} />,
+    key: "neighborhood"
   });
   
-  // Next: Virtual tour section (if applicable)
-  if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') || 
+  // Virtual tour section (if available)
+  if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') ||
       (property.youtubeUrl && property.youtubeUrl.trim() !== '')) {
     sections.push({
       title: "Media",
-      content: <VirtualTourSection property={property} settings={settings} />
+      content: <VirtualTourSection property={property} settings={settings} />,
+      key: "virtualtour"
     });
   }
   
-  // Last: Contact section (always present, unless print view)
-  if (!isPrintView) {
-    sections.push({
-      title: "Contact",
-      content: <ContactSection property={property} settings={settings} />
-    });
-  }
-
-  // Log the final sections structure for debugging
-  console.log('Sections generated:', sections.map((s, i) => `${i}: ${s.title}`).join(', '), 
-    { totalSections: sections.length });
-
   return sections;
 }
