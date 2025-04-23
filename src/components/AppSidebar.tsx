@@ -5,7 +5,9 @@ import {
   Settings, 
   LogOut,
   Users as UsersIcon,
-  FileUp
+  FileUp,
+  ChevronDown,
+  Globe
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -16,17 +18,22 @@ import {
   SidebarGroupLabel, 
   SidebarMenu, 
   SidebarMenuButton, 
-  SidebarMenuItem 
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
+import { useState } from "react";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const { user, profile, isAdmin } = useAuth();
   const { toast } = useToast();
+  const [propertiesOpen, setPropertiesOpen] = useState(false);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -56,10 +63,43 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={() => navigate('/properties')} className="text-white hover:bg-primary-foreground/10">
+              <SidebarMenuButton 
+                onClick={() => setPropertiesOpen(!propertiesOpen)} 
+                className="text-white hover:bg-primary-foreground/10"
+              >
                 <Home className="w-4 h-4" />
                 <span>Properties</span>
+                <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${propertiesOpen ? 'rotate-180' : ''}`} />
               </SidebarMenuButton>
+              
+              {propertiesOpen && (
+                <SidebarMenuSub>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      onClick={() => navigate('/properties')}
+                      isActive={location.pathname === '/properties'}
+                    >
+                      All Properties
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      onClick={() => navigate('/properties/global-features')}
+                      isActive={location.pathname === '/properties/global-features'}
+                    >
+                      Global Features
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton 
+                      onClick={() => navigate('/properties/webviews')}
+                      isActive={location.pathname === '/properties/webviews'}
+                    >
+                      Webviews
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              )}
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton onClick={() => navigate('/import')} className="text-white hover:bg-primary-foreground/10">

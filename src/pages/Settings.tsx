@@ -7,7 +7,6 @@ import { AgencyTab } from "@/components/settings/AgencyTab";
 import { DesignTab } from "@/components/settings/DesignTab";
 import { AdvancedTab } from "@/components/settings/AdvancedTab";
 import { IconSettings } from "@/components/settings/IconSettings";
-import { GlobalTab } from "@/components/settings/GlobalTab";
 import { MailTab } from "@/components/settings/MailTab";
 
 const Settings = () => {
@@ -23,10 +22,6 @@ const Settings = () => {
     handleLogoUpload,
     handlePdfBackgroundUpload,
     handleWebviewBackgroundUpload,
-    handleGlobalFeatureAdd,
-    handleGlobalFeatureRemove,
-    handleGlobalFeatureBulkUpdate,
-    globalFeatures,
   } = useAgencySettings();
 
   return (
@@ -62,12 +57,6 @@ const Settings = () => {
           variant={activeTab === "icons" ? "default" : "outline"}
         >
           Icons
-        </Button>
-        <Button 
-          onClick={() => setActiveTab("global")} 
-          variant={activeTab === "global" ? "default" : "outline"}
-        >
-          Global
         </Button>
       </div>
 
@@ -111,17 +100,6 @@ const Settings = () => {
           <IconSettings
             settings={settings}
             onSelectChange={handleSelectChange}
-          />
-        )}
-
-        {activeTab === "global" && (
-          <GlobalTab
-            settings={settings}
-            onSelectChange={handleSelectChange}
-            globalFeatures={globalFeatures}
-            onFeatureAdd={handleGlobalFeatureAdd}
-            onFeatureRemove={handleGlobalFeatureRemove}
-            onFeatureBulkUpdate={handleGlobalFeatureBulkUpdate}
           />
         )}
 

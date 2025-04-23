@@ -1,4 +1,3 @@
-
 import React, { lazy } from "react";
 import { Route } from "react-router-dom";
 import { ProtectedRoute } from "../ProtectedRoute";
@@ -8,6 +7,8 @@ import { LoadingSpinner } from "../common/LoadingSpinner";
 // Lazy-loaded components
 const Index = lazy(() => import("../../pages/index"));
 const Properties = lazy(() => import("../../pages/Properties"));
+const GlobalFeaturesPage = lazy(() => import("../../pages/properties/GlobalFeaturesPage"));
+const WebviewsPage = lazy(() => import("../../pages/properties/WebviewsPage"));
 const PropertyFormPage = lazy(() => import("../../pages/PropertyFormPage"));
 const Settings = lazy(() => import("../../pages/Settings"));
 const Users = lazy(() => import("../../pages/Users"));
@@ -36,6 +37,34 @@ export const MainRoutes = [
         <PropertyLayout>
           <React.Suspense fallback={<LoadingSpinner />}>
             <Properties />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
+  />,
+  
+  <Route 
+    key="properties-global-features"
+    path="/properties/global-features" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <GlobalFeaturesPage />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
+  />,
+  
+  <Route 
+    key="properties-webviews"
+    path="/properties/webviews" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <WebviewsPage />
           </React.Suspense>
         </PropertyLayout>
       </ProtectedRoute>
