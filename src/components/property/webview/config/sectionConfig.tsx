@@ -65,6 +65,25 @@ export function getSections({
     });
   }
   
+  // Add neighborhood section (Location)
+  sections.push({
+    title: "Neighborhood",
+    content: <NeighborhoodSection 
+      property={property} 
+      waitForPlaces={waitForPlaces}
+      settings={settings}
+    />
+  });
+  
+  // Add virtual tour section if either virtual tour or YouTube video is available
+  if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') || 
+      (property.youtubeUrl && property.youtubeUrl.trim() !== '')) {
+    sections.push({
+      title: "Virtual Experience",
+      content: <VirtualTourSection property={property} settings={settings} />
+    });
+  }
+  
   // Add floorplan section if available - improved check to handle empty strings
   if (property.floorplanEmbedScript && property.floorplanEmbedScript.trim() !== '' || 
       (property.floorplans && property.floorplans.length > 0)) {
@@ -76,24 +95,6 @@ export function getSections({
   } else {
     console.log('Skipping floorplan section - no content available');
   }
-  
-  // Add virtual tour section if either virtual tour or YouTube video is available
-  if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') || 
-      (property.youtubeUrl && property.youtubeUrl.trim() !== '')) {
-    sections.push({
-      title: "Virtual Experience",
-      content: <VirtualTourSection property={property} settings={settings} />
-    });
-  }
-  
-  // Add remaining sections - fix the NeighborhoodSection props
-  sections.push({
-    title: "Neighborhood",
-    content: <NeighborhoodSection 
-      property={property} 
-      waitForPlaces={waitForPlaces} 
-    />
-  });
   
   // Add contact section if not in print view
   if (!isPrintView) {

@@ -1,75 +1,84 @@
 
-import React from "react";
-import { PropertyData } from "@/types/property";
-import { StarIcon } from "lucide-react";
-import { groupPlacesByCategory } from "../../form/steps/location/utils/placeUtils";
-import { PropertyNearbyPlace } from "@/types/property/PropertyPlaceTypes";
+import { useEffect, useState } from "react";
+import { WebViewSectionProps } from "../types";
+import { MapPin, Loader } from "lucide-react";
 
-// Import WebviewSectionTitle from the correct path
-import { WebviewSectionTitle } from "../components/WebviewSectionTitle";
-
-interface NeighborhoodSectionProps {
-  property: PropertyData;
+interface NeighborhoodSectionProps extends WebViewSectionProps {
   waitForPlaces?: boolean;
 }
 
-export function NeighborhoodSection({ property, waitForPlaces }: NeighborhoodSectionProps) {
-  if (!property.nearby_places || property.nearby_places.length === 0) {
-    return null;
-  }
-
-  // Filter only places that are marked as visible
-  const visiblePlaces = (property.nearby_places as PropertyNearbyPlace[]).filter(place => 
-    place.visible_in_webview !== false
-  );
-
-  if (visiblePlaces.length === 0) {
-    return null;
-  }
-
-  // Group the places by category
-  const placesByCategory = React.useMemo(() => {
-    return groupPlacesByCategory(visiblePlaces);
-  }, [visiblePlaces]);
-
-  // Get all categories from the grouped places
-  const categories = Object.keys(placesByCategory);
-
+export function NeighborhoodSection({ 
+  property, 
+  settings, 
+  waitForPlaces = false 
+}: NeighborhoodSectionProps) {
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  
+  // Generate map URL based on coordinates
+  const mapUrl = property.coordinates?.latitude && property.coordinates?.longitude
+    ? `https://maps.googleapis.com/maps/api/staticmap?center=${property.coordinates.latitude},${property.coordinates.longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${property.coordinates.latitude},${property.coordinates.longitude}&key=${property.mapApiKey || ''}`
+    : null;
+  
+  useEffect(() => {
+    if (mapUrl) {
+      const image = new Image();
+      image.onload = () => setIsMapLoaded(true);
+      image.src = mapUrl;
+    }
+  }, [mapUrl]);
+  
   return (
-    <div className="py-8 border-b border-estate-100">
-      <WebviewSectionTitle title="Omgeving" />
+    <div className="space-y-6 px-6">
+      <h2 
+        className="text-2xl font-bold" 
+        style={{ color: settings?.secondaryColor }}
+      >
+        Neighborhood
+      </h2>
       
-      <div className="mt-6 space-y-6">
-        {categories.map((category) => (
-          <div key={category} className="space-y-3">
-            <h3 className="font-semibold text-lg">{category}</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {placesByCategory[category].map(place => (
-                <div 
-                  key={place.id} 
-                  className="p-4 bg-white rounded-lg border border-estate-100 shadow-sm"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium text-estate-800">{place.name}</h4>
-                      {place.vicinity && (
-                        <p className="text-sm text-estate-500 mt-1">{place.vicinity}</p>
-                      )}
-                    </div>
-                    
-                    {place.rating !== undefined && typeof place.rating === 'number' && (
-                      <div className="flex items-center bg-amber-50 text-amber-700 px-2 py-1 rounded">
-                        <StarIcon className="h-4 w-4 fill-amber-500 text-amber-500 mr-1" />
-                        <span>{place.rating.toFixed(1)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* Location Description */}
+      {property.locationDescription && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">About the Area</h3>
+          <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
+            {property.locationDescription}
+          </p>
+        </div>
+      )}
+      
+      {/* Map Section */}
+      <div className="w-full">
+        {mapUrl ? (
+          <div className="rounded-lg overflow-hidden shadow-md">
+            <img 
+              src={mapUrl}
+              alt="Property location"
+              className="w-full h-auto"
+              style={{ opacity: isMapLoaded ? 1 : 0.3 }}
+            />
+            {!isMapLoaded && (
+              <div className="flex items-center justify-center h-[300px] bg-gray-100">
+                <Loader className="h-8 w-8 text-gray-400 animate-spin" />
+              </div>
+            )}
           </div>
-        ))}
+        ) : (
+          <div className="rounded-lg bg-gray-100 p-8 flex flex-col items-center justify-center text-center">
+            <MapPin className="h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-gray-500">No location coordinates available</p>
+          </div>
+        )}
+      </div>
+      
+      {/* Address */}
+      <div className="flex items-start space-x-2 mt-4">
+        <MapPin className="h-5 w-5 text-gray-700 mt-0.5" />
+        <div>
+          <h3 className="font-semibold">Address</h3>
+          <p className="text-gray-700">
+            {property.address || "Address not provided"}
+          </p>
+        </div>
       </div>
     </div>
   );

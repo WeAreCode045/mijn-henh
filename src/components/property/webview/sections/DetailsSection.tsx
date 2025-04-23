@@ -10,8 +10,6 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
     Array.isArray(property.features) ? property.features : [property.features]
   ) : [];
   
-  console.log('DetailsSection - Features:', features);
-  
   return (
     <div className="space-y-6 pb-16">
       <div className="px-6">
@@ -26,7 +24,8 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
         <div className="flex-[3] relative">
           <div className="relative bg-white/90 p-4 rounded-lg shadow-sm">
             <h3 
-              className="text-xl font-semibold mb-2 text-secondary-color"
+              className="text-xl font-semibold mb-2"
+              style={{ color: settings?.secondaryColor }}
             >
               Description
             </h3>
@@ -41,7 +40,8 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
           <div className="flex-[2]">
             <div className="bg-white/90 p-4 rounded-lg shadow-sm">
               <h3 
-                className="text-xl font-semibold mb-2 text-secondary-color"
+                className="text-xl font-semibold mb-2"
+                style={{ color: settings?.secondaryColor }}
               >
                 Features
               </h3>
@@ -65,11 +65,16 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                           }}
                         >
                           <TableCell className="p-2 text-gray-700 flex items-center text-left pl-4">
-                            <Check 
-                              className="w-5 h-5 mr-2 text-secondary-color"
-                              strokeWidth={2.5}
-                            />
-                            <span style={{ fontWeight: 600 }}>
+                            <div 
+                              className="w-6 h-6 rounded-full flex items-center justify-center mr-2"
+                              style={{ backgroundColor: settings?.secondaryColor || '#0EA5E9' }}
+                            >
+                              <Check 
+                                className="w-4 h-4 text-white"
+                                strokeWidth={2.5}
+                              />
+                            </div>
+                            <span style={{ fontWeight: 500 }}>
                               {feature.description}
                             </span>
                           </TableCell>

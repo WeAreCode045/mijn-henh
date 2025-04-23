@@ -1,7 +1,6 @@
 
 import { PropertyData } from "@/types/property";
 import { WebViewSectionProps } from "../types";
-import { useState } from "react";
 import "../styles/WebViewStyles.css";
 import { AreaImageSlider } from "../AreaImageSlider";
 
@@ -18,18 +17,34 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
   const area = property.areas[areaIndex];
   const areaTitle = area.title || `Area ${areaIndex + 1}`;
   
-  // Get area photos by finding property images that have this area's id
-  // Add null check for property.images before trying to filter
-  const areaPhotos = Array.isArray(property.images) 
-    ? property.images
-        .filter(img => img && typeof img === 'object' && 'area' in img && img.area === area.id)
-        .map(img => typeof img === 'object' && 'url' in img ? img.url : '')
-        .filter(url => url !== '')
-    : [];
+  // Get area photos
+  // 1. First check if area has its own images property
+  let areaPhotos: string[] = [];
+  if (area.images && area.images.length > 0) {
+    areaPhotos = area.images.map(img => typeof img === 'object' && img.url ? img.url : String(img));
+  } 
+  // 2. If no area images found, try to filter from property images
+  else if (Array.isArray(property.images)) {
+    areaPhotos = property.images
+      .filter(img => {
+        if (typeof img === 'object' && 'area' in img && img.area === area.id) {
+          return true;
+        }
+        return false;
+      })
+      .map(img => typeof img === 'object' && 'url' in img ? img.url : String(img));
+  }
+  
+  console.log(`Area ${areaIndex} photos:`, areaPhotos);
   
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-estate-800">{areaTitle}</h2>
+    <div className="space-y-6 px-6">
+      <h2 
+        className="text-2xl font-bold"
+        style={{ color: settings?.secondaryColor }}
+      >
+        {areaTitle}
+      </h2>
       
       {/* Area description */}
       {area.description && (
@@ -38,10 +53,20 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
         </div>
       )}
       
-      {/* Area images slider */}
+      {/* Area images */}
       {areaPhotos.length > 0 && (
         <div className="mt-6">
-          <AreaImageSlider areaImages={areaPhotos} areaTitle={areaTitle} />
+          <div className="grid grid-cols-2 gap-4">
+            {areaPhotos.map((photoUrl, idx) => (
+              <div key={idx} className="aspect-video rounded-md overflow-hidden">
+                <img 
+                  src={photoUrl} 
+                  alt={`${areaTitle} - Photo ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

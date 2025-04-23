@@ -16,11 +16,12 @@ export function Navigation({
   onNext 
 }: NavigationProps) {
   return (
-    <div className="mt-8 border-t pt-6 flex justify-between items-center">
+    <div className="flex justify-between items-center">
       <Button
         variant="outline"
         onClick={onPrevious}
         disabled={currentPage === 0}
+        className="shadow-sm"
       >
         <ChevronLeft className="mr-2 h-4 w-4" />
         Previous
@@ -34,6 +35,7 @@ export function Navigation({
         variant="outline"
         onClick={onNext}
         disabled={currentPage === totalPages - 1}
+        className="shadow-sm"
       >
         Next
         <ChevronRight className="ml-2 h-4 w-4" />

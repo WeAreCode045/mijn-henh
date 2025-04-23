@@ -25,7 +25,7 @@ export function WebViewLayout({
   const { primaryColor, secondaryColor } = useThemeColors(settings);
 
   return (
-    <div className="w-full min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
@@ -58,9 +58,9 @@ export function WebViewLayout({
       </header>
 
       {/* Main Content */}
-      <main className="w-full">
-        <div className="max-w-[1600px] mx-auto px-6 py-8">
-          <div className="flex gap-8">
+      <main className="w-full flex-1 flex flex-col">
+        <div className="max-w-[1600px] mx-auto px-6 py-8 flex-1 flex flex-col w-full">
+          <div className="flex gap-8 flex-1">
             {/* Left Sidebar */}
             <aside className="w-64 shrink-0">
               <SideMenu 
@@ -71,16 +71,20 @@ export function WebViewLayout({
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 max-w-[60%]">
-              {children}
+            <div className="flex-1 max-w-[60%] flex flex-col">
+              <div className="flex-1 overflow-y-auto pb-16">
+                {children}
+              </div>
               
-              {/* Navigation */}
-              <Navigation
-                currentPage={currentPage}
-                totalPages={property.areas?.length ? 6 + property.areas.length : 6}
-                onPrevious={() => onPageChange(currentPage - 1)}
-                onNext={() => onPageChange(currentPage + 1)}
-              />
+              {/* Navigation - sticky to the bottom */}
+              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2">
+                <Navigation
+                  currentPage={currentPage}
+                  totalPages={property.areas?.length ? 6 + property.areas.length : 6}
+                  onPrevious={() => onPageChange(currentPage - 1)}
+                  onNext={() => onPageChange(currentPage + 1)}
+                />
+              </div>
             </div>
 
             {/* Right Sidebar */}
