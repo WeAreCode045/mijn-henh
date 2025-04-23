@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { WebViewSectionProps } from "../types";
 import { MapPin, Loader } from "lucide-react";
+import "../styles/WebViewStyles.css";
 
 interface NeighborhoodSectionProps extends WebViewSectionProps {
   waitForPlaces?: boolean;
@@ -26,6 +27,19 @@ export function NeighborhoodSection({
       image.src = mapUrl;
     }
   }, [mapUrl]);
+
+  // Group nearby places by type/category for better organization
+  const groupedPlaces = property.nearby_places ? 
+    property.nearby_places.reduce((acc, place) => {
+      const category = place.type || place.category || 'Other';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(place);
+      return acc;
+    }, {} as Record<string, any[]>) : {};
+  
+  const hasNearbyPlaces = property.nearby_places && property.nearby_places.length > 0;
   
   return (
     <div className="space-y-6 px-6">
@@ -80,6 +94,33 @@ export function NeighborhoodSection({
           </p>
         </div>
       </div>
+      
+      {/* Nearby Places Section */}
+      {hasNearbyPlaces && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Nearby Places</h3>
+          
+          {Object.entries(groupedPlaces).map(([category, places]) => (
+            <div key={category} className="mb-6">
+              <h4 className="font-medium text-base mb-2 capitalize">{category}</h4>
+              <div className="space-y-2">
+                {places.map((place) => (
+                  <div key={place.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                    <span>{place.name}</span>
+                    {place.distance && (
+                      <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                        {typeof place.distance === 'number' 
+                          ? `${place.distance.toFixed(1)} km` 
+                          : place.distance}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

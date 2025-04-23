@@ -31,14 +31,11 @@ export function getSections({
   waitForPlaces = false,
   isPrintView = false
 }: SectionConfigProps): Section[] {
-  // Debug log for floorplan script
-  console.log('getSections - Property floorplan check:', {
+  // Debug logs for troubleshooting
+  console.log('getSections called with currentPage:', currentPage, {
     propertyId: property.id,
-    hasFloorplanScript: !!property.floorplanEmbedScript,
-    scriptType: typeof property.floorplanEmbedScript,
-    scriptLength: property.floorplanEmbedScript ? property.floorplanEmbedScript.length : 0,
-    scriptEmpty: property.floorplanEmbedScript === '',
-    scriptFirstChars: property.floorplanEmbedScript ? property.floorplanEmbedScript.substring(0, 30) + '...' : 'none',
+    areaCount: property.areas?.length || 0,
+    hasFloorplan: !!property.floorplanEmbedScript,
     hasVirtualTour: !!property.virtualTourUrl,
     hasYoutubeVideo: !!property.youtubeUrl
   });
@@ -55,13 +52,23 @@ export function getSections({
     }
   ];
   
-  // Add individual area sections
+  // Add individual area sections if they exist
   if (property.areas && property.areas.length > 0) {
     property.areas.forEach((area, index) => {
       sections.push({
         title: `Area: ${area.title || `Area ${index + 1}`}`,
         content: <SingleAreaSection property={property} settings={settings} areaIndex={index} />
       });
+    });
+  }
+
+  // These sections need to come in a specific order
+  // Add floorplan section 
+  if (property.floorplanEmbedScript || 
+      (property.floorplans && property.floorplans.length > 0)) {
+    sections.push({
+      title: "Floorplan",
+      content: <FloorplanSection property={property} settings={settings} />
     });
   }
   
@@ -84,18 +91,6 @@ export function getSections({
     });
   }
   
-  // Add floorplan section if available - improved check to handle empty strings
-  if (property.floorplanEmbedScript && property.floorplanEmbedScript.trim() !== '' || 
-      (property.floorplans && property.floorplans.length > 0)) {
-    console.log('Adding floorplan section to sections array');
-    sections.push({
-      title: "Floorplan",
-      content: <FloorplanSection property={property} settings={settings} />
-    });
-  } else {
-    console.log('Skipping floorplan section - no content available');
-  }
-  
   // Add contact section if not in print view
   if (!isPrintView) {
     sections.push({
@@ -105,8 +100,8 @@ export function getSections({
   }
 
   // Log the final sections structure for debugging
-  console.log('Sections generated:', sections.map(s => s.title).join(', '), 
-    { totalSections: sections.length, hasFloorplan: !!property.floorplanEmbedScript });
+  console.log('Sections generated:', sections.map((s, i) => `${i}: ${s.title}`).join(', '), 
+    { totalSections: sections.length });
 
   return sections;
 }

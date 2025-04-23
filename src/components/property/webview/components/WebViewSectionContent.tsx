@@ -22,7 +22,7 @@ export function WebViewSectionContent({
   waitForPlaces = false,
   showHeader = true
 }: WebViewSectionContentProps) {
-  const { getSectionIndex, calculateTotalPages } = usePageCalculation();
+  const { calculateTotalPages } = usePageCalculation();
   
   // Validate property data
   if (!property) {
@@ -33,12 +33,6 @@ export function WebViewSectionContent({
     );
   }
   
-  // Check if floorplan exists
-  console.log('Property has floorplan embed script:', !!property.floorplanEmbedScript);
-  if (property.floorplanEmbedScript) {
-    console.log('FloorplanEmbedScript exists, first 50 chars:', property.floorplanEmbedScript.substring(0, 50) + '...');
-  }
-
   // Get sections based on the current property and page
   const sections = getSections({ 
     property, 
@@ -73,7 +67,7 @@ export function WebViewSectionContent({
     sectionsAvailable: sections.length,
     currentSectionTitle: currentSection?.title,
     showHeader,
-    sectionTitles: sections.map(s => s.title)
+    sectionTitles: sections.map((s, i) => `${i}: ${s.title}`)
   });
   
   // Check if we have content for this page

@@ -24,9 +24,14 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
   const mainImage = property.featuredImage || 
                    (property.featuredImages && property.featuredImages.length > 0 ? property.featuredImages[0] : null) ||
                    (property.images && property.images.length > 0 ? 
-                     (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url) : null);
+                     (typeof property.images[0] === 'string' ? property.images[0] : 
+                      typeof property.images[0] === 'object' && 'url' in property.images[0] ? property.images[0].url : null) : null);
+
+  // Get featured images array, ensuring we have an array even if it's empty
+  const featuredImages = property.featuredImages || [];
 
   console.log("Selected main image for display:", mainImage);
+  console.log("Featured images count:", featuredImages.length);
 
   return (
     <div className="space-y-4 pb-24">
@@ -54,11 +59,11 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
               </span>
             </div>
             
-            {/* Featured images grid */}
-            {property.featuredImages && property.featuredImages.length > 0 && (
+            {/* Featured images grid - Always display if we have any */}
+            {featuredImages.length > 0 && (
               <div className="px-6 mt-4">
-                <div className="grid grid-cols-4 gap-2">
-                  {property.featuredImages.slice(0, 4).map((imageUrl, index) => (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {featuredImages.slice(0, 4).map((imageUrl, index) => (
                     <div key={index} className="rounded-md overflow-hidden h-[100px]">
                       <img 
                         src={imageUrl} 

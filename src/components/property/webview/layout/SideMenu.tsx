@@ -1,6 +1,7 @@
 
 import { PropertyData } from "@/types/property";
 import { NavigationMenu } from "@/components/ui/navigation-menu";
+import { useMemo } from "react";
 
 interface SideMenuProps {
   property: PropertyData;
@@ -9,50 +10,97 @@ interface SideMenuProps {
 }
 
 export function SideMenu({ property, currentPage, onPageChange }: SideMenuProps) {
+  // Calculate section indices based on property structure
+  const sectionIndices = useMemo(() => {
+    let indices = {
+      overview: 0,
+      details: 1,
+      areasStart: 2,
+      areasEnd: property.areas?.length ? 1 + property.areas.length : 1,
+      floorplan: property.areas?.length ? 2 + property.areas.length : 2,
+      location: property.areas?.length ? 3 + property.areas.length : 3,
+      media: property.areas?.length ? 4 + property.areas.length : 4,
+      contact: property.areas?.length ? 5 + property.areas.length : 5
+    };
+    
+    // Adjust if no floorplan
+    if (!property.floorplanEmbedScript && (!property.floorplans || property.floorplans.length === 0)) {
+      indices.location--;
+      indices.media--;
+      indices.contact--;
+    }
+    
+    // Adjust if no virtual tour or youtube
+    if ((!property.virtualTourUrl || property.virtualTourUrl.trim() === '') && 
+        (!property.youtubeUrl || property.youtubeUrl.trim() === '')) {
+      indices.contact--;
+    }
+    
+    console.log('Menu section indices:', indices);
+    return indices;
+  }, [property]);
+  
   return (
     <nav className="sticky top-24">
       <ul className="space-y-2">
         <MenuItem 
           title="Home" 
-          isActive={currentPage === 0}
-          onClick={() => onPageChange(0)}
+          isActive={currentPage === sectionIndices.overview}
+          onClick={() => onPageChange(sectionIndices.overview)}
         />
         <MenuItem 
           title="Introduction" 
-          isActive={currentPage === 1}
-          onClick={() => onPageChange(1)}
+          isActive={currentPage === sectionIndices.details}
+          onClick={() => onPageChange(sectionIndices.details)}
         />
         
         {/* Areas Submenu */}
-        <div className="pl-4 py-2">
-          <h3 className="font-semibold mb-2">Areas</h3>
-          <ul className="space-y-1">
-            {property.areas?.map((area, index) => (
-              <MenuItem
-                key={area.id}
-                title={area.name}
-                isActive={currentPage === index + 2}
-                onClick={() => onPageChange(index + 2)}
-                isSubmenu
-              />
-            ))}
-          </ul>
-        </div>
+        {property.areas && property.areas.length > 0 && (
+          <div className="pl-4 py-2">
+            <h3 className="font-semibold mb-2">Areas</h3>
+            <ul className="space-y-1">
+              {property.areas?.map((area, index) => (
+                <MenuItem
+                  key={area.id}
+                  title={area.title || area.name || `Area ${index + 1}`}
+                  isActive={currentPage === sectionIndices.areasStart + index}
+                  onClick={() => onPageChange(sectionIndices.areasStart + index)}
+                  isSubmenu
+                />
+              ))}
+            </ul>
+          </div>
+        )}
 
-        <MenuItem 
-          title="Floorplans" 
-          isActive={currentPage === (property.areas?.length || 0) + 2}
-          onClick={() => onPageChange((property.areas?.length || 0) + 2)}
-        />
+        {/* Show Floorplans menu item only if floorplan exists */}
+        {(property.floorplanEmbedScript || (property.floorplans && property.floorplans.length > 0)) && (
+          <MenuItem 
+            title="Floorplans" 
+            isActive={currentPage === sectionIndices.floorplan}
+            onClick={() => onPageChange(sectionIndices.floorplan)}
+          />
+        )}
+        
         <MenuItem 
           title="Location" 
-          isActive={currentPage === (property.areas?.length || 0) + 3}
-          onClick={() => onPageChange((property.areas?.length || 0) + 3)}
+          isActive={currentPage === sectionIndices.location}
+          onClick={() => onPageChange(sectionIndices.location)}
         />
+        
+        {/* Show Media menu item only if virtual tour or youtube exists */}
+        {((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') || 
+          (property.youtubeUrl && property.youtubeUrl.trim() !== '')) && (
+          <MenuItem 
+            title="Media" 
+            isActive={currentPage === sectionIndices.media}
+            onClick={() => onPageChange(sectionIndices.media)}
+          />
+        )}
+        
         <MenuItem 
-          title="Media" 
-          isActive={currentPage === (property.areas?.length || 0) + 4}
-          onClick={() => onPageChange((property.areas?.length || 0) + 4)}
+          title="Contact" 
+          isActive={currentPage === sectionIndices.contact}
+          onClick={() => onPageChange(sectionIndices.contact)}
         />
       </ul>
     </nav>

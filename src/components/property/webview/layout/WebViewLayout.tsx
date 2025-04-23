@@ -6,6 +6,7 @@ import { Navigation } from "./Navigation";
 import { ShareButton } from "./ShareButton";
 import { SideMenu } from "./SideMenu";
 import { ContactSidebar } from "./ContactSidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WebViewLayoutProps {
   property: PropertyData;
@@ -58,9 +59,9 @@ export function WebViewLayout({
       </header>
 
       {/* Main Content */}
-      <main className="w-full flex-1 flex flex-col">
+      <main className="w-full flex-1 flex flex-col overflow-hidden">
         <div className="max-w-[1600px] mx-auto px-6 py-8 flex-1 flex flex-col w-full">
-          <div className="flex gap-8 flex-1">
+          <div className="flex gap-8 flex-1 overflow-hidden">
             {/* Left Sidebar */}
             <aside className="w-64 shrink-0">
               <SideMenu 
@@ -71,13 +72,16 @@ export function WebViewLayout({
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 max-w-[60%] flex flex-col">
-              <div className="flex-1 overflow-y-auto pb-16">
-                {children}
-              </div>
+            <div className="flex-1 max-w-[60%] flex flex-col overflow-hidden">
+              {/* Scrollable content area */}
+              <ScrollArea className="flex-1 overflow-y-auto">
+                <div className="pr-4 pb-16">
+                  {children}
+                </div>
+              </ScrollArea>
               
-              {/* Navigation - sticky to the bottom */}
-              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2">
+              {/* Navigation - sticky to the bottom, full width */}
+              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 w-full">
                 <Navigation
                   currentPage={currentPage}
                   totalPages={property.areas?.length ? 6 + property.areas.length : 6}

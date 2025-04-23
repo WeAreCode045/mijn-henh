@@ -13,21 +13,20 @@ export const usePageCalculation = () => {
       total += propertyData.areas.length; // Add a page for each area
     }
     
-    // Add floorplan page if floorplanEmbedScript exists and is not empty
-    if (propertyData.floorplanEmbedScript && propertyData.floorplanEmbedScript.trim() !== '') {
+    // Add floorplan page if floorplanEmbedScript exists or floorplans array has items
+    if ((propertyData.floorplanEmbedScript && propertyData.floorplanEmbedScript.trim() !== '') ||
+        (propertyData.floorplans && propertyData.floorplans.length > 0)) {
       total += 1;
-      console.log('Adding floorplan page because floorplanEmbedScript exists:', 
-        propertyData.floorplanEmbedScript.substring(0, 50) + '...');
-    } else {
-      console.log('No floorplan page added - floorplanEmbedScript is missing or empty:', 
-        propertyData.floorplanEmbedScript === undefined ? 'undefined' : 
-        propertyData.floorplanEmbedScript === null ? 'null' : 
-        propertyData.floorplanEmbedScript === '' ? 'empty string' : 
-        'contains only whitespace');
     }
     
     // Add neighborhood page
     total += 1;
+    
+    // Add virtual tour page if either virtualTourUrl or youtubeUrl exists
+    if ((propertyData.virtualTourUrl && propertyData.virtualTourUrl.trim() !== '') ||
+        (propertyData.youtubeUrl && propertyData.youtubeUrl.trim() !== '')) {
+      total += 1;
+    }
     
     // Add contact page if not print view
     if (!isPrintView) {
@@ -37,7 +36,9 @@ export const usePageCalculation = () => {
     console.log('Total pages calculated:', total, {
       hasAreas: propertyData.areas?.length > 0,
       areaCount: propertyData.areas?.length || 0,
-      hasFloorplan: !!propertyData.floorplanEmbedScript && propertyData.floorplanEmbedScript.trim() !== '',
+      hasFloorplan: (!!propertyData.floorplanEmbedScript && propertyData.floorplanEmbedScript.trim() !== '') || 
+                    (propertyData.floorplans && propertyData.floorplans.length > 0),
+      hasVirtualTour: !!propertyData.virtualTourUrl || !!propertyData.youtubeUrl,
       isPrintView
     });
     
