@@ -1,5 +1,4 @@
 
-import React from "react";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { OverviewSection } from "../sections/OverviewSection";
