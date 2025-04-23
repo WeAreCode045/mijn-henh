@@ -16,7 +16,7 @@ export function Navigation({
   onNext 
 }: NavigationProps) {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center py-2">
       <Button
         variant="outline"
         onClick={onPrevious}

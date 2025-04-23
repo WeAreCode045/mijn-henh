@@ -20,20 +20,12 @@ export function SideMenu({ property, currentPage, onPageChange }: SideMenuProps)
       floorplan: property.areas?.length ? 2 + property.areas.length : 2,
       location: property.areas?.length ? 3 + property.areas.length : 3,
       media: property.areas?.length ? 4 + property.areas.length : 4,
-      contact: property.areas?.length ? 5 + property.areas.length : 5
     };
     
     // Adjust if no floorplan
     if (!property.floorplanEmbedScript && (!property.floorplans || property.floorplans.length === 0)) {
       indices.location--;
       indices.media--;
-      indices.contact--;
-    }
-    
-    // Adjust if no virtual tour or youtube
-    if ((!property.virtualTourUrl || property.virtualTourUrl.trim() === '') && 
-        (!property.youtubeUrl || property.youtubeUrl.trim() === '')) {
-      indices.contact--;
     }
     
     console.log('Menu section indices:', indices);
@@ -96,12 +88,6 @@ export function SideMenu({ property, currentPage, onPageChange }: SideMenuProps)
             onClick={() => onPageChange(sectionIndices.media)}
           />
         )}
-        
-        <MenuItem 
-          title="Contact" 
-          isActive={currentPage === sectionIndices.contact}
-          onClick={() => onPageChange(sectionIndices.contact)}
-        />
       </ul>
     </nav>
   );

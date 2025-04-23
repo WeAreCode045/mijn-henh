@@ -93,27 +93,45 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
               Nearby Places
             </h3>
             
-            {Object.entries(placesByCategory).map(([category, places]) => (
-              <div key={category} className="mb-6 last:mb-0">
-                <h4 className="text-md font-medium mb-2 border-b pb-1">
-                  {category}
-                </h4>
-                
-                <ul className="space-y-2">
-                  {places.map((place, index) => (
-                    <li 
-                      key={place.id || `place-${category}-${index}`}
-                      className="flex items-center justify-between py-2 px-3 hover:bg-slate-50 rounded-md border-b border-gray-100"
-                    >
-                      <span className="flex-1">{place.name}</span>
-                      <span className="text-gray-500 text-sm">
-                        {formatDistance(place.distance)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            <div className="space-y-6">
+              {Object.entries(placesByCategory).map(([category, places]) => (
+                <div key={category} className="mb-6 last:mb-0">
+                  <h4 className="text-md font-medium mb-3 border-b pb-1">
+                    {category}
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {places.map((place, index) => (
+                      <div 
+                        key={place.id || `place-${category}-${index}`}
+                        className="bg-slate-50 p-3 rounded-md shadow-sm hover:shadow-md transition-shadow border border-slate-100"
+                      >
+                        <div className="flex justify-between items-start">
+                          <h5 className="text-sm font-medium">{place.name}</h5>
+                          <span className="text-xs px-2 py-1 bg-slate-200 rounded-full">
+                            {formatDistance(place.distance)}
+                          </span>
+                        </div>
+                        {place.vicinity && (
+                          <p className="text-xs text-gray-500 mt-1">{place.vicinity}</p>
+                        )}
+                        {place.rating && (
+                          <div className="flex items-center mt-2">
+                            <span className="text-xs text-yellow-500">★</span>
+                            <span className="text-xs ml-1">{place.rating}</span>
+                            {place.user_ratings_total && (
+                              <span className="text-xs text-gray-400 ml-1">
+                                ({place.user_ratings_total})
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         
