@@ -19,9 +19,6 @@ import {
   SidebarMenu, 
   SidebarMenuButton, 
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,32 +70,26 @@ export function AppSidebar() {
               </SidebarMenuButton>
               
               {propertiesOpen && (
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      onClick={() => navigate('/properties')}
-                      isActive={location.pathname === '/properties'}
-                    >
-                      All Properties
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      onClick={() => navigate('/properties/global-features')}
-                      isActive={location.pathname === '/properties/global-features'}
-                    >
-                      Global Features
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton 
-                      onClick={() => navigate('/properties/webviews')}
-                      isActive={location.pathname === '/properties/webviews'}
-                    >
-                      Webviews
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
+                <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1">
+                  <SidebarMenuButton 
+                    onClick={() => navigate('/properties')}
+                    className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/properties' ? 'bg-primary-foreground/10' : ''}`}
+                  >
+                    All Properties
+                  </SidebarMenuButton>
+                  <SidebarMenuButton 
+                    onClick={() => navigate('/properties/global-features')}
+                    className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/properties/global-features' ? 'bg-primary-foreground/10' : ''}`}
+                  >
+                    Global Features
+                  </SidebarMenuButton>
+                  <SidebarMenuButton 
+                    onClick={() => navigate('/properties/webviews')}
+                    className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/properties/webviews' ? 'bg-primary-foreground/10' : ''}`}
+                  >
+                    Webviews
+                  </SidebarMenuButton>
+                </div>
               )}
             </SidebarMenuItem>
             <SidebarMenuItem>
