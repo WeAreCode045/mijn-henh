@@ -7,7 +7,6 @@ import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { PropertyData, PropertyFormData, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyCity } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
 
 interface PropertyTabContentsProps {
@@ -39,7 +38,6 @@ export function PropertyTabContents({
   isUpdating,
   agentInfo
 }: PropertyTabContentsProps) {
-  const [webViewOpen, setWebViewOpen] = useState(false);
   const [fullPropertyData, setFullPropertyData] = useState<PropertyData | null>(null);
   
   // Fetch full property data when needed
@@ -143,12 +141,16 @@ export function PropertyTabContents({
     fetchPropertyData();
   }, [property]);
   
-  // Custom WebView handler that opens the modal
+  // Custom WebView handler that opens in new tab
   const handleOpenWebView = (e: React.MouseEvent) => {
     console.log('PropertyTabContents: handleOpenWebView called for property', property.id);
     e.preventDefault();
     e.stopPropagation();
-    setWebViewOpen(true);
+    
+    // Use the provided handleWebView function which now opens in a new tab
+    if (typeof handleWebView === 'function') {
+      handleWebView(e);
+    }
     return true;
   };
 
@@ -214,15 +216,6 @@ export function PropertyTabContents({
           property={property}
         />
       </TabsContent>
-      
-      {/* Web View Modal Dialog - Only render when we have full property data with images */}
-      {fullPropertyData && (
-        <PropertyWebViewDialog
-          propertyData={fullPropertyData}
-          isOpen={webViewOpen}
-          onOpenChange={setWebViewOpen}
-        />
-      )}
     </>
   );
 }
