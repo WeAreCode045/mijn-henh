@@ -51,7 +51,7 @@ export function getSections({
     },
     {
       title: "Details",
-      content: <DetailsSection property={property} />
+      content: <DetailsSection property={property} settings={settings} />
     }
   ];
   
