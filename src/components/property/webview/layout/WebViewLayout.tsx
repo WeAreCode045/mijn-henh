@@ -1,4 +1,3 @@
-
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { useThemeColors } from "@/hooks/useThemeColors";
@@ -28,7 +27,7 @@ export function WebViewLayout({
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b">
-        <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
           <div className="w-40">
             {settings.logoUrl && (
@@ -58,7 +57,7 @@ export function WebViewLayout({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-6 py-8">
+      <main className="max-w-[1600px] mx-auto px-6 py-8">
         <div className="flex gap-8">
           {/* Left Sidebar */}
           <aside className="w-64 shrink-0">
