@@ -2,6 +2,7 @@
 import { useAgencySettings } from "@/hooks/useAgencySettings";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { PropertyData } from "@/types/property";
 import { usePropertyData } from "./webview/hooks/usePropertyData";
 import { WebViewLoading } from "./webview/WebViewLoading";
 import { WebViewError } from "./webview/WebViewError";
