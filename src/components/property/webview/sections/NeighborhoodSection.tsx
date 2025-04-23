@@ -4,8 +4,8 @@ import { PropertyNearbyPlace } from "@/types/property";
 
 export function NeighborhoodSection({ property, settings, waitForPlaces = false }: WebViewSectionProps) {
   // Get nearby places, ensuring it's always an array
-  const nearbyPlaces = property.nearbyPlaces ? 
-    (Array.isArray(property.nearbyPlaces) ? property.nearbyPlaces : [property.nearbyPlaces]) 
+  const nearbyPlaces = property.nearby_places ? 
+    (Array.isArray(property.nearby_places) ? property.nearby_places : [property.nearby_places]) 
     : [];
   
   console.log("Nearby places:", nearbyPlaces);
@@ -21,15 +21,21 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
   }, {} as Record<string, PropertyNearbyPlace[]>);
   
   // Format a place's distance for display
-  const formatDistance = (distance?: number): string => {
+  const formatDistance = (distance?: number | string): string => {
     if (distance === undefined || distance === null) return "";
     
+    // Convert string to number if needed
+    const numDistance = typeof distance === 'string' ? parseFloat(distance) : distance;
+    
+    // Handle NaN
+    if (isNaN(numDistance)) return "";
+    
     // Format based on distance
-    if (distance < 1) {
-      return `${Math.round(distance * 1000)} m`;
+    if (numDistance < 1) {
+      return `${Math.round(numDistance * 1000)} m`;
     }
     
-    return `${distance.toFixed(1)} km`;
+    return `${numDistance.toFixed(1)} km`;
   };
   
   return (
@@ -37,9 +43,9 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
       <div className="px-6">
         {/* Property Location Map */}
         <div className="mb-6 rounded-lg overflow-hidden shadow-md">
-          {property.location ? (
+          {property.latitude && property.longitude ? (
             <iframe
-              src={`https://maps.google.com/maps?q=${property.location.lat},${property.location.lng}&z=15&output=embed`}
+              src={`https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`}
               width="100%"
               height="400"
               style={{ border: 0 }}
@@ -67,11 +73,11 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
           </p>
           
           {/* Location Description (if available) */}
-          {property.locationDescription && (
+          {property.location_description && (
             <div className="mt-4">
               <h4 className="text-md font-medium mb-1">About this location</h4>
               <p className="text-gray-600 text-[13px] leading-relaxed whitespace-pre-wrap">
-                {property.locationDescription}
+                {property.location_description}
               </p>
             </div>
           )}

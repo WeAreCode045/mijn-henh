@@ -18,10 +18,18 @@ export function SingleAreaSection({ property, settings, areaIndex }: SingleAreaS
 
   const area = property.areas[areaIndex];
   
-  // Get area images safely
-  const areaImages = area.images && Array.isArray(area.images) 
-    ? area.images 
-    : [];
+  // Get area images safely - extract URLs from images array
+  const areaImages: string[] = [];
+  
+  if (area.images && Array.isArray(area.images)) {
+    area.images.forEach((img) => {
+      if (typeof img === 'string') {
+        areaImages.push(img);
+      } else if (typeof img === 'object' && img && 'url' in img) {
+        areaImages.push(img.url as string);
+      }
+    });
+  }
 
   console.log(`Area ${areaIndex} images:`, areaImages);
 
@@ -40,7 +48,10 @@ export function SingleAreaSection({ property, settings, areaIndex }: SingleAreaS
           {/* Area Images */}
           {areaImages.length > 0 ? (
             <div className="mb-4">
-              <AreaImageSlider images={areaImages} />
+              <AreaImageSlider 
+                images={areaImages} 
+                areaTitle={area.title || area.name} 
+              />
             </div>
           ) : (
             <div className="mb-4 bg-gray-100 h-48 flex items-center justify-center rounded-lg">
@@ -54,10 +65,10 @@ export function SingleAreaSection({ property, settings, areaIndex }: SingleAreaS
           </p>
           
           {/* Area Metadata */}
-          {area.sqft && (
+          {area.size && (
             <div className="mt-2 flex items-center">
               <span className="text-sm font-medium">Size:</span>
-              <span className="ml-2 text-sm text-gray-600">{area.sqft} m²</span>
+              <span className="ml-2 text-sm text-gray-600">{area.size} m²</span>
             </div>
           )}
         </div>
