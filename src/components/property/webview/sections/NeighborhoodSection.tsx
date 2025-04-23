@@ -16,7 +16,7 @@ export function NeighborhoodSection({
   
   // Generate map URL based on coordinates
   const mapUrl = property.latitude && property.longitude
-    ? `https://maps.googleapis.com/maps/api/staticmap?center=${property.latitude},${property.longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${property.latitude},${property.longitude}&key=${settings?.google_maps_api_key || ''}`
+    ? `https://maps.googleapis.com/maps/api/staticmap?center=${property.latitude},${property.longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${property.latitude},${property.longitude}&key=${settings?.googleMapsApiKey || ''}`
     : null;
   
   useEffect(() => {
