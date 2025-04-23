@@ -73,7 +73,10 @@ const GlobalFeaturesPage = () => {
                             const featuresList = featuresText.split('\n')
                               .map(feature => feature.trim())
                               .filter(feature => feature.length > 0);
-                            handleGlobalFeatureBulkUpdate(featuresList);
+                            
+                            // Pass the features list directly instead of as an array
+                            // This matches what the function is expecting in the hook
+                            handleGlobalFeatureBulkUpdate(featuresText);
                             textarea.value = '';
                           }}
                         >
