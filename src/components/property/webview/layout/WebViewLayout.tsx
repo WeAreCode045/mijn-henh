@@ -1,3 +1,4 @@
+
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { useThemeColors } from "@/hooks/useThemeColors";
@@ -24,7 +25,7 @@ export function WebViewLayout({
   const { primaryColor, secondaryColor } = useThemeColors(settings);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
@@ -57,39 +58,41 @@ export function WebViewLayout({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-[1600px] mx-auto px-6 py-8">
-        <div className="flex gap-8">
-          {/* Left Sidebar */}
-          <aside className="w-64 shrink-0">
-            <SideMenu 
-              property={property}
-              currentPage={currentPage}
-              onPageChange={onPageChange}
-            />
-          </aside>
-
-          {/* Main Content */}
-          <div className="flex-1 max-w-[60%]">
-            {children}
-            
-            {/* Navigation */}
-            <Navigation
-              currentPage={currentPage}
-              totalPages={property.areas?.length ? 6 + property.areas.length : 6}
-              onPrevious={() => onPageChange(currentPage - 1)}
-              onNext={() => onPageChange(currentPage + 1)}
-            />
-          </div>
-
-          {/* Right Sidebar */}
-          <aside className="w-80 shrink-0">
-            <div className="sticky top-24">
-              <ContactSidebar 
+      <main className="w-full">
+        <div className="max-w-[1600px] mx-auto px-6 py-8">
+          <div className="flex gap-8">
+            {/* Left Sidebar */}
+            <aside className="w-64 shrink-0">
+              <SideMenu 
                 property={property}
-                settings={settings}
+                currentPage={currentPage}
+                onPageChange={onPageChange}
+              />
+            </aside>
+
+            {/* Main Content */}
+            <div className="flex-1 max-w-[60%]">
+              {children}
+              
+              {/* Navigation */}
+              <Navigation
+                currentPage={currentPage}
+                totalPages={property.areas?.length ? 6 + property.areas.length : 6}
+                onPrevious={() => onPageChange(currentPage - 1)}
+                onNext={() => onPageChange(currentPage + 1)}
               />
             </div>
-          </aside>
+
+            {/* Right Sidebar */}
+            <aside className="w-80 shrink-0">
+              <div className="sticky top-24">
+                <ContactSidebar 
+                  property={property}
+                  settings={settings}
+                />
+              </div>
+            </aside>
+          </div>
         </div>
       </main>
     </div>
