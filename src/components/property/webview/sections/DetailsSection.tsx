@@ -6,8 +6,11 @@ import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
   // Ensure features is always an array
-  const features = Array.isArray(property.features) ? property.features : 
-                  (property.features ? [property.features] : []);
+  const features = property.features ? (
+    Array.isArray(property.features) ? property.features : [property.features]
+  ) : [];
+  
+  console.log('DetailsSection - Features:', features);
   
   return (
     <div className="space-y-6 pb-16">
