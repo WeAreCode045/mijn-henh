@@ -15,8 +15,8 @@ export function NeighborhoodSection({
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   
   // Generate map URL based on coordinates
-  const mapUrl = property.coordinates?.latitude && property.coordinates?.longitude
-    ? `https://maps.googleapis.com/maps/api/staticmap?center=${property.coordinates.latitude},${property.coordinates.longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${property.coordinates.latitude},${property.coordinates.longitude}&key=${property.mapApiKey || ''}`
+  const mapUrl = property.latitude && property.longitude
+    ? `https://maps.googleapis.com/maps/api/staticmap?center=${property.latitude},${property.longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${property.latitude},${property.longitude}&key=${settings?.google_maps_api_key || ''}`
     : null;
   
   useEffect(() => {
@@ -37,11 +37,11 @@ export function NeighborhoodSection({
       </h2>
       
       {/* Location Description */}
-      {property.locationDescription && (
+      {property.location_description && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-2">About the Area</h3>
           <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
-            {property.locationDescription}
+            {property.location_description}
           </p>
         </div>
       )}
