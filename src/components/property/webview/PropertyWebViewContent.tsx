@@ -1,7 +1,7 @@
 
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getPrintStylesContent } from "./PrintStyles";
 import { WebViewSectionContent } from "./components/WebViewSectionContent";
 
@@ -25,8 +25,8 @@ export function PropertyWebViewContent({
   settings,
   isPrintView = false,
   waitForPlaces = false,
-  currentPage: externalCurrentPage,
-  setCurrentPage: externalSetCurrentPage,
+  currentPage = 0,
+  setCurrentPage,
   selectedImage,
   setSelectedImage,
   handleShare,
@@ -34,12 +34,6 @@ export function PropertyWebViewContent({
   handleDownload,
   showHeader = true
 }: PropertyWebViewContentProps) {
-  const [internalCurrentPage, setInternalCurrentPage] = useState(0);
-  
-  // Use external state if provided, otherwise use internal state
-  const currentPage = externalCurrentPage !== undefined ? externalCurrentPage : internalCurrentPage;
-  const setCurrentPageFn = externalSetCurrentPage || setInternalCurrentPage;
-  
   return (
     <div className="p-6 h-full overflow-y-auto">
       {isPrintView && (

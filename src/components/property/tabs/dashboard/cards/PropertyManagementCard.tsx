@@ -10,10 +10,8 @@ import {
   ArchiveButton, 
   DeleteButton 
 } from "./property-management";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { PropertyWebViewDialog } from "@/components/property/webview/PropertyWebViewDialog";
 
 interface PropertyManagementCardProps {
   propertyId: string;
@@ -43,35 +41,30 @@ export function PropertyManagementCard({
   youtubeUrl
 }: PropertyManagementCardProps) {
   const { toast } = useToast();
-  const [propertyData, setPropertyData] = useState<any>(null);
-  const [webViewOpen, setWebViewOpen] = useState(false);
   
-  console.log("PropertyManagementCard - propertyId:", propertyId);
-  console.log("PropertyManagementCard - isArchived:", isArchived);
-  console.log("PropertyManagementCard - onGeneratePDF is function:", typeof onGeneratePDF === 'function');
-  console.log("PropertyManagementCard - onWebView is function:", typeof onWebView === 'function');
-
-  // Fetch property data for the modal
-  useEffect(() => {
-    if (!propertyId) return;
+  // Handle opening the web view in a new tab
+  const handleWebView = useCallback((e: React.MouseEvent) => {
+    console.log("PropertyManagementCard: handleWebView called");
+    e.preventDefault();
+    e.stopPropagation();
     
-    const fetchPropertyData = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', propertyId)
-          .single();
-          
-        if (error) throw error;
-        if (data) setPropertyData(data);
-      } catch (error) {
-        console.error('Error fetching property data:', error);
-      }
-    };
+    // Get the web view URL
+    const webViewUrl = `/property/${propertyId}/webview`;
     
-    fetchPropertyData();
-  }, [propertyId]);
+    // Open in a new tab
+    window.open(webViewUrl, '_blank', 'noopener,noreferrer');
+    
+    // Notify the user
+    toast({
+      title: "Web View",
+      description: "Opening web view in a new tab",
+    });
+    
+    // Also call the original handler if needed for analytics
+    if (typeof onWebView === 'function') {
+      onWebView(e);
+    }
+  }, [propertyId, onWebView, toast]);
 
   // Handle sharing the property link
   const handleShare = useCallback((e: React.MouseEvent) => {
@@ -79,27 +72,25 @@ export function PropertyManagementCard({
     e.stopPropagation();
     
     try {
-      // Create the share URL (web view URL)
-      const shareUrl = `${window.location.origin}/property/${propertyId}/webview`;
+      // Create the share URL
+      const shareUrl = `${window.location.origin}/share/${propertyId}`;
       
-      // Try to use the Web Share API if available
-      if (navigator.share) {
-        navigator.share({
-          title: 'Property Web View',
-          url: shareUrl
-        })
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareUrl)
         .then(() => {
-          console.log('Successfully shared');
+          toast({
+            title: "Link Copied",
+            description: "Property share link copied to clipboard",
+          });
         })
-        .catch((error) => {
-          console.error('Error sharing:', error);
-          // Fallback to clipboard
-          copyToClipboard(shareUrl);
+        .catch(err => {
+          console.error('Could not copy text: ', err);
+          toast({
+            title: "Failed to Copy",
+            description: "Could not copy link to clipboard",
+            variant: "destructive"
+          });
         });
-      } else {
-        // Fallback for browsers without Web Share API
-        copyToClipboard(shareUrl);
-      }
     } catch (error) {
       console.error('Share error:', error);
       toast({
@@ -109,25 +100,6 @@ export function PropertyManagementCard({
       });
     }
   }, [propertyId, toast]);
-
-  // Copy URL to clipboard helper
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast({
-          title: "Link Copied",
-          description: "Property link copied to clipboard",
-        });
-      })
-      .catch(err => {
-        console.error('Could not copy text: ', err);
-        toast({
-          title: "Failed to Copy",
-          description: "Could not copy link to clipboard",
-          variant: "destructive"
-        });
-      });
-  };
 
   // Handle opening the virtual tour in a new window
   const handleViewTour = useCallback((e: React.MouseEvent) => {
@@ -158,21 +130,6 @@ export function PropertyManagementCard({
       });
     }
   }, [virtualTourUrl, toast]);
-
-  // Handle web view
-  const handleWebView = useCallback((e: React.MouseEvent) => {
-    console.log("PropertyManagementCard: handleWebView called");
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Open the modal
-    setWebViewOpen(true);
-    
-    // Also call the original handler if needed
-    // if (typeof onWebView === 'function') {
-    //   onWebView(e);
-    // }
-  }, []);
 
   return (
     <Card>
@@ -209,7 +166,6 @@ export function PropertyManagementCard({
           virtualTourUrl={virtualTourUrl}
           youtubeUrl={youtubeUrl}
           showTextButtons={true}
-          propertyData={propertyData}
         />
         
         <DateInfoSection 
@@ -226,15 +182,6 @@ export function PropertyManagementCard({
         
         <DeleteButton onDelete={onDelete} />
       </CardContent>
-      
-      {/* WebView Modal Dialog directly in the card for initial property load */}
-      {propertyData && (
-        <PropertyWebViewDialog
-          propertyData={propertyData}
-          isOpen={webViewOpen}
-          onOpenChange={setWebViewOpen}
-        />
-      )}
     </Card>
   );
 }

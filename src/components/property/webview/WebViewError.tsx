@@ -1,35 +1,51 @@
 
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface WebViewErrorProps {
-  error?: string | null;
-  isDialog?: boolean;
+  error?: Error | string;
 }
 
-export function WebViewError({ error, isDialog = false }: WebViewErrorProps) {
+export function WebViewError({ error }: WebViewErrorProps) {
   const navigate = useNavigate();
   
-  // Create a more user-friendly error message
-  const errorMessage = error?.includes("not found") 
-    ? "We couldn't find the property you're looking for. It may have been removed or the URL is incorrect."
-    : error || "There was a problem loading this property. Please try again later.";
-  
-  console.error("WebView Error:", error);
-  
+  // Get error message
+  const errorMessage = error instanceof Error 
+    ? error.message 
+    : typeof error === 'string' 
+      ? error 
+      : 'An unknown error occurred';
+
   return (
-    <div className={`${isDialog ? "" : "min-h-screen"} bg-white flex flex-col items-center justify-center p-4`}>
-      <div className="max-w-md w-full text-center space-y-6">
-        <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-        <h1 className="text-2xl font-bold text-gray-800">Property Not Found</h1>
-        <p className="text-gray-600">{errorMessage}</p>
-        <div className="flex space-x-4 justify-center">
-          <Button onClick={() => navigate('/properties')} variant="default">
-            View All Properties
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">
+          Error Loading Property
+        </h2>
+        
+        <p className="text-gray-600 mb-6">
+          We couldn't load this property. The error was:
+        </p>
+        
+        <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-6">
+          <p className="text-red-700 text-sm font-mono break-words">
+            {errorMessage}
+          </p>
+        </div>
+        
+        <div className="flex flex-col space-y-2">
+          <Button 
+            onClick={() => navigate('/properties')}
+            variant="default"
+          >
+            Return to Properties
           </Button>
-          <Button onClick={() => navigate('/')} variant="outline">
-            Go Home
+          
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+          >
+            Retry
           </Button>
         </div>
       </div>

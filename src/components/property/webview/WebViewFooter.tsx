@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { MoveLeft, MoveRight, Printer, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share, Printer } from "lucide-react";
 
 interface WebViewFooterProps {
   currentPage: number;
@@ -9,6 +9,7 @@ interface WebViewFooterProps {
   onNext: () => void;
   onShare: (platform: string) => Promise<void>;
   onPrint: () => void;
+  isAdminView?: boolean;
 }
 
 export function WebViewFooter({
@@ -17,55 +18,58 @@ export function WebViewFooter({
   onPrevious,
   onNext,
   onShare,
-  onPrint
+  onPrint,
+  isAdminView = false
 }: WebViewFooterProps) {
+  // Format page counter as "1 of 5"
+  const pageCounter = `${currentPage + 1} of ${totalPages}`;
+  
   return (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onShare('copy')}
-          className="hover:bg-estate-100"
-          title="Share link"
-        >
-          <Share2 className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onPrint}
-          className="hover:bg-estate-100"
-          title="Print brochure"
-        >
-          <Printer className="w-4 h-4" />
-        </Button>
-      </div>
-      
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onPrevious}
-          disabled={currentPage === 0}
-          className="hover:bg-estate-100"
-          title="Previous page"
-        >
-          <MoveLeft className="w-4 h-4" />
-        </Button>
-        <span className="text-sm">
-          {currentPage + 1} / {totalPages}
-        </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onNext}
-          disabled={currentPage === totalPages - 1}
-          className="hover:bg-estate-100"
-          title="Next page"
-        >
-          <MoveRight className="w-4 h-4" />
-        </Button>
+    <div className="bg-white border-t border-gray-200 px-8 py-4">
+      <div className="flex justify-between items-center">
+        {/* Navigation */}
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrevious}
+            disabled={currentPage === 0}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+          </Button>
+          
+          <span className="text-sm text-gray-500 px-2">{pageCounter}</span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNext}
+            disabled={currentPage >= totalPages - 1}
+          >
+            Next <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        
+        {/* Actions */}
+        <div className="flex items-center space-x-2">
+          {isAdminView && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onShare('copy')}
+            >
+              <Share className="h-4 w-4 mr-1" /> Share
+            </Button>
+          )}
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPrint}
+          >
+            <Printer className="h-4 w-4 mr-1" /> Print
+          </Button>
+        </div>
       </div>
     </div>
   );

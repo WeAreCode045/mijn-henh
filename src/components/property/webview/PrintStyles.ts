@@ -1,58 +1,62 @@
-// Create a string of CSS rules for print styles
-export const getPrintStylesContent = () => 
-  `/* Print Styles */
-  @media print {
-    body {
-      font-family: 'Arial', sans-serif;
-      color: #333;
-      line-height: 1.5;
-    }
-    
-    h1 {
-      font-size: 24pt;
-      margin-bottom: 10pt;
-    }
-    
-    h2 {
-      font-size: 18pt;
-      margin-bottom: 8pt;
-    }
-    
-    p {
-      font-size: 12pt;
-      margin-bottom: 8pt;
-    }
-    
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    
-    .page-break {
-      page-break-after: always;
-    }
-    
-    .no-print {
-      display: none !important;
-    }
-    
-    a {
-      text-decoration: none;
-      color: #333;
-    }
-    
-    button, .form-container, nav, footer {
-      display: none !important;
-    }
-  }
-`;
 
-// This function should be used in a React component context
-const getPrintStyles = () => {
-  return {
-    __html: getPrintStylesContent()
-  };
-};
-
-// For backwards compatibility - in case this is imported elsewhere
-;
+export function getPrintStylesContent() {
+  return `
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      
+      .webview-container-main {
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+      }
+      
+      .webview-sticky-header, 
+      .webview-sticky-footer, 
+      .non-printable {
+        display: none !important;
+      }
+      
+      .webview-section {
+        page-break-inside: avoid;
+        margin-bottom: 15mm;
+      }
+      
+      /* Make images fit better on printed page */
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+      
+      /* Ensure text is readable */
+      p, li, td, th {
+        font-size: 11pt !important;
+        line-height: 1.4 !important;
+        color: black !important;
+      }
+      
+      h1, h2, h3, h4 {
+        color: black !important;
+      }
+      
+      /* Ensure tables fit on page */
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      
+      /* Add page breaks before main sections */
+      .page-break-before {
+        page-break-before: always !important;
+      }
+      
+      /* Prevent page breaks inside elements */
+      .no-page-break {
+        page-break-inside: avoid !important;
+      }
+    }
+  `;
+}

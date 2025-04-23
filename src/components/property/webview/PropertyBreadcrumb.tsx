@@ -1,13 +1,6 @@
 
 import { ChevronLeft } from "lucide-react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 
 interface PropertyBreadcrumbProps {
   title: string;
@@ -16,24 +9,19 @@ interface PropertyBreadcrumbProps {
 
 export function PropertyBreadcrumb({ title, onBack }: PropertyBreadcrumbProps) {
   return (
-    <div className="bg-estate-50 p-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink 
-              onClick={onBack} 
-              className="flex items-center gap-1 text-estate-600 hover:text-estate-800"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Back to Properties
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="py-3 flex items-center">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onBack}
+        className="mr-2"
+      >
+        <ChevronLeft className="h-4 w-4 mr-1" /> Back to Properties
+      </Button>
+      
+      <span className="text-sm text-gray-600 truncate">
+        {title}
+      </span>
     </div>
   );
 }
