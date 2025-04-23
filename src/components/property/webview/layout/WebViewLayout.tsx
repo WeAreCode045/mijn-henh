@@ -72,19 +72,17 @@ export function WebViewLayout({
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 max-w-[60%] flex flex-col overflow-hidden">
+            <div className="flex-1 max-w-[60%] flex flex-col">
               {/* Scrollable content area */}
-              <ScrollArea className="flex-1 overflow-y-auto">
-                <div className="pr-4 pb-16">
-                  {children}
-                </div>
+              <ScrollArea className="flex-1 overflow-y-auto pr-4">
+                {children}
               </ScrollArea>
               
               {/* Navigation - sticky to the bottom, full width */}
-              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 w-full z-10">
+              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 z-10 w-full">
                 <Navigation
                   currentPage={currentPage}
-                  totalPages={property.areas?.length ? 6 + property.areas.length : 6}
+                  totalPages={calculateTotalPages(property)}
                   onPrevious={() => onPageChange(currentPage - 1)}
                   onNext={() => onPageChange(currentPage + 1)}
                 />
@@ -105,4 +103,34 @@ export function WebViewLayout({
       </main>
     </div>
   );
+}
+
+// Helper function to calculate total pages
+function calculateTotalPages(property: PropertyData): number {
+  let total = 2; // Start with Overview and Details pages
+  
+  // Add individual area pages
+  if (property.areas && property.areas.length > 0) {
+    total += property.areas.length;
+  }
+  
+  // Add floorplan page if available
+  if ((property.floorplanEmbedScript && property.floorplanEmbedScript.trim() !== '') ||
+      (property.floorplans && property.floorplans.length > 0)) {
+    total += 1;
+  }
+  
+  // Add neighborhood page
+  total += 1;
+  
+  // Add virtual tour/media page if either exists
+  if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') ||
+      (property.youtubeUrl && property.youtubeUrl.trim() !== '')) {
+    total += 1;
+  }
+  
+  // Add contact page
+  total += 1;
+  
+  return total;
 }

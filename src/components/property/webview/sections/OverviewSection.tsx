@@ -52,46 +52,44 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
   return (
     <div className="space-y-4 pb-24">
       <div className="space-y-4 mt-2">
+        {/* Blue bar with title and price (now ABOVE the image) */}
+        <div 
+          className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
+          style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}
+        >
+          <h2 className="font-semibold text-white text-lg truncate mr-4">
+            {property.title}
+          </h2>
+          <span className="text-white font-bold text-lg whitespace-nowrap">
+            {formatPrice(property.price)}
+          </span>
+        </div>
+        
         {mainImage && (
-          <>
-            <div className="relative px-6">
-              <img
-                src={mainImage}
-                alt={property.title}
-                className="w-full h-[450px] object-cover rounded-lg shadow-lg"
-              />
-            </div>
-
-            {/* Blue bar with title and price */}
-            <div 
-              className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
-              style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}
-            >
-              <h2 className="font-semibold text-white text-lg truncate mr-4">
-                {property.title}
-              </h2>
-              <span className="text-white font-bold text-lg whitespace-nowrap">
-                {formatPrice(property.price)}
-              </span>
-            </div>
+          <div className="relative px-6">
+            <img
+              src={mainImage}
+              alt={property.title}
+              className="w-full h-[450px] object-cover rounded-lg shadow-lg"
+            />
+          </div>
+        )}
             
-            {/* Featured images grid - Always display if we have any */}
-            {featuredImages.length > 0 && (
-              <div className="px-6 mt-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {featuredImages.slice(0, 4).map((imageUrl, index) => (
-                    <div key={index} className="rounded-md overflow-hidden h-[100px]">
-                      <img 
-                        src={imageUrl} 
-                        alt={`Property ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+        {/* Featured images grid - Always display if we have any */}
+        {featuredImages.length > 0 && (
+          <div className="px-6 mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {featuredImages.slice(0, 4).map((imageUrl, index) => (
+                <div key={index} className="rounded-md overflow-hidden h-[100px]">
+                  <img 
+                    src={imageUrl} 
+                    alt={`Property ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
-            )}
-          </>
+              ))}
+            </div>
+          </div>
         )}        
       </div>
     </div>

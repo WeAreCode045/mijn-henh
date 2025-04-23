@@ -1,130 +1,137 @@
 
-import { useEffect, useState } from "react";
 import { WebViewSectionProps } from "../types";
-import { MapPin, Loader } from "lucide-react";
-import "../styles/WebViewStyles.css";
+import { PropertyNearbyPlace } from "@/types/property";
 
-interface NeighborhoodSectionProps extends WebViewSectionProps {
-  waitForPlaces?: boolean;
-}
-
-export function NeighborhoodSection({ 
-  property, 
-  settings, 
-  waitForPlaces = false 
-}: NeighborhoodSectionProps) {
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
+export function NeighborhoodSection({ property, settings, waitForPlaces = false }: WebViewSectionProps) {
+  // Get nearby places, ensuring it's always an array
+  const nearbyPlaces = property.nearbyPlaces ? 
+    (Array.isArray(property.nearbyPlaces) ? property.nearbyPlaces : [property.nearbyPlaces]) 
+    : [];
   
-  // Generate map URL based on coordinates
-  const mapUrl = property.latitude && property.longitude
-    ? `https://maps.googleapis.com/maps/api/staticmap?center=${property.latitude},${property.longitude}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C${property.latitude},${property.longitude}&key=${settings?.googleMapsApiKey || ''}`
-    : null;
+  console.log("Nearby places:", nearbyPlaces);
   
-  useEffect(() => {
-    if (mapUrl) {
-      const image = new Image();
-      image.onload = () => setIsMapLoaded(true);
-      image.src = mapUrl;
+  // Group places by category
+  const placesByCategory = nearbyPlaces.reduce((acc, place) => {
+    const category = place.type || "Other";
+    if (!acc[category]) {
+      acc[category] = [];
     }
-  }, [mapUrl]);
-
-  // Group nearby places by type/category for better organization
-  const groupedPlaces = property.nearby_places ? 
-    property.nearby_places.reduce((acc, place) => {
-      // Use type as the primary category identifier, with fallback to avoid TypeScript errors
-      const category = place.type || 'Other';
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(place);
-      return acc;
-    }, {} as Record<string, any[]>) : {};
+    acc[category].push(place);
+    return acc;
+  }, {} as Record<string, PropertyNearbyPlace[]>);
   
-  const hasNearbyPlaces = property.nearby_places && property.nearby_places.length > 0;
-  
-  console.log("Property nearby places:", property.nearby_places);
-  console.log("Grouped places:", groupedPlaces);
+  // Format a place's distance for display
+  const formatDistance = (distance?: number): string => {
+    if (distance === undefined || distance === null) return "";
+    
+    // Format based on distance
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)} m`;
+    }
+    
+    return `${distance.toFixed(1)} km`;
+  };
   
   return (
-    <div className="space-y-6 px-6">
-      <h2 
-        className="text-2xl font-bold" 
-        style={{ color: settings?.secondaryColor }}
-      >
-        Neighborhood
-      </h2>
-      
-      {/* Location Description */}
-      {property.location_description && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-2">About the Area</h3>
-          <p className="text-gray-600 text-base leading-relaxed whitespace-pre-wrap">
-            {property.location_description}
-          </p>
-        </div>
-      )}
-      
-      {/* Map Section */}
-      <div className="w-full">
-        {mapUrl ? (
-          <div className="rounded-lg overflow-hidden shadow-md">
-            <img 
-              src={mapUrl}
-              alt="Property location"
-              className="w-full h-auto"
-              style={{ opacity: isMapLoaded ? 1 : 0.3 }}
+    <div className="space-y-6 pb-8">
+      <div className="px-6">
+        {/* Property Location Map */}
+        <div className="mb-6 rounded-lg overflow-hidden shadow-md">
+          {property.location ? (
+            <iframe
+              src={`https://maps.google.com/maps?q=${property.location.lat},${property.location.lng}&z=15&output=embed`}
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
             />
-            {!isMapLoaded && (
-              <div className="flex items-center justify-center h-[300px] bg-gray-100">
-                <Loader className="h-8 w-8 text-gray-400 animate-spin" />
+          ) : (
+            <div className="bg-gray-100 h-[400px] flex items-center justify-center">
+              <p className="text-gray-400">No location data available</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Property Location Address */}
+        <div className="mb-6 bg-white/90 p-4 rounded-lg shadow-sm">
+          <h3 
+            className="text-xl font-semibold mb-2"
+            style={{ color: settings?.secondaryColor }}
+          >
+            Address
+          </h3>
+          <p className="text-gray-600">
+            {property.address || "Address not available"}
+          </p>
+          
+          {/* Location Description (if available) */}
+          {property.locationDescription && (
+            <div className="mt-4">
+              <h4 className="text-md font-medium mb-1">About this location</h4>
+              <p className="text-gray-600 text-[13px] leading-relaxed whitespace-pre-wrap">
+                {property.locationDescription}
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {/* Nearby Places */}
+        {Object.entries(placesByCategory).length > 0 && (
+          <div className="bg-white/90 p-4 rounded-lg shadow-sm">
+            <h3 
+              className="text-xl font-semibold mb-4"
+              style={{ color: settings?.secondaryColor }}
+            >
+              Nearby Places
+            </h3>
+            
+            {Object.entries(placesByCategory).map(([category, places]) => (
+              <div key={category} className="mb-6 last:mb-0">
+                <h4 className="text-md font-medium mb-2 border-b pb-1">
+                  {category}
+                </h4>
+                
+                <ul className="space-y-2">
+                  {places.map((place, index) => (
+                    <li 
+                      key={place.id || `place-${category}-${index}`}
+                      className="flex items-center justify-between py-2 px-3 hover:bg-slate-50 rounded-md border-b border-gray-100"
+                    >
+                      <span className="flex-1">{place.name}</span>
+                      <span className="text-gray-500 text-sm">
+                        {formatDistance(place.distance)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            )}
+            ))}
           </div>
-        ) : (
-          <div className="rounded-lg bg-gray-100 p-8 flex flex-col items-center justify-center text-center">
-            <MapPin className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-gray-500">No location coordinates available</p>
+        )}
+        
+        {Object.entries(placesByCategory).length === 0 && !waitForPlaces && (
+          <div className="bg-white/90 p-4 rounded-lg shadow-sm text-center">
+            <p className="text-gray-500">No nearby places found</p>
+          </div>
+        )}
+        
+        {waitForPlaces && Object.entries(placesByCategory).length === 0 && (
+          <div className="bg-white/90 p-4 rounded-lg shadow-sm text-center">
+            <div className="animate-pulse flex space-x-4">
+              <div className="flex-1 space-y-4 py-1">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+              </div>
+            </div>
+            <p className="text-gray-400 mt-4">Loading nearby places...</p>
           </div>
         )}
       </div>
-      
-      {/* Address */}
-      <div className="flex items-start space-x-2 mt-4">
-        <MapPin className="h-5 w-5 text-gray-700 mt-0.5" />
-        <div>
-          <h3 className="font-semibold">Address</h3>
-          <p className="text-gray-700">
-            {property.address || "Address not provided"}
-          </p>
-        </div>
-      </div>
-      
-      {/* Nearby Places Section */}
-      {hasNearbyPlaces && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4">Nearby Places</h3>
-          
-          {Object.entries(groupedPlaces).map(([category, places]) => (
-            <div key={category} className="mb-6">
-              <h4 className="font-medium text-base mb-2 capitalize">{category}</h4>
-              <div className="space-y-2">
-                {places.map((place, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                    <span>{place.name}</span>
-                    {place.distance && (
-                      <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                        {typeof place.distance === 'number' 
-                          ? `${place.distance.toFixed(1)} km` 
-                          : place.distance}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

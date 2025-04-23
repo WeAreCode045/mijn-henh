@@ -22,7 +22,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
       </div>
       
       <div className="px-6 py-1 flex flex-col md:flex-row gap-6">
-        {/* Description Section - adjusted width to be more balanced */}
+        {/* Description Section */}
         <div className="flex-[3] relative">
           <div className="relative bg-white/90 p-4 rounded-lg shadow-sm">
             <h3 
@@ -37,7 +37,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
           </div>
         </div>
 
-        {/* Features Section - adjusted width to be more balanced */}
+        {/* Features Section */}
         {features.length > 0 && (
           <div className="flex-[2]">
             <div className="bg-white/90 p-4 rounded-lg shadow-sm">
