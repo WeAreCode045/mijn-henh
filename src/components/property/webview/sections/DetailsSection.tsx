@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
-  // Ensure features is always an array before using map
+  // Ensure features is always an array
   const features = Array.isArray(property.features) ? property.features : 
                   (property.features ? [property.features] : []);
   
