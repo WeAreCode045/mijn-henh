@@ -5,6 +5,8 @@ import { VirtualTourCard } from "./VirtualTourCard";
 import { SortableImageGrid } from "./images/SortableImageGrid";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { usePropertyImageHandlers } from "@/hooks/property/media/usePropertyImageHandlers";
+import { FloorplanEmbed } from "./floorplans/FloorplanEmbed";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MediaTabContentProps {
   property: PropertyData;
@@ -32,6 +34,7 @@ export function MediaTabContent({
   isReadOnly = false
 }: MediaTabContentProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [floorplanEmbedScript, setFloorplanEmbedScript] = useState(property.floorplanEmbedScript || '');
   
   // If no handlers are provided, create them using our hook
   const {
@@ -59,6 +62,12 @@ export function MediaTabContent({
   const onFloorplanEmbedScriptUpdate = handleFloorplanEmbedScriptUpdate || ((script: string) => {
     console.log("Floorplan embed script update not implemented:", script);
   });
+
+  const handleSaveFloorplanEmbed = () => {
+    if (onFloorplanEmbedScriptUpdate) {
+      onFloorplanEmbedScriptUpdate(floorplanEmbedScript);
+    }
+  };
 
   // Ensure property.images is an array of PropertyImage objects
   const normalizedImages = React.useMemo(() => {
@@ -132,6 +141,33 @@ export function MediaTabContent({
       </section>
       
       <div className="grid gap-6">
+        {/* Floorplan Embed Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Interactive Floorplan</CardTitle>
+            <CardDescription>
+              Add an embed script from a floorplan provider
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FloorplanEmbed 
+              script={floorplanEmbedScript} 
+              onChange={(e) => setFloorplanEmbedScript(e.target.value)}
+            />
+          </CardContent>
+          {!isReadOnly && (
+            <CardFooter>
+              <button 
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                onClick={handleSaveFloorplanEmbed}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Saving...' : 'Save Floorplan Embed'}
+              </button>
+            </CardFooter>
+          )}
+        </Card>
+        
         <VirtualTourCard
           virtualTourUrl={property.virtualTourUrl || ""}
           youtubeUrl={property.youtubeUrl || ""}
@@ -140,11 +176,10 @@ export function MediaTabContent({
           isReadOnly={isReadOnly}
         />
         
-        {/* Additional media cards can go here */}
-        
+        {/* Display embedded floorplan if present */}
         {property.floorplanEmbedScript && (
           <div className="mt-4">
-            <h3 className="text-lg font-medium mb-2">Floorplan Embed</h3>
+            <h3 className="text-lg font-medium mb-2">Floorplan Preview</h3>
             <div className="bg-muted p-4 rounded-md">
               <div dangerouslySetInnerHTML={{ __html: property.floorplanEmbedScript }} />
             </div>

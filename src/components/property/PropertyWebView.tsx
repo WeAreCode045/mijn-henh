@@ -7,7 +7,6 @@ import { usePropertyData } from "./webview/hooks/usePropertyData";
 import { WebViewLoading } from "./webview/WebViewLoading";
 import { WebViewError } from "./webview/WebViewError";
 import { WebViewLayout } from "./webview/layout/WebViewLayout";
-import { useWebViewBackground } from "./webview/hooks/useWebViewBackground";
 import { WebViewSectionContent } from "./webview/components/WebViewSectionContent";
 
 interface PropertyWebViewProps {
