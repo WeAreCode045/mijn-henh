@@ -5,6 +5,10 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Check } from "lucide-react";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
+  // Ensure features is always an array before using map
+  const features = Array.isArray(property.features) ? property.features : 
+                  (property.features ? [property.features] : []);
+  
   return (
     <div className="space-y-6 pb-16">
       <div className="px-6">
@@ -30,7 +34,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
         </div>
 
         {/* Features Section - adjusted width to be more balanced */}
-        {property.features && property.features.length > 0 && (
+        {features.length > 0 && (
           <div className="flex-[2]">
             <div className="bg-white/90 p-4 rounded-lg shadow-sm">
               <h3 
@@ -41,7 +45,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
               <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
                 <Table>
                   <TableBody>
-                    {property.features.map((feature, index) => {
+                    {features.map((feature, index) => {
                       const isEven = index % 2 === 0;
                       
                       // Blue/gray for even rows, light gray for odd rows

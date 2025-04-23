@@ -20,8 +20,13 @@ export const generateFeaturesSection = (
   
   // Display features with more spacing between rows
   pdf.setFontSize(10); // Increased font size from 8
-  if (property.features && property.features.length > 0) {
-    property.features.slice(0, 15).forEach((feature, index) => { // Reduced max features to 15 to account for bigger font
+  
+  // Ensure features is always an array before trying to iterate over it
+  const features = Array.isArray(property.features) ? property.features : 
+                  (property.features ? [property.features] : []);
+  
+  if (features.length > 0) {
+    features.slice(0, 15).forEach((feature, index) => { // Reduced max features to 15 to account for bigger font
       // Increase line spacing from 4 to 6
       const featureY = descriptionY + 18 + (index * 6);
       

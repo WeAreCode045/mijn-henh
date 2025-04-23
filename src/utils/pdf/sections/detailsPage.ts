@@ -75,7 +75,11 @@ export const generateDetailsPage = async (
   yPos = result.newY;
   currentPage = result.newPage;
 
-  if (property.features?.length) {
+  // Ensure features is an array before checking length and iterating
+  const features = Array.isArray(property.features) ? property.features : 
+                  (property.features ? [property.features] : []);
+                  
+  if (features.length > 0) {
     pdf.setFontSize(20);
     pdf.setTextColor(settings.primaryColor || BROCHURE_STYLES.colors.primary);
     pdf.text('Kenmerken', margin, yPos);
@@ -84,7 +88,7 @@ export const generateDetailsPage = async (
     pdf.setFontSize(11);
     pdf.setTextColor(BROCHURE_STYLES.colors.text.secondary);
     
-    property.features.forEach((feature, index) => {
+    features.forEach((feature, index) => {
       if (index > 0 && index % 3 === 0) {
         yPos += 20;
         const pageCheck = startNewPageIfNeeded(pdf, yPos, settings, currentPage, totalPages, property.title);
