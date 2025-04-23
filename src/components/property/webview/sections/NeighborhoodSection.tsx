@@ -31,7 +31,8 @@ export function NeighborhoodSection({
   // Group nearby places by type/category for better organization
   const groupedPlaces = property.nearby_places ? 
     property.nearby_places.reduce((acc, place) => {
-      const category = place.type || place.category || 'Other';
+      // Use type as the primary category identifier, with fallback to avoid TypeScript errors
+      const category = place.type || 'Other';
       if (!acc[category]) {
         acc[category] = [];
       }

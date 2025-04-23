@@ -20,16 +20,16 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
   let areaPhotos: string[] = [];
   
   // 1. First check if area has its own images property
-  if (area.images && area.images.length > 0) {
+  if (area.images && Array.isArray(area.images) && area.images.length > 0) {
     areaPhotos = area.images.map(img => 
       typeof img === 'string' ? img : 
-      typeof img === 'object' && img.url ? img.url : ''
+      typeof img === 'object' && img && 'url' in img ? img.url : ''
     ).filter(url => url !== '');
     console.log(`Found ${areaPhotos.length} direct images for area ${area.id}`);
   }
   
   // 2. If no area images found yet, check for areaImages property (new format)
-  if (areaPhotos.length === 0 && area.areaImages && area.areaImages.length > 0) {
+  if (areaPhotos.length === 0 && area.areaImages && Array.isArray(area.areaImages) && area.areaImages.length > 0) {
     areaPhotos = area.areaImages.map(img => img.url).filter(Boolean);
     console.log(`Found ${areaPhotos.length} areaImages for area ${area.id}`);
   }
