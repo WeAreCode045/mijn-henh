@@ -77,7 +77,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                               />
                             </div>
                             <span style={{ fontWeight: 500 }}>
-                              {feature.description || feature.name}
+                              {feature.description}
                             </span>
                           </TableCell>
                         </TableRow>

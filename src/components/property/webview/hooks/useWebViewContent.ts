@@ -13,7 +13,7 @@ export function useWebViewContent({
   currentPage: number;
   setCurrentPage: (page: number) => void;
 }) {
-  const { calculateTotalPages, isValidPageIndex, getSectionIndex } = usePageCalculation();
+  const { calculateTotalPages, isValidPageIndex } = usePageCalculation();
   const totalPages = calculateTotalPages(propertyData);
   
   // Reset to first page when property changes
