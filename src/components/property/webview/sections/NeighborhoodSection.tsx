@@ -42,6 +42,9 @@ export function NeighborhoodSection({
   
   const hasNearbyPlaces = property.nearby_places && property.nearby_places.length > 0;
   
+  console.log("Property nearby places:", property.nearby_places);
+  console.log("Grouped places:", groupedPlaces);
+  
   return (
     <div className="space-y-6 px-6">
       <h2 
@@ -105,8 +108,8 @@ export function NeighborhoodSection({
             <div key={category} className="mb-6">
               <h4 className="font-medium text-base mb-2 capitalize">{category}</h4>
               <div className="space-y-2">
-                {places.map((place) => (
-                  <div key={place.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                {places.map((place, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
                     <span>{place.name}</span>
                     {place.distance && (
                       <span className="text-sm bg-gray-100 px-2 py-1 rounded">

@@ -5,21 +5,21 @@ export const usePageCalculation = () => {
   const calculateTotalPages = (propertyData: PropertyData | null, isPrintView: boolean = false) => {
     if (!propertyData) return 0;
     
-    // Start with basic pages
-    let total = 2; // Overview and Details pages always exist
+    // Count sections based on property structure
+    let total = 2; // Start with Overview and Details pages which always exist
     
     // Add individual area pages if they exist
     if (propertyData.areas && propertyData.areas.length > 0) {
       total += propertyData.areas.length; // Add a page for each area
     }
     
-    // Add floorplan page if floorplanEmbedScript exists or floorplans array has items
+    // Add floorplan page if available
     if ((propertyData.floorplanEmbedScript && propertyData.floorplanEmbedScript.trim() !== '') ||
         (propertyData.floorplans && propertyData.floorplans.length > 0)) {
       total += 1;
     }
     
-    // Add neighborhood page
+    // Add neighborhood page (always present)
     total += 1;
     
     // Add virtual tour page if either virtualTourUrl or youtubeUrl exists
@@ -52,14 +52,5 @@ export const usePageCalculation = () => {
     return pageIndex >= 0 && pageIndex < totalPages;
   };
 
-  // Function to get section index based on page number
-  const getSectionIndex = (pageIndex: number, propertyData: PropertyData | null, isPrintView: boolean = false) => {
-    if (!isValidPageIndex(pageIndex, propertyData, isPrintView)) {
-      return 0; // Default to first page if invalid
-    }
-    
-    return pageIndex;
-  };
-
-  return { calculateTotalPages, isValidPageIndex, getSectionIndex };
+  return { calculateTotalPages, isValidPageIndex };
 };

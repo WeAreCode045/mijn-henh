@@ -17,18 +17,34 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
     return "€ " + numericPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  console.log("OverviewSection rendering with main image:", property.featuredImage);
+  console.log("OverviewSection rendering with property:", property);
+  console.log("Featured image:", property.featuredImage);
   console.log("Featured images:", property.featuredImages);
 
   // Get the image to display (main image, first featured image, or first regular image)
-  const mainImage = property.featuredImage || 
-                   (property.featuredImages && property.featuredImages.length > 0 ? property.featuredImages[0] : null) ||
-                   (property.images && property.images.length > 0 ? 
-                     (typeof property.images[0] === 'string' ? property.images[0] : 
-                      typeof property.images[0] === 'object' && 'url' in property.images[0] ? property.images[0].url : null) : null);
+  let mainImage = property.featuredImage;
+  
+  // If no featuredImage directly, try to get from featuredImages array
+  if (!mainImage && property.featuredImages && Array.isArray(property.featuredImages) && property.featuredImages.length > 0) {
+    mainImage = property.featuredImages[0];
+  }
+  
+  // If still no image, try to get from regular images
+  if (!mainImage && property.images && Array.isArray(property.images) && property.images.length > 0) {
+    const firstImage = property.images[0];
+    if (typeof firstImage === 'string') {
+      mainImage = firstImage;
+    } else if (typeof firstImage === 'object' && firstImage && 'url' in firstImage) {
+      mainImage = firstImage.url;
+    }
+  }
 
   // Get featured images array, ensuring we have an array even if it's empty
-  const featuredImages = property.featuredImages || [];
+  let featuredImages: string[] = [];
+  
+  if (property.featuredImages && Array.isArray(property.featuredImages)) {
+    featuredImages = property.featuredImages;
+  }
 
   console.log("Selected main image for display:", mainImage);
   console.log("Featured images count:", featuredImages.length);

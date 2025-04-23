@@ -19,6 +19,9 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
   // Improved area images extraction logic
   let areaPhotos: string[] = [];
   
+  // Debug current area
+  console.log(`Processing area:`, area);
+  
   // 1. First check if area has its own images property
   if (area.images && Array.isArray(area.images) && area.images.length > 0) {
     areaPhotos = area.images.map(img => 
@@ -47,6 +50,24 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
       .filter(url => url !== '');
     
     console.log(`Found ${areaPhotos.length} property images with area=${area.id}`);
+  }
+  
+  // 4. As a fallback, check if images might be stored in a different format (legacy data)
+  if (areaPhotos.length === 0 && area.imageIds && Array.isArray(area.imageIds) && area.imageIds.length > 0) {
+    // Try to match image IDs to property images
+    if (Array.isArray(property.images)) {
+      areaPhotos = property.images
+        .filter(img => {
+          if (typeof img === 'object' && img && 'id' in img) {
+            return area.imageIds.includes(img.id);
+          }
+          return false;
+        })
+        .map(img => typeof img === 'object' && 'url' in img ? img.url : String(img))
+        .filter(url => url !== '');
+      
+      console.log(`Found ${areaPhotos.length} images matching area imageIds`);
+    }
   }
   
   console.log(`Area ${areaIndex} (${area.title}) final photos:`, areaPhotos);

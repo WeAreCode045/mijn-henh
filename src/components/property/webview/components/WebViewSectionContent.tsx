@@ -3,7 +3,6 @@ import React from "react";
 import { PropertyData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { getSections } from "../config/sectionConfig";
-import { usePageCalculation } from "../hooks/usePageCalculation";
 
 interface WebViewSectionContentProps {
   property: PropertyData;
@@ -22,8 +21,6 @@ export function WebViewSectionContent({
   waitForPlaces = false,
   showHeader = true
 }: WebViewSectionContentProps) {
-  const { calculateTotalPages } = usePageCalculation();
-  
   // Validate property data
   if (!property) {
     return (
@@ -33,7 +30,7 @@ export function WebViewSectionContent({
     );
   }
   
-  // Get sections based on the current property and page
+  // Get all available sections for this property
   const sections = getSections({ 
     property, 
     settings, 
@@ -50,21 +47,17 @@ export function WebViewSectionContent({
     );
   }
   
-  // Get total pages
-  const totalPages = calculateTotalPages(property, isPrintView);
+  // Ensure the currentPage is within bounds
+  const safePageIndex = Math.min(Math.max(0, currentPage), sections.length - 1);
   
-  // Get validated section index and ensure it's within boundaries
-  const safePageIndex = Math.min(Math.max(0, currentPage), totalPages - 1);
-  
-  // Get the current section, with fallback to first section if current is not available
-  const currentSection = safePageIndex < sections.length ? sections[safePageIndex] : sections[0];
+  // Get the current section based on page index
+  const currentSection = sections[safePageIndex];
   
   // Debug information to help identify issues
   console.log('WebViewSectionContent rendering:', {
     currentPage,
     safePageIndex,
-    totalPages,
-    sectionsAvailable: sections.length,
+    totalSections: sections.length,
     currentSectionTitle: currentSection?.title,
     showHeader,
     sectionTitles: sections.map((s, i) => `${i}: ${s.title}`)

@@ -81,7 +81,7 @@ export function WebViewLayout({
               </ScrollArea>
               
               {/* Navigation - sticky to the bottom, full width */}
-              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 w-full">
+              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 w-full z-10">
                 <Navigation
                   currentPage={currentPage}
                   totalPages={property.areas?.length ? 6 + property.areas.length : 6}

@@ -10,6 +10,8 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
     Array.isArray(property.features) ? property.features : [property.features]
   ) : [];
   
+  console.log("Properties features:", features);
+  
   return (
     <div className="space-y-6 pb-16">
       <div className="px-6">
@@ -75,7 +77,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                               />
                             </div>
                             <span style={{ fontWeight: 500 }}>
-                              {feature.description}
+                              {feature.description || feature.name}
                             </span>
                           </TableCell>
                         </TableRow>

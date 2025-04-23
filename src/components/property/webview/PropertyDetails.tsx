@@ -12,6 +12,7 @@ interface PropertyDetailsProps {
 
 export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
   const safeSettings = getSafeSettings(settings);
+  const primaryColor = settings?.primaryColor || "#40497A";
   
   return (
     <div className="mb-8">
@@ -25,7 +26,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               iconName={safeSettings.iconBuildYear}
               label="Year Built"
               value={property.buildYear}
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
           
@@ -34,7 +35,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               iconName={safeSettings.iconBedrooms}
               label="Bedrooms"
               value={property.bedrooms || ""}
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
           
@@ -43,7 +44,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               iconName={safeSettings.iconBathrooms}
               label="Bathrooms"
               value={property.bathrooms || ""}
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
           
@@ -52,7 +53,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               iconName={safeSettings.iconGarages}
               label="Garages"
               value={property.garages || ""}
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
           
@@ -62,7 +63,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               label="Plot Size"
               value={formatNumber(property.sqft)}
               unit="m²"
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
           
@@ -72,7 +73,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               label="Living Space"
               value={formatNumber(property.livingArea)}
               unit="m²"
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
           
@@ -81,7 +82,7 @@ export function PropertyDetails({ property, settings }: PropertyDetailsProps) {
               iconName="home"
               label="Property Type"
               value={property.propertyType}
-              primaryColor={settings?.primaryColor || "#40497A"}
+              primaryColor={primaryColor}
             />
           )}
         </div>

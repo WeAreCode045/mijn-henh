@@ -35,35 +35,37 @@ export function getSections({
   console.log('getSections called with currentPage:', currentPage, {
     propertyId: property.id,
     areaCount: property.areas?.length || 0,
-    hasFloorplan: !!property.floorplanEmbedScript,
+    hasFloorplan: !!property.floorplanEmbedScript || (property.floorplans && property.floorplans.length > 0),
     hasVirtualTour: !!property.virtualTourUrl,
     hasYoutubeVideo: !!property.youtubeUrl
   });
-
-  // Start with the fixed sections
-  const sections: Section[] = [
-    {
-      title: "Overview",
-      content: <OverviewSection property={property} settings={settings} />
-    },
-    {
-      title: "Details",
-      content: <DetailsSection property={property} settings={settings} />
-    }
-  ];
   
-  // Add individual area sections if they exist
+  // Always create sections in fixed order
+  const sections: Section[] = [];
+
+  // 0: Overview (Home)
+  sections.push({
+    title: "Overview",
+    content: <OverviewSection property={property} settings={settings} />
+  });
+  
+  // 1: Details (Introduction)
+  sections.push({
+    title: "Details",
+    content: <DetailsSection property={property} settings={settings} />
+  });
+  
+  // 2..N: Individual area sections
   if (property.areas && property.areas.length > 0) {
     property.areas.forEach((area, index) => {
       sections.push({
-        title: `Area: ${area.title || `Area ${index + 1}`}`,
+        title: `Area: ${area.title || area.name || `Area ${index + 1}`}`,
         content: <SingleAreaSection property={property} settings={settings} areaIndex={index} />
       });
     });
   }
 
-  // These sections need to come in a specific order
-  // Add floorplan section 
+  // Next: Floorplan section (if applicable)
   if (property.floorplanEmbedScript || 
       (property.floorplans && property.floorplans.length > 0)) {
     sections.push({
@@ -72,9 +74,9 @@ export function getSections({
     });
   }
   
-  // Add neighborhood section (Location)
+  // Next: Neighborhood section (always present)
   sections.push({
-    title: "Neighborhood",
+    title: "Location",
     content: <NeighborhoodSection 
       property={property} 
       waitForPlaces={waitForPlaces}
@@ -82,16 +84,16 @@ export function getSections({
     />
   });
   
-  // Add virtual tour section if either virtual tour or YouTube video is available
+  // Next: Virtual tour section (if applicable)
   if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') || 
       (property.youtubeUrl && property.youtubeUrl.trim() !== '')) {
     sections.push({
-      title: "Virtual Experience",
+      title: "Media",
       content: <VirtualTourSection property={property} settings={settings} />
     });
   }
   
-  // Add contact section if not in print view
+  // Last: Contact section (always present, unless print view)
   if (!isPrintView) {
     sections.push({
       title: "Contact",
