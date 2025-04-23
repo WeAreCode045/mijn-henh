@@ -19,9 +19,13 @@ export function SingleAreaSection({ property, settings, areaIndex = 0 }: WebView
   const areaTitle = area.title || `Area ${areaIndex + 1}`;
   
   // Get area photos by finding property images that have this area's id
-  const areaPhotos = property.images
-    .filter(img => img.area === area.id)
-    .map(img => img.url);
+  // Add null check for property.images before trying to filter
+  const areaPhotos = Array.isArray(property.images) 
+    ? property.images
+        .filter(img => img && typeof img === 'object' && 'area' in img && img.area === area.id)
+        .map(img => typeof img === 'object' && 'url' in img ? img.url : '')
+        .filter(url => url !== '')
+    : [];
   
   return (
     <div className="space-y-6">
