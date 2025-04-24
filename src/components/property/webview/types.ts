@@ -4,13 +4,8 @@ import { AgencySettings } from "@/types/agency";
 
 export interface WebViewSectionProps {
   property: PropertyData;
-  settings?: AgencySettings;
+  settings: AgencySettings;
+  isPrintView?: boolean;
   waitForPlaces?: boolean;
-  setSelectedImage?: (image: string | null) => void;
-}
-
-interface WebViewDialogProps {
-  property: PropertyData;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  currentAreaId?: string;
 }

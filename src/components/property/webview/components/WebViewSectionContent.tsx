@@ -59,8 +59,7 @@ export function WebViewSectionContent({
     safePageIndex,
     totalSections: sections.length,
     currentSectionTitle: currentSection?.title,
-    showHeader,
-    sectionTitles: sections.map((s, i) => `${i}: ${s.title}`)
+    showHeader
   });
   
   // Check if we have content for this page
@@ -74,6 +73,11 @@ export function WebViewSectionContent({
 
   return (
     <div className="webview-section p-4 mb-8">
+      {showHeader && (
+        <h2 className="text-2xl font-bold mb-6">
+          {currentSection.title}
+        </h2>
+      )}
       {currentSection.content}
     </div>
   );

@@ -3,13 +3,18 @@ import { WebViewSectionProps } from "../types";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyImage } from "@/types/property";
+import { AreaImageSlider } from "../AreaImageSlider";
 
 interface PropertyImageWithArea extends PropertyImage {
   area?: string | null;
   [key: string]: string | boolean | number | null | undefined;
 }
 
-export function AreasSection({ property, settings }: WebViewSectionProps) {
+interface AreasSectionProps extends WebViewSectionProps {
+  currentAreaId?: string;
+}
+
+export function AreasSection({ property, settings, currentAreaId }: AreasSectionProps) {
   const [areaImages, setAreaImages] = useState<Record<string, PropertyImageWithArea[]>>({});
   
   useEffect(() => {
@@ -43,6 +48,7 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
         }
         
         setAreaImages(imagesByArea);
+        console.log("Area images fetched:", imagesByArea);
       } catch (err) {
         console.error('Error fetching area images:', err);
       }
@@ -59,25 +65,35 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
     );
   }
 
-  // Ensure we have valid areas to display
-  const areasToDisplay = property.areas.slice(0, 2);
+  // If a specific area ID is provided, show only that area
+  const areasToDisplay = currentAreaId
+    ? property.areas.filter(area => area.id === currentAreaId)
+    : property.areas;
   
-  const getAreaImages = (areaId: string): string[] => {
-    if (areaImages[areaId]) {
-      return areaImages[areaId].map(img => img.url);
+  const getAreaImages = (area: any): string[] => {
+    // First try to get images from our fetched area images
+    if (areaImages[area.id] && areaImages[area.id].length > 0) {
+      return areaImages[area.id].map(img => img.url);
     }
     
-    const area = property.areas?.find(a => a.id === areaId);
-    if (!area || !area.images || !property.images) return [];
+    // Then try to get them from area.images if available
+    if (area.images && Array.isArray(area.images) && area.images.length > 0) {
+      return area.images.map((img: any) => typeof img === 'string' ? img : img.url);
+    }
     
-    return area.images.map(img => typeof img === 'string' ? img : img.url);
+    // Then try to get them from area.areaImages if available
+    if (area.areaImages && Array.isArray(area.areaImages) && area.areaImages.length > 0) {
+      return area.areaImages.map((img: any) => img.url);
+    }
+    
+    return [];
   };
 
   return (
     <div className="space-y-4 pb-24">
       <div className="px-6 space-y-8">
         {areasToDisplay.map((area, index) => {
-          const areaImagesUrls = getAreaImages(area.id);
+          const areaImagesUrls = getAreaImages(area);
           const columnCount = area.columns || 2;
           
           return (
@@ -94,21 +110,19 @@ export function AreasSection({ property, settings }: WebViewSectionProps) {
                 </p>
               </div>
 
-              {areaImagesUrls.length > 0 && (
-                <div 
-                  className="grid gap-4"
-                  style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
-                >
-                  {areaImagesUrls.map((imageUrl, imgIndex) => (
-                    <img
-                      key={imgIndex}
-                      src={imageUrl}
-                      alt={`${area.title} ${imgIndex + 1}`}
-                      className="w-full aspect-video object-cover rounded-lg"
-                    />
-                  ))}
-                </div>
-              )}
+              {/* Use AreaImageSlider to display images */}
+              <div className="mt-4">
+                {areaImagesUrls.length > 0 ? (
+                  <AreaImageSlider 
+                    images={areaImagesUrls} 
+                    areaTitle={area.title}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+                    <p className="text-gray-500">No images available for this area</p>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

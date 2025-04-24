@@ -26,7 +26,7 @@ export function WebViewLayout({
   const { primaryColor, secondaryColor } = useThemeColors(settings);
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="w-full h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
@@ -59,9 +59,9 @@ export function WebViewLayout({
       </header>
 
       {/* Main Content */}
-      <main className="w-full flex-1 flex flex-col">
-        <div className="max-w-[1600px] mx-auto px-6 py-8 flex-1 flex flex-col w-full">
-          <div className="flex gap-8 h-full">
+      <main className="w-full flex-1 flex overflow-hidden">
+        <div className="max-w-[1600px] mx-auto px-6 py-8 flex-1 flex w-full">
+          <div className="flex gap-8 h-full w-full">
             {/* Left Sidebar */}
             <aside className="w-64 shrink-0">
               <SideMenu 
@@ -73,13 +73,13 @@ export function WebViewLayout({
 
             {/* Main Content */}
             <div className="flex-1 max-w-[60%] flex flex-col h-full">
-              {/* Scrollable content area - moving ScrollArea here for proper scrolling */}
-              <ScrollArea className="flex-1 h-full pr-4">
+              {/* Scrollable content area */}
+              <div className="flex-1 overflow-y-auto pr-4">
                 {children}
-              </ScrollArea>
+              </div>
               
               {/* Navigation - sticky to the bottom */}
-              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 z-10 w-full">
+              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 z-10">
                 <Navigation
                   currentPage={currentPage}
                   totalPages={calculateTotalPages(property)}
