@@ -18,9 +18,19 @@ interface SupabasePropertyData {
   hasGarden: boolean;
   description: string;
   location_description: string;
-  features: any; // Using any to accommodate Json or array types
-  areas: any; // Using any to accommodate Json or array types
-  nearby_places: any; // Using any to accommodate Json or array types
+  features: Json[] | Json | null;
+  areas: Array<{
+    id: string;
+    title?: string;
+    name?: string;
+    description?: string;
+    size?: string;
+    images?: Array<{
+      url: string;
+      id?: string;
+    }>;
+  }> | Json | null;
+  nearby_places: Json[] | Json | null;
   latitude: number | null;
   longitude: number | null;
   map_image: string | null;
@@ -47,6 +57,8 @@ interface SupabasePropertyData {
   template_id?: string; // Make this optional since template functionality is removed
   floorplanEmbedScript?: string;
   propertyType?: string; // Add propertyType property
+  virtualTourUrl?: string | null;
+  youtubeUrl?: string | null;
 }
 
 export function transformSupabaseData(
@@ -96,17 +108,29 @@ export function transformSupabaseData(
   // Ensure areas is an array
   const dataAreas = Array.isArray(data.areas) ? data.areas : [];
   
-  // Transform areas to include images from property_images table
-  const transformedAreas = dataAreas.map((area: any) => ({
-    ...area,
-    images: data.property_images
-      .filter((img) => img.area === area.id)
-      .map((img) => ({
-        id: img.id,
-        url: img.url,
-        area: img.area
-      }))
-  }));
+  // Debug log for areas data
+  console.log('Raw areas data:', dataAreas);
+
+  // Transform areas and extract image URLs from the JSONB data
+  const transformedAreas = dataAreas.map((area: { 
+    id: string; 
+    title?: string; 
+    name?: string; 
+    description?: string; 
+    size?: string;
+    images?: Array<{ url: string; id?: string; }>;
+  }) => {
+    // Debug log for each area's images
+    console.log(`Area ${area.id || 'unknown'} images:`, area.images);
+    
+    return {
+      ...area,
+      images: area.images?.map(img => img.url) || []
+    };
+  });
+
+  // Debug log for transformed areas
+  console.log('Transformed areas with image URLs:', transformedAreas);
 
   // Ensure features is always an array
   const dataFeatures = Array.isArray(data.features) ? data.features : 
@@ -158,6 +182,8 @@ export function transformSupabaseData(
     template_id: data.template_id || "default",
     floorplanEmbedScript: data.floorplanEmbedScript || "",
     floorplans: [],
+    virtualTourUrl: data.virtualTourUrl || "",
+    youtubeUrl: data.youtubeUrl || ""
   };
 
   console.log('transformSupabaseData - Returning transformed data:', {
@@ -166,7 +192,9 @@ export function transformSupabaseData(
     hasFloorplanScript: !!transformedData.floorplanEmbedScript,
     scriptLength: transformedData.floorplanEmbedScript ? transformedData.floorplanEmbedScript.length : 0,
     imageCount: transformedData.images.length,
-    areaCount: transformedData.areas.length
+    areaCount: transformedData.areas.length,
+    virtualTourUrl: transformedData.virtualTourUrl,
+    youtubeUrl: transformedData.youtubeUrl
   });
 
   return transformedData;

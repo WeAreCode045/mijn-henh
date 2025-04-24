@@ -8,9 +8,23 @@ export function VirtualTourSection({ property, settings }: WebViewSectionProps) 
   const virtualTourUrl = property.virtualTourUrl || '';
   const youtubeUrl = property.youtubeUrl || '';
   
+  // Debug info
+  console.log('VirtualTourSection - Property:', {
+    virtualTourUrl: property.virtualTourUrl,
+    youtubeUrl: property.youtubeUrl,
+    rawProperty: property
+  });
+  
   // Check if content exists
   const hasVirtualTour = virtualTourUrl && virtualTourUrl.trim() !== '';
   const hasVideo = youtubeUrl && youtubeUrl.trim() !== '';
+  
+  console.log('VirtualTourSection - Status:', {
+    hasVirtualTour,
+    hasVideo,
+    virtualTourUrl,
+    youtubeUrl
+  });
   
   // Format YouTube URL for embedding if needed
   const getEmbeddedYoutubeUrl = (url: string) => {
@@ -59,18 +73,11 @@ export function VirtualTourSection({ property, settings }: WebViewSectionProps) 
     <div className="space-y-6 pb-8">
       <div className="px-6">
         <div className="bg-white/90 p-4 rounded-lg shadow-sm">
-          <h2 
-            className="text-2xl font-bold mb-6"
-            style={{ color: settings?.secondaryColor }}
-          >
-            Virtual Experience
-          </h2>
-          
           <div className="grid grid-cols-1 gap-8">
             {/* Virtual Tour */}
             {hasVirtualTour && (
               <div className="virtual-tour-container">
-                <h3 className="flex items-center text-lg font-semibold mb-4">
+                <h3 className="flex items-center text-lg font-semibold mb-4" style={{ color: settings?.secondaryColor }}>
                   <Film className="mr-2 h-5 w-5 text-estate-600" />
                   Virtual Tour
                 </h3>
@@ -88,7 +95,7 @@ export function VirtualTourSection({ property, settings }: WebViewSectionProps) 
             {/* YouTube Video */}
             {hasVideo && (
               <div className="video-container">
-                <h3 className="flex items-center text-lg font-semibold mb-4">
+                <h3 className="flex items-center text-lg font-semibold mb-4" style={{ color: settings?.secondaryColor }}>
                   <Youtube className="mr-2 h-5 w-5 text-estate-600" />
                   Property Video
                 </h3>

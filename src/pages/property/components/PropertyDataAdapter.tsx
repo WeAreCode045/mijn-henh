@@ -28,6 +28,12 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
       if (!propertyData) return;
       
       try {
+        // Debug logging for media URLs
+        console.log('Raw property data:', {
+          virtualTourUrl: propertyData.virtualTourUrl,
+          youtubeUrl: propertyData.youtubeUrl,
+          rawData: propertyData
+        });
         // Fetch images from property_images table
         let images: PropertyImage[] = [];
         
@@ -78,6 +84,12 @@ export function PropertyDataAdapter({ propertyData, children }: PropertyDataAdap
         // Determine status from metadata or direct property field
         const status = metadata?.status || propertyData.status || 'Draft';
         
+        // Debug log for media URLs
+        console.log('PropertyDataAdapter - Media URLs:', {
+          virtualTourUrl: propertyData.virtualTourUrl,
+          youtubeUrl: propertyData.youtubeUrl
+        });
+
         // Create the structured property data
         const structuredProperty: PropertyData = {
           id: propertyData.id || "",

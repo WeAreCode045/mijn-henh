@@ -18,27 +18,29 @@ export function Navigation({
   return (
     <div className="flex justify-between items-center py-2">
       <Button
-        variant="outline"
+        variant="ghost"
         onClick={onPrevious}
         disabled={currentPage === 0}
-        className="shadow-sm"
+        className="hover:bg-black/5 transition-colors disabled:opacity-30 text-gray-700"
       >
-        <ChevronLeft className="mr-2 h-4 w-4" />
+        <ChevronLeft className="mr-2 h-5 w-5" />
         Previous
       </Button>
 
-      <span className="text-sm text-gray-500">
-        Page {currentPage + 1} of {totalPages}
-      </span>
+      <div className="px-4 py-1 rounded-full bg-black/5 backdrop-blur-sm">
+        <span className="text-sm font-medium text-gray-700">
+          {currentPage + 1} / {totalPages}
+        </span>
+      </div>
 
       <Button
-        variant="outline"
+        variant="ghost"
         onClick={onNext}
         disabled={currentPage === totalPages - 1}
-        className="shadow-sm"
+        className="hover:bg-black/5 transition-colors disabled:opacity-30 text-gray-700"
       >
         Next
-        <ChevronRight className="ml-2 h-4 w-4" />
+        <ChevronRight className="ml-2 h-5 w-5" />
       </Button>
     </div>
   );

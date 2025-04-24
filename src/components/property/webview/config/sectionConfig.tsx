@@ -64,14 +64,11 @@ export function getSections({
     />
   });
 
-  // Add media (virtual tour and YouTube)
-  if ((property.virtualTourUrl && property.virtualTourUrl.trim() !== '') ||
-      (property.youtubeUrl && property.youtubeUrl.trim() !== '')) {
-    sections.push({
-      title: "Media",
-      content: <VirtualTourSection property={property} settings={settings} />
-    });
-  }
+  // Add media section
+  sections.push({
+    title: "Media",
+    content: <VirtualTourSection property={property} settings={settings} />
+  });
 
   return sections;
 }

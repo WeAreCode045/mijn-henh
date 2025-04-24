@@ -20,38 +20,40 @@ export function AreaImageSlider({ images, areaTitle = "Area" }: AreaImageSliderP
 
   return (
     <div className="area-image-slider">
-      {/* Main image */}
-      <div 
-        className="main-image-container relative aspect-[4/3] rounded-lg overflow-hidden mb-2 cursor-pointer"
-        onClick={() => setLightboxOpen(true)}
-      >
-        <img 
-          src={images[currentImageIndex]} 
-          alt={`${areaTitle} - Main view`}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      
-      {/* Thumbnails */}
-      {images.length > 1 && (
-        <div className="thumbnails-container grid grid-cols-5 gap-2">
-          {images.map((image, index) => (
-            <div 
-              key={index}
-              className={`thumbnail aspect-[4/3] rounded-md overflow-hidden cursor-pointer border-2 ${
-                index === currentImageIndex ? 'border-estate-600' : 'border-transparent'
-              }`}
-              onClick={() => setCurrentImageIndex(index)}
-            >
-              <img 
-                src={image} 
-                alt={`${areaTitle} thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+      <div className="flex gap-4">
+        {/* Main image */}
+        <div 
+          className="flex-1 relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer"
+          onClick={() => setLightboxOpen(true)}
+        >
+          <img 
+            src={images[currentImageIndex]} 
+            alt={`${areaTitle} - Main view`}
+            className="w-full h-full object-cover"
+          />
         </div>
-      )}
+        
+        {/* Thumbnails on the right */}
+        {images.length > 1 && (
+          <div className="w-48 grid grid-cols-2 gap-2 content-start">
+            {images.map((image, index) => (
+              <div 
+                key={index}
+                className={`thumbnail aspect-[4/3] rounded-md overflow-hidden cursor-pointer border-2 ${
+                  index === currentImageIndex ? 'border-estate-600' : 'border-transparent'
+                } transition-colors hover:border-estate-400`}
+                onClick={() => setCurrentImageIndex(index)}
+              >
+                <img 
+                  src={image} 
+                  alt={`${areaTitle} thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       
       {/* Lightbox */}
       {lightboxOpen && (

@@ -79,7 +79,7 @@ export function WebViewLayout({
               </div>
               
               {/* Navigation - sticky to the bottom */}
-              <div className="sticky bottom-0 bg-white border-t mt-4 pt-4 pb-2 z-10">
+              <div className="sticky bottom-0 mt-4 pt-4 pb-2 z-10 bg-gradient-to-t from-gray-50 via-gray-50/95 to-transparent backdrop-blur-[2px]">
                 <Navigation
                   currentPage={currentPage}
                   totalPages={calculateTotalPages(property)}
