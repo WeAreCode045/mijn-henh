@@ -59,7 +59,7 @@ export function WebViewLayout({
       </header>
 
       {/* Main Content */}
-      <main className="w-full flex-1 flex overflow-hidden">
+      <main className="w-full flex-1 flex overflow-y-auto">
         <div className="max-w-[1600px] mx-auto px-6 py-8 flex-1 flex w-full">
           <div className="flex gap-8 h-full w-full">
             {/* Left Sidebar */}

@@ -89,7 +89,7 @@ export function NeighborhoodSection({ property, settings, waitForPlaces = false 
   };
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 overflow-y-auto">
       <div className="px-6">
         <div className="grid grid-cols-10 gap-6">
           {/* Left side: Location Description */}

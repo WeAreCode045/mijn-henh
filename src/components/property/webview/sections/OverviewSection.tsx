@@ -50,21 +50,12 @@ export function OverviewSection({ property, settings }: WebViewSectionProps) {
   console.log("Featured images count:", featuredImages.length);
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-24 overflow-y-hidden">
       <div className="space-y-4 mt-2">
         {/* Blue bar with title and price (now ABOVE the image) */}
-        <div 
-          className="mx-6 px-4 py-3 rounded-md flex justify-between items-center"
-          style={{ backgroundColor: settings?.primaryColor || '#0EA5E9' }}
-        >
-          <h2 className="font-semibold text-white text-lg truncate mr-4">
-            {property.title}
-          </h2>
-          <span className="text-white font-bold text-lg whitespace-nowrap">
-            {formatPrice(property.price)}
-          </span>
-        </div>
+
         
+      
         {mainImage && (
           <div className="relative px-6">
             <img

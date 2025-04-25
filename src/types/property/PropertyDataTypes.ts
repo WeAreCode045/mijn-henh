@@ -58,4 +58,5 @@ export interface PropertyData {
     photoUrl?: string;
   };
   propertyType?: string; // Property type field
+  featured?: Array<{description: string; [key: string]: any}>; // JSONB featured column with features
 }

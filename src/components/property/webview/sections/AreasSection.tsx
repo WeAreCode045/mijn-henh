@@ -90,7 +90,7 @@ export function AreasSection({ property, settings, currentAreaId }: AreasSection
   };
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-24 overflow-y-hidden">
       <div className="px-6 space-y-8">
         {areasToDisplay.map((area, index) => {
           const areaImagesUrls = getAreaImages(area);
