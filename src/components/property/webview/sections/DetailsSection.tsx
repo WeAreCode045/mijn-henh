@@ -1,40 +1,13 @@
 
-import { PropertyDetails } from "../PropertyDetails";
 import { WebViewSectionProps } from "../types";
+import { PropertyDetails } from "../PropertyDetails";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Check } from "lucide-react";
-import { PropertyData } from "@/types/property";
-
-// Extended interface to include the featured property
-interface ExtendedPropertyData extends PropertyData {
-  featured?: Array<{description: string; [key: string]: string | number | boolean | null | undefined}>;
-}
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
-  // Ensure features is always an array
-  const features = property.features ? (
-    Array.isArray(property.features) ? property.features : [property.features]
-  ) : [];
-  
-  // Get features from the featured JSONB column
-  // Cast property to ExtendedPropertyData to access the featured property
-  const extendedProperty = property as ExtendedPropertyData;
-  const featuredFeatures = extendedProperty.featured ? (
-    Array.isArray(extendedProperty.featured) ? extendedProperty.featured : [extendedProperty.featured]
-  ) : [];
-  
-  // Combine both feature sources
-  const allFeatures = [
-    ...features,
-    ...featuredFeatures.map((feature, index) => ({
-      id: `featured-${index}`,
-      description: feature.description || ''
-    }))
-  ];
-  
-  console.log("Properties features:", features);
-  console.log("Featured features:", featuredFeatures);
-  
+  // We'll safely parse the features array
+  const features = Array.isArray(property.features) ? property.features : [];
+
   return (
     <div className="space-y-6 pb-16 overflow-y-auto">
       <div className="px-6">
@@ -61,7 +34,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
         </div>
 
         {/* Features Section */}
-        {allFeatures.length > 0 && (
+        {features.length > 0 && (
           <div className="flex-[2]">
             <div className="bg-white/90 p-4 rounded-lg shadow-sm">
               <h3 
@@ -73,19 +46,17 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
               <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
                 <Table>
                   <TableBody>
-                    {allFeatures.map((feature, index) => {
+                    {features.map((feature, index) => {
                       const isEven = index % 2 === 0;
-                      
-                      // Blue/gray for even rows, light gray for odd rows
-                      const bgColor = isEven 
-                        ? '#e2e8f0' // Tailwind's slate-200 color (blue/gray tint)
-                        : '#f3f3f3'; // Light gray
+                      const description = typeof feature === 'string' 
+                        ? feature 
+                        : feature.description || '';
                       
                       return (
                         <TableRow 
-                          key={feature.id || index}
+                          key={index}
                           style={{ 
-                            backgroundColor: bgColor,
+                            backgroundColor: isEven ? '#e2e8f0' : '#f3f3f3',
                             borderBottom: 'none'
                           }}
                         >
@@ -100,7 +71,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                               />
                             </div>
                             <span style={{ fontWeight: 500 }}>
-                              {feature.description}
+                              {description}
                             </span>
                           </TableCell>
                         </TableRow>
