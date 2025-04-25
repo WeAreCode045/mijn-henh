@@ -6,8 +6,22 @@ import { Check } from "lucide-react";
 import { PropertyFeature } from "@/types/property";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
-  // Make sure features is properly typed as an array of PropertyFeature
-  const features = Array.isArray(property.features) ? property.features : [];
+  // Ensure features is an array and extract descriptions properly
+  const features = Array.isArray(property.features) 
+    ? property.features.map(feature => {
+        // Handle different possible feature formats
+        if (typeof feature === 'string') {
+          return { id: `feature-${Math.random().toString(36).substring(2, 9)}`, description: feature };
+        } 
+        else if (typeof feature === 'object' && feature !== null) {
+          return { 
+            id: feature.id || `feature-${Math.random().toString(36).substring(2, 9)}`,
+            description: feature.description || String(feature)
+          };
+        }
+        return { id: `feature-${Math.random().toString(36).substring(2, 9)}`, description: 'Unknown feature' };
+      })
+    : [];
   
   return (
     <div className="space-y-6 pb-16 overflow-y-auto">
@@ -47,22 +61,12 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
               <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
                 <Table>
                   <TableBody>
-                    {features.map((feature: PropertyFeature | string, index: number) => {
+                    {features.map((feature, index) => {
                       const isEven = index % 2 === 0;
-                      
-                      // Extract description from feature correctly
-                      let description: string;
-                      if (typeof feature === 'string') {
-                        description = feature;
-                      } else if (typeof feature === 'object' && feature !== null) {
-                        description = feature.description || '';
-                      } else {
-                        description = 'Unknown feature';
-                      }
                       
                       return (
                         <TableRow 
-                          key={index}
+                          key={feature.id || index}
                           style={{ 
                             backgroundColor: isEven ? '#e2e8f0' : '#f3f3f3',
                             borderBottom: 'none'
@@ -79,7 +83,7 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
                               />
                             </div>
                             <span style={{ fontWeight: 500 }}>
-                              {description}
+                              {feature.description}
                             </span>
                           </TableCell>
                         </TableRow>

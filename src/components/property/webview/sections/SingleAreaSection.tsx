@@ -19,20 +19,20 @@ export function SingleAreaSection({ property, settings, areaIndex }: SingleAreaS
 
   const area = property.areas[areaIndex];
   
-  // Get area images safely - extract URLs from images array
-  const areaImages: string[] = [];
+  // Extract image URLs from PropertyImage objects
+  const areaImageUrls: string[] = [];
   
   if (area.images && Array.isArray(area.images)) {
     area.images.forEach((img) => {
       if (typeof img === 'string') {
-        areaImages.push(img);
+        areaImageUrls.push(img);
       } else if (typeof img === 'object' && img && 'url' in img) {
-        areaImages.push(img.url as string);
+        areaImageUrls.push(img.url);
       }
     });
   }
 
-  console.log(`Area ${areaIndex} images:`, areaImages);
+  console.log(`Area ${areaIndex} image URLs:`, areaImageUrls);
 
   return (
     <div className="space-y-6 pb-8">
@@ -47,10 +47,10 @@ export function SingleAreaSection({ property, settings, areaIndex }: SingleAreaS
           </h2>
           
           {/* Area Images */}
-          {areaImages.length > 0 ? (
+          {areaImageUrls.length > 0 ? (
             <div className="mb-4">
               <AreaImageSlider 
-                images={areaImages} 
+                images={areaImageUrls} 
                 areaTitle={area.title || area.name} 
               />
             </div>

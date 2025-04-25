@@ -149,11 +149,21 @@ export function transformSupabaseData(
   const transformFeatures = (features: any): PropertyFeature[] => {
     if (!features) return [];
     
+    // Ensure features is an array
     const featureArray = Array.isArray(features) ? features : [features];
     
+    // Map each feature to ensure it has the correct structure
     return featureArray.map((feature: any) => {
-      // If feature is already a PropertyFeature object with description
-      if (typeof feature === 'object' && feature.description) {
+      // If feature is already a PropertyFeature object with id and description
+      if (typeof feature === 'object' && feature !== null && feature.id && feature.description) {
+        return {
+          id: feature.id,
+          description: feature.description
+        };
+      }
+      
+      // If feature is an object with just description
+      if (typeof feature === 'object' && feature !== null && feature.description) {
         return {
           id: feature.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
           description: feature.description
@@ -165,6 +175,16 @@ export function transformSupabaseData(
         return {
           id: `feature-${Math.random().toString(36).substr(2, 9)}`,
           description: feature
+        };
+      }
+      
+      // If feature is an object but without standard properties
+      if (typeof feature === 'object' && feature !== null) {
+        // Try to determine what to use as description
+        const description = feature.description || feature.name || feature.value || JSON.stringify(feature);
+        return {
+          id: feature.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
+          description: description
         };
       }
       
@@ -202,6 +222,12 @@ export function transformSupabaseData(
     });
   };
 
+  // Process features data
+  const features = transformFeatures(data.features);
+  
+  // Debug log for features
+  console.log('Transformed features:', features);
+
   // Create the transformed property data
   const transformedData: PropertyData = {
     id: data.id,
@@ -219,7 +245,7 @@ export function transformSupabaseData(
     hasGarden: data.hasGarden || false,
     description: data.description || "",
     location_description: data.location_description || "",
-    features: transformFeatures(data.features),
+    features: features,
     images: images,
     featuredImage: featuredImage,
     featuredImages: featuredImages,
