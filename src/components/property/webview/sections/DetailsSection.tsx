@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { PropertyFeature } from "@/types/property";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
-  // Ensure features is an array and extract descriptions properly
+  // Ensure features is processed properly for display
   const features = Array.isArray(property.features) 
     ? property.features.map(feature => {
         // Handle different possible feature formats
