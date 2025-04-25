@@ -1,6 +1,7 @@
 
 import { WebViewSectionProps } from "../types";
 import { AreaImageSlider } from "../AreaImageSlider";
+import { PropertyImage } from "@/types/property";
 
 interface SingleAreaSectionProps extends WebViewSectionProps {
   areaIndex: number;

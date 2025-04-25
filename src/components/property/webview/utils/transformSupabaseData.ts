@@ -123,6 +123,12 @@ export function transformSupabaseData(
     // Debug log for each area's images
     console.log(`Area ${area.id || 'unknown'} images:`, area.images);
     
+    // Convert string URLs to PropertyImage objects
+    const areaImages: PropertyImage[] = area.images?.map(img => ({
+      id: img.id || `img-${Math.random().toString(36).substring(2, 11)}`,
+      url: img.url
+    })) || [];
+    
     // Ensure all required properties are present
     return {
       id: area.id,
@@ -130,7 +136,7 @@ export function transformSupabaseData(
       name: area.name || area.title || `Area ${area.id.substring(0, 4)}`, // Ensure name is always defined
       description: area.description || '',
       size: area.size || '',
-      images: area.images?.map(img => img.url) || [],
+      images: areaImages, // Now properly formatted as PropertyImage[]
       imageIds: [], // Required property in PropertyArea
       columns: 2 // Default value
     };
