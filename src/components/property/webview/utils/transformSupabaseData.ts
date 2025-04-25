@@ -112,7 +112,7 @@ export function transformSupabaseData(
   console.log('Raw areas data:', dataAreas);
 
   // Transform areas and extract image URLs from the JSONB data
-  const transformedAreas = dataAreas.map((area: { 
+  const transformedAreas: PropertyArea[] = dataAreas.map((area: { 
     id: string; 
     title?: string; 
     name?: string; 
@@ -123,11 +123,15 @@ export function transformSupabaseData(
     // Debug log for each area's images
     console.log(`Area ${area.id || 'unknown'} images:`, area.images);
     
+    // Ensure all required properties are present
     return {
-      ...area,
+      id: area.id,
+      title: area.title || '',
+      name: area.name || area.title || `Area ${area.id.substring(0, 4)}`, // Ensure name is always defined
+      description: area.description || '',
+      size: area.size || '',
       images: area.images?.map(img => img.url) || [],
-      // Add required properties for PropertyArea type
-      imageIds: [],
+      imageIds: [], // Required property in PropertyArea
       columns: 2 // Default value
     };
   });
