@@ -1,5 +1,5 @@
 
-import { PropertyData, PropertyImage } from "@/types/property";
+import { PropertyData, PropertyImage, PropertyFeature, PropertyArea, PropertyNearbyPlace } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
 
@@ -125,20 +125,72 @@ export function transformSupabaseData(
     
     return {
       ...area,
-      images: area.images?.map(img => img.url) || []
+      images: area.images?.map(img => img.url) || [],
+      // Add required properties for PropertyArea type
+      imageIds: [],
+      columns: 2 // Default value
     };
   });
 
   // Debug log for transformed areas
   console.log('Transformed areas with image URLs:', transformedAreas);
 
-  // Ensure features is always an array
-  const dataFeatures = Array.isArray(data.features) ? data.features : 
-                      (data.features ? [data.features] : []);
+  // Transform features to ensure they match the PropertyFeature type
+  const transformFeatures = (features: any): PropertyFeature[] => {
+    if (!features) return [];
+    
+    const featureArray = Array.isArray(features) ? features : [features];
+    
+    return featureArray.map((feature: any) => {
+      // If feature is already a PropertyFeature object with description
+      if (typeof feature === 'object' && feature.description) {
+        return {
+          id: feature.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
+          description: feature.description
+        };
+      }
+      
+      // If feature is just a string
+      if (typeof feature === 'string') {
+        return {
+          id: `feature-${Math.random().toString(36).substr(2, 9)}`,
+          description: feature
+        };
+      }
+      
+      // Default case with empty description
+      return {
+        id: `feature-${Math.random().toString(36).substr(2, 9)}`,
+        description: 'Unknown feature'
+      };
+    });
+  };
 
-  // Ensure nearby_places is always an array
-  const nearbyPlaces = Array.isArray(data.nearby_places) ? data.nearby_places : 
-                      (data.nearby_places ? [data.nearby_places] : []);
+  // Transform nearby places to ensure they match PropertyNearbyPlace type
+  const transformNearbyPlaces = (places: any): PropertyNearbyPlace[] => {
+    if (!places) return [];
+    
+    const placesArray = Array.isArray(places) ? places : [places];
+    
+    return placesArray.map((place: any) => {
+      if (typeof place === 'object') {
+        return {
+          id: place.id || `place-${Math.random().toString(36).substr(2, 9)}`,
+          name: place.name || 'Unknown place',
+          distance: place.distance || '0',
+          type: place.type || 'unknown'
+        };
+      }
+      
+      // Default case if place is not an object
+      return {
+        id: `place-${Math.random().toString(36).substr(2, 9)}`,
+        name: typeof place === 'string' ? place : 'Unknown place',
+        distance: '0',
+        type: 'unknown'
+      };
+    });
+  };
 
   // Create the transformed property data
   const transformedData: PropertyData = {
@@ -157,12 +209,12 @@ export function transformSupabaseData(
     hasGarden: data.hasGarden || false,
     description: data.description || "",
     location_description: data.location_description || "",
-    features: dataFeatures,
+    features: transformFeatures(data.features),
     images: images,
     featuredImage: featuredImage,
     featuredImages: featuredImages,
     areas: transformedAreas,
-    nearby_places: nearbyPlaces,
+    nearby_places: transformNearbyPlaces(data.nearby_places),
     latitude: data.latitude,
     longitude: data.longitude,
     map_image: data.map_image,
@@ -194,7 +246,8 @@ export function transformSupabaseData(
     imageCount: transformedData.images.length,
     areaCount: transformedData.areas.length,
     virtualTourUrl: transformedData.virtualTourUrl,
-    youtubeUrl: transformedData.youtubeUrl
+    youtubeUrl: transformedData.youtubeUrl,
+    featuresCount: transformedData.features.length
   });
 
   return transformedData;

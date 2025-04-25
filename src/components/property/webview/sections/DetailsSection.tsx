@@ -3,11 +3,12 @@ import { WebViewSectionProps } from "../types";
 import { PropertyDetails } from "../PropertyDetails";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Check } from "lucide-react";
+import { PropertyFeature } from "@/types/property";
 
 export function DetailsSection({ property, settings }: WebViewSectionProps) {
-  // We'll safely parse the features array
+  // Make sure features is properly typed as an array of PropertyFeature
   const features = Array.isArray(property.features) ? property.features : [];
-
+  
   return (
     <div className="space-y-6 pb-16 overflow-y-auto">
       <div className="px-6">
@@ -46,11 +47,18 @@ export function DetailsSection({ property, settings }: WebViewSectionProps) {
               <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
                 <Table>
                   <TableBody>
-                    {features.map((feature, index) => {
+                    {features.map((feature: PropertyFeature | string, index: number) => {
                       const isEven = index % 2 === 0;
-                      const description = typeof feature === 'string' 
-                        ? feature 
-                        : feature.description || '';
+                      
+                      // Extract description from feature correctly
+                      let description: string;
+                      if (typeof feature === 'string') {
+                        description = feature;
+                      } else if (typeof feature === 'object' && feature !== null) {
+                        description = feature.description || '';
+                      } else {
+                        description = 'Unknown feature';
+                      }
                       
                       return (
                         <TableRow 
