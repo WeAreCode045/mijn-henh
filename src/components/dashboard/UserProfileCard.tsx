@@ -87,10 +87,12 @@ export function UserProfileCard({ inSidebar = false }: UserProfileCardProps) {
             <Mail className="h-4 w-4 text-muted-foreground" />
             <span className="text-">{profile?.email || "No email"}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{profile?.phone || "No phone"}</span>
-          </div>
+          {profile?.phone && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{profile.phone}</span>
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter>

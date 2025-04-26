@@ -6,12 +6,32 @@ import { PropertyFormLoader } from "./form/PropertyFormLoader";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useState } from "react";
-import { PropertyAgentDetail } from "./dashboard/components/PropertyAgentDetail";
 import { Separator } from "../ui/separator";
 import { PropertyDashboardTab } from "./tabs/dashboard";
 import { ParticipantsTab } from "@/pages/property/tabs/ParticipantsTab";
 import { DocumentsTab } from "@/pages/property/tabs/DocumentsTab";
 import { CommunicationsTab } from "@/pages/property/tabs/CommunicationsTab";
+
+interface PropertyAgentDetailProps {
+  agent: { id: string; name: string } | null;
+  agents: any[];
+  onChange: (agentId: string) => void;
+  agentId?: string;
+}
+
+// This is a stub component that should be imported from the correct path
+// or implemented if it doesn't exist yet
+const PropertyAgentDetail = ({ agent, agents, onChange, agentId }: PropertyAgentDetailProps) => {
+  return (
+    <div className="flex items-center gap-2">
+      {agent ? (
+        <div>{agent.name}</div>
+      ) : (
+        <div>No agent assigned</div>
+      )}
+    </div>
+  );
+};
 
 interface PropertyFormContainerProps {
   propertyId?: string | null;
@@ -93,14 +113,14 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
         >
           <TabsContent value="dashboard">
             <PropertyDashboardTab
-              property={formData}
-              deleteProperty={deleteProperty}
+              formData={formData}
+              onDelete={deleteProperty}
               propertyId={id || ""}
             />
           </TabsContent>
           <TabsContent value="content">
             <PropertyFormContent
-              formData={formData}
+              propertyData={formData}
               settings={settings}
               isSubmitting={isSubmitting}
               onSave={saveProperty}

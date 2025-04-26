@@ -5,8 +5,12 @@ export interface User {
   full_name: string | null;
   phone: string | null;
   whatsapp_number: string | null;
-  role: "admin" | "agent" | null;
-  avatar_url: string | null; // Changed from avatar to avatar_url to match database
+  role: "admin" | "agent" | "seller" | "buyer" | null;
+  avatar_url: string | null; 
+  address?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
 }
 
 export interface UserFormData {
@@ -15,5 +19,5 @@ export interface UserFormData {
   fullName: string;
   phone: string;
   whatsappNumber: string;
-  role: "admin" | "agent";
+  role: "admin" | "agent" | "seller" | "buyer";
 }

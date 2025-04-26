@@ -39,8 +39,12 @@ export function useUsers() {
           full_name: user.full_name || null,
           phone: user.phone || null,
           whatsapp_number: user.whatsapp_number || null,
-          role: user.role || null,
-          avatar_url: user.avatar_url || null
+          role: user.role as "admin" | "agent" | "seller" | "buyer" | null,
+          avatar_url: user.avatar_url || null,
+          address: user.address || null,
+          city: user.city || null,
+          postal_code: user.postal_code || null,
+          country: user.country || null
         }));
 
         console.log("Transformed users:", transformedData);

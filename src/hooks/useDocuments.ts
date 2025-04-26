@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 import { Document, DocumentSignature } from '@/types/document';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
@@ -57,15 +57,19 @@ export function useDocuments(propertyId?: string, isGlobal = false) {
       const fileExt = file.name.split('.').pop();
       const filePath = `documents/${document.property_id || 'global'}/${timestamp}-${file.name}`;
       
+      // Create a function that tracks upload progress
+      const handleProgress = (progress: { loaded: number; total: number }) => {
+        setUploadProgress(Math.round((progress.loaded / progress.total) * 100));
+      };
+      
       // Upload file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false,
-          onUploadProgress: (progress) => {
-            setUploadProgress(Math.round((progress.loaded / progress.total) * 100));
-          }
+          // Using the standard ProgressEvent interface that matches what onUploadProgress expects
+          onUploadProgress: handleProgress
         });
 
       if (uploadError) {

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -77,7 +76,6 @@ export function DocumentUploadDialog({
           requires_signature: requiresSignature,
           is_global: isGlobal,
           creator_id: '', // This will be set in the hook
-          file_url: '', // This will be set after upload
         }
       });
       

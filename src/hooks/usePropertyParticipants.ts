@@ -34,7 +34,7 @@ export function usePropertyParticipants(propertyId?: string) {
         throw error;
       }
 
-      return data as PropertyParticipant[];
+      return data as unknown as PropertyParticipant[];
     },
     enabled: !!propertyId,
   });

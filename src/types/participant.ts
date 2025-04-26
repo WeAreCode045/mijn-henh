@@ -12,7 +12,18 @@ export interface PropertyParticipant {
   status: ParticipantStatus;
   created_at: string;
   updated_at: string;
-  user?: User; // Joined from profiles
+  user?: {
+    id: string;
+    full_name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    whatsapp_number?: string | null;
+    avatar_url?: string | null;
+    address?: string | null;
+    city?: string | null;
+    postal_code?: string | null;
+    country?: string | null;
+  };
 }
 
 export interface ParticipantInvite {
