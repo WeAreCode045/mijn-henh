@@ -114,13 +114,13 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
           <TabsContent value="dashboard">
             <PropertyDashboardTab
               formData={formData}
-              onDelete={deleteProperty}
               propertyId={id || ""}
+              onDelete={deleteProperty}
             />
           </TabsContent>
           <TabsContent value="content">
             <PropertyFormContent
-              propertyData={formData}
+              formData={formData}
               settings={settings}
               isSubmitting={isSubmitting}
               onSave={saveProperty}

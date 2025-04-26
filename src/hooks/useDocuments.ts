@@ -57,10 +57,8 @@ export function useDocuments(propertyId?: string, isGlobal = false) {
       const fileExt = file.name.split('.').pop();
       const filePath = `documents/${document.property_id || 'global'}/${timestamp}-${file.name}`;
       
-      // Create a function that tracks upload progress
-      const handleProgress = (progress: { loaded: number; total: number }) => {
-        setUploadProgress(Math.round((progress.loaded / progress.total) * 100));
-      };
+      // Track upload progress manually
+      let progressHandler: ((progress: number) => void) | null = null;
       
       // Upload file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -68,8 +66,6 @@ export function useDocuments(propertyId?: string, isGlobal = false) {
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false,
-          // Using the standard ProgressEvent interface that matches what onUploadProgress expects
-          onUploadProgress: handleProgress
         });
 
       if (uploadError) {

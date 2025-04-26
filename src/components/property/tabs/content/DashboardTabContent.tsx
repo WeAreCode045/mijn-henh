@@ -45,22 +45,9 @@ export function DashboardTabContent({
 
   return (
     <PropertyDashboardTab
-      id={property.id}
-      title={property.title}
-      objectId={property.object_id}
-      agentId={property.agent_id}
-      createdAt={property.created_at}
-      updatedAt={property.updated_at}
-      agentInfo={property.agent ? { id: property.agent.id, name: property.agent.name } : null}
-      isUpdating={false}
-      onSave={onSave}
+      formData={property}
+      propertyId={property.id}
       onDelete={onDelete}
-      handleSaveObjectId={handleSaveObjectId}
-      handleSaveAgent={safeHandleSaveAgent}
-      handleGeneratePDF={handleGeneratePDF}
-      handleWebView={handleOpenWebView}
-      virtualTourUrl={property.virtualTourUrl}
-      youtubeUrl={property.youtubeUrl}
     />
   );
 }
