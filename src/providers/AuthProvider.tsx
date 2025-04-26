@@ -1,129 +1,125 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import {
-  Session,
-  useSession,
-  useSupabaseClient,
-} from '@supabase/auth-helpers-react';
-import { Database } from '@/integrations/supabase/types';
-import { User } from '@/types/user';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Session, User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextProps {
-  session: Session | null;
   user: User | null;
-  profile: User | null;
-  isAdmin: boolean;
+  profile: {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+    role: 'admin' | 'agent' | 'seller' | 'buyer' | null;
+    avatar_url: string | null;
+  } | null;
+  session: Session | null;
   isLoading: boolean;
-  isError: boolean;
-  supabaseClient: any;
-  signOut: () => Promise<void>;
+  isAdmin: boolean;
+  isAgent: boolean;
+  isSeller: boolean;
+  isBuyer: boolean;
 }
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+const AuthContext = createContext<AuthContextProps>({
+  user: null,
+  profile: null,
+  session: null,
+  isLoading: true,
+  isAdmin: false,
+  isAgent: false,
+  isSeller: false,
+  isBuyer: false
+});
+
+export const useAuth = () => useContext(AuthContext);
 
 interface AuthProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const session = useSession();
-  const supabaseClient = useSupabaseClient<Database>();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
+  const [profile, setProfile] = useState<AuthContextProps['profile']>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProfile() {
-      setIsLoading(true);
-      setIsError(false);
-
-      if (session?.user?.id) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (error) {
-            setIsError(true);
-            console.error('Error fetching profile:', error);
-            return;
-          }
-
-          if (data) {
-            const userData: User = {
-              id: data.id,
-              email: data.email,
-              full_name: data.full_name,
-              phone: data.phone,
-              whatsapp_number: data.whatsapp_number,
-              role: data.role,
-              avatar_url: data.avatar_url,
-            };
-            setProfile(userData);
-            setIsAdmin(data.role === 'admin');
-          }
-        } catch (error) {
-          setIsError(true);
-          console.error('Unexpected error fetching profile:', error);
-        } finally {
-          setIsLoading(false);
+    // First set up the auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        // Load profile data if we have a user
+        if (newSession?.user) {
+          setTimeout(async () => {
+            await fetchProfile(newSession.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
         }
-      } else {
-        setProfile(null);
-        setIsAdmin(false);
+        
         setIsLoading(false);
       }
-    }
-
-    if (session?.user) {
-      // Create a properly structured User object
-      const userData: User = {
-        id: session.user.id,
-        email: session.user.email,
-        full_name: session.user.user_metadata.full_name || null,
-        phone: null,
-        whatsapp_number: null,
-        role: null,
-        avatar_url: null
-      };
-      setUser(userData);
-    } else {
-      setUser(null);
-    }
+    );
     
-    fetchProfile();
-  }, [session, supabaseClient]);
-
-  const signOut = async () => {
-    await supabaseClient.auth.signOut();
+    // Then check for existing session (which might trigger the listener above)
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    initializeAuth();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, role, avatar_url')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+    }
   };
+  
+  const isAdmin = profile?.role === 'admin';
+  const isAgent = profile?.role === 'agent';
+  const isSeller = profile?.role === 'seller';
+  const isBuyer = profile?.role === 'buyer';
 
-  const value: AuthContextProps = {
-    session,
+  const value = {
     user,
     profile,
-    isAdmin,
+    session,
     isLoading,
-    isError,
-    supabaseClient,
-    signOut,
+    isAdmin,
+    isAgent,
+    isSeller,
+    isBuyer
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

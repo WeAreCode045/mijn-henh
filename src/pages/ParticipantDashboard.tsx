@@ -1,0 +1,175 @@
+
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/providers/AuthProvider';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { PropertyData } from '@/types/property';
+import { useNavigate } from 'react-router-dom';
+import { PropertyCard } from '@/components/property/PropertyCard';
+import { DocumentList } from '@/components/property/documents/DocumentList';
+import { MessageList } from '@/components/property/messages/MessageList';
+import { transformSupabaseData } from '@/components/property/webview/utils/transformSupabaseData';
+import { Loader2 } from 'lucide-react';
+
+export default function ParticipantDashboard() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('properties');
+  const [properties, setProperties] = useState<PropertyData[]>([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchParticipantProperties = async () => {
+      if (!user?.id) return;
+
+      setIsLoading(true);
+      
+      try {
+        // Get properties where the user is a participant
+        const { data: participations, error: participationsError } = await supabase
+          .from('property_participants')
+          .select('property_id, role')
+          .eq('user_id', user.id);
+
+        if (participationsError) {
+          console.error('Error fetching property participations:', participationsError);
+          return;
+        }
+
+        if (!participations.length) {
+          setIsLoading(false);
+          return;
+        }
+
+        const propertyIds = participations.map(p => p.property_id);
+        
+        // Fetch the property details
+        const { data: propertyData, error: propertyError } = await supabase
+          .from('properties')
+          .select(`
+            *,
+            property_images(*),
+            agent:profiles(*)
+          `)
+          .in('id', propertyIds);
+
+        if (propertyError) {
+          console.error('Error fetching properties:', propertyError);
+          return;
+        }
+
+        // Transform the property data
+        const transformedProperties = propertyData.map(property => 
+          transformSupabaseData(property)
+        );
+        
+        setProperties(transformedProperties);
+        
+        if (transformedProperties.length > 0 && !selectedPropertyId) {
+          setSelectedPropertyId(transformedProperties[0].id);
+        }
+      } catch (error) {
+        console.error('Error in participant dashboard:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchParticipantProperties();
+  }, [user?.id, selectedPropertyId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (properties.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <Card className="p-8">
+          <CardContent className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Welcome to Your Dashboard</h2>
+            <p className="text-lg text-gray-600">
+              You are not yet connected to any properties. Please contact your agent for access.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <h1 className="text-3xl font-bold mb-6">Your Property Dashboard</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Properties</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              {properties.map(property => (
+                <div 
+                  key={property.id} 
+                  className={`p-4 rounded-lg cursor-pointer ${
+                    selectedPropertyId === property.id ? 'bg-primary/10' : 'bg-gray-100'
+                  }`}
+                  onClick={() => setSelectedPropertyId(property.id)}
+                >
+                  <h3 className="font-medium">{property.title}</h3>
+                  <p className="text-sm text-gray-600">{property.address}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="lg:col-span-2">
+          {selectedPropertyId && (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {properties.find(p => p.id === selectedPropertyId)?.title || 'Property Details'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid w-full grid-cols-3 mb-6">
+                    <TabsTrigger value="properties">Property Details</TabsTrigger>
+                    <TabsTrigger value="documents">Documents</TabsTrigger>
+                    <TabsTrigger value="messages">Messages</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="properties">
+                    <div className="grid gap-4">
+                      {selectedPropertyId && (
+                        <PropertyCard 
+                          property={properties.find(p => p.id === selectedPropertyId)!} 
+                          onDelete={() => {}} // No delete functionality for participants
+                        />
+                      )}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="documents">
+                    <DocumentList propertyId={selectedPropertyId} />
+                  </TabsContent>
+                  
+                  <TabsContent value="messages">
+                    <MessageList propertyId={selectedPropertyId} />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

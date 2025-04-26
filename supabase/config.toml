@@ -24,3 +24,4 @@ verify_jwt = true
 
 [functions.fetch-nylas-emails]
 verify_jwt = true
+

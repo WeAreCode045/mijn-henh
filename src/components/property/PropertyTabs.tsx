@@ -1,8 +1,9 @@
 
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Image, Home, MessageCircle } from "lucide-react";
+import { FileText, Image, Home, MessageCircle, Users, FileCheck } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePropertyMessages } from "@/hooks/useMessages";
 
 interface PropertyTabsProps {
   activeTab: string;
@@ -18,6 +19,7 @@ export function PropertyTabs({
   children
 }: PropertyTabsProps) {
   const [unreadCount, setUnreadCount] = useState(0);
+  const { hasUnreadMessages } = usePropertyMessages(propertyId);
 
   useEffect(() => {
     // Fetch unread submissions count
@@ -60,7 +62,7 @@ export function PropertyTabs({
 
   return (
     <>
-      <TabsList className="grid grid-cols-4 mb-8">
+      <TabsList className="grid grid-cols-6 mb-8">
         <TabsTrigger 
           value="dashboard" 
           onClick={() => handleTabChange('dashboard')}
@@ -96,11 +98,29 @@ export function PropertyTabs({
         >
           <MessageCircle className="h-4 w-4" />
           <span>Communications</span>
-          {unreadCount > 0 && (
+          {(unreadCount > 0 || hasUnreadMessages) && (
             <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-              {unreadCount}
+              {unreadCount + (hasUnreadMessages ? 1 : 0)}
             </span>
           )}
+        </TabsTrigger>
+        <TabsTrigger 
+          value="participants" 
+          onClick={() => handleTabChange('participants')}
+          className="flex items-center gap-2"
+          data-state={activeTab === 'participants' ? 'active' : ''}
+        >
+          <Users className="h-4 w-4" />
+          <span>Participants</span>
+        </TabsTrigger>
+        <TabsTrigger 
+          value="documents" 
+          onClick={() => handleTabChange('documents')}
+          className="flex items-center gap-2"
+          data-state={activeTab === 'documents' ? 'active' : ''}
+        >
+          <FileCheck className="h-4 w-4" />
+          <span>Documents</span>
         </TabsTrigger>
       </TabsList>
       {children}

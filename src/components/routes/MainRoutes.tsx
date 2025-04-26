@@ -1,3 +1,4 @@
+
 import React, { lazy } from "react";
 import { Route } from "react-router-dom";
 import { ProtectedRoute } from "../ProtectedRoute";
@@ -13,6 +14,7 @@ const PropertyFormPage = lazy(() => import("../../pages/PropertyFormPage"));
 const Settings = lazy(() => import("../../pages/Settings"));
 const Users = lazy(() => import("../../pages/Users"));
 const Import = lazy(() => import("../../pages/Import"));
+const ParticipantDashboard = lazy(() => import("../../pages/ParticipantDashboard"));
 
 export const MainRoutes = [
   <Route 
@@ -163,6 +165,20 @@ export const MainRoutes = [
         <PropertyLayout>
           <React.Suspense fallback={<LoadingSpinner />}>
             <PropertyFormPage />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
+  />,
+  
+  <Route 
+    key="participant-dashboard"
+    path="/participant" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <ParticipantDashboard />
           </React.Suspense>
         </PropertyLayout>
       </ProtectedRoute>
