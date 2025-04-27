@@ -45,10 +45,12 @@ export function usePropertyParticipants(propertyId?: string) {
         if (participantProfile && 
             typeof participantProfile === 'object' && 
             'first_name' in participantProfile && 
-            'last_name' in participantProfile && 
-            participantProfile.first_name && 
-            participantProfile.last_name) {
-          fullName = `${participantProfile.first_name} ${participantProfile.last_name}`;
+            'last_name' in participantProfile) {
+          const firstName = participantProfile['first_name'];
+          const lastName = participantProfile['last_name'];
+          if (firstName && lastName) {
+            fullName = `${firstName} ${lastName}`;
+          }
         }
           
         return {
@@ -58,13 +60,13 @@ export function usePropertyParticipants(propertyId?: string) {
                 userProfile.id : item.user_id,
             full_name: fullName,
             email: participantProfile && typeof participantProfile === 'object' && 'email' in participantProfile ? 
-                   participantProfile.email : 
+                   participantProfile['email'] : 
                    (userProfile && typeof userProfile === 'object' && 'email' in userProfile ? 
                     userProfile.email : null),
             phone: participantProfile && typeof participantProfile === 'object' && 'phone' in participantProfile ? 
-                   participantProfile.phone : null,
+                   participantProfile['phone'] : null,
             whatsapp_number: participantProfile && typeof participantProfile === 'object' && 'whatsapp_number' in participantProfile ? 
-                             participantProfile.whatsapp_number : null,
+                             participantProfile['whatsapp_number'] : null,
             role: userProfile && typeof userProfile === 'object' && 'role' in userProfile ? 
                   userProfile.role : item.role
           }
