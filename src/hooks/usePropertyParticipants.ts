@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +44,7 @@ export function usePropertyParticipants(propertyId?: string) {
       // First check if a user with this email exists
       const { data: existingUsers } = await supabase
         .from('profiles')
-        .select('id, email')
+        .select('id, email, role')
         .eq('email', participant.email)
         .single();
 
@@ -52,14 +53,27 @@ export function usePropertyParticipants(propertyId?: string) {
       if (existingUsers) {
         // User exists, use their ID
         userId = existingUsers.id;
+        
+        // If the user exists but doesn't have the correct role, update it
+        // This is important when a user might get invited as both a buyer and seller
+        if (existingUsers.role !== participant.role) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ role: participant.role })
+            .eq('id', existingUsers.id);
+          
+          if (updateError) {
+            console.warn('Could not update existing user role:', updateError);
+          }
+        }
       } else {
-        // Create a new user with this email
+        // Create a new user with this email and correct role
         const { data: authUser, error: signUpError } = await supabase.auth.signUp({
           email: participant.email,
           password: Math.random().toString(36).slice(-10), // Generate random password
           options: {
             data: {
-              role: participant.role,
+              role: participant.role, // Explicitly set the correct role
               full_name: `New ${participant.role}`,
             }
           }
@@ -71,6 +85,18 @@ export function usePropertyParticipants(propertyId?: string) {
         }
 
         userId = authUser.user?.id;
+        
+        // Double-check the profile exists with the correct role
+        if (userId) {
+          const { error: profileUpdateError } = await supabase
+            .from('profiles')
+            .update({ role: participant.role })
+            .eq('id', userId);
+            
+          if (profileUpdateError) {
+            console.warn('Could not ensure profile role:', profileUpdateError);
+          }
+        }
       }
 
       // Now add the participant
