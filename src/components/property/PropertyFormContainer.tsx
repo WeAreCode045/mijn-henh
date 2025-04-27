@@ -11,6 +11,7 @@ import { PropertyDashboardTab } from "./tabs/dashboard";
 import { ParticipantsTab } from "@/pages/property/tabs/ParticipantsTab";
 import { DocumentsTab } from "@/pages/property/tabs/DocumentsTab";
 import { CommunicationsTab } from "@/pages/property/tabs/CommunicationsTab";
+import { DashboardTabContent } from "./tabs/content/DashboardTabContent";
 
 interface PropertyAgentDetailProps {
   agent: { id: string; name: string } | null;
@@ -76,6 +77,32 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
+  
+  const handleSaveAgent = async (agentId: string): Promise<void> => {
+    return handleAgentChange(agentId);
+  };
+  
+  const handleSaveObjectId = async (objectId: string): Promise<void> => {
+    if (formData && setFormData) {
+      setFormData({
+        ...formData,
+        object_id: objectId
+      });
+      // Additional logic to save to database if needed
+      return Promise.resolve();
+    }
+    return Promise.reject("Form data not available");
+  };
+  
+  const handleWebView = (e: React.MouseEvent) => {
+    console.log("Web view clicked");
+    // Implementation would go here
+  };
+  
+  const handleGeneratePDF = (e: React.MouseEvent) => {
+    console.log("Generate PDF clicked");
+    // Implementation would go here
+  };
 
   if (isLoading) {
     return <PropertyFormLoader />;
@@ -112,10 +139,14 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
           propertyId={id || ""}
         >
           <TabsContent value="dashboard">
-            <PropertyDashboardTab
-              formData={formData}
-              propertyId={id || ""}
+            <DashboardTabContent
+              property={formData}
               onDelete={deleteProperty}
+              onSave={saveProperty}
+              onWebView={handleWebView}
+              handleSaveAgent={handleSaveAgent}
+              handleSaveObjectId={handleSaveObjectId}
+              handleGeneratePDF={handleGeneratePDF}
             />
           </TabsContent>
           <TabsContent value="content">
