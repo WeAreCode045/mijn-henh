@@ -15,10 +15,17 @@ serve(async (req) => {
   }
 
   try {
-    const { type, participantId } = await req.json();
+    const { type, participantId, to, subject, html, text, from, fromName } = await req.json();
 
+    // Handle participant invitation resend
     if (type === 'resend_participant_invite') {
-      const { data: participant, error: participantError } = await supabase
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') || '',
+        Deno.env.get('SUPABASE_ANON_KEY') || '',
+        { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      );
+      
+      const { data: participant, error: participantError } = await supabaseClient
         .from('property_participants')
         .select('*, user:profiles(*), property:properties(title)')
         .eq('id', participantId)
@@ -29,24 +36,47 @@ serve(async (req) => {
         throw new Error('Participant or email not found');
       }
 
-      const { data: emailResult } = await resend.emails.send({
-        from: 'onboarding@resend.dev',
+      const { error } = await resend.emails.send({
+        from: from || fromName 
+          ? `${fromName || 'Property Portal'} <${from || 'onboarding@resend.dev'}>`
+          : 'Property Portal <onboarding@resend.dev>',
         to: participant.user.email,
         subject: `Reminder: Join ${participant.property.title} as a ${participant.role}`,
         html: `
           <h1>You have been invited to join a property</h1>
           <p>You have been invited to join ${participant.property.title} as a ${participant.role}.</p>
           <p>Click the link below to accept the invitation:</p>
-          <a href="${Deno.env.get('SITE_URL')}/properties/${participant.property_id}">Accept Invitation</a>
+          <a href="${Deno.env.get('SITE_URL') || 'https://app.hausenhuis.com'}/participant">Accept Invitation</a>
         `,
       });
 
-      return new Response(JSON.stringify(emailResult), {
+      if (error) throw error;
+      
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Handle general email sending
+    if (to && (html || text) && subject) {
+      const { data, error } = await resend.emails.send({
+        from: from || fromName 
+          ? `${fromName || 'Property Portal'} <${from || 'onboarding@resend.dev'}>`
+          : 'Property Portal <onboarding@resend.dev>',
+        to: typeof to === 'string' ? [to] : to,
+        subject,
+        html,
+        text
+      });
+
+      if (error) throw error;
+      
+      return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    throw new Error('Invalid request type');
+    throw new Error('Invalid request data');
   } catch (error) {
     console.error('Error:', error);
     return new Response(
@@ -58,3 +88,6 @@ serve(async (req) => {
     );
   }
 });
+
+// Helper to create Supabase client
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';

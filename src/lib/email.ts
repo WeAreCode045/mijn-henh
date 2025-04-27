@@ -19,7 +19,7 @@ export async function sendEmail({
   fromName
 }: SendEmailArgs): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data, error } = await supabase.functions.invoke('send-email', {
+    const { error } = await supabase.functions.invoke('send-email', {
       body: { to, subject, html, text, from, fromName }
     });
 

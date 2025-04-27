@@ -174,18 +174,33 @@ export function usePropertyParticipants(propertyId?: string) {
 
   const resendInviteMutation = useMutation({
     mutationFn: async (participantId: string) => {
-      const { error } = await supabase.functions.invoke('send-email', {
+      const { data, error } = await supabase.functions.invoke('send-email', {
         body: {
           type: 'resend_participant_invite',
           participantId
         }
       });
 
-      if (error) throw error;
-      return participantId;
+      if (error) {
+        console.error("Error sending invitation:", error);
+        throw error;
+      }
+      
+      return data;
     },
     onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Invitation has been resent successfully",
+      });
       queryClient.invalidateQueries({ queryKey: ['property-participants', propertyId] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send invitation",
+        variant: "destructive",
+      });
     },
   });
 

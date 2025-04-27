@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { usePropertyParticipants } from "@/hooks/usePropertyParticipants";
 import { ParticipantRole } from "@/types/participant";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ParticipantInviteDialogProps {
   open: boolean;
@@ -30,19 +32,59 @@ export function ParticipantInviteDialog({
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addParticipant } = usePropertyParticipants(propertyId);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      await addParticipant({
+      // First add participant
+      const result = await addParticipant({
         email,
         role,
         propertyId,
       });
+      
+      // Then get the property details to send in the invitation
+      const { data: property } = await supabase
+        .from('properties')
+        .select('title')
+        .eq('id', propertyId)
+        .single();
+      
+      // Send initial invitation email
+      const { error: emailError } = await supabase.functions.invoke('send-email', {
+        body: {
+          to: email,
+          subject: `You've been invited as a ${role} for ${property?.title || 'a property'}`,
+          html: `
+            <h1>Property Invitation</h1>
+            <p>You have been invited to participate as a <strong>${role}</strong> for ${property?.title || 'a property'}.</p>
+            <p>Please login to your account or create a new one to view this property.</p>
+            <p><a href="${window.location.origin}/participant">Open Property Portal</a></p>
+          `
+        }
+      });
+      
+      if (emailError) {
+        console.warn("Error sending invitation email:", emailError);
+        // Don't block the flow if the email fails
+      }
+      
       setEmail("");
       onOpenChange(false);
+      
+      toast({
+        title: "Invitation sent",
+        description: `${role} invitation has been sent to ${email}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to add ${role}`,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
