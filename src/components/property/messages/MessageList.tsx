@@ -1,5 +1,4 @@
-
-import { usePropertyMessages } from "@/hooks/useMessages";
+import { usePropertyMessages } from "@/hooks/messages/usePropertyMessages";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConversationList } from "./ConversationList";
