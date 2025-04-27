@@ -1,4 +1,3 @@
-
 export interface PropertyMessage {
   id: string;
   property_id: string;
@@ -45,4 +44,9 @@ export interface Conversation {
   unreadCount: number;
   propertyId: string;
   propertyTitle: string;
+}
+
+export interface MessageData {
+  recipientId: string;
+  message: string;
 }
