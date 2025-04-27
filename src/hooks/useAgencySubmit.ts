@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AgencySettings } from "@/types/agency";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,25 +71,29 @@ export const useAgencySubmit = ({
           smtp_from_email: settings.smtpFromEmail,
           smtp_from_name: settings.smtpFromName,
           smtp_secure: settings.smtpSecure,
-          // Mailjet settings
-          mailjet_api_key: settings.mailjetApiKey,
-          mailjet_api_secret: settings.mailjetApiSecret,
-          mailjet_from_email: settings.mailjetFromEmail,
-          mailjet_from_name: settings.mailjetFromName,
-          // IMAP settings - Add these fields to the update
+          
+          // Resend settings
+          resend_api_key: settings.resendApiKey,
+          resend_from_email: settings.resendFromEmail,
+          resend_from_name: settings.resendFromName,
+          
+          // IMAP settings
           imap_host: settings.imapHost,
           imap_port: settings.imapPort,
           imap_username: settings.imapUsername,
           imap_password: settings.imapPassword,
           imap_tls: settings.imapTls,
-          imap_mailbox: settings.imapMailbox || "INBOX",
+          imap_mailbox: settings.imapMailbox,
+          
           // OpenAI API key
           openai_api_key: settings.openaiApiKey,
-          // Nylas settings with updated field names that match database columns
+          
+          // Nylas settings
           nylas_client_id: settings.nylasClientId,
           nylas_client_secret: settings.nylasApiKey || settings.nylasClientSecret,
           nylas_access_token: settings.nylasGrantId || settings.nylasAccessToken,
-          // Make sure we're sending a properly formatted array
+          
+          // Global features
           global_features: featureDescriptions
         })
         .eq('id', settings.id);

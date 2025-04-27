@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySettings } from "@/types/agency";
 import { defaultAgencySettings } from "./defaultAgencySettings";
@@ -71,12 +70,11 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     smtpFromEmail: data.smtp_from_email || null,
     smtpFromName: data.smtp_from_name || null,
     smtpSecure: data.smtp_secure || false,
-    // Mailjet settings
-    mailjetApiKey: data.mailjet_api_key || null,
-    mailjetApiSecret: data.mailjet_api_secret || null,
-    mailjetFromEmail: data.mailjet_from_email || null,
-    mailjetFromName: data.mailjet_from_name || null,
-    // IMAP settings - Add these fields from data
+    // Resend settings
+    resendApiKey: data.resend_api_key || null,
+    resendFromEmail: data.resend_from_email || null,
+    resendFromName: data.resend_from_name || null,
+    // IMAP settings
     imapHost: data.imap_host || null,
     imapPort: data.imap_port || null,
     imapUsername: data.imap_username || null,
@@ -85,5 +83,12 @@ export async function fetchAgencySettings(): Promise<AgencySettings | null> {
     imapMailbox: data.imap_mailbox || "INBOX",
     // OpenAI API key
     openaiApiKey: data.openai_api_key || null,
+    // Nylas settings
+    nylasClientId: data.nylas_client_id || null,
+    nylasApiKey: data.nylas_client_secret || null,
+    nylasGrantId: data.nylas_access_token || null,
+    // For backwards compatibility
+    nylasClientSecret: data.nylas_client_secret || null,
+    nylasAccessToken: data.nylas_access_token || null,
   };
 }

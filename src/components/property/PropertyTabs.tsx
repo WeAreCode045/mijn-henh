@@ -1,4 +1,3 @@
-
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image, Home, MessageCircle, Users, FileCheck } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
