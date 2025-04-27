@@ -35,16 +35,18 @@ export function useUsers() {
         // Transform the data to match the User type
         const transformedData: User[] = (data as ProfileRow[]).map(user => ({
           id: user.id,
-          email: user.email || null,
-          full_name: user.full_name || null,
-          phone: user.phone || null,
-          whatsapp_number: user.whatsapp_number || null,
-          role: user.role as "admin" | "agent" | "seller" | "buyer" | null,
-          avatar_url: user.avatar_url || null,
-          address: user.address || null,
-          city: user.city || null,
-          postal_code: user.postal_code || null,
-          country: user.country || null
+          email: user.email || '',
+          full_name: user.full_name || '',
+          phone: user.phone || '',
+          whatsapp_number: user.whatsapp_number || '',
+          role: user.role as "admin" | "agent" | "seller" | "buyer" | undefined,
+          avatar_url: user.avatar_url || '',
+          address: user.address || '',
+          city: user.city || '',
+          postal_code: user.postal_code || '',
+          country: user.country || '',
+          created_at: user.created_at || '',
+          updated_at: user.updated_at || ''
         }));
 
         console.log("Transformed users:", transformedData);
