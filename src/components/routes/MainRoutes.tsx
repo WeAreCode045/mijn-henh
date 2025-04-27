@@ -224,5 +224,19 @@ export const MainRoutes = [
         </PropertyLayout>
       </ProtectedRoute>
     }
+  />,
+  
+  <Route 
+    key="property-documents"
+    path="/property/:id/documents" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <PropertyFormPage />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    }
   />
 ];

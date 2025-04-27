@@ -5,7 +5,8 @@ import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { ParticipantsTabContent } from "../wrapper/ParticipantsTabContent";
-import { PropertyData, PropertyFormData, PropertyCity, PropertyFeature } from "@/types/property";
+import { DocumentsTab } from "../../../pages/property/tabs/DocumentsTab";
+import { PropertyData, PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
 
@@ -205,7 +206,7 @@ export function PropertyTabContents({
       </TabsContent>
 
       <TabsContent value="documents" className="mt-4 space-y-4">
-        <div>Documents tab content</div>
+        <DocumentsTab propertyId={property.id} propertyTitle={property.title || ''} />
       </TabsContent>
     </>
   );
