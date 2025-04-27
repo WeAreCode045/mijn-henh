@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User, Mail, Edit, Phone } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
+import { User as UserType } from "@/types/user";
 
 interface UserProfileCardProps {
   inSidebar?: boolean;

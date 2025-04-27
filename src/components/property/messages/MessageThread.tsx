@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SendHorizontal } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { formatRelative } from "date-fns";
+import { User } from "@/types/user";
 
 interface MessageThreadProps {
   messages: PropertyMessage[];
