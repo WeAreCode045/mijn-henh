@@ -4,7 +4,7 @@ import { PropertyData } from "@/types/property";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageList } from "../../messages/MessageList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ParticipantsTab } from "@/pages/property/tabs/ParticipantsTab";
+import { PropertyContactSubmissions } from "../../submissions/PropertyContactSubmissions";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
@@ -20,7 +20,7 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="participants">Participants</TabsTrigger>
+          <TabsTrigger value="submissions">Webview Submissions</TabsTrigger>
         </TabsList>
         <TabsContent value="messages">
           <Card>
@@ -32,11 +32,15 @@ export function CommunicationsTabContent({ property }: CommunicationsTabContentP
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="participants">
-          <ParticipantsTab 
-            propertyId={property.id}
-            propertyTitle={property.title}
-          />
+        <TabsContent value="submissions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Webview Contact Submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PropertyContactSubmissions propertyId={property.id} />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

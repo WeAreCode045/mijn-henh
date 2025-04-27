@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { DashboardTabContent } from "../content/DashboardTabContent";
@@ -8,6 +7,7 @@ import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { PropertyData, PropertyFormData, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyCity } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
+import { ParticipantsTabContent } from "./ParticipantsTabContent";
 
 interface PropertyTabContentsProps {
   activeTab: string;
@@ -40,7 +40,6 @@ export function PropertyTabContents({
 }: PropertyTabContentsProps) {
   const [fullPropertyData, setFullPropertyData] = useState<PropertyData | null>(null);
   
-  // Fetch full property data when needed
   useEffect(() => {
     const fetchPropertyData = async () => {
       if (!property || !property.id) return;
@@ -60,10 +59,8 @@ export function PropertyTabContents({
         if (data) {
           console.log("Fetched property data:", data);
           
-          // Transform property data to include images property
           const propertyImages = Array.isArray(data.property_images) ? data.property_images : [];
           
-          // Safely handle features, areas, and nearby_places to ensure they're arrays before transforming
           const featuresArray = Array.isArray(data.features) ? data.features : 
                               (typeof data.features === 'object' && data.features !== null ? [data.features] : []);
           
@@ -73,29 +70,24 @@ export function PropertyTabContents({
           const nearbyPlacesArray = Array.isArray(data.nearby_places) ? data.nearby_places : 
                                   (typeof data.nearby_places === 'object' && data.nearby_places !== null ? [data.nearby_places] : []);
           
-          // Handle nearby_cities to ensure it's properly typed
           const nearbyCitiesArray = Array.isArray(data.nearby_cities) ? data.nearby_cities : 
                                 (typeof data.nearby_cities === 'object' && data.nearby_cities !== null ? [data.nearby_cities] : []);
           
-          // Transform fields using helper functions after ensuring they're arrays
           const transformedFeatures = transformFeatures(featuresArray);
           const transformedAreas = transformAreas(areasArray);
           const transformedNearbyPlaces = transformNearbyPlaces(nearbyPlacesArray);
           const transformedImages = transformImages(propertyImages);
           
-          // Process nearby_cities to ensure it matches PropertyCity structure
           const transformedNearbyCities: PropertyCity[] = nearbyCitiesArray.map((city: any) => ({
             id: city.id || `city-${Date.now()}-${Math.random()}`,
             name: city.name || "Unknown City",
             distance: city.distance
           }));
           
-          // Process metadata to ensure it has the correct structure
           let transformedMetadata: { status?: string; [key: string]: unknown } = {};
           
           if (data.metadata) {
             if (typeof data.metadata === 'string') {
-              // If metadata is a string, try to parse it
               try {
                 transformedMetadata = JSON.parse(data.metadata);
               } catch (e) {
@@ -103,15 +95,12 @@ export function PropertyTabContents({
                 transformedMetadata = { status: data.status || 'Draft' };
               }
             } else if (typeof data.metadata === 'object' && data.metadata !== null) {
-              // If metadata is already an object, use it directly
               transformedMetadata = data.metadata as Record<string, unknown>;
             }
           } else {
-            // Default metadata with status from the property if available
             transformedMetadata = { status: data.status || 'Draft' };
           }
           
-          // Create properly formatted PropertyData with images
           const transformedData: PropertyData = {
             ...data,
             images: transformedImages,
@@ -141,20 +130,17 @@ export function PropertyTabContents({
     fetchPropertyData();
   }, [property]);
   
-  // Custom WebView handler that opens in new tab
   const handleOpenWebView = (e: React.MouseEvent) => {
     console.log('PropertyTabContents: handleOpenWebView called for property', property.id);
     e.preventDefault();
     e.stopPropagation();
     
-    // Use the provided handleWebView function which now opens in a new tab
     if (typeof handleWebView === 'function') {
       handleWebView(e);
     }
     return true;
   };
 
-  // Provide fallbacks for required handler functions
   const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
     ? handleSaveAgent 
     : async () => { console.warn("handleSaveAgent not provided in PropertyTabContents"); };
@@ -163,7 +149,6 @@ export function PropertyTabContents({
     ? handleSaveObjectId
     : async () => { console.warn("handleSaveObjectId not provided in PropertyTabContents"); };
 
-  // Ensure we have handlers.currentStep and handlers.handleStepClick
   const safeHandlers = {
     ...handlers,
     currentStep: handlers?.currentStep !== undefined ? handlers.currentStep : 0,
@@ -212,9 +197,11 @@ export function PropertyTabContents({
       </TabsContent>
       
       <TabsContent value="communications" className="mt-4 space-y-4">
-        <CommunicationsTabContent
-          property={property}
-        />
+        <CommunicationsTabContent property={property} />
+      </TabsContent>
+
+      <TabsContent value="participants" className="mt-4 space-y-4">
+        <ParticipantsTabContent property={property} />
       </TabsContent>
     </>
   );
