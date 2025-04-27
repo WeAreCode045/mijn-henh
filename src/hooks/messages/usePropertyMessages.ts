@@ -41,7 +41,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
             created_at,
             is_read,
             updated_at,
-            sender:profiles!sender_id(id, full_name, phone, email, avatar_url, phone, whatsapp_number, created_at, updated_at),
+            sender:profiles!sender_id(id, full_name, phone, email, avatar_url, whatsapp_number, created_at, updated_at),
             recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number, created_at, updated_at)
           `)
           .eq('property_id', propertyId)
@@ -84,7 +84,6 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data, ensuring all required fields are included
-
   return {
     conversations,
     isLoadingConversations,
@@ -99,10 +98,10 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
       full_name: profile.full_name || '',
       avatar_url: profile.avatar_url,
       role: profile.role as User["role"],
-      phone: profile.phone || undefined,
-      whatsapp_number: profile.whatsapp_number || undefined,
-      created_at: profile.created_at || undefined,
-      updated_at: profile.updated_at || undefined
+      phone: profile.phone || '',
+      whatsapp_number: profile.whatsapp_number || '',
+      created_at: profile.created_at || '',
+      updated_at: profile.updated_at || ''
     } : null
   };
 }

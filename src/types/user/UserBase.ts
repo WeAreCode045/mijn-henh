@@ -4,9 +4,9 @@ export interface UserBase {
   email: string;
   full_name: string;
   avatar_url?: string;
-  phone?: string;
-  whatsapp_number?: string;
-  created_at?: string;
-  updated_at?: string;
+  phone: string;
+  whatsapp_number: string;
+  created_at: string;
+  updated_at: string;
   role?: "admin" | "agent" | "seller" | "buyer";
 }
