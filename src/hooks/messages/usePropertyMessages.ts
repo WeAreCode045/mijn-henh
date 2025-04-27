@@ -84,17 +84,6 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data, ensuring all required fields are included
-  const currentUser: User | null = profile ? {
-    id: profile.id,
-    email: profile.email || '',
-    full_name: profile.full_name || '',
-    avatar_url: profile.avatar_url,
-    role: profile.role as "admin" | "agent" | "seller" | "buyer" | undefined,
-    phone: profile.phone || undefined,
-    whatsapp_number: profile.whatsapp_number || undefined,
-    created_at: profile.created_at || undefined,
-    updated_at: profile.updated_at || undefined
-  } : null;
 
   return {
     conversations,
@@ -104,6 +93,16 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
     isLoadingMessages,
     messagesError,
     sendMessage,
-    currentUser
+    currentUser: profile ? {
+      id: profile.id,
+      email: profile.email || '',
+      full_name: profile.full_name || '',
+      avatar_url: profile.avatar_url,
+      role: profile.role as User["role"],
+      phone: profile.phone || undefined,
+      whatsapp_number: profile.whatsapp_number || undefined,
+      created_at: profile.created_at || undefined,
+      updated_at: profile.updated_at || undefined
+    } : null
   };
 }

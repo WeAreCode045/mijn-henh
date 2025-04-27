@@ -6,6 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextProps {
   user: User | null;
   profile: {
+    updated_at: never;
+    created_at: never;
+    whatsapp_number: unknown;
+    phone: never;
     id: string;
     full_name: string | null;
     email: string | null;
@@ -31,6 +35,7 @@ const AuthContext = createContext<AuthContextProps>({
   isBuyer: false
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
 interface AuthProviderProps {
@@ -98,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw error;
       }
       
-      setProfile(data);
+      setProfile(data as AuthContextProps['profile']);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
