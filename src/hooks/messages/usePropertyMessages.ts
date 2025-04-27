@@ -83,7 +83,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data
-  // Using the imported User type from @/types/user which combines all user type interfaces
+  // Making sure we use the complete User type with all required properties
   const currentUser: User | null = profile ? {
     id: profile.id,
     email: profile.email || '',
