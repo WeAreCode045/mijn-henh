@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConversationList } from "./ConversationList";
 import { MessageThread } from "./MessageThread";
+import { PropertyMessage } from "@/types/message";
 
 interface MessageListProps {
   propertyId: string;
@@ -16,8 +17,16 @@ export function MessageList({ propertyId }: MessageListProps) {
     messages, 
     isLoadingConversations, 
     isLoadingMessages, 
-    sendMessage 
+    sendMessage,
+    currentUser
   } = usePropertyMessages(propertyId, selectedParticipantId);
+
+  // Wrapper for sendMessage function to convert string to expected parameters
+  const handleSendMessage = (content: string) => {
+    if (selectedParticipantId && content) {
+      sendMessage({ recipientId: selectedParticipantId, message: content });
+    }
+  };
 
   return (
     <div className="h-[600px] border rounded-md grid grid-cols-3 overflow-hidden">
@@ -30,12 +39,16 @@ export function MessageList({ propertyId }: MessageListProps) {
         />
       </div>
       <div className="col-span-2 flex flex-col">
-        <MessageThread
-          messages={messages || []}
-          isLoading={isLoadingMessages}
-          selectedParticipantId={selectedParticipantId}
-          onSendMessage={sendMessage}
-        />
+        {currentUser && (
+          <MessageThread
+            messages={messages || []}
+            isLoading={isLoadingMessages}
+            selectedParticipantId={selectedParticipantId}
+            onSendMessage={handleSendMessage}
+            propertyId={propertyId}
+            currentUser={currentUser}
+          />
+        )}
       </div>
     </div>
   );

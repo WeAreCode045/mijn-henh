@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PenSquare, UserCircle, Mail, Phone } from "lucide-react";
@@ -12,9 +12,10 @@ import { User } from "@/types/user";
 interface UserProfileCardProps {
   user: User;
   onUpdateProfile?: (updatedUser: Partial<User>) => Promise<void>;
+  inSidebar?: boolean;
 }
 
-export function UserProfileCard({ user, onUpdateProfile }: UserProfileCardProps) {
+export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     full_name: user.full_name,
@@ -77,12 +78,10 @@ export function UserProfileCard({ user, onUpdateProfile }: UserProfileCardProps)
       </CardContent>
       <CardFooter className="flex justify-center p-4 pt-0">
         <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" onClick={handleEditClick} className="space-x-1">
-              <PenSquare className="h-4 w-4" />
-              <span>Edit Profile</span>
-            </Button>
-          </DialogTrigger>
+          <Button variant="outline" size="sm" onClick={handleEditClick} className="space-x-1">
+            <PenSquare className="h-4 w-4" />
+            <span>Edit Profile</span>
+          </Button>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Edit Your Profile</DialogTitle>

@@ -1,203 +1,188 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { PropertyMessage, Conversation } from '@/types/message';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/providers/AuthProvider';
-import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/providers/AuthProvider";
+import { PropertyMessage, Conversation } from "@/types/message";
+import { User } from "@/types/user";
 
-export function usePropertyMessages(propertyId?: string, participantId?: string) {
-  const { toast } = useToast();
+export function usePropertyMessages(propertyId: string, participantId: string | null) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const currentUserId = user?.id;
 
-  // Listen for new messages in real-time
-  useEffect(() => {
-    if (!propertyId) return;
-
-    const channel = supabase
-      .channel('property-messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'property_messages',
-          filter: `property_id=eq.${propertyId}`
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['property-messages', propertyId, participantId] });
-          queryClient.invalidateQueries({ queryKey: ['property-conversations', propertyId] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [propertyId, participantId, queryClient]);
-
-  // Get conversations (grouped by participant)
+  // Fetch conversations
   const {
     data: conversations,
-    isLoading: conversationsLoading
+    isLoading: isLoadingConversations,
+    error: conversationsError
   } = useQuery({
-    queryKey: ['property-conversations', propertyId],
+    queryKey: ["propertyConversations", propertyId],
     queryFn: async () => {
-      if (!propertyId || !user?.id) return [];
+      if (!currentUserId || !propertyId) return [];
 
-      // Get all messages for this property where current user is sender or recipient
+      // This is a placeholder - implement the actual logic to fetch conversations
+      // for this property from your database
       const { data, error } = await supabase
-        .from('property_messages')
+        .from('messages')
         .select(`
-          *,
-          sender:profiles!sender_id(id, full_name, email, avatar_url),
-          recipient:profiles!recipient_id(id, full_name, email, avatar_url)
+          id,
+          sender_id,
+          recipient_id,
+          message,
+          created_at,
+          is_read,
+          sender:sender_id(id, full_name, email, avatar_url),
+          recipient:recipient_id(id, full_name, email, avatar_url)
         `)
         .eq('property_id', propertyId)
-        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+        .or(`sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching messages:', error);
-        throw error;
+        console.error("Error fetching conversations:", error);
+        return [];
       }
 
-      // Get property details
-      const { data: propertyData } = await supabase
-        .from('properties')
-        .select('title')
-        .eq('id', propertyId)
-        .single();
-
-      // Group by participant (the other person in the conversation)
-      const conversationMap = new Map<string, PropertyMessage[]>();
+      // Process the data to group by participant
+      const conversationMap = new Map<string, Conversation>();
       
-      (data as PropertyMessage[]).forEach(message => {
-        const participantId = message.sender_id === user.id ? message.recipient_id : message.sender_id;
-        if (!conversationMap.has(participantId)) {
-          conversationMap.set(participantId, []);
+      data.forEach((message: any) => {
+        const otherParticipantId = message.sender_id === currentUserId ? 
+          message.recipient_id : message.sender_id;
+          
+        const otherParticipant = message.sender_id === currentUserId ? 
+          message.recipient : message.sender;
+          
+        if (!otherParticipant || !otherParticipantId) return;
+        
+        if (!conversationMap.has(otherParticipantId)) {
+          conversationMap.set(otherParticipantId, {
+            participantId: otherParticipantId,
+            participantName: otherParticipant.full_name || 'Unknown',
+            participantEmail: otherParticipant.email || '',
+            participantAvatar: otherParticipant.avatar_url,
+            lastMessage: message.message,
+            lastMessageDate: message.created_at,
+            unreadCount: message.is_read ? 0 : 1,
+            propertyId,
+            propertyTitle: '' // You might want to fetch this separately
+          });
+        } else {
+          // Update unread count
+          const conversation = conversationMap.get(otherParticipantId)!;
+          if (!message.is_read && message.sender_id !== currentUserId) {
+            conversation.unreadCount += 1;
+          }
         }
-        conversationMap.get(participantId)?.push(message);
       });
-
-      // Format conversations
-      return Array.from(conversationMap.entries()).map(([participantId, messages]) => {
-        const lastMessage = messages[0]; // Messages are ordered by created_at desc
-        const participant = lastMessage.sender_id === user.id ? lastMessage.recipient : lastMessage.sender;
-        const unreadCount = messages.filter(m => m.recipient_id === user.id && !m.is_read).length;
-
-        return {
-          participantId,
-          participantName: participant?.full_name || 'Unknown',
-          participantEmail: participant?.email || '',
-          participantAvatar: participant?.avatar_url,
-          lastMessage: lastMessage.message,
-          lastMessageDate: lastMessage.created_at,
-          unreadCount,
-          propertyId,
-          propertyTitle: propertyData?.title || 'Unknown Property'
-        };
-      });
+      
+      return Array.from(conversationMap.values());
     },
-    enabled: !!propertyId && !!user?.id,
+    enabled: !!currentUserId && !!propertyId
   });
 
-  // Get messages between current user and selected participant
+  // Fetch messages for a specific conversation
   const {
     data: messages,
-    isLoading: messagesLoading,
+    isLoading: isLoadingMessages,
     error: messagesError
   } = useQuery({
-    queryKey: ['property-messages', propertyId, participantId],
+    queryKey: ["propertyMessages", propertyId, participantId],
     queryFn: async () => {
-      if (!propertyId || !participantId || !user?.id) return [];
+      if (!currentUserId || !propertyId || !participantId) return [];
 
-      // Get messages between current user and selected participant for this property
       const { data, error } = await supabase
-        .from('property_messages')
+        .from('messages')
         .select(`
-          *,
-          sender:profiles!sender_id(id, full_name, email, avatar_url),
-          recipient:profiles!recipient_id(id, full_name, email, avatar_url)
+          id,
+          property_id,
+          sender_id,
+          recipient_id,
+          message,
+          created_at,
+          is_read,
+          sender:sender_id(id, full_name, email, avatar_url),
+          recipient:recipient_id(id, full_name, email, avatar_url)
         `)
         .eq('property_id', propertyId)
-        .or(`and(sender_id.eq.${user.id},recipient_id.eq.${participantId}),and(sender_id.eq.${participantId},recipient_id.eq.${user.id})`)
+        .or(`and(sender_id.eq.${currentUserId},recipient_id.eq.${participantId}),and(sender_id.eq.${participantId},recipient_id.eq.${currentUserId})`)
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('Error fetching messages:', error);
-        throw error;
+        console.error("Error fetching messages:", error);
+        return [];
       }
 
-      // Mark unread messages as read
-      const unreadMessageIds = data
-        .filter(m => m.recipient_id === user.id && !m.is_read)
-        .map(m => m.id);
-
-      if (unreadMessageIds.length > 0) {
+      // Mark messages as read
+      const unreadMessages = data.filter(
+        msg => !msg.is_read && msg.recipient_id === currentUserId
+      );
+      
+      if (unreadMessages.length > 0) {
+        const unreadIds = unreadMessages.map(msg => msg.id);
         await supabase
-          .from('property_messages')
+          .from('messages')
           .update({ is_read: true })
-          .in('id', unreadMessageIds);
+          .in('id', unreadIds);
       }
 
       return data as PropertyMessage[];
     },
-    enabled: !!propertyId && !!participantId && !!user?.id,
+    enabled: !!currentUserId && !!propertyId && !!participantId
   });
 
-  // Send a message
-  const sendMessageMutation = useMutation({
-    mutationFn: async ({ 
-      recipientId, 
-      message 
-    }: { 
-      recipientId: string;
-      message: string;
-    }) => {
-      if (!propertyId || !user?.id) {
-        throw new Error('Missing required parameters');
+  // Mutation to send a message
+  const { mutate: sendMessage } = useMutation({
+    mutationFn: async ({ recipientId, message }: { recipientId: string, message: string }) => {
+      if (!currentUserId || !propertyId || !recipientId || !message) {
+        throw new Error("Missing required fields to send message");
       }
 
       const { data, error } = await supabase
-        .from('property_messages')
+        .from('messages')
         .insert({
           property_id: propertyId,
-          sender_id: user.id,
+          sender_id: currentUserId,
           recipient_id: recipientId,
-          message
+          message,
+          is_read: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .select('*')
-        .single();
+        .select();
 
       if (error) {
-        console.error('Error sending message:', error);
+        console.error("Error sending message:", error);
         throw error;
       }
 
-      return data;
+      return data[0];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-messages', propertyId, participantId] });
-      queryClient.invalidateQueries({ queryKey: ['property-conversations', propertyId] });
-    },
-    onError: () => {
-      toast({
-        title: 'Error',
-        description: 'Failed to send message',
-        variant: 'destructive',
-      });
-    },
+      // Invalidate relevant queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["propertyMessages", propertyId, participantId] });
+      queryClient.invalidateQueries({ queryKey: ["propertyConversations", propertyId] });
+    }
   });
+
+  // Create a currentUser object from the profile data
+  const currentUser: User | null = profile ? {
+    id: profile.id,
+    email: profile.email || '',
+    full_name: profile.full_name || '',
+    avatar_url: profile.avatar_url,
+    role: profile.role as "admin" | "agent" | "seller" | "buyer" | undefined,
+    phone: profile.phone
+  } : null;
 
   return {
     conversations,
+    isLoadingConversations,
+    conversationsError,
     messages,
-    isLoadingConversations: conversationsLoading,
-    isLoadingMessages: messagesLoading,
+    isLoadingMessages,
     messagesError,
-    sendMessage: sendMessageMutation.mutate,
-    hasUnreadMessages: conversations?.some(conv => conv.unreadCount > 0) || false
+    sendMessage,
+    currentUser
   };
 }

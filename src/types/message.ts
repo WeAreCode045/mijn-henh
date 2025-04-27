@@ -22,6 +22,19 @@ export interface PropertyMessage {
   };
 }
 
+export interface Message {
+  id: string;
+  content: string;
+  sender: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url?: string;
+  };
+  timestamp: string;
+  read: boolean;
+}
+
 export interface Conversation {
   participantId: string;
   participantName: string;

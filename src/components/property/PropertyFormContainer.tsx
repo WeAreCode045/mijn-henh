@@ -111,8 +111,7 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     settings,
     isSubmitting,
     initialStep: initialContentStep || 0,
-    // Use formData as formState, but fall back to initialFormData if it's not available
-    // This ensures the type is always PropertyFormData rather than {}
+    // Use formData as formState, but always ensure it's not undefined
     formState: formData || initialFormData,
     onSave: saveProperty,
     isSaving: isSubmitting, // Adding the missing isSaving property

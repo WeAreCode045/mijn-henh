@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { User } from "@/types/user";
+import { PropertyMessage } from "@/types/message";
 
 interface Message {
   id: string;
@@ -16,17 +17,21 @@ interface Message {
 }
 
 interface MessageThreadProps {
-  messages: Message[];
+  messages: Message[] | PropertyMessage[];
   currentUser: User;
   onSendMessage: (content: string) => void;
   propertyId: string;
+  isLoading?: boolean;
+  selectedParticipantId?: string | null;
 }
 
 export function MessageThread({
   messages,
   currentUser,
   onSendMessage,
-  propertyId
+  propertyId,
+  isLoading = false,
+  selectedParticipantId = null
 }: MessageThreadProps) {
   const [newMessage, setNewMessage] = useState("");
 
@@ -38,8 +43,28 @@ export function MessageThread({
     }
   };
 
+  // Convert PropertyMessage to Message if needed
+  const normalizedMessages = messages.map(msg => {
+    if ('message' in msg) {
+      // This is a PropertyMessage
+      return {
+        id: msg.id,
+        content: msg.message,
+        sender: msg.sender || { 
+          id: msg.sender_id, 
+          full_name: "Unknown", 
+          email: "" 
+        },
+        timestamp: msg.created_at,
+        read: msg.is_read
+      } as Message;
+    }
+    // This is already in Message format
+    return msg as Message;
+  });
+
   // Group messages by date
-  const groupedMessages = messages.reduce((groups: Record<string, Message[]>, message) => {
+  const groupedMessages = normalizedMessages.reduce((groups: Record<string, Message[]>, message) => {
     const date = new Date(message.timestamp).toLocaleDateString();
     if (!groups[date]) {
       groups[date] = [];
@@ -47,6 +72,14 @@ export function MessageThread({
     groups[date].push(message);
     return groups;
   }, {});
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-full p-8">Loading messages...</div>;
+  }
+
+  if (!selectedParticipantId) {
+    return <div className="flex items-center justify-center h-full p-8">Select a conversation to view messages</div>;
+  }
 
   return (
     <div className="flex flex-col h-full">
