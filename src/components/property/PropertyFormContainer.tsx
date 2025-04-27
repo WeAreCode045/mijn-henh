@@ -110,7 +110,7 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     settings,
     isSubmitting,
     initialStep: initialContentStep || 0,
-    formState: formData || {},
+    formState: formData || {}, // Ensure we pass formData as formState to match PropertyFormData type
     onSave: saveProperty,
     // Add all required props from PropertyFormManagerChildrenProps
     handleFieldChange: (field: string, value: any) => {
