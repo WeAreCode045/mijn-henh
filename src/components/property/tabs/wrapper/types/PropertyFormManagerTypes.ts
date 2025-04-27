@@ -9,7 +9,7 @@ export interface PropertyFormManagerProps {
 
 export interface PropertyFormManagerChildrenProps {
   formState: PropertyFormData;
-  formData?: PropertyFormData;
+  formData: PropertyFormData;
   handleFieldChange: (field: string, value: any) => void;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;

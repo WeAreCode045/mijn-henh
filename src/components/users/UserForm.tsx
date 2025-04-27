@@ -26,10 +26,11 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
   const [formData, setFormData] = useState<UserFormData>({
     email: initialData?.email || "",
     password: "",
-    fullName: initialData?.full_name || "",
+    full_name: initialData?.full_name || "",
     phone: initialData?.phone || "",
-    whatsappNumber: initialData?.whatsapp_number || "",
-    role: (initialData?.role as "admin" | "agent") || "agent"
+    whatsapp_number: initialData?.whatsapp_number || "",
+    role: (initialData?.role as "admin" | "agent") || "agent",
+    avatar_url: initialData?.avatar_url || ""
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>(initialData?.avatar_url || "");
@@ -84,9 +85,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         const { error } = await supabase
           .from("profiles")
           .update({
-            full_name: formData.fullName,
+            full_name: formData.full_name,
             phone: formData.phone,
-            whatsapp_number: formData.whatsappNumber,
+            whatsapp_number: formData.whatsapp_number,
             role: formData.role,
             updated_at: new Date().toISOString(),
             ...(photoUrl && { avatar_url: photoUrl })
@@ -105,7 +106,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           password: formData.password,
           options: {
             data: {
-              full_name: formData.fullName,
+              full_name: formData.full_name,
             },
           },
         });
@@ -121,10 +122,10 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           const { error: profileError } = await supabase
             .from("profiles")
             .update({
-              full_name: formData.fullName,
+              full_name: formData.full_name,
               role: formData.role,
               phone: formData.phone,
-              whatsapp_number: formData.whatsappNumber,
+              whatsapp_number: formData.whatsapp_number,
               updated_at: new Date().toISOString(),
               ...(photoUrl && { avatar_url: photoUrl })
             })
@@ -160,7 +161,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         <div className="flex items-center gap-4">
           <Avatar className="w-20 h-20">
             <AvatarImage src={photoPreview} alt="Profile photo" />
-            <AvatarFallback>{formData.fullName?.charAt(0) || "U"}</AvatarFallback>
+            <AvatarFallback>{formData.full_name?.charAt(0) || "U"}</AvatarFallback>
           </Avatar>
           <Input
             type="file"
@@ -202,9 +203,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         <Label htmlFor="fullName">Full Name</Label>
         <Input
           id="fullName"
-          value={formData.fullName}
+          value={formData.full_name}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, fullName: e.target.value }))
+            setFormData((prev) => ({ ...prev, full_name: e.target.value }))
           }
           required
         />
@@ -225,9 +226,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         <Input
           id="whatsappNumber"
           type="tel"
-          value={formData.whatsappNumber}
+          value={formData.whatsapp_number}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, whatsappNumber: e.target.value }))
+            setFormData((prev) => ({ ...prev, whatsapp_number: e.target.value }))
           }
         />
       </div>

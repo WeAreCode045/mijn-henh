@@ -32,15 +32,27 @@ export function usePropertyImages(
   const images = normalizeImages(formState.images as any[]);
   
   // Handle image upload
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const handleImageUpload = useCallback(async (input: FileList | React.ChangeEvent<HTMLInputElement>) => {
+    let files: FileList;
+    
+    // Handle different input types
+    if ('target' in input && input.target && input.target.files) {
+      files = input.target.files;
+    } else if (input instanceof FileList) {
+      files = input;
+    } else {
+      console.error('Invalid input to handleImageUpload');
+      return;
+    }
+    
+    if (!files || files.length === 0) return;
     
     setIsUploading(true);
     
     try {
       // In a real implementation, you would upload the files to your server
       // For now, we'll just simulate the upload
-      const uploadedImageUrls = Array.from(e.target.files).map((file, index) => ({
+      const uploadedImageUrls = Array.from(files).map((file) => ({
         id: `temp_${uuidv4()}`,
         url: URL.createObjectURL(file)
       }));
@@ -57,25 +69,45 @@ export function usePropertyImages(
   }, [formState.images, normalizeImages, handleFieldChange, setPendingChanges]);
   
   // Remove an image
-  const handleRemoveImage = useCallback((index: number) => {
+  const handleRemoveImage = useCallback((indexOrUrl: number | string) => {
     const currentImages = normalizeImages(formState.images as any[]);
-    const updatedImages = [...currentImages];
-    updatedImages.splice(index, 1);
+    let updatedImages: PropertyImage[];
+    
+    if (typeof indexOrUrl === 'number') {
+      // Remove by index
+      updatedImages = [...currentImages];
+      updatedImages.splice(indexOrUrl, 1);
+    } else {
+      // Remove by URL
+      updatedImages = currentImages.filter(img => img.url !== indexOrUrl);
+    }
     
     handleFieldChange('images', updatedImages);
     setPendingChanges(true);
   }, [formState.images, normalizeImages, handleFieldChange, setPendingChanges]);
   
   // Handle floorplan upload
-  const handleFloorplanUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const handleFloorplanUpload = useCallback(async (input: FileList | React.ChangeEvent<HTMLInputElement>) => {
+    let files: FileList;
+    
+    // Handle different input types
+    if ('target' in input && input.target && input.target.files) {
+      files = input.target.files;
+    } else if (input instanceof FileList) {
+      files = input;
+    } else {
+      console.error('Invalid input to handleFloorplanUpload');
+      return;
+    }
+    
+    if (!files || files.length === 0) return;
     
     setIsUploadingFloorplan(true);
     
     try {
       // In a real implementation, you would upload the files to your server
       // For now, we'll just simulate the upload
-      const uploadedFloorplans = Array.from(e.target.files).map((file, index) => ({
+      const uploadedFloorplans = Array.from(files).map((file) => ({
         id: `floorplan_${uuidv4()}`,
         url: URL.createObjectURL(file)
       }));
@@ -92,10 +124,18 @@ export function usePropertyImages(
   }, [formState.floorplans, normalizeImages, handleFieldChange, setPendingChanges]);
   
   // Remove a floorplan
-  const handleRemoveFloorplan = useCallback((index: number) => {
+  const handleRemoveFloorplan = useCallback((indexOrId: number | string) => {
     const currentFloorplans = normalizeImages(formState.floorplans as any[]) || [];
-    const updatedFloorplans = [...currentFloorplans];
-    updatedFloorplans.splice(index, 1);
+    let updatedFloorplans: PropertyImage[];
+    
+    if (typeof indexOrId === 'number') {
+      // Remove by index
+      updatedFloorplans = [...currentFloorplans];
+      updatedFloorplans.splice(indexOrId, 1);
+    } else {
+      // Remove by ID
+      updatedFloorplans = currentFloorplans.filter(fp => fp.id !== indexOrId);
+    }
     
     handleFieldChange('floorplans', updatedFloorplans);
     setPendingChanges(true);
