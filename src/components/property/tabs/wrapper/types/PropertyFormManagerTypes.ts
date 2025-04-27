@@ -59,4 +59,5 @@ export interface PropertyFormManagerChildrenProps {
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   images: string[];
+  settings?: any; // Add settings property to fix the type error
 }
