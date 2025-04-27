@@ -13,6 +13,8 @@ export interface PropertyMessage {
     full_name?: string;
     email?: string;
     avatar_url?: string;
+   phone?: string;
+    
   };
   recipient?: {
     id: string;
@@ -30,6 +32,7 @@ export interface Message {
     full_name: string;
     email: string;
     avatar_url?: string;
+    phone?: string;
   };
   timestamp: string;
   read: boolean;
@@ -45,9 +48,4 @@ export interface Conversation {
   unreadCount: number;
   propertyId: string;
   propertyTitle: string;
-}
-
-export interface MessageData {
-  recipientId: string;
-  message: string;
 }

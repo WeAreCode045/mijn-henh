@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
-import { PropertyMessage } from "@/types/message";
+import { PropertyMessage, MessageData } from "@/types/message";
 import { User } from "@/types/user";
 import { usePropertyConversations } from "./usePropertyConversations";
 import { useSendMessage } from "./useSendMessage";
@@ -40,7 +40,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
             message,
             created_at,
             is_read,
-            sender:profiles!sender_id(id, full_name, email, avatar_url, phone, whatsapp_number),
+            sender:profiles!sender_id(id, full_name, phone, email, avatar_url, phone, whatsapp_number),
             recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number)
           `)
           .eq('property_id', propertyId)
@@ -83,13 +83,12 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data
-  // Making sure we use the complete User type with all required properties
   const currentUser: User | null = profile ? {
     id: profile.id,
     email: profile.email || '',
     full_name: profile.full_name || '',
+    avatar_url: profile.avatar_url,
     role: profile.role as "admin" | "agent" | "seller" | "buyer" | undefined,
-    avatar_url: profile.avatar_url || null,
     phone: profile.phone || undefined,
     whatsapp_number: profile.whatsapp_number || undefined,
     created_at: profile.created_at || undefined,
