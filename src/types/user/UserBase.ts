@@ -7,5 +7,6 @@ export interface UserBase {
   phone?: string;
   whatsapp_number?: string;
   created_at?: string;
+  updated_at?: string;
   role?: "admin" | "agent" | "seller" | "buyer";
 }

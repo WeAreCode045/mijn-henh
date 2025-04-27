@@ -13,14 +13,16 @@ export interface PropertyMessage {
     full_name?: string;
     email?: string;
     avatar_url?: string;
-   phone?: string;
-    
+    phone?: string;
+    whatsapp_number?: string;
   };
   recipient?: {
     id: string;
     full_name?: string;
     email?: string;
     avatar_url?: string;
+    phone?: string;
+    whatsapp_number?: string;
   };
 }
 
@@ -48,4 +50,9 @@ export interface Conversation {
   unreadCount: number;
   propertyId: string;
   propertyTitle: string;
+}
+
+export interface MessageData {
+  recipientId: string;
+  message: string;
 }
