@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
-import { PropertyMessage, MessageData } from "@/types/message";
+import { PropertyMessage } from "@/types/message";
 import { User } from "@/types/user";
 import { usePropertyConversations } from "./usePropertyConversations";
 import { useSendMessage } from "./useSendMessage";
@@ -83,7 +83,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data
-  // Using the User type imported from the modular type definition
+  // Using the imported User type from @/types/user which combines all user type interfaces
   const currentUser: User | null = profile ? {
     id: profile.id,
     email: profile.email || '',

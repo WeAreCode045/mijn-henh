@@ -1,3 +1,4 @@
+
 export interface PropertyMessage {
   id: string;
   property_id: string;
