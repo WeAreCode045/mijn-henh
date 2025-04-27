@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Phone, Edit } from "lucide-react";
+import { User, Mail, Edit } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
 interface UserProfileCardProps {
