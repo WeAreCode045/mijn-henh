@@ -6,15 +6,15 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextProps {
   user: User | null;
   profile: {
-    updated_at: never;
-    created_at: never;
-    whatsapp_number: unknown;
-    phone: never;
     id: string;
     full_name: string | null;
     email: string | null;
     role: 'admin' | 'agent' | 'seller' | 'buyer' | null;
     avatar_url: string | null;
+    phone?: string | null;
+    whatsapp_number?: string | null;
+    created_at?: string | null;
+    updated_at?: string | null;
   } | null;
   session: Session | null;
   isLoading: boolean;

@@ -100,9 +100,9 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
       avatar_url: profile.avatar_url,
       role: profile.role as User["role"],
       phone: profile.phone || undefined,
-      whatsapp_number: profile.whatsapp_number?.toString() || undefined,
-      created_at: profile.created_at?.toString() || undefined,
-      updated_at: profile.updated_at?.toString() || undefined
+      whatsapp_number: profile.whatsapp_number || undefined,
+      created_at: profile.created_at || undefined,
+      updated_at: profile.updated_at || undefined
     } : null
   };
 }
