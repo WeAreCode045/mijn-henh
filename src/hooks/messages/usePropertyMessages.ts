@@ -83,10 +83,10 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
     full_name: profile.full_name || '',
     avatar_url: profile.avatar_url,
     role: profile.role as "admin" | "agent" | "seller" | "buyer" | undefined,
-    phone: profile.phone,
-    whatsapp_number: profile.whatsapp_number,
-    created_at: profile.created_at,
-    updated_at: profile.updated_at
+    phone: profile.phone || undefined,
+    whatsapp_number: profile.whatsapp_number || undefined,
+    created_at: profile.created_at || undefined,
+    updated_at: profile.updated_at || undefined
   } : null;
 
   return {
