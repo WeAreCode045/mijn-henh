@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { PropertyData } from "@/types/property";
 import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
 
@@ -26,23 +26,6 @@ export function DashboardTabContent({
   console.log("DashboardTabContent - onWebView is function:", typeof onWebView === 'function');
   console.log("DashboardTabContent - handleGeneratePDF is function:", typeof handleGeneratePDF === 'function');
   
-  // Provide a fallback for handleSaveAgent if it's undefined
-  const safeHandleSaveAgent = typeof handleSaveAgent === 'function' 
-    ? handleSaveAgent 
-    : async () => { console.warn("handleSaveAgent not provided"); };
-    
-  // Handle for web view that opens in a new tab
-  const handleOpenWebView = (e: React.MouseEvent) => {
-    console.log("DashboardTabContent - handleOpenWebView called");
-    
-    // Call the original handler which now opens in a new tab
-    if (typeof onWebView === 'function') {
-      onWebView(e);
-    }
-    
-    return true;
-  };
-
   return (
     <PropertyDashboardTab
       formData={property}
