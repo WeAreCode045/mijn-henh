@@ -15,6 +15,7 @@ import { ParticipantRole } from "@/types/participant";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { sendEmail } from "@/lib/email";
 
 interface ParticipantInviteDialogProps {
   open: boolean;
@@ -54,23 +55,16 @@ export function ParticipantInviteDialog({
         .single();
       
       // Send initial invitation email
-      const { error: emailError } = await supabase.functions.invoke('send-email', {
-        body: {
-          to: email,
-          subject: `You've been invited as a ${role} for ${property?.title || 'a property'}`,
-          html: `
-            <h1>Property Invitation</h1>
-            <p>You have been invited to participate as a <strong>${role}</strong> for ${property?.title || 'a property'}.</p>
-            <p>Please login to your account or create a new one to view this property.</p>
-            <p><a href="${window.location.origin}/participant">Open Property Portal</a></p>
-          `
-        }
+      await sendEmail({
+        to: email,
+        subject: `You've been invited as a ${role} for ${property?.title || 'a property'}`,
+        html: `
+          <h1>Property Invitation</h1>
+          <p>You have been invited to participate as a <strong>${role}</strong> for ${property?.title || 'a property'}.</p>
+          <p>Please login to your account or create a new one to view this property.</p>
+          <p><a href="${window.location.origin}/participant">Open Property Portal</a></p>
+        `
       });
-      
-      if (emailError) {
-        console.warn("Error sending invitation email:", emailError);
-        // Don't block the flow if the email fails
-      }
       
       setEmail("");
       onOpenChange(false);
@@ -80,6 +74,7 @@ export function ParticipantInviteDialog({
         description: `${role} invitation has been sent to ${email}`,
       });
     } catch (error: any) {
+      console.error("Error sending invitation:", error);
       toast({
         title: "Error",
         description: error.message || `Failed to add ${role}`,

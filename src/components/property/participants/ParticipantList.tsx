@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PropertyParticipant } from "@/types/participant";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,8 @@ import { useState } from "react";
 import { ParticipantInviteDialog } from "./ParticipantInviteDialog";
 import { usePropertyParticipants } from "@/hooks/usePropertyParticipants";
 import { Mail } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+import { sendEmail } from "@/lib/email";
 
 interface ParticipantListProps {
   propertyId: string;
@@ -29,10 +31,11 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
         title: "Success",
         description: `Invitation resent to ${email}`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error resending invitation:", error);
       toast({
         title: "Error",
-        description: "Failed to resend invitation",
+        description: error.message || "Failed to resend invitation",
         variant: "destructive",
       });
     }
