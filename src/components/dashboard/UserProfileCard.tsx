@@ -18,11 +18,15 @@ interface UserProfileCardProps {
 export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: user.full_name,
-    email: user.email,
-    phone: user.phone || "",
+    full_name: user?.full_name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
+
+  if (!user) {
+    return null;
+  }
 
   const handleEditClick = () => {
     setIsEditing(true);

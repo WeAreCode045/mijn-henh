@@ -1,49 +1,37 @@
 
-import { PropertyTabs } from "./PropertyTabs";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { PropertyFormContent } from "./form/PropertyFormContent";
-import { PropertyFormLoader } from "./form/PropertyFormLoader";
+import React, { useState, useEffect } from "react";
+import { PropertyForm } from "@/components/PropertyForm";
+import { PropertyFormLayout } from "./PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
-import { useState } from "react";
-import { Separator } from "../ui/separator";
-import { PropertyDashboardTab } from "./tabs/dashboard";
-import { ParticipantsTab } from "@/pages/property/tabs/ParticipantsTab";
-import { DocumentsTab } from "@/pages/property/tabs/DocumentsTab";
-import { CommunicationsTab } from "@/pages/property/tabs/CommunicationsTab";
-import { DashboardTabContent } from "./tabs/content/DashboardTabContent";
-import { initialFormData } from "@/hooks/property-form/initialFormData";
-
-interface PropertyAgentDetailProps {
-  agent: { id: string; name: string } | null;
-  agents: any[];
-  onChange: (agentId: string) => void;
-  agentId?: string;
-}
-
-// This is a stub component that should be imported from the correct path
-// or implemented if it doesn't exist yet
-const PropertyAgentDetail = ({ agent, agents, onChange, agentId }: PropertyAgentDetailProps) => {
-  return (
-    <div className="flex items-center gap-2">
-      {agent ? (
-        <div>{agent.name}</div>
-      ) : (
-        <div>No agent assigned</div>
-      )}
-    </div>
-  );
-};
+import { useAuth } from "@/providers/AuthProvider";
+import { PropertyFormLoader } from "@/components/property/form/PropertyFormLoader";
+import { useSearchParams, useParams } from "react-router-dom";
+import { PropertyData } from "@/types/property";
 
 interface PropertyFormContainerProps {
-  propertyId?: string | null;
+  propertyId?: string;
   initialTab?: string;
   initialContentStep?: number;
 }
 
-export function PropertyFormContainer({ propertyId, initialTab, initialContentStep }: PropertyFormContainerProps) {
-  const [activeTab, setActiveTab] = useState<string>(initialTab || "dashboard");
-  const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
+export function PropertyFormContainer({ 
+  propertyId: propPropertyId, 
+  initialTab, 
+  initialContentStep
+}: PropertyFormContainerProps) {
+  const { isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { id: paramsId } = useParams();
+  // Use propertyId from props, searchParams, or URL params in that order
+  const propertyId = propPropertyId || searchParams.get("propertyId") || paramsId;
+  const [agentInfo, setAgentInfo] = useState<{id: string, name: string} | null>(null);
+  
+  // Log to help with debugging
+  console.log("PropertyFormContainer - Using property ID:", propertyId);
+  console.log("PropertyFormContainer - Initial tab:", initialTab);
+  console.log("PropertyFormContainer - Initial content step:", initialContentStep);
+  
   const {
     id,
     formData,
@@ -57,6 +45,15 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     setIsSubmitting,
     toast
   } = usePropertyFormContainerData(propertyId);
+
+  // Additional debug logging
+  useEffect(() => {
+    console.log("PropertyFormContainer - formData loaded:", formData !== undefined && formData !== null);
+    if (formData) {
+      console.log("PropertyFormContainer - formData ID:", formData.id);
+      console.log("PropertyFormContainer - formData title:", formData.title);
+    }
+  }, [formData]);
 
   const {
     deleteProperty,
@@ -75,148 +72,87 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     agents
   );
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
-  
-  const handleSaveAgent = async (agentId: string): Promise<void> => {
-    return handleAgentChange(agentId);
-  };
-  
-  const handleSaveObjectId = async (objectId: string): Promise<void> => {
-    if (formData && setFormData) {
-      setFormData({
-        ...formData,
-        object_id: objectId
+  // Set document title based on property title
+  useEffect(() => {
+    if (formData?.title) {
+      document.title = formData.title;
+      console.log("PropertyFormContainer - Property loaded:", {
+        id: formData.id,
+        title: formData.title
       });
-      // Additional logic to save to database if needed
-      return Promise.resolve();
+    } else {
+      document.title = "Edit Property";
     }
-    return Promise.reject("Form data not available");
-  };
-  
-  const handleWebView = (e: React.MouseEvent) => {
-    console.log("Web view clicked");
-    // Implementation would go here
-  };
-  
-  const handleGeneratePDF = (e: React.MouseEvent) => {
-    console.log("Generate PDF clicked");
-    // Implementation would go here
-  };
+    
+    return () => {
+      document.title = "Brochure Generator";
+    };
+  }, [formData?.title]);
 
-  // Creating an object with all the required props for PropertyFormContent
-  const formContentProps = {
-    formData,
-    settings,
-    isSubmitting,
-    initialStep: initialContentStep || 0,
-    // Use formData as formState, but always ensure it's not undefined
-    formState: formData || initialFormData,
-    onSave: saveProperty,
-    isSaving: isSubmitting, // Adding the missing isSaving property
-    // Add all required props from PropertyFormManagerChildrenProps
-    handleFieldChange: (field: string, value: any) => {
-      if (setFormData && formData) {
-        setFormData({ ...formData, [field]: value });
-      }
-    },
-    handleSaveObjectId,
-    handleSaveAgent,
-    addFeature: () => console.log('Add feature stub'),
-    removeFeature: () => console.log('Remove feature stub'),
-    updateFeature: () => console.log('Update feature stub'),
-    addArea: () => console.log('Add area stub'),
-    removeArea: () => console.log('Remove area stub'),
-    updateArea: () => console.log('Update area stub'),
-    handleAreaImageRemove: () => console.log('Remove area image stub'),
-    handleAreaImagesSelect: () => console.log('Select area images stub'),
-    handleAreaImageUpload: async () => console.log('Upload area image stub'),
-    handleImageUpload: async () => console.log('Upload image stub'),
-    handleRemoveImage: () => console.log('Remove image stub'),
-    isUploading: false,
-    handleAreaPhotosUpload: async () => console.log('Upload area photos stub'),
-    handleRemoveAreaPhoto: () => console.log('Remove area photo stub'),
-    handleFloorplanUpload: async () => console.log('Upload floorplan stub'),
-    handleRemoveFloorplan: () => console.log('Remove floorplan stub'),
-    isUploadingFloorplan: false,
-    handleSetFeaturedImage: () => console.log('Set featured image stub'),
-    handleToggleFeaturedImage: () => console.log('Toggle featured image stub'),
-    onSubmit: () => console.log('Submit stub'),
-    currentStep: 0,
-    handleStepClick: () => console.log('Step click stub'),
-    propertyWithRequiredProps: { id: formData?.id || '', ...formData } || initialFormData,
-    setPendingChanges: () => console.log('Set pending changes stub'),
-    images: images || [],
-  };
-
-  if (isLoading) {
+  if (isLoading || !formData) {
     return <PropertyFormLoader />;
   }
 
-  if (!formData) {
-    return (
-      <div className="p-6 bg-white rounded-lg shadow">
-        <p className="text-center text-gray-500">Property not found</p>
-      </div>
-    );
-  }
+  // Create a complete PropertyData object from formData to avoid TypeScript errors
+  const propertyData: PropertyData = {
+    id: formData.id || '',
+    title: formData.title || '',
+    price: formData.price || '',
+    address: formData.address || '',
+    bedrooms: formData.bedrooms || '',
+    bathrooms: formData.bathrooms || '',
+    sqft: formData.sqft || '',
+    livingArea: formData.livingArea || '',
+    buildYear: formData.buildYear || '',
+    garages: formData.garages || '',
+    energyLabel: formData.energyLabel || '',
+    hasGarden: formData.hasGarden || false,
+    description: formData.description || '',
+    location_description: formData.location_description || '',
+    features: formData.features || [],
+    areas: formData.areas || [],
+    nearby_places: formData.nearby_places || [],
+    nearby_cities: formData.nearby_cities || [],
+    images: formData.images || [],
+    floorplans: formData.floorplans || [],
+    map_image: formData.map_image || null,
+    latitude: formData.latitude || null,
+    longitude: formData.longitude || null,
+    object_id: formData.object_id || '',
+    agent_id: formData.agent_id || '',
+    template_id: formData.template_id || 'default',
+    virtualTourUrl: formData.virtualTourUrl || '',
+    youtubeUrl: formData.youtubeUrl || '',
+    floorplanEmbedScript: formData.floorplanEmbedScript || '',
+    created_at: formData.created_at,
+    updated_at: formData.updated_at,
+    status: formData.status || 'Draft',
+    featuredImage: formData.featuredImage || null,
+    featuredImages: formData.featuredImages || []
+  };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">{formData.title || "Untitled Property"}</h1>
-        <div className="flex items-center gap-4">
-          <PropertyAgentDetail
-            agent={agentInfo}
-            agents={agents}
-            onChange={handleAgentChange}
-            agentId={selectedAgent}
-          />
-        </div>
-      </div>
-
-      <Separator className="mb-6" />
-
-      <Tabs value={activeTab} className="w-full">
-        <PropertyTabs
-          activeTab={activeTab}
-          handleTabChange={handleTabChange}
-          propertyId={id || ""}
-        >
-          <TabsContent value="dashboard">
-            <DashboardTabContent
-              property={formData}
-              onDelete={deleteProperty}
-              onSave={saveProperty}
-              onWebView={handleWebView}
-              handleSaveAgent={handleSaveAgent}
-              handleSaveObjectId={handleSaveObjectId}
-              handleGeneratePDF={handleGeneratePDF}
-            />
-          </TabsContent>
-          <TabsContent value="content">
-            <PropertyFormContent
-              {...formContentProps}
-            />
-          </TabsContent>
-          <TabsContent value="media">
-            <div className="space-y-6 pb-4">
-              <h2 className="text-2xl font-bold">Media</h2>
-              {/* Media tab content */}
-            </div>
-          </TabsContent>
-          <TabsContent value="communications">
-            <CommunicationsTab propertyId={id || ""} propertyTitle={formData.title || "Untitled Property"} />
-          </TabsContent>
-          <TabsContent value="participants">
-            <ParticipantsTab propertyId={id || ""} propertyTitle={formData.title || "Untitled Property"} />
-          </TabsContent>
-          <TabsContent value="documents">
-            <DocumentsTab propertyId={id || ""} propertyTitle={formData.title || "Untitled Property"} />
-          </TabsContent>
-        </PropertyTabs>
-      </Tabs>
-    </div>
+    <PropertyFormLayout
+      title={formData.title || "Edit Property"}
+      propertyData={propertyData}
+      settings={settings}
+      isAdmin={isAdmin}
+      agents={agents}
+      selectedAgent={selectedAgent}
+      onAgentSelect={handleAgentChange}
+      onDeleteProperty={deleteProperty}
+      onSaveProperty={saveProperty}
+      onImageUpload={handleImageUpload}
+      onRemoveImage={handleRemoveImage}
+      images={images}
+      agentInfo={agentInfo}
+      isSubmitting={isSubmitting}
+    >
+      <PropertyForm 
+        initialTab={initialTab}
+        initialContentStep={initialContentStep}
+        formData={formData}
+      />
+    </PropertyFormLayout>
   );
 }

@@ -3,7 +3,6 @@ import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image, Home, MessageCircle, Users, FileCheck } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePropertyMessages } from "@/hooks/useMessages";
 
 interface PropertyTabsProps {
   activeTab: string;
@@ -19,7 +18,7 @@ export function PropertyTabs({
   children
 }: PropertyTabsProps) {
   const [unreadCount, setUnreadCount] = useState(0);
-  const { hasUnreadMessages } = usePropertyMessages(propertyId);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
   useEffect(() => {
     // Fetch unread submissions count
@@ -36,6 +35,19 @@ export function PropertyTabs({
         console.error('Error fetching unread count:', error);
       } else if (count !== null) {
         setUnreadCount(count);
+      }
+
+      // Check for unread messages
+      const { count: messageCount, error: messageError } = await supabase
+        .from('property_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('property_id', propertyId)
+        .eq('is_read', false);
+      
+      if (!messageError && messageCount !== null && messageCount > 0) {
+        setHasUnreadMessages(true);
+      } else {
+        setHasUnreadMessages(false);
       }
     };
 
@@ -54,9 +66,24 @@ export function PropertyTabs({
         fetchUnreadCount();
       })
       .subscribe();
+      
+    // Set up real-time subscription for unread messages
+    const messagesSubscription = supabase
+      .channel('unread-messages')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'property_messages',
+        filter: `property_id=eq.${propertyId}`
+      }, () => {
+        // Refetch count when messages change
+        fetchUnreadCount();
+      })
+      .subscribe();
 
     return () => {
       submissionsSubscription.unsubscribe();
+      messagesSubscription.unsubscribe();
     };
   }, [propertyId]);
 

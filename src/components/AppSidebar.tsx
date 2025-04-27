@@ -138,7 +138,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="mb-4 px-4 !bg-primary text-white">
         <SidebarGroup>
-          <UserProfileCard inSidebar={true} />
+          {profile && <UserProfileCard user={profile} inSidebar={true} />}
           <SidebarMenu className="mt-4">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout} className="text-white hover:bg-primary-foreground/10">
