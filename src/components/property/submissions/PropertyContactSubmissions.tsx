@@ -34,6 +34,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
     // Find the submission in the submissions array to ensure we're using the correct type
     const submission = submissions.find(s => s.id === id);
     if (submission) {
+      // Use the submission directly from the submissions array, which has the correct type
       setSelectedSubmission(submission);
       
       // Mark as read when selected if not already read
