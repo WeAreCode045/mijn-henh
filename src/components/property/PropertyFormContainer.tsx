@@ -12,6 +12,7 @@ import { ParticipantsTab } from "@/pages/property/tabs/ParticipantsTab";
 import { DocumentsTab } from "@/pages/property/tabs/DocumentsTab";
 import { CommunicationsTab } from "@/pages/property/tabs/CommunicationsTab";
 import { DashboardTabContent } from "./tabs/content/DashboardTabContent";
+import { initialFormData } from "@/hooks/property-form/initialFormData";
 
 interface PropertyAgentDetailProps {
   agent: { id: string; name: string } | null;
@@ -110,8 +111,11 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     settings,
     isSubmitting,
     initialStep: initialContentStep || 0,
-    formState: formData || {}, // Ensure we pass formData as formState to match PropertyFormData type
+    // Use formData as formState, but fall back to initialFormData if it's not available
+    // This ensures the type is always PropertyFormData rather than {}
+    formState: formData || initialFormData,
     onSave: saveProperty,
+    isSaving: isSubmitting, // Adding the missing isSaving property
     // Add all required props from PropertyFormManagerChildrenProps
     handleFieldChange: (field: string, value: any) => {
       if (setFormData && formData) {
@@ -142,10 +146,9 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     onSubmit: () => console.log('Submit stub'),
     currentStep: 0,
     handleStepClick: () => console.log('Step click stub'),
-    propertyWithRequiredProps: { id: formData?.id || '', ...formData },
+    propertyWithRequiredProps: { id: formData?.id || '', ...formData } || initialFormData,
     setPendingChanges: () => console.log('Set pending changes stub'),
     images: images || [],
-    isSaving: isSubmitting // Adding the missing isSaving property
   };
 
   if (isLoading) {

@@ -1,155 +1,123 @@
 
-import { PropertyMessage } from "@/types/message";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/providers/AuthProvider";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SendHorizontal } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { formatRelative } from "date-fns";
+import { Send } from "lucide-react";
 import { User } from "@/types/user";
 
+interface Message {
+  id: string;
+  content: string;
+  sender: User;
+  timestamp: string;
+  read: boolean;
+}
+
 interface MessageThreadProps {
-  messages: PropertyMessage[];
-  isLoading: boolean;
-  selectedParticipantId: string | null;
-  onSendMessage: (data: { recipientId: string; message: string }) => void;
+  messages: Message[];
+  currentUser: User;
+  onSendMessage: (content: string) => void;
+  propertyId: string;
 }
 
 export function MessageThread({
   messages,
-  isLoading,
-  selectedParticipantId,
+  currentUser,
   onSendMessage,
+  propertyId
 }: MessageThreadProps) {
-  const { user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  
-  // Scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollElement) {
-        scrollElement.scrollTop = scrollElement.scrollHeight;
-      }
-    }
-  }, [messages]);
 
-  const formatMessageDate = (dateString: string) => {
-    try {
-      return formatRelative(new Date(dateString), new Date());
-    } catch (error) {
-      return "Unknown date";
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newMessage.trim()) {
+      onSendMessage(newMessage);
+      setNewMessage("");
     }
   };
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedParticipantId) return;
-    
-    onSendMessage({
-      recipientId: selectedParticipantId,
-      message: newMessage.trim()
-    });
-    
-    setNewMessage("");
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  // Group messages by date
+  const groupedMessages = messages.reduce((groups: Record<string, Message[]>, message) => {
+    const date = new Date(message.timestamp).toLocaleDateString();
+    if (!groups[date]) {
+      groups[date] = [];
     }
-  };
-
-  if (!selectedParticipantId) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-4 text-center text-gray-500">
-        Select a conversation to start messaging.
-      </div>
-    );
-  }
+    groups[date].push(message);
+    return groups;
+  }, {});
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-3 border-b">
-        {messages.length > 0 && (
-          <h3 className="font-medium">
-            {messages[0].sender_id === user?.id 
-              ? messages[0].recipient?.full_name 
-              : messages[0].sender?.full_name}
-          </h3>
-        )}
-      </div>
-      
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            No messages yet. Send a message to start the conversation.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message) => {
-              const isCurrentUser = message.sender_id === user?.id;
-              return (
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {Object.keys(groupedMessages).map((date) => (
+          <div key={date} className="space-y-2">
+            <div className="text-center">
+              <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                {date}
+              </span>
+            </div>
+            {groupedMessages[date].map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${
+                  message.sender.id === currentUser.id ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
+                  className={`flex max-w-[70%] ${
+                    message.sender.id === currentUser.id
+                      ? "flex-row-reverse"
+                      : "flex-row"
+                  }`}
                 >
-                  <div className={`flex gap-2 max-w-[80%] ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <Avatar className="h-8 w-8">
-                      {isCurrentUser && user?.avatar_url && (
-                        <AvatarImage src={user.avatar_url} />
-                      )}
-                      {!isCurrentUser && message.sender?.avatar_url && (
-                        <AvatarImage src={message.sender.avatar_url} />
-                      )}
-                      <AvatarFallback>
-                        {isCurrentUser && user?.full_name
-                          ? user.full_name.split(" ").map(n => n[0]).join("") || "U"
-                          : message.sender?.full_name
-                            ? message.sender.full_name.split(" ").map(n => n[0]).join("") || "U"
-                            : "U"
-                        }
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className={`px-3 py-2 rounded-lg ${
-                        isCurrentUser ? "bg-primary text-white" : "bg-gray-100"
-                      }`}>
-                        {message.message}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formatMessageDate(message.created_at)}
-                      </div>
-                    </div>
+                  <Avatar className="h-8 w-8 mr-2">
+                    <AvatarImage src={message.sender.avatar_url} />
+                    <AvatarFallback>
+                      {message.sender.avatar_url ? "..." : message.sender.full_name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div
+                    className={`rounded-lg p-3 ${
+                      message.sender.id === currentUser.id
+                        ? "bg-primary text-primary-foreground mr-2"
+                        : "bg-muted ml-2"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold">
+                      {message.sender.full_name}
+                    </p>
+                    <p className="text-sm">{message.content}</p>
+                    <p className="text-xs opacity-70 mt-1 text-right">
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-        )}
-      </ScrollArea>
-      
-      <div className="p-3 border-t">
-        <div className="flex gap-2">
-          <Textarea
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Type your message..."
-            className="min-h-[60px]"
-          />
-          <Button size="icon" onClick={handleSendMessage} disabled={!newMessage.trim()}>
-            <SendHorizontal />
-          </Button>
-        </div>
+        ))}
       </div>
+
+      <Card className="mt-4 border-t">
+        <CardContent className="p-4">
+          <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+            <Input
+              placeholder="Type your message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              className="flex-1"
+            />
+            <Button type="submit" size="icon">
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

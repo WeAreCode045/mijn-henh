@@ -1,110 +1,129 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, Mail, Edit, Phone } from "lucide-react";
-import { useAuth } from "@/providers/AuthProvider";
-import { User as UserType } from "@/types/user";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PenSquare, UserCircle, Mail, Phone } from "lucide-react";
+import { User } from "@/types/user";
 
 interface UserProfileCardProps {
-  inSidebar?: boolean;
+  user: User;
+  onUpdateProfile?: (updatedUser: Partial<User>) => Promise<void>;
 }
 
-export function UserProfileCard({ inSidebar = false }: UserProfileCardProps) {
-  const { profile } = useAuth();
-  const navigate = useNavigate();
-  
-  const handleEditProfile = () => {
-    navigate("/settings"); // Navigate to settings page for now
-  };
-  
-  // Extract initials from full name
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map(part => part[0])
-      .join("")
-      .toUpperCase();
+export function UserProfileCard({ user, onUpdateProfile }: UserProfileCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: user.full_name,
+    email: user.email,
+    phone: user.phone || "",
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setFormData({
+      full_name: user.full_name,
+      email: user.email,
+      phone: user.phone || "",
+    });
   };
 
-  if (inSidebar) {
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center space-x-3">
-          <Avatar className="h-10 w-10">
-            {profile?.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={profile.full_name || "User"} />
-            ) : (
-              <AvatarFallback className="text-sm">
-                {profile?.full_name ? getInitials(profile.full_name) : <User className="h-4 w-4" />}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          <div className="space-y-0.5">
-            <h3 className="text-sm font-medium">{profile?.full_name || "User"}</h3>
-            <p className="text-xs text-muted-foreground">{profile?.role || "User"}</p>
-          </div>
-        </div>
-        <div className="text-xs space-y-1 ml-1">
-          <div className="flex items-center gap-1.5">
-            <Mail className="h-3 w-3 text-muted-foreground" />
-            <span className="text-muted-foreground truncate max-w-[160px]">{profile?.email || "No email"}</span>
-          </div>
-          {profile?.phone && (
-            <div className="flex items-center gap-1.5">
-              <Phone className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">{profile.phone}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onUpdateProfile) return;
+
+    setIsUpdating(true);
+    try {
+      await onUpdateProfile({
+        full_name: formData.full_name,
+        email: formData.email,
+        phone: formData.phone,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle>User Profile</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col items-center">
-          <Avatar className="h-20 w-20 mb-2">
-            {profile?.avatar_url ? (
-              <AvatarImage src={profile.avatar_url} alt={profile.full_name || "User"} />
-            ) : (
-              <AvatarFallback className="text-lg">
-                {profile?.full_name ? getInitials(profile.full_name) : <User />}
-              </AvatarFallback>
-            )}
+    <Card className="border shadow-sm">
+      <CardContent className="p-6">
+        <div className="flex flex-col items-center text-center">
+          <Avatar className="h-24 w-24 mb-4">
+            <AvatarImage src={user.avatar_url} />
+            <AvatarFallback>
+              <UserCircle className="h-12 w-12" />
+            </AvatarFallback>
           </Avatar>
-          <h3 className="font-medium text-lg">{profile?.full_name || "User"}</h3>
-          <span className="text-sm text-muted-foreground">{profile?.role || "User"}</span>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <span className="text-">{profile?.email || "No email"}</span>
+          <h3 className="text-xl font-semibold">{user.full_name}</h3>
+          <p className="text-sm text-gray-500 mb-1">{user.role}</p>
+          <div className="flex items-center mt-4 space-x-1 text-sm text-gray-500">
+            <Mail className="h-4 w-4" />
+            <span>{user.email}</span>
           </div>
-          {profile?.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{profile.phone}</span>
+          {user.phone && (
+            <div className="flex items-center mt-2 space-x-1 text-sm text-gray-500">
+              <Phone className="h-4 w-4" />
+              <span>{user.phone}</span>
             </div>
           )}
         </div>
       </CardContent>
-      <CardFooter>
-        <Button 
-          variant="outline" 
-          className="w-full color-black bg-gray-100 flex items-center gap-2"
-          onClick={handleEditProfile}
-        >
-          <Edit className="h-4 w-4" />
-          Edit Profile
-        </Button>
+      <CardFooter className="flex justify-center p-4 pt-0">
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" onClick={handleEditClick} className="space-x-1">
+              <PenSquare className="h-4 w-4" />
+              <span>Edit Profile</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Your Profile</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   );
