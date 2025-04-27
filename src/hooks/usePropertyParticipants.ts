@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,14 +24,7 @@ export function usePropertyParticipants(propertyId?: string) {
         .select(`
           *,
           user:profiles(id, email, role),
-          participant_profile:participants_profile(
-            id, 
-            first_name, 
-            last_name, 
-            email,
-            phone,
-            whatsapp_number
-          )
+          participant_profile:participants_profile(*)
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
@@ -51,9 +43,11 @@ export function usePropertyParticipants(propertyId?: string) {
           ...item,
           user: {
             id: userProfile?.id || item.user_id,
-            full_name: participantProfile?.first_name && participantProfile?.last_name 
-              ? `${participantProfile.first_name} ${participantProfile.last_name}` 
-              : 'Unknown',
+            full_name: participantProfile ? 
+              (participantProfile.first_name && participantProfile.last_name ? 
+                `${participantProfile.first_name} ${participantProfile.last_name}` : 
+                'Unknown') : 
+              'Unknown',
             email: participantProfile?.email || userProfile?.email || null,
             phone: participantProfile?.phone || null,
             whatsapp_number: participantProfile?.whatsapp_number || null,
@@ -289,4 +283,3 @@ export function usePropertyParticipants(propertyId?: string) {
     resendInvite: resendInviteMutation.mutate,
   };
 }
-
