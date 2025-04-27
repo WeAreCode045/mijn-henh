@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyData, PropertyFormData } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { PropertyTabContents } from "./tabs/wrapper/PropertyTabContents";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
+import { Users } from "lucide-react";
 
 interface PropertyTabsWrapperProps {
   property: PropertyData;
@@ -39,43 +39,32 @@ export function PropertyTabsWrapper({
   const navigate = useNavigate();
   const { id } = useParams();
   
-  // Determine initial tab with priority:
-  // 1. initialTab prop (from URL or parent component)
-  // 2. searchParams.propertyTab
-  // 3. default to "dashboard"
   const urlTab = searchParams.get("propertyTab");
   const startTab = initialTab || urlTab || "dashboard";
   
   const [activeTab, setActiveTab] = useState(startTab);
   const [contentStep, setContentStep] = useState(initialContentStep || 0);
   
-  // Update URL when tab changes
   useEffect(() => {
     console.log("PropertyTabsWrapper - Active Tab changed to:", activeTab);
     
-    // For content tab, ensure we preserve the step in URL
     if (activeTab === "content" && id) {
-      // Map content steps to slugs
       const slugs = ["general", "location", "features", "areas"];
       const slug = slugs[contentStep] || "general";
       
-      // Navigate to the content step URL
       navigate(`/property/${id}/content/${slug}`);
     } else if (id) {
-      // For other tabs, navigate to the tab
       if (activeTab !== "dashboard") {
         navigate(`/property/${id}/${activeTab}`);
       } else {
         navigate(`/property/${id}/dashboard`);
       }
     } else {
-      // Fallback to using search params if no ID (should be rare)
       searchParams.set("propertyTab", activeTab);
       setSearchParams(searchParams);
     }
   }, [activeTab, id, navigate, searchParams, setSearchParams, contentStep]);
 
-  // Effect to sync contentStep with initialContentStep when it changes
   useEffect(() => {
     if (initialContentStep !== undefined && initialContentStep !== contentStep) {
       console.log("PropertyTabsWrapper - Setting content step to:", initialContentStep);
@@ -83,7 +72,6 @@ export function PropertyTabsWrapper({
     }
   }, [initialContentStep, contentStep]);
 
-  // Log the current tab for debugging
   useEffect(() => {
     console.log("PropertyTabsWrapper - Active Tab:", activeTab);
     console.log("PropertyTabsWrapper - Content Step:", contentStep);
@@ -103,7 +91,6 @@ export function PropertyTabsWrapper({
     setContentStep(step);
   };
 
-  // Combine provided handlers with local handlers
   const combinedHandlers = {
     ...handlers,
     currentStep: contentStep,
@@ -116,7 +103,7 @@ export function PropertyTabsWrapper({
       onValueChange={handleTabChange}
       className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-4 lg:grid-cols-4 h-auto">
+      <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 h-auto">
         <TabsTrigger
           value="dashboard"
           disabled={isArchived}
@@ -144,6 +131,14 @@ export function PropertyTabsWrapper({
           className="py-3 text-sm"
         >
           Communications
+        </TabsTrigger>
+        <TabsTrigger
+          value="participants"
+          disabled={isArchived}
+          className="py-3 text-sm flex items-center gap-2"
+        >
+          <Users className="h-4 w-4" />
+          <span>Participants</span>
         </TabsTrigger>
       </TabsList>
 
