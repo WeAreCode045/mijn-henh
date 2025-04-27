@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
-import { MessageData } from "@/types/message";
+import { MessageData } from "@/types/message.d";
 
 export function useSendMessage(propertyId: string, recipientId: string | null) {
   const { user } = useAuth();

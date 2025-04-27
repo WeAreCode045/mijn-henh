@@ -17,6 +17,8 @@ export interface PropertyMessage {
     avatar_url?: string;
     phone?: string;
     whatsapp_number?: string;
+    created_at?: string;
+    updated_at?: string;
   };
   recipient?: {
     id: string;
@@ -25,6 +27,8 @@ export interface PropertyMessage {
     avatar_url?: string;
     phone?: string;
     whatsapp_number?: string;
+    created_at?: string;
+    updated_at?: string;
   };
 }
 

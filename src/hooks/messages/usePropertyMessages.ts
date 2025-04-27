@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
-import { PropertyMessage, MessageData } from "@/types/message";
+import { PropertyMessage, MessageData } from "@/types/message.d";
 import { User } from "@/types/user";
 import { usePropertyConversations } from "./usePropertyConversations";
 import { useSendMessage } from "./useSendMessage";
@@ -40,8 +40,8 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
             message,
             created_at,
             is_read,
-            sender:profiles!sender_id(id, full_name, phone, email, avatar_url, phone, whatsapp_number),
-            recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number)
+            sender:profiles!sender_id(id, full_name, phone, email, avatar_url, phone, whatsapp_number, created_at, updated_at),
+            recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number, created_at, updated_at)
           `)
           .eq('property_id', propertyId)
           .or(`and(sender_id.eq.${currentUserId},recipient_id.eq.${participantId}),and(sender_id.eq.${participantId},recipient_id.eq.${currentUserId})`)
@@ -70,7 +70,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
         // Add the missing updated_at field required by PropertyMessage
         const messagesWithUpdatedAt = data.map(msg => ({
           ...msg,
-          updated_at: msg.created_at // Default to created_at if updated_at is not available
+          updated_at: msg.updated_at || msg.created_at // Default to created_at if updated_at is not available
         }));
 
         return messagesWithUpdatedAt as PropertyMessage[];
