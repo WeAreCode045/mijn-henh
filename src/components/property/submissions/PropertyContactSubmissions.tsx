@@ -31,12 +31,15 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
   });
 
   const handleSelectSubmission = (id: string) => {
+    // Find the submission in the submissions array to ensure we're using the correct type
     const submission = submissions.find(s => s.id === id);
-    setSelectedSubmission(submission || null);
-    
-    // Mark as read when selected if not already read
-    if (submission && !submission.is_read) {
-      markAsRead(propertyId, id);
+    if (submission) {
+      setSelectedSubmission(submission);
+      
+      // Mark as read when selected if not already read
+      if (!submission.is_read) {
+        markAsRead(propertyId, id);
+      }
     }
   };
 
