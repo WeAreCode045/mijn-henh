@@ -1,11 +1,14 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { DashboardTabContent } from "../content/DashboardTabContent";
 import { ContentTabWrapper } from "../content/ContentTabWrapper";
 import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { ParticipantsTabContent } from "../wrapper/ParticipantsTabContent";
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyCity, PropertyFeature } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
+import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
 
 interface PropertyTabContentsProps {
   activeTab: string;
