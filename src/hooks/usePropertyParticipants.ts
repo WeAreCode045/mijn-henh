@@ -36,18 +36,21 @@ export function usePropertyParticipants(propertyId?: string) {
 
       // Transform the data to include participant profile information if it exists
       return data.map(item => {
-        const participantProfile = item.participant_profile;
-        const userProfile = item.user;
+        const participantProfile = item.participant_profile || {};
+        const userProfile = item.user || {};
         
+        // Safely access properties with optional chaining
+        const fullName = participantProfile 
+          ? (participantProfile.first_name && participantProfile.last_name 
+              ? `${participantProfile.first_name} ${participantProfile.last_name}` 
+              : 'Unknown') 
+          : 'Unknown';
+          
         return {
           ...item,
           user: {
             id: userProfile?.id || item.user_id,
-            full_name: participantProfile ? 
-              (participantProfile.first_name && participantProfile.last_name ? 
-                `${participantProfile.first_name} ${participantProfile.last_name}` : 
-                'Unknown') : 
-              'Unknown',
+            full_name: fullName,
             email: participantProfile?.email || userProfile?.email || null,
             phone: participantProfile?.phone || null,
             whatsapp_number: participantProfile?.whatsapp_number || null,
