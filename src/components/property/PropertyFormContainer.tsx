@@ -156,6 +156,7 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
               isSubmitting={isSubmitting}
               onSave={saveProperty}
               initialStep={initialContentStep}
+              formState={formData} // Add the missing formState prop
             />
           </TabsContent>
           <TabsContent value="media">

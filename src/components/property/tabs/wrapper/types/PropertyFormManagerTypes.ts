@@ -1,7 +1,5 @@
 
-import { PropertyData } from "@/types/property";
-import { PropertyFormData } from "@/types/property";
-import { ChangeEvent } from "react";
+import { PropertyData, PropertyFormData } from '@/types/property';
 
 export interface PropertyFormManagerProps {
   property: PropertyData;
@@ -11,7 +9,8 @@ export interface PropertyFormManagerProps {
 
 export interface PropertyFormManagerChildrenProps {
   formState: PropertyFormData;
-  handleFieldChange: (field: keyof PropertyData, value: any) => void;
+  formData?: PropertyFormData;
+  handleFieldChange: (field: string, value: any) => void;
   handleSaveObjectId: (objectId: string) => Promise<void>;
   handleSaveAgent: (agentId: string) => Promise<void>;
   addFeature: () => void;
@@ -23,44 +22,41 @@ export interface PropertyFormManagerChildrenProps {
   handleAreaImageRemove: (areaId: string, imageId: string) => void;
   handleAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
   handleAreaImageUpload: (areaId: string, files: FileList) => Promise<void>;
-  handleImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveImage: (index: number) => void;
+  handleImageUpload: (files: FileList) => Promise<void>;
+  handleRemoveImage: (imageUrl: string) => void;
   isUploading: boolean;
-  handleAreaPhotosUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleAreaPhotosUpload: (files: FileList) => Promise<void>;
   handleRemoveAreaPhoto: (areaId: string, imageId: string) => void;
-  handleFloorplanUpload: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveFloorplan: (index: number) => void;
+  handleFloorplanUpload: (files: FileList) => Promise<void>;
+  handleRemoveFloorplan: (floorplanId: string) => void;
   isUploadingFloorplan: boolean;
-  handleSetFeaturedImage: (url: string | null) => void;
-  handleToggleFeaturedImage: (url: string) => void;
+  handleSetFeaturedImage: (imageUrl: string) => void;
+  handleToggleFeaturedImage: (imageUrl: string) => void;
   onSubmit: () => void;
   currentStep: number;
   handleStepClick: (step: number) => void;
   propertyWithRequiredProps: PropertyData;
-  lastSaved: Date | null;
+  lastSaved?: Date;
   isSaving: boolean;
-  setPendingChanges: (pending: boolean) => void;
-  // Location-related handlers
-  onFetchLocationData: () => Promise<any>;
-  onFetchCategoryPlaces: (category: string) => Promise<any>;
-  onFetchNearbyCities: () => Promise<any>;
-  onGenerateLocationDescription: () => Promise<any>;
-  onGenerateMap: () => Promise<any>;
-  onRemoveNearbyPlace: (index: number) => void;
-  isLoadingLocationData: boolean;
-  isGeneratingMap: boolean;
-  // For media components
-  handleVirtualTourUpdate: (url: string) => void;
-  handleYoutubeUrlUpdate: (url: string) => void;
-  handleFloorplanEmbedScriptUpdate: (script: string) => void;
-  // Aliases for backward compatibility
-  onAddFeature: () => void;
-  onRemoveFeature: (id: string) => void;
-  onUpdateFeature: (id: string, description: string) => void;
-  onAddArea: () => void;
-  onRemoveArea: (id: string) => void;
-  onUpdateArea: (id: string, field: any, value: any) => void;
-  onAreaImageRemove: (areaId: string, imageId: string) => void;
-  onAreaImagesSelect: (areaId: string, imageIds: string[]) => void;
-  images: any[];
+  setPendingChanges: (pendingChanges: boolean) => void;
+  onFetchLocationData?: () => Promise<void>;
+  onFetchCategoryPlaces?: (category: string) => Promise<any>;
+  onFetchNearbyCities?: () => Promise<void>;
+  onGenerateLocationDescription?: () => Promise<void>;
+  onGenerateMap?: () => Promise<void>;
+  onRemoveNearbyPlace?: (index: number) => void;
+  isLoadingLocationData?: boolean;
+  isGeneratingMap?: boolean;
+  handleVirtualTourUpdate?: (url: string) => void;
+  handleYoutubeUrlUpdate?: (url: string) => void;
+  handleFloorplanEmbedScriptUpdate?: (script: string) => void;
+  onAddFeature?: () => void;
+  onRemoveFeature?: (id: string) => void;
+  onUpdateFeature?: (id: string, description: string) => void;
+  onAddArea?: () => void;
+  onRemoveArea?: (id: string) => void;
+  onUpdateArea?: (id: string, field: any, value: any) => void;
+  onAreaImageRemove?: (areaId: string, imageId: string) => void;
+  onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
+  images: string[];
 }

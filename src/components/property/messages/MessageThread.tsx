@@ -102,14 +102,18 @@ export function MessageThread({
                 >
                   <div className={`flex gap-2 max-w-[80%] ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
                     <Avatar className="h-8 w-8">
-                      {isCurrentUser 
-                        ? (user?.avatar_url ? <AvatarImage src={user.avatar_url} /> : null)
-                        : (message.sender?.avatar_url ? <AvatarImage src={message.sender.avatar_url} /> : null)
-                      }
+                      {isCurrentUser && user?.avatar_url && (
+                        <AvatarImage src={user.avatar_url} />
+                      )}
+                      {!isCurrentUser && message.sender?.avatar_url && (
+                        <AvatarImage src={message.sender.avatar_url} />
+                      )}
                       <AvatarFallback>
-                        {isCurrentUser 
-                          ? (user?.full_name?.split(" ").map(n => n[0]).join("") || "U")
-                          : (message.sender?.full_name?.split(" ").map(n => n[0]).join("") || "U")
+                        {isCurrentUser && user?.full_name
+                          ? user.full_name.split(" ").map(n => n[0]).join("") || "U"
+                          : message.sender?.full_name
+                            ? message.sender.full_name.split(" ").map(n => n[0]).join("") || "U"
+                            : "U"
                         }
                       </AvatarFallback>
                     </Avatar>
