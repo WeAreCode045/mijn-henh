@@ -67,10 +67,10 @@ export function AppSidebar() {
     full_name: profile.full_name || '',
     avatar_url: profile.avatar_url || undefined,
     phone: profile.phone || undefined,
-    whatsapp_number: profile.whatsapp_number || undefined,
+    whatsapp_number: profile.whatsapp_number?.toString() || undefined,
     role: profile.role,
-    created_at: profile.created_at || undefined,
-    updated_at: profile.updated_at || undefined
+    created_at: profile.created_at?.toString() || undefined,
+    updated_at: profile.updated_at?.toString() || undefined
   } : null;
 
   return (
