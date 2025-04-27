@@ -43,7 +43,7 @@ export function EmailReplyModal({
   const [to, setTo] = useState(recipientEmail);
   const [isSending, setIsSending] = useState(false);
   const [smtpConfigured, setSmtpConfigured] = useState(false);
-  const [mailjetConfigured, setMailjetConfigured] = useState(false);
+  const [resendConfigured, setResendConfigured] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, profile } = useAuth();
@@ -61,7 +61,7 @@ export function EmailReplyModal({
       try {
         const { data, error } = await supabase
           .from('agency_settings')
-          .select('smtp_host, smtp_username, smtp_password, mailjet_api_key, mailjet_api_secret')
+          .select('smtp_host, smtp_username, smtp_password, resend_api_key')
           .single();
           
         if (error) {
@@ -70,7 +70,7 @@ export function EmailReplyModal({
         }
         
         setSmtpConfigured(!!(data?.smtp_host && data?.smtp_username && data?.smtp_password));
-        setMailjetConfigured(!!(data?.mailjet_api_key && data?.mailjet_api_secret));
+        setResendConfigured(!!data?.resend_api_key);
       } catch (err) {
         console.error('Failed to check email settings:', err);
       }
@@ -80,8 +80,8 @@ export function EmailReplyModal({
   }, []);
 
   const handleSendEmail = async () => {
-    if (!smtpConfigured && !mailjetConfigured) {
-      setError("Email sending is not configured. Please configure SMTP or Mailjet settings in the Mail tab of Settings first.");
+    if (!smtpConfigured && !resendConfigured) {
+      setError("Email sending is not configured. Please configure SMTP or Resend settings in the Mail tab of Settings first.");
       return;
     }
     
@@ -145,7 +145,7 @@ export function EmailReplyModal({
     }
   };
 
-  const isEmailConfigured = smtpConfigured || mailjetConfigured;
+  const isEmailConfigured = smtpConfigured || resendConfigured;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

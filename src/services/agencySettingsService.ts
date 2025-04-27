@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySettings } from "@/types/agency";
 
@@ -31,11 +32,10 @@ interface AgencySettingsData {
   smtp_from_email?: string;
   smtp_from_name?: string;
   smtp_secure?: boolean;
-  // Mailjet settings
-  mailjet_api_key?: string;
-  mailjet_api_secret?: string;
-  mailjet_from_email?: string;
-  mailjet_from_name?: string;
+  // Resend settings
+  resend_api_key?: string;
+  resend_from_email?: string;
+  resend_from_name?: string;
   // IMAP settings
   imap_host?: string;
   imap_port?: string;

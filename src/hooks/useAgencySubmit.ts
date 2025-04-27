@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AgencySettings } from "@/types/agency";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,8 +48,8 @@ export const useAgencySubmit = ({
           email: settings.email,
           phone: settings.phone,
           address: settings.address,
-          primary_color: settings.primaryColor || settings.primary_color,
-          secondary_color: settings.secondaryColor || settings.secondary_color,
+          primary_color: settings.primaryColor,
+          secondary_color: settings.secondaryColor,
           logo_url: logoPreview || settings.logoUrl,
           description_background_url: settings.webviewBgImage,
           facebook_url: settings.facebookUrl,
@@ -167,12 +168,11 @@ export const useAgencySubmit = ({
           smtpFromEmail: latestSettings.smtp_from_email,
           smtpFromName: latestSettings.smtp_from_name,
           smtpSecure: latestSettings.smtp_secure,
-          // Mailjet settings
-          mailjetApiKey: latestSettings.mailjet_api_key,
-          mailjetApiSecret: latestSettings.mailjet_api_secret,
-          mailjetFromEmail: latestSettings.mailjet_from_email,
-          mailjetFromName: latestSettings.mailjet_from_name,
-          // IMAP settings - Add these fields
+          // Resend settings
+          resendApiKey: latestSettings.resend_api_key,
+          resendFromEmail: latestSettings.resend_from_email,
+          resendFromName: latestSettings.resend_from_name,
+          // IMAP settings
           imapHost: latestSettings.imap_host,
           imapPort: latestSettings.imap_port,
           imapUsername: latestSettings.imap_username,

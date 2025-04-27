@@ -45,10 +45,9 @@ interface EmailSettings {
   smtpFromEmail?: string;
   smtpFromName?: string;
   smtpSecure?: boolean;
-  mailjetApiKey?: string;
-  mailjetApiSecret?: string;
-  mailjetFromEmail?: string;
-  mailjetFromName?: string;
+  resendApiKey?: string;
+  resendFromEmail?: string;
+  resendFromName?: string;
 }
 
 serve(async (req) => {
@@ -171,19 +170,18 @@ serve(async (req) => {
       smtpFromEmail: agencySettings.smtp_from_email,
       smtpFromName: agencySettings.smtp_from_name,
       smtpSecure: agencySettings.smtp_secure,
-      mailjetApiKey: agencySettings.mailjet_api_key,
-      mailjetApiSecret: agencySettings.mailjet_api_secret,
-      mailjetFromEmail: agencySettings.mailjet_from_email,
-      mailjetFromName: agencySettings.mailjet_from_name,
+      resendApiKey: agencySettings.resend_api_key,
+      resendFromEmail: agencySettings.resend_from_email,
+      resendFromName: agencySettings.resend_from_name,
     };
 
-    // Determine the from email to use (prefer Mailjet if available)
-    const fromEmail = agencySettings.mailjet_from_email || 
+    // Determine the from email to use (prefer Resend if available)
+    const fromEmail = agencySettings.resend_from_email || 
                       agencySettings.smtp_from_email || 
                       agentProfile?.email || 
                       'noreply@example.com';
                       
-    const fromName = agencySettings.mailjet_from_name || 
+    const fromName = agencySettings.resend_from_name || 
                     agencySettings.smtp_from_name || 
                     agentProfile?.full_name || 
                     'Property Agent';
