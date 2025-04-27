@@ -36,25 +36,37 @@ export function usePropertyParticipants(propertyId?: string) {
 
       // Transform the data to include participant profile information if it exists
       return data.map(item => {
-        const participantProfile = item.participant_profile || {};
-        const userProfile = item.user || {};
+        // Make sure we handle potentially undefined data
+        const participantProfile = item.participant_profile || null;
+        const userProfile = item.user || null;
         
-        // Safely access properties with optional chaining
-        const fullName = participantProfile 
-          ? (participantProfile.first_name && participantProfile.last_name 
-              ? `${participantProfile.first_name} ${participantProfile.last_name}` 
-              : 'Unknown') 
-          : 'Unknown';
+        // Determine name with proper null checks
+        let fullName = 'Unknown';
+        if (participantProfile && 
+            typeof participantProfile === 'object' && 
+            'first_name' in participantProfile && 
+            'last_name' in participantProfile && 
+            participantProfile.first_name && 
+            participantProfile.last_name) {
+          fullName = `${participantProfile.first_name} ${participantProfile.last_name}`;
+        }
           
         return {
           ...item,
           user: {
-            id: userProfile?.id || item.user_id,
+            id: userProfile && typeof userProfile === 'object' && 'id' in userProfile ? 
+                userProfile.id : item.user_id,
             full_name: fullName,
-            email: participantProfile?.email || userProfile?.email || null,
-            phone: participantProfile?.phone || null,
-            whatsapp_number: participantProfile?.whatsapp_number || null,
-            role: userProfile?.role || item.role
+            email: participantProfile && typeof participantProfile === 'object' && 'email' in participantProfile ? 
+                   participantProfile.email : 
+                   (userProfile && typeof userProfile === 'object' && 'email' in userProfile ? 
+                    userProfile.email : null),
+            phone: participantProfile && typeof participantProfile === 'object' && 'phone' in participantProfile ? 
+                   participantProfile.phone : null,
+            whatsapp_number: participantProfile && typeof participantProfile === 'object' && 'whatsapp_number' in participantProfile ? 
+                             participantProfile.whatsapp_number : null,
+            role: userProfile && typeof userProfile === 'object' && 'role' in userProfile ? 
+                  userProfile.role : item.role
           }
         };
       }) as unknown as PropertyParticipant[];
