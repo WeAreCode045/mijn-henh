@@ -1,9 +1,9 @@
 
 import { UserBase } from './UserBase';
-import { UserContact } from './UserContact';
 import { UserTimestamps } from './UserTimestamps';
 import { UserFormData } from './UserForm';
 
-export type User = UserBase & UserContact & UserTimestamps;
+// Simple User type that combines the base properties
+export type User = UserBase;
 
-export type { UserFormData, UserBase, UserContact, UserTimestamps };
+export type { UserFormData, UserBase, UserTimestamps };

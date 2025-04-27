@@ -84,6 +84,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data, ensuring all required fields are included
+  // and explicitly handle optional properties with proper typing
   return {
     conversations,
     isLoadingConversations,

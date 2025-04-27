@@ -7,6 +7,7 @@ import { MessageThread } from "./MessageThread";
 import { PropertyMessage } from "@/types/message";
 import { useToast } from "@/components/ui/use-toast";
 import { Spinner } from "@/components/ui/spinner";
+import { User } from "@/types/user";
 
 interface MessageListProps {
   propertyId: string;

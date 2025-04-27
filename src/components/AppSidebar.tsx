@@ -25,12 +25,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 import { useState, useEffect } from "react";
+import { User } from "@/types/user";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
+  
+  // Safely access role with fallback
   const userRole = profile?.role || 'agent';
 
   const handleLogout = async () => {
@@ -56,6 +59,19 @@ export function AppSidebar() {
   if (!user) return null;
 
   const isParticipant = userRole === 'seller' || userRole === 'buyer';
+
+  // Create properly typed user object for the profile card
+  const userProfile: User | null = profile ? {
+    id: profile.id,
+    email: profile.email || '',
+    full_name: profile.full_name || '',
+    avatar_url: profile.avatar_url || undefined,
+    phone: profile.phone || undefined,
+    whatsapp_number: profile.whatsapp_number || undefined,
+    role: profile.role,
+    created_at: profile.created_at || undefined,
+    updated_at: profile.updated_at || undefined
+  } : null;
 
   return (
     <Sidebar>
@@ -138,7 +154,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="mb-4 px-4 !bg-primary text-white">
         <SidebarGroup>
-          {profile && <UserProfileCard user={profile} inSidebar={true} />}
+          {userProfile && <UserProfileCard user={userProfile} inSidebar={true} />}
           <SidebarMenu className="mt-4">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout} className="text-white hover:bg-primary-foreground/10">
