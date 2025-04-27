@@ -89,7 +89,7 @@ export function PropertyTabs({
 
   return (
     <>
-      <TabsList className="grid grid-cols-6 mb-8">
+      <TabsList className="grid grid-cols-7 mb-8">
         <TabsTrigger 
           value="dashboard" 
           onClick={() => handleTabChange('dashboard')}
