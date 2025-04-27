@@ -184,8 +184,8 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
     full_name: profile.full_name || '',
     avatar_url: profile.avatar_url,
     role: profile.role as "admin" | "agent" | "seller" | "buyer" | undefined,
-    phone: profile.phone,
-    whatsapp_number: profile.whatsapp_number
+    phone: profile.phone || '',
+    whatsapp_number: profile.whatsapp_number || ''
   } : null;
 
   return {

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { PropertyForm } from "@/components/PropertyForm";
-import { PropertyFormLayout } from "./PropertyFormLayout";
+import { PropertyFormLayout } from "@/pages/property/PropertyFormLayout";
 import { usePropertyFormContainerData } from "@/hooks/property-form/usePropertyFormContainerData";
 import { usePropertyFormContainerActions } from "@/hooks/property-form/usePropertyFormContainerActions";
 import { useAuth } from "@/providers/AuthProvider";
