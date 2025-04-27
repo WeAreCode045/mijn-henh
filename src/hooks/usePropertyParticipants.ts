@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,14 +43,18 @@ export function usePropertyParticipants(propertyId?: string) {
         
         // Determine name with proper null checks
         let fullName = 'Unknown';
+        
+        // Only try to access properties if participantProfile is non-null
         if (participantProfile && 
-            typeof participantProfile === 'object' && 
-            'first_name' in participantProfile && 
-            'last_name' in participantProfile) {
-          const firstName = participantProfile['first_name'];
-          const lastName = participantProfile['last_name'];
-          if (firstName && lastName) {
-            fullName = `${firstName} ${lastName}`;
+            typeof participantProfile === 'object') {
+          // Now check if the needed properties exist
+          if ('first_name' in participantProfile && 
+              'last_name' in participantProfile) {
+            const firstName = participantProfile['first_name'];
+            const lastName = participantProfile['last_name'];
+            if (firstName && lastName) {
+              fullName = `${firstName} ${lastName}`;
+            }
           }
         }
           
@@ -59,13 +64,21 @@ export function usePropertyParticipants(propertyId?: string) {
             id: userProfile && typeof userProfile === 'object' && 'id' in userProfile ? 
                 userProfile.id : item.user_id,
             full_name: fullName,
-            email: participantProfile && typeof participantProfile === 'object' && 'email' in participantProfile ? 
-                   participantProfile['email'] : 
-                   (userProfile && typeof userProfile === 'object' && 'email' in userProfile ? 
-                    userProfile.email : null),
-            phone: participantProfile && typeof participantProfile === 'object' && 'phone' in participantProfile ? 
-                   participantProfile['phone'] : null,
-            whatsapp_number: participantProfile && typeof participantProfile === 'object' && 'whatsapp_number' in participantProfile ? 
+            email: participantProfile && 
+                  typeof participantProfile === 'object' && 
+                  'email' in participantProfile ? 
+                  participantProfile['email'] : 
+                  (userProfile && 
+                   typeof userProfile === 'object' && 
+                   'email' in userProfile ? 
+                   userProfile.email : null),
+            phone: participantProfile && 
+                  typeof participantProfile === 'object' && 
+                  'phone' in participantProfile ? 
+                  participantProfile['phone'] : null,
+            whatsapp_number: participantProfile && 
+                             typeof participantProfile === 'object' && 
+                             'whatsapp_number' in participantProfile ? 
                              participantProfile['whatsapp_number'] : null,
             role: userProfile && typeof userProfile === 'object' && 'role' in userProfile ? 
                   userProfile.role : item.role
