@@ -7,19 +7,43 @@ export interface PropertyMessage {
   sender_id: string;
   recipient_id: string;
   message: string;
-  created_at: string;
   is_read: boolean;
-  sender?: User;
-  recipient?: User;
+  created_at: string;
+  updated_at: string;
+  sender?: {
+    id: string;
+    full_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
+  recipient?: {
+    id: string;
+    full_name?: string;
+    email?: string;
+    avatar_url?: string;
+  };
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url?: string;
+  };
+  timestamp: string;
+  read: boolean;
 }
 
 export interface Conversation {
   participantId: string;
   participantName: string;
   participantEmail: string;
-  participantAvatar: string | null;
-  lastMessage: string;
-  lastMessageDate: string | null;
+  participantAvatar?: string;
+  lastMessage?: string;
+  lastMessageDate?: string;
   unreadCount: number;
   propertyId: string;
   propertyTitle: string;

@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
-import { PropertyMessage } from "@/types/message";
+import { PropertyMessage, MessageData } from "@/types/message";
 import { User } from "@/types/user";
 import { usePropertyConversations } from "./usePropertyConversations";
 import { useSendMessage } from "./useSendMessage";
@@ -67,7 +67,13 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
           queryClient.invalidateQueries({ queryKey: ["propertyConversations", propertyId] });
         }
 
-        return data as PropertyMessage[];
+        // Add the missing updated_at field required by PropertyMessage
+        const messagesWithUpdatedAt = data.map(msg => ({
+          ...msg,
+          updated_at: msg.created_at // Default to created_at if updated_at is not available
+        }));
+
+        return messagesWithUpdatedAt as PropertyMessage[];
       } catch (err) {
         console.error("Error in messages query:", err);
         return [];
