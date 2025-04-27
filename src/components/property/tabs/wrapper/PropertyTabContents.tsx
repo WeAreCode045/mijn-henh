@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { DashboardTabContent } from "../content/DashboardTabContent";
@@ -7,7 +6,7 @@ import { MediaTabContent } from "../media/MediaTabContent";
 import { CommunicationsTabContent } from "../wrapper/CommunicationsTabContent";
 import { ParticipantsTabContent } from "../wrapper/ParticipantsTabContent";
 import { DocumentsTab } from "@/pages/property/tabs/DocumentsTab";
-import { PropertyData, PropertyFormData } from "@/types/property";
+import { PropertyData, PropertyFormData, PropertyCity } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
 import { transformFeatures, transformAreas, transformNearbyPlaces, transformImages } from "@/hooks/property-form/propertyDataTransformer";
 
