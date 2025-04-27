@@ -65,6 +65,7 @@ export function ParticipantInviteDialog({
         .single();
       
       const siteUrl = window.location.origin;
+      const inviteLink = `${siteUrl}/auth?email=${encodeURIComponent(email)}&redirect=/participant`;
       
       // Send initial invitation email using agency settings if available
       await sendEmail({
@@ -75,8 +76,13 @@ export function ParticipantInviteDialog({
           <p>You have been invited to participate as a <strong>${role}</strong> for ${property.title || 'a property'}.</p>
           <p>Please login to your account or create a new one to view this property.</p>
           <p>If this is your first time, you'll need to set your password first.</p>
-          <p><a href="${siteUrl}/auth?email=${encodeURIComponent(email)}&redirect=/participant">Set Password & Access Property Portal</a></p>
+          <p><a href="${inviteLink}">Set Password & Access Property Portal</a></p>
           <p><small>If you already have an account, simply log in to access your property.</small></p>
+          <p style="margin-top: 20px; color: #666;">
+            If the button above doesn't work, copy and paste this link into your browser:
+            <br>
+            <span style="word-break: break-all; font-family: monospace;">${inviteLink}</span>
+          </p>
         `,
         from: agencySettings?.resend_from_email,
         fromName: agencySettings?.resend_from_name
