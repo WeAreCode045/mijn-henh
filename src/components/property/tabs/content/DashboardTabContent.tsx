@@ -22,10 +22,6 @@ export function DashboardTabContent({
   handleSaveObjectId,
   handleGeneratePDF
 }: DashboardTabContentProps) {
-  console.log("DashboardTabContent - Property ID:", property.id);
-  console.log("DashboardTabContent - onWebView is function:", typeof onWebView === 'function');
-  console.log("DashboardTabContent - handleGeneratePDF is function:", typeof handleGeneratePDF === 'function');
-  
   return (
     <PropertyDashboardTab
       formData={property}
