@@ -3,8 +3,6 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -16,19 +14,35 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize Resend with the API key from environment variables
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY is not set in environment variables");
+    }
+    const resend = new Resend(resendApiKey);
+
     const { type, participantId, to, subject, html, text, from, fromName } = await req.json();
 
     // Handle participant invitation resend
     if (type === 'resend_participant_invite') {
+      // Create Supabase client
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase credentials missing from environment variables");
+      }
+      
       const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') || '',
-        Deno.env.get('SUPABASE_ANON_KEY') || '',
+        supabaseUrl,
+        supabaseAnonKey,
         { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
       );
       
+      // Fetch participant data
       const { data: participant, error: participantError } = await supabaseClient
         .from('property_participants')
-        .select('*, user:profiles(*), property:properties(title)')
+        .select('*, user:profiles(*), property:properties(title, agent_id)')
         .eq('id', participantId)
         .single();
 
@@ -37,19 +51,20 @@ serve(async (req) => {
         throw new Error('Participant or email not found');
       }
 
-      // Get domain settings from agency
-      const { data: property, error: propertyError } = await supabaseClient
-        .from('properties')
+      // Get agency settings for email configuration
+      // First get the agent's agency_id
+      const { data: agent, error: agentError } = await supabaseClient
+        .from('profiles')
         .select('agency_id')
-        .eq('id', participant.property_id)
+        .eq('id', participant.property.agent_id)
         .single();
         
-      if (propertyError) throw propertyError;
+      if (agentError) throw agentError;
       
       const { data: agencySettings, error: agencyError } = await supabaseClient
         .from('agency_settings')
         .select('resend_from_email, resend_from_name')
-        .eq('id', property.agency_id)
+        .eq('id', agent.agency_id)
         .single();
         
       if (agencyError) throw agencyError;
@@ -79,7 +94,7 @@ serve(async (req) => {
     
     // Handle general email sending
     if (to && (html || text) && subject) {
-      // Get domain settings if possible
+      // Get agency settings if possible
       let fromEmail = from || 'onboarding@resend.dev';
       let displayName = fromName || 'Property Portal';
 
@@ -87,20 +102,27 @@ serve(async (req) => {
       const authHeader = req.headers.get('Authorization');
       if (authHeader) {
         try {
+          const supabaseUrl = Deno.env.get('SUPABASE_URL');
+          const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+          
+          if (!supabaseUrl || !supabaseAnonKey) {
+            throw new Error("Supabase credentials missing from environment variables");
+          }
+          
           const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') || '',
-            Deno.env.get('SUPABASE_ANON_KEY') || '',
+            supabaseUrl,
+            supabaseAnonKey,
             { global: { headers: { Authorization: authHeader } } }
           );
           
           // Try to get the user's agency settings
-          const { data: userAgency } = await supabaseClient.auth.getUser();
+          const { data: userAuth } = await supabaseClient.auth.getUser();
           
-          if (userAgency?.user?.id) {
+          if (userAuth?.user?.id) {
             const { data: profile } = await supabaseClient
               .from('profiles')
               .select('agency_id')
-              .eq('id', userAgency.user.id)
+              .eq('id', userAuth.user.id)
               .single();
               
             if (profile?.agency_id) {

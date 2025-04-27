@@ -8,7 +8,6 @@ import { ParticipantInviteDialog } from "./ParticipantInviteDialog";
 import { usePropertyParticipants } from "@/hooks/usePropertyParticipants";
 import { Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { sendEmail } from "@/lib/email";
 
 interface ParticipantListProps {
   propertyId: string;

@@ -50,20 +50,44 @@ export function ParticipantInviteDialog({
       // Then get the property details to send in the invitation
       const { data: property } = await supabase
         .from('properties')
-        .select('title')
+        .select('title, agent_id')
         .eq('id', propertyId)
         .single();
       
-      // Send initial invitation email
+      if (!property) {
+        throw new Error("Property not found");
+      }
+      
+      // Get agent details to find agency settings
+      const { data: agent } = await supabase
+        .from('profiles')
+        .select('agency_id')
+        .eq('id', property.agent_id)
+        .single();
+      
+      if (!agent?.agency_id) {
+        throw new Error("Agent or agency not found");
+      }
+      
+      // Get agency settings
+      const { data: agencySettings } = await supabase
+        .from('agency_settings')
+        .select('resend_from_email, resend_from_name')
+        .eq('id', agent.agency_id)
+        .single();
+      
+      // Send initial invitation email using agency settings if available
       await sendEmail({
         to: email,
-        subject: `You've been invited as a ${role} for ${property?.title || 'a property'}`,
+        subject: `You've been invited as a ${role} for ${property.title || 'a property'}`,
         html: `
           <h1>Property Invitation</h1>
-          <p>You have been invited to participate as a <strong>${role}</strong> for ${property?.title || 'a property'}.</p>
+          <p>You have been invited to participate as a <strong>${role}</strong> for ${property.title || 'a property'}.</p>
           <p>Please login to your account or create a new one to view this property.</p>
           <p><a href="${window.location.origin}/participant">Open Property Portal</a></p>
-        `
+        `,
+        from: agencySettings?.resend_from_email,
+        fromName: agencySettings?.resend_from_name
       });
       
       setEmail("");
