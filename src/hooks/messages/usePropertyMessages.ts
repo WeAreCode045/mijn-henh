@@ -40,6 +40,7 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
             message,
             created_at,
             is_read,
+            updated_at,
             sender:profiles!sender_id(id, full_name, phone, email, avatar_url, phone, whatsapp_number, created_at, updated_at),
             recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number, created_at, updated_at)
           `)
@@ -67,13 +68,13 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
           queryClient.invalidateQueries({ queryKey: ["propertyConversations", propertyId] });
         }
 
-        // Add the missing updated_at field required by PropertyMessage
-        const messagesWithUpdatedAt = data.map(msg => ({
+        // Process messages to ensure they have all required fields
+        const processedMessages = data.map(msg => ({
           ...msg,
           updated_at: msg.updated_at || msg.created_at // Default to created_at if updated_at is not available
         }));
 
-        return messagesWithUpdatedAt as PropertyMessage[];
+        return processedMessages as PropertyMessage[];
       } catch (err) {
         console.error("Error in messages query:", err);
         return [];
