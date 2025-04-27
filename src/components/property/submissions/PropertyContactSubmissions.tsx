@@ -21,7 +21,7 @@ interface PropertyContactSubmissionsProps {
 export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmissionsProps) {
   const { submissions, isLoading, refetch } = useFetchSubmissions(propertyId);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
-  const { markAsRead } = useMarkAsRead({ onSuccess: refetch });
+  const { markAsRead } = useMarkAsRead();
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'submission' | 'reply' } | null>(null);
@@ -36,7 +36,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
     
     // Mark as read when selected if not already read
     if (submission && !submission.is_read) {
-      markAsRead(id);
+      markAsRead(propertyId, id);
     }
   };
 
@@ -77,6 +77,11 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
     setDeleteDialogOpen(false);
     setItemToDelete(null);
   };
+  
+  // Create an adapter function to convert between the required parameter formats
+  const handleMarkAsRead = (id: string, isRead: boolean) => {
+    markAsRead(propertyId, id);
+  };
 
   return (
     <div className="space-y-4">
@@ -92,7 +97,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
               contacts={submissions}
               selectedContactId={selectedSubmission?.id || null}
               onSelect={handleSelectSubmission}
-              onMarkAsRead={markAsRead}
+              onMarkAsRead={handleMarkAsRead}
               onDelete={handleDeleteSubmission}
             />
           </div>
@@ -102,7 +107,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
             {selectedSubmission ? (
               <SubmissionDetail 
                 submission={selectedSubmission}
-                onMarkAsRead={(isRead) => markAsRead(selectedSubmission.id)}
+                onMarkAsRead={(isRead) => handleMarkAsRead(selectedSubmission.id, isRead)}
                 onReplyEmail={handleOpenEmailModal}
                 onBack={() => setSelectedSubmission(null)}
                 onRefresh={refetch}
