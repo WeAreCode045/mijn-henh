@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySettings } from "@/types/agency";
 
@@ -108,11 +107,12 @@ export const agencySettingsService = {
       smtp_from_email: data.smtpFromEmail || null,
       smtp_from_name: data.smtpFromName || null,
       smtp_secure: data.smtpSecure || false,
-      // Mailjet settings
-      mailjet_api_key: data.mailjetApiKey || null,
-      mailjet_api_secret: data.mailjetApiSecret || null,
-      mailjet_from_email: data.mailjetFromEmail || null,
-      mailjet_from_name: data.mailjetFromName || null,
+      
+      // Resend settings
+      resend_api_key: data.resendApiKey || null,
+      resend_from_email: data.resendFromEmail || null,
+      resend_from_name: data.resendFromName || null,
+      
       // IMAP settings
       imap_host: data.imapHost || null,
       imap_port: data.imapPort || null,
@@ -120,6 +120,7 @@ export const agencySettingsService = {
       imap_password: data.imapPassword || null,
       imap_tls: data.imapTls !== undefined ? data.imapTls : true,
       imap_mailbox: data.imapMailbox || "INBOX",
+      
       // OpenAI API key
       openai_api_key: data.openaiApiKey || null,
     };

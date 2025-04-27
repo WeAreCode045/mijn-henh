@@ -1,4 +1,3 @@
-
 import { Settings } from "@/types/settings";
 
 export interface AgencySettings {
@@ -61,11 +60,6 @@ export interface AgencySettings {
   // For backwards compatibility
   nylasClientSecret?: string;
   nylasAccessToken?: string;
-  
-  // Database field aliases
-  primary_color?: string;
-  secondary_color?: string;
-  global_features?: any;
 }
 
 // Default settings

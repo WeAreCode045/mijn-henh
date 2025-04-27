@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +31,7 @@ export function EmailSection({
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="imap">IMAP</TabsTrigger>
           <TabsTrigger value="nylas">Nylas API</TabsTrigger>
-          <TabsTrigger value="mailjet">Mailjet</TabsTrigger>
+          <TabsTrigger value="resend">Resend</TabsTrigger>
         </TabsList>
 
         <TabsContent value="smtp">
@@ -241,50 +240,47 @@ export function EmailSection({
           </div>
         </TabsContent>
         
-        <TabsContent value="mailjet">
+        <TabsContent value="resend">
           <div className="space-y-4 mt-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="mailjetApiKey">Mailjet API Key</Label>
-                <Input
-                  id="mailjetApiKey"
-                  name="mailjetApiKey"
-                  placeholder="Mailjet API Key"
-                  value={settings.mailjetApiKey || ""}
-                  onChange={onChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="mailjetApiSecret">Mailjet API Secret</Label>
-                <Input
-                  id="mailjetApiSecret"
-                  name="mailjetApiSecret"
-                  type="password"
-                  placeholder="Mailjet API Secret"
-                  value={settings.mailjetApiSecret || ""}
-                  onChange={onChange}
-                />
-              </div>
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md mb-4">
+              <p className="text-sm text-yellow-800">
+                To use Resend, you need to create a Resend account and get an API key. 
+                <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
+                  Sign up for Resend
+                </a>
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="resendApiKey">Resend API Key</Label>
+              <Input
+                id="resendApiKey"
+                name="resendApiKey"
+                type="password"
+                placeholder="re_123..."
+                value={settings.resendApiKey || ""}
+                onChange={onChange}
+              />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="mailjetFromEmail">From Email</Label>
+                <Label htmlFor="resendFromEmail">From Email</Label>
                 <Input
-                  id="mailjetFromEmail"
-                  name="mailjetFromEmail"
-                  placeholder="noreply@example.com"
-                  value={settings.mailjetFromEmail || ""}
+                  id="resendFromEmail"
+                  name="resendFromEmail"
+                  placeholder="noreply@yourdomain.com"
+                  value={settings.resendFromEmail || ""}
                   onChange={onChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="mailjetFromName">From Name</Label>
+                <Label htmlFor="resendFromName">From Name</Label>
                 <Input
-                  id="mailjetFromName"
-                  name="mailjetFromName"
+                  id="resendFromName"
+                  name="resendFromName"
                   placeholder="Your Company"
-                  value={settings.mailjetFromName || ""}
+                  value={settings.resendFromName || ""}
                   onChange={onChange}
                 />
               </div>

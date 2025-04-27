@@ -35,10 +35,6 @@ export type Database = {
           imap_username: string | null
           instagram_url: string | null
           logo_url: string | null
-          mailjet_api_key: string | null
-          mailjet_api_secret: string | null
-          mailjet_from_email: string | null
-          mailjet_from_name: string | null
           name: string
           nylas_access_token: string | null
           nylas_client_id: string | null
@@ -46,6 +42,9 @@ export type Database = {
           openai_api_key: string | null
           phone: string | null
           primary_color: string | null
+          resend_api_key: string | null
+          resend_from_email: string | null
+          resend_from_name: string | null
           secondary_color: string | null
           smtp_from_email: string | null
           smtp_from_name: string | null
@@ -83,10 +82,6 @@ export type Database = {
           imap_username?: string | null
           instagram_url?: string | null
           logo_url?: string | null
-          mailjet_api_key?: string | null
-          mailjet_api_secret?: string | null
-          mailjet_from_email?: string | null
-          mailjet_from_name?: string | null
           name: string
           nylas_access_token?: string | null
           nylas_client_id?: string | null
@@ -94,6 +89,9 @@ export type Database = {
           openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
+          resend_api_key?: string | null
+          resend_from_email?: string | null
+          resend_from_name?: string | null
           secondary_color?: string | null
           smtp_from_email?: string | null
           smtp_from_name?: string | null
@@ -131,10 +129,6 @@ export type Database = {
           imap_username?: string | null
           instagram_url?: string | null
           logo_url?: string | null
-          mailjet_api_key?: string | null
-          mailjet_api_secret?: string | null
-          mailjet_from_email?: string | null
-          mailjet_from_name?: string | null
           name?: string
           nylas_access_token?: string | null
           nylas_client_id?: string | null
@@ -142,6 +136,9 @@ export type Database = {
           openai_api_key?: string | null
           phone?: string | null
           primary_color?: string | null
+          resend_api_key?: string | null
+          resend_from_email?: string | null
+          resend_from_name?: string | null
           secondary_color?: string | null
           smtp_from_email?: string | null
           smtp_from_name?: string | null
