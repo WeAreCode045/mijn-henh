@@ -18,6 +18,7 @@ export function PropertyFormManager({ property, isArchived = false, children }: 
   // Create the props object to pass to children
   const childrenProps: PropertyFormManagerChildrenProps = {
     formState: formManager.formState,
+    formData: formManager.formState, // Add formData prop
     handleFieldChange: formManager.handleFieldChange,
     handleSaveObjectId: formManager.handleSaveObjectId,
     handleSaveAgent: formManager.handleSaveAgent,
@@ -69,7 +70,7 @@ export function PropertyFormManager({ property, isArchived = false, children }: 
     onUpdateArea: formManager.onUpdateArea,
     onAreaImageRemove: formManager.onAreaImageRemove,
     onAreaImagesSelect: formManager.onAreaImagesSelect,
-    images: formManager.images
+    images: formManager.images.map(img => typeof img === 'string' ? img : img.url) // Convert PropertyImage[] to string[]
   };
   
   return children(childrenProps);
