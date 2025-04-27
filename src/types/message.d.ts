@@ -15,12 +15,16 @@ export interface PropertyMessage {
     full_name?: string;
     email?: string;
     avatar_url?: string;
+    phone?: string;
+    whatsapp_number?: string;
   };
   recipient?: {
     id: string;
     full_name?: string;
     email?: string;
     avatar_url?: string;
+    phone?: string;
+    whatsapp_number?: string;
   };
 }
 
