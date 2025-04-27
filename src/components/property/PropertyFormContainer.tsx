@@ -104,6 +104,49 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     // Implementation would go here
   };
 
+  // Creating an object with all the required props for PropertyFormContent
+  const formContentProps = {
+    formData,
+    settings,
+    isSubmitting,
+    initialStep: initialContentStep || 0,
+    formState: formData || {},
+    onSave: saveProperty,
+    // Add all required props from PropertyFormManagerChildrenProps
+    handleFieldChange: (field: string, value: any) => {
+      if (setFormData && formData) {
+        setFormData({ ...formData, [field]: value });
+      }
+    },
+    handleSaveObjectId,
+    handleSaveAgent,
+    addFeature: () => console.log('Add feature stub'),
+    removeFeature: () => console.log('Remove feature stub'),
+    updateFeature: () => console.log('Update feature stub'),
+    addArea: () => console.log('Add area stub'),
+    removeArea: () => console.log('Remove area stub'),
+    updateArea: () => console.log('Update area stub'),
+    handleAreaImageRemove: () => console.log('Remove area image stub'),
+    handleAreaImagesSelect: () => console.log('Select area images stub'),
+    handleAreaImageUpload: async () => console.log('Upload area image stub'),
+    handleImageUpload: async () => console.log('Upload image stub'),
+    handleRemoveImage: () => console.log('Remove image stub'),
+    isUploading: false,
+    handleAreaPhotosUpload: async () => console.log('Upload area photos stub'),
+    handleRemoveAreaPhoto: () => console.log('Remove area photo stub'),
+    handleFloorplanUpload: async () => console.log('Upload floorplan stub'),
+    handleRemoveFloorplan: () => console.log('Remove floorplan stub'),
+    isUploadingFloorplan: false,
+    handleSetFeaturedImage: () => console.log('Set featured image stub'),
+    handleToggleFeaturedImage: () => console.log('Toggle featured image stub'),
+    onSubmit: () => console.log('Submit stub'),
+    currentStep: 0,
+    handleStepClick: () => console.log('Step click stub'),
+    propertyWithRequiredProps: { id: formData?.id || '', ...formData },
+    setPendingChanges: () => console.log('Set pending changes stub'),
+    images: images || []
+  };
+
   if (isLoading) {
     return <PropertyFormLoader />;
   }
@@ -151,12 +194,7 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
           </TabsContent>
           <TabsContent value="content">
             <PropertyFormContent
-              formData={formData}
-              settings={settings}
-              isSubmitting={isSubmitting}
-              onSave={saveProperty}
-              initialStep={initialContentStep}
-              formState={formData} // Add the missing formState prop
+              {...formContentProps}
             />
           </TabsContent>
           <TabsContent value="media">
