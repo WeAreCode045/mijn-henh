@@ -29,7 +29,7 @@ import { User } from "@/types/user";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   
