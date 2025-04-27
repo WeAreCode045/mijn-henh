@@ -1,18 +1,44 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { PropertyData } from "@/types/property";
-import { CommunicationsTabContent as PropertyCommunicationsTabContent } from "../content/CommunicationsTabContent";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageList } from "../../messages/MessageList";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ParticipantsTab } from "@/pages/property/tabs/ParticipantsTab";
 
 interface CommunicationsTabContentProps {
   property: PropertyData;
 }
 
 export function CommunicationsTabContent({ property }: CommunicationsTabContentProps) {
+  const [activeTab, setActiveTab] = useState<string>("messages");
+
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Communications</h2>
-      <p className="mb-4">Property communications management for: {property.title}</p>
-      <PropertyCommunicationsTabContent property={property} />
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Property Communications</h2>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="participants">Participants</TabsTrigger>
+        </TabsList>
+        <TabsContent value="messages">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Messages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MessageList propertyId={property.id} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="participants">
+          <ParticipantsTab 
+            propertyId={property.id}
+            propertyTitle={property.title}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

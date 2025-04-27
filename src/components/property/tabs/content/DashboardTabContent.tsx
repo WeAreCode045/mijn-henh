@@ -2,6 +2,7 @@
 import React from "react";
 import { PropertyData } from "@/types/property";
 import { PropertyDashboardTab } from "../dashboard/PropertyDashboardTab";
+import { PropertyTabActionsHandler } from "../wrapper/PropertyTabActionsHandler";
 
 interface DashboardTabContentProps {
   property: PropertyData;
@@ -23,10 +24,18 @@ export function DashboardTabContent({
   handleGeneratePDF
 }: DashboardTabContentProps) {
   return (
-    <PropertyDashboardTab
-      formData={property}
+    <PropertyTabActionsHandler
       propertyId={property.id}
-      onDelete={onDelete}
-    />
+      propertyData={property}
+    >
+      {({ handleGeneratePDF: handlePDF, handleOpenWebView }) => (
+        <PropertyDashboardTab
+          formData={property}
+          propertyId={property.id}
+          onDelete={onDelete}
+          onSave={onSave}
+        />
+      )}
+    </PropertyTabActionsHandler>
   );
 }

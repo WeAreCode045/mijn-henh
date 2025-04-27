@@ -1,45 +1,57 @@
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
+import { useQueryClient } from "@tanstack/react-query";
+import { MessageData } from "@/types/message";
 
-export function useSendMessage(propertyId: string, participantId: string | null) {
-  const queryClient = useQueryClient();
+export function useSendMessage(propertyId: string, recipientId: string | null) {
   const { user } = useAuth();
   const currentUserId = user?.id;
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { mutate: sendMessage } = useMutation({
-    mutationFn: async ({ recipientId, message }: { recipientId: string, message: string }) => {
-      if (!currentUserId || !propertyId || !recipientId || !message) {
-        throw new Error("Missing required fields to send message");
-      }
+  const sendMessage = async (messageData: MessageData) => {
+    if (!currentUserId || !propertyId || !messageData.recipientId) {
+      throw new Error("Missing required information to send message");
+    }
 
+    setIsLoading(true);
+
+    try {
       const { data, error } = await supabase
         .from('property_messages')
         .insert({
           property_id: propertyId,
           sender_id: currentUserId,
-          recipient_id: recipientId,
-          message,
-          is_read: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          recipient_id: messageData.recipientId,
+          message: messageData.message,
+          is_read: false
         })
         .select();
 
       if (error) {
-        console.error("Error sending message:", error);
         throw error;
       }
 
-      return data[0];
-    },
-    onSuccess: () => {
-      // Invalidate relevant queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["propertyMessages", propertyId, participantId] });
-      queryClient.invalidateQueries({ queryKey: ["propertyConversations", propertyId] });
-    }
-  });
+      // Invalidate the messages query to refresh the messages list
+      queryClient.invalidateQueries({ 
+        queryKey: ["propertyMessages", propertyId, messageData.recipientId]
+      });
+      
+      // Invalidate the conversations query to update the conversations list
+      queryClient.invalidateQueries({ 
+        queryKey: ["propertyConversations", propertyId]
+      });
 
-  return { sendMessage };
+      return data;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    sendMessage,
+    isLoading
+  };
 }
