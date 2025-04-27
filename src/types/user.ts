@@ -16,8 +16,13 @@ export interface User {
 export interface UserFormData {
   email: string;
   password: string;
-  fullName: string;
+  full_name: string;
   phone: string;
-  whatsappNumber: string;
+  whatsapp_number: string;
   role: "admin" | "agent" | "seller" | "buyer";
+  avatar_url: string; 
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
 }
