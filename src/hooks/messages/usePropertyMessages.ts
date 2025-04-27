@@ -83,12 +83,13 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   });
 
   // Create a currentUser object from the profile data
+  // Using the User type imported from the modular type definition
   const currentUser: User | null = profile ? {
     id: profile.id,
     email: profile.email || '',
     full_name: profile.full_name || '',
     role: profile.role as "admin" | "agent" | "seller" | "buyer" | undefined,
-    avatar_url: profile.avatar_url,
+    avatar_url: profile.avatar_url || null,
     phone: profile.phone || undefined,
     whatsapp_number: profile.whatsapp_number || undefined,
     created_at: profile.created_at || undefined,

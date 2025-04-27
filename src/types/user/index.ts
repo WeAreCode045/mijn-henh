@@ -6,4 +6,4 @@ import { UserFormData } from './UserForm';
 
 export type User = UserBase & UserContact & UserTimestamps;
 
-export type { UserFormData };
+export type { UserFormData, UserBase, UserContact, UserTimestamps };
