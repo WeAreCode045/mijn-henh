@@ -40,6 +40,7 @@ export interface PropertyFormManagerChildrenProps {
   isSaving: boolean;
   isSubmitting?: boolean;
   onSave?: () => Promise<void>;
+  initialStep?: number;
   setPendingChanges: (pendingChanges: boolean) => void;
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
