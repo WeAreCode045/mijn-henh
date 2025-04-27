@@ -58,7 +58,7 @@ export function ParticipantInviteDialog({
         throw new Error("Property not found");
       }
       
-      // Get agency settings directly, we don't need to go through the agent profile
+      // Get agency settings
       const { data: agencySettings } = await supabase
         .from('agency_settings')
         .select('resend_from_email, resend_from_name')
@@ -67,7 +67,7 @@ export function ParticipantInviteDialog({
       const siteUrl = window.location.origin;
       const inviteLink = `${siteUrl}/auth?email=${encodeURIComponent(email)}&redirect=/participant`;
       
-      // Send initial invitation email using agency settings if available
+      // Send initial invitation email
       await sendEmail({
         to: email,
         subject: `You've been invited as a ${role} for ${property.title || 'a property'}`,

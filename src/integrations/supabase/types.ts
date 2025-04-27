@@ -255,6 +255,72 @@ export type Database = {
           },
         ]
       }
+      participants_profile: {
+        Row: {
+          address: string | null
+          bank_account_number: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          first_name: string | null
+          gender: string | null
+          id: string
+          id_number: string | null
+          last_name: string | null
+          nationality: string | null
+          phone: string | null
+          place_of_birth: string | null
+          postal_code: string | null
+          social_number: string | null
+          updated_at: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          address?: string | null
+          bank_account_number?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id: string
+          id_number?: string | null
+          last_name?: string | null
+          nationality?: string | null
+          phone?: string | null
+          place_of_birth?: string | null
+          postal_code?: string | null
+          social_number?: string | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          address?: string | null
+          bank_account_number?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id?: string
+          id_number?: string | null
+          last_name?: string | null
+          nationality?: string | null
+          phone?: string | null
+          place_of_birth?: string | null
+          postal_code?: string | null
+          social_number?: string | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -744,30 +810,36 @@ export type Database = {
       property_participants: {
         Row: {
           created_at: string
+          documents_signed: Json | null
           id: string
           property_id: string
           role: string
           status: string
           updated_at: string
           user_id: string
+          webview_approved: boolean | null
         }
         Insert: {
           created_at?: string
+          documents_signed?: Json | null
           id?: string
           property_id: string
           role: string
           status?: string
           updated_at?: string
           user_id: string
+          webview_approved?: boolean | null
         }
         Update: {
           created_at?: string
+          documents_signed?: Json | null
           id?: string
           property_id?: string
           role?: string
           status?: string
           updated_at?: string
           user_id?: string
+          webview_approved?: boolean | null
         }
         Relationships: [
           {

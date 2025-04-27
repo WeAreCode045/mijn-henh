@@ -24,7 +24,15 @@ export function usePropertyParticipants(propertyId?: string) {
         .from('property_participants')
         .select(`
           *,
-          user:profiles(id, full_name, email, phone, whatsapp_number, avatar_url, address, city, postal_code, country)
+          user:profiles(id, email, role),
+          participant_profile:participants_profile(
+            id, 
+            first_name, 
+            last_name, 
+            email,
+            phone,
+            whatsapp_number
+          )
         `)
         .eq('property_id', propertyId)
         .order('created_at', { ascending: false });
@@ -34,7 +42,25 @@ export function usePropertyParticipants(propertyId?: string) {
         throw error;
       }
 
-      return data as unknown as PropertyParticipant[];
+      // Transform the data to include participant profile information if it exists
+      return data.map(item => {
+        const participantProfile = item.participant_profile;
+        const userProfile = item.user;
+        
+        return {
+          ...item,
+          user: {
+            id: userProfile?.id || item.user_id,
+            full_name: participantProfile?.first_name && participantProfile?.last_name 
+              ? `${participantProfile.first_name} ${participantProfile.last_name}` 
+              : 'Unknown',
+            email: participantProfile?.email || userProfile?.email || null,
+            phone: participantProfile?.phone || null,
+            whatsapp_number: participantProfile?.whatsapp_number || null,
+            role: userProfile?.role || item.role
+          }
+        };
+      }) as unknown as PropertyParticipant[];
     },
     enabled: !!propertyId,
   });
@@ -55,7 +81,6 @@ export function usePropertyParticipants(propertyId?: string) {
         userId = existingUsers.id;
         
         // If the user exists but doesn't have the correct role, update it
-        // This is important when a user might get invited as both a buyer and seller
         if (existingUsers.role !== participant.role) {
           const { error: updateError } = await supabase
             .from('profiles')
@@ -74,7 +99,6 @@ export function usePropertyParticipants(propertyId?: string) {
           options: {
             data: {
               role: participant.role, // Explicitly set the correct role
-              full_name: `New ${participant.role}`,
             }
           }
         });
@@ -265,3 +289,4 @@ export function usePropertyParticipants(propertyId?: string) {
     resendInvite: resendInviteMutation.mutate,
   };
 }
+

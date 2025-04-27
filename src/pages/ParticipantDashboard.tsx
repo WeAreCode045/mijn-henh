@@ -10,7 +10,8 @@ import { PropertyCard } from '@/components/property/PropertyCard';
 import { DocumentList } from '@/components/property/documents/DocumentList';
 import { MessageList } from '@/components/property/messages/MessageList';
 import { transformSupabaseData } from '@/components/property/webview/utils/transformSupabaseData';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { UserCircle, Loader2 } from 'lucide-react';
 
 export default function ParticipantDashboard() {
   const { user } = useAuth();
@@ -80,6 +81,10 @@ export default function ParticipantDashboard() {
     fetchParticipantProperties();
   }, [user?.id, selectedPropertyId]);
 
+  const handleGoToProfile = () => {
+    navigate('/participant/profile');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -91,6 +96,13 @@ export default function ParticipantDashboard() {
   if (properties.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Your Dashboard</h1>
+          <Button onClick={handleGoToProfile} variant="outline">
+            <UserCircle className="mr-2 h-4 w-4" />
+            View Profile
+          </Button>
+        </div>
         <Card className="p-8">
           <CardContent className="text-center">
             <h2 className="text-2xl font-bold mb-4">Welcome to Your Dashboard</h2>
@@ -105,7 +117,13 @@ export default function ParticipantDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-6">Your Property Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Your Property Dashboard</h1>
+        <Button onClick={handleGoToProfile} variant="outline">
+          <UserCircle className="mr-2 h-4 w-4" />
+          View Profile
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
