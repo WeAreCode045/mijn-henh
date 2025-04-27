@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyTabsWrapper } from "./property/PropertyTabsWrapper";
@@ -27,6 +26,7 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
   const [agentInfo, setAgentInfo] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const { deleteProperty } = usePropertyDeletion();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Use formData from props if available, otherwise use from hook
   const formData = propFormData || hookFormData;
@@ -74,12 +74,26 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
     }
   }, [formData?.agent_id]);
 
-  const handleSave = () => {
-    if (id) {
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      if (id) {
+        toast({
+          description: "Property data saved",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving property:", error);
       toast({
-        description: "Property data refreshed",
+        title: "Error",
+        description: "Failed to save property",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
+    
+    return Promise.resolve();
   };
 
   const handleDelete = async (): Promise<void> => {
@@ -120,7 +134,6 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
     }
   };
 
-  // Prevent form submissions from reloading the page
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Main property form submission prevented");
@@ -167,7 +180,7 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
           initialTab={initialTab}
           initialContentStep={initialContentStep}
           formData={formData}
-          // Pass necessary handlers that need to be available to inner content tabs
+          isSubmitting={isSubmitting}
           handlers={{
             onFieldChange: (field, value) => {
               if (setFormData) {
@@ -180,7 +193,8 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
             currentStep: currentStep,
             handleStepClick: handleStepClick,
             handleNext: handleNext,
-            handlePrevious: handlePrevious
+            handlePrevious: handlePrevious,
+            onSave: handleSave
           }}
         />
       </form>

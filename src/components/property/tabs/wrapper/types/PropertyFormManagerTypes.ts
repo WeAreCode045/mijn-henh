@@ -38,7 +38,8 @@ export interface PropertyFormManagerChildrenProps {
   propertyWithRequiredProps: PropertyData;
   lastSaved?: Date;
   isSaving: boolean;
-  isSubmitting?: boolean; // Add isSubmitting property
+  isSubmitting?: boolean;
+  onSave?: () => Promise<void>;
   setPendingChanges: (pendingChanges: boolean) => void;
   onFetchLocationData?: () => Promise<void>;
   onFetchCategoryPlaces?: (category: string) => Promise<any>;
@@ -60,5 +61,5 @@ export interface PropertyFormManagerChildrenProps {
   onAreaImageRemove?: (areaId: string, imageId: string) => void;
   onAreaImagesSelect?: (areaId: string, imageIds: string[]) => void;
   images: string[];
-  settings?: any; // Settings property
+  settings?: any;
 }
