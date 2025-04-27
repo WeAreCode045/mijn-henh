@@ -40,8 +40,8 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
             message,
             created_at,
             is_read,
-            sender:profiles!sender_id(id, full_name, email, avatar_url),
-            recipient:profiles!recipient_id(id, full_name, email, avatar_url)
+            sender:profiles!sender_id(id, full_name, email, avatar_url, phone, whatsapp_number),
+            recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number)
           `)
           .eq('property_id', propertyId)
           .or(`and(sender_id.eq.${currentUserId},recipient_id.eq.${participantId}),and(sender_id.eq.${participantId},recipient_id.eq.${currentUserId})`)
