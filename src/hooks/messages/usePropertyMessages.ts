@@ -1,5 +1,5 @@
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
 import { PropertyMessage } from "@/types/message";
@@ -12,7 +12,12 @@ export function usePropertyMessages(propertyId: string, participantId: string | 
   const { user, profile } = useAuth();
   const currentUserId = user?.id;
 
-  const { conversations, isLoadingConversations, conversationsError } = usePropertyConversations(propertyId);
+  const {
+    conversations,
+    isLoadingConversations,
+    conversationsError
+  } = usePropertyConversations(propertyId);
+
   const { sendMessage } = useSendMessage(propertyId, participantId);
 
   const {

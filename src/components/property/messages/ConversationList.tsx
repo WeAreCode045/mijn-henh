@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -48,12 +49,21 @@ export function ConversationList({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full"
+          disabled={isLoading}
         />
       </div>
       
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+        <div className="p-4 space-y-4">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="flex items-start gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredConversations.length === 0 ? (
         <div className="flex-1 flex items-center justify-center p-4 text-center text-gray-500">

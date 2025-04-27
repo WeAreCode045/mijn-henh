@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { User } from "@/types/user";
 import { PropertyMessage } from "@/types/message";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Message {
   id: string;
@@ -22,6 +22,7 @@ interface MessageThreadProps {
   onSendMessage: (content: string) => void;
   propertyId: string;
   isLoading?: boolean;
+  error?: Error | null;
   selectedParticipantId?: string | null;
 }
 
@@ -31,22 +32,62 @@ export function MessageThread({
   onSendMessage,
   propertyId,
   isLoading = false,
+  error = null,
   selectedParticipantId = null
 }: MessageThreadProps) {
   const [newMessage, setNewMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      onSendMessage(newMessage);
-      setNewMessage("");
+    if (newMessage.trim() && !isSending) {
+      setIsSending(true);
+      try {
+        await onSendMessage(newMessage);
+        setNewMessage("");
+      } finally {
+        setIsSending(false);
+      }
     }
   };
 
-  // Convert PropertyMessage to Message if needed
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-4 space-y-4">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="flex items-start gap-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[200px]" />
+              <Skeleton className="h-20 w-[300px]" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="text-center text-red-600">
+          <p className="font-semibold">Error loading messages</p>
+          <p className="text-sm">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedParticipantId) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4">
+        <p className="text-gray-500">Select a conversation to view messages</p>
+      </div>
+    );
+  }
+
   const normalizedMessages = messages.map(msg => {
     if ('message' in msg) {
-      // This is a PropertyMessage
       return {
         id: msg.id,
         content: msg.message,
@@ -59,11 +100,9 @@ export function MessageThread({
         read: msg.is_read
       } as Message;
     }
-    // This is already in Message format
     return msg as Message;
   });
 
-  // Group messages by date
   const groupedMessages = normalizedMessages.reduce((groups: Record<string, Message[]>, message) => {
     const date = new Date(message.timestamp).toLocaleDateString();
     if (!groups[date]) {
@@ -72,14 +111,6 @@ export function MessageThread({
     groups[date].push(message);
     return groups;
   }, {});
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-full p-8">Loading messages...</div>;
-  }
-
-  if (!selectedParticipantId) {
-    return <div className="flex items-center justify-center h-full p-8">Select a conversation to view messages</div>;
-  }
 
   return (
     <div className="flex flex-col h-full">
@@ -144,8 +175,9 @@ export function MessageThread({
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               className="flex-1"
+              disabled={isSending}
             />
-            <Button type="submit" size="icon">
+            <Button type="submit" size="icon" disabled={isSending}>
               <Send className="h-4 w-4" />
             </Button>
           </form>
