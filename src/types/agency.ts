@@ -1,7 +1,6 @@
 
 import { Settings } from "@/types/settings";
 
-// Agency settings interface
 export interface AgencySettings {
   id: string;
   name: string;
@@ -38,11 +37,10 @@ export interface AgencySettings {
   smtpFromName?: string;
   smtpSecure?: boolean;
   
-  // Mailjet settings
-  mailjetApiKey?: string;
-  mailjetApiSecret?: string;
-  mailjetFromEmail?: string;
-  mailjetFromName?: string;
+  // Resend settings
+  resendApiKey?: string;
+  resendFromEmail?: string;
+  resendFromName?: string;
   
   // IMAP settings
   imapHost?: string;
@@ -55,19 +53,19 @@ export interface AgencySettings {
   // OpenAI API key
   openaiApiKey?: string;
   
-  // Nylas settings - using consistent naming
-  nylasClientId?: string;  // Mapped from nylas_client_id
-  nylasApiKey?: string;    // Mapped from nylas_client_secret
-  nylasGrantId?: string;   // Mapped from nylas_access_token
+  // Nylas settings
+  nylasClientId?: string;
+  nylasApiKey?: string;
+  nylasGrantId?: string;
   
-  // For backwards compatibility - will be deprecated
-  nylasClientSecret?: string; // Alias for nylasApiKey
-  nylasAccessToken?: string;  // Alias for nylasGrantId
+  // For backwards compatibility
+  nylasClientSecret?: string;
+  nylasAccessToken?: string;
   
   // Database field aliases
   primary_color?: string;
   secondary_color?: string;
-  global_features?: any; // This is needed to handle the database field
+  global_features?: any;
 }
 
 // Default settings

@@ -1,15 +1,11 @@
-
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 interface EmailMessage {
   to: string | string[];
@@ -29,10 +25,47 @@ interface Settings {
   smtpFromEmail?: string;
   smtpFromName?: string;
   smtpSecure?: boolean;
-  mailjetApiKey?: string;
-  mailjetApiSecret?: string;
-  mailjetFromEmail?: string;
-  mailjetFromName?: string;
+  resendApiKey?: string;
+  resendFromEmail?: string;
+  resendFromName?: string;
+}
+
+async function sendWithResend(settings: Settings, message: EmailMessage) {
+  if (!settings.resendApiKey) {
+    throw new Error('Resend API key missing');
+  }
+
+  const fromEmail = message.from || settings.resendFromEmail;
+  const fromName = message.fromName || settings.resendFromName;
+
+  if (!fromEmail) {
+    throw new Error('From email is required for Resend');
+  }
+
+  const resend = new Resend(settings.resendApiKey);
+
+  try {
+    console.log('Sending email via Resend:', {
+      from: fromEmail,
+      to: message.to,
+      subject: message.subject
+    });
+
+    const emailResult = await resend.emails.send({
+      from: fromName ? `${fromName} <${fromEmail}>` : fromEmail,
+      to: Array.isArray(message.to) ? message.to : [message.to],
+      cc: message.cc,
+      subject: message.subject,
+      html: message.html || message.text || '',
+      text: message.text
+    });
+
+    console.log('Email sent successfully via Resend');
+    return emailResult;
+  } catch (error) {
+    console.error('Resend error:', error);
+    throw error;
+  }
 }
 
 async function sendWithSmtp(settings: Settings, message: EmailMessage) {
@@ -103,106 +136,20 @@ async function sendWithSmtp(settings: Settings, message: EmailMessage) {
   }
 }
 
-async function sendWithMailjet(settings: Settings, message: EmailMessage) {
-  if (!settings.mailjetApiKey || !settings.mailjetApiSecret) {
-    throw new Error('Mailjet API key or secret missing');
-  }
-
-  const fromEmail = message.from || settings.mailjetFromEmail;
-  const fromName = message.fromName || settings.mailjetFromName;
-
-  if (!fromEmail) {
-    throw new Error('From email is required for Mailjet');
-  }
-
-  try {
-    // Create recipient array
-    let recipients = [];
-    if (Array.isArray(message.to)) {
-      recipients = message.to.map(email => ({ Email: email }));
-    } else {
-      recipients = [{ Email: message.to }];
-    }
-
-    // Create CC recipients if they exist
-    let ccRecipients = [];
-    if (message.cc) {
-      if (Array.isArray(message.cc)) {
-        ccRecipients = message.cc.map(email => ({ Email: email }));
-      } else {
-        ccRecipients = [{ Email: message.cc }];
-      }
-    }
-
-    const url = "https://api.mailjet.com/v3.1/send";
-    const auth = btoa(`${settings.mailjetApiKey}:${settings.mailjetApiSecret}`);
-
-    const payload = {
-      Messages: [
-        {
-          From: {
-            Email: fromEmail,
-            Name: fromName || fromEmail
-          },
-          To: recipients,
-          Cc: ccRecipients.length > 0 ? ccRecipients : undefined,
-          Subject: message.subject,
-          TextPart: message.text || "",
-          HTMLPart: message.html || message.text || ""
-        }
-      ]
-    };
-
-    console.log('Sending email via Mailjet:', {
-      from: fromEmail,
-      to: message.to,
-      subject: message.subject
-    });
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${auth}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Mailjet API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Mailjet response:', data);
-    return data;
-  } catch (error) {
-    console.error('Mailjet error:', error);
-    throw error;
-  }
-}
-
 serve(async (req) => {
-  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Parse request body
     const requestData = await req.json();
     
-    // Ensure message and settings are defined
     if (!requestData || !requestData.message || !requestData.settings) {
       throw new Error('Invalid request: message or settings missing');
     }
     
     const { message, settings } = requestData;
 
-    // Validate that message.to exists
     if (!message.to) {
       throw new Error('Recipient (to) is required');
     }
@@ -216,20 +163,20 @@ serve(async (req) => {
 
     console.log('Available settings:', {
       smtp: !!settings.smtpHost,
-      mailjet: !!settings.mailjetApiKey
+      resend: !!settings.resendApiKey
     });
 
     let result;
     let provider;
 
-    // First try Mailjet if configured
-    if (settings.mailjetApiKey && settings.mailjetApiSecret) {
+    // First try Resend if configured
+    if (settings.resendApiKey) {
       try {
-        console.log('Attempting to send via Mailjet');
-        result = await sendWithMailjet(settings, message);
-        provider = 'mailjet';
-      } catch (mailjetError) {
-        console.error('Mailjet error:', mailjetError);
+        console.log('Attempting to send via Resend');
+        result = await sendWithResend(settings, message);
+        provider = 'resend';
+      } catch (resendError) {
+        console.error('Resend error:', resendError);
         
         // If we have SMTP configured as fallback, try that
         if (settings.smtpHost) {
@@ -242,11 +189,11 @@ serve(async (req) => {
             throw new Error(`Email sending failed: ${smtpError.message}`);
           }
         } else {
-          throw new Error(`Mailjet error: ${mailjetError.message}`);
+          throw new Error(`Resend error: ${resendError.message}`);
         }
       }
     } 
-    // If no Mailjet, try SMTP
+    // If no Resend, try SMTP
     else if (settings.smtpHost) {
       console.log('Attempting to send via SMTP');
       try {
