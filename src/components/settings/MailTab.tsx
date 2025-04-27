@@ -19,7 +19,7 @@ export function MailTab({ settings, onChange, onSwitchChange }: MailTabProps) {
       <EmailSection 
         settings={settings}
         onChange={onChange}
-        onSwitchChange={onSwitchChange}
+        onSwitchChange={(name) => (checked: boolean) => onSwitchChange(name, checked)}
       />
     </div>
   );

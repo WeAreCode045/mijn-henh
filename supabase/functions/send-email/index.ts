@@ -51,20 +51,10 @@ serve(async (req) => {
         throw new Error('Participant or email not found');
       }
 
-      // Get agency settings for email configuration
-      // First get the agent's agency_id
-      const { data: agent, error: agentError } = await supabaseClient
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', participant.property.agent_id)
-        .single();
-        
-      if (agentError) throw agentError;
-      
+      // Get agency settings directly
       const { data: agencySettings, error: agencyError } = await supabaseClient
         .from('agency_settings')
         .select('resend_from_email, resend_from_name')
-        .eq('id', agent.agency_id)
         .single();
         
       if (agencyError) throw agencyError;
@@ -94,54 +84,35 @@ serve(async (req) => {
     
     // Handle general email sending
     if (to && (html || text) && subject) {
-      // Get agency settings if possible
+      // Get agency settings directly without using current user
       let fromEmail = from || 'onboarding@resend.dev';
       let displayName = fromName || 'Property Portal';
 
-      // Try to get authorization header and use it if available
-      const authHeader = req.headers.get('Authorization');
-      if (authHeader) {
-        try {
-          const supabaseUrl = Deno.env.get('SUPABASE_URL');
-          const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
-          
-          if (!supabaseUrl || !supabaseAnonKey) {
-            throw new Error("Supabase credentials missing from environment variables");
-          }
-          
+      try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+        
+        if (supabaseUrl && supabaseAnonKey) {
           const supabaseClient = createClient(
             supabaseUrl,
             supabaseAnonKey,
-            { global: { headers: { Authorization: authHeader } } }
+            { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
           );
           
-          // Try to get the user's agency settings
-          const { data: userAuth } = await supabaseClient.auth.getUser();
-          
-          if (userAuth?.user?.id) {
-            const { data: profile } = await supabaseClient
-              .from('profiles')
-              .select('agency_id')
-              .eq('id', userAuth.user.id)
-              .single();
-              
-            if (profile?.agency_id) {
-              const { data: agencySettings } = await supabaseClient
-                .from('agency_settings')
-                .select('resend_from_email, resend_from_name')
-                .eq('id', profile.agency_id)
-                .single();
-                
-              if (agencySettings?.resend_from_email) {
-                fromEmail = agencySettings.resend_from_email;
-                displayName = agencySettings.resend_from_name || displayName;
-              }
-            }
+          // Try to get agency settings directly
+          const { data: agencySettings } = await supabaseClient
+            .from('agency_settings')
+            .select('resend_from_email, resend_from_name')
+            .single();
+            
+          if (agencySettings?.resend_from_email) {
+            fromEmail = agencySettings.resend_from_email;
+            displayName = agencySettings.resend_from_name || displayName;
           }
-        } catch (err) {
-          // If we can't get the user's agency settings, just use the provided from/fromName
-          console.log("Error getting agency settings:", err);
         }
+      } catch (err) {
+        // If we can't get the agency settings, just use the provided from/fromName
+        console.log("Error getting agency settings:", err);
       }
 
       const { data, error } = await resend.emails.send({

@@ -58,22 +58,10 @@ export function ParticipantInviteDialog({
         throw new Error("Property not found");
       }
       
-      // Get agent details to find agency settings
-      const { data: agent } = await supabase
-        .from('profiles')
-        .select('agency_id')
-        .eq('id', property.agent_id)
-        .single();
-      
-      if (!agent?.agency_id) {
-        throw new Error("Agent or agency not found");
-      }
-      
-      // Get agency settings
+      // Get agency settings directly, we don't need to go through the agent profile
       const { data: agencySettings } = await supabase
         .from('agency_settings')
         .select('resend_from_email, resend_from_name')
-        .eq('id', agent.agency_id)
         .single();
       
       // Send initial invitation email using agency settings if available
