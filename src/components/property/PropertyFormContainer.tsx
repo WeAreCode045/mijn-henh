@@ -144,7 +144,8 @@ export function PropertyFormContainer({ propertyId, initialTab, initialContentSt
     handleStepClick: () => console.log('Step click stub'),
     propertyWithRequiredProps: { id: formData?.id || '', ...formData },
     setPendingChanges: () => console.log('Set pending changes stub'),
-    images: images || []
+    images: images || [],
+    isSaving: isSubmitting // Adding the missing isSaving property
   };
 
   if (isLoading) {
