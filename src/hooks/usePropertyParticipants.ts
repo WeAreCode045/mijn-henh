@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -173,7 +172,23 @@ export function usePropertyParticipants(propertyId?: string) {
     },
   });
 
-  // Get user's participation in a property
+  const resendInviteMutation = useMutation({
+    mutationFn: async (participantId: string) => {
+      const { error } = await supabase.functions.invoke('send-email', {
+        body: {
+          type: 'resend_participant_invite',
+          participantId
+        }
+      });
+
+      if (error) throw error;
+      return participantId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-participants', propertyId] });
+    },
+  });
+
   const { data: userParticipation } = useQuery({
     queryKey: ['user-participation', propertyId, user?.id],
     queryFn: async () => {
@@ -206,5 +221,6 @@ export function usePropertyParticipants(propertyId?: string) {
     isParticipantSeller: userParticipation?.role === 'seller',
     isParticipantBuyer: userParticipation?.role === 'buyer',
     userParticipation,
+    resendInvite: resendInviteMutation.mutate,
   };
 }

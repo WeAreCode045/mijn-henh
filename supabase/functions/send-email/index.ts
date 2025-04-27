@@ -9,62 +9,50 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface EmailRequest {
-  to: string | string[];
-  subject: string;
-  html?: string;
-  text?: string;
-  from?: string;
-  fromName?: string;
-}
-
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { to, subject, html, text, from, fromName }: EmailRequest = await req.json();
+    const { type, participantId } = await req.json();
 
-    if (!to || !subject || (!html && !text)) {
-      throw new Error('Missing required fields');
-    }
+    if (type === 'resend_participant_invite') {
+      const { data: participant, error: participantError } = await supabase
+        .from('property_participants')
+        .select('*, user:profiles(*), property:properties(title)')
+        .eq('id', participantId)
+        .single();
 
-    const fromEmail = from || 'onboarding@resend.dev';
-    const sender = fromName ? `${fromName} <${fromEmail}>` : fromEmail;
-
-    const { data, error } = await resend.emails.send({
-      from: sender,
-      to: Array.isArray(to) ? to : [to],
-      subject,
-      html: html || text,
-      text: text || html?.replace(/<[^>]*>/g, '') // Strip HTML if only HTML is provided
-    });
-
-    if (error) {
-      console.error('Resend API error:', error);
-      throw error;
-    }
-
-    console.log('Email sent successfully:', data);
-
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      { 
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      if (participantError) throw participantError;
+      if (!participant || !participant.user?.email) {
+        throw new Error('Participant or email not found');
       }
-    );
-  } catch (error: any) {
-    console.error('Error sending email:', error);
+
+      const { data: emailResult } = await resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: participant.user.email,
+        subject: `Reminder: Join ${participant.property.title} as a ${participant.role}`,
+        html: `
+          <h1>You have been invited to join a property</h1>
+          <p>You have been invited to join ${participant.property.title} as a ${participant.role}.</p>
+          <p>Click the link below to accept the invitation:</p>
+          <a href="${Deno.env.get('SITE_URL')}/properties/${participant.property_id}">Accept Invitation</a>
+        `,
+      });
+
+      return new Response(JSON.stringify(emailResult), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    throw new Error('Invalid request type');
+  } catch (error) {
+    console.error('Error:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message || 'Failed to send email' 
-      }),
-      {
-        status: 500,
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );

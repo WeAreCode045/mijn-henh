@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PropertyParticipant } from "@/types/participant";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ParticipantInviteDialog } from "./ParticipantInviteDialog";
 import { usePropertyParticipants } from "@/hooks/usePropertyParticipants";
+import { Mail } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ParticipantListProps {
   propertyId: string;
@@ -15,11 +16,28 @@ interface ParticipantListProps {
 
 export function ParticipantList({ propertyId, title, role }: ParticipantListProps) {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const { participants, isLoading, removeParticipant, updateParticipantStatus } = usePropertyParticipants(propertyId);
+  const { participants, isLoading, removeParticipant, updateParticipantStatus, resendInvite } = usePropertyParticipants(propertyId);
+  const { toast } = useToast();
 
   // Filter participants by role
   const filteredParticipants = participants?.filter(p => p.role === role) || [];
   
+  const handleResendInvite = async (participantId: string, email: string) => {
+    try {
+      await resendInvite(participantId);
+      toast({
+        title: "Success",
+        description: `Invitation resent to ${email}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resend invitation",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -61,7 +79,7 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-[150px]">Actions</TableHead>
+                <TableHead className="w-[200px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -73,16 +91,26 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {participant.status === 'pending' && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => updateParticipantStatus({
-                            participantId: participant.id,
-                            status: 'active'
-                          })}
-                        >
-                          Activate
-                        </Button>
+                        <>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => updateParticipantStatus({
+                              participantId: participant.id,
+                              status: 'active'
+                            })}
+                          >
+                            Activate
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => participant.user?.email && handleResendInvite(participant.id, participant.user.email)}
+                          >
+                            <Mail className="h-4 w-4 mr-1" />
+                            Resend
+                          </Button>
+                        </>
                       )}
                       <Button 
                         variant="destructive" 
