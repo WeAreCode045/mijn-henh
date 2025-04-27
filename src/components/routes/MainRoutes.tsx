@@ -1,4 +1,3 @@
-
 import React, { lazy } from "react";
 import { Route } from "react-router-dom";
 import { ProtectedRoute } from "../ProtectedRoute";
@@ -211,5 +210,19 @@ export const MainRoutes = [
         </PropertyLayout>
       </ProtectedRoute>
     } 
+  />,
+  
+  <Route 
+    key="property-participants"
+    path="/property/:id/participants" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <PropertyFormPage />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    }
   />
 ];
