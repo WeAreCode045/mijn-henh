@@ -87,12 +87,20 @@ export default function ParticipantDashboard() {
             ...property,
             agent: property.agent ? {
               id: property.agent.user_id,
-              full_name: property.agent.user && typeof property.agent.user === 'object'
-                ? `${property.agent.user.first_name || ''} ${property.agent.user.last_name || ''}`.trim()
-                : (property.agent.email?.split('@')[0] || 'Unknown'),
+              full_name: property.agent.user && 
+                         typeof property.agent.user === 'object' &&
+                         property.agent.user !== null ?
+                `${property.agent.user?.first_name || ''} ${property.agent.user?.last_name || ''}`.trim() :
+                (property.agent.email?.split('@')[0] || 'Unknown'),
               email: property.agent.email || '',
-              phone: property.agent.user && typeof property.agent.user === 'object' ? property.agent.user.phone || '' : '',
-              avatar_url: property.agent.user && typeof property.agent.user === 'object' ? property.agent.user.avatar_url || '' : ''
+              phone: property.agent.user && 
+                     typeof property.agent.user === 'object' && 
+                     property.agent.user !== null ? 
+                property.agent.user?.phone || '' : '',
+              avatar_url: property.agent.user && 
+                          typeof property.agent.user === 'object' && 
+                          property.agent.user !== null ? 
+                property.agent.user?.avatar_url || '' : ''
             } : null
           };
 

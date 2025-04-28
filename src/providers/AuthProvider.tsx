@@ -89,13 +89,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Error fetching participant profile:', profileError);
             } else if (participantProfile) {
               const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
+              // Create the profile with appropriate fields, handling avatar_url specifically
               setProfile({
                 id: session.user.id,
                 role: roleData.role,
                 email: participantProfile.email || roleData.email || session.user.email,
                 full_name: fullName || session.user.email.split('@')[0],
-                // Use optional chaining to safely access properties that might not exist
-                avatar_url: participantProfile.avatar_url || undefined,
+                avatar_url: undefined, // This property doesn't exist in participants_profile, so set as undefined
                 phone: participantProfile.phone,
                 whatsapp_number: participantProfile.whatsapp_number
               });
@@ -163,8 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         role: data.role,
                         email: profileData.email || session.user.email,
                         full_name: fullName || session.user.email.split('@')[0],
-                        // Use optional chaining or undefined for properties that might not exist
-                        avatar_url: profileData.avatar_url || undefined,
+                        avatar_url: undefined, // This field doesn't exist in participants_profile
                         phone: profileData.phone,
                         whatsapp_number: profileData.whatsapp_number
                       });
