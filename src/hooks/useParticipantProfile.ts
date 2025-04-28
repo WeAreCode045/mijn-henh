@@ -13,9 +13,9 @@ export function useParticipantProfile(userId?: string) {
     queryFn: async () => {
       if (!userId) return null;
 
-      // Check if user has buyer or seller role in users_roles table
+      // Check if user has buyer or seller role in accounts table
       const { data: roleData, error: roleError } = await supabase
-        .from('users_roles')
+        .from('accounts')
         .select('role')
         .eq('user_id', userId)
         .in('role', ['buyer', 'seller'])

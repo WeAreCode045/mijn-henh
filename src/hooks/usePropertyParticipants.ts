@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,11 +22,18 @@ export function usePropertyParticipants(propertyId?: string) {
 
       console.log(`Fetching participants for property: ${propertyId}`);
 
+      // Get participants from the accounts table where property_id matches and role is buyer or seller
       const { data, error } = await supabase
         .from('accounts')
         .select(`
-          *,
-          participant_profile:participants_profile(*)
+          id,
+          user_id,
+          property_id,
+          role,
+          status,
+          email,
+          created_at,
+          updated_at
         `)
         .in('role', ['buyer', 'seller'])
         .eq('property_id', propertyId)
@@ -38,30 +46,43 @@ export function usePropertyParticipants(propertyId?: string) {
 
       console.log("Fetched participants data:", data);
 
-      return data.map(item => {
-        const participantProfileData = item.participant_profile as ParticipantProfileData;
-        
-        let fullName = participantProfileData?.first_name && participantProfileData?.last_name ? 
-          `${participantProfileData.first_name} ${participantProfileData.last_name}` : 
-          'Unknown';
+      // For each participant, fetch their profile data
+      const participantsWithProfiles: PropertyParticipant[] = [];
+
+      for (const participant of data) {
+        // Get participant profile
+        const { data: profileData } = await supabase
+          .from('participants_profile')
+          .select('*')
+          .eq('id', participant.user_id)
+          .single();
+
+        // Create a full name from profile data
+        const fullName = profileData?.first_name && profileData?.last_name ? 
+          `${profileData.first_name} ${profileData.last_name}` : 
+          (profileData?.first_name || profileData?.last_name || participant.email?.split('@')[0] || 'Unknown');
           
-        return {
-          id: item.id,
-          property_id: item.property_id,
-          user_id: item.user_id,
-          role: item.role,
-          status: item.status,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
+        participantsWithProfiles.push({
+          id: participant.id,
+          property_id: participant.property_id,
+          user_id: participant.user_id,
+          role: participant.role,
+          status: participant.status,
+          created_at: participant.created_at,
+          updated_at: participant.updated_at,
+          documents_signed: [], // Default empty array
+          webview_approved: false, // Default to false
           user: {
-            id: item.user_id,
+            id: participant.user_id,
             full_name: fullName,
-            email: item.email || '',
-            role: item.role
+            email: participant.email || '',
+            role: participant.role
           },
-          participant_profile: participantProfileData
-        } as PropertyParticipant;
-      });
+          participant_profile: profileData || null
+        });
+      }
+
+      return participantsWithProfiles;
     },
     enabled: !!propertyId,
   });
@@ -70,17 +91,25 @@ export function usePropertyParticipants(propertyId?: string) {
     mutationFn: async (participant: ParticipantInvite) => {
       console.log("Starting participant invitation process for:", participant);
       
-      const { data: existingUsers } = await supabase
-        .from('auth.users')
-        .select('id, email')
-        .eq('email', participant.email);
-
-      console.log("Existing users check:", existingUsers);
+      let userId: string;
+      let existingUser = false;
       
-      let userId;
+      // First check if the user already exists
+      const { data: existingUserData, error: existingUserError } = await supabase
+        .from('accounts')
+        .select('user_id')
+        .eq('email', participant.email)
+        .limit(1);
+        
+      if (existingUserError) {
+        console.error('Error checking existing user:', existingUserError);
+        throw existingUserError;
+      }
       
-      if (existingUsers && existingUsers.length > 0) {
-        userId = existingUsers[0].id;
+      if (existingUserData && existingUserData.length > 0) {
+        // User already exists
+        userId = existingUserData[0].user_id;
+        existingUser = true;
         console.log(`User already exists with ID: ${userId}`);
       } else {
         console.log(`Creating new user for email: ${participant.email}`);
@@ -96,12 +125,15 @@ export function usePropertyParticipants(propertyId?: string) {
         }
 
         console.log("New user created:", authUser);
-        userId = authUser.user?.id;
+        if (!authUser.user?.id) {
+          throw new Error('Failed to create user');
+        }
+        userId = authUser.user.id;
       }
 
       console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
       
-      // Insert into users_roles table instead of property_participants
+      // Insert into accounts table
       const { data, error } = await supabase
         .from('accounts')
         .insert({
@@ -111,7 +143,7 @@ export function usePropertyParticipants(propertyId?: string) {
           status: 'pending',
           email: participant.email
         })
-        .select('*');
+        .select();
 
       if (error) {
         if (error.code === '23505') { // Unique violation
@@ -142,7 +174,7 @@ export function usePropertyParticipants(propertyId?: string) {
 
   const removeParticipantMutation = useMutation({
     mutationFn: async (participantId: string) => {
-      // Delete from users_roles instead of property_participants
+      // Delete from accounts
       const { error } = await supabase
         .from('accounts')
         .delete()
@@ -173,12 +205,12 @@ export function usePropertyParticipants(propertyId?: string) {
 
   const updateParticipantStatusMutation = useMutation({
     mutationFn: async ({ participantId, status }: { participantId: string; status: string }) => {
-      // Update users_roles instead of property_participants
+      // Update accounts status
       const { data, error } = await supabase
         .from('accounts')
         .update({ status })
         .eq('id', participantId)
-        .select('*')
+        .select()
         .single();
 
       if (error) {
@@ -241,6 +273,7 @@ export function usePropertyParticipants(propertyId?: string) {
     queryFn: async () => {
       if (!propertyId || !user?.id) return null;
 
+      // Get from accounts table
       const { data, error } = await supabase
         .from('accounts')
         .select('*')
@@ -254,7 +287,23 @@ export function usePropertyParticipants(propertyId?: string) {
         throw error;
       }
 
-      return data as PropertyParticipant | null;
+      if (!data) return null;
+      
+      // Add the required fields for PropertyParticipant
+      const fullParticipant: PropertyParticipant = {
+        ...data,
+        documents_signed: [],
+        webview_approved: false,
+        user: {
+          id: data.user_id,
+          full_name: user.email?.split('@')[0] || 'User',
+          email: data.email || user.email || '',
+          role: data.role
+        },
+        participant_profile: null
+      };
+
+      return fullParticipant;
     },
     enabled: !!propertyId && !!user?.id,
   });

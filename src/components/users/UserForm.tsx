@@ -99,9 +99,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
         if (profileError) throw profileError;
         
-        // Update user role in users_roles table
+        // Update user role in accounts table (previously users_roles)
         const { error: roleError } = await supabase
-          .from("users_roles")
+          .from("accounts")
           .update({
             role: formData.role,
             updated_at: new Date().toISOString()
@@ -150,10 +150,10 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
           if (profileError) throw profileError;
           
-          // Update user role in users_roles table if needed
+          // Update user role in accounts table if needed (previously users_roles)
           if (formData.role === 'admin') {
             const { error: roleError } = await supabase
-              .from("users_roles")
+              .from("accounts")
               .update({
                 role: formData.role,
                 updated_at: new Date().toISOString()

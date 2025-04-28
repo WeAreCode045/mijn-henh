@@ -28,11 +28,12 @@ export default function ParticipantDashboard() {
       setIsLoading(true);
       
       try {
-        // Get properties where the user is a participant
+        // Get properties where the user is a participant (via accounts table)
         const { data: participations, error: participationsError } = await supabase
-          .from('property_participants')
+          .from('accounts')
           .select('property_id, role')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .in('role', ['buyer', 'seller']);
 
         if (participationsError) {
           console.error('Error fetching property participations:', participationsError);
@@ -44,7 +45,12 @@ export default function ParticipantDashboard() {
           return;
         }
 
-        const propertyIds = participations.map(p => p.property_id);
+        const propertyIds = participations.map(p => p.property_id).filter(id => id !== null) as string[];
+        
+        if (propertyIds.length === 0) {
+          setIsLoading(false);
+          return;
+        }
         
         // Fetch the property details
         const { data: propertyData, error: propertyError } = await supabase
@@ -52,7 +58,7 @@ export default function ParticipantDashboard() {
           .select(`
             *,
             property_images(*),
-            agent:profiles(*)
+            agent:accounts!properties_agent_id_fkey(*)
           `)
           .in('id', propertyIds);
 

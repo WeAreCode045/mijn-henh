@@ -35,7 +35,7 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
           object_id, 
           price, 
           agent_id,
-          agent:profiles(id, full_name)
+          agent:accounts!properties_agent_id_fkey(user_id, email)
         `)
         .eq('archived', false)
         .order('title');
@@ -55,13 +55,18 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
       
       if (data) {
         console.log(`useProperties - Fetched ${data.length} properties`);
-        const processedProperties = data.map(item => ({
-          ...item,
-          agent: item.agent ? {
-            id: item.agent.id,
-            name: item.agent.full_name
-          } : null
-        }));
+        const processedProperties = data.map(item => {
+          // Handle the new agent structure
+          const agentData = item.agent || null;
+          
+          return {
+            ...item,
+            agent: agentData ? {
+              id: agentData.user_id,
+              name: agentData.email?.split('@')[0] || 'Unknown' // Fallback to email username if no full name
+            } : null
+          };
+        });
         setProperties(processedProperties);
       }
     } catch (error) {

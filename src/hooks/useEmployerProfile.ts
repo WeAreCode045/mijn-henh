@@ -28,9 +28,9 @@ export function useEmployerProfile(userId?: string) {
     queryFn: async () => {
       if (!userId) return null;
 
-      // Check if user has admin or agent role in users_roles table
+      // Check if user has admin or agent role in accounts table
       const { data: roleData, error: roleError } = await supabase
-        .from('users_roles')
+        .from('accounts')
         .select('role')
         .eq('user_id', userId)
         .in('role', ['admin', 'agent'])
