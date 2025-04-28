@@ -25,7 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 import { useState, useEffect } from "react";
-import { User } from "@/types/user";
+import { User, UserBase } from "@/types/user";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -60,7 +60,8 @@ export function AppSidebar() {
     avatar_url: authProfile.avatar_url || undefined,
     phone: authProfile.phone || undefined,
     whatsapp_number: authProfile.whatsapp_number || undefined,
-    role: authProfile.role || userRole || undefined,
+    // Ensure role is one of the allowed types
+    role: (authProfile.role || userRole) as UserBase['role'],
   } : null;
 
   return (
