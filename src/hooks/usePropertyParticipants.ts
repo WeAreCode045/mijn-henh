@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyParticipant, ParticipantInvite, ParticipantProfileData } from '@/types/participant';
+import { PropertyParticipant, ParticipantInvite, ParticipantProfileData, ParticipantRole, ParticipantStatus } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -66,17 +66,17 @@ export function usePropertyParticipants(propertyId?: string) {
           id: participant.id,
           property_id: participant.property_id,
           user_id: participant.user_id,
-          role: participant.role,
-          status: participant.status,
+          role: participant.role as ParticipantRole,
+          status: participant.status as ParticipantStatus,
           created_at: participant.created_at,
           updated_at: participant.updated_at,
+          email: participant.email,
           documents_signed: [], // Default empty array
           webview_approved: false, // Default to false
           user: {
             id: participant.user_id,
             full_name: fullName,
-            email: participant.email || '',
-            role: participant.role
+            email: participant.email || ''
           },
           participant_profile: profileData || null
         });
@@ -292,13 +292,14 @@ export function usePropertyParticipants(propertyId?: string) {
       // Add the required fields for PropertyParticipant
       const fullParticipant: PropertyParticipant = {
         ...data,
+        role: data.role as ParticipantRole,
+        status: data.status as ParticipantStatus,
         documents_signed: [],
         webview_approved: false,
         user: {
           id: data.user_id,
           full_name: user.email?.split('@')[0] || 'User',
-          email: data.email || user.email || '',
-          role: data.role
+          email: data.email || user.email || ''
         },
         participant_profile: null
       };

@@ -1,186 +1,149 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { UserBase } from '@/types/user';
-import { EmployerProfileData } from '@/hooks/useEmployerProfile';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
-  session: Session | null;
   user: User | null;
-  profile: UserBase | null;
+  session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   isAdmin: boolean;
   isAgent: boolean;
-  isParticipant: boolean;
+  userRole: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserBase | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
-
+  
   useEffect(() => {
-    // Initialize auth state
-    const initAuth = async () => {
+    // Get initial session
+    const getSession = async () => {
       setIsLoading(true);
       
-      // Get initial session
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user || null);
+      const { data: { session }, error } = await supabase.auth.getSession();
       
-      if (initialSession?.user) {
-        await fetchUserProfile(initialSession.user.id);
+      if (error) {
+        console.error('Error getting session:', error);
+      }
+      
+      if (session) {
+        setSession(session);
+        setUser(session.user);
+        
+        // Get user role from the accounts table
+        const { data: roleData, error: roleError } = await supabase
+          .from('accounts')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+          
+        if (roleError) {
+          console.error('Error getting user role:', roleError);
+        } else if (roleData) {
+          setUserRole(roleData.role);
+        }
       }
       
       setIsLoading(false);
-      
-      // Set up auth state listener
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, newSession) => {
-          console.log("Auth state changed:", event);
-          setSession(newSession);
-          setUser(newSession?.user || null);
-          
-          if (newSession?.user) {
-            await fetchUserProfile(newSession.user.id);
-          } else {
-            setProfile(null);
-            setUserRole(null);
-          }
-        }
-      );
-      
-      return () => {
-        subscription.unsubscribe();
-      };
     };
     
-    initAuth();
+    getSession();
+    
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+      
+      // Update role on auth state change
+      if (session?.user) {
+        supabase.from('accounts')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+          .then(({ data, error }) => {
+            if (error) {
+              console.error('Error getting user role on auth change:', error);
+            } else if (data) {
+              setUserRole(data.role);
+            }
+          });
+      } else {
+        setUserRole(null);
+      }
+      
+      setIsLoading(false);
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
   
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      console.log("Fetching user role and profile for:", userId);
-      
-      // First check what role the user has from users_roles table
-      const { data: roleData, error: roleError } = await supabase
-        .from('users_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .single();
-      
-      if (roleError && roleError.code !== 'PGRST116') {
-        console.error("Error fetching user role:", roleError);
-      }
-      
-      const role = roleData?.role || null;
-      console.log("User role:", role);
-      setUserRole(role);
-      
-      // Fetch profile data based on role
-      if (role === 'admin' || role === 'agent') {
-        // Fetch from employer_profiles
-        const { data, error } = await supabase
-          .from('employer_profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-        
-        if (error) {
-          console.error("Error fetching employer profile:", error);
-        } else if (data) {
-          const employerProfile = data as EmployerProfileData;
-          setProfile({
-            id: employerProfile.id,
-            email: employerProfile.email || '',
-            full_name: `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim(),
-            phone: employerProfile.phone || undefined,
-            whatsapp_number: employerProfile.whatsapp_number || undefined,
-            avatar_url: employerProfile.avatar_url || undefined,
-            role: role
-          });
-        }
-      } else if (role === 'buyer' || role === 'seller') {
-        // Fetch from participants_profile
-        const { data, error } = await supabase
-          .from('participants_profile')
-          .select('*')
-          .eq('id', userId)
-          .single();
-        
-        if (error) {
-          console.error("Error fetching participant profile:", error);
-        } else if (data) {
-          setProfile({
-            id: data.id,
-            email: data.email || '',
-            full_name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-            phone: data.phone || undefined,
-            whatsapp_number: data.whatsapp_number || undefined,
-            role: role
-          });
-        }
-      } else {
-        console.log("User has no role assigned or profile not found");
-        setProfile({
-          id: userId,
-          email: user?.email || '',
-          full_name: '',
-          role: null
-        });
-      }
-    } catch (error) {
-      console.error("Error in fetchUserProfile:", error);
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      throw error;
     }
   };
   
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error("Error signing in:", error);
+  const signUp = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
+    
+    if (error) {
       throw error;
     }
   };
   
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      throw error;
+    }
+  };
+  
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
+    
+    if (error) {
+      throw error;
     }
   };
   
   const isAdmin = userRole === 'admin';
-  const isAgent = userRole === 'agent' || userRole === 'admin';  // Admins have agent abilities
-  const isParticipant = userRole === 'buyer' || userRole === 'seller';
+  const isAgent = userRole === 'agent' || userRole === 'admin';
   
-  return (
-    <AuthContext.Provider value={{
-      session,
-      user,
-      profile,
-      isLoading,
-      signIn,
-      signOut,
-      isAdmin,
-      isAgent,
-      isParticipant
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const value = {
+    user,
+    session,
+    isLoading,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    isAdmin,
+    isAgent,
+    userRole,
+  };
+  
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

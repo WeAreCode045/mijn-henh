@@ -35,7 +35,16 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
           object_id, 
           price, 
           agent_id,
-          agent:accounts!properties_agent_id_fkey(user_id, email)
+          agent:accounts!properties_agent_id_fkey(
+            user_id,
+            email,
+            user:employer_profiles!inner(
+              id,
+              email,
+              first_name,
+              last_name
+            )
+          )
         `)
         .eq('archived', false)
         .order('title');
@@ -58,12 +67,21 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
         const processedProperties = data.map(item => {
           // Handle the new agent structure
           const agentData = item.agent || null;
+          let agentName = 'Unknown';
+          
+          if (agentData && agentData.user) {
+            if (agentData.user.first_name || agentData.user.last_name) {
+              agentName = `${agentData.user.first_name || ''} ${agentData.user.last_name || ''}`.trim();
+            } else if (agentData.email) {
+              agentName = agentData.email.split('@')[0];
+            }
+          }
           
           return {
             ...item,
             agent: agentData ? {
               id: agentData.user_id,
-              name: agentData.email?.split('@')[0] || 'Unknown' // Fallback to email username if no full name
+              name: agentName
             } : null
           };
         });

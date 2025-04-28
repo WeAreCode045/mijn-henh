@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,9 +66,9 @@ export default function ParticipantProfile() {
       setIsLoading(true);
       
       try {
-        // First check if user has a participant role in users_roles table
+        // First check if user has a participant role in accounts table
         const { data: roleData, error: roleError } = await supabase
-          .from('users_roles')
+          .from('accounts')
           .select('role')
           .eq('user_id', user.id)
           .in('role', ['buyer', 'seller'])

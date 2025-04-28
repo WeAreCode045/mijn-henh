@@ -1,4 +1,3 @@
-
 import { PropertyData, PropertyImage, PropertyFeature, PropertyArea, PropertyNearbyPlace } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
@@ -41,7 +40,7 @@ interface SupabasePropertyData {
     full_name: string;
     email: string;
     phone: string;
-    avatar_url: string; // This is the field from the database
+    avatar_url: string;
   } | null;
   property_images: {
     id: string;
@@ -75,7 +74,6 @@ export function transformSupabaseData(
     imageCount: data.property_images?.length || 0
   });
 
-  
   // Extract images from property_images
   const images: PropertyImage[] = [];
   let featuredImage: string | null = null;

@@ -32,6 +32,7 @@ export interface PropertyParticipant {
   status: ParticipantStatus;
   created_at: string;
   updated_at: string;
+  email?: string | null;
   documents_signed: string[] | null;
   webview_approved: boolean;
   user?: {

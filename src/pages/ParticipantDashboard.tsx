@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,7 +57,20 @@ export default function ParticipantDashboard() {
           .select(`
             *,
             property_images(*),
-            agent:accounts!properties_agent_id_fkey(*)
+            agent:accounts!properties_agent_id_fkey(
+              id,
+              user_id,
+              email,
+              role,
+              user:employer_profiles!inner(
+                id,
+                first_name,
+                last_name,
+                phone,
+                email,
+                avatar_url
+              )
+            )
           `)
           .in('id', propertyIds);
 
@@ -67,15 +79,29 @@ export default function ParticipantDashboard() {
           return;
         }
 
-        // Transform the property data
-        const transformedProperties = propertyData.map(property => 
-          transformSupabaseData(property)
-        );
+        // Process agent data to match the expected format
+        const processedProperties = propertyData.map(property => {
+          // Transform the agent data to match what transformSupabaseData expects
+          const transformedProperty = {
+            ...property,
+            agent: property.agent ? {
+              id: property.agent.user_id,
+              full_name: property.agent.user ? 
+                `${property.agent.user.first_name || ''} ${property.agent.user.last_name || ''}`.trim() || 
+                property.agent.email?.split('@')[0] || 'Unknown',
+              email: property.agent.email || '',
+              phone: property.agent.user?.phone || '',
+              avatar_url: property.agent.user?.avatar_url || ''
+            } : null
+          };
+
+          return transformSupabaseData(transformedProperty);
+        });
         
-        setProperties(transformedProperties);
+        setProperties(processedProperties);
         
-        if (transformedProperties.length > 0 && !selectedPropertyId) {
-          setSelectedPropertyId(transformedProperties[0].id);
+        if (processedProperties.length > 0 && !selectedPropertyId) {
+          setSelectedPropertyId(processedProperties[0].id);
         }
       } catch (error) {
         console.error('Error in participant dashboard:', error);
