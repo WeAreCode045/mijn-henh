@@ -20,22 +20,27 @@ export interface Property {
 export function useProperties(searchTerm: string = "", limit: number = 50) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchProperties = async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       console.log("useProperties - Fetching properties");
+      
+      // Check if the user is authenticated first
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        console.log("No authenticated session found");
+        setProperties([]);
+        setIsLoading(false);
+        return;
+      }
+      
       let query = supabase
         .from('properties')
-        .select(`
-          id, 
-          title, 
-          address, 
-          status, 
-          object_id, 
-          price, 
-          agent_id
-        `)
+        .select('id, title, address, status, object_id, price, agent_id')
         .eq('archived', false)
         .order('title');
         
@@ -49,10 +54,9 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
       
       if (error) {
         console.error('Error fetching properties:', error);
-        throw error;
-      }
-      
-      if (data) {
+        setError(error);
+        setProperties([]);
+      } else if (data) {
         console.log(`useProperties - Fetched ${data.length} properties`);
         const processedProperties = data.map(item => {
           return {
@@ -67,6 +71,7 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
       }
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setError(error instanceof Error ? error : new Error('Unknown error occurred'));
       setProperties([]);
     } finally {
       setIsLoading(false);
@@ -99,5 +104,5 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
     fetchProperties();
   };
 
-  return { properties, isLoading, handleDelete, refetch };
+  return { properties, isLoading, error, handleDelete, refetch };
 }

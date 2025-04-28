@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +15,7 @@ interface AuthContextType {
   isAgent: boolean;
   userRole: string | null;
   profile: AppUser | null;
+  initialized: boolean; // Added initialized flag
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,16 +89,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       
       try {
+        // First set up the auth change listener to catch any auth events during initialization
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (_event, session) => {
+            setSession(session);
+            setUser(session?.user || null);
+            
+            if (session?.user) {
+              try {
+                const { data, error } = await supabase.from('accounts')
+                  .select('role')
+                  .eq('user_id', session.user.id)
+                  .order('created_at', { ascending: false })
+                  .limit(1)
+                  .single();
+                  
+                if (error) {
+                  console.error('Error getting user role on auth change:', error);
+                  setUserRole(null);
+                } else if (data) {
+                  setUserRole(data.role);
+                  await fetchUserProfile(session.user.id, data.role, session.user.email);
+                }
+              } catch (err) {
+                console.error('Unexpected error in auth state change:', err);
+              } finally {
+                setIsLoading(false);
+              }
+            } else {
+              clearAuthState();
+              setIsLoading(false);
+            }
+          }
+        );
+        
+        // Then check for existing session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
           clearAuthState();
-          setIsLoading(false);
-          return;
-        }
-        
-        if (session) {
+        } else if (session) {
           setSession(session);
           setUser(session.user);
           
@@ -118,56 +149,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Get additional profile information based on user role
             await fetchUserProfile(session.user.id, roleData.role, session.user.email);
           }
-        } else {
-          clearAuthState();
         }
+        
+        // Cleanup function to unsubscribe
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (err) {
         console.error('Unexpected error in getSession:', err);
         clearAuthState();
       } finally {
         setIsLoading(false);
-        setInitialized(true);
+        setInitialized(true); // Mark initialization as complete
       }
     };
     
     getSession();
-    
-    // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user || null);
-        
-        if (session?.user) {
-          try {
-            const { data, error } = await supabase.from('accounts')
-              .select('role')
-              .eq('user_id', session.user.id)
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .single();
-              
-            if (error) {
-              console.error('Error getting user role on auth change:', error);
-              setUserRole(null);
-            } else if (data) {
-              setUserRole(data.role);
-              await fetchUserProfile(session.user.id, data.role, session.user.email);
-            }
-          } catch (err) {
-            console.error('Unexpected error in auth state change:', err);
-          }
-        } else {
-          clearAuthState();
-        }
-        
-        setIsLoading(false);
-      }
-    );
-    
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [clearAuthState, fetchUserProfile]);
   
   const signIn = async (email: string, password: string) => {
@@ -242,17 +239,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAgent,
     userRole,
     profile,
+    initialized, // Include initialized in the context value
   };
-  
-  // Only provide the context if we've completed initialization
-  // This prevents flash of logged-out state and premature redirects
-  if (!initialized && isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-estate-800"></div>
-      </div>
-    );
-  }
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
