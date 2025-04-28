@@ -30,11 +30,11 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
         title: "Success",
         description: `Invitation resent to ${email}`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error resending invitation:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to resend invitation",
+        description: (error as Error)?.message || "Failed to resend invitation",
         variant: "destructive",
       });
     }

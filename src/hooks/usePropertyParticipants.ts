@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyParticipant, ParticipantInvite } from '@/types/participant';
+import { PropertyParticipant, ParticipantInvite, ParticipantProfileData } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -38,7 +38,7 @@ export function usePropertyParticipants(propertyId?: string) {
       // Transform the data to include participant profile information if it exists
       return data.map(item => {
         // Make sure we handle potentially undefined data
-        const participantProfile = item.participant_profile || null;
+        const participantProfile = item.participant_profile as unknown as ParticipantProfileData || null;
         const userProfile = item.user || null;
         
         // Determine name with proper null checks

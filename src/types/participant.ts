@@ -6,22 +6,22 @@ export type ParticipantStatus = 'pending' | 'active' | 'declined';
 
 export interface ParticipantProfileData {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  phone: string | null;
-  whatsapp_number: string | null;
-  date_of_birth: string | null;
-  id_number: string | null;
-  social_number: string | null;
-  place_of_birth: string | null;
-  nationality: string | null;
-  gender: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp_number?: string | null;
+  date_of_birth?: string | null;
+  id_number?: string | null;
+  social_number?: string | null;
+  place_of_birth?: string | null;
+  nationality?: string | null;
+  gender?: string | null;
   bank_account_number: string | null;
-  address: string | null;
-  city: string | null;
-  postal_code: string | null;
-  country: string | null;
+  address?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
 }
 
 export interface PropertyParticipant {
@@ -46,7 +46,7 @@ export interface PropertyParticipant {
     postal_code?: string | null;
     country?: string | null;
   };
-  participant_profile?: ParticipantProfileData;
+  participant_profile?: ParticipantProfileData | null;
 }
 
 export interface ParticipantInvite {
