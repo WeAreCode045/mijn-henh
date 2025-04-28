@@ -24,8 +24,12 @@ function PropertyContentRedirect() {
 // It will only use the redirect parameter and not pass email in the URL
 function AuthParticipantRedirect() {
   const [searchParams] = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
-  return <Navigate to={redirect} replace />;
+  // Use a constant redirect path to avoid infinite loop
+  // Only redirect if explicitly provided in URL, otherwise go to root
+  const redirect = searchParams.get('redirect');
+  const targetPath = redirect || '/';
+  
+  return <Navigate to={targetPath} replace />;
 }
 
 export const RedirectRoutes = [
