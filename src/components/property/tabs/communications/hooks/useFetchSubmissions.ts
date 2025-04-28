@@ -33,7 +33,8 @@ export function useFetchSubmissions(propertyId: string) {
           agent:agent_id (
             id,
             email,
-            full_name,
+            first_name,
+            last_name,
             phone,
             avatar_url
           ),
@@ -75,6 +76,20 @@ export function useFetchSubmissions(propertyId: string) {
           } : undefined
         }));
         
+        // Safely handle agent data which might be null or an error
+        let agentData = undefined;
+        if (item.agent && typeof item.agent === 'object' && !('error' in item.agent)) {
+          const firstName = item.agent.first_name || '';
+          const lastName = item.agent.last_name || '';
+          agentData = {
+            id: item.agent.id,
+            full_name: `${firstName} ${lastName}`.trim() || 'Unnamed Agent',
+            email: item.agent.email || '',
+            phone: item.agent.phone || '',
+            avatar_url: item.agent.avatar_url
+          };
+        }
+        
         return {
           id: item.id,
           property_id: item.property_id,
@@ -87,13 +102,7 @@ export function useFetchSubmissions(propertyId: string) {
           created_at: item.created_at,
           updated_at: item.updated_at,
           agent_id: item.agent_id,
-          agent: item.agent ? {
-            id: item.agent.id,
-            full_name: item.agent.full_name,
-            email: item.agent.email,
-            phone: item.agent.phone || '',
-            avatar_url: item.agent.avatar_url
-          } : undefined,
+          agent: agentData,
           replies: transformedReplies
         };
       });

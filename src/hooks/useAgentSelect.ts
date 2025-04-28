@@ -16,16 +16,34 @@ export function useAgentSelect(initialAgentId?: string) {
   useEffect(() => {
     const fetchAgents = async () => {
       if (isAdmin) {
-        const { data, error } = await supabase
-          .from('employer_profiles')
-          .select('id, first_name, last_name')
-          .or('role.eq.agent,role.eq.admin'); // Include both agent and admin roles
+        // First get all users with agent or admin role
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('user_id, role')
+          .or('role.eq.agent,role.eq.admin');
         
-        if (!error && data) {
-          setAgents(data.map(agent => ({
-            id: agent.id,
-            full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
-          })));
+        if (accountsError) {
+          console.error('Error fetching accounts:', accountsError);
+          return;
+        }
+        
+        if (accountsData && accountsData.length > 0) {
+          const agentIds = accountsData.map(account => account.user_id);
+          
+          // Then fetch their profiles from employer_profiles
+          const { data, error } = await supabase
+            .from('employer_profiles')
+            .select('id, first_name, last_name')
+            .in('id', agentIds);
+          
+          if (!error && data) {
+            setAgents(data.map(agent => ({
+              id: agent.id,
+              full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
+            })));
+          } else if (error) {
+            console.error('Error fetching employer profiles:', error);
+          }
         }
       }
     };

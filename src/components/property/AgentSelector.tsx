@@ -26,18 +26,31 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, role')
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('user_id, role')
           .or('role.eq.agent,role.eq.admin');
         
-        if (error) throw error;
+        if (accountsError) throw accountsError;
         
-        if (data) {
-          setAgents(data.map(agent => ({
-            id: agent.id || "",
-            full_name: agent.full_name || 'Unnamed Agent'
-          })));
+        if (accountsData && accountsData.length > 0) {
+          const agentIds = accountsData.map(account => account.user_id);
+          
+          const { data, error } = await supabase
+            .from('employer_profiles')
+            .select('id, first_name, last_name')
+            .in('id', agentIds);
+          
+          if (error) throw error;
+          
+          if (data) {
+            setAgents(data.map(agent => ({
+              id: agent.id || "",
+              full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
+            })));
+          }
+        } else {
+          setAgents([]);
         }
       } catch (error) {
         console.error("Error fetching agents:", error);

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,19 +58,13 @@ export default function ParticipantDashboard() {
         .select(`
           *,
           property_images(*),
-          agent:accounts!properties_agent_id_fkey(
-            id,
-            user_id,
+          agent:agent_id(
+            id, 
             email,
-            role,
-            user:employer_profiles!inner(
-              id,
-              first_name,
-              last_name,
-              phone,
-              email,
-              avatar_url
-            )
+            first_name,
+            last_name,
+            phone,
+            avatar_url
           )
         `)
         .in('id', propertyIds);
@@ -85,23 +78,23 @@ export default function ParticipantDashboard() {
       // Process agent data to match the expected format
       const processedProperties = propertyData.map(property => {
         // Transform the agent data to match what transformSupabaseData expects
-        const transformedProperty = {
-          ...property,
-          agent: property.agent ? {
-            id: property.agent.user_id,
-            full_name: property.agent.user && 
-                       typeof property.agent.user === 'object' ?
-              `${(property.agent.user as any)?.first_name || ''} ${(property.agent.user as any)?.last_name || ''}`.trim() :
-              (property.agent.email?.split('@')[0] || 'Unknown'),
+        let transformedProperty = { ...property };
+        
+        // Safely handle agent data
+        if (property.agent && typeof property.agent === 'object' && !('error' in property.agent)) {
+          const firstName = property.agent.first_name || '';
+          const lastName = property.agent.last_name || '';
+          
+          transformedProperty.agent = {
+            id: property.agent.id,
+            full_name: `${firstName} ${lastName}`.trim() || 'Unnamed Agent',
             email: property.agent.email || '',
-            phone: property.agent.user && 
-                   typeof property.agent.user === 'object' ? 
-              (property.agent.user as any)?.phone || '' : '',
-            avatar_url: property.agent.user && 
-                        typeof property.agent.user === 'object' ? 
-              (property.agent.user as any)?.avatar_url || '' : ''
-          } : null
-        };
+            phone: property.agent.phone || '',
+            avatar_url: property.agent.avatar_url || ''
+          };
+        } else {
+          transformedProperty.agent = null;
+        }
 
         return transformSupabaseData(transformedProperty);
       });

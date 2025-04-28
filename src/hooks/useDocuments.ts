@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -22,10 +23,10 @@ export function useDocuments(propertyId?: string, isGlobal = false) {
         .from('documents')
         .select(`
           *,
-          creator:profiles(id, full_name, email),
+          creator:creator_id(id, first_name, last_name, email),
           signatures:document_signatures(
             *,
-            user:profiles(id, full_name, email)
+            user:user_id(id, full_name, email)
           )
         `)
         .order('created_at', { ascending: false });
@@ -45,7 +46,51 @@ export function useDocuments(propertyId?: string, isGlobal = false) {
         throw error;
       }
 
-      return data as Document[];
+      // Transform data to match Document interface
+      return data.map((doc: any): Document => {
+        // Process creator data
+        const creatorFirstName = doc.creator?.first_name || '';
+        const creatorLastName = doc.creator?.last_name || '';
+        const creatorFullName = `${creatorFirstName} ${creatorLastName}`.trim();
+        
+        // Process signatures
+        const signatures = doc.signatures?.map((sig: any): DocumentSignature => {
+          return {
+            id: sig.id,
+            document_id: sig.document_id,
+            user_id: sig.user_id,
+            status: sig.status,
+            signature_data: sig.signature_data,
+            created_at: sig.created_at,
+            updated_at: sig.updated_at,
+            user: sig.user ? {
+              id: sig.user.id,
+              full_name: sig.user.full_name,
+              email: sig.user.email
+            } : undefined
+          };
+        }) || [];
+
+        return {
+          id: doc.id,
+          property_id: doc.property_id,
+          creator_id: doc.creator_id,
+          title: doc.title,
+          description: doc.description,
+          file_url: doc.file_url,
+          document_type: doc.document_type,
+          is_global: doc.is_global,
+          requires_signature: doc.requires_signature,
+          created_at: doc.created_at,
+          updated_at: doc.updated_at,
+          creator: doc.creator ? {
+            id: doc.creator.id,
+            full_name: creatorFullName || undefined,
+            email: doc.creator.email || undefined
+          } : undefined,
+          signatures: signatures
+        };
+      });
     },
     enabled: isGlobal || !!propertyId,
   });

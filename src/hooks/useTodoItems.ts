@@ -18,7 +18,7 @@ export function useTodoItems(propertyId?: string) {
         .select(`
           *,
           property:property_id(id, title),
-          assigned_to:assigned_to_id(id, full_name)
+          assigned_to:assigned_to_id(id, first_name, last_name)
         `)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
@@ -32,7 +32,38 @@ export function useTodoItems(propertyId?: string) {
 
       if (error) throw error;
       
-      setTodoItems(data || []);
+      // Transform data to match TodoItem interface with proper handling of assigned_to
+      const transformedItems = data.map((item: any): TodoItem => {
+        // For assigned_to, check if it's an error or null, handle accordingly
+        let assignedTo = undefined;
+        if (item.assigned_to && typeof item.assigned_to === 'object' && !('error' in item.assigned_to)) {
+          const firstName = item.assigned_to.first_name || '';
+          const lastName = item.assigned_to.last_name || '';
+          assignedTo = {
+            id: item.assigned_to.id,
+            full_name: `${firstName} ${lastName}`.trim() || 'Unnamed User'
+          };
+        }
+        
+        return {
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          due_date: item.due_date,
+          completed: item.completed,
+          property_id: item.property_id,
+          assigned_to_id: item.assigned_to_id,
+          notify_at: item.notify_at,
+          notification_sent: item.notification_sent,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          sort_order: item.sort_order,
+          property: item.property,
+          assigned_to: assignedTo
+        };
+      });
+      
+      setTodoItems(transformedItems);
     } catch (error) {
       console.error('Error fetching todo items:', error);
       toast({
