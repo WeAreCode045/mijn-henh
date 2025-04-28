@@ -56,6 +56,26 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     }
   };
 
+  // If in sidebar, use a more compact layout
+  if (inSidebar) {
+    return (
+      <div className="flex items-center space-x-3 p-1">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={user.avatar_url} />
+          <AvatarFallback>
+            <UserCircle className="h-6 w-6" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{user.full_name}</p>
+          <p className="text-xs text-white/70 truncate">{user.role}</p>
+          <p className="text-xs text-white/70 truncate">{user.email}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Default full card layout
   return (
     <Card className="border shadow-sm">
       <CardContent className="p-6">

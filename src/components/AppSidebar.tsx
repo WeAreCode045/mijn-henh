@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard, 
   Home, 
@@ -61,6 +62,9 @@ export function AppSidebar() {
     whatsapp_number: profile.whatsapp_number || undefined,
     role: (profile.role || userRole) as User['role'],
   } : null;
+
+  // For debugging
+  console.log("Sidebar user profile:", userProfile);
 
   return (
     <Sidebar>
@@ -151,7 +155,11 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="mb-4 px-4 !bg-primary text-white">
         <SidebarGroup>
-          {userProfile && <UserProfileCard user={userProfile} inSidebar={true} />}
+          {userProfile && (
+            <div className="px-2 py-3 rounded bg-primary-foreground/5">
+              <UserProfileCard user={userProfile} inSidebar={true} />
+            </div>
+          )}
           <SidebarMenu className="mt-4">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout} className="text-white hover:bg-primary-foreground/10">
