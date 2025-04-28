@@ -31,17 +31,41 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
+      const names = fullName.trim().split(' ');
+      const firstName = names[0] || '';
+      const lastName = names.slice(1).join(' ') || '';
+      
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
               full_name: fullName,
+              first_name: firstName,
+              last_name: lastName
             },
           },
         });
+        
         if (error) throw error;
+        
+        if (data.user) {
+          // Create the employer profile explicitly
+          const { error: profileError } = await supabase
+            .from('employer_profiles')
+            .insert({
+              id: data.user.id,
+              email: email,
+              first_name: firstName,
+              last_name: lastName
+            });
+            
+          if (profileError) {
+            console.error("Error creating profile:", profileError);
+          }
+        }
+        
         toast({
           title: "Success",
           description: "Please check your email to confirm your account",

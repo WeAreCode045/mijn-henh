@@ -22,27 +22,38 @@ export function useSessionInit({
   fetchUserProfile: (userId: string, role: string, email: string | undefined) => Promise<any>;
 }) {
   const handleAuthStateChange = useCallback(async (session: any) => {
+    console.log('Auth state change', session ? 'Session exists' : 'No session');
     setSession(session);
     setUser(session?.user || null);
             
     if (session?.user) {
       try {
-        const { data, error } = await supabase.from('accounts')
+        // Get the user's role from the accounts table
+        const { data: accountData, error: accountError } = await supabase.from('accounts')
           .select('role')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .maybeSingle();
+          .single();
                 
-        if (error) {
-          console.error('Error getting user role on auth change:', error);
+        if (accountError) {
+          console.error('Error getting user role on auth change:', accountError);
           setUserRole(null);
-        } else if (data) {
-          setUserRole(data.role);
-          const userProfile = await fetchUserProfile(session.user.id, data.role, session.user.email);
+        } else if (accountData) {
+          console.log('User role from accounts:', accountData.role);
+          setUserRole(accountData.role);
+          
+          // Fetch the user profile based on role
+          const userProfile = await fetchUserProfile(session.user.id, accountData.role, session.user.email);
           if (userProfile) {
+            console.log('User profile fetched:', userProfile);
             setProfile(userProfile);
+          } else {
+            console.log('No profile found for user');
           }
+        } else {
+          console.log('No account found for user');
+          setUserRole(null);
         }
       } catch (err) {
         console.error('Unexpected error in auth state change:', err);
