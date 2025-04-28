@@ -1,7 +1,6 @@
 
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
-import { LoadingSpinner } from "./common/LoadingSpinner";
 import { Spinner } from "./ui/spinner";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {

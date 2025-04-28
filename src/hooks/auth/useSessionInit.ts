@@ -32,7 +32,7 @@ export function useSessionInit({
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
                 
         if (error) {
           console.error('Error getting user role on auth change:', error);
@@ -53,43 +53,68 @@ export function useSessionInit({
       clearAuthState();
       setIsLoading(false);
     }
-  }, [clearAuthState, fetchUserProfile, setInitialized, setIsLoading, setProfile, setSession, setUser, setUserRole]);
+  }, [clearAuthState, fetchUserProfile, setIsLoading, setProfile, setSession, setUser, setUserRole]);
 
   useEffect(() => {
+    // Important flag to prevent state updates after unmounting
+    let isMounted = true;
+    
     const initSession = async () => {
+      if (!isMounted) return;
+      
       setIsLoading(true);
       
       try {
+        // Set up the auth state change listener first
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (_, session) => {
-            await handleAuthStateChange(session);
+            if (isMounted) {
+              await handleAuthStateChange(session);
+            }
           }
         );
         
+        // Then check for an existing session
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
-          clearAuthState();
+          if (isMounted) {
+            clearAuthState();
+          }
         } else if (session) {
-          await handleAuthStateChange(session);
+          if (isMounted) {
+            await handleAuthStateChange(session);
+          }
         } else {
-          setIsLoading(false);
+          if (isMounted) {
+            setIsLoading(false);
+          }
         }
         
-        setInitialized(true);
+        // Set initialized to true only if component is still mounted
+        if (isMounted) {
+          setInitialized(true);
+        }
         
         return () => {
           subscription.unsubscribe();
         };
       } catch (err) {
         console.error('Unexpected error in getSession:', err);
-        clearAuthState();
-        setIsLoading(false);
-        setInitialized(true);
+        if (isMounted) {
+          clearAuthState();
+          setIsLoading(false);
+          setInitialized(true);
+        }
       }
     };
     
     initSession();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, [clearAuthState, handleAuthStateChange, setInitialized, setIsLoading]);
 }
