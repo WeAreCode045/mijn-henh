@@ -75,8 +75,8 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
             // Add safeguards when accessing potentially undefined properties
             if (typeof userData === 'object' && userData !== null) {
               // Use nullish coalescing for safety
-              const firstName = (userData as any)?.first_name ?? '';
-              const lastName = (userData as any)?.last_name ?? '';
+              const firstName = userData && (userData as any)?.first_name ? (userData as any).first_name : '';
+              const lastName = userData && (userData as any)?.last_name ? (userData as any).last_name : '';
               
               if (firstName || lastName) {
                 agentName = `${firstName} ${lastName}`.trim();

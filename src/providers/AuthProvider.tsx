@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 role: roleData.role,
                 email: employerProfile.email || roleData.email || session.user.email,
                 full_name: fullName || session.user.email.split('@')[0],
-                avatar_url: employerProfile.avatar_url,
+                avatar_url: employerProfile.avatar_url || undefined, // Ensure avatar_url is handled properly
                 phone: employerProfile.phone,
                 whatsapp_number: employerProfile.whatsapp_number
               });
@@ -89,19 +89,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Error fetching participant profile:', profileError);
             } else if (participantProfile) {
               const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
-              // Create the profile with appropriate fields, handling avatar_url specifically
               setProfile({
                 id: session.user.id,
                 role: roleData.role,
                 email: participantProfile.email || roleData.email || session.user.email,
                 full_name: fullName || session.user.email.split('@')[0],
-                avatar_url: undefined, // This property doesn't exist in participants_profile, so set as undefined
+                avatar_url: undefined, // This property doesn't exist in participants_profile
                 phone: participantProfile.phone,
                 whatsapp_number: participantProfile.whatsapp_number
               });
             }
           }
         }
+      } else {
+        // Explicitly reset all auth-related state when no session is found
+        setSession(null);
+        setUser(null);
+        setUserRole(null);
+        setProfile(null);
       }
       
       setIsLoading(false);
@@ -143,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         role: data.role,
                         email: profileData.email || session.user.email,
                         full_name: fullName || session.user.email.split('@')[0],
-                        avatar_url: profileData.avatar_url,
+                        avatar_url: profileData.avatar_url || undefined, // Ensure avatar_url is handled properly
                         phone: profileData.phone,
                         whatsapp_number: profileData.whatsapp_number
                       });
@@ -173,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           });
       } else {
+        // Clear all auth state when the user logs out
         setUserRole(null);
         setProfile(null);
       }
@@ -207,6 +213,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) {
       throw error;
     }
+    
+    // Manually clear auth state on sign out to ensure it's reset
+    setUser(null);
+    setSession(null);
+    setUserRole(null);
+    setProfile(null);
   };
   
   const resetPassword = async (email: string) => {
