@@ -42,7 +42,8 @@ export function usePropertyParticipants(propertyId?: string) {
         // Cast to handle typing issue - we need to check if it's a valid profile object first
         let participantProfileData: ParticipantProfileData | null = null;
         
-        if (item.participant_profile && 
+        // Add a null check for item.participant_profile before trying to access its properties
+        if (item.participant_profile != null && 
             typeof item.participant_profile === 'object' && 
             !('error' in item.participant_profile)) {
           participantProfileData = item.participant_profile as ParticipantProfileData;
