@@ -29,7 +29,7 @@ import { User } from "@/types/user";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isAgent, userRole, profile: authProfile } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -78,7 +78,7 @@ export function AppSidebar() {
   }, [user?.id]);
   
   // Safely access role with fallback
-  const userRole = profile?.role || 'agent';
+  const userRole2 = profile?.role || authProfile?.role || userRole || 'agent';
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -95,26 +95,26 @@ export function AppSidebar() {
 
   useEffect(() => {
     // Redirect to participant dashboard for buyers/sellers
-    if (user && (userRole === 'seller' || userRole === 'buyer') && window.location.pathname === '/') {
+    if (user && (userRole2 === 'seller' || userRole2 === 'buyer') && window.location.pathname === '/') {
       navigate('/participant');
     }
-  }, [user, userRole, navigate]);
+  }, [user, userRole2, navigate]);
 
   if (!user) return null;
 
-  const isParticipant = userRole === 'seller' || userRole === 'buyer';
+  const isParticipant = userRole2 === 'seller' || userRole2 === 'buyer';
 
   // Create properly typed user object for the profile card
-  const userProfile: User | null = profile ? {
-    id: profile.user_id,
-    email: profile.email || '',
-    full_name: profile.full_name || '',
-    avatar_url: profile.avatar_url || undefined,
-    phone: profile.phone || undefined,
-    whatsapp_number: profile.whatsapp_number || undefined,
-    role: profile.role,
-    created_at: profile.created_at || undefined,
-    updated_at: profile.updated_at || undefined
+  const userProfile: User | null = profile || authProfile ? {
+    id: profile?.user_id || authProfile?.id || user?.id || '',
+    email: profile?.email || authProfile?.email || user?.email || '',
+    full_name: profile?.full_name || authProfile?.full_name || '',
+    avatar_url: profile?.avatar_url || authProfile?.avatar_url || undefined,
+    phone: profile?.phone || authProfile?.phone || undefined,
+    whatsapp_number: profile?.whatsapp_number || authProfile?.whatsapp_number || undefined,
+    role: profile?.role || authProfile?.role || userRole || undefined,
+    created_at: profile?.created_at || authProfile?.created_at || undefined,
+    updated_at: profile?.updated_at || authProfile?.updated_at || undefined
   } : null;
 
   return (

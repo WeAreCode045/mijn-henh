@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { User as AppUser } from '@/types/user';
 
 interface AuthContextType {
   user: User | null;
@@ -14,7 +15,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isAgent: boolean;
   userRole: string | null;
-  profile: any | null;
+  profile: AppUser | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<AppUser | null>(null);
   
   useEffect(() => {
     // Get initial session
@@ -66,11 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profileError && profileError.code !== 'PGRST116') {
               console.error('Error fetching employer profile:', profileError);
             } else if (employerProfile) {
+              const fullName = `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim();
               setProfile({
-                ...employerProfile,
+                id: session.user.id,
                 role: roleData.role,
                 email: employerProfile.email || roleData.email || session.user.email,
-                full_name: `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim()
+                full_name: fullName || session.user.email.split('@')[0],
+                avatar_url: employerProfile.avatar_url,
+                phone: employerProfile.phone,
+                whatsapp_number: employerProfile.whatsapp_number
               });
             }
           } else if (roleData.role === 'buyer' || roleData.role === 'seller') {
@@ -83,11 +88,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (profileError && profileError.code !== 'PGRST116') {
               console.error('Error fetching participant profile:', profileError);
             } else if (participantProfile) {
+              const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
               setProfile({
-                ...participantProfile,
+                id: session.user.id,
                 role: roleData.role,
                 email: participantProfile.email || roleData.email || session.user.email,
-                full_name: `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim()
+                full_name: fullName || session.user.email.split('@')[0],
+                avatar_url: participantProfile.avatar_url,
+                phone: participantProfile.phone,
+                whatsapp_number: participantProfile.whatsapp_number
               });
             }
           }
@@ -127,10 +136,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   .single()
                   .then(({ data: profileData, error: profileError }) => {
                     if (!profileError && profileData) {
+                      const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
                       setProfile({
-                        ...profileData,
+                        id: session.user.id,
                         role: data.role,
-                        full_name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim()
+                        email: profileData.email || session.user.email,
+                        full_name: fullName || session.user.email.split('@')[0],
+                        avatar_url: profileData.avatar_url,
+                        phone: profileData.phone,
+                        whatsapp_number: profileData.whatsapp_number
                       });
                     }
                   });
@@ -142,10 +156,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   .single()
                   .then(({ data: profileData, error: profileError }) => {
                     if (!profileError && profileData) {
+                      const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
                       setProfile({
-                        ...profileData,
+                        id: session.user.id,
                         role: data.role,
-                        full_name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim()
+                        email: profileData.email || session.user.email,
+                        full_name: fullName || session.user.email.split('@')[0],
+                        avatar_url: profileData.avatar_url,
+                        phone: profileData.phone,
+                        whatsapp_number: profileData.whatsapp_number
                       });
                     }
                   });
