@@ -94,7 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 role: roleData.role,
                 email: participantProfile.email || roleData.email || session.user.email,
                 full_name: fullName || session.user.email.split('@')[0],
-                avatar_url: participantProfile.avatar_url,
+                // Use optional chaining to safely access properties that might not exist
+                avatar_url: participantProfile.avatar_url || undefined,
                 phone: participantProfile.phone,
                 whatsapp_number: participantProfile.whatsapp_number
               });
@@ -162,7 +163,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         role: data.role,
                         email: profileData.email || session.user.email,
                         full_name: fullName || session.user.email.split('@')[0],
-                        avatar_url: profileData.avatar_url,
+                        // Use optional chaining or undefined for properties that might not exist
+                        avatar_url: profileData.avatar_url || undefined,
                         phone: profileData.phone,
                         whatsapp_number: profileData.whatsapp_number
                       });

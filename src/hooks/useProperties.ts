@@ -69,8 +69,17 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
           let agentName = 'Unknown';
           
           if (agentData && agentData.user) {
-            if (agentData.user.first_name || agentData.user.last_name) {
-              agentName = `${agentData.user.first_name || ''} ${agentData.user.last_name || ''}`.trim();
+            const userData = agentData.user;
+            // Add safeguards when accessing potentially undefined properties
+            if (typeof userData === 'object' && userData !== null) {
+              const firstName = userData.first_name || '';
+              const lastName = userData.last_name || '';
+              
+              if (firstName || lastName) {
+                agentName = `${firstName} ${lastName}`.trim();
+              } else if (agentData.email) {
+                agentName = agentData.email.split('@')[0];
+              }
             } else if (agentData.email) {
               agentName = agentData.email.split('@')[0];
             }
