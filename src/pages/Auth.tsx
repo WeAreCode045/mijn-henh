@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,18 +16,14 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, initialized } = useAuth();
 
-  // Check if user is already logged in and redirect
+  // Redirect if already authenticated
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/', { replace: true });
-      }
-    };
-    
-    checkSession();
-  }, [navigate]);
+    if (initialized && user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, initialized, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

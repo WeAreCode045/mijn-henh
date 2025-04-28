@@ -65,7 +65,27 @@ export function useSessionInit({
       setIsLoading(true);
       
       try {
-        // Set up the auth state change listener first
+        // First check for an existing session
+        const { data: { session: existingSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Error getting session:', sessionError);
+          if (isMounted) {
+            clearAuthState();
+            setIsLoading(false);
+          }
+        } else if (existingSession) {
+          // We have a session, apply it immediately
+          if (isMounted) {
+            await handleAuthStateChange(existingSession);
+          }
+        } else {
+          if (isMounted) {
+            setIsLoading(false);
+          }
+        }
+        
+        // Then set up the auth state change listener for future changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (_, session) => {
             if (isMounted) {
@@ -74,34 +94,17 @@ export function useSessionInit({
           }
         );
         
-        // Then check for an existing session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting session:', error);
-          if (isMounted) {
-            clearAuthState();
-          }
-        } else if (session) {
-          if (isMounted) {
-            await handleAuthStateChange(session);
-          }
-        } else {
-          if (isMounted) {
-            setIsLoading(false);
-          }
-        }
-        
         // Set initialized to true only if component is still mounted
         if (isMounted) {
           setInitialized(true);
         }
         
+        // Return cleanup function
         return () => {
           subscription.unsubscribe();
         };
       } catch (err) {
-        console.error('Unexpected error in getSession:', err);
+        console.error('Unexpected error in initSession:', err);
         if (isMounted) {
           clearAuthState();
           setIsLoading(false);
