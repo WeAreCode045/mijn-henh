@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,12 +83,12 @@ export default function ParticipantDashboard() {
         
         // Safely handle agent data
         if (property.agent && typeof property.agent === 'object' && !('error' in property.agent)) {
-          const firstName = property.agent.first_name || '';
-          const lastName = property.agent.last_name || '';
-          
+          // We don't set full_name directly as it's not in the type definition
+          // transformSupabaseData will handle creating name from first_name and last_name
           transformedProperty.agent = {
             id: property.agent.id,
-            full_name: `${firstName} ${lastName}`.trim() || 'Unnamed Agent',
+            first_name: property.agent.first_name || '',
+            last_name: property.agent.last_name || '',
             email: property.agent.email || '',
             phone: property.agent.phone || '',
             avatar_url: property.agent.avatar_url || ''
