@@ -1,24 +1,39 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ParticipantProfileData } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
 
-export function useParticipantProfile(userId?: string) {
+export interface EmployerProfileData {
+  id: string;
+  email?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  whatsapp_number?: string | null;
+  avatar_url?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export function useEmployerProfile(userId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['participant-profile', userId],
+    queryKey: ['employer-profile', userId],
     queryFn: async () => {
       if (!userId) return null;
 
-      // Check if user has buyer or seller role in users_roles table
+      // Check if user has admin or agent role in users_roles table
       const { data: roleData, error: roleError } = await supabase
         .from('users_roles')
         .select('role')
         .eq('user_id', userId)
-        .in('role', ['buyer', 'seller'])
+        .in('role', ['admin', 'agent'])
         .single();
 
       if (roleError && roleError.code !== 'PGRST116') {
@@ -26,22 +41,21 @@ export function useParticipantProfile(userId?: string) {
         throw roleError;
       }
 
-      // Only proceed if user is a buyer or seller
+      // Only proceed if user is an admin or agent
       if (!roleData) {
-        console.log("User is not a buyer or seller");
+        console.log("User is not an admin or agent");
         return null;
       }
 
       const { data, error } = await supabase
-        .from('participants_profile')
+        .from('employer_profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
       if (error) {
-        console.error('Error fetching participant profile:', error);
+        console.error('Error fetching employer profile:', error);
         
-        // If the profile doesn't exist, we should return null rather than throwing
         if (error.code === 'PGRST116') { // No rows returned
           return null;
         }
@@ -49,18 +63,18 @@ export function useParticipantProfile(userId?: string) {
         throw error;
       }
 
-      return data as ParticipantProfileData;
+      return data as EmployerProfileData;
     },
     enabled: !!userId,
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: async (profileData: Partial<ParticipantProfileData>) => {
+    mutationFn: async (profileData: Partial<EmployerProfileData>) => {
       if (!userId) throw new Error('User ID is required');
 
       // Check if profile exists first
       const { data: existingProfile } = await supabase
-        .from('participants_profile')
+        .from('employer_profiles')
         .select('id')
         .eq('id', userId)
         .single();
@@ -70,7 +84,7 @@ export function useParticipantProfile(userId?: string) {
       if (existingProfile) {
         // Update existing profile
         const { data, error } = await supabase
-          .from('participants_profile')
+          .from('employer_profiles')
           .update(profileData)
           .eq('id', userId)
           .select('*')
@@ -81,7 +95,7 @@ export function useParticipantProfile(userId?: string) {
       } else {
         // Insert new profile
         const { data, error } = await supabase
-          .from('participants_profile')
+          .from('employer_profiles')
           .insert({ id: userId, ...profileData })
           .select('*')
           .single();
@@ -97,7 +111,7 @@ export function useParticipantProfile(userId?: string) {
         title: 'Profile Updated',
         description: 'Your profile has been updated successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ['participant-profile', userId] });
+      queryClient.invalidateQueries({ queryKey: ['employer-profile', userId] });
     },
     onError: (error) => {
       toast({

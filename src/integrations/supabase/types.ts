@@ -255,6 +255,54 @@ export type Database = {
           },
         ]
       }
+      employer_profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          postal_code: string | null
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       participants_profile: {
         Row: {
           address: string | null
@@ -992,6 +1040,44 @@ export type Database = {
           },
         ]
       }
+      users_roles: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string | null
+          role: Database["public"]["Enums"]["user_type"]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id?: string | null
+          role: Database["public"]["Enums"]["user_type"]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string | null
+          role?: Database["public"]["Enums"]["user_type"]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_roles_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webview_permissions: {
         Row: {
           created_at: string
@@ -1053,6 +1139,7 @@ export type Database = {
     }
     Enums: {
       user_role: "admin" | "agent" | "seller" | "buyer"
+      user_type: "admin" | "agent" | "buyer" | "seller"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1169,6 +1256,7 @@ export const Constants = {
   public: {
     Enums: {
       user_role: ["admin", "agent", "seller", "buyer"],
+      user_type: ["admin", "agent", "buyer", "seller"],
     },
   },
 } as const

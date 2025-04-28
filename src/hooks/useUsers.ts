@@ -5,8 +5,6 @@ import { User } from "@/types/user";
 import { useToast } from "@/components/ui/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
-type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
-
 export function useUsers() {
   const { toast } = useToast();
 
@@ -15,39 +13,60 @@ export function useUsers() {
     queryFn: async () => {
       console.log("Fetching users in useUsers hook");
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
+        // Query from both employer_profiles for admin/agent users
+        const { data: employerData, error: employerError } = await supabase
+          .from("employer_profiles")
+          .select(`
+            id,
+            email,
+            first_name,
+            last_name,
+            phone,
+            whatsapp_number,
+            avatar_url,
+            address,
+            city,
+            postal_code,
+            country,
+            created_at,
+            updated_at,
+            users_roles!inner(role)
+          `)
           .order("created_at", { ascending: false });
 
-        if (error) {
-          console.error("Error fetching users:", error);
-          throw error;
+        if (employerError) {
+          console.error("Error fetching employer profiles:", employerError);
+          throw employerError;
         }
         
-        console.log("Users data from supabase:", data);
+        console.log("Employer profiles data from supabase:", employerData);
         
-        if (!data || data.length === 0) {
+        if (!employerData || employerData.length === 0) {
           console.log("No users found in database");
           return [];
         }
         
         // Transform the data to match the User type
-        const transformedData: User[] = (data as ProfileRow[]).map(user => ({
-          id: user.id,
-          email: user.email || '',
-          full_name: user.full_name || '',
-          phone: user.phone || '',
-          whatsapp_number: user.whatsapp_number || '',
-          role: user.role as "admin" | "agent" | "seller" | "buyer" | undefined,
-          avatar_url: user.avatar_url || '',
-          address: user.address || '',
-          city: user.city || '',
-          postal_code: user.postal_code || '',
-          country: user.country || '',
-          created_at: user.created_at || '',
-          updated_at: user.updated_at || ''
-        }));
+        const transformedData: User[] = employerData.map(profile => {
+          // Get the role from the users_roles relation
+          const role = profile.users_roles[0]?.role || 'agent';
+          
+          return {
+            id: profile.id,
+            email: profile.email || '',
+            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+            phone: profile.phone || '',
+            whatsapp_number: profile.whatsapp_number || '',
+            role: role,
+            avatar_url: profile.avatar_url || '',
+            address: profile.address || '',
+            city: profile.city || '',
+            postal_code: profile.postal_code || '',
+            country: profile.country || '',
+            created_at: profile.created_at || '',
+            updated_at: profile.updated_at || ''
+          };
+        });
 
         console.log("Transformed users:", transformedData);
         return transformedData;

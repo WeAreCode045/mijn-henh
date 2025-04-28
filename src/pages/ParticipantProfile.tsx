@@ -67,7 +67,36 @@ export default function ParticipantProfile() {
       setIsLoading(true);
       
       try {
-        // First check if there's a participant profile
+        // First check if user has a participant role in users_roles table
+        const { data: roleData, error: roleError } = await supabase
+          .from('users_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .in('role', ['buyer', 'seller'])
+          .single();
+
+        if (roleError && roleError.code !== 'PGRST116') {
+          console.error('Error checking user role:', roleError);
+          toast({
+            title: 'Error',
+            description: 'Failed to verify your participant status',
+            variant: 'destructive',
+          });
+        }
+
+        // Only proceed if user is a buyer or seller
+        if (!roleData) {
+          console.log("User is not a buyer or seller");
+          toast({
+            title: 'Access Denied',
+            description: 'You do not have participant access',
+            variant: 'destructive',
+          });
+          navigate('/');
+          return;
+        }
+
+        // Check if there's a participant profile
         const { data: participantProfile, error } = await supabase
           .from('participants_profile')
           .select('*')
@@ -108,16 +137,12 @@ export default function ParticipantProfile() {
           });
         } else {
           // Get email from auth.users via profiles table
-          const { data: userProfile } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('id', user.id)
-            .single();
-
-          if (userProfile?.email) {
+          const { data: authUserData } = await supabase.auth.getUser();
+          
+          if (authUserData?.user?.email) {
             setProfileData(prev => ({
               ...prev,
-              email: userProfile.email || '',
+              email: authUserData.user.email || '',
             }));
           }
         }

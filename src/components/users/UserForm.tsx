@@ -27,6 +27,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
     email: initialData?.email || "",
     password: "",
     full_name: initialData?.full_name || "",
+    first_name: initialData?.full_name?.split(' ')[0] || "",
+    last_name: initialData?.full_name?.split(' ').slice(1).join(' ') || "",
     phone: initialData?.phone || "",
     whatsapp_number: initialData?.whatsapp_number || "",
     role: (initialData?.role as "admin" | "agent") || "agent",
@@ -82,19 +84,32 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           photoUrl = await uploadPhoto(initialData.id);
         }
 
-        const { error } = await supabase
-          .from("profiles")
+        // Update employer_profiles table
+        const { error: profileError } = await supabase
+          .from("employer_profiles")
           .update({
-            full_name: formData.full_name,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
             phone: formData.phone,
             whatsapp_number: formData.whatsapp_number,
-            role: formData.role,
             updated_at: new Date().toISOString(),
             ...(photoUrl && { avatar_url: photoUrl })
           })
           .eq("id", initialData.id);
 
-        if (error) throw error;
+        if (profileError) throw profileError;
+        
+        // Update user role in users_roles table
+        const { error: roleError } = await supabase
+          .from("users_roles")
+          .update({
+            role: formData.role,
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", initialData.id)
+          .in("role", ["admin", "agent"]);
+          
+        if (roleError) throw roleError;
 
         toast({
           title: "Success",
@@ -106,7 +121,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           password: formData.password,
           options: {
             data: {
-              full_name: formData.full_name,
+              full_name: `${formData.first_name} ${formData.last_name}`.trim(),
             },
           },
         });
@@ -119,11 +134,13 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             photoUrl = await uploadPhoto(authData.user.id);
           }
 
+          // Update employer_profiles table (the trigger should have created an initial entry)
           const { error: profileError } = await supabase
-            .from("profiles")
+            .from("employer_profiles")
             .update({
-              full_name: formData.full_name,
-              role: formData.role,
+              first_name: formData.first_name,
+              last_name: formData.last_name,
+              email: formData.email,
               phone: formData.phone,
               whatsapp_number: formData.whatsapp_number,
               updated_at: new Date().toISOString(),
@@ -132,6 +149,19 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             .eq("id", authData.user.id);
 
           if (profileError) throw profileError;
+          
+          // Update user role in users_roles table if needed
+          if (formData.role === 'admin') {
+            const { error: roleError } = await supabase
+              .from("users_roles")
+              .update({
+                role: formData.role,
+                updated_at: new Date().toISOString()
+              })
+              .eq("user_id", authData.user.id);
+              
+            if (roleError) throw roleError;
+          }
         }
 
         toast({
@@ -161,7 +191,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         <div className="flex items-center gap-4">
           <Avatar className="w-20 h-20">
             <AvatarImage src={photoPreview} alt="Profile photo" />
-            <AvatarFallback>{formData.full_name?.charAt(0) || "U"}</AvatarFallback>
+            <AvatarFallback>{formData.first_name?.charAt(0) || "U"}</AvatarFallback>
           </Avatar>
           <Input
             type="file"
@@ -200,12 +230,23 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         </div>
       )}
       <div className="space-y-2">
-        <Label htmlFor="fullName">Full Name</Label>
+        <Label htmlFor="firstName">First Name</Label>
         <Input
-          id="fullName"
-          value={formData.full_name}
+          id="firstName"
+          value={formData.first_name}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, full_name: e.target.value }))
+            setFormData((prev) => ({ ...prev, first_name: e.target.value }))
+          }
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="lastName">Last Name</Label>
+        <Input
+          id="lastName"
+          value={formData.last_name}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, last_name: e.target.value }))
           }
           required
         />
