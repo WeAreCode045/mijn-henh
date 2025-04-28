@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard, 
   Home, 
@@ -25,12 +24,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 import { useState } from "react";
-import { User, UserBase } from "@/types/user";
+import { User } from "@/types/user";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin, isAgent, userRole, profile: authProfile, signOut } = useAuth();
+  const { user, isAdmin, isAgent, userRole, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
 
@@ -53,15 +52,14 @@ export function AppSidebar() {
   };
 
   // Create properly typed user object for the profile card
-  const userProfile: User | null = authProfile ? {
-    id: authProfile.id || user?.id || '',
-    email: authProfile.email || user?.email || '',
-    full_name: authProfile.full_name || '',
-    avatar_url: authProfile.avatar_url || undefined,
-    phone: authProfile.phone || undefined,
-    whatsapp_number: authProfile.whatsapp_number || undefined,
-    // Ensure role is one of the allowed types
-    role: (authProfile.role || userRole) as UserBase['role'],
+  const userProfile: User | null = profile ? {
+    id: profile.id || user?.id || '',
+    email: profile.email || user?.email || '',
+    full_name: profile.full_name || '',
+    avatar_url: profile.avatar_url || undefined,
+    phone: profile.phone || undefined,
+    whatsapp_number: profile.whatsapp_number || undefined,
+    role: (profile.role || userRole) as User['role'],
   } : null;
 
   return (
