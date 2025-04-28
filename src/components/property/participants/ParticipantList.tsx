@@ -20,8 +20,11 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
   const { participants, isLoading, removeParticipant, updateParticipantStatus, resendInvite } = usePropertyParticipants(propertyId);
   const { toast } = useToast();
 
+  console.log("ParticipantList - All participants:", participants);
+  
   // Filter participants by role
   const filteredParticipants = participants?.filter(p => p.role === role) || [];
+  console.log(`ParticipantList - Filtered ${role}s:`, filteredParticipants);
   
   const handleResendInvite = async (participantId: string, email: string) => {
     try {

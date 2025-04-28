@@ -40,12 +40,16 @@ export function ParticipantInviteDialog({
     setIsSubmitting(true);
     
     try {
+      console.log(`Adding ${role} with email ${email} to property ${propertyId}`);
+      
       // First add participant
       const result = await addParticipant({
         email,
         role,
         propertyId,
       });
+      
+      console.log("Participant added result:", result);
       
       // Then get the property details to send in the invitation
       const { data: property } = await supabase
