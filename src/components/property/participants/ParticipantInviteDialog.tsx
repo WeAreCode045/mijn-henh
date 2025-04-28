@@ -65,7 +65,8 @@ export function ParticipantInviteDialog({
         .single();
       
       const siteUrl = window.location.origin;
-      const inviteLink = `${siteUrl}/auth?email=${encodeURIComponent(email)}&redirect=/participant`;
+      // More secure invite link without email in URL
+      const inviteLink = `${siteUrl}/auth?redirect=/participant`;
       
       // Send initial invitation email
       await sendEmail({

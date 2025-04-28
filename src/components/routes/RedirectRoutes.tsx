@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Route, Navigate, useParams } from "react-router-dom";
+import { Route, Navigate, useParams, useSearchParams } from "react-router-dom";
 
 // This component handles the redirect from /property/:id to dashboard with tab=property
 function PropertyTabRedirect() {
@@ -20,6 +20,14 @@ function PropertyContentRedirect() {
   return <Navigate to={`/property/${id}/content/general`} replace />;
 }
 
+// This component securely redirects from auth to participant dashboard
+// It will only use the redirect parameter and not pass email in the URL
+function AuthParticipantRedirect() {
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
+  return <Navigate to={redirect} replace />;
+}
+
 export const RedirectRoutes = [
   <Route 
     key="property-redirect"
@@ -37,5 +45,11 @@ export const RedirectRoutes = [
     key="property-content-redirect"
     path="/property/:id/content" 
     element={<PropertyContentRedirect />} 
+  />,
+
+  <Route
+    key="auth-participant-redirect"
+    path="/auth" 
+    element={<AuthParticipantRedirect />}
   />
 ];

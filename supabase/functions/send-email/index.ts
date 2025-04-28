@@ -63,6 +63,9 @@ serve(async (req) => {
       const fromEmail = agencySettings?.resend_from_email || 'onboarding@resend.dev';
       const fromName = agencySettings?.resend_from_name || 'Property Portal';
 
+      // More secure link that doesn't expose the email in the URL
+      const inviteLink = `${Deno.env.get('SITE_URL') || 'https://app.hausenhuis.com'}/auth?redirect=/participant`;
+
       const { error } = await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
         to: participant.user.email,
@@ -71,7 +74,7 @@ serve(async (req) => {
           <h1>You have been invited to join a property</h1>
           <p>You have been invited to join ${participant.property.title} as a ${participant.role}.</p>
           <p>Click the link below to accept the invitation:</p>
-          <a href="${Deno.env.get('SITE_URL') || 'https://app.hausenhuis.com'}/participant">Accept Invitation</a>
+          <a href="${inviteLink}">Accept Invitation</a>
         `,
       });
 
