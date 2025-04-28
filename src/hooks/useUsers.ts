@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
 import { useToast } from "@/components/ui/use-toast";
-import type { Database } from "@/integrations/supabase/types";
 
 export function useUsers() {
   const { toast } = useToast();
@@ -13,7 +12,7 @@ export function useUsers() {
     queryFn: async () => {
       console.log("Fetching users in useUsers hook");
       try {
-        // Query from both employer_profiles for admin/agent users
+        // Query from both employer_profiles and accounts for admin/agent users
         const { data: employerData, error: employerError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -30,7 +29,7 @@ export function useUsers() {
             country,
             created_at,
             updated_at,
-            users_roles!inner(role)
+            accounts!inner(role)
           `)
           .order("created_at", { ascending: false });
 
@@ -48,8 +47,9 @@ export function useUsers() {
         
         // Transform the data to match the User type
         const transformedData: User[] = employerData.map(profile => {
-          // Get the role from the users_roles relation
-          const role = profile.users_roles[0]?.role || 'agent';
+          // Get the role from the accounts relation
+          const userAccount = Array.isArray(profile.accounts) ? profile.accounts[0] : profile.accounts;
+          const role = userAccount?.role || 'agent';
           
           return {
             id: profile.id,

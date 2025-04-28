@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accounts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          property_id: string | null
+          role: Database["public"]["Enums"]["user_type"]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          property_id?: string | null
+          role: Database["public"]["Enums"]["user_type"]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          property_id?: string | null
+          role?: Database["public"]["Enums"]["user_type"]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_settings: {
         Row: {
           address: string | null
@@ -449,6 +490,7 @@ export type Database = {
           nearby_places: Json | null
           notes: string | null
           object_id: string | null
+          participants: Json | null
           price: string | null
           propertyType: string | null
           shortDescription: string | null
@@ -487,6 +529,7 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
+          participants?: Json | null
           price?: string | null
           propertyType?: string | null
           shortDescription?: string | null
@@ -525,6 +568,7 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
+          participants?: Json | null
           price?: string | null
           propertyType?: string | null
           shortDescription?: string | null
@@ -540,7 +584,7 @@ export type Database = {
             foreignKeyName: "properties_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1033,44 +1077,6 @@ export type Database = {
           },
           {
             foreignKeyName: "todo_items_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users_roles: {
-        Row: {
-          created_at: string
-          id: string
-          property_id: string | null
-          role: Database["public"]["Enums"]["user_type"]
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          property_id?: string | null
-          role: Database["public"]["Enums"]["user_type"]
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          property_id?: string | null
-          role?: Database["public"]["Enums"]["user_type"]
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "users_roles_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
