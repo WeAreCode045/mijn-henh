@@ -68,13 +68,15 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
           const agentData = item.agent || null;
           let agentName = 'Unknown';
           
-          if (agentData && agentData.user) {
+          if (agentData) {
+            // Use safe null checks and optional chaining
             const userData = agentData.user;
+            
             // Add safeguards when accessing potentially undefined properties
             if (typeof userData === 'object' && userData !== null) {
-              // Use optional chaining and nullish coalescing for safety
-              const firstName = userData?.first_name ?? '';
-              const lastName = userData?.last_name ?? '';
+              // Use nullish coalescing for safety
+              const firstName = (userData as any)?.first_name ?? '';
+              const lastName = (userData as any)?.last_name ?? '';
               
               if (firstName || lastName) {
                 agentName = `${firstName} ${lastName}`.trim();
