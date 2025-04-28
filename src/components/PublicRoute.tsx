@@ -1,12 +1,7 @@
 
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
-
-const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-estate-800"></div>
-  </div>
-);
+import { LoadingSpinner } from "./common/LoadingSpinner";
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -16,8 +11,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (user) {
-    // Use replace prop to prevent back navigation issues
-    // Remove any potential circular redirects
+    // Always redirect to root with replace to prevent navigation issues
     return <Navigate to="/" replace />;
   }
 

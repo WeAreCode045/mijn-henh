@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,14 +15,12 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Check if user is already logged in and redirect
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        // Always redirect to home to avoid potential redirect loops
         navigate('/', { replace: true });
       }
     };
@@ -66,7 +63,6 @@ export default function Auth() {
             description: "Logged in successfully",
           });
           
-          // Always redirect to home to avoid potential redirect loops
           navigate('/', { replace: true });
         }
       }

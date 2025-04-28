@@ -12,6 +12,7 @@ import { MainRoutes } from "@/components/routes/MainRoutes";
 import { RedirectRoutes } from "@/components/routes/RedirectRoutes";
 import { FallbackRoutes } from "@/components/routes/FallbackRoutes";
 import { WebViewRoutes } from "@/components/routes/WebViewRoutes";
+import { AuthRoutes } from "@/components/routes/AuthRoutes";
 
 // Create a QueryClient instance with default options
 const queryClient = new QueryClient({
@@ -27,6 +28,10 @@ const queryClient = new QueryClient({
 // Convert the JSX route elements to route objects that createBrowserRouter expects
 const router = createBrowserRouter([
   ...MainRoutes.map(route => ({
+    path: route.props.path,
+    element: route.props.element
+  })),
+  ...AuthRoutes.map(route => ({
     path: route.props.path,
     element: route.props.element
   })),

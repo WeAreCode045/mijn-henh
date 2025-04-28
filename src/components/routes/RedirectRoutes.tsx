@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Route, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Route, Navigate, useParams } from "react-router-dom";
 
 // This component handles the redirect from /property/:id to dashboard with tab=property
 function PropertyTabRedirect() {
@@ -20,10 +20,9 @@ function PropertyContentRedirect() {
   return <Navigate to={`/property/${id}/content/general`} replace />;
 }
 
-// This component securely redirects from auth to participant dashboard
+// This component handles redirects from auth page when user is already authenticated
 function AuthParticipantRedirect() {
-  // Remove the dependency on searchParams which might be causing the loop
-  // Use a static path instead to prevent any possibility of infinite redirects
+  // Removed searchParams usage entirely, hardcode to home route with replace
   return <Navigate to="/" replace />;
 }
 
