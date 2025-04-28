@@ -17,14 +17,14 @@ import {
   SidebarGroup, 
   SidebarGroupLabel, 
   SidebarMenu, 
-  SidebarMenuButton, 
   SidebarMenuItem,
+  SidebarMenuButton, 
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { User, UserBase } from "@/types/user";
 
 export function AppSidebar() {
