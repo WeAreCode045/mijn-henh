@@ -29,15 +29,15 @@ export function TodoAssignmentFields({
   useEffect(() => {
     const fetchAgents = async () => {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .order('full_name');
+        .from('employer_profiles')
+        .select('id, first_name, last_name')
+        .order('first_name');
         
       if (!error && data) {
         // Make sure all agents have valid ids
         setAgents(data.map(agent => ({
           id: agent.id || `agent-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          full_name: agent.full_name || "Unnamed Agent"
+          full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || "Unnamed Agent"
         })));
       }
     };

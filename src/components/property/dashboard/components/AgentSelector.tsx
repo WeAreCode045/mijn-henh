@@ -27,8 +27,8 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
       setIsLoadingAgents(true);
       try {
         const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, role')
+          .from('employer_profiles')
+          .select('id, first_name, last_name')
           .or('role.eq.agent,role.eq.admin');
         
         if (error) throw error;
@@ -36,7 +36,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         if (data) {
           setAgents(data.map(agent => ({
             id: agent.id || "",
-            full_name: agent.full_name || 'Unnamed Agent'
+            full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
           })));
         }
       } catch (error) {

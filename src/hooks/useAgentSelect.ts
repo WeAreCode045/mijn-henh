@@ -17,12 +17,15 @@ export function useAgentSelect(initialAgentId?: string) {
     const fetchAgents = async () => {
       if (isAdmin) {
         const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name')
+          .from('employer_profiles')
+          .select('id, first_name, last_name')
           .or('role.eq.agent,role.eq.admin'); // Include both agent and admin roles
         
         if (!error && data) {
-          setAgents(data);
+          setAgents(data.map(agent => ({
+            id: agent.id,
+            full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
+          })));
         }
       }
     };

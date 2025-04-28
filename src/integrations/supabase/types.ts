@@ -284,7 +284,7 @@ export type Database = {
             foreignKeyName: "documents_creator_id_fkey"
             columns: ["creator_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "employer_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -584,7 +584,7 @@ export type Database = {
             foreignKeyName: "properties_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "employer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -637,7 +637,7 @@ export type Database = {
             foreignKeyName: "property_agenda_items_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "employer_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -694,7 +694,7 @@ export type Database = {
             foreignKeyName: "property_contact_submissions_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "employer_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -980,6 +980,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "property_submission_replies_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "employer_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "property_submission_replies_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
@@ -1072,7 +1079,7 @@ export type Database = {
             foreignKeyName: "todo_items_assigned_to_id_fkey"
             columns: ["assigned_to_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "employer_profiles"
             referencedColumns: ["id"]
           },
           {
