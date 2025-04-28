@@ -39,6 +39,7 @@ export function usePropertyParticipants(propertyId?: string) {
       return data.map(item => {
         // Make sure we handle potentially undefined data
         const userProfile = item.user || {};
+        
         // Cast to handle typing issue - we need to check if it's a valid profile object first
         let participantProfileData: ParticipantProfileData | null = null;
         
@@ -49,7 +50,8 @@ export function usePropertyParticipants(propertyId?: string) {
           !('error' in item.participant_profile)
         );
         
-        if (isValidProfile) {
+        if (isValidProfile && item.participant_profile) {
+          // Use type assertion after validation to ensure TypeScript understands this is safe
           participantProfileData = item.participant_profile as ParticipantProfileData;
         }
         
@@ -79,7 +81,7 @@ export function usePropertyParticipants(propertyId?: string) {
                   userProfile.role : item.role
           }
         };
-      }) as unknown as PropertyParticipant[];
+      }) as PropertyParticipant[];
     },
     enabled: !!propertyId,
   });
