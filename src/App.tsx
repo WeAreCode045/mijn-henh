@@ -3,11 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, RouterProvider, createBrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { AuthProvider } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client"; 
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { MainRoutes } from "@/components/routes/MainRoutes";
 import { RedirectRoutes } from "@/components/routes/RedirectRoutes";
 import { FallbackRoutes } from "@/components/routes/FallbackRoutes";
@@ -22,11 +22,21 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create a custom router that includes all routes from different sources
+// Create a custom router that includes all routes
+// Convert the JSX route elements to route objects that createBrowserRouter expects
 const router = createBrowserRouter([
-  ...MainRoutes,
-  ...RedirectRoutes,
-  ...FallbackRoutes
+  ...MainRoutes.map(route => ({
+    path: route.props.path,
+    element: route.props.element
+  })),
+  ...RedirectRoutes.map(route => ({
+    path: route.props.path,
+    element: route.props.element
+  })),
+  ...FallbackRoutes.map(route => ({
+    path: route.props.path,
+    element: route.props.element
+  }))
 ]);
 
 const App = () => (
