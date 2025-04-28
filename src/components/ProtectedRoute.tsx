@@ -16,8 +16,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" />;
+    // Use replace prop to prevent back navigation issues
+    return <Navigate to="/auth" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 }

@@ -14,7 +14,8 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (user) {
-    return <Navigate to="/" />;
+    // Use replace prop to prevent back navigation issues
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

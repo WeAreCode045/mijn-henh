@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { User as AppUser } from '@/types/user';
@@ -26,208 +26,204 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [profile, setProfile] = useState<AppUser | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  
+  // Fetch user profile based on role
+  const fetchUserProfile = useCallback(async (userId: string, role: string, email: string) => {
+    if (role === 'admin' || role === 'agent') {
+      const { data: employerProfile, error: profileError } = await supabase
+        .from('employer_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+        
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching employer profile:', profileError);
+      } else if (employerProfile) {
+        const fullName = `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim();
+        setProfile({
+          id: userId,
+          role: role,
+          email: employerProfile.email || email,
+          full_name: fullName || email.split('@')[0],
+          avatar_url: employerProfile.avatar_url || undefined,
+          phone: employerProfile.phone,
+          whatsapp_number: employerProfile.whatsapp_number
+        });
+      }
+    } else if (role === 'buyer' || role === 'seller') {
+      const { data: participantProfile, error: profileError } = await supabase
+        .from('participants_profile')
+        .select('*')
+        .eq('id', userId)
+        .single();
+        
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching participant profile:', profileError);
+      } else if (participantProfile) {
+        const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
+        setProfile({
+          id: userId,
+          role: role,
+          email: participantProfile.email || email,
+          full_name: fullName || email.split('@')[0],
+          avatar_url: undefined,
+          phone: participantProfile.phone,
+          whatsapp_number: participantProfile.whatsapp_number
+        });
+      }
+    }
+  }, []);
+  
+  // Clear auth state helper function
+  const clearAuthState = useCallback(() => {
+    setUser(null);
+    setSession(null);
+    setUserRole(null);
+    setProfile(null);
+  }, []);
   
   useEffect(() => {
-    // Get initial session
+    // Get initial session only once on mount
     const getSession = async () => {
       setIsLoading(true);
       
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-      }
-      
-      if (session) {
-        setSession(session);
-        setUser(session.user);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        // Get user role from the accounts table
-        const { data: roleData, error: roleError } = await supabase
-          .from('accounts')
-          .select('role, email')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-          
-        if (roleError) {
-          console.error('Error getting user role:', roleError);
-        } else if (roleData) {
-          setUserRole(roleData.role);
-          
-          // Get additional profile information based on user role
-          if (roleData.role === 'admin' || roleData.role === 'agent') {
-            const { data: employerProfile, error: profileError } = await supabase
-              .from('employer_profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (profileError && profileError.code !== 'PGRST116') {
-              console.error('Error fetching employer profile:', profileError);
-            } else if (employerProfile) {
-              const fullName = `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim();
-              setProfile({
-                id: session.user.id,
-                role: roleData.role,
-                email: employerProfile.email || roleData.email || session.user.email,
-                full_name: fullName || session.user.email.split('@')[0],
-                avatar_url: employerProfile.avatar_url || undefined, // Ensure avatar_url is handled properly
-                phone: employerProfile.phone,
-                whatsapp_number: employerProfile.whatsapp_number
-              });
-            }
-          } else if (roleData.role === 'buyer' || roleData.role === 'seller') {
-            const { data: participantProfile, error: profileError } = await supabase
-              .from('participants_profile')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (profileError && profileError.code !== 'PGRST116') {
-              console.error('Error fetching participant profile:', profileError);
-            } else if (participantProfile) {
-              const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
-              setProfile({
-                id: session.user.id,
-                role: roleData.role,
-                email: participantProfile.email || roleData.email || session.user.email,
-                full_name: fullName || session.user.email.split('@')[0],
-                avatar_url: undefined, // This property doesn't exist in participants_profile
-                phone: participantProfile.phone,
-                whatsapp_number: participantProfile.whatsapp_number
-              });
-            }
-          }
+        if (error) {
+          console.error('Error getting session:', error);
+          clearAuthState();
+          setIsLoading(false);
+          return;
         }
-      } else {
-        // Explicitly reset all auth-related state when no session is found
-        setSession(null);
-        setUser(null);
-        setUserRole(null);
-        setProfile(null);
+        
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+          
+          // Get user role from the accounts table
+          const { data: roleData, error: roleError } = await supabase
+            .from('accounts')
+            .select('role, email')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+            
+          if (roleError) {
+            console.error('Error getting user role:', roleError);
+          } else if (roleData) {
+            setUserRole(roleData.role);
+            // Get additional profile information based on user role
+            await fetchUserProfile(session.user.id, roleData.role, session.user.email);
+          }
+        } else {
+          clearAuthState();
+        }
+      } catch (err) {
+        console.error('Unexpected error in getSession:', err);
+        clearAuthState();
+      } finally {
+        setIsLoading(false);
+        setInitialized(true);
       }
-      
-      setIsLoading(false);
     };
     
     getSession();
     
     // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user || null);
-      
-      // Update role on auth state change
-      if (session?.user) {
-        supabase.from('accounts')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-          .then(({ data, error }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSession(session);
+        setUser(session?.user || null);
+        
+        if (session?.user) {
+          try {
+            const { data, error } = await supabase.from('accounts')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+              
             if (error) {
               console.error('Error getting user role on auth change:', error);
+              setUserRole(null);
             } else if (data) {
               setUserRole(data.role);
-              
-              // Fetch the appropriate profile data based on the role
-              if (data.role === 'admin' || data.role === 'agent') {
-                supabase
-                  .from('employer_profiles')
-                  .select('*')
-                  .eq('id', session.user.id)
-                  .single()
-                  .then(({ data: profileData, error: profileError }) => {
-                    if (!profileError && profileData) {
-                      const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
-                      setProfile({
-                        id: session.user.id,
-                        role: data.role,
-                        email: profileData.email || session.user.email,
-                        full_name: fullName || session.user.email.split('@')[0],
-                        avatar_url: profileData.avatar_url || undefined, // Ensure avatar_url is handled properly
-                        phone: profileData.phone,
-                        whatsapp_number: profileData.whatsapp_number
-                      });
-                    }
-                  });
-              } else if (data.role === 'buyer' || data.role === 'seller') {
-                supabase
-                  .from('participants_profile')
-                  .select('*')
-                  .eq('id', session.user.id)
-                  .single()
-                  .then(({ data: profileData, error: profileError }) => {
-                    if (!profileError && profileData) {
-                      const fullName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
-                      setProfile({
-                        id: session.user.id,
-                        role: data.role,
-                        email: profileData.email || session.user.email,
-                        full_name: fullName || session.user.email.split('@')[0],
-                        avatar_url: undefined, // This field doesn't exist in participants_profile
-                        phone: profileData.phone,
-                        whatsapp_number: profileData.whatsapp_number
-                      });
-                    }
-                  });
-              }
+              await fetchUserProfile(session.user.id, data.role, session.user.email);
             }
-          });
-      } else {
-        // Clear all auth state when the user logs out
-        setUserRole(null);
-        setProfile(null);
+          } catch (err) {
+            console.error('Unexpected error in auth state change:', err);
+          }
+        } else {
+          clearAuthState();
+        }
+        
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    });
+    );
     
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [clearAuthState, fetchUserProfile]);
   
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-      throw error;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        throw error;
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    
-    if (error) {
-      throw error;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      
+      if (error) {
+        throw error;
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      throw error;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Manually clear auth state on sign out
+      clearAuthState();
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Manually clear auth state on sign out to ensure it's reset
-    setUser(null);
-    setSession(null);
-    setUserRole(null);
-    setProfile(null);
   };
   
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password',
-    });
-    
-    if (error) {
-      throw error;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -247,6 +243,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userRole,
     profile,
   };
+  
+  // Only provide the context if we've completed initialization
+  // This prevents flash of logged-out state and premature redirects
+  if (!initialized && isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-estate-800"></div>
+      </div>
+    );
+  }
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

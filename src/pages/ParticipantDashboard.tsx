@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,103 +21,107 @@ export default function ParticipantDashboard() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchParticipantProperties = async () => {
-      if (!user?.id) return;
+  // Memoize fetch function to avoid recreation on each render
+  const fetchParticipantProperties = useCallback(async () => {
+    if (!user?.id) return;
 
-      setIsLoading(true);
-      
-      try {
-        // Get properties where the user is a participant (via accounts table)
-        const { data: participations, error: participationsError } = await supabase
-          .from('accounts')
-          .select('property_id, role')
-          .eq('user_id', user.id)
-          .in('role', ['buyer', 'seller']);
+    setIsLoading(true);
+    
+    try {
+      // Get properties where the user is a participant (via accounts table)
+      const { data: participations, error: participationsError } = await supabase
+        .from('accounts')
+        .select('property_id, role')
+        .eq('user_id', user.id)
+        .in('role', ['buyer', 'seller']);
 
-        if (participationsError) {
-          console.error('Error fetching property participations:', participationsError);
-          return;
-        }
-
-        if (!participations.length) {
-          setIsLoading(false);
-          return;
-        }
-
-        const propertyIds = participations.map(p => p.property_id).filter(id => id !== null) as string[];
-        
-        if (propertyIds.length === 0) {
-          setIsLoading(false);
-          return;
-        }
-        
-        // Fetch the property details
-        const { data: propertyData, error: propertyError } = await supabase
-          .from('properties')
-          .select(`
-            *,
-            property_images(*),
-            agent:accounts!properties_agent_id_fkey(
-              id,
-              user_id,
-              email,
-              role,
-              user:employer_profiles!inner(
-                id,
-                first_name,
-                last_name,
-                phone,
-                email,
-                avatar_url
-              )
-            )
-          `)
-          .in('id', propertyIds);
-
-        if (propertyError) {
-          console.error('Error fetching properties:', propertyError);
-          return;
-        }
-
-        // Process agent data to match the expected format
-        const processedProperties = propertyData.map(property => {
-          // Transform the agent data to match what transformSupabaseData expects
-          const transformedProperty = {
-            ...property,
-            agent: property.agent ? {
-              id: property.agent.user_id,
-              full_name: property.agent.user && 
-                         typeof property.agent.user === 'object' ?
-                `${(property.agent.user as any)?.first_name || ''} ${(property.agent.user as any)?.last_name || ''}`.trim() :
-                (property.agent.email?.split('@')[0] || 'Unknown'),
-              email: property.agent.email || '',
-              phone: property.agent.user && 
-                     typeof property.agent.user === 'object' ? 
-                (property.agent.user as any)?.phone || '' : '',
-              avatar_url: property.agent.user && 
-                          typeof property.agent.user === 'object' ? 
-                (property.agent.user as any)?.avatar_url || '' : ''
-            } : null
-          };
-
-          return transformSupabaseData(transformedProperty);
-        });
-        
-        setProperties(processedProperties);
-        
-        if (processedProperties.length > 0 && !selectedPropertyId) {
-          setSelectedPropertyId(processedProperties[0].id);
-        }
-      } catch (error) {
-        console.error('Error in participant dashboard:', error);
-      } finally {
+      if (participationsError) {
+        console.error('Error fetching property participations:', participationsError);
         setIsLoading(false);
+        return;
       }
-    };
 
+      if (!participations.length) {
+        setIsLoading(false);
+        return;
+      }
+
+      const propertyIds = participations.map(p => p.property_id).filter(id => id !== null) as string[];
+      
+      if (propertyIds.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fetch the property details
+      const { data: propertyData, error: propertyError } = await supabase
+        .from('properties')
+        .select(`
+          *,
+          property_images(*),
+          agent:accounts!properties_agent_id_fkey(
+            id,
+            user_id,
+            email,
+            role,
+            user:employer_profiles!inner(
+              id,
+              first_name,
+              last_name,
+              phone,
+              email,
+              avatar_url
+            )
+          )
+        `)
+        .in('id', propertyIds);
+
+      if (propertyError) {
+        console.error('Error fetching properties:', propertyError);
+        setIsLoading(false);
+        return;
+      }
+
+      // Process agent data to match the expected format
+      const processedProperties = propertyData.map(property => {
+        // Transform the agent data to match what transformSupabaseData expects
+        const transformedProperty = {
+          ...property,
+          agent: property.agent ? {
+            id: property.agent.user_id,
+            full_name: property.agent.user && 
+                       typeof property.agent.user === 'object' ?
+              `${(property.agent.user as any)?.first_name || ''} ${(property.agent.user as any)?.last_name || ''}`.trim() :
+              (property.agent.email?.split('@')[0] || 'Unknown'),
+            email: property.agent.email || '',
+            phone: property.agent.user && 
+                   typeof property.agent.user === 'object' ? 
+              (property.agent.user as any)?.phone || '' : '',
+            avatar_url: property.agent.user && 
+                        typeof property.agent.user === 'object' ? 
+              (property.agent.user as any)?.avatar_url || '' : ''
+          } : null
+        };
+
+        return transformSupabaseData(transformedProperty);
+      });
+      
+      setProperties(processedProperties);
+      
+      if (processedProperties.length > 0 && !selectedPropertyId) {
+        setSelectedPropertyId(processedProperties[0].id);
+      }
+    } catch (error) {
+      console.error('Error in participant dashboard:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
+  // Separate effect for fetching data that doesn't depend on selectedPropertyId
+  useEffect(() => {
     fetchParticipantProperties();
-  }, [user?.id, selectedPropertyId]);
+  }, [fetchParticipantProperties]);
 
   const handleGoToProfile = () => {
     navigate('/participant/profile');
