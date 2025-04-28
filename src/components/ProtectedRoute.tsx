@@ -17,6 +17,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     // Use replace prop to prevent back navigation issues
+    // Redirect to /auth without any query parameters to avoid loops
     return <Navigate to="/auth" replace />;
   }
 

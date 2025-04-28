@@ -21,15 +21,10 @@ function PropertyContentRedirect() {
 }
 
 // This component securely redirects from auth to participant dashboard
-// It will only use the redirect parameter and not pass email in the URL
 function AuthParticipantRedirect() {
-  const [searchParams] = useSearchParams();
-  // Use a constant redirect path to avoid infinite loop
-  // Only redirect if explicitly provided in URL, otherwise go to root
-  const redirect = searchParams.get('redirect');
-  const targetPath = redirect || '/';
-  
-  return <Navigate to={targetPath} replace />;
+  // Remove the dependency on searchParams which might be causing the loop
+  // Use a static path instead to prevent any possibility of infinite redirects
+  return <Navigate to="/" replace />;
 }
 
 export const RedirectRoutes = [

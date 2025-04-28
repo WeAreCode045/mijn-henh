@@ -23,16 +23,13 @@ export default function Auth() {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        // Get redirect URL from query params if available
-        const searchParams = new URLSearchParams(location.search);
-        const redirect = searchParams.get('redirect') || '/';
-        
-        navigate(redirect, { replace: true });
+        // Always redirect to home to avoid potential redirect loops
+        navigate('/', { replace: true });
       }
     };
     
     checkSession();
-  }, [navigate, location.search]);
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,11 +66,8 @@ export default function Auth() {
             description: "Logged in successfully",
           });
           
-          // Get redirect URL from query params if available
-          const searchParams = new URLSearchParams(location.search);
-          const redirect = searchParams.get('redirect') || '/';
-          
-          navigate(redirect, { replace: true });
+          // Always redirect to home to avoid potential redirect loops
+          navigate('/', { replace: true });
         }
       }
     } catch (error: any) {
