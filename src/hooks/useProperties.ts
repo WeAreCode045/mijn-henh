@@ -34,16 +34,7 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
           status, 
           object_id, 
           price, 
-          agent_id,
-          agent:accounts!properties_agent_id_fkey(
-            user_id,
-            email,
-            user:employer_profiles!inner(
-              id,
-              first_name,
-              last_name
-            )
-          )
+          agent_id
         `)
         .eq('archived', false)
         .order('title');
@@ -64,35 +55,11 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
       if (data) {
         console.log(`useProperties - Fetched ${data.length} properties`);
         const processedProperties = data.map(item => {
-          // Handle the new agent structure
-          const agentData = item.agent || null;
-          let agentName = 'Unknown';
-          
-          if (agentData) {
-            // Use safe null checks and optional chaining
-            const userData = agentData.user;
-            
-            // Add safeguards when accessing potentially undefined properties
-            if (typeof userData === 'object' && userData !== null) {
-              // Use nullish coalescing for safety
-              const firstName = userData && (userData as any)?.first_name ? (userData as any).first_name : '';
-              const lastName = userData && (userData as any)?.last_name ? (userData as any).last_name : '';
-              
-              if (firstName || lastName) {
-                agentName = `${firstName} ${lastName}`.trim();
-              } else if (agentData.email) {
-                agentName = agentData.email.split('@')[0];
-              }
-            } else if (agentData.email) {
-              agentName = agentData.email.split('@')[0];
-            }
-          }
-          
           return {
             ...item,
-            agent: agentData ? {
-              id: agentData.user_id,
-              name: agentName
+            agent: item.agent_id ? {
+              id: item.agent_id,
+              name: "Agent"  // Default name until we fetch actual agent info
             } : null
           };
         });

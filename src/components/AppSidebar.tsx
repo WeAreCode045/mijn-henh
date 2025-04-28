@@ -30,73 +30,18 @@ import { User } from "@/types/user";
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin, isAgent, userRole, profile: authProfile } = useAuth();
+  const { user, isAdmin, isAgent, userRole, profile: authProfile, signOut } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
-  
-  // Fetch the profile data
-  useEffect(() => {
-    if (!user?.id) return;
-    
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('accounts')
-          .select('*, user_id, role, email')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-          
-        if (error) {
-          console.error("Error fetching profile:", error);
-          return;
-        }
-        
-        if (data) {
-          // Get additional info for the profile
-          const { data: employerData, error: employerError } = await supabase
-            .from('employer_profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-            
-          if (employerError && employerError.code !== 'PGRST116') {
-            console.error("Error fetching employer profile:", employerError);
-          }
-          
-          setProfile({
-            ...data,
-            ...employerData,
-            full_name: employerData ? 
-              `${employerData.first_name || ''} ${employerData.last_name || ''}`.trim() : 
-              data.email?.split('@')[0] || 'User'
-          });
-        }
-      } catch (err) {
-        console.error("Error in fetchProfile:", err);
-      }
-    };
-    
-    fetchProfile();
-  }, [user?.id]);
-  
-  // Safely access role with fallback
-  const userRole2 = profile?.role || authProfile?.role || userRole || 'agent';
+
+  if (!user) return null;
+
+  const isParticipant = userRole === 'seller' || userRole === 'buyer';
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to sign out",
-          variant: "destructive",
-        });
-      } else {
-        navigate('/auth');
-      }
+      await signOut();
+      navigate('/auth');
     } catch (err) {
       console.error("Error during logout:", err);
       toast({
@@ -107,29 +52,15 @@ export function AppSidebar() {
     }
   };
 
-  // Use a separate effect for navigation to prevent render loops
-  useEffect(() => {
-    // Only redirect if we have a user and they should be on participant dashboard
-    if (user && (userRole2 === 'seller' || userRole2 === 'buyer') && location.pathname === '/') {
-      navigate('/participant');
-    }
-  }, [user, userRole2, navigate, location.pathname]);
-
-  if (!user) return null;
-
-  const isParticipant = userRole2 === 'seller' || userRole2 === 'buyer';
-
   // Create properly typed user object for the profile card
-  const userProfile: User | null = profile || authProfile ? {
-    id: profile?.user_id || authProfile?.id || user?.id || '',
-    email: profile?.email || authProfile?.email || user?.email || '',
-    full_name: profile?.full_name || authProfile?.full_name || '',
-    avatar_url: profile?.avatar_url || authProfile?.avatar_url || undefined,
-    phone: profile?.phone || authProfile?.phone || undefined,
-    whatsapp_number: profile?.whatsapp_number || authProfile?.whatsapp_number || undefined,
-    role: profile?.role || authProfile?.role || userRole || undefined,
-    created_at: profile?.created_at || authProfile?.created_at || undefined,
-    updated_at: profile?.updated_at || authProfile?.updated_at || undefined
+  const userProfile: User | null = authProfile ? {
+    id: authProfile.id || user?.id || '',
+    email: authProfile.email || user?.email || '',
+    full_name: authProfile.full_name || '',
+    avatar_url: authProfile.avatar_url || undefined,
+    phone: authProfile.phone || undefined,
+    whatsapp_number: authProfile.whatsapp_number || undefined,
+    role: authProfile.role || userRole || undefined,
   } : null;
 
   return (
