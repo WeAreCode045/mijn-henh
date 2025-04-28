@@ -25,7 +25,7 @@ export function usePropertyParticipants(propertyId?: string) {
         .from('property_participants')
         .select(`
           *,
-          user:profiles(id, email, full_name, role),
+          user:profiles(id, email),
           participant_profile:participants_profile(*)
         `)
         .eq('property_id', propertyId)
@@ -52,10 +52,8 @@ export function usePropertyParticipants(propertyId?: string) {
           participantProfileData = item.participant_profile as ParticipantProfileData;
         }
         
-        let fullName = userProfile && typeof userProfile === 'object' && 'full_name' in userProfile ? 
-            userProfile.full_name : 'Unknown';
-        
-        if (!fullName && participantProfileData) {
+        let fullName = 'Unknown';
+        if (participantProfileData) {
           const firstName = participantProfileData.first_name || '';
           const lastName = participantProfileData.last_name || '';
           if (firstName && lastName) {
@@ -86,8 +84,7 @@ export function usePropertyParticipants(propertyId?: string) {
                    (participantProfileData?.email || null),
             phone: participantProfileData?.phone || null,
             whatsapp_number: participantProfileData?.whatsapp_number || null,
-            role: userProfile && typeof userProfile === 'object' && 'role' in userProfile ? 
-                  userProfile.role : item.role
+            role: item.role
           },
           ...(participantProfileData ? { participant_profile: participantProfileData } : {})
         } as PropertyParticipant;
