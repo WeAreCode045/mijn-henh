@@ -35,23 +35,22 @@ export function usePropertyParticipants(propertyId?: string) {
         throw error;
       }
 
-      // Transform the data to include participant profile information if it exists
+      // Transform the data with proper type handling
       return data.map(item => {
         // Make sure we handle potentially undefined data
         const userProfile = item.user || {};
         
-        // Cast to handle typing issue - we need to check if it's a valid profile object first
+        // Initialize participant profile as null
         let participantProfileData: ParticipantProfileData | null = null;
         
-        // Add a type guard to ensure participant_profile is a valid object
-        const isValidProfile = (
-          item.participant_profile != null && 
+        // Check if participant_profile exists and is a proper object (not an error)
+        if (
+          item.participant_profile && 
           typeof item.participant_profile === 'object' && 
+          !Array.isArray(item.participant_profile) &&
           !('error' in item.participant_profile)
-        );
-        
-        if (isValidProfile && item.participant_profile) {
-          // Use type assertion after validation to ensure TypeScript understands this is safe
+        ) {
+          // Now TypeScript knows this is safe
           participantProfileData = item.participant_profile as ParticipantProfileData;
         }
         
@@ -66,8 +65,17 @@ export function usePropertyParticipants(propertyId?: string) {
           }
         }
           
+        // Return properly typed participant object
         return {
-          ...item,
+          id: item.id,
+          property_id: item.property_id,
+          user_id: item.user_id,
+          role: item.role,
+          status: item.status,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          documents_signed: item.documents_signed,
+          webview_approved: item.webview_approved,
           user: {
             id: userProfile && typeof userProfile === 'object' && 'id' in userProfile ? 
                 userProfile.id : item.user_id,
@@ -79,9 +87,11 @@ export function usePropertyParticipants(propertyId?: string) {
             whatsapp_number: participantProfileData?.whatsapp_number || null,
             role: userProfile && typeof userProfile === 'object' && 'role' in userProfile ? 
                   userProfile.role : item.role
-          }
-        };
-      }) as PropertyParticipant[];
+          },
+          // Only include participant_profile if it's valid
+          ...(participantProfileData ? { participant_profile: participantProfileData } : {})
+        } as PropertyParticipant;
+      });
     },
     enabled: !!propertyId,
   });
