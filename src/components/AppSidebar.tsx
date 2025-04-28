@@ -29,9 +29,53 @@ import { User } from "@/types/user";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { user, profile, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  
+  // Fetch the profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return;
+      
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('*, user_id, role, email')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+      
+      if (data) {
+        // Get additional info for the profile
+        const { data: employerData, error: employerError } = await supabase
+          .from('employer_profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+          
+        if (employerError && employerError.code !== 'PGRST116') {
+          console.error("Error fetching employer profile:", employerError);
+        }
+        
+        setProfile({
+          ...data,
+          ...employerData,
+          full_name: employerData ? 
+            `${employerData.first_name || ''} ${employerData.last_name || ''}`.trim() : 
+            data.email?.split('@')[0] || 'User'
+        });
+      }
+    };
+    
+    fetchProfile();
+  }, [user?.id]);
   
   // Safely access role with fallback
   const userRole = profile?.role || 'agent';
@@ -62,7 +106,7 @@ export function AppSidebar() {
 
   // Create properly typed user object for the profile card
   const userProfile: User | null = profile ? {
-    id: profile.id,
+    id: profile.user_id,
     email: profile.email || '',
     full_name: profile.full_name || '',
     avatar_url: profile.avatar_url || undefined,
@@ -133,12 +177,20 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 
                 {isAdmin && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={() => navigate('/users')} className="text-white hover:bg-primary-foreground/10">
-                      <UsersIcon className="w-4 h-4" />
-                      <span>Users</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton onClick={() => navigate('/users')} className="text-white hover:bg-primary-foreground/10">
+                        <UsersIcon className="w-4 h-4" />
+                        <span>Employees</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton onClick={() => navigate('/participants')} className="text-white hover:bg-primary-foreground/10">
+                        <UsersIcon className="w-4 h-4" />
+                        <span>Participants</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </>
                 )}
               </>
             )}

@@ -40,7 +40,6 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
             email,
             user:employer_profiles!inner(
               id,
-              email,
               first_name,
               last_name
             )

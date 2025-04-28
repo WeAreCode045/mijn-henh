@@ -14,6 +14,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isAgent: boolean;
   userRole: string | null;
+  profile: any | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   
   useEffect(() => {
     // Get initial session
@@ -42,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Get user role from the accounts table
         const { data: roleData, error: roleError } = await supabase
           .from('accounts')
-          .select('role')
+          .select('role, email')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -52,6 +54,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Error getting user role:', roleError);
         } else if (roleData) {
           setUserRole(roleData.role);
+          
+          // Get additional profile information based on user role
+          if (roleData.role === 'admin' || roleData.role === 'agent') {
+            const { data: employerProfile, error: profileError } = await supabase
+              .from('employer_profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (profileError && profileError.code !== 'PGRST116') {
+              console.error('Error fetching employer profile:', profileError);
+            } else if (employerProfile) {
+              setProfile({
+                ...employerProfile,
+                role: roleData.role,
+                email: employerProfile.email || roleData.email || session.user.email,
+                full_name: `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim()
+              });
+            }
+          } else if (roleData.role === 'buyer' || roleData.role === 'seller') {
+            const { data: participantProfile, error: profileError } = await supabase
+              .from('participants_profile')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (profileError && profileError.code !== 'PGRST116') {
+              console.error('Error fetching participant profile:', profileError);
+            } else if (participantProfile) {
+              setProfile({
+                ...participantProfile,
+                role: roleData.role,
+                email: participantProfile.email || roleData.email || session.user.email,
+                full_name: `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim()
+              });
+            }
+          }
         }
       }
       
@@ -78,10 +117,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Error getting user role on auth change:', error);
             } else if (data) {
               setUserRole(data.role);
+              
+              // Fetch the appropriate profile data based on the role
+              if (data.role === 'admin' || data.role === 'agent') {
+                supabase
+                  .from('employer_profiles')
+                  .select('*')
+                  .eq('id', session.user.id)
+                  .single()
+                  .then(({ data: profileData, error: profileError }) => {
+                    if (!profileError && profileData) {
+                      setProfile({
+                        ...profileData,
+                        role: data.role,
+                        full_name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim()
+                      });
+                    }
+                  });
+              } else if (data.role === 'buyer' || data.role === 'seller') {
+                supabase
+                  .from('participants_profile')
+                  .select('*')
+                  .eq('id', session.user.id)
+                  .single()
+                  .then(({ data: profileData, error: profileError }) => {
+                    if (!profileError && profileData) {
+                      setProfile({
+                        ...profileData,
+                        role: data.role,
+                        full_name: `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim()
+                      });
+                    }
+                  });
+              }
             }
           });
       } else {
         setUserRole(null);
+        setProfile(null);
       }
       
       setIsLoading(false);
@@ -140,6 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     isAgent,
     userRole,
+    profile,
   };
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
