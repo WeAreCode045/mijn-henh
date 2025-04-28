@@ -1,3 +1,4 @@
+
 import { PropertyData, PropertyImage, PropertyFeature, PropertyArea, PropertyNearbyPlace } from "@/types/property";
 import { AgencySettings } from "@/types/agency";
 import { Json } from "@/integrations/supabase/types";
@@ -37,7 +38,9 @@ interface SupabasePropertyData {
   object_id: string | null;
   agent: {
     id: string;
-    full_name: string;
+    full_name?: string;
+    first_name?: string;
+    last_name?: string;
     email: string;
     phone: string;
     avatar_url: string;
@@ -226,6 +229,22 @@ export function transformSupabaseData(
   // Debug log for features
   console.log('Transformed features:', features);
 
+  // Create agent object with full_name property from first_name and last_name if needed
+  let agent = null;
+  if (data.agent) {
+    const fullName = data.agent.full_name || 
+                    `${data.agent.first_name || ''} ${data.agent.last_name || ''}`.trim() || 
+                    'Unnamed Agent';
+    
+    agent = {
+      id: data.agent.id,
+      name: fullName,
+      email: data.agent.email || '',
+      phone: data.agent.phone || '',
+      photoUrl: data.agent.avatar_url || '',
+    };
+  }
+
   // Create the transformed property data
   const transformedData: PropertyData = {
     id: data.id,
@@ -254,15 +273,7 @@ export function transformSupabaseData(
     map_image: data.map_image,
     agent_id: data.agent_id,
     propertyType: data.propertyType || "", // Include propertyType in the transformed data
-    agent: data.agent
-      ? {
-          id: data.agent.id,
-          name: data.agent.full_name,
-          email: data.agent.email,
-          phone: data.agent.phone,
-          photoUrl: data.agent.avatar_url, // Map avatar_url to photoUrl
-        }
-      : undefined,
+    agent: agent,
     created_at: data.created_at,
     updated_at: data.updated_at,
     template_id: data.template_id || "default",
