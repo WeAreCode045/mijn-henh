@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,9 +86,9 @@ export default function ParticipantDashboard() {
             ...property,
             agent: property.agent ? {
               id: property.agent.user_id,
-              full_name: property.agent.user ? 
-                `${property.agent.user.first_name || ''} ${property.agent.user.last_name || ''}`.trim() || 
-                property.agent.email?.split('@')[0] || 'Unknown',
+              full_name: property.agent.user
+                ? `${property.agent.user.first_name || ''} ${property.agent.user.last_name || ''}`.trim()
+                : (property.agent.email?.split('@')[0] || 'Unknown'),
               email: property.agent.email || '',
               phone: property.agent.user?.phone || '',
               avatar_url: property.agent.user?.avatar_url || ''
