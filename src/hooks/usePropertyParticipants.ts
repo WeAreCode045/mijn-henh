@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,26 +38,20 @@ export function usePropertyParticipants(propertyId?: string) {
 
       console.log("Fetched participants data:", data);
 
-      // Transform the data with proper type handling
       return data.map(item => {
-        // Make sure we handle potentially undefined data
         const userProfile = item.user || {};
         
-        // Initialize participant profile as null
         let participantProfileData: ParticipantProfileData | null = null;
         
-        // Check if participant_profile exists and is a proper object (not an error)
         if (
           item.participant_profile && 
           typeof item.participant_profile === 'object' && 
           !Array.isArray(item.participant_profile) &&
           !('error' in item.participant_profile)
         ) {
-          // Now TypeScript knows this is safe
           participantProfileData = item.participant_profile as ParticipantProfileData;
         }
         
-        // Determine name with proper null checks
         let fullName = userProfile && typeof userProfile === 'object' && 'full_name' in userProfile ? 
             userProfile.full_name : 'Unknown';
         
@@ -74,7 +67,6 @@ export function usePropertyParticipants(propertyId?: string) {
           }
         }
           
-        // Return properly typed participant object
         return {
           id: item.id,
           property_id: item.property_id,
@@ -97,7 +89,6 @@ export function usePropertyParticipants(propertyId?: string) {
             role: userProfile && typeof userProfile === 'object' && 'role' in userProfile ? 
                   userProfile.role : item.role
           },
-          // Only include participant_profile if it's valid
           ...(participantProfileData ? { participant_profile: participantProfileData } : {})
         } as PropertyParticipant;
       });
@@ -109,10 +100,9 @@ export function usePropertyParticipants(propertyId?: string) {
     mutationFn: async (participant: ParticipantInvite) => {
       console.log("Starting participant invitation process for:", participant);
       
-      // First check if a user with this email exists
       const { data: existingUsers } = await supabase
         .from('profiles')
-        .select('id, email, role')
+        .select('id, email')
         .eq('email', participant.email);
 
       console.log("Existing users check:", existingUsers);
@@ -120,32 +110,14 @@ export function usePropertyParticipants(propertyId?: string) {
       let userId;
       
       if (existingUsers && existingUsers.length > 0) {
-        // User exists, use their ID
         userId = existingUsers[0].id;
-        console.log(`User already exists with ID: ${userId}, updating role to ${participant.role}`);
-        
-        // Always update the role to match the participant type
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ role: participant.role })
-          .eq('id', userId);
-        
-        if (updateError) {
-          console.error('Error updating existing user role:', updateError);
-          throw updateError;
-        }
+        console.log(`User already exists with ID: ${userId}`);
       } else {
-        // Create a new user with this email and correct role
-        console.log(`Creating new user with role: ${participant.role}`);
+        console.log(`Creating new user for email: ${participant.email}`);
         
         const { data: authUser, error: signUpError } = await supabase.auth.signUp({
           email: participant.email,
           password: Math.random().toString(36).slice(-10), // Generate random password
-          options: {
-            data: {
-              role: participant.role, // Explicitly set the correct role
-            }
-          }
         });
 
         if (signUpError) {
@@ -155,24 +127,8 @@ export function usePropertyParticipants(propertyId?: string) {
 
         console.log("New user created:", authUser);
         userId = authUser.user?.id;
-        
-        // Double-check the profile exists with the correct role
-        if (userId) {
-          console.log(`Ensuring profile for ${userId} has role ${participant.role}`);
-          
-          const { error: profileUpdateError } = await supabase
-            .from('profiles')
-            .update({ role: participant.role })
-            .eq('id', userId);
-            
-          if (profileUpdateError) {
-            console.error('Error ensuring profile role:', profileUpdateError);
-            throw profileUpdateError;
-          }
-        }
       }
 
-      // Now add the participant
       console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
       
       const { data, error } = await supabase
