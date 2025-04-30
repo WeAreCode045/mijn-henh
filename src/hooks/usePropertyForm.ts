@@ -48,6 +48,7 @@ export function usePropertyForm(propertyId?: string) {
     } else if (!isLoading && !propertyId) {
       // Create empty form data for a new property
       const emptyFormData: PropertyFormData = {
+        id: '', // Add ID with empty string to satisfy the type requirement
         title: '',
         price: '',
         address: '',
