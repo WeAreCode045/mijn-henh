@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard, 
   Home, 
@@ -42,8 +41,8 @@ export function AppSidebar() {
       if (user?.id) {
         try {
           const { data, error } = await supabase
-            .from('profiles')
-            .select('role')
+            .from('employer_profiles')
+            .select('*')
             .eq('id', user.id)
             .single();
 
@@ -52,9 +51,21 @@ export function AppSidebar() {
             return;
           }
 
-          if (data) {
-            console.log('User role from database:', data.role);
-            setLocalIsAdmin(data.role === 'admin');
+          // Check if user role is available in accounts table
+          const { data: accountData, error: accountError } = await supabase
+            .from('accounts')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
+            
+          if (accountError && accountError.code !== 'PGRST116') {
+            console.error('Error fetching user account:', accountError);
+            return;
+          }
+
+          if (accountData) {
+            console.log('User role from accounts table:', accountData.role);
+            setLocalIsAdmin(accountData.role === 'admin');
           }
         } catch (err) {
           console.error('Error in role check:', err);
@@ -221,4 +232,3 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
-

@@ -57,13 +57,14 @@ export function PropertyForm({ initialTab, initialContentStep, formData: propFor
       const fetchAgentInfo = async () => {
         try {
           const { data } = await supabase
-            .from('profiles')
-            .select('id, full_name')
+            .from('employer_profiles')
+            .select('id, first_name, last_name')
             .eq('id', formData.agent_id)
             .single();
           
           if (data) {
-            setAgentInfo({ id: data.id, name: data.full_name });
+            const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Unnamed Agent';
+            setAgentInfo({ id: data.id, name: fullName });
           }
         } catch (error) {
           console.error("Error fetching agent info:", error);

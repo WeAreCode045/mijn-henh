@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Notification } from "./NotificationTypes";
@@ -20,23 +19,16 @@ export function useReadStateManager(
     
     try {
       const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('user_notifications')
+        .from('employer_profiles')
+        .select('*')
         .eq('id', user.id)
         .single();
       
-      if (userProfile?.user_notifications) {
-        // Check if user_notifications is an array before using reduce
-        if (Array.isArray(userProfile.user_notifications)) {
-          return userProfile.user_notifications.reduce((acc: Record<string, boolean>, item: any) => {
-            acc[item.id] = item.read || false;
-            return acc;
-          }, {});
-        } else {
-          console.error('user_notifications is not an array:', userProfile.user_notifications);
-          return {};
-        }
-      }
+      // Since the employer_profiles table doesn't have a user_notifications field,
+      // we'll use a different approach - we could store this in local storage instead
+      // or create a separate notifications table in the database
+      
+      // For now, return empty object as fallback
       return {};
     } catch (err) {
       console.error('Error loading read notifications from database:', err);
@@ -57,16 +49,15 @@ export function useReadStateManager(
         read
       }));
       
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          user_notifications: notificationArray 
-        })
-        .eq('id', user.id);
+      // Instead of saving to employer_profiles, we could save to local storage
+      // or a separate notifications table
       
-      if (error) {
-        console.error('Error saving read notifications to database:', error);
-      }
+      // For now, we'll just log that this functionality needs implementation
+      console.log('Notification read states:', notificationArray);
+      
+      // Local storage implementation as temporary solution
+      localStorage.setItem(`user_notifications_${user.id}`, JSON.stringify(notificationArray));
+      
     } catch (err) {
       console.error('Error in saveReadNotifications:', err);
     }

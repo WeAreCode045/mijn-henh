@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { PropertyData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,13 +27,13 @@ export function usePropertyOverviewEdit({ property, settings }: UsePropertyOverv
     const fetchAgentName = async () => {
       if (property.agent_id) {
         const { data, error } = await supabase
-          .from('profiles')
-          .select('full_name')
+          .from('employer_profiles')
+          .select('first_name, last_name')
           .eq('id', property.agent_id)
           .single();
         
         if (data && !error) {
-          setAgentName(data.full_name || 'Unnamed Agent');
+          setAgentName(`${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Unnamed Agent');
         }
       } else {
         setAgentName('');

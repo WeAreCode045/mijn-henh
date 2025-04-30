@@ -139,26 +139,24 @@ export default function AppRoutes() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/participants"
+            element={
+              <ProtectedRoute>
+                <Participants />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
         </>
       )}
-
-      {/* Admin Routes */}
-      <Route
-        path="/users"
-        element={
-          <ProtectedRoute>
-            <Users />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/participants"
-        element={
-          <ProtectedRoute>
-            <Participants />
-          </ProtectedRoute>
-        }
-      />
 
       {/* 404 Route */}
       <Route path="*" element={<NotFound />} />
