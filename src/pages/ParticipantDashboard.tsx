@@ -76,6 +76,8 @@ export default function ParticipantDashboard() {
         return;
       }
 
+      console.log('Fetched property data with agents:', propertyData);
+      
       // Process agent data to match the expected format
       const processedProperties = propertyData.map(property => {
         // Transform the agent data to match what transformSupabaseData expects

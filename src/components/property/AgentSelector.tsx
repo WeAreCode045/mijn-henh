@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -26,16 +27,20 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
+        // First get all users with agent or admin role
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
           .select('user_id, role')
           .or('role.eq.agent,role.eq.admin');
         
-        if (accountsError) throw accountsError;
+        if (accountsError) {
+          throw accountsError;
+        }
         
         if (accountsData && accountsData.length > 0) {
           const agentIds = accountsData.map(account => account.user_id);
           
+          // Then fetch their profiles from employer_profiles
           const { data, error } = await supabase
             .from('employer_profiles')
             .select('id, first_name, last_name')
@@ -88,8 +93,8 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
       await onAgentChange(finalAgentId);
       
       toast({
-        title: "Agent updated",
-        description: "The property agent has been updated",
+        title: "Success",
+        description: "Agent updated successfully",
       });
     } catch (error) {
       console.error("Error saving agent:", error);
@@ -114,7 +119,14 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         defaultValue="no-agent"
       >
         <SelectTrigger id="agent-select" className="w-full">
-          <SelectValue placeholder="Select an agent" />
+          {isLoadingAgents ? (
+            <div className="flex items-center">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <span>Loading agents...</span>
+            </div>
+          ) : (
+            <SelectValue placeholder="Select an agent" />
+          )}
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="no-agent">No agent assigned</SelectItem>

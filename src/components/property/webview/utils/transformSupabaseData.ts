@@ -38,12 +38,11 @@ interface SupabasePropertyData {
   object_id: string | null;
   agent: {
     id: string;
-    full_name?: string;
     first_name?: string;
     last_name?: string;
-    email: string;
-    phone: string;
-    avatar_url: string;
+    email?: string;
+    phone?: string;
+    avatar_url?: string;
   } | null;
   property_images: {
     id: string;
@@ -56,9 +55,9 @@ interface SupabasePropertyData {
   }[];
   created_at: string;
   updated_at: string;
-  template_id?: string; // Make this optional since template functionality is removed
+  template_id?: string; 
   floorplanEmbedScript?: string;
-  propertyType?: string; // Add propertyType property
+  propertyType?: string; 
   virtualTourUrl?: string | null;
   youtubeUrl?: string | null;
 }
@@ -74,7 +73,8 @@ export function transformSupabaseData(
     hasFloorplanScript: !!data.floorplanEmbedScript,
     scriptLength: data.floorplanEmbedScript ? data.floorplanEmbedScript.length : 0,
     scriptType: typeof data.floorplanEmbedScript,
-    imageCount: data.property_images?.length || 0
+    imageCount: data.property_images?.length || 0,
+    agentData: data.agent
   });
 
   // Extract images from property_images
@@ -229,12 +229,10 @@ export function transformSupabaseData(
   // Debug log for features
   console.log('Transformed features:', features);
 
-  // Create agent object with full_name property from first_name and last_name if needed
+  // Create agent object with properly constructed name
   let agent = null;
   if (data.agent) {
-    const fullName = data.agent.full_name || 
-                    `${data.agent.first_name || ''} ${data.agent.last_name || ''}`.trim() || 
-                    'Unnamed Agent';
+    const fullName = `${data.agent.first_name || ''} ${data.agent.last_name || ''}`.trim() || 'Unnamed Agent';
     
     agent = {
       id: data.agent.id,
@@ -243,6 +241,8 @@ export function transformSupabaseData(
       phone: data.agent.phone || '',
       photoUrl: data.agent.avatar_url || '',
     };
+    
+    console.log('Transformed agent data:', agent);
   }
 
   // Create the transformed property data
@@ -292,7 +292,8 @@ export function transformSupabaseData(
     areaCount: transformedData.areas.length,
     virtualTourUrl: transformedData.virtualTourUrl,
     youtubeUrl: transformedData.youtubeUrl,
-    featuresCount: transformedData.features.length
+    featuresCount: transformedData.features.length,
+    agent: transformedData.agent
   });
 
   return transformedData;
