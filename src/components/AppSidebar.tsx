@@ -171,7 +171,6 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 
-                {/* Remove the isAdmin condition temporarily to check if the menu renders */}
                 <SidebarMenuItem className="relative">
                   <SidebarMenuButton 
                     onClick={() => setUsersOpen(!usersOpen)} 
@@ -182,12 +181,11 @@ export function AppSidebar() {
                     <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${usersOpen ? 'rotate-180' : ''}`} />
                   </SidebarMenuButton>
                   
-                  {/* Enhanced dropdown visibility */}
                   {usersOpen && (
                     <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1 bg-primary-foreground/10 rounded-md py-2">
                       <SidebarMenuButton 
-                        onClick={() => navigate('/users')}
-                        className={`text-white hover:bg-primary-foreground/20 ${location.pathname === '/users' ? 'bg-primary-foreground/20' : ''}`}
+                        onClick={() => navigate('/employees')}
+                        className={`text-white hover:bg-primary-foreground/20 ${location.pathname === '/employees' || location.pathname === '/users' ? 'bg-primary-foreground/20' : ''}`}
                       >
                         Employees
                       </SidebarMenuButton>
@@ -212,6 +210,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      
       <SidebarFooter className="mb-4 px-4 !bg-primary text-white">
         <SidebarGroup>
           {userProfile && (

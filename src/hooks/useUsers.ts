@@ -17,6 +17,7 @@ export function useUsers() {
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
           .select(`
+            id,
             user_id,
             role,
             email
@@ -127,11 +128,6 @@ export function useUsers() {
         console.error("Error deleting from employer_profiles:", profileError);
         throw profileError;
       }
-
-      // Optionally: Delete the auth user if you have admin privileges
-      // Uncomment if you have set up admin functions for auth
-      // const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      // if (authError) throw authError;
 
       toast({
         title: "Success",
