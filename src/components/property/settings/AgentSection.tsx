@@ -31,13 +31,35 @@ export function AgentSection({
   useEffect(() => {
     // Fetch agents
     const fetchAgents = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('role', 'agent');
+      // Get accounts first to filter by agent role
+      const { data: accountsData, error: accountsError } = await supabase
+        .from('accounts')
+        .select('user_id')
+        .in('role', ['agent', 'admin']);
       
-      if (!error && data) {
-        setAgents(data);
+      if (accountsError) {
+        console.error('Error fetching agent accounts:', accountsError);
+        return;
+      }
+
+      if (accountsData && accountsData.length > 0) {
+        const agentIds = accountsData.map(account => account.user_id);
+        
+        // Now get the profiles for these agent accounts
+        const { data, error } = await supabase
+          .from('employer_profiles')
+          .select('id, first_name, last_name')
+          .in('id', agentIds);
+        
+        if (!error && data) {
+          const formattedAgents: Agent[] = data.map(profile => ({
+            id: profile.id,
+            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Agent'
+          }));
+          setAgents(formattedAgents);
+        } else {
+          console.error('Error fetching agent profiles:', error);
+        }
       }
     };
     

@@ -1,115 +1,120 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/providers/AuthProvider";
-import { Conversation } from "@/types/message";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-export function usePropertyConversations(propertyId: string) {
-  const { user } = useAuth();
-  const currentUserId = user?.id;
+interface Participant {
+  id: string;
+  full_name?: string;
+  email?: string; 
+  avatar_url?: string;
+  phone?: string;
+  whatsapp_number?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
-  const {
-    data: conversations,
-    isLoading: isLoadingConversations,
-    error: conversationsError
-  } = useQuery({
-    queryKey: ["propertyConversations", propertyId],
-    queryFn: async (): Promise<Conversation[]> => {
-      if (!currentUserId || !propertyId) return [];
+interface Message {
+  id: string;
+  message: string;
+  sender_id: string;
+  recipient_id: string;
+  property_id: string;
+  is_read: boolean;
+  created_at: string;
+  updated_at: string;
+  sender: Participant;
+  recipient: Participant;
+}
+
+export function usePropertyConversations(propertyId?: string) {
+  const [conversations, setConversations] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (!propertyId) return;
+
+      setIsLoading(true);
+      setError(null);
 
       try {
-        // First, get all messages for this property where the current user is either sender or recipient
-        const { data: messagesData, error: messagesError } = await supabase
+        // Get messages for this property
+        const { data: messages, error: messagesError } = await supabase
           .from('property_messages')
-          .select(`
-            id,
-            property_id,
-            sender_id,
-            recipient_id,
-            message,
-            created_at,
-            is_read,
-            properties:property_id(title)
-          `)
+          .select('*')
           .eq('property_id', propertyId)
-          .or(`sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`)
           .order('created_at', { ascending: false });
 
-        if (messagesError) {
-          console.error("Error fetching messages for conversations:", messagesError);
-          return [];
+        if (messagesError) throw messagesError;
+
+        if (!messages || messages.length === 0) {
+          setConversations([]);
+          setIsLoading(false);
+          return;
         }
-
-        if (!messagesData || messagesData.length === 0) {
-          return [];
-        }
-
-        // Extract unique participants (excluding the current user)
-        const participantsMap = new Map<string, Conversation>();
-
-        for (const message of messagesData) {
-          // Determine the participant (not the current user)
-          const participantId = message.sender_id === currentUserId
-            ? message.recipient_id
-            : message.sender_id;
-          
-          // Skip if we already have this participant with a more recent message
-          if (participantsMap.has(participantId)) {
-            continue;
-          }
-
-          // Get participant details from profiles
-          const { data: participantData, error: participantError } = await supabase
-            .from('profiles')
-            .select('id, full_name, email, avatar_url')
-            .eq('id', participantId)
-            .single();
-
-          if (participantError) {
-            console.error(`Error fetching participant ${participantId}:`, participantError);
-            continue;
-          }
-
-          // Count unread messages from this participant
-          const { count: unreadCount, error: countError } = await supabase
-            .from('property_messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('property_id', propertyId)
-            .eq('sender_id', participantId)
-            .eq('recipient_id', currentUserId)
-            .eq('is_read', false);
-
-          if (countError) {
-            console.error("Error counting unread messages:", countError);
-          }
-
-          // Add to participants map
-          participantsMap.set(participantId, {
-            participantId: participantId,
-            participantName: participantData.full_name || 'Unknown User',
-            participantEmail: participantData.email || '',
-            participantAvatar: participantData.avatar_url,
-            lastMessage: message.message,
-            lastMessageDate: message.created_at,
-            unreadCount: unreadCount || 0,
-            propertyId: propertyId,
-            propertyTitle: message.properties?.title || 'Unknown Property'
+        
+        // We'll fetch user profiles separately and combine them
+        const senderIds = [...new Set(messages.map(m => m.sender_id))];
+        const recipientIds = [...new Set(messages.map(m => m.recipient_id))];
+        const allUserIds = [...new Set([...senderIds, ...recipientIds])];
+        
+        // Get all relevant user profiles
+        const { data: userProfiles, error: profilesError } = await supabase
+          .from('employer_profiles')
+          .select('id, first_name, last_name, email, avatar_url')
+          .in('id', allUserIds);
+        
+        if (profilesError) throw profilesError;
+        
+        // Map user IDs to their profiles
+        const userMap = new Map();
+        if (userProfiles) {
+          userProfiles.forEach(profile => {
+            userMap.set(profile.id, {
+              id: profile.id,
+              full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User',
+              email: profile.email || '',
+              avatar_url: profile.avatar_url || ''
+            });
           });
         }
-
-        // Convert map to array
-        return Array.from(participantsMap.values());
+        
+        // Build full messages with sender and recipient info
+        const messagesWithUserInfo = messages.map(message => {
+          const sender = userMap.get(message.sender_id) || {
+            id: message.sender_id,
+            full_name: 'Unknown User'
+          };
+          
+          const recipient = userMap.get(message.recipient_id) || {
+            id: message.recipient_id,
+            full_name: 'Unknown User'
+          };
+          
+          return {
+            ...message,
+            sender,
+            recipient
+          };
+        });
+        
+        setConversations(messagesWithUserInfo);
       } catch (err) {
-        console.error("Error in conversations query:", err);
-        return [];
+        const error = err instanceof Error ? err : new Error('An unknown error occurred');
+        console.error('Error fetching conversations:', error);
+        setError(error);
+      } finally {
+        setIsLoading(false);
       }
-    },
-    enabled: !!currentUserId && !!propertyId
-  });
+    };
+
+    fetchConversations();
+  }, [propertyId]);
 
   return {
     conversations,
-    isLoadingConversations,
-    conversationsError
+    isLoading,
+    error
   };
 }

@@ -39,13 +39,18 @@ export function useSubmissionReplies(submissionId: string) {
           
           if (reply.user_id) {
             const { data: userData, error: userError } = await supabase
-              .from('profiles')
-              .select('id, full_name, email, avatar_url')
+              .from('employer_profiles')
+              .select('id, first_name, last_name, email, avatar_url')
               .eq('id', reply.user_id)
               .single();
               
             if (!userError && userData) {
-              userInfo = userData;
+              userInfo = {
+                id: userData.id,
+                full_name: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
+                email: userData.email,
+                avatar_url: userData.avatar_url
+              };
             }
           }
           
@@ -55,12 +60,7 @@ export function useSubmissionReplies(submissionId: string) {
             agent_id: reply.user_id,
             message: reply.reply_text,
             created_at: reply.created_at,
-            agent: userInfo ? {
-              id: userInfo.id,
-              full_name: userInfo.full_name,
-              email: userInfo.email,
-              avatar_url: userInfo.avatar_url
-            } : undefined
+            agent: userInfo ? userInfo : undefined
           };
         }));
 

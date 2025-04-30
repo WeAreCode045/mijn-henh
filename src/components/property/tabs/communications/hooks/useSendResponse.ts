@@ -45,7 +45,7 @@ export function useSendResponse() {
         const { data: userProfile } = await supabase.auth.getUser();
         
         const { data: profile } = await supabase
-          .from("profiles")
+          .from("employer_profiles")
           .select("*")
           .eq("id", userProfile.user?.id)
           .single();

@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Notification } from "./NotificationTypes";
@@ -11,32 +12,32 @@ export function useReadStateManager(
 ) {
   const { user } = useAuth();
 
-  // Fetch user's read notification states
+  // Fetch user's read notification states from local storage
   const loadReadStates = async () => {
     if (!user) {
       return {};
     }
     
     try {
-      const { data: userProfile } = await supabase
-        .from('employer_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Use local storage implementation since employer_profiles doesn't have user_notifications field
+      const storedData = localStorage.getItem(`user_notifications_${user.id}`);
+      if (storedData) {
+        const notificationArray = JSON.parse(storedData);
+        const readStates: ReadStateMap = {};
+        notificationArray.forEach((item: {id: string, read: boolean}) => {
+          readStates[item.id] = item.read;
+        });
+        return readStates;
+      }
       
-      // Since the employer_profiles table doesn't have a user_notifications field,
-      // we'll use a different approach - we could store this in local storage instead
-      // or create a separate notifications table in the database
-      
-      // For now, return empty object as fallback
       return {};
     } catch (err) {
-      console.error('Error loading read notifications from database:', err);
+      console.error('Error loading read notifications from local storage:', err);
       return {};
     }
   };
 
-  // Save read notifications to database
+  // Save read notifications to local storage
   const saveReadNotifications = async (readMap: Record<string, boolean>) => {
     if (!user) {
       return;
@@ -49,13 +50,7 @@ export function useReadStateManager(
         read
       }));
       
-      // Instead of saving to employer_profiles, we could save to local storage
-      // or a separate notifications table
-      
-      // For now, we'll just log that this functionality needs implementation
-      console.log('Notification read states:', notificationArray);
-      
-      // Local storage implementation as temporary solution
+      // Save to local storage
       localStorage.setItem(`user_notifications_${user.id}`, JSON.stringify(notificationArray));
       
     } catch (err) {
@@ -119,22 +114,6 @@ export function useReadStateManager(
     }
     
     await saveReadNotifications(updatedReadStates);
-    
-    // If it's a database notification, delete it - but since we don't have a notifications table,
-    // we'll just skip this part for now
-    // The actual deletion would be uncommented when the notifications table is created
-    /*
-    if (!id.includes('-')) {
-      try {
-        await supabase
-          .from('notifications')
-          .delete()
-          .eq('id', id);
-      } catch (err) {
-        console.error('Error deleting notification from database:', err);
-      }
-    }
-    */
   };
 
   return {

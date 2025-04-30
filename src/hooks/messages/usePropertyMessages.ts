@@ -1,108 +1,114 @@
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/providers/AuthProvider";
-import { PropertyMessage, MessageData } from "@/types/message.d";
-import { User } from "@/types/user";
-import { usePropertyConversations } from "./usePropertyConversations";
-import { useSendMessage } from "./useSendMessage";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-export function usePropertyMessages(propertyId: string, participantId: string | null) {
-  const queryClient = useQueryClient();
-  const { user, profile } = useAuth();
-  const currentUserId = user?.id;
+interface Participant {
+  id: string;
+  full_name?: string;
+  email?: string; 
+  avatar_url?: string;
+  phone?: string;
+  whatsapp_number?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
-  const {
-    conversations,
-    isLoadingConversations,
-    conversationsError
-  } = usePropertyConversations(propertyId);
+export interface PropertyMessage {
+  id: string;
+  message: string;
+  sender_id: string;
+  recipient_id: string;
+  property_id: string;
+  is_read: boolean;
+  created_at: string;
+  updated_at: string;
+  sender: Participant;
+  recipient: Participant;
+}
 
-  const { sendMessage } = useSendMessage(propertyId, participantId);
+export function usePropertyMessages(propertyId?: string) {
+  const [messages, setMessages] = useState<PropertyMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const {
-    data: messages,
-    isLoading: isLoadingMessages,
-    error: messagesError
-  } = useQuery({
-    queryKey: ["propertyMessages", propertyId, participantId],
-    queryFn: async () => {
-      if (!currentUserId || !propertyId || !participantId) return [];
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!propertyId) return;
+
+      setIsLoading(true);
+      setError(null);
 
       try {
-        const { data, error } = await supabase
+        // Fetch all messages for this property
+        const { data: messagesData, error: messagesError } = await supabase
           .from('property_messages')
-          .select(`
-            id,
-            property_id,
-            sender_id,
-            recipient_id,
-            message,
-            created_at,
-            is_read,
-            updated_at,
-            sender:profiles!sender_id(id, full_name, phone, email, avatar_url, whatsapp_number, created_at, updated_at),
-            recipient:profiles!recipient_id(id, full_name, email, avatar_url, phone, whatsapp_number, created_at, updated_at)
-          `)
+          .select('*')
           .eq('property_id', propertyId)
-          .or(`and(sender_id.eq.${currentUserId},recipient_id.eq.${participantId}),and(sender_id.eq.${participantId},recipient_id.eq.${currentUserId})`)
           .order('created_at', { ascending: true });
 
-        if (error) {
-          console.error("Error fetching messages:", error);
-          return [];
-        }
+        if (messagesError) throw messagesError;
 
-        // Mark messages as read
-        const unreadMessages = data.filter(
-          msg => !msg.is_read && msg.recipient_id === currentUserId
-        );
+        if (!messagesData || messagesData.length === 0) {
+          setMessages([]);
+          setIsLoading(false);
+          return;
+        }
         
-        if (unreadMessages.length > 0) {
-          const unreadIds = unreadMessages.map(msg => msg.id);
-          await supabase
-            .from('property_messages')
-            .update({ is_read: true })
-            .in('id', unreadIds);
-
-          queryClient.invalidateQueries({ queryKey: ["propertyConversations", propertyId] });
+        // Extract unique user IDs
+        const userIds = [...new Set([
+          ...messagesData.map(m => m.sender_id),
+          ...messagesData.map(m => m.recipient_id)
+        ])];
+        
+        // Get user profiles from employer_profiles
+        const { data: userProfiles, error: profilesError } = await supabase
+          .from('employer_profiles')
+          .select('id, first_name, last_name, email, avatar_url')
+          .in('id', userIds);
+        
+        if (profilesError) throw profilesError;
+        
+        // Create a map for quick user lookups
+        const userMap = new Map();
+        if (userProfiles) {
+          userProfiles.forEach(profile => {
+            userMap.set(profile.id, {
+              id: profile.id,
+              full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              email: profile.email,
+              avatar_url: profile.avatar_url
+            });
+          });
         }
-
-        // Process messages to ensure they have all required fields
-        const processedMessages = data.map(msg => ({
-          ...msg,
-          updated_at: msg.updated_at || msg.created_at // Default to created_at if updated_at is not available
-        }));
-
-        return processedMessages as PropertyMessage[];
+        
+        // Format messages with user info
+        const formattedMessages = messagesData.map(msg => {
+          const sender = userMap.get(msg.sender_id) || { id: msg.sender_id, full_name: 'Unknown User' };
+          const recipient = userMap.get(msg.recipient_id) || { id: msg.recipient_id, full_name: 'Unknown User' };
+          
+          return {
+            ...msg,
+            sender,
+            recipient
+          } as PropertyMessage;
+        });
+        
+        setMessages(formattedMessages);
       } catch (err) {
-        console.error("Error in messages query:", err);
-        return [];
+        const error = err instanceof Error ? err : new Error('An unknown error occurred');
+        console.error('Error fetching messages:', error);
+        setError(error);
+      } finally {
+        setIsLoading(false);
       }
-    },
-    enabled: !!currentUserId && !!propertyId && !!participantId
-  });
+    };
 
-  // Create a currentUser object from the profile data, ensuring all required fields are included
-  // and explicitly handle optional properties with proper typing
+    fetchMessages();
+  }, [propertyId]);
+
   return {
-    conversations,
-    isLoadingConversations,
-    conversationsError,
     messages,
-    isLoadingMessages,
-    messagesError,
-    sendMessage,
-    currentUser: profile ? {
-      id: profile.id,
-      email: profile.email || '',
-      full_name: profile.full_name || '',
-      avatar_url: profile.avatar_url,
-      role: profile.role as User["role"],
-      phone: profile.phone || undefined,
-      whatsapp_number: profile.whatsapp_number || undefined,
-      created_at: profile.created_at || undefined,
-      updated_at: profile.updated_at || undefined
-    } : null
+    isLoading,
+    error
   };
 }
