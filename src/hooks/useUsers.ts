@@ -21,7 +21,8 @@ export function useUsers() {
             user_id,
             role,
             email,
-            status
+            status,
+            created_at
           `)
           .in('role', ['admin', 'agent'])
           .order("created_at", { ascending: false });
@@ -63,10 +64,12 @@ export function useUsers() {
             whatsapp_number: profile?.whatsapp_number || '',
             role: account.role,
             avatar_url: profile?.avatar_url || '',
-            address: profile?.address || '',
-            city: profile?.city || '',
-            postal_code: profile?.postal_code || '',
-            country: profile?.country || '',
+            // Only include these properties if they exist in the UserBase type
+            ...(profile?.address && { address: profile.address }),
+            ...(profile?.city && { city: profile.city }),
+            ...(profile?.postal_code && { postal_code: profile.postal_code }),
+            ...(profile?.country && { country: profile.country }),
+            // Check if created_at exists on account before using it
             created_at: account.created_at || '',
             updated_at: profile?.updated_at || ''
           });
