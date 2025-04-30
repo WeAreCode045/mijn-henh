@@ -78,7 +78,7 @@ export function useUsers() {
               return {
                 id: profile.id,
                 email: profile.email || '',
-                full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+                full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
                 phone: profile.phone || '',
                 whatsapp_number: profile.whatsapp_number || '',
                 role: role,
@@ -98,7 +98,7 @@ export function useUsers() {
         return transformedData;
       } catch (err) {
         console.error("Error in useUsers query function:", err);
-        return [];
+        throw err; // Re-throw to be caught by tanstack query error handler
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -106,17 +106,32 @@ export function useUsers() {
 
   const deleteUser = async (userId: string) => {
     try {
-      // First delete from employer_profiles (will cascade to accounts)
+      // First delete from accounts table
+      const { error: accountError } = await supabase
+        .from('accounts')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (accountError) {
+        console.error("Error deleting from accounts:", accountError);
+        throw accountError;
+      }
+      
+      // Then delete from employer_profiles
       const { error: profileError } = await supabase
         .from('employer_profiles')
         .delete()
         .eq('id', userId);
       
-      if (profileError) throw profileError;
-      
-      // Then delete the auth user
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
+      if (profileError) {
+        console.error("Error deleting from employer_profiles:", profileError);
+        throw profileError;
+      }
+
+      // Optionally: Delete the auth user if you have admin privileges
+      // Uncomment if you have set up admin functions for auth
+      // const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      // if (authError) throw authError;
 
       toast({
         title: "Success",
@@ -125,9 +140,10 @@ export function useUsers() {
 
       refetch();
     } catch (error: any) {
+      console.error("Error in deleteUser:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to delete user",
         variant: "destructive",
       });
     }

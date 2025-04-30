@@ -155,6 +155,15 @@ export default function AppRoutes() {
               </ProtectedRoute>
             }
           />
+          {/* Add explicit employee route that points to the Users component */}
+          <Route
+            path="/employees"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
         </>
       )}
 
