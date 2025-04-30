@@ -83,8 +83,6 @@ export default function ParticipantDashboard() {
         
         // Safely handle agent data
         if (property.agent && typeof property.agent === 'object' && !('error' in property.agent)) {
-          // We don't set full_name directly as it's not in the type definition
-          // transformSupabaseData will handle creating name from first_name and last_name
           transformedProperty.agent = {
             id: property.agent.id,
             first_name: property.agent.first_name || '',
