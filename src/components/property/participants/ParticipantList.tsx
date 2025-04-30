@@ -3,10 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PropertyParticipant } from "@/types/participant";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ParticipantInviteDialog } from "./ParticipantInviteDialog";
 import { usePropertyParticipants } from "@/hooks/usePropertyParticipants";
-import { Mail } from "lucide-react";
+import { Mail, RefreshCw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ParticipantListProps {
@@ -17,7 +17,7 @@ interface ParticipantListProps {
 
 export function ParticipantList({ propertyId, title, role }: ParticipantListProps) {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const { participants, isLoading, removeParticipant, updateParticipantStatus, resendInvite } = usePropertyParticipants(propertyId);
+  const { participants, isLoading, removeParticipant, updateParticipantStatus, resendInvite, refetch } = usePropertyParticipants(propertyId);
   const { toast } = useToast();
 
   console.log("ParticipantList - All participants:", participants);
@@ -26,6 +26,14 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
   const filteredParticipants = participants?.filter(p => p.role === role) || [];
   console.log(`ParticipantList - Filtered ${role}s:`, filteredParticipants);
   
+  // After a participant is invited, refetch the list
+  useEffect(() => {
+    if (propertyId) {
+      console.log("Fetching participants for property:", propertyId);
+      refetch();
+    }
+  }, [propertyId, refetch]);
+
   const handleResendInvite = async (participantId: string, email: string) => {
     try {
       await resendInvite(participantId);
@@ -41,6 +49,10 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
         variant: "destructive",
       });
     }
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   const getStatusBadge = (status: string) => {
@@ -59,7 +71,18 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">{title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-medium">{title}</h3>
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={handleRefresh}
+            className="h-8 w-8"
+            title="Refresh participants"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
         <Button 
           size="sm" 
           onClick={() => setInviteDialogOpen(true)}

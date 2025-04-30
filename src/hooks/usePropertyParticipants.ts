@@ -14,7 +14,8 @@ export function usePropertyParticipants(propertyId?: string) {
   const {
     data: participants,
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
     queryKey: ['property-participants', propertyId],
     queryFn: async () => {
@@ -313,6 +314,7 @@ export function usePropertyParticipants(propertyId?: string) {
     participants,
     isLoading,
     error,
+    refetch,
     addParticipant: addParticipantMutation.mutate,
     removeParticipant: removeParticipantMutation.mutate,
     updateParticipantStatus: updateParticipantStatusMutation.mutate,

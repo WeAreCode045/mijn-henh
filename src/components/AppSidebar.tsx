@@ -33,6 +33,7 @@ export function AppSidebar() {
   const { user, isAdmin, isAgent, userRole, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
+  const [usersOpen, setUsersOpen] = useState(false); // New state for users dropdown
 
   if (!user) return null;
 
@@ -126,20 +127,33 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 
                 {isAdmin && (
-                  <>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton onClick={() => navigate('/users')} className="text-white hover:bg-primary-foreground/10">
-                        <UsersIcon className="w-4 h-4" />
-                        <span>Employees</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton onClick={() => navigate('/participants')} className="text-white hover:bg-primary-foreground/10">
-                        <UsersIcon className="w-4 h-4" />
-                        <span>Participants</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => setUsersOpen(!usersOpen)} 
+                      className="text-white hover:bg-primary-foreground/10"
+                    >
+                      <UsersIcon className="w-4 h-4" />
+                      <span>Users</span>
+                      <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${usersOpen ? 'rotate-180' : ''}`} />
+                    </SidebarMenuButton>
+                    
+                    {usersOpen && (
+                      <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1">
+                        <SidebarMenuButton 
+                          onClick={() => navigate('/users')}
+                          className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/users' ? 'bg-primary-foreground/10' : ''}`}
+                        >
+                          Employees
+                        </SidebarMenuButton>
+                        <SidebarMenuButton 
+                          onClick={() => navigate('/participants')}
+                          className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/participants' ? 'bg-primary-foreground/10' : ''}`}
+                        >
+                          Participants
+                        </SidebarMenuButton>
+                      </div>
+                    )}
+                  </SidebarMenuItem>
                 )}
               </>
             )}
