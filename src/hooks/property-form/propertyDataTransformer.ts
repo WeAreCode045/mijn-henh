@@ -1,4 +1,3 @@
-
 import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType, PropertyCity } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
@@ -132,4 +131,28 @@ export function transformImages(images: any[]): PropertyImage[] {
   return Array.isArray(images)
     ? images.map((img: any) => normalizeImage(img))
     : [];
+}
+
+export function transformMetadata(metadata: any): { [key: string]: unknown; status?: string } {
+  // If metadata is null or undefined, return an empty object
+  if (!metadata) return {};
+  
+  // If metadata is a string, try to parse it as JSON
+  if (typeof metadata === 'string') {
+    try {
+      const parsed = JSON.parse(metadata);
+      return typeof parsed === 'object' && parsed !== null ? parsed : { status: metadata };
+    } catch (e) {
+      // If parsing fails, return an object with status set to the string value
+      return { status: metadata };
+    }
+  }
+  
+  // If metadata is already an object, return it as is
+  if (typeof metadata === 'object' && metadata !== null) {
+    return metadata;
+  }
+  
+  // Default case, return an empty object
+  return {};
 }
