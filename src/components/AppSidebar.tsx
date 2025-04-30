@@ -185,7 +185,7 @@ export function AppSidebar() {
                     <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1 bg-primary-foreground/10 rounded-md py-2">
                       <SidebarMenuButton 
                         onClick={() => navigate('/employees')}
-                        className={`text-white hover:bg-primary-foreground/20 ${location.pathname === '/employees' || location.pathname === '/users' ? 'bg-primary-foreground/20' : ''}`}
+                        className={`text-white hover:bg-primary-foreground/20 ${location.pathname === '/employees' ? 'bg-primary-foreground/20' : ''}`}
                       >
                         Employees
                       </SidebarMenuButton>

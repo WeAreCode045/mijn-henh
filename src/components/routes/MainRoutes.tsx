@@ -14,6 +14,7 @@ const Settings = lazy(() => import("../../pages/Settings"));
 const Users = lazy(() => import("../../pages/Users"));
 const Import = lazy(() => import("../../pages/Import"));
 const ParticipantDashboard = lazy(() => import("../../pages/ParticipantDashboard"));
+const Participants = lazy(() => import("../../pages/Participants"));
 
 export const MainRoutes = [
   <Route 
@@ -238,5 +239,33 @@ export const MainRoutes = [
         </PropertyLayout>
       </ProtectedRoute>
     }
+  />,
+  
+  <Route 
+    key="participants"
+    path="/participants" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <Participants />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
+  />,
+  
+  <Route 
+    key="employees"
+    path="/employees" 
+    element={
+      <ProtectedRoute>
+        <PropertyLayout>
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <Users />
+          </React.Suspense>
+        </PropertyLayout>
+      </ProtectedRoute>
+    } 
   />
 ];

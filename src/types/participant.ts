@@ -1,4 +1,3 @@
-
 import { User } from "./user";
 
 export type ParticipantRole = 'seller' | 'buyer';
@@ -22,6 +21,11 @@ export interface ParticipantProfileData {
   city?: string | null;
   postal_code?: string | null;
   country?: string | null;
+  avatar_url?: string | null;
+  role?: string;
+  properties?: string[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PropertyParticipant {

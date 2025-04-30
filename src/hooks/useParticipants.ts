@@ -92,10 +92,11 @@ export function useParticipants() {
               city: profile.city || '',
               postal_code: profile.postal_code || '',
               country: profile.country || '',
-              role: account.role,
+              role: account.role,  // Explicitly add the role from the account
               created_at: profile.created_at || '',
               updated_at: profile.updated_at || '',
-              properties: [account.property_id].filter(Boolean) // Add property_id if it exists
+              properties: [account.property_id].filter(Boolean), // Add property_id if it exists
+              avatar_url: null  // Add default avatar_url
             });
           } else {
             // If the user already exists in our map, just add the property to their properties array
