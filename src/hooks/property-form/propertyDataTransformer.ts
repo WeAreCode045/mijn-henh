@@ -1,85 +1,131 @@
 
-import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType } from "@/types/property";
+import type { PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyImage, PropertyPlaceType, PropertyCity } from "@/types/property";
 import { Json } from "@/integrations/supabase/types";
 import { normalizeImage } from "@/utils/imageHelpers";
 
-export function transformFeatures(features: any[]): PropertyFeature[] {
-  return Array.isArray(features)
-    ? features.map((feature: any) => ({
-        id: feature.id || String(Date.now()),
-        description: feature.description || ""
-      }))
-    : [];
+export function transformFeatures(features: any): PropertyFeature[] {
+  // Ensure we're working with an array
+  if (!features) return [];
+  
+  // Try to convert to array if it's not already
+  let featuresArray: any[] = [];
+  
+  if (Array.isArray(features)) {
+    featuresArray = features;
+  } else if (typeof features === 'string') {
+    try {
+      const parsed = JSON.parse(features);
+      featuresArray = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+      featuresArray = [features]; // Treat as single feature if parsing fails
+    }
+  } else if (typeof features === 'object' && features !== null) {
+    featuresArray = [features]; // Single object case
+  }
+  
+  // Map to ensure consistent structure
+  return featuresArray.map((feature: any) => ({
+    id: feature.id || String(Date.now()),
+    description: feature.description || ""
+  }));
 }
 
-export function transformAreas(areas: any[]): PropertyArea[] {
-  return Array.isArray(areas)
-    ? areas.map((area: any) => {
-        // Ensure imageIds is always processed to a valid array
-        let imageIds: string[] = [];
-        
-        if (area.imageIds) {
-          if (Array.isArray(area.imageIds)) {
-            // Already an array, use it directly
-            imageIds = area.imageIds;
-          } else if (typeof area.imageIds === 'string') {
-            try {
-              // Try to parse as JSON
-              const parsed = JSON.parse(area.imageIds);
-              imageIds = Array.isArray(parsed) ? parsed : [];
-            } catch (e) {
-              // If parsing fails, treat as comma-separated or single value
-              imageIds = area.imageIds.includes(',') 
-                ? area.imageIds.split(',').map((id: string) => id.trim())
-                : [area.imageIds];
-            }
-          } else if (typeof area.imageIds === 'object' && area.imageIds !== null) {
-            // Handle any other object-like value
-            console.log("Object-like imageIds, trying to extract values:", area.imageIds);
-            try {
-              // Try to get values if it's an object with values
-              const values = Object.values(area.imageIds);
-              if (values.length > 0) {
-                imageIds = values.map(v => String(v));
-              }
-            } catch (err) {
-              console.error("Error extracting values from imageIds object:", err);
-            }
-          }
-        }
-        
-        // Process area images - ensure it's an array of PropertyImage
-        const processedImages = Array.isArray(area.images) 
-          ? area.images.map((img: any) => normalizeImage(img))
-          : [];
-        
-        return {
-          id: area.id || crypto.randomUUID(),
-          title: area.title || "",
-          description: area.description || "",
-          imageIds: imageIds,
-          columns: typeof area.columns === 'number' ? area.columns : 2,
-          name: area.name || "",
-          size: area.size || "",
-          images: processedImages
-        };
-      })
-    : [];
+export function transformAreas(areas: any): PropertyArea[] {
+  // Ensure we're working with an array
+  if (!areas) return [];
+  
+  // Try to convert to array if it's not already
+  let areasArray: any[] = [];
+  
+  if (Array.isArray(areas)) {
+    areasArray = areas;
+  } else if (typeof areas === 'string') {
+    try {
+      const parsed = JSON.parse(areas);
+      areasArray = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+      return []; // Return empty array if parsing fails
+    }
+  } else if (typeof areas === 'object' && areas !== null) {
+    areasArray = [areas]; // Single object case
+  }
+  
+  // Map to ensure consistent structure
+  return areasArray.map((area: any) => {
+    // Ensure area has all required properties
+    return {
+      id: area.id || crypto.randomUUID(),
+      title: area.title || "",
+      description: area.description || "",
+      name: area.name || "",
+      size: area.size || "",
+      imageIds: Array.isArray(area.imageIds) ? area.imageIds : [],
+      columns: typeof area.columns === 'number' ? area.columns : 2,
+      images: Array.isArray(area.images) ? area.images.map((img: any) => normalizeImage(img)) : []
+    };
+  });
 }
 
-export function transformNearbyPlaces(places: any[]): PropertyNearbyPlace[] {
-  return Array.isArray(places)
-    ? places.map((place: any) => ({
-        id: place.id || "",
-        name: place.name || "",
-        type: place.type || "other",
-        vicinity: place.vicinity || "",
-        rating: place.rating || 0,
-        user_ratings_total: place.user_ratings_total || 0,
-        visible_in_webview: place.visible_in_webview || false,
-        distance: place.distance || 0
-      }))
-    : [];
+export function transformNearbyPlaces(places: any): PropertyNearbyPlace[] {
+  // Ensure we're working with an array
+  if (!places) return [];
+  
+  // Try to convert to array if it's not already
+  let placesArray: any[] = [];
+  
+  if (Array.isArray(places)) {
+    placesArray = places;
+  } else if (typeof places === 'string') {
+    try {
+      const parsed = JSON.parse(places);
+      placesArray = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+      return []; // Return empty array if parsing fails
+    }
+  } else if (typeof places === 'object' && places !== null) {
+    placesArray = [places]; // Single object case
+  }
+  
+  // Map to ensure consistent structure
+  return placesArray.map((place: any) => ({
+    id: place.id || "",
+    name: place.name || "",
+    type: place.type || "other",
+    vicinity: place.vicinity || "",
+    rating: place.rating || 0,
+    user_ratings_total: place.user_ratings_total || 0,
+    visible_in_webview: place.visible_in_webview || false,
+    distance: place.distance || 0
+  }));
+}
+
+export function transformNearbyCities(cities: any): PropertyCity[] {
+  // Ensure we're working with an array
+  if (!cities) return [];
+  
+  // Try to convert to array if it's not already
+  let citiesArray: any[] = [];
+  
+  if (Array.isArray(cities)) {
+    citiesArray = cities;
+  } else if (typeof cities === 'string') {
+    try {
+      const parsed = JSON.parse(cities);
+      citiesArray = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) {
+      return []; // Return empty array if parsing fails
+    }
+  } else if (typeof cities === 'object' && cities !== null) {
+    citiesArray = [cities]; // Single object case
+  }
+  
+  // Map to ensure consistent structure
+  return citiesArray.map((city: any) => ({
+    id: city.id || String(Date.now()),
+    name: city.name || "",
+    distance: city.distance || "",
+    visible_in_webview: city.visible_in_webview || false
+  }));
 }
 
 export function transformImages(images: any[]): PropertyImage[] {

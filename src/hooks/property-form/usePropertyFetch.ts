@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyData, PropertyFeature, PropertyArea, PropertyNearbyPlace } from '@/types/property';
-import { transformFeatures, transformAreas, transformNearbyPlaces } from './propertyDataTransformer';
+import { PropertyData, PropertyFeature, PropertyArea, PropertyNearbyPlace, PropertyCity } from '@/types/property';
+import { transformFeatures, transformAreas, transformNearbyPlaces, transformNearbyCities } from './propertyDataTransformer';
 
 export function usePropertyFetch(propertyId?: string) {
   const [property, setProperty] = useState<PropertyData | null>(null);
@@ -64,6 +64,9 @@ export function usePropertyFetch(propertyId?: string) {
           // Process nearby places
           const processedNearbyPlaces: PropertyNearbyPlace[] = transformNearbyPlaces(data.nearby_places || []);
           
+          // Process nearby cities
+          const processedNearbyCities: PropertyCity[] = transformNearbyCities(data.nearby_cities || []);
+          
           const propertyData: PropertyData = {
             id: data.id,
             ...data,
@@ -73,7 +76,8 @@ export function usePropertyFetch(propertyId?: string) {
             // Use transformed data
             features: processedFeatures,
             areas: processedAreas,
-            nearby_places: processedNearbyPlaces
+            nearby_places: processedNearbyPlaces,
+            nearby_cities: processedNearbyCities
           };
           
           setProperty(propertyData);
