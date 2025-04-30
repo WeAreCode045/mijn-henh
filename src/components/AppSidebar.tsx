@@ -66,6 +66,7 @@ export function AppSidebar() {
 
   // For debugging
   console.log("Sidebar user profile:", userProfile);
+  console.log("isAdmin:", isAdmin);
 
   return (
     <Sidebar>
@@ -96,7 +97,7 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                   
                   {propertiesOpen && (
-                    <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1">
+                    <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1 bg-primary-foreground/5 rounded-md py-1">
                       <SidebarMenuButton 
                         onClick={() => navigate('/properties')}
                         className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/properties' ? 'bg-primary-foreground/10' : ''}`}
@@ -126,29 +127,30 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 
+                {/* Explicitly check and render the Users dropdown for admins */}
                 {isAdmin && (
-                  <SidebarMenuItem>
+                  <SidebarMenuItem className="relative">
                     <SidebarMenuButton 
                       onClick={() => setUsersOpen(!usersOpen)} 
-                      className="text-white hover:bg-primary-foreground/10"
+                      className="text-white hover:bg-primary-foreground/10 w-full"
                     >
                       <UsersIcon className="w-4 h-4" />
                       <span>Users</span>
                       <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${usersOpen ? 'rotate-180' : ''}`} />
                     </SidebarMenuButton>
                     
-                    {/* Added bg-primary-foreground/5 to make dropdown more visible */}
+                    {/* Enhanced dropdown visibility */}
                     {usersOpen && (
-                      <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1 bg-primary-foreground/5 rounded-md py-1">
+                      <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1 bg-primary-foreground/10 rounded-md py-2">
                         <SidebarMenuButton 
                           onClick={() => navigate('/users')}
-                          className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/users' ? 'bg-primary-foreground/10' : ''}`}
+                          className={`text-white hover:bg-primary-foreground/20 ${location.pathname === '/users' ? 'bg-primary-foreground/20' : ''}`}
                         >
                           Employees
                         </SidebarMenuButton>
                         <SidebarMenuButton 
                           onClick={() => navigate('/participants')}
-                          className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/participants' ? 'bg-primary-foreground/10' : ''}`}
+                          className={`text-white hover:bg-primary-foreground/20 ${location.pathname === '/participants' ? 'bg-primary-foreground/20' : ''}`}
                         >
                           Participants
                         </SidebarMenuButton>
