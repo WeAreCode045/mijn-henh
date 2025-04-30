@@ -33,7 +33,7 @@ export function AppSidebar() {
   const { user, isAdmin, isAgent, userRole, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
-  const [usersOpen, setUsersOpen] = useState(false); // New state for users dropdown
+  const [usersOpen, setUsersOpen] = useState(false); // State for users dropdown
 
   if (!user) return null;
 
@@ -137,8 +137,9 @@ export function AppSidebar() {
                       <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${usersOpen ? 'rotate-180' : ''}`} />
                     </SidebarMenuButton>
                     
+                    {/* Added bg-primary-foreground/5 to make dropdown more visible */}
                     {usersOpen && (
-                      <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1">
+                      <div className="ml-6 pl-2 border-l border-primary-foreground/20 mt-1 space-y-1 bg-primary-foreground/5 rounded-md py-1">
                         <SidebarMenuButton 
                           onClick={() => navigate('/users')}
                           className={`text-white hover:bg-primary-foreground/10 ${location.pathname === '/users' ? 'bg-primary-foreground/10' : ''}`}
