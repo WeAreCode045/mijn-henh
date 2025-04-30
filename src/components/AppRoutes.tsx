@@ -143,26 +143,22 @@ export default function AppRoutes() {
       )}
 
       {/* Admin Routes */}
-      {isAdmin && (
-        <>
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute>
-                <Users />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/participants"
-            element={
-              <ProtectedRoute>
-                <Participants />
-              </ProtectedRoute>
-            }
-          />
-        </>
-      )}
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <Users />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/participants"
+        element={
+          <ProtectedRoute>
+            <Participants />
+          </ProtectedRoute>
+        }
+      />
 
       {/* 404 Route */}
       <Route path="*" element={<NotFound />} />

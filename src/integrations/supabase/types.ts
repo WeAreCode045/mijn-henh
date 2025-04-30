@@ -230,13 +230,6 @@ export type Database = {
             referencedRelation: "documents"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "document_signatures_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       documents: {
@@ -406,57 +399,6 @@ export type Database = {
           postal_code?: string | null
           social_number?: string | null
           updated_at?: string | null
-          whatsapp_number?: string | null
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          address: string | null
-          avatar_url: string | null
-          city: string | null
-          country: string | null
-          created_at: string
-          email: string | null
-          full_name: string | null
-          id: string
-          phone: string | null
-          postal_code: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          updated_at: string
-          user_notifications: Json | null
-          whatsapp_number: string | null
-        }
-        Insert: {
-          address?: string | null
-          avatar_url?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id: string
-          phone?: string | null
-          postal_code?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string
-          user_notifications?: Json | null
-          whatsapp_number?: string | null
-        }
-        Update: {
-          address?: string | null
-          avatar_url?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          phone?: string | null
-          postal_code?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string
-          user_notifications?: Json | null
           whatsapp_number?: string | null
         }
         Relationships: []
@@ -848,20 +790,6 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "property_messages_recipient_id_fkey"
-            columns: ["recipient_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       property_notes: {
@@ -939,13 +867,6 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "property_participants_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1125,20 +1046,6 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webview_permissions_requested_by_fkey"
-            columns: ["requested_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webview_permissions_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

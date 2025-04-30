@@ -1,5 +1,6 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ParticipantProfileData } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
@@ -10,8 +11,9 @@ export function useParticipants() {
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchParticipants = async () => {
+  const { refetch } = useQuery({
+    queryKey: ['participants'],
+    queryFn: async () => {
       try {
         setIsLoading(true);
         console.log("Fetching participants...");
@@ -30,7 +32,8 @@ export function useParticipants() {
         
         if (!participantAccounts.length) {
           setParticipants([]);
-          return;
+          setIsLoading(false);
+          return [];
         }
         
         // Get all user profiles for these accounts
@@ -48,17 +51,19 @@ export function useParticipants() {
         console.log("Found participant profiles:", profilesData);
         
         // Combine account and profile data
-        const combinedData = profilesData.map(profile => {
+        const combinedData = profilesData?.map(profile => {
           const account = participantAccounts.find(acc => acc.user_id === profile.id);
           return {
             ...profile,
             role: account?.role || null,
             email: profile.email || account?.email || null
           };
-        });
+        }) || [];
         
         console.log("Combined participant data:", combinedData);
         setParticipants(combinedData);
+        setIsLoading(false);
+        return combinedData;
       } catch (err) {
         const error = err instanceof Error ? err : new Error('An unknown error occurred');
         setError(error);
@@ -68,54 +73,17 @@ export function useParticipants() {
           description: "Failed to load participants",
           variant: "destructive",
         });
-      } finally {
         setIsLoading(false);
+        return [];
       }
-    };
-    
-    fetchParticipants();
-  }, [toast]);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   return {
     participants,
     isLoading,
     error,
-    refetch: async () => {
-      setIsLoading(true);
-      try {
-        const { data: participantAccounts } = await supabase
-          .from('accounts')
-          .select('user_id, role, email')
-          .in('role', ['buyer', 'seller']);
-        
-        if (!participantAccounts?.length) {
-          setParticipants([]);
-          setIsLoading(false);
-          return;
-        }
-        
-        const userIds = participantAccounts.map(account => account.user_id);
-        
-        const { data: profilesData } = await supabase
-          .from('participants_profile')
-          .select('*')
-          .in('id', userIds);
-        
-        const combinedData = (profilesData || []).map(profile => {
-          const account = participantAccounts.find(acc => acc.user_id === profile.id);
-          return {
-            ...profile,
-            role: account?.role || null,
-            email: profile.email || account?.email || null
-          };
-        });
-        
-        setParticipants(combinedData || []);
-      } catch (err) {
-        console.error('Error refreshing participants:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+    refetch
   };
 }
