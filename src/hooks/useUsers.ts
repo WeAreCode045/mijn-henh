@@ -13,7 +13,32 @@ export function useUsers() {
     queryFn: async () => {
       console.log("Fetching users in useUsers hook");
       try {
-        // Get the user profiles directly from employer_profiles for admin/agent users
+        // First get all accounts with admin or agent roles
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select(`
+            user_id,
+            role,
+            email
+          `)
+          .in('role', ['admin', 'agent']);
+
+        if (accountsError) {
+          console.error("Error fetching accounts:", accountsError);
+          throw accountsError;
+        }
+        
+        console.log("Accounts data from supabase:", accountsData);
+        
+        if (!accountsData || accountsData.length === 0) {
+          console.log("No accounts found with admin or agent roles");
+          return [];
+        }
+        
+        // Extract user IDs from accounts
+        const userIds = accountsData.map(account => account.user_id);
+        
+        // Get the user profiles from employer_profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -30,7 +55,8 @@ export function useUsers() {
             country,
             created_at,
             updated_at
-          `);
+          `)
+          .in('id', userIds);
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -39,55 +65,34 @@ export function useUsers() {
         
         console.log("Employer profiles from supabase:", profiles);
         
-        if (!profiles || profiles.length === 0) {
-          console.log("No profiles found in database");
-          return [];
-        }
-
-        // Now get the role information from accounts table
-        const { data: accountsData, error: accountsError } = await supabase
-          .from("accounts")
-          .select(`
-            user_id,
-            role
-          `)
-          .in('role', ['admin', 'agent']);
-
-        if (accountsError) {
-          console.error("Error fetching accounts:", accountsError);
-          throw accountsError;
-        }
-
-        console.log("Account roles from supabase:", accountsData);
-
         // Create a map of user_id to role
         const roleMap = new Map();
-        accountsData?.forEach(account => {
+        accountsData.forEach(account => {
           roleMap.set(account.user_id, account.role);
         });
 
         // Map profiles to User type with role information
         const transformedData: User[] = profiles
-          .filter(profile => roleMap.has(profile.id)) // Only include profiles with admin/agent roles
-          .map(profile => {
-            const role = roleMap.get(profile.id);
-            return {
-              id: profile.id,
-              email: profile.email || '',
-              full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-              phone: profile.phone || '',
-              whatsapp_number: profile.whatsapp_number || '',
-              role: role,
-              avatar_url: profile.avatar_url || '',
-              // Include these properties conditionally if they exist in the UserBase type
-              ...(profile.address && { address: profile.address }),
-              ...(profile.city && { city: profile.city }),
-              ...(profile.postal_code && { postal_code: profile.postal_code }),
-              ...(profile.country && { country: profile.country }),
-              created_at: profile.created_at || '',
-              updated_at: profile.updated_at || ''
-            };
-          });
+          ? profiles.map(profile => {
+              const role = roleMap.get(profile.id);
+              return {
+                id: profile.id,
+                email: profile.email || '',
+                full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+                phone: profile.phone || '',
+                whatsapp_number: profile.whatsapp_number || '',
+                role: role,
+                avatar_url: profile.avatar_url || '',
+                // Include these properties conditionally if they exist in the UserBase type
+                ...(profile.address && { address: profile.address }),
+                ...(profile.city && { city: profile.city }),
+                ...(profile.postal_code && { postal_code: profile.postal_code }),
+                ...(profile.country && { country: profile.country }),
+                created_at: profile.created_at || '',
+                updated_at: profile.updated_at || ''
+              };
+            })
+          : [];
 
         console.log("Transformed users:", transformedData);
         return transformedData;
@@ -101,8 +106,17 @@ export function useUsers() {
 
   const deleteUser = async (userId: string) => {
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
-      if (error) throw error;
+      // First delete from employer_profiles (will cascade to accounts)
+      const { error: profileError } = await supabase
+        .from('employer_profiles')
+        .delete()
+        .eq('id', userId);
+      
+      if (profileError) throw profileError;
+      
+      // Then delete the auth user
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) throw authError;
 
       toast({
         title: "Success",

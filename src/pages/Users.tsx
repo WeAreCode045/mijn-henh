@@ -13,7 +13,7 @@ import { UserList } from "@/components/users/UserList";
 import { useUsers } from "@/hooks/useUsers";
 
 const Users = () => {
-  const { users, refetch, deleteUser } = useUsers();
+  const { users, refetch, deleteUser, isLoading } = useUsers();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -59,6 +59,7 @@ const Users = () => {
         users={users || []}
         onEdit={handleEditClick}
         onDelete={deleteUser}
+        isLoading={isLoading}
       />
     </div>
   );

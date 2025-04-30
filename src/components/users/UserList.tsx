@@ -9,14 +9,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Spinner } from "@/components/ui/spinner";
 
 interface UserListProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (userId: string) => void;
+  isLoading?: boolean;
 }
 
-export function UserList({ users, onEdit, onDelete }: UserListProps) {
+export function UserList({ users, onEdit, onDelete, isLoading = false }: UserListProps) {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!users || users.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <p className="text-gray-500">No users found. Add your first user by clicking the "Add New User" button above.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg shadow">
       <Table>
@@ -31,9 +49,9 @@ export function UserList({ users, onEdit, onDelete }: UserListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users?.map((user) => (
+          {users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell>{user.full_name}</TableCell>
+              <TableCell>{user.full_name || 'Unnamed User'}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
               <TableCell>{user.whatsapp_number}</TableCell>
