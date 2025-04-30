@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyData, PropertyFeature } from '@/types/property';
+import { PropertyData, PropertyFeature, PropertyArea, PropertyNearbyPlace } from '@/types/property';
+import { transformFeatures, transformAreas, transformNearbyPlaces } from './propertyDataTransformer';
 
 export function usePropertyFetch(propertyId?: string) {
   const [property, setProperty] = useState<PropertyData | null>(null);
@@ -54,27 +55,14 @@ export function usePropertyFetch(propertyId?: string) {
             console.error('Error fetching property images:', imageError);
           }
           
-          // Parse features as PropertyFeature[]
-          let parsedFeatures: PropertyFeature[] = [];
-          if (data.features) {
-            try {
-              // If features is a JSON string, parse it
-              if (typeof data.features === 'string') {
-                parsedFeatures = JSON.parse(data.features);
-              } 
-              // If features is already an array, use it directly
-              else if (Array.isArray(data.features)) {
-                parsedFeatures = data.features;
-              }
-              // If features is a JSONB object from PostgreSQL, it might already be parsed
-              else if (typeof data.features === 'object') {
-                parsedFeatures = Array.isArray(data.features) ? data.features : [];
-              }
-            } catch (e) {
-              console.error('Error parsing features:', e);
-              parsedFeatures = [];
-            }
-          }
+          // Process features data
+          const processedFeatures: PropertyFeature[] = transformFeatures(data.features || []);
+          
+          // Process areas data
+          const processedAreas: PropertyArea[] = transformAreas(data.areas || []);
+          
+          // Process nearby places
+          const processedNearbyPlaces: PropertyNearbyPlace[] = transformNearbyPlaces(data.nearby_places || []);
           
           const propertyData: PropertyData = {
             id: data.id,
@@ -82,8 +70,10 @@ export function usePropertyFetch(propertyId?: string) {
             agent: agentInfo,
             // Ensure images is defined to satisfy the PropertyData interface
             images: imageData || [],
-            // Use parsed features
-            features: parsedFeatures
+            // Use transformed data
+            features: processedFeatures,
+            areas: processedAreas,
+            nearby_places: processedNearbyPlaces
           };
           
           setProperty(propertyData);
