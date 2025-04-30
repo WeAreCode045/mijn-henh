@@ -59,24 +59,48 @@ export function usePropertyConversations(propertyId?: string) {
         const recipientIds = [...new Set(messages.map(m => m.recipient_id))];
         const allUserIds = [...new Set([...senderIds, ...recipientIds])];
         
-        // Get all relevant user profiles
-        const { data: userProfiles, error: profilesError } = await supabase
+        // Get profiles from employer_profiles (for admin/agent users)
+        const { data: employerProfiles, error: employerError } = await supabase
           .from('employer_profiles')
           .select('id, first_name, last_name, email, avatar_url')
           .in('id', allUserIds);
         
-        if (profilesError) throw profilesError;
+        if (employerError) throw employerError;
+        
+        // Get profiles from participants_profile (for buyer/seller users)
+        const { data: participantProfiles, error: participantError } = await supabase
+          .from('participants_profile')
+          .select('id, first_name, last_name, email')
+          .in('id', allUserIds);
+        
+        if (participantError) throw participantError;
         
         // Map user IDs to their profiles
         const userMap = new Map();
-        if (userProfiles) {
-          userProfiles.forEach(profile => {
+        
+        // Add employer profiles to the map
+        if (employerProfiles) {
+          employerProfiles.forEach(profile => {
             userMap.set(profile.id, {
               id: profile.id,
               full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User',
               email: profile.email || '',
               avatar_url: profile.avatar_url || ''
             });
+          });
+        }
+        
+        // Add participant profiles to the map
+        if (participantProfiles) {
+          participantProfiles.forEach(profile => {
+            if (!userMap.has(profile.id)) {
+              userMap.set(profile.id, {
+                id: profile.id,
+                full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User',
+                email: profile.email || '',
+                avatar_url: null
+              });
+            }
           });
         }
         

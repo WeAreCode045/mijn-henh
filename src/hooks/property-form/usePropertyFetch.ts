@@ -44,10 +44,24 @@ export function usePropertyFetch(propertyId?: string) {
             }
           }
           
-          setProperty({
+          // Get property images
+          const { data: imageData, error: imageError } = await supabase
+            .from('property_images')
+            .select('*')
+            .eq('property_id', propertyId);
+            
+          if (imageError) {
+            console.error('Error fetching property images:', imageError);
+          }
+          
+          const propertyData: PropertyData = {
             ...data,
-            agent: agentInfo
-          } as PropertyData);
+            agent: agentInfo,
+            // Ensure images is defined to satisfy the PropertyData interface
+            images: imageData || []
+          };
+          
+          setProperty(propertyData);
         }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('An unknown error occurred');
