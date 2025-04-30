@@ -28,6 +28,9 @@ const Participants = () => {
     setIsDialogOpen(true);
   };
 
+  console.log("Participants page loaded");
+  console.log("Participants data:", participants);
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -37,6 +40,12 @@ const Participants = () => {
       {isLoading ? (
         <div className="flex justify-center p-8">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      ) : participants.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <UserCircle className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-600">No participants found</h3>
+          <p className="text-gray-500 mt-2">Participants will appear here when buyers or sellers are added to properties.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

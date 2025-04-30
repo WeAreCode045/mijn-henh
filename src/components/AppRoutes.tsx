@@ -23,6 +23,12 @@ export default function AppRoutes() {
   const { isAdmin, isAgent, userRole } = useAuth();
   const isParticipant = userRole === 'buyer' || userRole === 'seller';
 
+  // Debug information
+  console.log("AppRoutes - isAdmin:", isAdmin);
+  console.log("AppRoutes - isAgent:", isAgent);
+  console.log("AppRoutes - userRole:", userRole);
+  console.log("AppRoutes - isParticipant:", isParticipant);
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -75,7 +81,7 @@ export default function AppRoutes() {
       )}
 
       {/* Agent Routes */}
-      {isAgent && (
+      {(isAgent || isAdmin) && (
         <>
           <Route
             path="/properties"

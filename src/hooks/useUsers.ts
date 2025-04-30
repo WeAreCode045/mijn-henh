@@ -1,72 +1,76 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
 import { useToast } from "@/components/ui/use-toast";
 
 export function useUsers() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: users, refetch, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       console.log("Fetching users in useUsers hook");
       try {
-        // Query from both employer_profiles and accounts for admin/agent users
-        const { data: employerData, error: employerError } = await supabase
-          .from("employer_profiles")
+        // Query from accounts table to get admin/agent users
+        const { data: accountsData, error: accountsError } = await supabase
+          .from("accounts")
           .select(`
             id,
+            user_id,
+            role,
             email,
-            first_name,
-            last_name,
-            phone,
-            whatsapp_number,
-            avatar_url,
-            address,
-            city,
-            postal_code,
-            country,
-            created_at,
-            updated_at,
-            accounts!inner(role)
+            status
           `)
+          .in('role', ['admin', 'agent'])
           .order("created_at", { ascending: false });
 
-        if (employerError) {
-          console.error("Error fetching employer profiles:", employerError);
-          throw employerError;
+        if (accountsError) {
+          console.error("Error fetching accounts:", accountsError);
+          throw accountsError;
         }
         
-        console.log("Employer profiles data from supabase:", employerData);
+        console.log("Accounts data from supabase:", accountsData);
         
-        if (!employerData || employerData.length === 0) {
+        if (!accountsData || accountsData.length === 0) {
           console.log("No users found in database");
           return [];
         }
         
-        // Transform the data to match the User type
-        const transformedData: User[] = employerData.map(profile => {
-          // Get the role from the accounts relation
-          const userAccount = Array.isArray(profile.accounts) ? profile.accounts[0] : profile.accounts;
-          const role = userAccount?.role || 'agent';
+        // For each account, fetch the profile information
+        const transformedData: User[] = [];
+        
+        for (const account of accountsData) {
+          // Get employer profile for each user
+          const { data: profile, error: profileError } = await supabase
+            .from("employer_profiles")
+            .select("*")
+            .eq("id", account.user_id)
+            .single();
+            
+          if (profileError && profileError.code !== 'PGRST116') {
+            console.error(`Error fetching profile for user ${account.user_id}:`, profileError);
+            continue;
+          }
           
-          return {
-            id: profile.id,
-            email: profile.email || '',
-            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
-            phone: profile.phone || '',
-            whatsapp_number: profile.whatsapp_number || '',
-            role: role,
-            avatar_url: profile.avatar_url || '',
-            address: profile.address || '',
-            city: profile.city || '',
-            postal_code: profile.postal_code || '',
-            country: profile.country || '',
-            created_at: profile.created_at || '',
-            updated_at: profile.updated_at || ''
-          };
-        });
+          // Create user object combining account and profile data
+          transformedData.push({
+            id: account.user_id,
+            email: profile?.email || account.email || '',
+            full_name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '',
+            phone: profile?.phone || '',
+            whatsapp_number: profile?.whatsapp_number || '',
+            role: account.role,
+            avatar_url: profile?.avatar_url || '',
+            address: profile?.address || '',
+            city: profile?.city || '',
+            postal_code: profile?.postal_code || '',
+            country: profile?.country || '',
+            created_at: account.created_at || '',
+            updated_at: profile?.updated_at || ''
+          });
+        }
 
         console.log("Transformed users:", transformedData);
         return transformedData;
