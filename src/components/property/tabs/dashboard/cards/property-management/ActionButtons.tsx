@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { IconActionButtons } from "./IconActionButtons";
 import { useCallback } from "react";
 
@@ -12,14 +12,15 @@ interface ActionButtonsProps {
   onViewTour?: (e: React.MouseEvent) => void;
   isArchived?: boolean;
   propertyId: string;
-  agentId?: string;
-  handleSaveAgent: (agentId: string) => Promise<void>;
-  createdAt?: string;
-  updatedAt?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;
   showTextButtons?: boolean;
-  propertyData?: any;
+  // Remove properties that aren't needed
+  // agentId?: string;
+  // handleSaveAgent?: (agentId: string) => Promise<void>;
+  // createdAt?: string;
+  // updatedAt?: string;
+  // propertyData?: any;
 }
 
 export function ActionButtons({ 
@@ -29,14 +30,15 @@ export function ActionButtons({
   onViewTour = () => {},
   isArchived = false,
   propertyId,
-  agentId,
-  handleSaveAgent,
-  createdAt,
-  updatedAt,
   virtualTourUrl,
   youtubeUrl,
   showTextButtons = true,
-  propertyData: initialPropertyData
+  // Remove unused properties
+  // agentId,
+  // handleSaveAgent,
+  // createdAt,
+  // updatedAt,
+  // propertyData: initialPropertyData
 }: ActionButtonsProps) {
   const { toast } = useToast();
   
