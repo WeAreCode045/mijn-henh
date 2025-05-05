@@ -54,6 +54,8 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
         last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone,
+        // Update full_name to maintain compatibility
+        full_name: `${formData.first_name} ${formData.last_name}`.trim()
       });
       setIsEditing(false);
     } catch (error) {

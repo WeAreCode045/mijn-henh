@@ -9,4 +9,6 @@ export interface PropertyAgent {
   photoUrl?: string; // For compatibility with PropertyAgent in property.d.ts
   avatar_url?: string;
   address?: string; // For compatibility with PropertyAgent in property.d.ts
+  first_name?: string;
+  last_name?: string;
 }

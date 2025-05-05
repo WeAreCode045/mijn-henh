@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
@@ -86,7 +87,7 @@ export default function Properties() {
                         key={agent.id} 
                         value={agent.id}
                       >
-                        {agent.full_name || "Unnamed Agent"}
+                        {agent.display_name || "Unnamed Agent"}
                       </SelectItem>
                     ))}
                   </SelectContent>

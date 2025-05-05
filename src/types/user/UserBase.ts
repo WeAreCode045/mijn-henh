@@ -3,6 +3,8 @@ export interface UserBase {
   id: string;
   email: string;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
   avatar_url?: string;
   phone?: string | undefined;
   whatsapp_number?: string | undefined;
