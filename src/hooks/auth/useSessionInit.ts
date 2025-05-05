@@ -74,6 +74,7 @@ export function useSessionInit({
       if (!isMounted) return;
       
       setIsLoading(true);
+      console.log('Initializing auth session...');
       
       try {
         // First check for an existing session
@@ -87,10 +88,12 @@ export function useSessionInit({
           }
         } else if (existingSession) {
           // We have a session, apply it immediately
+          console.log('Existing session found:', existingSession.user?.id);
           if (isMounted) {
             await handleAuthStateChange(existingSession);
           }
         } else {
+          console.log('No existing session found');
           if (isMounted) {
             setIsLoading(false);
           }
@@ -99,6 +102,7 @@ export function useSessionInit({
         // Then set up the auth state change listener for future changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (_, session) => {
+            console.log('Auth state change event triggered');
             if (isMounted) {
               await handleAuthStateChange(session);
             }
@@ -107,11 +111,13 @@ export function useSessionInit({
         
         // Set initialized to true only if component is still mounted
         if (isMounted) {
+          console.log('Auth initialization complete');
           setInitialized(true);
         }
         
         // Return cleanup function
         return () => {
+          console.log('Cleaning up auth subscription');
           subscription.unsubscribe();
         };
       } catch (err) {

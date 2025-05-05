@@ -7,12 +7,8 @@ import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { AuthProvider } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client"; 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { MainRoutes } from "@/components/routes/MainRoutes";
-import { RedirectRoutes } from "@/components/routes/RedirectRoutes";
-import { FallbackRoutes } from "@/components/routes/FallbackRoutes";
-import { WebViewRoutes } from "@/components/routes/WebViewRoutes";
-import { AuthRoutes } from "@/components/routes/AuthRoutes";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "@/components/AppRoutes";
 
 // Add error boundary component for better error handling
 const ErrorFallback = () => (
@@ -44,46 +40,18 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create a custom router that includes all routes
-// Convert the JSX route elements to route objects that createBrowserRouter expects
-const router = createBrowserRouter([
-  ...MainRoutes.map(route => ({
-    path: route.props.path,
-    element: route.props.element,
-    errorElement: <ErrorFallback />
-  })),
-  ...AuthRoutes.map(route => ({
-    path: route.props.path,
-    element: route.props.element,
-    errorElement: <ErrorFallback />
-  })),
-  ...RedirectRoutes.map(route => ({
-    path: route.props.path,
-    element: route.props.element,
-    errorElement: <ErrorFallback />
-  })),
-  ...WebViewRoutes.map(route => ({
-    path: route.props.path,
-    element: route.props.element,
-    errorElement: <ErrorFallback />
-  })),
-  ...FallbackRoutes.map(route => ({
-    path: route.props.path,
-    element: route.props.element,
-    errorElement: <ErrorFallback />
-  }))
-]);
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <SessionContextProvider supabaseClient={supabase}>
       <AuthProvider>
         <SidebarProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <RouterProvider router={router} />
-          </TooltipProvider>
+          <BrowserRouter>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <AppRoutes />
+            </TooltipProvider>
+          </BrowserRouter>
         </SidebarProvider>
       </AuthProvider>
     </SessionContextProvider>
