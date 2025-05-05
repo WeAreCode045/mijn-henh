@@ -34,11 +34,13 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000,
       retry: 1,
-      // Add error handling to prevent white screens on query failures
-      onError: (error) => {
-        console.error('Query error:', error);
-      }
     },
+    mutations: {
+      // Add proper error handling in the mutations options
+      onError: (error) => {
+        console.error('Mutation error:', error);
+      }
+    }
   },
 });
 
