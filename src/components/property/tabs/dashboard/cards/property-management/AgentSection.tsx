@@ -42,6 +42,7 @@ export function AgentSection({ agentId, handleSaveAgent }: AgentSectionProps) {
       <AgentSelector 
         initialAgentId={agentId} 
         onAgentChange={handleAgentChange} 
+        isDisabled={isSaving}
       />
     </div>
   );

@@ -61,24 +61,23 @@ export function usePropertySaveHandlers(
       // If agentId is empty string, we want to set it to null in the database
       const finalAgentId = agentId.trim() === '' ? null : agentId;
       
-      // Update local state
+      // Update local state first
       onFieldChange('agent_id', finalAgentId);
       
       // Save to database
-      console.log("Updating agent_id to:", finalAgentId, "for property:", formState.id);
-      const { error } = await supabase
+      console.log("Executing Supabase update for agent_id:", finalAgentId, "for property:", formState.id);
+      const { error, data } = await supabase
         .from('properties')
         .update({ agent_id: finalAgentId })
-        .eq('id', formState.id);
+        .eq('id', formState.id)
+        .select();
       
       if (error) {
         console.error("Supabase error:", error);
         throw error;
       }
       
-      toast({
-        description: "Agent assigned successfully",
-      });
+      console.log("Agent update result:", data);
       
       return Promise.resolve();
     } catch (error) {
