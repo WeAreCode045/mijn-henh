@@ -29,7 +29,7 @@ export function usePropertyFormSubmit() {
     try {
       // Convert form data to submit format
       const submitData: PropertySubmitData = {
-        id: formData.id,
+        id: formData.id, // This line is now valid since we added id to PropertySubmitData
         title: formData.title || '',
         price: formData.price || '',
         address: formData.address || '',

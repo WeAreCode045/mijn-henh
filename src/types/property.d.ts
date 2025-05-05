@@ -129,6 +129,7 @@ export interface PropertyFormData extends PropertyData {
 
 // Property submit data
 export interface PropertySubmitData {
+  id?: string; // Added id property to fix TypeScript error
   title: string;
   price: string;
   address: string;

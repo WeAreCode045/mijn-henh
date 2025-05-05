@@ -116,7 +116,7 @@ export interface PropertyFormData {
 }
 
 export interface PropertySubmitData {
-  id?: string;
+  id?: string;  // Adding the id property to fix the TypeScript error
   title: string;
   price: string;
   address: string;

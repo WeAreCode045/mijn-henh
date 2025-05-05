@@ -19,7 +19,7 @@ export interface PropertyFormData extends PropertyData {
 
 // Property submit data
 export interface PropertySubmitData {
-  id?: string;
+  id?: string; // Adding id property to fix the TypeScript error
   title: string;
   price: string;
   address: string;
@@ -53,4 +53,8 @@ export interface PropertySubmitData {
   floorplanEmbedScript?: string;
   status?: string; // Added status property
   propertyType?: string; // Added propertyType property
+  metadata?: {
+    status?: string;
+    [key: string]: unknown;
+  }; // Metadata property
 }
