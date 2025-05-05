@@ -12,15 +12,17 @@ import { UserForm } from "@/components/users/UserForm";
 import { UserList } from "@/components/users/UserList";
 import { useUsers } from "@/hooks/useUsers";
 import { PropertyLayout } from "@/components/PropertyLayout";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Users = () => {
-  const { users, refetch, deleteUser, isLoading, error } = useUsers();
+  const { users, refetch, deleteUser, isLoading, error, isAuthenticated } = useUsers();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Debug information
-  console.log("Users component rendering with:", { users, isLoading, error });
+  console.log("Users component rendering with:", { users, isLoading, error, isAuthenticated });
 
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
@@ -46,10 +48,24 @@ const Users = () => {
         <Button onClick={handleAddNewClick}>Add New Employee</Button>
       </div>
 
+      {!isAuthenticated && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            You need to be logged in to view employees. Please log in with an admin account.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-          <p>Error loading employees: {error instanceof Error ? error.message : 'Unknown error'}</p>
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Error loading employees: {error instanceof Error ? error.message : 'Unknown error'}
+          </AlertDescription>
+        </Alert>
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

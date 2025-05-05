@@ -3,15 +3,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/providers/AuthProvider";
 
 export function useUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { session } = useAuth();
+
+  const isAuthenticated = !!session;
 
   const { data: users, refetch, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       console.log("Fetching users in useUsers hook");
+      
+      if (!isAuthenticated) {
+        console.log("User not authenticated, skipping fetch");
+        return [];
+      }
+      
       try {
         // First get all accounts with admin or agent roles
         const { data: accountsData, error: accountsError } = await supabase
@@ -26,7 +36,7 @@ export function useUsers() {
 
         if (accountsError) {
           console.error("Error fetching accounts:", accountsError);
-          throw accountsError;
+          throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
         }
         
         console.log("Admin/agent accounts data from supabase:", accountsData);
@@ -61,7 +71,7 @@ export function useUsers() {
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
-          throw profilesError;
+          throw new Error(`Failed to fetch employer profiles: ${profilesError.message}`);
         }
         
         console.log("Employer profiles from supabase:", profiles);
@@ -103,9 +113,20 @@ export function useUsers() {
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: isAuthenticated, // Only run the query if the user is authenticated
+    retry: 1, // Limit retry attempts for clearer error messages
   });
 
   const deleteUser = async (userId: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to delete users",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       // First delete from accounts table
       const { error: accountError } = await supabase
@@ -150,6 +171,7 @@ export function useUsers() {
     refetch,
     deleteUser,
     isLoading,
-    error
+    error,
+    isAuthenticated
   };
 }
