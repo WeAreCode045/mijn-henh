@@ -58,15 +58,43 @@ export function useProperties(searchTerm: string = "", limit: number = 50) {
         setProperties([]);
       } else if (data) {
         console.log(`useProperties - Fetched ${data.length} properties`);
-        const processedProperties = data.map(item => {
-          return {
-            ...item,
-            agent: item.agent_id ? {
-              id: item.agent_id,
+        
+        // Process properties
+        const propertyPromises = data.map(async (property) => {
+          // Default property data
+          const propertyData: Property = {
+            ...property,
+            agent: property.agent_id ? {
+              id: property.agent_id,
               name: "Agent"  // Default name until we fetch actual agent info
             } : null
           };
+          
+          // Try to get agent info if agent_id exists
+          if (property.agent_id) {
+            try {
+              const { data: agentData, error: agentError } = await supabase
+                .from('employer_profiles')
+                .select('id, first_name, last_name')
+                .eq('id', property.agent_id)
+                .maybeSingle();
+                
+              if (!agentError && agentData) {
+                propertyData.agent = {
+                  id: agentData.id,
+                  name: `${agentData.first_name || ''} ${agentData.last_name || ''}`.trim() || 'Unnamed Agent'
+                };
+              }
+            } catch (err) {
+              console.error('Error fetching agent info:', err);
+            }
+          }
+          
+          return propertyData;
         });
+        
+        // Wait for all property promises to resolve
+        const processedProperties = await Promise.all(propertyPromises);
         setProperties(processedProperties);
       }
     } catch (error) {

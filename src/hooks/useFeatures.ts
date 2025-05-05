@@ -16,17 +16,41 @@ export function useFeatures(propertyId: string) {
       try {
         setIsLoading(true);
         
+        // Verify user is authenticated before fetching
+        const { data: session } = await supabase.auth.getSession();
+        if (!session.session) {
+          console.log("No authenticated session found in useFeatures");
+          setIsLoading(false);
+          return;
+        }
+        
         // Fetch property features
-        const { data: propertyData } = await supabase
+        const { data: propertyData, error: propertyError } = await supabase
           .from('properties')
           .select('features')
           .eq('id', propertyId)
-          .single();
+          .maybeSingle();
+        
+        if (propertyError) {
+          console.error("Error fetching property features:", propertyError);
+          throw propertyError;
+        }
         
         if (propertyData && propertyData.features) {
-          const parsedFeatures = typeof propertyData.features === 'string' 
-            ? JSON.parse(propertyData.features) 
-            : propertyData.features;
+          let parsedFeatures: PropertyFeature[] = [];
+          
+          try {
+            if (typeof propertyData.features === 'string') {
+              parsedFeatures = JSON.parse(propertyData.features);
+            } else if (Array.isArray(propertyData.features)) {
+              parsedFeatures = propertyData.features;
+            } else if (typeof propertyData.features === 'object') {
+              parsedFeatures = [propertyData.features];
+            }
+          } catch (parseError) {
+            console.error("Error parsing features:", parseError);
+            parsedFeatures = [];
+          }
           
           setFeatures(Array.isArray(parsedFeatures) ? parsedFeatures : []);
         }
@@ -37,9 +61,12 @@ export function useFeatures(propertyId: string) {
           .select('*')
           .order('created_at', { ascending: false });
         
-        if (globalError) throw globalError;
+        if (globalError) {
+          console.error("Error fetching global features:", globalError);
+          throw globalError;
+        }
         
-        setGlobalFeatures(globalData as PropertyFeature[]);
+        setGlobalFeatures(globalData as PropertyFeature[] || []);
       } catch (error) {
         console.error('Error fetching features:', error);
         toast({

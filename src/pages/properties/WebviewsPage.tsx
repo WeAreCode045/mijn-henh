@@ -15,9 +15,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Share2, ExternalLink, Globe } from "lucide-react";
+import { Share2, ExternalLink, Globe, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface PropertyWebview {
   id: string;
@@ -29,22 +30,39 @@ interface PropertyWebview {
 const WebviewsPage = () => {
   const [properties, setProperties] = useState<PropertyWebview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
+        // Check if user is authenticated
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData.session) {
+          setError("You must be logged in to view webviews.");
+          setLoading(false);
+          return;
+        }
+        
+        // First fetch all properties
         const { data, error } = await supabase
           .from('properties')
           .select('id, title, status, created_at')
+          .eq('archived', false)
           .order('created_at', { ascending: false });
         
         if (error) {
+          console.error("Error fetching properties:", error);
           throw new Error(error.message);
         }
         
         if (data) {
+          console.log(`WebviewsPage - Fetched ${data.length} properties`);
+          
           const formattedData = data.map(property => ({
             id: property.id,
             title: property.title || 'Untitled Property',
@@ -53,9 +71,13 @@ const WebviewsPage = () => {
           }));
           
           setProperties(formattedData);
+        } else {
+          console.log("WebviewsPage - No properties found");
+          setProperties([]);
         }
       } catch (error) {
         console.error('Error fetching properties:', error);
+        setError("Failed to load properties");
         toast({
           title: "Error",
           description: "Failed to load properties",
@@ -70,30 +92,39 @@ const WebviewsPage = () => {
   }, [toast]);
 
   const handleShare = async (propertyId: string, platform: string) => {
-    const shareUrl = `${window.location.origin}/share/${propertyId}`;
-    
-    switch (platform) {
-      case 'whatsapp':
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`);
-        break;
-      case 'email':
-        window.location.href = `mailto:?subject=Check out this property&body=${encodeURIComponent(shareUrl)}`;
-        break;
-      case 'instagram':
-        // Instagram doesn't have a direct sharing API, but we can copy the link
-        await navigator.clipboard.writeText(shareUrl);
-        toast({
-          title: "Link copied",
-          description: "Share this link on Instagram",
-        });
-        break;
-      case 'copy':
-        await navigator.clipboard.writeText(shareUrl);
-        toast({
-          title: "Link copied",
-          description: "The share link has been copied to your clipboard",
-        });
-        break;
+    try {
+      const shareUrl = `${window.location.origin}/share/${propertyId}`;
+      
+      switch (platform) {
+        case 'whatsapp':
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`);
+          break;
+        case 'email':
+          window.location.href = `mailto:?subject=Check out this property&body=${encodeURIComponent(shareUrl)}`;
+          break;
+        case 'instagram':
+          // Instagram doesn't have a direct sharing API, but we can copy the link
+          await navigator.clipboard.writeText(shareUrl);
+          toast({
+            title: "Link copied",
+            description: "Share this link on Instagram",
+          });
+          break;
+        case 'copy':
+          await navigator.clipboard.writeText(shareUrl);
+          toast({
+            title: "Link copied",
+            description: "The share link has been copied to your clipboard",
+          });
+          break;
+      }
+    } catch (error) {
+      console.error("Error sharing property:", error);
+      toast({
+        title: "Error",
+        description: "Failed to share property",
+        variant: "destructive",
+      });
     }
   };
 
@@ -109,6 +140,14 @@ const WebviewsPage = () => {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6">Property Webviews</h1>
+      
+      {error && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       
       {loading ? (
         <div className="flex justify-center items-center h-64">

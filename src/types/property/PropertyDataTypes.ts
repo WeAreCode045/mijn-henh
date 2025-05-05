@@ -44,12 +44,12 @@ export interface PropertyData {
   youtubeUrl?: string;
   created_at?: string;
   updated_at?: string;
-  status?: string; // Property status field
-  archived?: boolean; // Property archived status
+  status?: string;
+  archived?: boolean;
   metadata?: {
     status?: string;
     [key: string]: any;
-  }; // Metadata object that can include status
+  };
   agent?: {
     id: string;
     name: string;
@@ -57,6 +57,6 @@ export interface PropertyData {
     phone?: string;
     photoUrl?: string;
   };
-  propertyType?: string; // Property type field
-  featured?: Array<{description: string; [key: string]: any}>; // JSONB featured column with features
+  propertyType?: string;
+  featured?: Array<{description: string; [key: string]: any}>;
 }
