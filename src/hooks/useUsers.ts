@@ -29,7 +29,7 @@ export function useUsers() {
           throw accountsError;
         }
         
-        console.log("Accounts data from supabase:", accountsData);
+        console.log("Admin/agent accounts data from supabase:", accountsData);
         
         if (!accountsData || accountsData.length === 0) {
           console.log("No accounts found with admin or agent roles");
