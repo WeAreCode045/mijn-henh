@@ -62,20 +62,26 @@ export function usePropertyFormActions(
       return Promise.reject(new Error("Property ID is missing"));
     }
 
-    // If agentId is empty string, log a message and set it to null in the database
     if (agentId.trim() === '') {
       console.log("No agent ID provided. Setting agent_id to null in the database.");
     }
     const finalAgentId = agentId.trim() === '' ? null : agentId;
     
+    console.log("Agent ID to save:", agentId);
+    console.log("Final Agent ID:", finalAgentId);
+    console.log("Property ID:", formData.id);
+
     try {
-      console.log("Updating agent_id to:", finalAgentId);
+      console.log("Updating properties table with:", { agent_id: finalAgentId, property_id: formData.id });
       const { error } = await supabase
         .from('properties')
         .update({ agent_id: finalAgentId })
         .eq('id', formData.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
       
       toast({
         description: "Agent assigned successfully",
