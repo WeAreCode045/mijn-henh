@@ -9,9 +9,10 @@ import { useToast } from "@/components/ui/use-toast";
 interface AgentSelectorProps {
   initialAgentId?: string;
   onAgentChange: (agentId: string) => Promise<void>;
+  isDisabled?: boolean;
 }
 
-export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorProps) {
+export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = false }: AgentSelectorProps) {
   const [agents, setAgents] = useState<{id: string, display_name: string}[]>([]);
   const [currentAgentId, setCurrentAgentId] = useState(initialAgentId || "no-agent");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
@@ -31,7 +32,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
         // First get all users with agent or admin role
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('user_id, role')
+          .select('user_id, role, email')
           .or('role.eq.agent,role.eq.admin');
         
         if (accountsError) {
@@ -74,33 +75,18 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   }, [toast]);
 
   const handleAgentChange = async (agentId: string) => {
-    console.log("Agent change requested:", agentId, "onAgentChange:", typeof onAgentChange);
-    
-    // Verify that onAgentChange is a function
-    if (!onAgentChange || typeof onAgentChange !== 'function') {
-      console.error("Error: onAgentChange is not a function", onAgentChange);
-      toast({
-        title: "Error",
-        description: "Cannot update agent - invalid handler",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const finalAgentId = agentId === "no-agent" ? "" : agentId;
-    
     try {
       setIsSaving(true);
       setCurrentAgentId(agentId);
       
       // Log exactly what we're passing to the handler
-      console.log("Calling onAgentChange with agent ID:", finalAgentId);
+      console.log("AgentSelector: Calling onAgentChange with agent ID:", agentId === "no-agent" ? "" : agentId);
       
-      await onAgentChange(finalAgentId);
-      
+      await onAgentChange(agentId === "no-agent" ? "" : agentId);
       toast({
         title: "Success",
-        description: "Agent updated successfully",
+        description: "The assigned agent has been updated.",
+        variant: "default",
       });
     } catch (error) {
       console.error("Error saving agent:", error);
@@ -123,7 +109,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
       <Select 
         value={currentAgentId} 
         onValueChange={handleAgentChange}
-        disabled={isLoadingAgents || isSaving}
+        disabled={isLoadingAgents || isSaving || isDisabled}
         defaultValue="no-agent"
       >
         <SelectTrigger id="agent-select" className="w-full">
