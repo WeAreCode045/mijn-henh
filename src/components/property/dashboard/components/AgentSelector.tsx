@@ -113,7 +113,7 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="agent-select">Assigned Agent</Label>
+      <Label htmlFor="agent-select">Assign Agent</Label>
       <Select 
         value={currentAgentId} 
         onValueChange={handleAgentChange}
