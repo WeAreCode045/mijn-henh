@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { PropertyFormData } from "@/types/property";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { prepareAreasForFormSubmission } from "../property-form/preparePropertyData";
 
 export function usePropertyAutoSave() {
@@ -23,6 +23,8 @@ export function usePropertyAutoSave() {
     setIsSaving(true);
     
     try {
+      console.log(`Starting autosave for field ${String(field)} on property ${propertyId}`);
+      
       // Get current property data for change tracking
       const { data: currentPropertyData } = await supabase
         .from('properties')
@@ -68,6 +70,7 @@ export function usePropertyAutoSave() {
       }
 
       console.log('Auto-save successful, new timestamp:', updatedData?.[0]?.updated_at);
+      console.log('Updated data from database:', updatedData);
       
       // If we got back data, use the actual server timestamp for lastSaved
       if (updatedData && updatedData[0]) {
@@ -97,9 +100,13 @@ export function usePropertyAutoSave() {
     formData: PropertyFormData, 
     specificFields?: Record<string, any>
   ): Promise<boolean> => {
-    if (!formData.id) return false;
+    if (!formData.id) {
+      console.error("Cannot autosave - property ID is missing");
+      return false;
+    }
     
     setIsSaving(true);
+    console.log(`Starting autosaveData for property ${formData.id}`);
     
     try {
       // If specific fields provided, only save those
@@ -129,6 +136,7 @@ export function usePropertyAutoSave() {
       };
       
       console.log('Auto-saving property data...', specificFields ? 'Specific fields only' : 'All fields');
+      console.log('Submit data:', submitData);
 
       const { error, data: updatedData } = await supabase
         .from('properties')
@@ -142,6 +150,7 @@ export function usePropertyAutoSave() {
       }
 
       console.log('Auto-save successful, new timestamp:', updatedData?.[0]?.updated_at);
+      console.log('Updated data from database:', updatedData);
       
       // If we got back data, use the actual server timestamp for lastSaved
       if (updatedData && updatedData[0]) {

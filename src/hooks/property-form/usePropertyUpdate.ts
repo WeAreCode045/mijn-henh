@@ -1,5 +1,5 @@
 
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { PropertySubmitData } from "@/types/property";
 import { preparePropertyDataForSubmission } from "./utils/propertyDataFormatter";
@@ -39,6 +39,7 @@ export function usePropertyUpdate() {
       
       console.log("usePropertyUpdate - Final update data:", finalDataToUpdate);
             
+      // Ensure we're using proper supabase formatting for the update
       const { error, data: updatedData } = await supabase
         .from('properties')
         .update(finalDataToUpdate)
