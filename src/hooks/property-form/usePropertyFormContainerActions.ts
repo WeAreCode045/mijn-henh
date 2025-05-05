@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { usePropertyFormSubmit } from "@/hooks/usePropertyFormSubmit";
 import { usePropertyImages } from "@/hooks/usePropertyImages";
@@ -113,6 +112,8 @@ export function usePropertyFormContainerActions(
     if (formData.id) {
       try {
         console.log("Updating agent_id to:", finalAgentId, "for property:", formData.id);
+        
+        // Direct database update using Supabase
         const { error, data } = await supabase
           .from('properties')
           .update({ agent_id: finalAgentId })

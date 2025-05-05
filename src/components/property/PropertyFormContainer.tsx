@@ -52,6 +52,7 @@ export function PropertyFormContainer({
     if (formData) {
       console.log("PropertyFormContainer - formData ID:", formData.id);
       console.log("PropertyFormContainer - formData title:", formData.title);
+      console.log("PropertyFormContainer - formData agent_id:", formData.agent_id);
     }
   }, [formData]);
 

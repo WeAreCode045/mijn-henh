@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface AgentSelectorProps {
   initialAgentId?: string;
@@ -96,11 +96,6 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
       
       console.log("AgentSelector: Calling onAgentChange with agent ID:", finalAgentId);
       await onAgentChange(finalAgentId);
-      
-      toast({
-        title: "Success",
-        description: "Agent updated successfully",
-      });
     } catch (error) {
       console.error("Error saving agent:", error);
       toast({

@@ -159,13 +159,8 @@ export function PropertyManagementCard({
           onViewTour={handleViewTour}
           isArchived={isArchived}
           propertyId={propertyId}
-          agentId={agentId}
-          handleSaveAgent={handleSaveAgent}
-          createdAt={createdAt}
-          updatedAt={updatedAt}
           virtualTourUrl={virtualTourUrl}
           youtubeUrl={youtubeUrl}
-          showTextButtons={true}
         />
         
         <DateInfoSection 
