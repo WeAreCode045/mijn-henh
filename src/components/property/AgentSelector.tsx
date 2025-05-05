@@ -15,6 +15,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
   const [agents, setAgents] = useState<{id: string, full_name: string}[]>([]);
   const [currentAgentId, setCurrentAgentId] = useState(initialAgentId || "no-agent");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -89,7 +90,12 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
     const finalAgentId = agentId === "no-agent" ? "" : agentId;
     
     try {
+      setIsSaving(true);
       setCurrentAgentId(agentId);
+      
+      // Log exactly what we're passing to the handler
+      console.log("Calling onAgentChange with agent ID:", finalAgentId);
+      
       await onAgentChange(finalAgentId);
       
       toast({
@@ -106,6 +112,8 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
       
       // Reset to previous agent ID on error
       setCurrentAgentId(initialAgentId || "no-agent");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -115,7 +123,7 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
       <Select 
         value={currentAgentId} 
         onValueChange={handleAgentChange}
-        disabled={isLoadingAgents}
+        disabled={isLoadingAgents || isSaving}
         defaultValue="no-agent"
       >
         <SelectTrigger id="agent-select" className="w-full">
@@ -123,6 +131,11 @@ export function AgentSelector({ initialAgentId, onAgentChange }: AgentSelectorPr
             <div className="flex items-center">
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               <span>Loading agents...</span>
+            </div>
+          ) : isSaving ? (
+            <div className="flex items-center">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <span>Saving...</span>
             </div>
           ) : (
             <SelectValue placeholder="Select an agent" />

@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { AgentSelector } from "../../../../dashboard/components/AgentSelector";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,6 +10,7 @@ interface AgentSectionProps {
 
 export function AgentSection({ agentId, handleSaveAgent }: AgentSectionProps) {
   const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAgentChange = async (selectedAgentId: string) => {
     if (selectedAgentId === agentId) {
@@ -18,6 +20,7 @@ export function AgentSection({ agentId, handleSaveAgent }: AgentSectionProps) {
     
     console.log("Saving agent:", selectedAgentId);
     try {
+      setIsSaving(true);
       await handleSaveAgent(selectedAgentId);
       toast({
         description: "Agent updated successfully",
@@ -29,6 +32,8 @@ export function AgentSection({ agentId, handleSaveAgent }: AgentSectionProps) {
         description: "Failed to update agent",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 

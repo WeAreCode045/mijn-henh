@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard, 
   Home, 
@@ -25,6 +26,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 import { useState, useEffect } from "react";
 import { User } from "@/types/user";
+import { useEmployerProfile } from "@/hooks/useEmployerProfile";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -32,8 +34,9 @@ export function AppSidebar() {
   const { user, isAdmin, isAgent, userRole, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [propertiesOpen, setPropertiesOpen] = useState(false);
-  const [usersOpen, setUsersOpen] = useState(false); // State for users dropdown
+  const [usersOpen, setUsersOpen] = useState(false); 
   const [localIsAdmin, setLocalIsAdmin] = useState(false);
+  const { updateProfile } = useEmployerProfile(user?.id);
 
   useEffect(() => {
     // Check user role directly
@@ -91,6 +94,22 @@ export function AppSidebar() {
         description: "An unexpected error occurred",
         variant: "destructive",
       });
+    }
+  };
+
+  // Update profile function
+  const handleUpdateProfile = async (updatedData: Partial<User>) => {
+    try {
+      await updateProfile({
+        first_name: updatedData.full_name?.split(' ')[0] || '',
+        last_name: updatedData.full_name?.split(' ').slice(1).join(' ') || '',
+        email: updatedData.email,
+        phone: updatedData.phone
+      });
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return Promise.reject(error);
     }
   };
 
@@ -215,7 +234,11 @@ export function AppSidebar() {
         <SidebarGroup>
           {userProfile && (
             <div className="px-2 py-3 rounded bg-primary-foreground/5">
-              <UserProfileCard user={userProfile} inSidebar={true} />
+              <UserProfileCard 
+                user={userProfile} 
+                inSidebar={true} 
+                onUpdateProfile={handleUpdateProfile}
+              />
             </div>
           )}
           <SidebarMenu className="mt-4">

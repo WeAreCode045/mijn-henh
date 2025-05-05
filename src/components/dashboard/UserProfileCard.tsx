@@ -70,7 +70,59 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
           <p className="text-sm font-medium truncate">{user.full_name}</p>
           <p className="text-xs text-white/70 truncate">{user.role}</p>
           <p className="text-xs text-white/70 truncate">{user.email}</p>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mt-1 p-0 h-6 text-xs text-white/70 hover:text-white"
+            onClick={handleEditClick}
+          >
+            <PenSquare className="h-3 w-3 mr-1" />
+            Edit
+          </Button>
         </div>
+
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Your Profile</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="sidebar-name">Full Name</Label>
+                <Input
+                  id="sidebar-name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sidebar-email">Email</Label>
+                <Input
+                  id="sidebar-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sidebar-phone">Phone</Label>
+                <Input
+                  id="sidebar-phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
