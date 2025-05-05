@@ -23,7 +23,28 @@ export function useUsers() {
       }
       
       try {
-        // First get all employer profiles
+        // Get all accounts with admin or agent roles
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('user_id, role, email')
+          .in('role', ['admin', 'agent']);
+
+        if (accountsError) {
+          console.error("Error fetching accounts:", accountsError);
+          throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
+        }
+
+        console.log("Admin/agent accounts data from supabase:", accountsData);
+        
+        if (!accountsData || accountsData.length === 0) {
+          console.log("No admin/agent accounts found");
+          return [];
+        }
+        
+        // Extract user IDs from accounts to fetch their profiles
+        const userIds = accountsData.map(account => account.user_id);
+        
+        // Fetch employer profiles for these user IDs
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -40,7 +61,8 @@ export function useUsers() {
             country,
             created_at,
             updated_at
-          `);
+          `)
+          .in('id', userIds);
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -48,41 +70,26 @@ export function useUsers() {
         }
         
         console.log("Employer profiles from supabase:", profiles);
+
+        // Create a map of user_id to profile
+        const profileMap = new Map();
+        if (profiles) {
+          profiles.forEach(profile => {
+            profileMap.set(profile.id, profile);
+          });
+        }
         
-        if (!profiles || profiles.length === 0) {
-          console.log("No employer profiles found");
-          return [];
-        }
-
-        // Then get all accounts with admin or agent roles
-        const { data: accountsData, error: accountsError } = await supabase
-          .from('accounts')
-          .select('user_id, role')
-          .in('role', ['admin', 'agent']);
-
-        if (accountsError) {
-          console.error("Error fetching accounts:", accountsError);
-          throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
-        }
-
-        console.log("Admin/agent accounts data from supabase:", accountsData);
-
-        // Create a map of user_id to role
-        const roleMap = new Map();
-        accountsData?.forEach(account => {
-          roleMap.set(account.user_id, account.role);
-        });
-
-        // Filter profiles to only include those with admin or agent roles
-        const employeeProfiles = profiles
-          .filter(profile => roleMap.has(profile.id))
-          .map(profile => ({
-            id: profile.id,
-            email: profile.email || '',
+        // Map accounts to user profiles with role information
+        const employeeProfiles = accountsData.map(account => {
+          const profile = profileMap.get(account.user_id) || {};
+          
+          return {
+            id: account.user_id,
+            email: profile.email || account.email || '',
             full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
             phone: profile.phone || '',
             whatsapp_number: profile.whatsapp_number || '',
-            role: roleMap.get(profile.id) || 'agent',
+            role: account.role || 'agent',
             avatar_url: profile.avatar_url || '',
             address: profile.address || '',
             city: profile.city || '',
@@ -90,7 +97,8 @@ export function useUsers() {
             country: profile.country || '',
             created_at: profile.created_at || '',
             updated_at: profile.updated_at || ''
-          }));
+          };
+        });
 
         console.log("Transformed employee profiles:", employeeProfiles);
         return employeeProfiles;

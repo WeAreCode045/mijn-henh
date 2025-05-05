@@ -9,4 +9,8 @@ export interface UserBase {
   created_at?: string | undefined;
   updated_at?: string | undefined;
   role?: "admin" | "agent" | "seller" | "buyer";
+  address?: string | undefined;
+  city?: string | undefined;
+  postal_code?: string | undefined;
+  country?: string | undefined;
 }
