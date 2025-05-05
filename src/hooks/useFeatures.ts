@@ -43,9 +43,31 @@ export function useFeatures(propertyId: string) {
             if (typeof propertyData.features === 'string') {
               parsedFeatures = JSON.parse(propertyData.features);
             } else if (Array.isArray(propertyData.features)) {
-              parsedFeatures = propertyData.features;
+              // Ensure each feature has id and description
+              parsedFeatures = (propertyData.features as any[]).map(feature => {
+                // If feature is already a properly shaped object
+                if (typeof feature === 'object' && feature !== null && 'id' in feature && 'description' in feature) {
+                  return feature as PropertyFeature;
+                }
+                // If feature is just a string
+                if (typeof feature === 'string') {
+                  return {
+                    id: crypto.randomUUID(),
+                    description: feature
+                  };
+                }
+                // If feature is an object but missing properties
+                return {
+                  id: feature?.id || crypto.randomUUID(),
+                  description: feature?.description || String(feature) || ''
+                };
+              });
             } else if (typeof propertyData.features === 'object') {
-              parsedFeatures = [propertyData.features];
+              const feature = propertyData.features as Record<string, any>;
+              parsedFeatures = [{
+                id: feature.id || crypto.randomUUID(),
+                description: feature.description || ''
+              }];
             }
           } catch (parseError) {
             console.error("Error parsing features:", parseError);
