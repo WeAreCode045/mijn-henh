@@ -26,7 +26,15 @@ export function usePropertyFormContainerActions(
   );
 
   const deletePropertyHandler = async () => {
-    if (!formData?.id) return;
+    if (!formData?.id) {
+      console.warn("Cannot delete property - missing property ID");
+      toast({
+        title: "Error",
+        description: "Cannot delete property - missing property data",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       await deleteProperty(formData.id);
@@ -42,7 +50,15 @@ export function usePropertyFormContainerActions(
   };
 
   const saveProperty = async () => {
-    if (!formData) return;
+    if (!formData) {
+      console.warn("Cannot save property - missing property data");
+      toast({
+        title: "Error",
+        description: "Cannot save property - missing property data",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     try {

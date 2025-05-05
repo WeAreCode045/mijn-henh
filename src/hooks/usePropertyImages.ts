@@ -41,7 +41,8 @@ export function usePropertyImages(
     longitude: null,
     floorplanEmbedScript: '',
     virtualTourUrl: '',
-    youtubeUrl: ''
+    youtubeUrl: '',
+    floorplans: []
   };
 
   // Main property images

@@ -14,12 +14,30 @@ import { FallbackRoutes } from "@/components/routes/FallbackRoutes";
 import { WebViewRoutes } from "@/components/routes/WebViewRoutes";
 import { AuthRoutes } from "@/components/routes/AuthRoutes";
 
+// Add error boundary component for better error handling
+const ErrorFallback = () => (
+  <div className="min-h-screen flex items-center justify-center flex-col p-4">
+    <h2 className="text-xl font-semibold mb-4">Something went wrong</h2>
+    <p className="mb-4">The application encountered an error. Please try refreshing the page.</p>
+    <button 
+      onClick={() => window.location.reload()} 
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      Refresh Page
+    </button>
+  </div>
+);
+
 // Create a QueryClient instance with default options
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000,
       retry: 1,
+      // Add error handling to prevent white screens on query failures
+      onError: (error) => {
+        console.error('Query error:', error);
+      }
     },
   },
 });
@@ -29,23 +47,28 @@ const queryClient = new QueryClient({
 const router = createBrowserRouter([
   ...MainRoutes.map(route => ({
     path: route.props.path,
-    element: route.props.element
+    element: route.props.element,
+    errorElement: <ErrorFallback />
   })),
   ...AuthRoutes.map(route => ({
     path: route.props.path,
-    element: route.props.element
+    element: route.props.element,
+    errorElement: <ErrorFallback />
   })),
   ...RedirectRoutes.map(route => ({
     path: route.props.path,
-    element: route.props.element
+    element: route.props.element,
+    errorElement: <ErrorFallback />
   })),
   ...WebViewRoutes.map(route => ({
     path: route.props.path,
-    element: route.props.element
+    element: route.props.element,
+    errorElement: <ErrorFallback />
   })),
   ...FallbackRoutes.map(route => ({
     path: route.props.path,
-    element: route.props.element
+    element: route.props.element,
+    errorElement: <ErrorFallback />
   }))
 ]);
 
