@@ -19,6 +19,7 @@ export function usePropertyFormContainerActions(
   const { handleSubmit } = usePropertyFormSubmit();
   const { deleteProperty } = usePropertyDeletion();
   
+  // Pass formData directly - the usePropertyImages hook now handles null values
   const { handleImageUpload, handleRemoveImage, images } = usePropertyImages(
     formData, 
     setFormData
@@ -143,6 +144,7 @@ export function usePropertyFormContainerActions(
     handleAgentChange,
     handleImageUpload,
     handleRemoveImage,
-    images: images.map(img => typeof img === 'string' ? img : img.url)
+    // Ensure images is an array even if it's undefined
+    images: Array.isArray(images) ? images.map(img => typeof img === 'string' ? img : img.url) : []
   };
 }

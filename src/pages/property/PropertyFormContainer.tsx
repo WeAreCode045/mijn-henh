@@ -89,12 +89,13 @@ export function PropertyFormContainer({
     };
   }, [formData?.title]);
 
-  if (isLoading || !formData) {
+  if (isLoading) {
     return <PropertyFormLoader />;
   }
 
   // Create a complete PropertyData object from formData to avoid TypeScript errors
-  const propertyData: PropertyData = {
+  // Handle null formData
+  const propertyData: PropertyData = formData ? {
     id: formData.id || '',
     title: formData.title || '',
     price: formData.price || '',
@@ -129,11 +130,44 @@ export function PropertyFormContainer({
     status: formData.status || 'Draft',
     featuredImage: formData.featuredImage || null,
     featuredImages: formData.featuredImages || []
+  } : {
+    id: '',
+    title: 'New Property',
+    price: '',
+    address: '',
+    bedrooms: '',
+    bathrooms: '',
+    sqft: '',
+    livingArea: '',
+    buildYear: '',
+    garages: '',
+    energyLabel: '',
+    hasGarden: false,
+    description: '',
+    location_description: '',
+    features: [],
+    areas: [],
+    nearby_places: [],
+    nearby_cities: [],
+    images: [],
+    floorplans: [],
+    map_image: null,
+    latitude: null,
+    longitude: null,
+    object_id: '',
+    agent_id: '',
+    template_id: 'default',
+    virtualTourUrl: '',
+    youtubeUrl: '',
+    floorplanEmbedScript: '',
+    status: 'Draft',
+    featuredImage: null,
+    featuredImages: []
   };
 
   return (
     <PropertyFormLayout
-      title={formData.title || "Edit Property"}
+      title={formData?.title || "Edit Property"}
       propertyData={propertyData}
       settings={settings}
       isAdmin={isAdmin}
@@ -144,14 +178,14 @@ export function PropertyFormContainer({
       onSaveProperty={saveProperty}
       onImageUpload={handleImageUpload}
       onRemoveImage={handleRemoveImage}
-      images={images}
+      images={images || []}
       agentInfo={agentInfo}
       isSubmitting={isSubmitting}
     >
       <PropertyForm 
         initialTab={initialTab}
         initialContentStep={initialContentStep}
-        formData={formData}
+        formData={formData || undefined}
       />
     </PropertyFormLayout>
   );
