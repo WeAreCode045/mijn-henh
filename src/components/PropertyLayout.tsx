@@ -11,6 +11,8 @@ const LoadingSpinner = () => (
 
 export const PropertyLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
+  
+  console.log("PropertyLayout rendering with children");
 
   return (
     <div className="min-h-screen flex w-full">

@@ -18,6 +18,7 @@ import WebviewsPage from "@/pages/properties/WebviewsPage";
 import ParticipantDashboard from "@/pages/ParticipantDashboard";
 import ParticipantProfile from "@/pages/ParticipantProfile";
 import Participants from "@/pages/Participants";
+import { PropertyLayout } from "@/components/PropertyLayout";
 
 export default function AppRoutes() {
   const { isAdmin, isAgent, userRole } = useAuth();
@@ -41,14 +42,16 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Protected Routes */}
+      {/* Protected Routes with PropertyLayout */}
       {isParticipant ? (
         <>
           <Route
             path="/"
             element={
               <ProtectedRoute>
-                <ParticipantDashboard />
+                <PropertyLayout>
+                  <ParticipantDashboard />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -56,7 +59,9 @@ export default function AppRoutes() {
             path="/participant"
             element={
               <ProtectedRoute>
-                <ParticipantDashboard />
+                <PropertyLayout>
+                  <ParticipantDashboard />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -64,7 +69,9 @@ export default function AppRoutes() {
             path="/participant/profile"
             element={
               <ProtectedRoute>
-                <ParticipantProfile />
+                <PropertyLayout>
+                  <ParticipantProfile />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -74,20 +81,24 @@ export default function AppRoutes() {
           path="/"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <PropertyLayout>
+                <Dashboard />
+              </PropertyLayout>
             </ProtectedRoute>
           }
         />
       )}
 
-      {/* Agent Routes */}
+      {/* Agent Routes with PropertyLayout */}
       {(isAgent || isAdmin) && (
         <>
           <Route
             path="/properties"
             element={
               <ProtectedRoute>
-                <Properties />
+                <PropertyLayout>
+                  <Properties />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -95,7 +106,9 @@ export default function AppRoutes() {
             path="/properties/add"
             element={
               <ProtectedRoute>
-                <PropertyFormPage />
+                <PropertyLayout>
+                  <PropertyFormPage />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -103,7 +116,9 @@ export default function AppRoutes() {
             path="/properties/:id"
             element={
               <ProtectedRoute>
-                <PropertyFormContainer />
+                <PropertyLayout>
+                  <PropertyFormContainer />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -111,7 +126,9 @@ export default function AppRoutes() {
             path="/properties/global-features"
             element={
               <ProtectedRoute>
-                <GlobalFeaturesPage />
+                <PropertyLayout>
+                  <GlobalFeaturesPage />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -119,7 +136,9 @@ export default function AppRoutes() {
             path="/properties/webviews"
             element={
               <ProtectedRoute>
-                <WebviewsPage />
+                <PropertyLayout>
+                  <WebviewsPage />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -127,7 +146,9 @@ export default function AppRoutes() {
             path="/import"
             element={
               <ProtectedRoute>
-                <Import />
+                <PropertyLayout>
+                  <Import />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -135,7 +156,9 @@ export default function AppRoutes() {
             path="/settings"
             element={
               <ProtectedRoute>
-                <Settings />
+                <PropertyLayout>
+                  <Settings />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -143,7 +166,9 @@ export default function AppRoutes() {
             path="/participants"
             element={
               <ProtectedRoute>
-                <Participants />
+                <PropertyLayout>
+                  <Participants />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
@@ -151,16 +176,19 @@ export default function AppRoutes() {
             path="/users"
             element={
               <ProtectedRoute>
-                <Users />
+                <PropertyLayout>
+                  <Users />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
-          {/* Add explicit employee route that points to the Users component */}
           <Route
             path="/employees"
             element={
               <ProtectedRoute>
-                <Users />
+                <PropertyLayout>
+                  <Users />
+                </PropertyLayout>
               </ProtectedRoute>
             }
           />
