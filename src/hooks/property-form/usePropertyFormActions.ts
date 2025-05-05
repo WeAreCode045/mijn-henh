@@ -1,4 +1,3 @@
-
 import { PropertyFormData } from '@/types/property';
 import { usePropertyFormSubmit } from '@/hooks/usePropertyFormSubmit';
 import { useToast } from '@/components/ui/use-toast';
@@ -62,8 +61,11 @@ export function usePropertyFormActions(
       });
       return Promise.reject(new Error("Property ID is missing"));
     }
-    
-    // If agentId is empty string, we want to set it to null in the database
+
+    // If agentId is empty string, log a message and set it to null in the database
+    if (agentId.trim() === '') {
+      console.log("No agent ID provided. Setting agent_id to null in the database.");
+    }
     const finalAgentId = agentId.trim() === '' ? null : agentId;
     
     try {
