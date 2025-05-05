@@ -14,7 +14,7 @@ interface AgentSelectorProps {
 
 export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = false }: AgentSelectorProps) {
   const [agents, setAgents] = useState<{id: string, display_name: string}[]>([]);
-  const [currentAgentId, setCurrentAgentId] = useState(initialAgentId || "no-agent");
+  const [currentAgentId, setCurrentAgentId] = useState<string>(initialAgentId || "no-agent");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -32,7 +32,7 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
         // First get all users with agent or admin role
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('user_id, role, email')
+          .select('user_id, role')
           .or('role.eq.agent,role.eq.admin');
         
         if (accountsError) {
@@ -75,14 +75,32 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
   }, [toast]);
 
   const handleAgentChange = async (agentId: string) => {
+    console.log("AgentSelector: Selected agent ID:", agentId);
+    
+    if (!onAgentChange || typeof onAgentChange !== 'function') {
+      console.error("Error: onAgentChange is not a function", onAgentChange);
+      toast({
+        title: "Error",
+        description: "Cannot update agent - invalid handler",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       setIsSaving(true);
       setCurrentAgentId(agentId);
       
-      // Log exactly what we're passing to the handler
-      console.log("AgentSelector: Calling onAgentChange with agent ID:", agentId === "no-agent" ? "" : agentId);
+      // Convert "no-agent" to empty string which will be converted to NULL in the backend
+      const finalAgentId = agentId === "no-agent" ? "" : agentId;
       
-      await onAgentChange(agentId === "no-agent" ? "" : agentId);
+      console.log("AgentSelector: Calling onAgentChange with agent ID:", finalAgentId);
+      await onAgentChange(finalAgentId);
+      
+      toast({
+        title: "Success",
+        description: "Agent updated successfully",
+      });
     } catch (error) {
       console.error("Error saving agent:", error);
       toast({

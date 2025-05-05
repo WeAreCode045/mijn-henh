@@ -100,6 +100,7 @@ export function usePropertyFormContainerActions(
     // Set to null if it's an empty string or "no-agent"
     const finalAgentId = agentId === "no-agent" || agentId.trim() === '' ? null : agentId;
     
+    // Update the UI state
     setSelectedAgent(finalAgentId || '');
     
     // Update the form data with the selected agent
@@ -112,15 +113,18 @@ export function usePropertyFormContainerActions(
     if (formData.id) {
       try {
         console.log("Updating agent_id to:", finalAgentId, "for property:", formData.id);
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('properties')
           .update({ agent_id: finalAgentId })
-          .eq('id', formData.id);
+          .eq('id', formData.id)
+          .select();
         
         if (error) {
           console.error("Supabase error:", error);
           throw error;
         }
+        
+        console.log("Agent update result:", data);
         
         // Find the agent info to display
         if (finalAgentId) {

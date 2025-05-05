@@ -14,11 +14,11 @@ export function AgentSection({ agentId, handleSaveAgent }: AgentSectionProps) {
 
   const handleAgentChange = async (selectedAgentId: string) => {
     if (selectedAgentId === agentId) {
-      console.log("Agent unchanged, skipping update");
+      console.log("AgentSection: Agent unchanged, skipping update");
       return;
     }
     
-    console.log("Saving agent:", selectedAgentId);
+    console.log("AgentSection: Saving agent:", selectedAgentId);
     try {
       setIsSaving(true);
       await handleSaveAgent(selectedAgentId);

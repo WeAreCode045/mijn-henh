@@ -64,8 +64,10 @@ export function usePropertySaveHandlers(
       // Update local state first
       onFieldChange('agent_id', finalAgentId);
       
-      // Save to database
+      // Debug: Log the exact update to be executed
       console.log("Executing Supabase update for agent_id:", finalAgentId, "for property:", formState.id);
+      
+      // Execute the database update
       const { error, data } = await supabase
         .from('properties')
         .update({ agent_id: finalAgentId })
