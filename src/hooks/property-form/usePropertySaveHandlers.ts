@@ -67,19 +67,20 @@ export function usePropertySaveHandlers(
       // Debug: Log the exact update to be executed
       console.log("Executing Supabase update for agent_id:", finalAgentId, "for property:", formState.id);
       
-      // Execute the database update
-      const { error, data } = await supabase
+      // Execute the database update with explicit debugging
+      const result = await supabase
         .from('properties')
         .update({ agent_id: finalAgentId })
         .eq('id', formState.id)
         .select();
       
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
+      // Check for errors and log results
+      if (result.error) {
+        console.error("Supabase update error:", result.error);
+        throw result.error;
       }
       
-      console.log("Agent update result:", data);
+      console.log("Agent update success, result:", result.data);
       
       return Promise.resolve();
     } catch (error) {

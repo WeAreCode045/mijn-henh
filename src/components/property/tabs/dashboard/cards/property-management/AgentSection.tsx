@@ -25,6 +25,7 @@ export function AgentSection({ agentId, handleSaveAgent }: AgentSectionProps) {
       toast({
         description: "Agent updated successfully",
       });
+      console.log("AgentSection: Agent save completed successfully");
     } catch (error) {
       console.error("Error saving agent:", error);
       toast({
