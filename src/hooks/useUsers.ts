@@ -23,33 +23,7 @@ export function useUsers() {
       }
       
       try {
-        // First get all accounts with admin or agent roles
-        const { data: accountsData, error: accountsError } = await supabase
-          .from('accounts')
-          .select(`
-            id,
-            user_id,
-            role,
-            email
-          `)
-          .in('role', ['admin', 'agent']);
-
-        if (accountsError) {
-          console.error("Error fetching accounts:", accountsError);
-          throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
-        }
-        
-        console.log("Admin/agent accounts data from supabase:", accountsData);
-        
-        if (!accountsData || accountsData.length === 0) {
-          console.log("No accounts found with admin or agent roles");
-          return [];
-        }
-        
-        // Extract user IDs from accounts
-        const userIds = accountsData.map(account => account.user_id);
-        
-        // Get the user profiles from employer_profiles
+        // First get all employer profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -66,8 +40,7 @@ export function useUsers() {
             country,
             created_at,
             updated_at
-          `)
-          .in('id', userIds);
+          `);
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -76,45 +49,57 @@ export function useUsers() {
         
         console.log("Employer profiles from supabase:", profiles);
         
+        if (!profiles || profiles.length === 0) {
+          console.log("No employer profiles found");
+          return [];
+        }
+
+        // Then get all accounts with admin or agent roles
+        const { data: accountsData, error: accountsError } = await supabase
+          .from('accounts')
+          .select('user_id, role')
+          .in('role', ['admin', 'agent']);
+
+        if (accountsError) {
+          console.error("Error fetching accounts:", accountsError);
+          throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
+        }
+
+        console.log("Admin/agent accounts data from supabase:", accountsData);
+
         // Create a map of user_id to role
         const roleMap = new Map();
-        accountsData.forEach(account => {
+        accountsData?.forEach(account => {
           roleMap.set(account.user_id, account.role);
         });
 
-        // Map profiles to User type with role information
-        const transformedData: User[] = profiles
-          ? profiles.map(profile => {
-              const role = roleMap.get(profile.id);
-              return {
-                id: profile.id,
-                email: profile.email || '',
-                full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
-                phone: profile.phone || '',
-                whatsapp_number: profile.whatsapp_number || '',
-                role: role,
-                avatar_url: profile.avatar_url || '',
-                // Include these properties conditionally if they exist in the UserBase type
-                ...(profile.address && { address: profile.address }),
-                ...(profile.city && { city: profile.city }),
-                ...(profile.postal_code && { postal_code: profile.postal_code }),
-                ...(profile.country && { country: profile.country }),
-                created_at: profile.created_at || '',
-                updated_at: profile.updated_at || ''
-              };
-            })
-          : [];
+        // Filter profiles to only include those with admin or agent roles
+        const employeeProfiles = profiles
+          .filter(profile => roleMap.has(profile.id))
+          .map(profile => ({
+            id: profile.id,
+            email: profile.email || '',
+            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
+            phone: profile.phone || '',
+            whatsapp_number: profile.whatsapp_number || '',
+            role: roleMap.get(profile.id) || 'agent',
+            avatar_url: profile.avatar_url || '',
+            address: profile.address || '',
+            city: profile.city || '',
+            postal_code: profile.postal_code || '',
+            country: profile.country || '',
+            created_at: profile.created_at || '',
+            updated_at: profile.updated_at || ''
+          }));
 
-        console.log("Transformed users:", transformedData);
-        return transformedData;
+        console.log("Transformed employee profiles:", employeeProfiles);
+        return employeeProfiles;
       } catch (err) {
         console.error("Error in useUsers query function:", err);
-        throw err; // Re-throw to be caught by tanstack query error handler
+        throw err;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    enabled: isAuthenticated, // Only run the query if the user is authenticated
-    retry: 1, // Limit retry attempts for clearer error messages
+    enabled: isAuthenticated
   });
 
   const deleteUser = async (userId: string) => {
