@@ -143,7 +143,7 @@ export interface PropertySubmitData {
   template_id?: string;
   virtualTourUrl: string;
   youtubeUrl: string;
-  images: string[];
+  images: string[]; // Required images property - ensure this exists
   floorplanEmbedScript: string;
   status?: string; // Status property
   propertyType?: string; // Property type property

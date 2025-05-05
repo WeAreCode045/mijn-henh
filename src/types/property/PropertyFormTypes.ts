@@ -57,4 +57,5 @@ export interface PropertySubmitData {
     status?: string;
     [key: string]: unknown;
   }; // Metadata property
+  images: string[] | any[]; // Required images property
 }

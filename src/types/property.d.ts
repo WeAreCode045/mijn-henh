@@ -145,7 +145,7 @@ export interface PropertySubmitData {
   shortDescription?: string; // Added shortDescription field
   location_description?: string;
   features: string;
-  images: string[];
+  images: string[]; // Required images property
   areas: PropertyArea[];
   map_image?: string | null;
   latitude?: number | null;

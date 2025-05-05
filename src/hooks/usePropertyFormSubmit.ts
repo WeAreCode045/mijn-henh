@@ -60,6 +60,9 @@ export function usePropertyFormSubmit() {
         status: formData.status || 'Draft',
         propertyType: formData.propertyType || '',
         metadata: formData.metadata || { status: formData.status || 'Draft' },
+        images: Array.isArray(formData.images) 
+          ? formData.images.map(img => typeof img === 'string' ? img : img.url) 
+          : []
       };
 
       console.log("Prepared submitData:", submitData);
