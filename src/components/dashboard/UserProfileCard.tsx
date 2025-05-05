@@ -18,7 +18,8 @@ interface UserProfileCardProps {
 export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: user?.full_name || "",
+    first_name: user?.first_name || "",
+    last_name: user?.last_name || "",
     email: user?.email || "",
     phone: user?.phone || "",
   });
@@ -28,11 +29,16 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     return null;
   }
 
+  // Compute display name from first and last name
+  const displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 
+                      (user.email ? user.email.split('@')[0] : 'Unknown');
+
   const handleEditClick = () => {
     setIsEditing(true);
     setFormData({
-      full_name: user.full_name,
-      email: user.email,
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      email: user.email || "",
       phone: user.phone || "",
     });
   };
@@ -44,7 +50,8 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     setIsUpdating(true);
     try {
       await onUpdateProfile({
-        full_name: formData.full_name,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone,
       });
@@ -67,7 +74,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{user.full_name}</p>
+          <p className="text-sm font-medium truncate">{displayName}</p>
           <p className="text-xs text-white/70 truncate">{user.role}</p>
           <p className="text-xs text-white/70 truncate">{user.email}</p>
           <Button 
@@ -88,11 +95,19 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="sidebar-name">Full Name</Label>
+                <Label htmlFor="sidebar-first-name">First Name</Label>
                 <Input
-                  id="sidebar-name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  id="sidebar-first-name"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sidebar-last-name">Last Name</Label>
+                <Input
+                  id="sidebar-last-name"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -138,7 +153,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
               <UserCircle className="h-12 w-12" />
             </AvatarFallback>
           </Avatar>
-          <h3 className="text-xl font-semibold">{user.full_name}</h3>
+          <h3 className="text-xl font-semibold">{displayName}</h3>
           <p className="text-sm text-gray-500 mb-1">{user.role}</p>
           <div className="flex items-center mt-4 space-x-1 text-sm text-gray-500">
             <Mail className="h-4 w-4" />
@@ -164,11 +179,19 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="first-name">First Name</Label>
                 <Input
-                  id="name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  id="first-name"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last-name">Last Name</Label>
+                <Input
+                  id="last-name"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 />
               </div>
               <div className="space-y-2">

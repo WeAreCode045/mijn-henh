@@ -13,7 +13,7 @@ interface AgentSelectorProps {
 }
 
 export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = false }: AgentSelectorProps) {
-  const [agents, setAgents] = useState<{id: string, full_name: string}[]>([]);
+  const [agents, setAgents] = useState<{id: string, display_name: string}[]>([]);
   const [currentAgentId, setCurrentAgentId] = useState(initialAgentId || "no-agent");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -32,7 +32,7 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
         // First get all users with agent or admin role
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('user_id, role')
+          .select('user_id, role, email')
           .or('role.eq.agent,role.eq.admin');
         
         if (accountsError) {
@@ -53,7 +53,7 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
           if (data) {
             setAgents(data.map(agent => ({
               id: agent.id || "",
-              full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
+              display_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
             })));
           }
         } else {
@@ -129,7 +129,7 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
               key={agent.id} 
               value={agent.id}
             >
-              {agent.full_name}
+              {agent.display_name}
             </SelectItem>
           ))}
         </SelectContent>

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface Agent {
   id: string;
-  full_name: string;
+  display_name: string;
 }
 
 interface AgentSectionProps {
@@ -61,7 +61,7 @@ export function AgentSection({
           if (!error && data) {
             const formattedAgents: Agent[] = data.map(profile => ({
               id: profile.id,
-              full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Agent'
+              display_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Agent'
             }));
             setAgents(formattedAgents);
           } else {
@@ -115,7 +115,7 @@ export function AgentSection({
                   key={agent.id} 
                   value={agent.id}
                 >
-                  {agent.full_name}
+                  {agent.display_name}
                 </SelectItem>
               ))}
             </SelectContent>

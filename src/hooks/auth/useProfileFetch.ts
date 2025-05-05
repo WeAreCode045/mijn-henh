@@ -26,6 +26,8 @@ export function useProfileFetch() {
           id: userId,
           role: role,
           email: employerProfile.email || email,
+          first_name: employerProfile.first_name || '',
+          last_name: employerProfile.last_name || '',
           full_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
           avatar_url: employerProfile.avatar_url || undefined,
           phone: employerProfile.phone,
@@ -35,12 +37,14 @@ export function useProfileFetch() {
         console.log('No employer profile found, creating new one');
         // If no profile exists yet, create a basic one
         try {
+          const firstName = email ? email.split('@')[0] : '';
+          
           const { data: newProfile, error: createError } = await supabase
             .from('employer_profiles')
             .insert({
               id: userId,
               email: email,
-              first_name: email ? email.split('@')[0] : '',
+              first_name: firstName,
               last_name: ''
             })
             .select()
@@ -56,6 +60,8 @@ export function useProfileFetch() {
               id: userId,
               role: role,
               email: email,
+              first_name: firstName,
+              last_name: '',
               full_name: email ? email.split('@')[0] : 'Unknown',
               avatar_url: undefined,
               phone: null,
@@ -84,6 +90,8 @@ export function useProfileFetch() {
           id: userId,
           role: role,
           email: participantProfile.email || email,
+          first_name: participantProfile.first_name || '',
+          last_name: participantProfile.last_name || '',
           full_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
           avatar_url: undefined,
           phone: participantProfile.phone,

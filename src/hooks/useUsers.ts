@@ -86,6 +86,8 @@ export function useUsers() {
           return {
             id: account.user_id,
             email: profile.email || account.email || '',
+            first_name: profile.first_name || '',
+            last_name: profile.last_name || '',
             full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
             phone: profile.phone || '',
             whatsapp_number: profile.whatsapp_number || '',

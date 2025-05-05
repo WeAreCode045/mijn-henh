@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface Agent {
   id: string;
-  full_name: string;
+  display_name: string;
 }
 
 export function useAgentSelect(initialAgentId?: string) {
@@ -59,7 +59,7 @@ export function useAgentSelect(initialAgentId?: string) {
             if (data) {
               setAgents(data.map(agent => ({
                 id: agent.id,
-                full_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
+                display_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
               })));
             }
           }

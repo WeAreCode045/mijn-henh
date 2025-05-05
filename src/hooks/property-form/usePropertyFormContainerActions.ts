@@ -126,7 +126,12 @@ export function usePropertyFormContainerActions(
         if (finalAgentId) {
           const agent = agents.find(a => a.id === finalAgentId);
           if (agent) {
-            setAgentInfo({ id: agent.id, name: agent.full_name });
+            // Use display_name if it exists, otherwise try to build from first_name and last_name
+            const agentName = agent.display_name || 
+              `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 
+              'Unnamed Agent';
+            
+            setAgentInfo({ id: agent.id, name: agentName });
           } else {
             setAgentInfo(null);
           }

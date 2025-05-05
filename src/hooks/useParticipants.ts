@@ -96,7 +96,8 @@ export function useParticipants() {
               created_at: profile.created_at || '',
               updated_at: profile.updated_at || '',
               properties: [account.property_id].filter(Boolean), // Add property_id if it exists
-              avatar_url: null  // Add default avatar_url
+              avatar_url: null,  // Add default avatar_url
+              full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant'
             });
           } else {
             // If the user already exists in our map, just add the property to their properties array
