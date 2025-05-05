@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/AuthProvider";
@@ -11,7 +10,7 @@ interface Agent {
   last_name?: string;
 }
 
-export function useAgentSelect(initialAgentId?: string) {
+export function useAgentSelect(initialAgentId?: string, propertyId?: string) {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string>(initialAgentId || "");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +22,6 @@ export function useAgentSelect(initialAgentId?: string) {
       if (isAdmin) {
         setIsLoading(true);
         try {
-          // First get all users with agent or admin role
           const { data: accountsData, error: accountsError } = await supabase
             .from('accounts')
             .select('user_id, role')
@@ -42,7 +40,6 @@ export function useAgentSelect(initialAgentId?: string) {
           if (accountsData && accountsData.length > 0) {
             const agentIds = accountsData.map(account => account.user_id);
             
-            // Then fetch their profiles from employer_profiles
             const { data, error } = await supabase
               .from('employer_profiles')
               .select('id, first_name, last_name')
@@ -88,6 +85,44 @@ export function useAgentSelect(initialAgentId?: string) {
       setSelectedAgent(initialAgentId);
     }
   }, [initialAgentId]);
+
+  // Save the selected agent to the properties table
+  useEffect(() => {
+    const saveSelectedAgent = async () => {
+      if (propertyId && selectedAgent) {
+        try {
+          const { error } = await supabase
+            .from('properties')
+            .update({ agent_id: selectedAgent })
+            .eq('id', propertyId);
+
+          if (error) {
+            console.error('Error updating property with selected agent:', error);
+            toast({
+              title: "Error",
+              description: "Failed to save selected agent",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Success",
+              description: "Agent successfully assigned to the property",
+              variant: "default",
+            });
+          }
+        } catch (error) {
+          console.error('Unexpected error while saving selected agent:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save selected agent",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    saveSelectedAgent();
+  }, [selectedAgent, propertyId, toast]);
 
   return {
     agents,
