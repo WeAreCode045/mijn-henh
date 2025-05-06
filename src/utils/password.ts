@@ -19,5 +19,5 @@ export function generateRandomPassword(length: number = 10): string {
   }
   
   // Shuffle the password characters
-  return password.split('').sort(() => 0.5 - Math.random()).join('');
+  return password.split('').sort(() => Math.random() - 0.5).join('');
 }

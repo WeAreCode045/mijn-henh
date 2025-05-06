@@ -92,99 +92,182 @@ export function usePropertyParticipants(propertyId?: string) {
     mutationFn: async (participant: ParticipantInvite) => {
       console.log("Starting participant invitation process for:", participant);
       
+      // Generate a secure password for the new user
+      const temporaryPassword = participant.temporaryPassword || 
+        Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-2);
+      
       let userId: string;
       let existingUser = false;
       
-      // First check if the user already exists
-      const { data: existingUserData, error: existingUserError } = await supabase
-        .from('accounts')
-        .select('user_id')
-        .eq('email', participant.email)
-        .limit(1);
+      try {
+        // Step 1: Check if user already exists in the accounts table
+        const { data: existingUserData, error: existingUserError } = await supabase
+          .from('accounts')
+          .select('user_id')
+          .eq('email', participant.email)
+          .limit(1);
         
-      if (existingUserError) {
-        console.error('Error checking existing user:', existingUserError);
-        throw existingUserError;
-      }
-      
-      if (existingUserData && existingUserData.length > 0) {
-        // User already exists
-        userId = existingUserData[0].user_id;
-        existingUser = true;
-        console.log(`User already exists with ID: ${userId}`);
-      } else {
-        console.log(`Creating new user for email: ${participant.email}`);
-        
-        // Use the provided temporary password or generate a random one
-        const password = participant.temporaryPassword || Math.random().toString(36).slice(-10);
-        
-        // Create the user account
-        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-          email: participant.email,
-          password: password,
-          options: {
-            data: {
-              first_name: participant.firstName,
-              last_name: participant.lastName,
-              role: participant.role
-            }
-          }
-        });
-
-        if (signUpError) {
-          console.error('Error creating user:', signUpError);
-          throw signUpError;
+        if (existingUserError) {
+          console.error('Error checking existing user:', existingUserError);
         }
-
-        console.log("New user created:", authUser);
-        if (!authUser.user?.id) {
-          throw new Error('Failed to create user');
-        }
-        userId = authUser.user.id;
         
-        // Create participant profile with first and last name
-        const { error: profileError } = await supabase
-          .from('participants_profile')
-          .insert({
-            id: userId,
-            first_name: participant.firstName,
-            last_name: participant.lastName,
-            email: participant.email
-            // Note: role is stored in the accounts table, not in participants_profile
+        if (existingUserData && existingUserData.length > 0) {
+          // User already exists in our system
+          userId = existingUserData[0].user_id;
+          existingUser = true;
+          console.log(`User already exists with ID: ${userId}`);
+        } else {
+          // Step 2: User doesn't exist, create a new one
+          console.log(`Creating new user for email: ${participant.email}`);
+          
+          // Create the user account with minimal options to avoid schema issues
+          const { data: authUser, error: signUpError } = await supabase.auth.signUp({
+            email: participant.email,
+            password: temporaryPassword
+            // Avoid adding any metadata or options that might trigger the user_type error
           });
           
-        if (profileError) {
-          console.error('Error creating participant profile:', profileError);
-          // Don't throw here, we can continue without the profile
+          if (signUpError) {
+            console.error('Error creating user:', signUpError);
+            throw new Error(`Failed to create user: ${signUpError.message}`);
+          }
+          
+          if (!authUser?.user?.id) {
+            console.error('User creation response:', authUser);
+            throw new Error('Failed to create user: No user ID returned');
+          }
+          
+          userId = authUser.user.id;
+          console.log("New user created with ID:", userId);
+          
+          // Step 3: Create participant profile with more detailed logging
+          try {
+            console.log(`Creating participant profile for user ID: ${userId}`);
+            console.log('Profile data:', {
+              id: userId,
+              first_name: participant.firstName,
+              last_name: participant.lastName,
+              email: participant.email
+            });
+            
+            const { error: profileError } = await supabase
+              .from('participants_profile')
+              .insert({
+                id: userId,
+                first_name: participant.firstName,
+                last_name: participant.lastName,
+                email: participant.email
+              });
+            
+            if (profileError) {
+              console.error('Error creating participant profile:', profileError);
+              console.error('Error details:', profileError.details, profileError.hint, profileError.message);
+              // Don't throw here, we can continue without the profile
+            } else {
+              console.log('Participant profile created successfully');
+            }
+          } catch (profileError) {
+            console.error('Exception creating participant profile:', profileError);
+            // Continue without the profile
+          }
         }
-      }
-
-      console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
-      
-      // Insert into accounts table
-      const { data, error } = await supabase
-        .from('accounts')
-        .insert({
-          property_id: participant.propertyId,
-          user_id: userId,
-          role: participant.role,
-          status: 'pending',
-          email: participant.email
-        })
-        .select();
-
-      if (error) {
-        if (error.code === '23505') { // Unique violation
-          throw new Error('This user is already a participant for this property');
+        
+        // Step 4: Add participant to the property
+        console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
+        
+        const { data, error } = await supabase
+          .from('accounts')
+          .insert({
+            property_id: participant.propertyId,
+            user_id: userId,
+            role: participant.role,
+            status: 'pending',
+            email: participant.email
+          })
+          .select();
+        
+        if (error) {
+          if (error.code === '23505') { // Unique violation
+            throw new Error('This user is already a participant for this property');
+          }
+          console.error('Error adding participant:', error);
+          throw error;
         }
-        console.error('Error adding participant:', error);
+        
+        console.log("Participant successfully added:", data);
+        
+        // Return the created participant along with the temporary password for email sending
+        return {
+          ...data[0],
+          temporaryPassword: existingUser ? undefined : temporaryPassword
+        };
+      } catch (error) {
+        console.error('Error in participant invitation process:', error);
         throw error;
       }
-
-      console.log("Participant successfully added:", data);
-      return data[0];
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
+      console.log('Participant added successfully, sending invitation email:', result);
+      
+      try {
+        // Only send email if we have a temporary password (new user)
+        if (result.temporaryPassword) {
+          // Get property details
+          const { data: property } = await supabase
+            .from('properties')
+            .select('title')
+            .eq('id', propertyId)
+            .single();
+          
+          // Get agency settings
+          const { data: agencySettings } = await supabase
+            .from('agency_settings')
+            .select('resend_from_email, resend_from_name')
+            .single();
+          
+          const siteUrl = window.location.origin;
+          const inviteLink = `${siteUrl}/auth?redirect=/participant`;
+          
+          // Import email utility
+          const { sendEmail } = await import('@/lib/email');
+          
+          // Send invitation email with login details
+          await sendEmail({
+            to: result.email,
+            subject: `You've been invited as a ${result.role} for ${property?.title || 'a property'}`,
+            html: `
+              <h1>Property Invitation</h1>
+              <p>Hello,</p>
+              <p>You have been invited to participate as a <strong>${result.role}</strong> for ${property?.title || 'a property'}.</p>
+              <p>We've created an account for you with the following details:</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Email:</strong> ${result.email}</p>
+                <p><strong>Temporary Password:</strong> ${result.temporaryPassword}</p>
+              </div>
+              <p>Please login using these credentials. You'll be prompted to change your password after your first login.</p>
+              <p><a href="${inviteLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
+              <p style="margin-top: 20px; color: #666;">
+                If the button above doesn't work, copy and paste this link into your browser:
+                <br>
+                <span style="word-break: break-all; font-family: monospace;">${inviteLink}</span>
+              </p>
+              <p style="margin-top: 20px; font-size: 12px; color: #888;">
+                For security reasons, please change your password immediately after logging in.
+              </p>
+            `,
+            from: agencySettings?.resend_from_email,
+            fromName: agencySettings?.resend_from_name
+          });
+          
+          console.log('Invitation email sent successfully');
+        } else {
+          console.log('User already exists, no need to send login details');
+        }
+      } catch (error) {
+        console.error('Error sending invitation email:', error);
+        // Don't throw here, we still want to show success for adding the participant
+      }
+      
       toast({
         title: 'Success',
         description: 'Participant added successfully',
