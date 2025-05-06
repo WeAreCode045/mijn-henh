@@ -90,60 +90,59 @@ export function usePropertyParticipants(propertyId?: string) {
 
   const addParticipantMutation = useMutation({
     mutationFn: async (participant: ParticipantInvite) => {
-      console.log("Starting participant invitation process for:", participant);
+      console.log("Starting simplified participant invitation process for:", participant);
       
-      // Generate a secure password for the new user
+      // Generate a secure password for the invitation email
       const temporaryPassword = participant.temporaryPassword || 
         Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-2);
       
-      let userId: string;
-      let existingUser = false;
-      
       try {
-        // Step 1: Check if user already exists in the accounts table
-        const { data: existingUserData, error: existingUserError } = await supabase
+        // Step 1: Check if the email already exists in any property
+        const { data: existingParticipant, error: checkError } = await supabase
+          .from('accounts')
+          .select('id, user_id, property_id, role')
+          .eq('email', participant.email)
+          .eq('property_id', participant.propertyId)
+          .limit(1);
+        
+        if (checkError) {
+          console.error('Error checking existing participant:', checkError);
+          throw new Error(`Failed to check existing participant: ${checkError.message}`);
+        }
+        
+        // If participant already exists for this property, return error
+        if (existingParticipant && existingParticipant.length > 0) {
+          throw new Error('This email is already a participant for this property');
+        }
+        
+        // Step 2: Check if the email exists in any other property
+        const { data: existingEmail, error: emailCheckError } = await supabase
           .from('accounts')
           .select('user_id')
           .eq('email', participant.email)
           .limit(1);
         
-        if (existingUserError) {
-          console.error('Error checking existing user:', existingUserError);
+        let userId: string;
+        let isNewUser = true;
+        
+        if (emailCheckError) {
+          console.error('Error checking existing email:', emailCheckError);
+          // Continue anyway with a new user ID
         }
         
-        if (existingUserData && existingUserData.length > 0) {
-          // User already exists in our system
-          userId = existingUserData[0].user_id;
-          existingUser = true;
-          console.log(`User already exists with ID: ${userId}`);
+        // If email exists in another property, use the same user_id
+        if (existingEmail && existingEmail.length > 0) {
+          userId = existingEmail[0].user_id;
+          isNewUser = false;
+          console.log(`Using existing user ID: ${userId} for email: ${participant.email}`);
         } else {
-          // Step 2: User doesn't exist, create a new one
-          console.log(`Creating new user for email: ${participant.email}`);
+          // Generate a new UUID for the user
+          userId = crypto.randomUUID();
+          console.log(`Generated new user ID: ${userId} for email: ${participant.email}`);
           
-          // Create the user account with minimal options to avoid schema issues
-          const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-            email: participant.email,
-            password: temporaryPassword
-            // Avoid adding any metadata or options that might trigger the user_type error
-          });
-          
-          if (signUpError) {
-            console.error('Error creating user:', signUpError);
-            throw new Error(`Failed to create user: ${signUpError.message}`);
-          }
-          
-          if (!authUser?.user?.id) {
-            console.error('User creation response:', authUser);
-            throw new Error('Failed to create user: No user ID returned');
-          }
-          
-          userId = authUser.user.id;
-          console.log("New user created with ID:", userId);
-          
-          // Step 3: Create participant profile with more detailed logging
+          // Step 3: Create participant profile for new users
           try {
-            console.log(`Creating participant profile for user ID: ${userId}`);
-            console.log('Profile data:', {
+            console.log('Creating participant profile with data:', {
               id: userId,
               first_name: participant.firstName,
               last_name: participant.lastName,
@@ -161,8 +160,8 @@ export function usePropertyParticipants(propertyId?: string) {
             
             if (profileError) {
               console.error('Error creating participant profile:', profileError);
-              console.error('Error details:', profileError.details, profileError.hint, profileError.message);
-              // Don't throw here, we can continue without the profile
+              console.error('Profile error details:', profileError.details, profileError.hint);
+              // Continue anyway - we'll just have a user without a profile
             } else {
               console.log('Participant profile created successfully');
             }
@@ -172,10 +171,10 @@ export function usePropertyParticipants(propertyId?: string) {
           }
         }
         
-        // Step 4: Add participant to the property
+        // Step 4: Add the participant to the property
         console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
         
-        const { data, error } = await supabase
+        const { data: newParticipant, error: insertError } = await supabase
           .from('accounts')
           .insert({
             property_id: participant.propertyId,
@@ -186,20 +185,21 @@ export function usePropertyParticipants(propertyId?: string) {
           })
           .select();
         
-        if (error) {
-          if (error.code === '23505') { // Unique violation
-            throw new Error('This user is already a participant for this property');
-          }
-          console.error('Error adding participant:', error);
-          throw error;
+        if (insertError) {
+          console.error('Error adding participant to property:', insertError);
+          throw new Error(`Failed to add participant: ${insertError.message}`);
         }
         
-        console.log("Participant successfully added:", data);
+        if (!newParticipant || newParticipant.length === 0) {
+          throw new Error('No data returned after adding participant');
+        }
         
-        // Return the created participant along with the temporary password for email sending
+        console.log('Participant successfully added:', newParticipant[0]);
+        
+        // Return the participant data with the temporary password for email sending
         return {
-          ...data[0],
-          temporaryPassword: existingUser ? undefined : temporaryPassword
+          ...newParticipant[0],
+          temporaryPassword: isNewUser ? temporaryPassword : undefined
         };
       } catch (error) {
         console.error('Error in participant invitation process:', error);
