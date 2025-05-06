@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AgentSelectorProps {
   initialAgentId?: string;
-  onAgentChange: (agentId: string) => Promise<void>;
+  onAgentChange: (agentId: string | null) => Promise<void>;
   isDisabled?: boolean;
 }
 
@@ -91,8 +91,9 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
       setIsSaving(true);
       setCurrentAgentId(agentId);
       
-      // Convert "no-agent" to empty string which will be converted to NULL in the backend
-      const finalAgentId = agentId === "no-agent" ? "" : agentId;
+      // Convert "no-agent" to null which will be properly handled in the database
+      // Using null directly instead of empty string to ensure it's properly processed
+      const finalAgentId = agentId === "no-agent" ? null : agentId;
       
       console.log("AgentSelector: Calling onAgentChange with agent ID:", finalAgentId);
       await onAgentChange(finalAgentId);

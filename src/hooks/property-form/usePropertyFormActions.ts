@@ -51,7 +51,7 @@ export function usePropertyFormActions(
   };
 
   // Handle saving agent
-  const handleSaveAgent = async (agentId: string): Promise<void> => {
+  const handleSaveAgent = async (agentId: string | null): Promise<void> => {
     console.log("usePropertyFormActions - Saving agent ID:", agentId);
     
     if (!formData.id) {
@@ -63,10 +63,8 @@ export function usePropertyFormActions(
       return Promise.reject(new Error("Property ID is missing"));
     }
 
-    if (agentId.trim() === '') {
-      console.log("No agent ID provided. Setting agent_id to null in the database.");
-    }
-    const finalAgentId = agentId.trim() === '' ? null : agentId;
+    // Handle null values or empty strings properly
+    const finalAgentId = agentId === null || (typeof agentId === 'string' && agentId.trim() === '') ? null : agentId;
     
     console.log("Agent ID to save:", agentId);
     console.log("Final Agent ID:", finalAgentId);
