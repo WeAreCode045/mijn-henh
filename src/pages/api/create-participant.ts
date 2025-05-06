@@ -27,14 +27,19 @@ export default async function handler(
     }
 
     // Check if user already exists in auth system
-    const { data: existingUser, error: authCheckError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    // Using getUserById with email - note the API changed and there is no getUserByEmail method
+    const { data: userList, error: userListError } = await supabaseAdmin
+      .from('participants_profile')
+      .select('id, email')
+      .eq('email', email)
+      .limit(1);
     
-    if (authCheckError && authCheckError.message !== 'User not found') {
-      console.error('Error checking existing user:', authCheckError);
+    if (userListError) {
+      console.error('Error checking existing user:', userListError);
       return res.status(500).json({ error: 'Failed to check if user exists' });
     }
     
-    if (existingUser) {
+    if (userList && userList.length > 0) {
       return res.status(400).json({ error: 'User already exists' });
     }
 

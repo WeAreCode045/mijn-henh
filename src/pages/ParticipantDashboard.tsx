@@ -83,10 +83,10 @@ export default function ParticipantDashboard() {
         // Transform the agent data to match what transformSupabaseData expects
         let transformedProperty = { ...property };
         
-        // Safely handle agent data
+        // Safely handle agent data - properly handle null agent
         if (property.agent && typeof property.agent === 'object' && !('error' in property.agent)) {
           transformedProperty.agent = {
-            id: property.agent.id,
+            id: property.agent.id || '',
             first_name: property.agent.first_name || '',
             last_name: property.agent.last_name || '',
             email: property.agent.email || '',
@@ -94,7 +94,15 @@ export default function ParticipantDashboard() {
             avatar_url: property.agent.avatar_url || ''
           };
         } else {
-          transformedProperty.agent = null;
+          // Provide an empty agent object with required properties instead of null
+          transformedProperty.agent = {
+            id: '',
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone: '',
+            avatar_url: ''
+          };
         }
 
         return transformSupabaseData(transformedProperty);
