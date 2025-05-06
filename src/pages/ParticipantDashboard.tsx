@@ -12,6 +12,7 @@ import { MessageList } from '@/components/property/messages/MessageList';
 import { transformSupabaseData } from '@/components/property/webview/utils/transformSupabaseData';
 import { Button } from '@/components/ui/button';
 import { UserCircle, Loader2 } from 'lucide-react';
+import { PropertyAgent } from '@/types/property/PropertyAgentTypes';
 
 export default function ParticipantDashboard() {
   const { user } = useAuth();
@@ -80,12 +81,28 @@ export default function ParticipantDashboard() {
       
       // Process agent data to match the expected format
       const processedProperties = propertyData.map(property => {
-        // Transform the agent data to match what transformSupabaseData expects
+        // Create a copy of the property to transform
         let transformedProperty = { ...property };
         
-        // Safely handle agent data - properly handle null agent
-        if (property.agent && typeof property.agent === 'object' && !('error' in property.agent)) {
-          transformedProperty.agent = {
+        // Create a proper agent object that matches the PropertyAgent type
+        let agentData: PropertyAgent = {
+          id: '',
+          first_name: '',
+          last_name: '',
+          email: '',
+          phone: '',
+          avatar_url: ''
+        };
+        
+        // Check if we have valid agent data (not null and not an error)
+        if (
+          property.agent && 
+          typeof property.agent === 'object' && 
+          property.agent !== null && 
+          !('error' in property.agent)
+        ) {
+          // Extract agent data with null checks
+          agentData = {
             id: property.agent.id || '',
             first_name: property.agent.first_name || '',
             last_name: property.agent.last_name || '',
@@ -93,17 +110,10 @@ export default function ParticipantDashboard() {
             phone: property.agent.phone || '',
             avatar_url: property.agent.avatar_url || ''
           };
-        } else {
-          // Provide an empty agent object with required properties instead of null
-          transformedProperty.agent = {
-            id: '',
-            first_name: '',
-            last_name: '',
-            email: '',
-            phone: '',
-            avatar_url: ''
-          };
         }
+        
+        // Set the agent property with the properly formatted data
+        transformedProperty.agent = agentData;
 
         return transformSupabaseData(transformedProperty);
       });
