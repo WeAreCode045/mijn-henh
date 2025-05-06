@@ -2,6 +2,7 @@ import { PropertyFormData } from '@/types/property';
 import { usePropertyFormSubmit } from '@/hooks/usePropertyFormSubmit';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
 
 export function usePropertyFormActions(
   formData: PropertyFormData,
@@ -100,6 +101,11 @@ export function usePropertyFormActions(
     }
   };
 
+  const handleAgentChange = (selectedAgentId: string) => {
+    console.log("AgentSelector: Selected agent ID:", selectedAgentId);
+    handleSaveAgent(selectedAgentId);
+  };
+
   const onSubmit = () => {
     // Final save when clicking submit
     if (formData.id) {
@@ -126,9 +132,31 @@ export function usePropertyFormActions(
     }
   };
 
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', formData.id);
+  
+      if (error) {
+        console.error("Error fetching property data:", error);
+        return;
+      }
+  
+      if (data) {
+        console.log("Fetched property data:", data);
+        // Update state only if necessary
+      }
+    };
+  
+    fetchPropertyData();
+  }, [formData.id]);
+
   return {
     handleSaveObjectId,
     handleSaveAgent,
+    handleAgentChange,
     onSubmit
   };
 }
