@@ -14,13 +14,15 @@ import {
 import { useParticipants } from "@/hooks/useParticipants";
 import { ParticipantProfileData } from "@/types/participant";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle, Eye } from "lucide-react";
+import { UserCircle, Eye, UserPlus } from "lucide-react";
 import { PropertyLayout } from "@/components/PropertyLayout";
 import { Spinner } from "@/components/ui/spinner";
+import { CreateParticipantDialog } from "@/components/participants/CreateParticipantDialog";
 
 const Participants = () => {
-  const { participants, isLoading, error } = useParticipants();
+  const { participants, isLoading, error, refetch } = useParticipants();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<ParticipantProfileData | null>(null);
 
   const handleViewProfile = (participant: ParticipantProfileData) => {
@@ -36,6 +38,10 @@ const Participants = () => {
       <div className="container mx-auto py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Participants</h1>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Create Participant
+          </Button>
         </div>
 
         {error && (
@@ -144,6 +150,13 @@ const Participants = () => {
             )}
           </DialogContent>
         </Dialog>
+        
+        {/* Create Participant Dialog */}
+        <CreateParticipantDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          onSuccess={refetch}
+        />
       </div>
     </PropertyLayout>
   );

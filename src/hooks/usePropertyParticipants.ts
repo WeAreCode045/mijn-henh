@@ -90,17 +90,33 @@ export function usePropertyParticipants(propertyId?: string) {
 
   const addParticipantMutation = useMutation({
     mutationFn: async (participant: ParticipantInvite) => {
-      console.log("Starting simplified participant invitation process for:", participant);
-      
-      // Generate a secure password for the invitation email
-      const temporaryPassword = participant.temporaryPassword || 
-        Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-2);
+      console.log("Starting participant invitation process for:", participant);
       
       try {
-        // Step 1: Check if the email already exists in any property
+        // Step 1: Check if the user already exists in the system
+        const { data: existingUser, error: userCheckError } = await supabase
+          .from('accounts')
+          .select('user_id')
+          .eq('email', participant.email)
+          .limit(1);
+        
+        if (userCheckError) {
+          console.error('Error checking existing user:', userCheckError);
+          throw new Error(`Failed to check existing user: ${userCheckError.message}`);
+        }
+        
+        // User must exist to be added as a participant
+        if (!existingUser || existingUser.length === 0) {
+          throw new Error('User does not exist. Please create the user first in the admin panel.');
+        }
+        
+        const userId = existingUser[0].user_id;
+        console.log(`Using existing user ID: ${userId} for email: ${participant.email}`);
+        
+        // Step 2: Check if the participant already exists for this property
         const { data: existingParticipant, error: checkError } = await supabase
           .from('accounts')
-          .select('id, user_id, property_id, role')
+          .select('id')
           .eq('email', participant.email)
           .eq('property_id', participant.propertyId)
           .limit(1);
@@ -115,63 +131,7 @@ export function usePropertyParticipants(propertyId?: string) {
           throw new Error('This email is already a participant for this property');
         }
         
-        // Step 2: Check if the email exists in any other property
-        const { data: existingEmail, error: emailCheckError } = await supabase
-          .from('accounts')
-          .select('user_id')
-          .eq('email', participant.email)
-          .limit(1);
-        
-        let userId: string;
-        let isNewUser = true;
-        
-        if (emailCheckError) {
-          console.error('Error checking existing email:', emailCheckError);
-          // Continue anyway with a new user ID
-        }
-        
-        // If email exists in another property, use the same user_id
-        if (existingEmail && existingEmail.length > 0) {
-          userId = existingEmail[0].user_id;
-          isNewUser = false;
-          console.log(`Using existing user ID: ${userId} for email: ${participant.email}`);
-        } else {
-          // Generate a new UUID for the user
-          userId = crypto.randomUUID();
-          console.log(`Generated new user ID: ${userId} for email: ${participant.email}`);
-          
-          // Step 3: Create participant profile for new users
-          try {
-            console.log('Creating participant profile with data:', {
-              id: userId,
-              first_name: participant.firstName,
-              last_name: participant.lastName,
-              email: participant.email
-            });
-            
-            const { error: profileError } = await supabase
-              .from('participants_profile')
-              .insert({
-                id: userId,
-                first_name: participant.firstName,
-                last_name: participant.lastName,
-                email: participant.email
-              });
-            
-            if (profileError) {
-              console.error('Error creating participant profile:', profileError);
-              console.error('Profile error details:', profileError.details, profileError.hint);
-              // Continue anyway - we'll just have a user without a profile
-            } else {
-              console.log('Participant profile created successfully');
-            }
-          } catch (profileError) {
-            console.error('Exception creating participant profile:', profileError);
-            // Continue without the profile
-          }
-        }
-        
-        // Step 4: Add the participant to the property
+        // Step 3: Add the participant to the property
         console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
         
         const { data: newParticipant, error: insertError } = await supabase
@@ -196,10 +156,48 @@ export function usePropertyParticipants(propertyId?: string) {
         
         console.log('Participant successfully added:', newParticipant[0]);
         
-        // Return the participant data with the temporary password for email sending
+        // Step 4: Update participant profile with first and last name if needed
+        try {
+          // Check if profile exists
+          const { data: existingProfile } = await supabase
+            .from('participants_profile')
+            .select('id, first_name, last_name')
+            .eq('id', userId)
+            .single();
+          
+          // If profile exists but first/last name are different, update them
+          if (existingProfile && 
+              (existingProfile.first_name !== participant.firstName || 
+               existingProfile.last_name !== participant.lastName)) {
+            
+            console.log('Updating participant profile with new name:', {
+              first_name: participant.firstName,
+              last_name: participant.lastName
+            });
+            
+            const { error: updateError } = await supabase
+              .from('participants_profile')
+              .update({
+                first_name: participant.firstName,
+                last_name: participant.lastName
+              })
+              .eq('id', userId);
+            
+            if (updateError) {
+              console.error('Error updating participant profile:', updateError);
+              // Continue anyway - this is not critical
+            }
+          }
+        } catch (profileError) {
+          console.error('Error handling participant profile:', profileError);
+          // Continue anyway - this is not critical
+        }
+        
+        // Return the participant data
         return {
           ...newParticipant[0],
-          temporaryPassword: isNewUser ? temporaryPassword : undefined
+          firstName: participant.firstName,
+          lastName: participant.lastName
         };
       } catch (error) {
         console.error('Error in participant invitation process:', error);
@@ -210,59 +208,46 @@ export function usePropertyParticipants(propertyId?: string) {
       console.log('Participant added successfully, sending invitation email:', result);
       
       try {
-        // Only send email if we have a temporary password (new user)
-        if (result.temporaryPassword) {
-          // Get property details
-          const { data: property } = await supabase
-            .from('properties')
-            .select('title')
-            .eq('id', propertyId)
-            .single();
-          
-          // Get agency settings
-          const { data: agencySettings } = await supabase
-            .from('agency_settings')
-            .select('resend_from_email, resend_from_name')
-            .single();
-          
-          const siteUrl = window.location.origin;
-          const inviteLink = `${siteUrl}/auth?redirect=/participant`;
-          
-          // Import email utility
-          const { sendEmail } = await import('@/lib/email');
-          
-          // Send invitation email with login details
-          await sendEmail({
-            to: result.email,
-            subject: `You've been invited as a ${result.role} for ${property?.title || 'a property'}`,
-            html: `
-              <h1>Property Invitation</h1>
-              <p>Hello,</p>
-              <p>You have been invited to participate as a <strong>${result.role}</strong> for ${property?.title || 'a property'}.</p>
-              <p>We've created an account for you with the following details:</p>
-              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                <p><strong>Email:</strong> ${result.email}</p>
-                <p><strong>Temporary Password:</strong> ${result.temporaryPassword}</p>
-              </div>
-              <p>Please login using these credentials. You'll be prompted to change your password after your first login.</p>
-              <p><a href="${inviteLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
-              <p style="margin-top: 20px; color: #666;">
-                If the button above doesn't work, copy and paste this link into your browser:
-                <br>
-                <span style="word-break: break-all; font-family: monospace;">${inviteLink}</span>
-              </p>
-              <p style="margin-top: 20px; font-size: 12px; color: #888;">
-                For security reasons, please change your password immediately after logging in.
-              </p>
-            `,
-            from: agencySettings?.resend_from_email,
-            fromName: agencySettings?.resend_from_name
-          });
-          
-          console.log('Invitation email sent successfully');
-        } else {
-          console.log('User already exists, no need to send login details');
-        }
+        // Get property details
+        const { data: property } = await supabase
+          .from('properties')
+          .select('title')
+          .eq('id', propertyId)
+          .single();
+        
+        // Get agency settings
+        const { data: agencySettings } = await supabase
+          .from('agency_settings')
+          .select('resend_from_email, resend_from_name')
+          .single();
+        
+        const siteUrl = window.location.origin;
+        const inviteLink = `${siteUrl}/auth?redirect=/participant`;
+        
+        // Import email utility
+        const { sendEmail } = await import('@/lib/email');
+        
+        // Send invitation email (without login details since user already exists)
+        await sendEmail({
+          to: result.email,
+          subject: `You've been invited as a ${result.role} for ${property?.title || 'a property'}`,
+          html: `
+            <h1>Property Invitation</h1>
+            <p>Hello ${result.firstName || ''} ${result.lastName || ''},</p>
+            <p>You have been invited to participate as a <strong>${result.role}</strong> for ${property?.title || 'a property'}.</p>
+            <p>You can access this property using your existing account credentials.</p>
+            <p><a href="${inviteLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
+            <p style="margin-top: 20px; color: #666;">
+              If the button above doesn't work, copy and paste this link into your browser:
+              <br>
+              <span style="word-break: break-all; font-family: monospace;">${inviteLink}</span>
+            </p>
+          `,
+          from: agencySettings?.resend_from_email,
+          fromName: agencySettings?.resend_from_name
+        });
+        
+        console.log('Invitation email sent successfully');
       } catch (error) {
         console.error('Error sending invitation email:', error);
         // Don't throw here, we still want to show success for adding the participant

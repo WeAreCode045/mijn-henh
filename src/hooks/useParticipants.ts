@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ParticipantProfileData } from "@/types/participant";
 
 export function useParticipants() {
-  const { data: participants, isLoading, error } = useQuery({
+  const { data: participants, isLoading, error, refetch } = useQuery({
     queryKey: ["participants"],
     queryFn: async () => {
       console.log("Fetching participants in useParticipants hook");
@@ -124,6 +124,7 @@ export function useParticipants() {
   return {
     participants: participants || [],
     isLoading,
-    error
+    error,
+    refetch
   };
 }
