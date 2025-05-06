@@ -1,3 +1,4 @@
+
 import type { Request, Response } from 'express';
 // Using Express types since Next.js App Router doesn't use NextApiRequest/NextApiResponse
 import { createClient } from '@supabase/supabase-js';
@@ -25,19 +26,15 @@ export default async function handler(
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Check if user already exists
-    const { data: existingUsers, error: checkError } = await supabaseAdmin
-      .from('participants_profile')
-      .select('id, email')
-      .eq('email', email)
-      .limit(1);
-
-    if (checkError) {
-      console.error('Error checking existing user:', checkError);
+    // Check if user already exists in auth system
+    const { data: existingUser, error: authCheckError } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    
+    if (authCheckError && authCheckError.message !== 'User not found') {
+      console.error('Error checking existing user:', authCheckError);
       return res.status(500).json({ error: 'Failed to check if user exists' });
     }
-
-    if (existingUsers && existingUsers.length > 0) {
+    
+    if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 

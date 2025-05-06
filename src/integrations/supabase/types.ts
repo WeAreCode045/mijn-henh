@@ -521,15 +521,7 @@ export type Database = {
           virtualTourUrl?: string | null
           youtubeUrl?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "properties_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       property_agenda_items: {
         Row: {

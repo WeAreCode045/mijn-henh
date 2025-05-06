@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@supabase/supabase-js";
@@ -75,16 +76,16 @@ export function CreateParticipantDialog({
       }
 
       // Also check if email exists in auth system
-      const { data: existingAuth, error: authCheckError } = await supabase.auth.signInWithPassword({
+      const { error: authCheckError } = await supabase.auth.signInWithPassword({
         email,
         password: "INVALID_PASSWORD_TO_CHECK_EXISTENCE" // This will fail but tell us if the user exists
       });
 
-      if (authCheckError && !authCheckError.message.includes("Invalid login credentials")) {
-        // If error is not about invalid credentials, it's a real error
-        console.error("Unexpected error checking auth:", authCheckError);
-      } else if (!authCheckError) {
-        // If no error, user somehow logged in with our fake password (shouldn't happen)
+      // If error doesn't mention invalid credentials, user doesn't exist (expected)
+      // If error mentions invalid credentials, user exists but password was wrong (as expected)
+      const userExistsInAuth = !authCheckError || (authCheckError && !authCheckError.message.includes("Invalid login credentials"));
+      
+      if (userExistsInAuth) {
         toast({
           title: "User already exists",
           description: `A user with email ${email} already exists in the auth system.`,
@@ -98,10 +99,6 @@ export function CreateParticipantDialog({
       const temporaryPassword = generateRandomPassword(12);
 
       console.log(`Creating new participant with email ${email} and role ${role}`);
-
-      // Create user in Supabase Auth with absolutely minimal options
-      // We're avoiding any metadata or options that might trigger the user_type error
-      console.log("Using minimal signup approach to avoid user_type error");
       
       let userId: string;
       let authCreationSucceeded = false;
@@ -110,7 +107,6 @@ export function CreateParticipantDialog({
         console.log("Using server-side API to create participant with admin privileges");
         
         // Call our server-side API endpoint to create the participant
-        // This uses the service role key with admin privileges to bypass the user_type error
         const response = await fetch('/api/create-participant', {
           method: 'POST',
           headers: {
@@ -140,28 +136,23 @@ export function CreateParticipantDialog({
         authCreationSucceeded = true;
         console.log('Participant created successfully with ID:', userId);
         
-      } catch (error) {
-        console.error('Participant creation failed:', error);
+      } catch (serverError) {
+        console.error('Participant creation failed using server-side approach:', serverError);
         
-        // If the server-side approach fails, fall back to client-side creation
-        console.log('Falling back to client-side participant creation');
+        // If the server-side approach fails, try the client-side approach
+        console.log('Attempting client-side participant creation');
         
         try {
-          // Try the standard signup with ABSOLUTELY minimal options
-          // Based on the error "type \"user_type\" does not exist", we need to avoid anything that might trigger this
-          console.log("Attempting bare-minimum signup to avoid user_type error");
-          
-          // Create a new Supabase client for this operation to ensure no default options are applied
+          // Create a new Supabase client for this operation to avoid any stored settings
           const freshClient = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL || '',
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
           );
           
-          // Use the raw API call with minimal data
+          // Use the basic signUp method without any metadata or options
           const { data: authUser, error: signUpError } = await freshClient.auth.signUp({
             email,
             password: temporaryPassword,
-            // No options at all - not even emailRedirectTo
           });
 
           if (signUpError) {
@@ -177,7 +168,7 @@ export function CreateParticipantDialog({
           authCreationSucceeded = true;
           console.log('User created successfully with client-side approach, ID:', userId);
           
-          // Create participant profile (without role field)
+          // Create participant profile
           const { error: profileError } = await supabase
             .from("participants_profile")
             .insert({
@@ -185,7 +176,6 @@ export function CreateParticipantDialog({
               first_name: firstName,
               last_name: lastName,
               email: email
-              // Note: role is NOT stored in participants_profile table
             });
 
           if (profileError) {
@@ -193,39 +183,29 @@ export function CreateParticipantDialog({
             throw new Error(`Failed to create participant profile: ${profileError.message}`);
           }
           
-        } catch (fallbackError) {
-          console.error('All participant creation methods failed:', fallbackError);
+          console.log("Participant profile created successfully");
           
-          // If all methods fail, we can't proceed due to the foreign key constraint
-          // The 'id' in participants_profile must exist in the 'users' table
-          console.error('All user creation methods failed. Cannot proceed due to foreign key constraints.');
-          
-          toast({
-            title: 'User Creation Failed',
-            description: 'We could not create a user account due to database constraints. Please contact the system administrator for assistance.',
-            variant: 'destructive',
-          });
-          
-          // We can't create a profile without a valid user ID due to foreign key constraints
-          throw new Error('Cannot create participant profile without a valid user ID in the auth system');
+        } catch (clientError) {
+          console.error('Client-side participant creation also failed:', clientError);
+          throw new Error(`All participant creation methods failed: ${clientError instanceof Error ? clientError.message : String(clientError)}`);
         }
       }
-      
-      console.log("Participant profile created successfully");
-      console.log("Note: The role will be stored in the accounts table when the participant is added to a property");
+
+      console.log("Participant profile creation complete");
+      console.log("The role will be stored in the accounts table when the participant is added to a property");
 
       // Reset form and close dialog
       resetForm();
       onOpenChange(false);
 
-      // Show success message based on whether auth creation succeeded
-      if (authCreationSucceeded) {
-        toast({
-          title: "Participant created",
-          description: `${firstName} ${lastName} has been created as a ${role}.`,
-        });
+      // Show success message
+      toast({
+        title: "Participant created",
+        description: `${firstName} ${lastName} has been created as a ${role}.`,
+      });
 
-        // Send welcome email with login details only if auth creation succeeded
+      // Send welcome email with login details only if auth creation succeeded
+      if (authCreationSucceeded) {
         try {
           // Get agency settings
           const { data: agencySettings } = await supabase
@@ -270,12 +250,8 @@ export function CreateParticipantDialog({
           console.log("Welcome email sent successfully");
         } catch (emailError) {
           console.error("Error sending welcome email:", emailError);
-          // Don't throw here, we still want to show success for creating the participant
+          // Don't throw here, just log the error
         }
-      } else {
-        // If auth creation failed, we've already shown a toast about the issue
-        // Just log the completion of the profile creation
-        console.log("Participant profile created with temporary ID, but auth creation failed");
       }
 
       // Call onSuccess callback if provided
@@ -284,7 +260,16 @@ export function CreateParticipantDialog({
       }
     } catch (error) {
       console.error("Error creating participant:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to create participant";
+      
+      let errorMessage = error instanceof Error ? error.message : "Failed to create participant";
+      
+      // Provide more user-friendly error messages
+      if (errorMessage.includes("type \"user_type\" does not exist")) {
+        errorMessage = "Database schema error: The user_type enum is missing. Please contact the administrator.";
+      } else if (errorMessage.includes("All participant creation methods failed")) {
+        errorMessage = "Unable to create user account. Please try again later or contact support.";
+      }
+      
       toast({
         title: "Error",
         description: errorMessage,
