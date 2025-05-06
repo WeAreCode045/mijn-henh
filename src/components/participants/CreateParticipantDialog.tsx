@@ -51,7 +51,7 @@ export function CreateParticipantDialog({
     setIsSubmitting(true);
 
     try {
-      // Check if user already exists in participants_profile
+      // Check if user already exists in participants_profile or accounts
       const { data: existingProfile, error: checkError } = await supabase
         .from("participants_profile")
         .select("id, email")
@@ -106,60 +106,116 @@ export function CreateParticipantDialog({
       let authCreationSucceeded = false;
       
       try {
-        // First attempt: Use the standard signup
-        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password: temporaryPassword
-          // No options or metadata to avoid triggering the user_type error
+        console.log("Using server-side API to create participant with admin privileges");
+        
+        // Call our server-side API endpoint to create the participant
+        // This uses the service role key with admin privileges to bypass the user_type error
+        const response = await fetch('/api/create-participant', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password: temporaryPassword,
+            firstName,
+            lastName
+          }),
         });
-
-        if (signUpError) {
-          console.error("Error with standard signup:", signUpError);
-          throw signUpError;
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Server-side participant creation failed:', errorData);
+          throw new Error(errorData.error || 'Failed to create participant');
         }
-
-        if (!authUser?.user?.id) {
-          throw new Error("No user ID returned from standard signup");
+        
+        const result = await response.json();
+        
+        if (!result.userId) {
+          throw new Error('No user ID returned from server');
         }
-
-        userId = authUser.user.id;
+        
+        userId = result.userId;
         authCreationSucceeded = true;
-        console.log("User created successfully with standard signup, ID:", userId);
-      } catch (standardSignupError) {
-        console.error("Standard signup failed, trying alternative approach:", standardSignupError);
+        console.log('Participant created successfully with ID:', userId);
         
-        // If we get here, we need to use a workaround
-        // For now, we'll generate a UUID and use that as the user ID
-        // This won't create a real auth user, but it will allow us to create the profile
-        userId = crypto.randomUUID();
-        console.log("Generated temporary user ID:", userId);
+      } catch (error) {
+        console.error('Participant creation failed:', error);
         
-        // In a production environment, you would need to handle this differently
-        // For example, by using a server-side function with admin privileges
-        // or by creating a support ticket for an admin to create the user manually
+        // If the server-side approach fails, fall back to client-side creation
+        console.log('Falling back to client-side participant creation');
         
-        toast({
-          title: "Auth Creation Issue",
-          description: "There was an issue creating the user in the auth system. A temporary ID has been generated, but the user won't be able to log in until this is resolved by an admin.",
-          variant: "destructive",
-        });
-      }
+        try {
+          // Try the standard signup with minimal options
+          const { data: authUser, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: temporaryPassword,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth`
+            }
+          });
 
-      // Create participant profile
-      const { error: profileError } = await supabase
-        .from("participants_profile")
-        .insert({
-          id: userId,
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          role: role,
-        });
+          if (signUpError) {
+            console.error('Error with client-side signup:', signUpError);
+            throw signUpError;
+          }
 
-      if (profileError) {
-        console.error("Error creating participant profile:", profileError);
-        throw new Error(`Failed to create participant profile: ${profileError.message}`);
+          if (!authUser?.user?.id) {
+            throw new Error('No user ID returned from client-side signup');
+          }
+
+          userId = authUser.user.id;
+          authCreationSucceeded = true;
+          console.log('User created successfully with client-side approach, ID:', userId);
+          
+          // Create participant profile (without role field)
+          const { error: profileError } = await supabase
+            .from("participants_profile")
+            .insert({
+              id: userId,
+              first_name: firstName,
+              last_name: lastName,
+              email: email
+              // Note: role is NOT stored in participants_profile table
+            });
+
+          if (profileError) {
+            console.error("Error creating participant profile:", profileError);
+            throw new Error(`Failed to create participant profile: ${profileError.message}`);
+          }
+          
+        } catch (fallbackError) {
+          console.error('All participant creation methods failed:', fallbackError);
+          
+          // If all methods fail, generate a UUID as a last resort
+          userId = crypto.randomUUID();
+          console.log('Generated temporary user ID:', userId);
+          
+          toast({
+            title: 'Auth Creation Issue',
+            description: 'There was an issue creating the user in the auth system. A temporary ID has been generated, but the user will not be able to log in until this is resolved by an admin.',
+            variant: 'destructive',
+          });
+          
+          // Create participant profile with the generated ID
+          const { error: profileError } = await supabase
+            .from("participants_profile")
+            .insert({
+              id: userId,
+              first_name: firstName,
+              last_name: lastName,
+              email: email
+            });
+
+          if (profileError) {
+            console.error("Error creating participant profile with generated ID:", profileError);
+            throw new Error(`Failed to create participant profile: ${profileError.message}`);
+          }
+        }
       }
+      
+      console.log("Participant profile created successfully");
+      console.log("Note: The role will be stored in the accounts table when the participant is added to a property");
 
       // Reset form and close dialog
       resetForm();
