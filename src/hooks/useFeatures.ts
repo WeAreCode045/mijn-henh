@@ -15,6 +15,7 @@ export function useFeatures(propertyId: string) {
     const fetchFeatures = async () => {
       try {
         setIsLoading(true);
+        console.log("useFeatures: Starting to fetch features for property ID:", propertyId);
         
         // Verify user is authenticated before fetching
         const { data: session } = await supabase.auth.getSession();
@@ -25,6 +26,7 @@ export function useFeatures(propertyId: string) {
         }
         
         // Fetch property features
+        console.log("useFeatures: Fetching property features from properties table");
         const { data: propertyData, error: propertyError } = await supabase
           .from('properties')
           .select('features')
@@ -74,10 +76,15 @@ export function useFeatures(propertyId: string) {
             parsedFeatures = [];
           }
           
+          console.log("useFeatures: Parsed property features:", parsedFeatures.length, "items");
           setFeatures(Array.isArray(parsedFeatures) ? parsedFeatures : []);
+        } else {
+          console.log("useFeatures: No features found for property");
+          setFeatures([]);
         }
         
         // Fetch global features
+        console.log("useFeatures: Fetching global features from property_features table");
         const { data: globalData, error: globalError } = await supabase
           .from('property_features')
           .select('*')
@@ -88,6 +95,7 @@ export function useFeatures(propertyId: string) {
           throw globalError;
         }
         
+        console.log("useFeatures: Global features fetched:", globalData?.length || 0, "items");
         setGlobalFeatures(globalData as PropertyFeature[] || []);
       } catch (error) {
         console.error('Error fetching features:', error);
@@ -103,6 +111,9 @@ export function useFeatures(propertyId: string) {
 
     if (propertyId) {
       fetchFeatures();
+    } else {
+      console.log("useFeatures: No property ID provided, skipping feature fetch");
+      setIsLoading(false);
     }
   }, [propertyId, toast]);
 

@@ -36,22 +36,40 @@ export const useAgencySettings = () => {
 
   // Fetch global features from the database
   const fetchGlobalFeatures = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('property_features')
-      .select('*')
-      .order('description', { ascending: true });
-    
-    if (error) {
-      console.error("Error fetching global features:", error);
+    try {
+      // Verify user is authenticated before fetching
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        console.log("No authenticated session found in fetchGlobalFeatures");
+        return;
+      }
+
+      console.log("Fetching global features from property_features table");
+      const { data, error } = await supabase
+        .from('property_features')
+        .select('*')
+        .order('description', { ascending: true });
+      
+      if (error) {
+        console.error("Error fetching global features:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch global features",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log("Global features fetched:", data?.length || 0, "items");
+      setGlobalFeatures(data || []);
+    } catch (error) {
+      console.error("Unexpected error fetching global features:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch global features",
+        description: "An unexpected error occurred while fetching global features",
         variant: "destructive"
       });
-      return;
     }
-    
-    setGlobalFeatures(data || []);
   }, [toast]);
 
   // Handle adding a new global feature

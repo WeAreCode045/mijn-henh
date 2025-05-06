@@ -17,7 +17,7 @@ interface PropertyManagementCardProps {
   propertyId: string;
   agentId?: string;
   isArchived?: boolean;
-  handleSaveAgent: (agentId: string) => Promise<void>;
+  handleSaveAgent: (agentId: string | null) => Promise<void>;
   onGeneratePDF: (e: React.MouseEvent) => void;
   onWebView: (e: React.MouseEvent) => void;
   onDelete: () => Promise<void>;
