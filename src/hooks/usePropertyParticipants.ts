@@ -115,9 +115,20 @@ export function usePropertyParticipants(propertyId?: string) {
       } else {
         console.log(`Creating new user for email: ${participant.email}`);
         
+        // Use the provided temporary password or generate a random one
+        const password = participant.temporaryPassword || Math.random().toString(36).slice(-10);
+        
+        // Create the user account
         const { data: authUser, error: signUpError } = await supabase.auth.signUp({
           email: participant.email,
-          password: Math.random().toString(36).slice(-10), // Generate random password
+          password: password,
+          options: {
+            data: {
+              first_name: participant.firstName,
+              last_name: participant.lastName,
+              role: participant.role
+            }
+          }
         });
 
         if (signUpError) {
@@ -130,6 +141,22 @@ export function usePropertyParticipants(propertyId?: string) {
           throw new Error('Failed to create user');
         }
         userId = authUser.user.id;
+        
+        // Create participant profile with first and last name
+        const { error: profileError } = await supabase
+          .from('participants_profile')
+          .insert({
+            id: userId,
+            first_name: participant.firstName,
+            last_name: participant.lastName,
+            email: participant.email,
+            role: participant.role
+          });
+          
+        if (profileError) {
+          console.error('Error creating participant profile:', profileError);
+          // Don't throw here, we can continue without the profile
+        }
       }
 
       console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);

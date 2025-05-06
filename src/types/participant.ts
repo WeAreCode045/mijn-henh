@@ -56,6 +56,9 @@ export interface PropertyParticipant {
 
 export interface ParticipantInvite {
   email: string;
+  firstName: string;
+  lastName: string;
   role: ParticipantRole;
   propertyId: string;
+  temporaryPassword?: string;
 }
