@@ -149,8 +149,8 @@ export function usePropertyParticipants(propertyId?: string) {
             id: userId,
             first_name: participant.firstName,
             last_name: participant.lastName,
-            email: participant.email,
-            role: participant.role
+            email: participant.email
+            // Note: role is stored in the accounts table, not in participants_profile
           });
           
         if (profileError) {
