@@ -102,20 +102,21 @@ export default function ParticipantDashboard() {
           !('error' in property.agent)
         ) {
           // Extract agent data with null checks
+          const agent = property.agent as any; // Cast to any to help TypeScript
           agentData = {
-            id: property.agent.id || '',
-            first_name: property.agent.first_name || '',
-            last_name: property.agent.last_name || '',
-            email: property.agent.email || '',
-            phone: property.agent.phone || '',
-            avatar_url: property.agent.avatar_url || ''
+            id: agent.id || '',
+            first_name: agent.first_name || '',
+            last_name: agent.last_name || '',
+            email: agent.email || '',
+            phone: agent.phone || '',
+            avatar_url: agent.avatar_url || ''
           };
         }
         
-        // Set the agent property with the properly formatted data
-        transformedProperty.agent = agentData;
+        // Cast transformedProperty to any to avoid TypeScript errors
+        (transformedProperty as any).agent = agentData;
 
-        return transformSupabaseData(transformedProperty);
+        return transformSupabaseData(transformedProperty as any);
       });
       
       setProperties(processedProperties);
