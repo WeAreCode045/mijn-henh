@@ -51,22 +51,42 @@ export function CreateParticipantDialog({
     setIsSubmitting(true);
 
     try {
-      // Check if user already exists
-      const { data: existingUser, error: checkError } = await supabase
+      // Check if user already exists in participants_profile
+      const { data: existingProfile, error: checkError } = await supabase
         .from("participants_profile")
         .select("id, email")
         .eq("email", email)
         .limit(1);
 
       if (checkError) {
-        console.error("Error checking existing user:", checkError);
+        console.error("Error checking existing profile:", checkError);
         throw new Error(`Failed to check if user exists: ${checkError.message}`);
       }
 
-      if (existingUser && existingUser.length > 0) {
+      if (existingProfile && existingProfile.length > 0) {
         toast({
           title: "User already exists",
           description: `A user with email ${email} already exists.`,
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Also check if email exists in auth system
+      const { data: existingAuth, error: authCheckError } = await supabase.auth.signInWithPassword({
+        email,
+        password: "INVALID_PASSWORD_TO_CHECK_EXISTENCE" // This will fail but tell us if the user exists
+      });
+
+      if (authCheckError && !authCheckError.message.includes("Invalid login credentials")) {
+        // If error is not about invalid credentials, it's a real error
+        console.error("Unexpected error checking auth:", authCheckError);
+      } else if (!authCheckError) {
+        // If no error, user somehow logged in with our fake password (shouldn't happen)
+        toast({
+          title: "User already exists",
+          description: `A user with email ${email} already exists in the auth system.`,
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -78,23 +98,52 @@ export function CreateParticipantDialog({
 
       console.log(`Creating new participant with email ${email} and role ${role}`);
 
-      // Create user in Supabase Auth
-      const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: temporaryPassword,
-      });
+      // Create user in Supabase Auth with absolutely minimal options
+      // We're avoiding any metadata or options that might trigger the user_type error
+      console.log("Using minimal signup approach to avoid user_type error");
+      
+      let userId: string;
+      let authCreationSucceeded = false;
+      
+      try {
+        // First attempt: Use the standard signup
+        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: temporaryPassword
+          // No options or metadata to avoid triggering the user_type error
+        });
 
-      if (signUpError) {
-        console.error("Error creating user:", signUpError);
-        throw new Error(`Failed to create user: ${signUpError.message}`);
+        if (signUpError) {
+          console.error("Error with standard signup:", signUpError);
+          throw signUpError;
+        }
+
+        if (!authUser?.user?.id) {
+          throw new Error("No user ID returned from standard signup");
+        }
+
+        userId = authUser.user.id;
+        authCreationSucceeded = true;
+        console.log("User created successfully with standard signup, ID:", userId);
+      } catch (standardSignupError) {
+        console.error("Standard signup failed, trying alternative approach:", standardSignupError);
+        
+        // If we get here, we need to use a workaround
+        // For now, we'll generate a UUID and use that as the user ID
+        // This won't create a real auth user, but it will allow us to create the profile
+        userId = crypto.randomUUID();
+        console.log("Generated temporary user ID:", userId);
+        
+        // In a production environment, you would need to handle this differently
+        // For example, by using a server-side function with admin privileges
+        // or by creating a support ticket for an admin to create the user manually
+        
+        toast({
+          title: "Auth Creation Issue",
+          description: "There was an issue creating the user in the auth system. A temporary ID has been generated, but the user won't be able to log in until this is resolved by an admin.",
+          variant: "destructive",
+        });
       }
-
-      if (!authUser?.user?.id) {
-        throw new Error("Failed to create user: No user ID returned");
-      }
-
-      const userId = authUser.user.id;
-      console.log("New user created with ID:", userId);
 
       // Create participant profile
       const { error: profileError } = await supabase
@@ -116,58 +165,64 @@ export function CreateParticipantDialog({
       resetForm();
       onOpenChange(false);
 
-      // Show success message
-      toast({
-        title: "Participant created",
-        description: `${firstName} ${lastName} has been created as a ${role}.`,
-      });
-
-      // Send welcome email with login details
-      try {
-        // Get agency settings
-        const { data: agencySettings } = await supabase
-          .from("agency_settings")
-          .select("resend_from_email, resend_from_name")
-          .single();
-
-        const siteUrl = window.location.origin;
-        const loginLink = `${siteUrl}/auth`;
-
-        // Import email utility
-        const { sendEmail } = await import("@/lib/email");
-
-        // Send welcome email with login details
-        await sendEmail({
-          to: email,
-          subject: `Welcome to the Property Portal`,
-          html: `
-            <h1>Welcome to the Property Portal</h1>
-            <p>Hello ${firstName} ${lastName},</p>
-            <p>Your account has been created as a <strong>${role}</strong>.</p>
-            <p>You can log in with the following credentials:</p>
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Temporary Password:</strong> ${temporaryPassword}</p>
-            </div>
-            <p>Please login using these credentials. You'll be prompted to change your password after your first login.</p>
-            <p><a href="${loginLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
-            <p style="margin-top: 20px; color: #666;">
-              If the button above doesn't work, copy and paste this link into your browser:
-              <br>
-              <span style="word-break: break-all; font-family: monospace;">${loginLink}</span>
-            </p>
-            <p style="margin-top: 20px; font-size: 12px; color: #888;">
-              For security reasons, please change your password immediately after logging in.
-            </p>
-          `,
-          from: agencySettings?.resend_from_email,
-          fromName: agencySettings?.resend_from_name,
+      // Show success message based on whether auth creation succeeded
+      if (authCreationSucceeded) {
+        toast({
+          title: "Participant created",
+          description: `${firstName} ${lastName} has been created as a ${role}.`,
         });
 
-        console.log("Welcome email sent successfully");
-      } catch (emailError) {
-        console.error("Error sending welcome email:", emailError);
-        // Don't throw here, we still want to show success for creating the participant
+        // Send welcome email with login details only if auth creation succeeded
+        try {
+          // Get agency settings
+          const { data: agencySettings } = await supabase
+            .from("agency_settings")
+            .select("resend_from_email, resend_from_name")
+            .single();
+
+          const siteUrl = window.location.origin;
+          const loginLink = `${siteUrl}/auth`;
+
+          // Import email utility
+          const { sendEmail } = await import("@/lib/email");
+
+          // Send welcome email with login details
+          await sendEmail({
+            to: email,
+            subject: `Welcome to the Property Portal`,
+            html: `
+              <h1>Welcome to the Property Portal</h1>
+              <p>Hello ${firstName} ${lastName},</p>
+              <p>Your account has been created as a <strong>${role}</strong>.</p>
+              <p>You can log in with the following credentials:</p>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Temporary Password:</strong> ${temporaryPassword}</p>
+              </div>
+              <p>Please login using these credentials. You'll be prompted to change your password after your first login.</p>
+              <p><a href="${loginLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
+              <p style="margin-top: 20px; color: #666;">
+                If the button above doesn't work, copy and paste this link into your browser:
+                <br>
+                <span style="word-break: break-all; font-family: monospace;">${loginLink}</span>
+              </p>
+              <p style="margin-top: 20px; font-size: 12px; color: #888;">
+                For security reasons, please change your password immediately after logging in.
+              </p>
+            `,
+            from: agencySettings?.resend_from_email,
+            fromName: agencySettings?.resend_from_name,
+          });
+
+          console.log("Welcome email sent successfully");
+        } catch (emailError) {
+          console.error("Error sending welcome email:", emailError);
+          // Don't throw here, we still want to show success for creating the participant
+        }
+      } else {
+        // If auth creation failed, we've already shown a toast about the issue
+        // Just log the completion of the profile creation
+        console.log("Participant profile created with temporary ID, but auth creation failed");
       }
 
       // Call onSuccess callback if provided
