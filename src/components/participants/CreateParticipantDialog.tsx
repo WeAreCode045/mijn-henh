@@ -187,30 +187,18 @@ export function CreateParticipantDialog({
         } catch (fallbackError) {
           console.error('All participant creation methods failed:', fallbackError);
           
-          // If all methods fail, generate a UUID as a last resort
-          userId = crypto.randomUUID();
-          console.log('Generated temporary user ID:', userId);
+          // If all methods fail, we can't proceed due to the foreign key constraint
+          // The 'id' in participants_profile must exist in the 'users' table
+          console.error('All user creation methods failed. Cannot proceed due to foreign key constraints.');
           
           toast({
-            title: 'Auth Creation Issue',
-            description: 'There was an issue creating the user in the auth system. A temporary ID has been generated, but the user will not be able to log in until this is resolved by an admin.',
+            title: 'User Creation Failed',
+            description: 'We could not create a user account due to database constraints. Please contact the system administrator for assistance.',
             variant: 'destructive',
           });
           
-          // Create participant profile with the generated ID
-          const { error: profileError } = await supabase
-            .from("participants_profile")
-            .insert({
-              id: userId,
-              first_name: firstName,
-              last_name: lastName,
-              email: email
-            });
-
-          if (profileError) {
-            console.error("Error creating participant profile with generated ID:", profileError);
-            throw new Error(`Failed to create participant profile: ${profileError.message}`);
-          }
+          // We can't create a profile without a valid user ID due to foreign key constraints
+          throw new Error('Cannot create participant profile without a valid user ID in the auth system');
         }
       }
       
