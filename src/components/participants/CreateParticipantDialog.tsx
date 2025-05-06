@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@supabase/supabase-js";
 import {
   Dialog,
   DialogContent,
@@ -146,13 +147,21 @@ export function CreateParticipantDialog({
         console.log('Falling back to client-side participant creation');
         
         try {
-          // Try the standard signup with minimal options
-          const { data: authUser, error: signUpError } = await supabase.auth.signUp({
+          // Try the standard signup with ABSOLUTELY minimal options
+          // Based on the error "type \"user_type\" does not exist", we need to avoid anything that might trigger this
+          console.log("Attempting bare-minimum signup to avoid user_type error");
+          
+          // Create a new Supabase client for this operation to ensure no default options are applied
+          const freshClient = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+          );
+          
+          // Use the raw API call with minimal data
+          const { data: authUser, error: signUpError } = await freshClient.auth.signUp({
             email,
             password: temporaryPassword,
-            options: {
-              emailRedirectTo: `${window.location.origin}/auth`
-            }
+            // No options at all - not even emailRedirectTo
           });
 
           if (signUpError) {
