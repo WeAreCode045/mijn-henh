@@ -121,7 +121,8 @@ export function useParticipants() {
               updated_at: profile.updated_at || '',
               properties: propertyMap.get(account.id) || [],
               avatar_url: null,
-              full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant'
+              full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
+              bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility
             });
           }
         });

@@ -49,8 +49,11 @@ export function useParticipantProfile(accountId?: string) {
         throw error;
       }
 
-      // Cast the response to our type
-      return data as unknown as ParticipantProfileData;
+      // Add bank_account_number field for compatibility
+      return {
+        ...data,
+        bank_account_number: data.iban || null
+      } as unknown as ParticipantProfileData;
     },
     enabled: !!accountId,
   });

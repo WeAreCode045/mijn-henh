@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PropertyParticipant } from "@/types/participant";
 import { Button } from "@/components/ui/button";

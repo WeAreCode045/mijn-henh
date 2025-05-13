@@ -266,13 +266,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "documents_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "documents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -427,7 +420,6 @@ export type Database = {
           nearby_places: Json | null
           notes: string | null
           object_id: string | null
-          participants: Json | null
           price: string | null
           propertyType: string | null
           seller_id: string | null
@@ -468,7 +460,6 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
-          participants?: Json | null
           price?: string | null
           propertyType?: string | null
           seller_id?: string | null
@@ -509,7 +500,6 @@ export type Database = {
           nearby_places?: Json | null
           notes?: string | null
           object_id?: string | null
-          participants?: Json | null
           price?: string | null
           propertyType?: string | null
           seller_id?: string | null
@@ -522,6 +512,13 @@ export type Database = {
           youtubeUrl?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "properties_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "properties_buyer_id_fkey"
             columns: ["buyer_id"]
@@ -583,13 +580,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "property_agenda_items_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "property_agenda_items_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -639,13 +629,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "property_contact_submissions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "property_contact_submissions_property_id_fkey"
             columns: ["property_id"]
@@ -908,13 +891,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "property_submission_replies_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "property_submission_replies_submission_id_fkey"
             columns: ["submission_id"]
             isOneToOne: false
@@ -1003,13 +979,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "todo_items_assigned_to_id_fkey"
-            columns: ["assigned_to_id"]
-            isOneToOne: false
-            referencedRelation: "employer_profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "todo_items_property_id_fkey"
             columns: ["property_id"]
