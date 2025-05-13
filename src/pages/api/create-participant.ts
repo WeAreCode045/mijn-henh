@@ -27,19 +27,19 @@ export default async function handler(
     }
 
     // Check if user already exists in auth system
-    // Using getUserById with email - note the API changed and there is no getUserByEmail method
-    const { data: userList, error: userListError } = await supabaseAdmin
-      .from('participants_profile')
-      .select('id, email')
+    const { data: existingAccounts, error: existingError } = await supabaseAdmin
+      .from('accounts')
+      .select('id, user_id')
       .eq('email', email)
+      .eq('type', 'participant')
       .limit(1);
     
-    if (userListError) {
-      console.error('Error checking existing user:', userListError);
+    if (existingError) {
+      console.error('Error checking existing accounts:', existingError);
       return res.status(500).json({ error: 'Failed to check if user exists' });
     }
     
-    if (userList && userList.length > 0) {
+    if (existingAccounts && existingAccounts.length > 0) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
@@ -61,14 +61,34 @@ export default async function handler(
 
     const userId = authUser.user.id;
 
+    // Create account entry
+    const { data: accountData, error: accountError } = await supabaseAdmin
+      .from('accounts')
+      .insert({
+        user_id: userId,
+        email: email,
+        type: 'participant',
+        status: 'active',
+        display_name: `${firstName} ${lastName}`.trim()
+      })
+      .select('id')
+      .single();
+      
+    if (accountError) {
+      console.error('Error creating account:', accountError);
+      return res.status(500).json({ error: `Failed to create account: ${accountError.message}` });
+    }
+    
+    const accountId = accountData.id;
+
     // Create participant profile
     const { error: profileError } = await supabaseAdmin
       .from('participants_profile')
       .insert({
-        id: userId,
+        id: accountId,
         first_name: firstName,
         last_name: lastName,
-        email
+        email: email
       });
 
     if (profileError) {
@@ -80,6 +100,7 @@ export default async function handler(
     return res.status(200).json({ 
       success: true, 
       userId,
+      accountId,
       message: 'Participant created successfully'
     });
   } catch (error) {

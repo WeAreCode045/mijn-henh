@@ -9,17 +9,18 @@ export function useParticipants() {
     queryFn: async () => {
       console.log("Fetching participants in useParticipants hook");
       try {
-        // First get all accounts with buyer or seller roles
+        // First get all accounts with participant type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
           .select(`
             id,
             user_id,
-            role,
+            type,
+            display_name,
             email,
-            property_id
+            role
           `)
-          .in('role', ['buyer', 'seller']);
+          .eq('type', 'participant');
 
         if (accountsError) {
           console.error("Error fetching participant accounts:", accountsError);
@@ -29,14 +30,11 @@ export function useParticipants() {
         console.log("Participant accounts data from supabase:", accountsData);
         
         if (!accountsData || accountsData.length === 0) {
-          console.log("No accounts found with buyer or seller roles");
+          console.log("No accounts found with participant type");
           return [];
         }
         
-        // Extract unique user IDs from accounts (avoid duplicates if a user is in multiple properties)
-        const userIds = [...new Set(accountsData.map(account => account.user_id))];
-        
-        // Get the user profiles from participants_profile
+        // Get the participant profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("participants_profile")
           .select(`
@@ -50,10 +48,17 @@ export function useParticipants() {
             city,
             postal_code,
             country,
+            date_of_birth,
+            place_of_birth,
+            identification,
+            nationality,
+            gender,
+            iban,
+            role,
             created_at,
             updated_at
           `)
-          .in('id', userIds);
+          .in('id', accountsData.map(account => account.id));
 
         if (profilesError && profilesError.code !== 'PGRST116') {
           console.error("Error fetching participant profiles:", profilesError);
@@ -62,7 +67,7 @@ export function useParticipants() {
         
         console.log("Participant profiles from supabase:", profiles);
 
-        // Create a map of user_id to profile for quick lookups
+        // Create a map of id to profile for quick lookups
         const profileMap = new Map();
         if (profiles) {
           profiles.forEach(profile => {
@@ -70,19 +75,62 @@ export function useParticipants() {
           });
         }
         
-        // Create a map to store the participant data with unique user_id
+        // Find properties linked to these participants
+        const { data: propertiesBuyer, error: buyerError } = await supabase
+          .from('properties')
+          .select('id, buyer_id')
+          .in('buyer_id', accountsData.map(a => a.id));
+          
+        if (buyerError && buyerError.code !== 'PGRST116') {
+          console.error("Error fetching buyer properties:", buyerError);
+        }
+        
+        const { data: propertiesSeller, error: sellerError } = await supabase
+          .from('properties')
+          .select('id, seller_id')
+          .in('seller_id', accountsData.map(a => a.id));
+          
+        if (sellerError && sellerError.code !== 'PGRST116') {
+          console.error("Error fetching seller properties:", sellerError);
+        }
+        
+        // Create a map of account id to properties
+        const propertyMap = new Map();
+        if (propertiesBuyer) {
+          propertiesBuyer.forEach(prop => {
+            if (prop.buyer_id) {
+              if (!propertyMap.has(prop.buyer_id)) {
+                propertyMap.set(prop.buyer_id, []);
+              }
+              propertyMap.get(prop.buyer_id).push(prop.id);
+            }
+          });
+        }
+        
+        if (propertiesSeller) {
+          propertiesSeller.forEach(prop => {
+            if (prop.seller_id) {
+              if (!propertyMap.has(prop.seller_id)) {
+                propertyMap.set(prop.seller_id, []);
+              }
+              propertyMap.get(prop.seller_id).push(prop.id);
+            }
+          });
+        }
+        
+        // Create a map to store the participant data with unique id
         const participantsMap = new Map();
         
         // Process each account to create participant data
         accountsData.forEach(account => {
-          if (!participantsMap.has(account.user_id)) {
-            const profile = profileMap.get(account.user_id) || {};
+          if (!participantsMap.has(account.id)) {
+            const profile = profileMap.get(account.id) || {};
             
             // Use account email if profile doesn't have one
             const email = profile.email || account.email || '';
             
-            participantsMap.set(account.user_id, {
-              id: account.user_id,
+            participantsMap.set(account.id, {
+              id: account.id,
               email: email,
               first_name: profile.first_name || '',
               last_name: profile.last_name || '',
@@ -92,19 +140,19 @@ export function useParticipants() {
               city: profile.city || '',
               postal_code: profile.postal_code || '',
               country: profile.country || '',
-              role: account.role,  // Explicitly add the role from the account
+              date_of_birth: profile.date_of_birth || null,
+              place_of_birth: profile.place_of_birth || null,
+              identification: profile.identification || null,
+              nationality: profile.nationality || null,
+              gender: profile.gender || null,
+              iban: profile.iban || null,
+              role: profile.role || account.role || 'buyer',
               created_at: profile.created_at || '',
               updated_at: profile.updated_at || '',
-              properties: [account.property_id].filter(Boolean), // Add property_id if it exists
-              avatar_url: null,  // Add default avatar_url
-              full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant'
+              properties: propertyMap.get(account.id) || [],
+              avatar_url: null,
+              full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant'
             });
-          } else {
-            // If the user already exists in our map, just add the property to their properties array
-            const participant = participantsMap.get(account.user_id);
-            if (account.property_id && !participant.properties.includes(account.property_id)) {
-              participant.properties.push(account.property_id);
-            }
           }
         });
         

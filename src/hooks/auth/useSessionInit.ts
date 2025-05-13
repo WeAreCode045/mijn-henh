@@ -19,7 +19,7 @@ export function useSessionInit({
   setIsLoading: (loading: boolean) => void;
   setInitialized: (initialized: boolean) => void;
   clearAuthState: () => void;
-  fetchUserProfile: (userId: string, role: string, email: string | undefined) => Promise<any>;
+  fetchUserProfile: (userId: string, type: string, email: string | undefined) => Promise<any>;
 }) {
   const handleAuthStateChange = useCallback(async (session: any) => {
     console.log('Auth state change', session ? 'Session exists' : 'No session');
@@ -28,23 +28,23 @@ export function useSessionInit({
             
     if (session?.user) {
       try {
-        // Get the user's role from the accounts table
+        // Get the user's type and role from the accounts table
         const { data: accountData, error: accountError } = await supabase.from('accounts')
-          .select('role')
+          .select('id, type, role')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
                 
         if (accountError) {
-          console.error('Error getting user role on auth change:', accountError);
+          console.error('Error getting user account on auth change:', accountError);
           setUserRole(null);
         } else if (accountData) {
-          console.log('User role from accounts:', accountData.role);
+          console.log('User account data:', accountData);
           setUserRole(accountData.role);
           
-          // Fetch the user profile based on role
-          const userProfile = await fetchUserProfile(session.user.id, accountData.role, session.user.email);
+          // Fetch the user profile based on type
+          const userProfile = await fetchUserProfile(session.user.id, accountData.type, session.user.email);
           if (userProfile) {
             console.log('User profile fetched:', userProfile);
             setProfile(userProfile);

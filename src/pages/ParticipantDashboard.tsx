@@ -29,58 +29,48 @@ export default function ParticipantDashboard() {
     setIsLoading(true);
     
     try {
-      // Get properties where the user is a participant (via accounts table)
-      const { data: participations, error: participationsError } = await supabase
+      // First get the account linked to this user
+      const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('property_id, role')
+        .select('id')
         .eq('user_id', user.id)
-        .in('role', ['buyer', 'seller']);
-
-      if (participationsError) {
-        console.error('Error fetching property participations:', participationsError);
-        setIsLoading(false);
-        return;
-      }
-
-      if (!participations.length) {
-        setIsLoading(false);
-        return;
-      }
-
-      const propertyIds = participations.map(p => p.property_id).filter(id => id !== null) as string[];
-      
-      if (propertyIds.length === 0) {
+        .eq('type', 'participant')
+        .single();
+        
+      if (accountError) {
+        console.error('Error fetching participant account:', accountError);
         setIsLoading(false);
         return;
       }
       
-      // Fetch the property details
-      const { data: propertyData, error: propertyError } = await supabase
+      const accountId = accountData.id;
+      
+      // Get properties where this account is a buyer or seller
+      const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
         .select(`
           *,
           property_images(*),
-          agent:agent_id(
-            id, 
-            email,
-            first_name,
-            last_name,
-            phone,
-            avatar_url
-          )
+          agent:agent_id(*)
         `)
-        .in('id', propertyIds);
+        .or(`seller_id.eq.${accountId},buyer_id.eq.${accountId}`)
+        .eq('archived', false);
 
-      if (propertyError) {
-        console.error('Error fetching properties:', propertyError);
+      if (propertiesError) {
+        console.error('Error fetching properties:', propertiesError);
         setIsLoading(false);
         return;
       }
 
-      console.log('Fetched property data with agents:', propertyData);
+      console.log('Fetched property data with agents:', propertiesData);
+      
+      if (propertiesData.length === 0) {
+        setIsLoading(false);
+        return;
+      }
       
       // Process agent data to match the expected format
-      const processedProperties = propertyData.map(property => {
+      const processedProperties = await Promise.all(propertiesData.map(async (property) => {
         // Create a copy of the property to transform
         let transformedProperty = { ...property };
         
@@ -94,30 +84,40 @@ export default function ParticipantDashboard() {
           avatar_url: ''
         };
         
-        // Check if we have valid agent data (not null and not an error)
-        if (
-          property.agent && 
-          typeof property.agent === 'object' && 
-          property.agent !== null && 
-          !('error' in property.agent)
-        ) {
-          // Extract agent data with null checks
-          const agent = property.agent as any; // Cast to any to help TypeScript
-          agentData = {
-            id: agent.id || '',
-            first_name: agent.first_name || '',
-            last_name: agent.last_name || '',
-            email: agent.email || '',
-            phone: agent.phone || '',
-            avatar_url: agent.avatar_url || ''
-          };
+        // Check if we have valid agent data
+        if (property.agent_id) {
+          // Fetch agent information from appropriate tables
+          const { data: agentAccount, error: agentError } = await supabase
+            .from('accounts')
+            .select('email')
+            .eq('id', property.agent_id)
+            .single();
+            
+          if (!agentError && agentAccount) {
+            const { data: agentProfile } = await supabase
+              .from('employer_profiles')
+              .select('first_name, last_name, phone, avatar_url')
+              .eq('id', property.agent_id)
+              .single();
+              
+            if (agentProfile) {
+              agentData = {
+                id: property.agent_id,
+                first_name: agentProfile.first_name || '',
+                last_name: agentProfile.last_name || '',
+                email: agentAccount.email || '',
+                phone: agentProfile.phone || '',
+                avatar_url: agentProfile.avatar_url || ''
+              };
+            }
+          }
         }
         
-        // Cast transformedProperty to any to avoid TypeScript errors
+        // Replace the agent property with our formatted data
         (transformedProperty as any).agent = agentData;
 
         return transformSupabaseData(transformedProperty as any);
-      });
+      }));
       
       setProperties(processedProperties);
       

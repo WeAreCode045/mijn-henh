@@ -12,43 +12,35 @@ export type Database = {
       accounts: {
         Row: {
           created_at: string
-          email: string | null
+          display_name: string | null
           id: string
-          property_id: string | null
           role: Database["public"]["Enums"]["user_type"]
           status: string
+          type: Database["public"]["Enums"]["account_type"] | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          email?: string | null
+          display_name?: string | null
           id?: string
-          property_id?: string | null
           role: Database["public"]["Enums"]["user_type"]
           status?: string
+          type?: Database["public"]["Enums"]["account_type"] | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          email?: string | null
+          display_name?: string | null
           id?: string
-          property_id?: string | null
           role?: Database["public"]["Enums"]["user_type"]
           status?: string
+          type?: Database["public"]["Enums"]["account_type"] | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "accounts_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       agency_settings: {
         Row: {
@@ -291,56 +283,57 @@ export type Database = {
       }
       employer_profiles: {
         Row: {
-          address: string | null
+          agency_id: string | null
           avatar_url: string | null
-          city: string | null
-          country: string | null
           created_at: string
           email: string | null
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
-          postal_code: string | null
+          role: string | null
           updated_at: string
           whatsapp_number: string | null
         }
         Insert: {
-          address?: string | null
+          agency_id?: string | null
           avatar_url?: string | null
-          city?: string | null
-          country?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
           phone?: string | null
-          postal_code?: string | null
+          role?: string | null
           updated_at?: string
           whatsapp_number?: string | null
         }
         Update: {
-          address?: string | null
+          agency_id?: string | null
           avatar_url?: string | null
-          city?: string | null
-          country?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
-          postal_code?: string | null
+          role?: string | null
           updated_at?: string
           whatsapp_number?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employer_profiles_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agency_settings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       participants_profile: {
         Row: {
           address: string | null
-          bank_account_number: string | null
           city: string | null
           country: string | null
           created_at: string | null
@@ -348,20 +341,20 @@ export type Database = {
           email: string | null
           first_name: string | null
           gender: string | null
+          iban: string | null
           id: string
-          id_number: string | null
+          identification: Json | null
           last_name: string | null
           nationality: string | null
           phone: string | null
           place_of_birth: string | null
           postal_code: string | null
-          social_number: string | null
+          role: string | null
           updated_at: string | null
           whatsapp_number: string | null
         }
         Insert: {
           address?: string | null
-          bank_account_number?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
@@ -369,20 +362,20 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           gender?: string | null
+          iban?: string | null
           id: string
-          id_number?: string | null
+          identification?: Json | null
           last_name?: string | null
           nationality?: string | null
           phone?: string | null
           place_of_birth?: string | null
           postal_code?: string | null
-          social_number?: string | null
+          role?: string | null
           updated_at?: string | null
           whatsapp_number?: string | null
         }
         Update: {
           address?: string | null
-          bank_account_number?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
@@ -390,14 +383,15 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           gender?: string | null
+          iban?: string | null
           id?: string
-          id_number?: string | null
+          identification?: Json | null
           last_name?: string | null
           nationality?: string | null
           phone?: string | null
           place_of_birth?: string | null
           postal_code?: string | null
-          social_number?: string | null
+          role?: string | null
           updated_at?: string | null
           whatsapp_number?: string | null
         }
@@ -413,6 +407,7 @@ export type Database = {
           bathrooms: string | null
           bedrooms: string | null
           buildYear: string | null
+          buyer_id: string | null
           created_at: string
           description: string | null
           energyLabel: string | null
@@ -435,6 +430,7 @@ export type Database = {
           participants: Json | null
           price: string | null
           propertyType: string | null
+          seller_id: string | null
           shortDescription: string | null
           sqft: string | null
           status: string | null
@@ -452,6 +448,7 @@ export type Database = {
           bathrooms?: string | null
           bedrooms?: string | null
           buildYear?: string | null
+          buyer_id?: string | null
           created_at?: string
           description?: string | null
           energyLabel?: string | null
@@ -474,6 +471,7 @@ export type Database = {
           participants?: Json | null
           price?: string | null
           propertyType?: string | null
+          seller_id?: string | null
           shortDescription?: string | null
           sqft?: string | null
           status?: string | null
@@ -491,6 +489,7 @@ export type Database = {
           bathrooms?: string | null
           bedrooms?: string | null
           buildYear?: string | null
+          buyer_id?: string | null
           created_at?: string
           description?: string | null
           energyLabel?: string | null
@@ -513,6 +512,7 @@ export type Database = {
           participants?: Json | null
           price?: string | null
           propertyType?: string | null
+          seller_id?: string | null
           shortDescription?: string | null
           sqft?: string | null
           status?: string | null
@@ -521,7 +521,22 @@ export type Database = {
           virtualTourUrl?: string | null
           youtubeUrl?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "properties_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_agenda_items: {
         Row: {
@@ -1057,6 +1072,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_type: "employee" | "participant"
       user_role: "admin" | "agent" | "seller" | "buyer"
       user_type: "admin" | "agent" | "buyer" | "seller"
     }
@@ -1174,6 +1190,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type: ["employee", "participant"],
       user_role: ["admin", "agent", "seller", "buyer"],
       user_type: ["admin", "agent", "buyer", "seller"],
     },

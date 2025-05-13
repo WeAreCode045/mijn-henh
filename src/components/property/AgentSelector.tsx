@@ -29,33 +29,45 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
-        // First get all users with agent or admin role
+        // Get all accounts with type employee
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('user_id, role, email')
-          .or('role.eq.agent,role.eq.admin');
+          .select('id, display_name, email, type')
+          .eq('type', 'employee');
         
         if (accountsError) {
           throw accountsError;
         }
         
         if (accountsData && accountsData.length > 0) {
-          const agentIds = accountsData.map(account => account.user_id);
-          
-          // Then fetch their profiles from employer_profiles
-          const { data, error } = await supabase
+          // Get employer profiles to get roles
+          const { data: profiles, error: profilesError } = await supabase
             .from('employer_profiles')
-            .select('id, first_name, last_name')
-            .in('id', agentIds);
-          
-          if (error) throw error;
-          
-          if (data) {
-            setAgents(data.map(agent => ({
-              id: agent.id || "",
-              display_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
-            })));
+            .select('id, role')
+            .in('id', accountsData.map(account => account.id));
+            
+          if (profilesError) {
+            throw profilesError;
           }
+          
+          // Create a map of id to role
+          const roleMap = new Map();
+          if (profiles) {
+            profiles.forEach(profile => {
+              roleMap.set(profile.id, profile.role);
+            });
+          }
+          
+          // Filter accounts to only include admin and agent roles
+          const agentAccounts = accountsData.filter(account => {
+            const role = roleMap.get(account.id);
+            return role === 'admin' || role === 'agent';
+          });
+          
+          setAgents(agentAccounts.map(account => ({
+            id: account.id,
+            display_name: account.display_name || account.email || 'Unnamed Agent'
+          })));
         } else {
           setAgents([]);
         }

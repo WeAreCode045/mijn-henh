@@ -15,42 +15,44 @@ export interface EmployerProfileData {
   city?: string | null;
   postal_code?: string | null;
   country?: string | null;
+  role?: string | null;
+  agency_id?: string | null;
   created_at?: string;
   updated_at?: string;
 }
 
-export function useEmployerProfile(userId?: string) {
+export function useEmployerProfile(accountId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['employer-profile', userId],
+    queryKey: ['employer-profile', accountId],
     queryFn: async () => {
-      if (!userId) return null;
+      if (!accountId) return null;
 
-      // Check if user has admin or agent role in accounts table
-      const { data: roleData, error: roleError } = await supabase
+      // Check if account has employee type in accounts table
+      const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('role')
-        .eq('user_id', userId)
-        .in('role', ['admin', 'agent'])
+        .select('type')
+        .eq('id', accountId)
+        .eq('type', 'employee')
         .single();
 
-      if (roleError && roleError.code !== 'PGRST116') {
-        console.error('Error checking user role:', roleError);
-        throw roleError;
+      if (accountError && accountError.code !== 'PGRST116') {
+        console.error('Error checking account type:', accountError);
+        throw accountError;
       }
 
-      // Only proceed if user is an admin or agent
-      if (!roleData) {
-        console.log("User is not an admin or agent");
+      // Only proceed if account is an employee type
+      if (!accountData) {
+        console.log("Account is not an employee type");
         return null;
       }
 
       const { data, error } = await supabase
         .from('employer_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', accountId)
         .single();
 
       if (error) {
@@ -65,18 +67,18 @@ export function useEmployerProfile(userId?: string) {
 
       return data as EmployerProfileData;
     },
-    enabled: !!userId,
+    enabled: !!accountId,
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<EmployerProfileData>) => {
-      if (!userId) throw new Error('User ID is required');
+      if (!accountId) throw new Error('Account ID is required');
 
       // Check if profile exists first
       const { data: existingProfile } = await supabase
         .from('employer_profiles')
         .select('id')
-        .eq('id', userId)
+        .eq('id', accountId)
         .single();
 
       let result;
@@ -86,22 +88,40 @@ export function useEmployerProfile(userId?: string) {
         const { data, error } = await supabase
           .from('employer_profiles')
           .update(profileData)
-          .eq('id', userId)
+          .eq('id', accountId)
           .select('*')
           .single();
 
         if (error) throw error;
         result = data;
+        
+        // Also update display_name in accounts
+        if (profileData.first_name || profileData.last_name) {
+          const displayName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
+          await supabase
+            .from('accounts')
+            .update({ display_name: displayName })
+            .eq('id', accountId);
+        }
       } else {
         // Insert new profile
         const { data, error } = await supabase
           .from('employer_profiles')
-          .insert({ id: userId, ...profileData })
+          .insert({ id: accountId, ...profileData })
           .select('*')
           .single();
 
         if (error) throw error;
         result = data;
+        
+        // Set display_name in accounts
+        if (profileData.first_name || profileData.last_name) {
+          const displayName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
+          await supabase
+            .from('accounts')
+            .update({ display_name: displayName })
+            .eq('id', accountId);
+        }
       }
 
       return result;
@@ -111,7 +131,7 @@ export function useEmployerProfile(userId?: string) {
         title: 'Profile Updated',
         description: 'Your profile has been updated successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ['employer-profile', userId] });
+      queryClient.invalidateQueries({ queryKey: ['employer-profile', accountId] });
     },
     onError: (error) => {
       toast({

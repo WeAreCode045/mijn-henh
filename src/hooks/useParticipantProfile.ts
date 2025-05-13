@@ -4,38 +4,38 @@ import { supabase } from '@/integrations/supabase/client';
 import { ParticipantProfileData } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
 
-export function useParticipantProfile(userId?: string) {
+export function useParticipantProfile(accountId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['participant-profile', userId],
+    queryKey: ['participant-profile', accountId],
     queryFn: async () => {
-      if (!userId) return null;
+      if (!accountId) return null;
 
-      // Check if user has buyer or seller role in accounts table
-      const { data: roleData, error: roleError } = await supabase
+      // Check if account has participant type in accounts table
+      const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('role')
-        .eq('user_id', userId)
-        .in('role', ['buyer', 'seller'])
+        .select('type')
+        .eq('id', accountId)
+        .eq('type', 'participant')
         .single();
 
-      if (roleError && roleError.code !== 'PGRST116') {
-        console.error('Error checking user role:', roleError);
-        throw roleError;
+      if (accountError && accountError.code !== 'PGRST116') {
+        console.error('Error checking account type:', accountError);
+        throw accountError;
       }
 
-      // Only proceed if user is a buyer or seller
-      if (!roleData) {
-        console.log("User is not a buyer or seller");
+      // Only proceed if account is a participant type
+      if (!accountData) {
+        console.log("Account is not a participant type");
         return null;
       }
 
       const { data, error } = await supabase
         .from('participants_profile')
         .select('*')
-        .eq('id', userId)
+        .eq('id', accountId)
         .single();
 
       if (error) {
@@ -51,18 +51,18 @@ export function useParticipantProfile(userId?: string) {
 
       return data as ParticipantProfileData;
     },
-    enabled: !!userId,
+    enabled: !!accountId,
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<ParticipantProfileData>) => {
-      if (!userId) throw new Error('User ID is required');
+      if (!accountId) throw new Error('Account ID is required');
 
       // Check if profile exists first
       const { data: existingProfile } = await supabase
         .from('participants_profile')
         .select('id')
-        .eq('id', userId)
+        .eq('id', accountId)
         .single();
 
       let result;
@@ -72,22 +72,40 @@ export function useParticipantProfile(userId?: string) {
         const { data, error } = await supabase
           .from('participants_profile')
           .update(profileData)
-          .eq('id', userId)
+          .eq('id', accountId)
           .select('*')
           .single();
 
         if (error) throw error;
         result = data;
+        
+        // Also update display_name in accounts
+        if (profileData.first_name || profileData.last_name) {
+          const displayName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
+          await supabase
+            .from('accounts')
+            .update({ display_name: displayName })
+            .eq('id', accountId);
+        }
       } else {
         // Insert new profile
         const { data, error } = await supabase
           .from('participants_profile')
-          .insert({ id: userId, ...profileData })
+          .insert({ id: accountId, ...profileData })
           .select('*')
           .single();
 
         if (error) throw error;
         result = data;
+        
+        // Set display_name in accounts
+        if (profileData.first_name || profileData.last_name) {
+          const displayName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
+          await supabase
+            .from('accounts')
+            .update({ display_name: displayName })
+            .eq('id', accountId);
+        }
       }
 
       return result;
@@ -97,7 +115,7 @@ export function useParticipantProfile(userId?: string) {
         title: 'Profile Updated',
         description: 'Your profile has been updated successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ['participant-profile', userId] });
+      queryClient.invalidateQueries({ queryKey: ['participant-profile', accountId] });
     },
     onError: (error) => {
       toast({

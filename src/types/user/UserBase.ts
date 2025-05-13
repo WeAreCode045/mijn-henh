@@ -3,6 +3,7 @@ export interface UserBase {
   id: string;
   email: string;
   full_name: string;
+  display_name?: string;
   first_name?: string;
   last_name?: string;
   avatar_url?: string;
@@ -10,7 +11,7 @@ export interface UserBase {
   whatsapp_number?: string | undefined;
   created_at?: string | undefined;
   updated_at?: string | undefined;
-  role?: "admin" | "agent" | "seller" | "buyer";
+  type?: "employee" | "participant";
   address?: string | undefined;
   city?: string | undefined;
   postal_code?: string | undefined;

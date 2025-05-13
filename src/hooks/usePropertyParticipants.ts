@@ -23,61 +23,84 @@ export function usePropertyParticipants(propertyId?: string) {
 
       console.log(`Fetching participants for property: ${propertyId}`);
 
-      // Get participants from the accounts table where property_id matches and role is buyer or seller
-      const { data, error } = await supabase
+      // Check if property has participants as seller or buyer
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('seller_id, buyer_id')
+        .eq('id', propertyId)
+        .single();
+        
+      if (propertyError) {
+        console.error('Error fetching property:', propertyError);
+        throw propertyError;
+      }
+      
+      const participantIds: string[] = [];
+      if (property.seller_id) participantIds.push(property.seller_id);
+      if (property.buyer_id) participantIds.push(property.buyer_id);
+      
+      if (participantIds.length === 0) {
+        return [];
+      }
+
+      // Get the accounts info
+      const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
         .select(`
           id,
           user_id,
-          property_id,
+          email,
+          display_name,
+          type,
           role,
           status,
-          email,
           created_at,
           updated_at
         `)
-        .in('role', ['buyer', 'seller'])
-        .eq('property_id', propertyId)
-        .order('created_at', { ascending: false });
+        .in('id', participantIds)
+        .eq('type', 'participant');
 
-      if (error) {
-        console.error('Error fetching participants:', error);
-        throw error;
+      if (accountsError) {
+        console.error('Error fetching participant accounts:', accountsError);
+        throw accountsError;
       }
 
-      console.log("Fetched participants data:", data);
+      console.log("Fetched participant accounts:", accounts);
+
+      if (!accounts || accounts.length === 0) {
+        return [];
+      }
 
       // For each participant, fetch their profile data
       const participantsWithProfiles: PropertyParticipant[] = [];
 
-      for (const participant of data) {
+      for (const account of accounts) {
         // Get participant profile
         const { data: profileData } = await supabase
           .from('participants_profile')
           .select('*')
-          .eq('id', participant.user_id)
+          .eq('id', account.id)
           .single();
 
-        // Create a full name from profile data
-        const fullName = profileData?.first_name && profileData?.last_name ? 
-          `${profileData.first_name} ${profileData.last_name}` : 
-          (profileData?.first_name || profileData?.last_name || participant.email?.split('@')[0] || 'Unknown');
+        // Create a participant object
+        const isSellerParticipant = property.seller_id === account.id;
+        const role = isSellerParticipant ? 'seller' : 'buyer';
           
         participantsWithProfiles.push({
-          id: participant.id,
-          property_id: participant.property_id,
-          user_id: participant.user_id,
-          role: participant.role as ParticipantRole,
-          status: participant.status as ParticipantStatus,
-          created_at: participant.created_at,
-          updated_at: participant.updated_at,
-          email: participant.email,
+          id: account.id,
+          property_id: propertyId,
+          user_id: account.user_id,
+          role: role as ParticipantRole,
+          status: account.status as ParticipantStatus,
+          created_at: account.created_at,
+          updated_at: account.updated_at,
+          email: account.email,
           documents_signed: [], // Default empty array
           webview_approved: false, // Default to false
           user: {
-            id: participant.user_id,
-            full_name: fullName,
-            email: participant.email || ''
+            id: account.user_id,
+            full_name: account.display_name || `Unknown ${role}`,
+            email: account.email || ''
           },
           participant_profile: profileData || null
         });
@@ -93,10 +116,13 @@ export function usePropertyParticipants(propertyId?: string) {
       console.log("Starting participant invitation process for:", participant);
       
       try {
-        // Step 1: Check if the user already exists in the system
+        // Step 1: Create auth user if doesn't exist
+        let userId: string;
+        
+        // Check if the user already exists by email
         const { data: existingUser, error: userCheckError } = await supabase
           .from('accounts')
-          .select('user_id')
+          .select('id, user_id')
           .eq('email', participant.email)
           .limit(1);
         
@@ -105,97 +131,110 @@ export function usePropertyParticipants(propertyId?: string) {
           throw new Error(`Failed to check existing user: ${userCheckError.message}`);
         }
         
-        // User must exist to be added as a participant
-        if (!existingUser || existingUser.length === 0) {
-          throw new Error('User does not exist. Please create the user first in the admin panel.');
-        }
+        let accountId: string;
         
-        const userId = existingUser[0].user_id;
-        console.log(`Using existing user ID: ${userId} for email: ${participant.email}`);
-        
-        // Step 2: Check if the participant already exists for this property
-        const { data: existingParticipant, error: checkError } = await supabase
-          .from('accounts')
-          .select('id')
-          .eq('email', participant.email)
-          .eq('property_id', participant.propertyId)
-          .limit(1);
-        
-        if (checkError) {
-          console.error('Error checking existing participant:', checkError);
-          throw new Error(`Failed to check existing participant: ${checkError.message}`);
-        }
-        
-        // If participant already exists for this property, return error
-        if (existingParticipant && existingParticipant.length > 0) {
-          throw new Error('This email is already a participant for this property');
-        }
-        
-        // Step 3: Add the participant to the property
-        console.log(`Adding participant with role ${participant.role} to property ${participant.propertyId}`);
-        
-        const { data: newParticipant, error: insertError } = await supabase
-          .from('accounts')
-          .insert({
-            property_id: participant.propertyId,
-            user_id: userId,
-            role: participant.role,
-            status: 'pending',
-            email: participant.email
-          })
-          .select();
-        
-        if (insertError) {
-          console.error('Error adding participant to property:', insertError);
-          throw new Error(`Failed to add participant: ${insertError.message}`);
-        }
-        
-        if (!newParticipant || newParticipant.length === 0) {
-          throw new Error('No data returned after adding participant');
-        }
-        
-        console.log('Participant successfully added:', newParticipant[0]);
-        
-        // Step 4: Update participant profile with first and last name if needed
-        try {
-          // Check if profile exists
-          const { data: existingProfile } = await supabase
-            .from('participants_profile')
-            .select('id, first_name, last_name')
-            .eq('id', userId)
-            .single();
+        // If user exists, use their id
+        if (existingUser && existingUser.length > 0) {
+          accountId = existingUser[0].id;
+          userId = existingUser[0].user_id;
+          console.log(`Using existing account ID: ${accountId} for email: ${participant.email}`);
+        } else {
+          // Create a new user in auth
+          const password = Math.random().toString(36).slice(-8); // Generate random password
           
-          // If profile exists but first/last name are different, update them
-          if (existingProfile && 
-              (existingProfile.first_name !== participant.firstName || 
-               existingProfile.last_name !== participant.lastName)) {
+          // Create user using auth.admin API
+          const { data: authData, error: authError } = await supabase.functions.invoke('create-user', {
+            body: {
+              email: participant.email,
+              password,
+              firstName: participant.firstName,
+              lastName: participant.lastName
+            }
+          });
+          
+          if (authError || !authData) {
+            console.error('Error creating auth user:', authError || 'No data returned');
+            throw new Error(`Failed to create user: ${authError?.message || 'Unknown error'}`);
+          }
+          
+          userId = authData.userId;
+          
+          // Create account
+          const { data: newAccount, error: accountError } = await supabase
+            .from('accounts')
+            .insert({
+              user_id: userId,
+              email: participant.email,
+              type: 'participant',
+              role: participant.role,
+              status: 'pending',
+              display_name: `${participant.firstName} ${participant.lastName}`.trim()
+            })
+            .select('id')
+            .single();
             
-            console.log('Updating participant profile with new name:', {
+          if (accountError) {
+            console.error('Error creating account:', accountError);
+            throw new Error(`Failed to create account: ${accountError.message}`);
+          }
+          
+          accountId = newAccount.id;
+          
+          // Create participant profile
+          const { error: profileError } = await supabase
+            .from('participants_profile')
+            .insert({
+              id: accountId,
+              email: participant.email,
               first_name: participant.firstName,
-              last_name: participant.lastName
+              last_name: participant.lastName,
+              role: participant.role
             });
             
-            const { error: updateError } = await supabase
-              .from('participants_profile')
-              .update({
-                first_name: participant.firstName,
-                last_name: participant.lastName
-              })
-              .eq('id', userId);
-            
-            if (updateError) {
-              console.error('Error updating participant profile:', updateError);
-              // Continue anyway - this is not critical
-            }
+          if (profileError) {
+            console.error('Error creating participant profile:', profileError);
+            throw new Error(`Failed to create profile: ${profileError.message}`);
           }
-        } catch (profileError) {
-          console.error('Error handling participant profile:', profileError);
-          // Continue anyway - this is not critical
+        }
+        
+        // Step 2: Check if the participant is already linked to this property
+        const { data: property } = await supabase
+          .from('properties')
+          .select('seller_id, buyer_id')
+          .eq('id', participant.propertyId)
+          .single();
+          
+        if (participant.role === 'seller' && property.seller_id === accountId) {
+          throw new Error('This seller is already linked to this property');
+        }
+        
+        if (participant.role === 'buyer' && property.buyer_id === accountId) {
+          throw new Error('This buyer is already linked to this property');
+        }
+        
+        // Step 3: Update the property with the participant
+        const updateData: any = {};
+        if (participant.role === 'seller') {
+          updateData.seller_id = accountId;
+        } else {
+          updateData.buyer_id = accountId;
+        }
+        
+        const { error: updateError } = await supabase
+          .from('properties')
+          .update(updateData)
+          .eq('id', participant.propertyId);
+          
+        if (updateError) {
+          console.error('Error updating property with participant:', updateError);
+          throw new Error(`Failed to link participant to property: ${updateError.message}`);
         }
         
         // Return the participant data
         return {
-          ...newParticipant[0],
+          id: accountId,
+          role: participant.role,
+          email: participant.email,
           firstName: participant.firstName,
           lastName: participant.lastName
         };
@@ -227,7 +266,7 @@ export function usePropertyParticipants(propertyId?: string) {
         // Import email utility
         const { sendEmail } = await import('@/lib/email');
         
-        // Send invitation email (without login details since user already exists)
+        // Send invitation email
         await sendEmail({
           to: result.email,
           subject: `You've been invited as a ${result.role} for ${property?.title || 'a property'}`,
@@ -235,7 +274,7 @@ export function usePropertyParticipants(propertyId?: string) {
             <h1>Property Invitation</h1>
             <p>Hello ${result.firstName || ''} ${result.lastName || ''},</p>
             <p>You have been invited to participate as a <strong>${result.role}</strong> for ${property?.title || 'a property'}.</p>
-            <p>You can access this property using your existing account credentials.</p>
+            <p>You can access this property using your account credentials.</p>
             <p><a href="${inviteLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
             <p style="margin-top: 20px; color: #666;">
               If the button above doesn't work, copy and paste this link into your browser:
@@ -269,19 +308,26 @@ export function usePropertyParticipants(propertyId?: string) {
   });
 
   const removeParticipantMutation = useMutation({
-    mutationFn: async (participantId: string) => {
-      // Delete from accounts
+    mutationFn: async (participantData: { participantId: string; role: ParticipantRole }) => {
+      // Update property to remove reference to this participant
+      const updateData: any = {};
+      if (participantData.role === 'seller') {
+        updateData.seller_id = null;
+      } else {
+        updateData.buyer_id = null;
+      }
+      
       const { error } = await supabase
-        .from('accounts')
-        .delete()
-        .eq('id', participantId);
+        .from('properties')
+        .update(updateData)
+        .eq('id', propertyId);
 
       if (error) {
         console.error('Error removing participant:', error);
         throw error;
       }
 
-      return participantId;
+      return participantData.participantId;
     },
     onSuccess: () => {
       toast({
@@ -301,7 +347,7 @@ export function usePropertyParticipants(propertyId?: string) {
 
   const updateParticipantStatusMutation = useMutation({
     mutationFn: async ({ participantId, status }: { participantId: string; status: string }) => {
-      // Update accounts status
+      // Update account status
       const { data, error } = await supabase
         .from('accounts')
         .update({ status })
@@ -364,43 +410,98 @@ export function usePropertyParticipants(propertyId?: string) {
     },
   });
 
+  // Check if current user is a participant in this property
   const { data: userParticipation } = useQuery({
     queryKey: ['user-participation', propertyId, user?.id],
     queryFn: async () => {
       if (!propertyId || !user?.id) return null;
 
-      // Get from accounts table
-      const { data, error } = await supabase
+      // First get the account ID for this user
+      const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('*')
-        .eq('property_id', propertyId)
+        .select('id')
         .eq('user_id', user.id)
-        .in('role', ['buyer', 'seller'])
+        .eq('type', 'participant')
         .single();
+        
+      if (accountError) {
+        console.error('Error fetching user account:', accountError);
+        return null;
+      }
+      
+      if (!accountData) return null;
+      
+      // Now check if this account is linked to the property
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('seller_id, buyer_id')
+        .eq('id', propertyId)
+        .single();
+        
+      if (propertyError) {
+        console.error('Error fetching property:', propertyError);
+        return null;
+      }
+      
+      // Check if the account is either seller or buyer
+      if (property.seller_id === accountData.id) {
+        const { data: account } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('id', accountData.id)
+          .single();
+          
+        if (!account) return null;
+        
+        // Add the required fields for PropertyParticipant
+        const fullParticipant: PropertyParticipant = {
+          id: account.id,
+          user_id: account.user_id,
+          property_id: propertyId,
+          role: 'seller',
+          status: account.status as ParticipantStatus,
+          documents_signed: [],
+          webview_approved: false,
+          user: {
+            id: account.user_id,
+            full_name: account.display_name || 'User',
+            email: account.email || ''
+          },
+          participant_profile: null
+        };
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user participation:', error);
-        throw error;
+        return fullParticipant;
+      } 
+      else if (property.buyer_id === accountData.id) {
+        const { data: account } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('id', accountData.id)
+          .single();
+          
+        if (!account) return null;
+        
+        // Add the required fields for PropertyParticipant
+        const fullParticipant: PropertyParticipant = {
+          id: account.id,
+          user_id: account.user_id,
+          property_id: propertyId,
+          role: 'buyer',
+          status: account.status as ParticipantStatus,
+          documents_signed: [],
+          webview_approved: false,
+          user: {
+            id: account.user_id,
+            full_name: account.display_name || 'User',
+            email: account.email || ''
+          },
+          participant_profile: null
+        };
+
+        return fullParticipant;
       }
 
-      if (!data) return null;
-      
-      // Add the required fields for PropertyParticipant
-      const fullParticipant: PropertyParticipant = {
-        ...data,
-        role: data.role as ParticipantRole,
-        status: data.status as ParticipantStatus,
-        documents_signed: [],
-        webview_approved: false,
-        user: {
-          id: data.user_id,
-          full_name: user.email?.split('@')[0] || 'User',
-          email: data.email || user.email || ''
-        },
-        participant_profile: null
-      };
-
-      return fullParticipant;
+      return null;
     },
     enabled: !!propertyId && !!user?.id,
   });

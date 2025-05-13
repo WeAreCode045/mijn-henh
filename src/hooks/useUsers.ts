@@ -23,28 +23,25 @@ export function useUsers() {
       }
       
       try {
-        // Get all accounts with admin or agent roles
+        // Get all accounts with employee type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('user_id, role, email')
-          .in('role', ['admin', 'agent']);
+          .select('id, user_id, type, display_name, email, role')
+          .eq('type', 'employee');
 
         if (accountsError) {
           console.error("Error fetching accounts:", accountsError);
           throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
         }
 
-        console.log("Admin/agent accounts data from supabase:", accountsData);
+        console.log("Employee accounts data from supabase:", accountsData);
         
         if (!accountsData || accountsData.length === 0) {
-          console.log("No admin/agent accounts found");
+          console.log("No employee accounts found");
           return [];
         }
         
-        // Extract user IDs from accounts to fetch their profiles
-        const userIds = accountsData.map(account => account.user_id);
-        
-        // Fetch employer profiles for these user IDs
+        // Fetch employer profiles for these account IDs
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -59,10 +56,11 @@ export function useUsers() {
             city,
             postal_code,
             country,
+            role,
             created_at,
             updated_at
           `)
-          .in('id', userIds);
+          .in('id', accountsData.map(account => account.id));
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -71,7 +69,7 @@ export function useUsers() {
         
         console.log("Employer profiles from supabase:", profiles);
 
-        // Create a map of user_id to profile
+        // Create a map of id to profile
         const profileMap = new Map();
         if (profiles) {
           profiles.forEach(profile => {
@@ -79,19 +77,21 @@ export function useUsers() {
           });
         }
         
-        // Map accounts to user profiles with role information
+        // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
-          const profile = profileMap.get(account.user_id) || {};
+          const profile = profileMap.get(account.id) || {};
           
           return {
-            id: account.user_id,
+            id: account.id,
             email: profile.email || account.email || '',
             first_name: profile.first_name || '',
             last_name: profile.last_name || '',
-            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
+            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || account.display_name || 'Unnamed User',
+            display_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
             phone: profile.phone || '',
             whatsapp_number: profile.whatsapp_number || '',
-            role: account.role || 'agent',
+            type: account.type || 'employee',
+            role: profile.role || account.role || 'agent',
             avatar_url: profile.avatar_url || '',
             address: profile.address || '',
             city: profile.city || '',
@@ -123,28 +123,17 @@ export function useUsers() {
     }
     
     try {
-      // First delete from accounts table
+      // Delete from accounts (this should cascade to employer_profiles)
       const { error: accountError } = await supabase
         .from('accounts')
         .delete()
-        .eq('user_id', userId);
+        .eq('id', userId);
       
       if (accountError) {
         console.error("Error deleting from accounts:", accountError);
         throw accountError;
       }
       
-      // Then delete from employer_profiles
-      const { error: profileError } = await supabase
-        .from('employer_profiles')
-        .delete()
-        .eq('id', userId);
-      
-      if (profileError) {
-        console.error("Error deleting from employer_profiles:", profileError);
-        throw profileError;
-      }
-
       toast({
         title: "Success",
         description: "User deleted successfully",
