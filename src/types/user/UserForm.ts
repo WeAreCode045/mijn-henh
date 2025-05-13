@@ -11,4 +11,5 @@ export interface UserFormData {
   avatar_url?: string;
   agency_id?: string;
   type: "employee";
+  full_name?: string;
 }

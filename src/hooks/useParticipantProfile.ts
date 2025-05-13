@@ -49,7 +49,8 @@ export function useParticipantProfile(accountId?: string) {
         throw error;
       }
 
-      return data as ParticipantProfileData;
+      // Cast the response to our type
+      return data as unknown as ParticipantProfileData;
     },
     enabled: !!accountId,
   });

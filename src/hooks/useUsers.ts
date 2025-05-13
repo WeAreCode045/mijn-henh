@@ -26,7 +26,7 @@ export function useUsers() {
         // Get all accounts with employee type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('id, user_id, type, display_name, email, role')
+          .select('*')
           .eq('type', 'employee');
 
         if (accountsError) {

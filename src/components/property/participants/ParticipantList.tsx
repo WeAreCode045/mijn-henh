@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PropertyParticipant } from "@/types/participant";
 import { Button } from "@/components/ui/button";
@@ -65,6 +64,15 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
         return <Badge variant="outline" className="bg-red-100">Declined</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const handleRemoveParticipant = (participant: PropertyParticipant) => {
+    if (window.confirm(`Are you sure you want to remove this ${participant.role}?`)) {
+      removeParticipant({ 
+        participantId: participant.id, 
+        role: participant.role 
+      });
     }
   };
 
@@ -143,7 +151,7 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
                       <Button 
                         variant="destructive" 
                         size="sm"
-                        onClick={() => removeParticipant(participant.id)}
+                        onClick={() => handleRemoveParticipant(participant)}
                       >
                         Remove
                       </Button>

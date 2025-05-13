@@ -12,14 +12,7 @@ export function useParticipants() {
         // First get all accounts with participant type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select(`
-            id,
-            user_id,
-            type,
-            display_name,
-            email,
-            role
-          `)
+          .select('*')
           .eq('type', 'participant');
 
         if (accountsError) {
@@ -37,27 +30,7 @@ export function useParticipants() {
         // Get the participant profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("participants_profile")
-          .select(`
-            id,
-            email,
-            first_name,
-            last_name,
-            phone,
-            whatsapp_number,
-            address,
-            city,
-            postal_code,
-            country,
-            date_of_birth,
-            place_of_birth,
-            identification,
-            nationality,
-            gender,
-            iban,
-            role,
-            created_at,
-            updated_at
-          `)
+          .select(`*`)
           .in('id', accountsData.map(account => account.id));
 
         if (profilesError && profilesError.code !== 'PGRST116') {
@@ -126,12 +99,9 @@ export function useParticipants() {
           if (!participantsMap.has(account.id)) {
             const profile = profileMap.get(account.id) || {};
             
-            // Use account email if profile doesn't have one
-            const email = profile.email || account.email || '';
-            
             participantsMap.set(account.id, {
               id: account.id,
-              email: email,
+              email: account.email || '',
               first_name: profile.first_name || '',
               last_name: profile.last_name || '',
               phone: profile.phone || '',

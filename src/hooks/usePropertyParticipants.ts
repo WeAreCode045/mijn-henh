@@ -46,17 +46,7 @@ export function usePropertyParticipants(propertyId?: string) {
       // Get the accounts info
       const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
-        .select(`
-          id,
-          user_id,
-          email,
-          display_name,
-          type,
-          role,
-          status,
-          created_at,
-          updated_at
-        `)
+        .select('*')
         .in('id', participantIds)
         .eq('type', 'participant');
 
@@ -84,13 +74,13 @@ export function usePropertyParticipants(propertyId?: string) {
 
         // Create a participant object
         const isSellerParticipant = property.seller_id === account.id;
-        const role = isSellerParticipant ? 'seller' : 'buyer';
+        const role = isSellerParticipant ? 'seller' as ParticipantRole : 'buyer' as ParticipantRole;
           
         participantsWithProfiles.push({
           id: account.id,
           property_id: propertyId,
           user_id: account.user_id,
-          role: role as ParticipantRole,
+          role: role,
           status: account.status as ParticipantStatus,
           created_at: account.created_at,
           updated_at: account.updated_at,
@@ -102,7 +92,7 @@ export function usePropertyParticipants(propertyId?: string) {
             full_name: account.display_name || `Unknown ${role}`,
             email: account.email || ''
           },
-          participant_profile: profileData || null
+          participant_profile: profileData as ParticipantProfileData || null
         });
       }
 
@@ -454,12 +444,14 @@ export function usePropertyParticipants(propertyId?: string) {
         if (!account) return null;
         
         // Add the required fields for PropertyParticipant
-        const fullParticipant: PropertyParticipant = {
+        const fullParticipant = {
           id: account.id,
           user_id: account.user_id,
           property_id: propertyId,
-          role: 'seller',
+          role: 'seller' as ParticipantRole,
           status: account.status as ParticipantStatus,
+          created_at: account.created_at,
+          updated_at: account.updated_at,
           documents_signed: [],
           webview_approved: false,
           user: {
@@ -468,7 +460,7 @@ export function usePropertyParticipants(propertyId?: string) {
             email: account.email || ''
           },
           participant_profile: null
-        };
+        } as PropertyParticipant;
 
         return fullParticipant;
       } 
@@ -482,12 +474,14 @@ export function usePropertyParticipants(propertyId?: string) {
         if (!account) return null;
         
         // Add the required fields for PropertyParticipant
-        const fullParticipant: PropertyParticipant = {
+        const fullParticipant = {
           id: account.id,
           user_id: account.user_id,
           property_id: propertyId,
-          role: 'buyer',
+          role: 'buyer' as ParticipantRole,
           status: account.status as ParticipantStatus,
+          created_at: account.created_at,
+          updated_at: account.updated_at,
           documents_signed: [],
           webview_approved: false,
           user: {
@@ -496,7 +490,7 @@ export function usePropertyParticipants(propertyId?: string) {
             email: account.email || ''
           },
           participant_profile: null
-        };
+        } as PropertyParticipant;
 
         return fullParticipant;
       }

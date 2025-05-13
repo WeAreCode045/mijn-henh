@@ -12,6 +12,7 @@ export interface UserBase {
   created_at?: string | undefined;
   updated_at?: string | undefined;
   type?: "employee" | "participant";
+  role?: "admin" | "agent" | "buyer" | "seller";
   address?: string | undefined;
   city?: string | undefined;
   postal_code?: string | undefined;

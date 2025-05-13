@@ -1,3 +1,4 @@
+
 import { User } from "./user";
 
 export type ParticipantRole = 'seller' | 'buyer';
@@ -11,12 +12,15 @@ export interface ParticipantProfileData {
   phone?: string | null;
   whatsapp_number?: string | null;
   date_of_birth?: string | null;
-  id_number?: string | null;
-  social_number?: string | null;
   place_of_birth?: string | null;
+  identification?: {
+    type?: "passport" | "IDcard" | null;
+    social_number?: string | null;
+    document_number?: string | null;
+  } | null;
   nationality?: string | null;
   gender?: string | null;
-  bank_account_number: string | null;
+  iban?: string | null;
   address?: string | null;
   city?: string | null;
   postal_code?: string | null;
