@@ -11,7 +11,6 @@ import { User } from "@/types/user";
 import { UserForm } from "@/components/users/UserForm";
 import { UserList } from "@/components/users/UserList";
 import { useUsers } from "@/hooks/useUsers";
-import { PropertyLayout } from "@/components/PropertyLayout";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 

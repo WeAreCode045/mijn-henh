@@ -41,23 +41,43 @@ export function useUsers() {
           return [];
         }
 
+        // Create a map for emails
+        const emailMap = new Map();
+        
+        // First try to get emails from the accounts table directly
+        accountsData.forEach(account => {
+          if (account.email) {
+            emailMap.set(account.id, account.email);
+            emailMap.set(account.user_id, account.email);
+          }
+        });
+        
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account.user_id)
+          .filter(account => account.user_id && !emailMap.has(account.user_id))
           .map(account => account.user_id);
           
-        const emailMap = new Map();
         if (userIds.length > 0) {
-          const { data: usersData } = await supabase.auth.admin.listUsers({
-            perPage: 1000
-          });
-          
-          if (usersData && usersData.users) {
-            usersData.users.forEach(user => {
-              if (user.id && user.email) {
-                emailMap.set(user.id, user.email);
-              }
+          try {
+            const { data: usersData } = await supabase.auth.admin.listUsers({
+              perPage: 1000
             });
+            
+            if (usersData && usersData.users) {
+              usersData.users.forEach(user => {
+                if (user.id && user.email) {
+                  emailMap.set(user.id, user.email);
+                  
+                  const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
+                  if (matchingAccount) {
+                    emailMap.set(matchingAccount.id, user.email);
+                  }
+                }
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching user emails from auth.users:", err);
+            // Continue without these emails
           }
         }
         
@@ -72,10 +92,6 @@ export function useUsers() {
             phone,
             whatsapp_number,
             avatar_url,
-            address,
-            city,
-            postal_code,
-            country,
             role,
             created_at,
             updated_at
@@ -100,8 +116,9 @@ export function useUsers() {
         // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
           const profile = profileMap.get(account.id) || {};
-          // Get email from profile, or from the email map (auth.users), or fallback to empty string
-          const userEmail = profile.email || (account.user_id ? emailMap.get(account.user_id) : '') || '';
+          
+          // Get email from emailMap, profile, or fall back to empty string
+          const userEmail = emailMap.get(account.id) || profile.email || '';
           
           return {
             id: account.id,
@@ -115,10 +132,6 @@ export function useUsers() {
             type: account.type || 'employee',
             role: profile.role || account.role || 'agent',
             avatar_url: profile.avatar_url || '',
-            address: profile.address || '',
-            city: profile.city || '',
-            postal_code: profile.postal_code || '',
-            country: profile.country || '',
             created_at: profile.created_at || '',
             updated_at: profile.updated_at || ''
           };

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
         if (profileError) throw profileError;
         
-        // Update user role in accounts table (previously users_roles)
+        // Update user role in accounts table 
         const { error: roleError } = await supabase
           .from("accounts")
           .update({
@@ -133,8 +134,36 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             photoUrl = await uploadPhoto(authData.user.id);
           }
 
-          // Update employer_profiles table (the trigger should have created an initial entry)
-          const { error: profileError } = await supabase
+          // We don't need to add a profile or account as there's a trigger in Supabase 
+          // that creates an account and profile for new users. Let's just update them:
+          const { error: accountError } = await supabase
+            .from("accounts")
+            .update({
+              role: formData.role,
+              type: formData.type,
+              display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+              email: formData.email
+            })
+            .eq("user_id", authData.user.id);
+
+          if (accountError) {
+            console.error("Error updating account:", accountError);
+            // If the trigger hasn't created the account yet, we might need to create it manually
+            const { error: insertError } = await supabase
+              .from("accounts")
+              .insert({
+                user_id: authData.user.id,
+                role: formData.role,
+                type: formData.type,
+                display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+                email: formData.email
+              });
+
+            if (insertError) throw insertError;
+          }
+
+          // Update employer_profiles
+          const { error: profileUpdateError } = await supabase
             .from("employer_profiles")
             .update({
               first_name: formData.first_name,
@@ -147,19 +176,22 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             })
             .eq("id", authData.user.id);
 
-          if (profileError) throw profileError;
-          
-          // Update user role and type in accounts table
-          const { error: accountsError } = await supabase
-            .from("accounts")
-            .update({
-              role: formData.role,
-              type: formData.type,
-              updated_at: new Date().toISOString()
-            })
-            .eq("user_id", authData.user.id);
-              
-          if (accountsError) throw accountsError;
+          if (profileUpdateError) {
+            // If update fails, try to insert
+            const { error: profileInsertError } = await supabase
+              .from("employer_profiles")
+              .insert({
+                id: authData.user.id,
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                email: formData.email,
+                phone: formData.phone,
+                whatsapp_number: formData.whatsapp_number,
+                ...(photoUrl && { avatar_url: photoUrl })
+              });
+
+            if (profileInsertError) throw profileInsertError;
+          }
         }
 
         toast({
@@ -179,9 +211,64 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
     }
   };
 
-  // Ensure we have a safe value for role
-  const safeRole = formData.role || "agent";
+  // Simplified form for creating a new user (only fields required for auth)
+  if (!isEditMode) {
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, email: e.target.value }))
+            }
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, password: e.target.value }))
+            }
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            value={formData.first_name}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, first_name: e.target.value }))
+            }
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            value={formData.last_name}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, last_name: e.target.value }))
+            }
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full">
+          Create Employee
+        </Button>
+      </form>
+    );
+  }
 
+  // Full form for editing an existing user
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -209,24 +296,10 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, email: e.target.value }))
           }
-          disabled={isEditMode}
+          disabled={true}
           required
         />
       </div>
-      {!isEditMode && (
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, password: e.target.value }))
-            }
-            required
-          />
-        </div>
-      )}
       <div className="space-y-2">
         <Label htmlFor="firstName">First Name</Label>
         <Input
@@ -274,7 +347,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
       <div className="space-y-2">
         <Label htmlFor="role">Role</Label>
         <Select
-          value={safeRole}
+          value={formData.role}
           onValueChange={(value: "admin" | "agent") =>
             setFormData((prev) => ({ ...prev, role: value }))
           }
@@ -290,7 +363,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         </Select>
       </div>
       <Button type="submit" className="w-full">
-        {isEditMode ? "Update User" : "Create User"}
+        Update User
       </Button>
     </form>
   );

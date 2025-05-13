@@ -27,24 +27,38 @@ export function useParticipants() {
           return [];
         }
         
-        // Fetch email addresses for these accounts from auth.users
+        // Get emails for these accounts
+        const emailMap = new Map();
+        
+        // First try to get emails from the accounts table directly
+        accountsData.forEach(account => {
+          if (account.email) {
+            emailMap.set(account.id, account.email);
+          }
+        });
+        
+        // For any missing emails, try to get them from auth.users via admin API
         const userIds = accountsData
-          .filter(account => account.user_id)
+          .filter(account => account.user_id && !emailMap.has(account.id))
           .map(account => account.user_id);
           
-        // Only proceed with valid user IDs
-        const emailMap = new Map();
         if (userIds.length > 0) {
-          const { data: usersData } = await supabase.auth.admin.listUsers({
-            perPage: 1000
-          });
-          
-          if (usersData && usersData.users) {
-            usersData.users.forEach(user => {
-              if (user.id && user.email) {
-                emailMap.set(user.id, user.email);
-              }
+          try {
+            const { data: usersData } = await supabase.auth.admin.listUsers({
+              perPage: 1000
             });
+            
+            if (usersData && usersData.users) {
+              usersData.users.forEach(user => {
+                const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
+                if (matchingAccount && user.email) {
+                  emailMap.set(matchingAccount.id, user.email);
+                }
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching user emails from auth.users:", err);
+            // Continue without these emails
           }
         }
         
@@ -69,49 +83,6 @@ export function useParticipants() {
           });
         }
         
-        // Find properties linked to these participants
-        const { data: propertiesBuyer, error: buyerError } = await supabase
-          .from('properties')
-          .select('id, buyer_id')
-          .in('buyer_id', accountsData.map(a => a.id));
-          
-        if (buyerError && buyerError.code !== 'PGRST116') {
-          console.error("Error fetching buyer properties:", buyerError);
-        }
-        
-        const { data: propertiesSeller, error: sellerError } = await supabase
-          .from('properties')
-          .select('id, seller_id')
-          .in('seller_id', accountsData.map(a => a.id));
-          
-        if (sellerError && sellerError.code !== 'PGRST116') {
-          console.error("Error fetching seller properties:", sellerError);
-        }
-        
-        // Create a map of account id to properties
-        const propertyMap = new Map();
-        if (propertiesBuyer) {
-          propertiesBuyer.forEach(prop => {
-            if (prop.buyer_id) {
-              if (!propertyMap.has(prop.buyer_id)) {
-                propertyMap.set(prop.buyer_id, []);
-              }
-              propertyMap.get(prop.buyer_id).push(prop.id);
-            }
-          });
-        }
-        
-        if (propertiesSeller) {
-          propertiesSeller.forEach(prop => {
-            if (prop.seller_id) {
-              if (!propertyMap.has(prop.seller_id)) {
-                propertyMap.set(prop.seller_id, []);
-              }
-              propertyMap.get(prop.seller_id).push(prop.id);
-            }
-          });
-        }
-        
         // Create a map to store the participant data with unique id
         const participantsMap = new Map();
         
@@ -119,8 +90,8 @@ export function useParticipants() {
         accountsData.forEach(account => {
           if (!participantsMap.has(account.id)) {
             const profile = profileMap.get(account.id) || {};
-            // Get email from profile, or from the email map (auth.users), or fallback to empty string
-            const userEmail = profile.email || (account.user_id ? emailMap.get(account.user_id) : '') || '';
+            // Get email from the emailMap, profile, or fallback to empty string
+            const userEmail = emailMap.get(account.id) || profile.email || '';
             
             participantsMap.set(account.id, {
               id: account.id,

@@ -10,6 +10,6 @@ export interface UserFormData {
   role: "admin" | "agent";
   avatar_url?: string;
   agency_id?: string;
-  type: "employee";
+  type: "employee" | "participant";
   full_name?: string;
 }

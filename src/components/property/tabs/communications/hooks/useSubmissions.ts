@@ -1,108 +1,132 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Submission } from '@/types/submission';
+interface Submission {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  inquiry_type: string;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+  agent: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    display_name: string;
+    avatar_url: string;
+  };
+  property: {
+    id: string;
+    title: string;
+  };
+  replies: any[];
+}
 
 export function useSubmissions(propertyId: string) {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  // Validate propertyId is a proper UUID before using it in a query
-  const isValidPropertyId = propertyId && 
-                           propertyId.trim() !== '' && 
-                           propertyId !== '1' &&
-                           /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(propertyId);
-
-  const fetchSubmissions = useCallback(async () => {
-    // Check if propertyId exists and is valid
-    if (!isValidPropertyId) {
-      console.log('useSubmissions: No valid propertyId provided, skipping fetch');
-      setSubmissions([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      console.log(`Fetching submissions for property ID: ${propertyId}`);
-      
+  const { data: submissions, isLoading, error } = useQuery({
+    queryKey: ["submissions", propertyId],
+    queryFn: async () => {
       const { data, error } = await supabase
-        .from('property_contact_submissions')
+        .from("submissions")
         .select(`
-          *,
-          agent:agent_id(
+          id,
+          name,
+          email,
+          phone,
+          inquiry_type,
+          message,
+          created_at,
+          is_read,
+          agent: agents (
             id,
-            first_name, 
-            last_name,
             email,
-            phone,
+            first_name,
+            last_name,
+            display_name,
             avatar_url
+          ),
+          property: properties (
+            id,
+            title
+          ),
+          replies (
+            id,
+            created_at,
+            message,
+            agent_id
           )
         `)
-        .eq('property_id', propertyId)
-        .order('created_at', { ascending: false });
+        .eq("property_id", propertyId);
 
       if (error) {
-        console.error('Error fetching submissions:', error);
-        throw error;
+        throw new Error(error.message);
       }
 
-      console.log(`Found ${data?.length || 0} submissions for property ID: ${propertyId}`);
+      if (!data) {
+        return [];
+      }
 
-      // Transform data to match Submission interface
-      const transformedData = data.map(item => {
-        // Safely handle agent data which might be null
-        let agentData = undefined;
-        if (item.agent && typeof item.agent === 'object' && !('error' in item.agent)) {
-          const firstName = item.agent?.first_name || '';
-          const lastName = item.agent?.last_name || '';
-          agentData = {
-            id: item.agent?.id || '',
-            full_name: `${firstName} ${lastName}`.trim() || 'Unnamed Agent',
-            email: item.agent?.email || '',
-            phone: item.agent?.phone || '',
-            avatar_url: item.agent?.avatar_url || null
-          };
-        }
+      return transformData(data);
+    },
+  });
 
-        return {
-          id: item.id,
-          property_id: item.property_id,
-          name: item.name,
-          email: item.email,
-          phone: item.phone,
-          message: item.message || '',
-          inquiry_type: item.inquiry_type,
-          is_read: item.is_read,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-          agent_id: item.agent_id,
-          agent: agentData,
-          replies: []
-        };
-      });
+  const transformData = (data: any[]) => {
+    return data.map((item) => {
+      const transformedItem = {
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        phone: item.phone,
+        inquiry_type: item.inquiry_type,
+        message: item.message,
+        created_at: item.created_at,
+        is_read: item.is_read,
+        agent: {
+          id: item.agent?.id || '',
+          email: item.agent?.email || '',
+          first_name: item.agent?.first_name || '',
+          last_name: item.agent?.last_name || '',
+          display_name: item.agent?.display_name || item.agent?.first_name ? `${item.agent?.first_name} ${item.agent?.last_name || ''}` : '',
+          avatar_url: item.agent?.avatar_url || '',
+        },
+        property: {
+          id: item.property?.id || '',
+          title: item.property?.title || '',
+        },
+        replies: item.replies || [],
+      };
 
-      setSubmissions(transformedData);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching submissions:', err);
-      setError(err instanceof Error ? err : new Error('Unknown error fetching submissions'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [propertyId, isValidPropertyId]);
+      return transformedItem;
+    });
+  };
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, [fetchSubmissions]);
+  const markAsReadMutation = useMutation({
+    mutationFn: async (submissionId: string) => {
+      const { data, error } = await supabase
+        .from("submissions")
+        .update({ is_read: true })
+        .eq("id", submissionId);
 
-  const refetch = fetchSubmissions;
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["submissions", propertyId]);
+    },
+  });
 
   return {
     submissions,
     isLoading,
     error,
-    refetch
+    markAsRead: markAsReadMutation.mutate,
   };
 }
