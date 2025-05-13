@@ -29,45 +29,25 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
-        // Get all accounts with type employee
-        const { data: accountsData, error: accountsError } = await supabase
+        // Get accounts with employee type and agent/admin role
+        const { data, error } = await supabase
           .from('accounts')
-          .select('id, display_name, email, type')
-          .eq('type', 'employee');
+          .select('id, display_name, type, role')
+          .eq('type', 'employee')
+          .in('role', ['agent', 'admin']);
         
-        if (accountsError) {
-          throw accountsError;
+        if (error) {
+          throw error;
         }
         
-        if (accountsData && accountsData.length > 0) {
-          // Get employer profiles to get roles
-          const { data: profiles, error: profilesError } = await supabase
-            .from('employer_profiles')
-            .select('id, role')
-            .in('id', accountsData.map(account => account.id));
-            
-          if (profilesError) {
-            throw profilesError;
-          }
-          
-          // Create a map of id to role
-          const roleMap = new Map();
-          if (profiles) {
-            profiles.forEach(profile => {
-              roleMap.set(profile.id, profile.role);
-            });
-          }
-          
-          // Filter accounts to only include admin and agent roles
-          const agentAccounts = accountsData.filter(account => {
-            const role = roleMap.get(account.id);
-            return role === 'admin' || role === 'agent';
-          });
-          
-          setAgents(agentAccounts.map(account => ({
+        if (data && data.length > 0) {
+          // Create a list of agents with their names
+          const agentsList = data.map(account => ({
             id: account.id,
-            display_name: account.display_name || account.email || 'Unnamed Agent'
-          })));
+            display_name: account.display_name || `Agent ${account.id.substring(0, 8)}`
+          }));
+          
+          setAgents(agentsList);
         } else {
           setAgents([]);
         }

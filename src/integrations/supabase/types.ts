@@ -980,6 +980,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "todo_items_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "todo_items_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false

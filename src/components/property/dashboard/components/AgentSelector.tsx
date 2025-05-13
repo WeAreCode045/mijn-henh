@@ -29,33 +29,25 @@ export function AgentSelector({ initialAgentId, onAgentChange, isDisabled = fals
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
-        // First get all users with agent or admin role
-        const { data: accountsData, error: accountsError } = await supabase
+        // Get accounts with employee type and agent/admin role
+        const { data, error } = await supabase
           .from('accounts')
-          .select('user_id, role')
-          .or('role.eq.agent,role.eq.admin');
+          .select('id, display_name, type, role')
+          .eq('type', 'employee')
+          .in('role', ['agent', 'admin']);
         
-        if (accountsError) {
-          throw accountsError;
+        if (error) {
+          throw error;
         }
         
-        if (accountsData && accountsData.length > 0) {
-          const agentIds = accountsData.map(account => account.user_id);
+        if (data && data.length > 0) {
+          // Create a list of agents with their names
+          const agentsList = data.map(account => ({
+            id: account.id,
+            display_name: account.display_name || `Agent ${account.id.substring(0, 8)}`
+          }));
           
-          // Then fetch their profiles from employer_profiles
-          const { data, error } = await supabase
-            .from('employer_profiles')
-            .select('id, first_name, last_name')
-            .in('id', agentIds);
-          
-          if (error) throw error;
-          
-          if (data) {
-            setAgents(data.map(agent => ({
-              id: agent.id || "",
-              display_name: `${agent.first_name || ''} ${agent.last_name || ''}`.trim() || 'Unnamed Agent'
-            })));
-          }
+          setAgents(agentsList);
         } else {
           setAgents([]);
         }

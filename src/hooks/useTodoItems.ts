@@ -18,7 +18,7 @@ export function useTodoItems(propertyId?: string) {
         .select(`
           *,
           property:property_id(id, title),
-          assigned_to:assigned_to_id(id, first_name, last_name)
+          assigned_to:assigned_to_id(*)
         `)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
@@ -34,14 +34,16 @@ export function useTodoItems(propertyId?: string) {
       
       // Transform data to match TodoItem interface with proper handling of assigned_to
       const transformedItems = data.map((item: any): TodoItem => {
-        // For assigned_to, check if it's an error or null, handle accordingly
+        // For assigned_to, check if it exists and has valid properties
         let assignedTo = undefined;
         if (item.assigned_to && typeof item.assigned_to === 'object' && !('error' in item.assigned_to)) {
-          const firstName = item.assigned_to.first_name || '';
-          const lastName = item.assigned_to.last_name || '';
+          // Create a display name from available fields
+          const displayName = item.assigned_to.display_name || 
+                             (item.assigned_to.user_id ? `User ${item.assigned_to.user_id.substring(0, 8)}` : 'Unnamed User');
+          
           assignedTo = {
             id: item.assigned_to.id,
-            full_name: `${firstName} ${lastName}`.trim() || 'Unnamed User'
+            full_name: displayName
           };
         }
         
