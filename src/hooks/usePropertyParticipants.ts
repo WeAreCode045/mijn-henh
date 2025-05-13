@@ -43,10 +43,10 @@ export function usePropertyParticipants(propertyId?: string) {
         return [];
       }
 
-      // Get the accounts info with user email from auth.users
+      // Get the accounts
       const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
-        .select('*, auth_users:user_id(email)')
+        .select('*')
         .in('id', participantIds)
         .eq('type', 'participant');
 
@@ -61,6 +61,26 @@ export function usePropertyParticipants(propertyId?: string) {
         return [];
       }
 
+      // Get emails from auth.users for each user_id
+      const userIds = accounts
+        .filter(account => account.user_id)
+        .map(account => account.user_id);
+        
+      const emailMap = new Map();
+      if (userIds.length > 0) {
+        const { data: usersData } = await supabase.auth.admin.listUsers({
+          perPage: 1000
+        });
+        
+        if (usersData && usersData.users) {
+          usersData.users.forEach(user => {
+            if (user.id && user.email) {
+              emailMap.set(user.id, user.email);
+            }
+          });
+        }
+      }
+      
       // For each participant, fetch their profile data
       const participantsWithProfiles: PropertyParticipant[] = [];
 
@@ -72,8 +92,8 @@ export function usePropertyParticipants(propertyId?: string) {
           .eq('id', account.id)
           .single();
 
-        // Get email from either profile, auth user, or account
-        const email = profileData?.email || account.auth_users?.email || '';
+        // Get email from profile, or from the email map (auth.users), or fallback to empty string
+        const email = profileData?.email || (account.user_id ? emailMap.get(account.user_id) : '') || '';
           
         // Create a participant object
         const isSellerParticipant = property.seller_id === account.id;
@@ -160,7 +180,6 @@ export function usePropertyParticipants(propertyId?: string) {
             .from('accounts')
             .insert({
               user_id: userId,
-              email: participant.email,
               type: 'participant',
               role: participant.role,
               status: 'pending',
@@ -415,7 +434,7 @@ export function usePropertyParticipants(propertyId?: string) {
       // First get the account ID for this user
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('id, auth_users:user_id(email)')
+        .select('*')
         .eq('user_id', user.id)
         .eq('type', 'participant')
         .single();
@@ -439,62 +458,49 @@ export function usePropertyParticipants(propertyId?: string) {
         return null;
       }
       
+      // Get email from auth.users for the user
+      let email = '';
+      const { data: userData } = await supabase.auth.admin.getUserById(user.id);
+      if (userData && userData.user) {
+        email = userData.user.email || '';
+      }
+      
       // Check if the account is either seller or buyer
       if (property.seller_id === accountData.id) {
-        const { data: account } = await supabase
-          .from('accounts')
-          .select('*, auth_users:user_id(email)')
-          .eq('id', accountData.id)
-          .single();
-          
-        if (!account) return null;
-        
-        const email = account.auth_users?.email || '';
-        
         return {
-          id: account.id,
-          user_id: account.user_id,
+          id: accountData.id,
+          user_id: accountData.user_id,
           property_id: propertyId,
           role: 'seller' as ParticipantRole,
-          status: account.status as ParticipantStatus,
-          created_at: account.created_at,
-          updated_at: account.updated_at,
+          status: accountData.status as ParticipantStatus,
+          created_at: accountData.created_at,
+          updated_at: accountData.updated_at,
           email: email,
           documents_signed: [],
           webview_approved: false,
           user: {
-            id: account.user_id,
-            full_name: account.display_name || 'User',
+            id: accountData.user_id,
+            full_name: accountData.display_name || 'User',
             email: email || ''
           },
           participant_profile: null
         } as PropertyParticipant;
       } 
       else if (property.buyer_id === accountData.id) {
-        const { data: account } = await supabase
-          .from('accounts')
-          .select('*, auth_users:user_id(email)')
-          .eq('id', accountData.id)
-          .single();
-          
-        if (!account) return null;
-        
-        const email = account.auth_users?.email || '';
-        
         return {
-          id: account.id,
-          user_id: account.user_id,
+          id: accountData.id,
+          user_id: accountData.user_id,
           property_id: propertyId,
           role: 'buyer' as ParticipantRole,
-          status: account.status as ParticipantStatus,
-          created_at: account.created_at,
-          updated_at: account.updated_at,
+          status: accountData.status as ParticipantStatus,
+          created_at: accountData.created_at,
+          updated_at: accountData.updated_at,
           email: email,
           documents_signed: [],
           webview_approved: false,
           user: {
-            id: account.user_id,
-            full_name: account.display_name || 'User',
+            id: accountData.user_id,
+            full_name: accountData.display_name || 'User',
             email: email || ''
           },
           participant_profile: null

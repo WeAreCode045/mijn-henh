@@ -25,7 +25,7 @@ export default function ParticipantDashboard() {
         // First get the participant account associated with this user
         const { data: accountData, error: accountError } = await supabase
           .from('accounts')
-          .select('*, auth_users:user_id(email)')
+          .select('*')
           .eq('user_id', user.id)
           .eq('type', 'participant')
           .single();
@@ -44,6 +44,13 @@ export default function ParticipantDashboard() {
         
         setAccountId(accountData.id);
         
+        // Get email from auth.users
+        let userEmail = '';
+        const { data: userData } = await supabase.auth.admin.getUserById(user.id);
+        if (userData && userData.user) {
+          userEmail = userData.user.email || '';
+        }
+        
         // Fetch participant profile
         const { data: profileData } = await supabase
           .from('participants_profile')
@@ -51,8 +58,8 @@ export default function ParticipantDashboard() {
           .eq('id', accountData.id)
           .single();
           
-        // Get the email from auth.users or profile
-        const email = accountData.auth_users?.email || profileData?.email || '';
+        // Use email from profile, auth user, or empty string
+        const email = profileData?.email || userEmail || '';
         
         setUserProfile({
           id: accountData.id,

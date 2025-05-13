@@ -26,7 +26,7 @@ export function useUsers() {
         // Get all accounts with employee type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('*, auth_users:user_id(email)')
+          .select('*')
           .eq('type', 'employee');
 
         if (accountsError) {
@@ -39,6 +39,26 @@ export function useUsers() {
         if (!accountsData || accountsData.length === 0) {
           console.log("No employee accounts found");
           return [];
+        }
+
+        // Get emails from auth.users for each user_id
+        const userIds = accountsData
+          .filter(account => account.user_id)
+          .map(account => account.user_id);
+          
+        const emailMap = new Map();
+        if (userIds.length > 0) {
+          const { data: usersData } = await supabase.auth.admin.listUsers({
+            perPage: 1000
+          });
+          
+          if (usersData && usersData.users) {
+            usersData.users.forEach(user => {
+              if (user.id && user.email) {
+                emailMap.set(user.id, user.email);
+              }
+            });
+          }
         }
         
         // Fetch employer profiles for these account IDs
@@ -80,11 +100,12 @@ export function useUsers() {
         // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
           const profile = profileMap.get(account.id) || {};
-          const userEmail = account.auth_users?.email || '';
+          // Get email from profile, or from the email map (auth.users), or fallback to empty string
+          const userEmail = profile.email || (account.user_id ? emailMap.get(account.user_id) : '') || '';
           
           return {
             id: account.id,
-            email: profile.email || userEmail,
+            email: userEmail,
             first_name: profile.first_name || '',
             last_name: profile.last_name || '',
             full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || account.display_name || 'Unnamed User',

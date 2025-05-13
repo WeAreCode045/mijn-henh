@@ -12,7 +12,7 @@ export function useParticipants() {
         // First get all accounts with participant type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('*, auth_users:user_id(email)')
+          .select('*')
           .eq('type', 'participant');
 
         if (accountsError) {
@@ -25,6 +25,27 @@ export function useParticipants() {
         if (!accountsData || accountsData.length === 0) {
           console.log("No accounts found with participant type");
           return [];
+        }
+        
+        // Fetch email addresses for these accounts from auth.users
+        const userIds = accountsData
+          .filter(account => account.user_id)
+          .map(account => account.user_id);
+          
+        // Only proceed with valid user IDs
+        const emailMap = new Map();
+        if (userIds.length > 0) {
+          const { data: usersData } = await supabase.auth.admin.listUsers({
+            perPage: 1000
+          });
+          
+          if (usersData && usersData.users) {
+            usersData.users.forEach(user => {
+              if (user.id && user.email) {
+                emailMap.set(user.id, user.email);
+              }
+            });
+          }
         }
         
         // Get the participant profiles
@@ -98,11 +119,12 @@ export function useParticipants() {
         accountsData.forEach(account => {
           if (!participantsMap.has(account.id)) {
             const profile = profileMap.get(account.id) || {};
-            const userEmail = account.auth_users?.email || '';
+            // Get email from profile, or from the email map (auth.users), or fallback to empty string
+            const userEmail = profile.email || (account.user_id ? emailMap.get(account.user_id) : '') || '';
             
             participantsMap.set(account.id, {
               id: account.id,
-              email: profile.email || userEmail,
+              email: userEmail,
               first_name: profile.first_name || '',
               last_name: profile.last_name || '',
               phone: profile.phone || '',
