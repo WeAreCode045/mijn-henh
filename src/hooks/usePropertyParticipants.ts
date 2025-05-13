@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,10 +43,10 @@ export function usePropertyParticipants(propertyId?: string) {
         return [];
       }
 
-      // Get the accounts info
+      // Get the accounts info with user email from auth.users
       const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
-        .select('*')
+        .select('*, auth_users:user_id(email)')
         .in('id', participantIds)
         .eq('type', 'participant');
 
@@ -71,6 +72,9 @@ export function usePropertyParticipants(propertyId?: string) {
           .eq('id', account.id)
           .single();
 
+        // Get email from either profile, auth user, or account
+        const email = profileData?.email || account.auth_users?.email || '';
+          
         // Create a participant object
         const isSellerParticipant = property.seller_id === account.id;
         const role = isSellerParticipant ? 'seller' as ParticipantRole : 'buyer' as ParticipantRole;
@@ -83,13 +87,13 @@ export function usePropertyParticipants(propertyId?: string) {
           status: account.status as ParticipantStatus,
           created_at: account.created_at,
           updated_at: account.updated_at,
-          email: account.email,
+          email: email,
           documents_signed: [], // Default empty array
           webview_approved: false, // Default to false
           user: {
             id: account.user_id,
             full_name: account.display_name || `Unknown ${role}`,
-            email: account.email || ''
+            email: email || ''
           },
           participant_profile: profileData ? {
             ...profileData,
@@ -411,7 +415,7 @@ export function usePropertyParticipants(propertyId?: string) {
       // First get the account ID for this user
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('id')
+        .select('id, auth_users:user_id(email)')
         .eq('user_id', user.id)
         .eq('type', 'participant')
         .single();
@@ -439,11 +443,13 @@ export function usePropertyParticipants(propertyId?: string) {
       if (property.seller_id === accountData.id) {
         const { data: account } = await supabase
           .from('accounts')
-          .select('*')
+          .select('*, auth_users:user_id(email)')
           .eq('id', accountData.id)
           .single();
           
         if (!account) return null;
+        
+        const email = account.auth_users?.email || '';
         
         return {
           id: account.id,
@@ -453,12 +459,13 @@ export function usePropertyParticipants(propertyId?: string) {
           status: account.status as ParticipantStatus,
           created_at: account.created_at,
           updated_at: account.updated_at,
+          email: email,
           documents_signed: [],
           webview_approved: false,
           user: {
             id: account.user_id,
             full_name: account.display_name || 'User',
-            email: account.email || ''
+            email: email || ''
           },
           participant_profile: null
         } as PropertyParticipant;
@@ -466,11 +473,13 @@ export function usePropertyParticipants(propertyId?: string) {
       else if (property.buyer_id === accountData.id) {
         const { data: account } = await supabase
           .from('accounts')
-          .select('*')
+          .select('*, auth_users:user_id(email)')
           .eq('id', accountData.id)
           .single();
           
         if (!account) return null;
+        
+        const email = account.auth_users?.email || '';
         
         return {
           id: account.id,
@@ -480,12 +489,13 @@ export function usePropertyParticipants(propertyId?: string) {
           status: account.status as ParticipantStatus,
           created_at: account.created_at,
           updated_at: account.updated_at,
+          email: email,
           documents_signed: [],
           webview_approved: false,
           user: {
             id: account.user_id,
             full_name: account.display_name || 'User',
-            email: account.email || ''
+            email: email || ''
           },
           participant_profile: null
         } as PropertyParticipant;
@@ -501,12 +511,12 @@ export function usePropertyParticipants(propertyId?: string) {
     isLoading,
     error,
     refetch,
-    addParticipant: (data) => {}, // This will be replaced by the existing implementation
-    removeParticipant: (data) => {}, // This will be replaced by the existing implementation
-    updateParticipantStatus: (data) => {}, // This will be replaced by the existing implementation
+    addParticipant: (data: ParticipantInvite) => addParticipantMutation.mutate(data),
+    removeParticipant: (data: { participantId: string; role: ParticipantRole }) => removeParticipantMutation.mutate(data),
+    updateParticipantStatus: (data: { participantId: string; status: string }) => updateParticipantStatusMutation.mutate(data),
     isParticipantSeller: userParticipation?.role === 'seller',
     isParticipantBuyer: userParticipation?.role === 'buyer',
     userParticipation,
-    resendInvite: (id) => {}, // This will be replaced by the existing implementation
+    resendInvite: (id: string) => resendInviteMutation.mutate(id),
   };
 }

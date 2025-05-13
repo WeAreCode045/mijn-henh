@@ -26,7 +26,7 @@ export function useUsers() {
         // Get all accounts with employee type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('*')
+          .select('*, auth_users:user_id(email)')
           .eq('type', 'employee');
 
         if (accountsError) {
@@ -80,10 +80,11 @@ export function useUsers() {
         // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
           const profile = profileMap.get(account.id) || {};
+          const userEmail = account.auth_users?.email || '';
           
           return {
             id: account.id,
-            email: profile.email || account.email || '',
+            email: profile.email || userEmail,
             first_name: profile.first_name || '',
             last_name: profile.last_name || '',
             full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || account.display_name || 'Unnamed User',

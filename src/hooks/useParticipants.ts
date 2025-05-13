@@ -12,7 +12,7 @@ export function useParticipants() {
         // First get all accounts with participant type
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
-          .select('*')
+          .select('*, auth_users:user_id(email)')
           .eq('type', 'participant');
 
         if (accountsError) {
@@ -98,10 +98,11 @@ export function useParticipants() {
         accountsData.forEach(account => {
           if (!participantsMap.has(account.id)) {
             const profile = profileMap.get(account.id) || {};
+            const userEmail = account.auth_users?.email || '';
             
             participantsMap.set(account.id, {
               id: account.id,
-              email: account.email || '',
+              email: profile.email || userEmail,
               first_name: profile.first_name || '',
               last_name: profile.last_name || '',
               phone: profile.phone || '',
@@ -119,7 +120,7 @@ export function useParticipants() {
               role: profile.role || account.role || 'buyer',
               created_at: profile.created_at || '',
               updated_at: profile.updated_at || '',
-              properties: propertyMap.get(account.id) || [],
+              properties: [], // Will be populated later
               avatar_url: null,
               full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
               bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility

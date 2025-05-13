@@ -76,17 +76,17 @@ export function useFetchSubmissions(propertyId: string) {
           } : undefined
         }));
         
-        // Safely handle agent data which might be null or an error
+        // Safely handle agent data which might be null
         let agentData = undefined;
         if (item.agent && typeof item.agent === 'object' && !('error' in item.agent)) {
-          const firstName = item.agent.first_name || '';
-          const lastName = item.agent.last_name || '';
+          const firstName = item.agent?.first_name || '';
+          const lastName = item.agent?.last_name || '';
           agentData = {
-            id: item.agent.id,
+            id: item.agent?.id || '',
             full_name: `${firstName} ${lastName}`.trim() || 'Unnamed Agent',
-            email: item.agent.email || '',
-            phone: item.agent.phone || '',
-            avatar_url: item.agent.avatar_url
+            email: item.agent?.email || '',
+            phone: item.agent?.phone || '',
+            avatar_url: item.agent?.avatar_url || null
           };
         }
         

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -27,12 +26,13 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
     email: initialData?.email || "",
     password: "",
     full_name: initialData?.full_name || "",
-    first_name: initialData?.full_name?.split(' ')[0] || "",
-    last_name: initialData?.full_name?.split(' ').slice(1).join(' ') || "",
+    first_name: initialData?.first_name || initialData?.full_name?.split(' ')[0] || "",
+    last_name: initialData?.last_name || initialData?.full_name?.split(' ').slice(1).join(' ') || "",
     phone: initialData?.phone || "",
     whatsapp_number: initialData?.whatsapp_number || "",
     role: (initialData?.role as "admin" | "agent") || "agent",
-    avatar_url: initialData?.avatar_url || ""
+    avatar_url: initialData?.avatar_url || "",
+    type: "employee" // Adding required type field
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>(initialData?.avatar_url || "");
@@ -106,8 +106,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             role: formData.role,
             updated_at: new Date().toISOString()
           })
-          .eq("user_id", initialData.id)
-          .in("role", ["admin", "agent"]);
+          .eq("id", initialData.id);
           
         if (roleError) throw roleError;
 
@@ -150,18 +149,17 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
           if (profileError) throw profileError;
           
-          // Update user role in accounts table if needed (previously users_roles)
-          if (formData.role === 'admin') {
-            const { error: roleError } = await supabase
-              .from("accounts")
-              .update({
-                role: formData.role,
-                updated_at: new Date().toISOString()
-              })
-              .eq("user_id", authData.user.id);
+          // Update user role and type in accounts table
+          const { error: accountsError } = await supabase
+            .from("accounts")
+            .update({
+              role: formData.role,
+              type: formData.type,
+              updated_at: new Date().toISOString()
+            })
+            .eq("user_id", authData.user.id);
               
-            if (roleError) throw roleError;
-          }
+          if (accountsError) throw accountsError;
         }
 
         toast({
