@@ -43,32 +43,35 @@ export function AppSidebar() {
     const checkUserRole = async () => {
       if (user?.id) {
         try {
+          // First try to get role by id
           const { data, error } = await supabase
-            .from('employer_profiles')
-            .select('*')
+            .from('accounts')
+            .select('role')
             .eq('id', user.id)
             .single();
 
           if (error) {
-            console.error('Error fetching user role:', error);
-            return;
-          }
-
-          // Check if user role is available in accounts table
-          const { data: accountData, error: accountError } = await supabase
-            .from('accounts')
-            .select('role')
-            .eq('user_id', user.id)
-            .single();
+            console.error('Error fetching user role by id:', error);
             
-          if (accountError && accountError.code !== 'PGRST116') {
-            console.error('Error fetching user account:', accountError);
-            return;
-          }
-
-          if (accountData) {
-            console.log('User role from accounts table:', accountData.role);
-            setLocalIsAdmin(accountData.role === 'admin');
+            // If that fails, try by user_id
+            const { data: accountData, error: accountError } = await supabase
+              .from('accounts')
+              .select('role')
+              .eq('user_id', user.id)
+              .single();
+              
+            if (accountError) {
+              console.error('Error fetching user account by user_id:', accountError);
+              return;
+            }
+            
+            if (accountData) {
+              console.log('User role from accounts table by user_id:', accountData.role);
+              setLocalIsAdmin(accountData.role === 'admin');
+            }
+          } else if (data) {
+            console.log('User role from accounts table by id:', data.role);
+            setLocalIsAdmin(data.role === 'admin');
           }
         } catch (err) {
           console.error('Error in role check:', err);
@@ -101,8 +104,8 @@ export function AppSidebar() {
   const handleUpdateProfile = async (updatedData: Partial<User>) => {
     try {
       await updateProfile({
-        first_name: updatedData.full_name?.split(' ')[0] || '',
-        last_name: updatedData.full_name?.split(' ').slice(1).join(' ') || '',
+        first_name: updatedData.first_name || '',
+        last_name: updatedData.last_name || '',
         email: updatedData.email,
         phone: updatedData.phone
       });
@@ -117,6 +120,8 @@ export function AppSidebar() {
   const userProfile: User | null = profile ? {
     id: profile.id || user?.id || '',
     email: profile.email || user?.email || '',
+    first_name: profile.first_name || '',
+    last_name: profile.last_name || '',
     full_name: profile.full_name || '',
     avatar_url: profile.avatar_url || undefined,
     phone: profile.phone || undefined,

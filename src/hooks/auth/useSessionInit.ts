@@ -31,15 +31,44 @@ export function useSessionInit({
         // Get the user's type and role from the accounts table
         const { data: accountData, error: accountError } = await supabase.from('accounts')
           .select('id, type, role, email')
-          .eq('user_id', session.user.id)
+          .eq('id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
                 
-        if (accountError) {
+        if (accountError && accountError.code !== 'PGRST116') {
           console.error('Error getting user account on auth change:', accountError);
-          setUserRole(null);
-          setIsLoading(false);
+          
+          // Try to get account by user_id
+          const { data: accountByUserId, error: secondError } = await supabase.from('accounts')
+            .select('id, type, role, email')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+            
+          if (secondError && secondError.code !== 'PGRST116') {
+            console.error('Secondary error getting user account:', secondError);
+            setUserRole(null);
+            setIsLoading(false);
+          } else if (accountByUserId) {
+            console.log('Found user account by user_id:', accountByUserId);
+            setUserRole(accountByUserId.role);
+            
+            try {
+              const email = accountByUserId.email || session.user.email;
+              const userProfile = await fetchUserProfile(accountByUserId.id, accountByUserId.type, email);
+              if (userProfile) {
+                console.log('User profile fetched by user_id:', userProfile);
+                setProfile(userProfile);
+              }
+            } catch (profileError) {
+              console.error('Error fetching user profile by user_id:', profileError);
+            }
+          } else {
+            setUserRole(null);
+            setIsLoading(false);
+          }
         } else if (accountData) {
           console.log('User account data:', accountData);
           setUserRole(accountData.role);

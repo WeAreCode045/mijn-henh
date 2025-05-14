@@ -50,8 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUserProfile
   });
 
-  const isAdmin = userRole === 'admin';
-  const isAgent = userRole === 'agent' || userRole === 'admin';
+  // Ensure the role is correctly determined
+  const isAdmin = userRole === 'admin' || profile?.role === 'admin';
+  const isAgent = userRole === 'agent' || userRole === 'admin' || 
+                 profile?.role === 'agent' || profile?.role === 'admin';
 
   const value = {
     user,

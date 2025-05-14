@@ -8,6 +8,34 @@ export function useProfileFetch() {
     console.log('Fetching profile for', userId, type, email);
     
     if (type === 'employee') {
+      // First check the accounts table for the user role
+      const { data: accountData, error: accountError } = await supabase
+        .from('accounts')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (accountError && accountError.code !== 'PGRST116') {
+        console.error('Error fetching account data by id:', accountError);
+        
+        // Try by user_id as a fallback
+        const { data: accountByUserId, error: userIdError } = await supabase
+          .from('accounts')
+          .select('role')
+          .eq('user_id', userId)
+          .maybeSingle();
+          
+        if (userIdError && userIdError.code !== 'PGRST116') {
+          console.error('Error fetching account data by user_id:', userIdError);
+        } else if (accountByUserId) {
+          console.log('Found account role by user_id:', accountByUserId.role);
+        }
+      } else if (accountData) {
+        console.log('Found account role:', accountData.role);
+      }
+      
+      const userRole = accountData?.role || 'agent';
+
       const { data: employerProfile, error: profileError } = await supabase
         .from('employer_profiles')
         .select('*')
@@ -33,7 +61,7 @@ export function useProfileFetch() {
           avatar_url: employerProfile.avatar_url || undefined,
           phone: employerProfile.phone,
           whatsapp_number: employerProfile.whatsapp_number,
-          role: employerProfile.role
+          role: userRole // Use the role from accounts table instead of the profile
         } as AppUser;
       } else {
         console.log('No employer profile found, attempting to create one');
@@ -48,7 +76,7 @@ export function useProfileFetch() {
               email: email,
               first_name: firstName,
               last_name: '',
-              role: 'agent'
+              role: userRole // Use the role from accounts table
             })
             .select()
             .single();
@@ -63,7 +91,7 @@ export function useProfileFetch() {
               last_name: '',
               full_name: firstName,
               display_name: firstName,
-              role: 'agent'
+              role: userRole // Use the role from accounts table
             } as AppUser;
           }
           
@@ -79,7 +107,7 @@ export function useProfileFetch() {
               avatar_url: undefined,
               phone: null,
               whatsapp_number: null,
-              role: 'agent'
+              role: userRole // Use the role from accounts table
             } as AppUser;
           }
         } catch (err) {
@@ -89,7 +117,7 @@ export function useProfileFetch() {
             id: userId,
             type: type,
             email: email || '',
-            role: 'agent'
+            role: userRole // Use the role from accounts table
           } as AppUser;
         }
       }
@@ -123,12 +151,21 @@ export function useProfileFetch() {
       }
     }
     
-    console.log('No profile found and could not create one, returning minimal user profile');
+    // Check accounts table directly as a last resort
+    const { data: accountInfo, error: accountQueryError } = await supabase
+      .from('accounts')
+      .select('role')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    const userRole = accountInfo?.role || (type === 'employee' ? 'agent' : 'buyer');
+    
+    console.log('No profile found and could not create one, returning minimal user profile with role:', userRole);
     return {
       id: userId,
       type: type,
       email: email || '',
-      role: type === 'employee' ? 'agent' : 'buyer'
+      role: userRole
     } as AppUser;
   }, []);
 

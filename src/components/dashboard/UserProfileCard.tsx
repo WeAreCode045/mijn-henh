@@ -32,6 +32,9 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
   // Compute display name from first and last name
   const displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 
                       (user.email ? user.email.split('@')[0] : 'Unknown');
+                      
+  // Ensure the role is properly formatted for display
+  const displayRole = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User';
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -77,7 +80,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
         </Avatar>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{displayName}</p>
-          <p className="text-xs text-white/70 truncate">{user.role}</p>
+          <p className="text-xs text-white/70 truncate">{displayRole}</p>
           <p className="text-xs text-white/70 truncate">{user.email}</p>
           <Button 
             variant="ghost" 
@@ -156,7 +159,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
             </AvatarFallback>
           </Avatar>
           <h3 className="text-xl font-semibold">{displayName}</h3>
-          <p className="text-sm text-gray-500 mb-1">{user.role}</p>
+          <p className="text-sm text-gray-500 mb-1">{displayRole}</p>
           <div className="flex items-center mt-4 space-x-1 text-sm text-gray-500">
             <Mail className="h-4 w-4" />
             <span>{user.email}</span>
