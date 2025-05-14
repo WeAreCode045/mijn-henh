@@ -96,29 +96,37 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             phone: formData.phone,
             whatsapp_number: formData.whatsapp_number,
             updated_at: new Date().toISOString(),
-            ...(photoUrl && { avatar_url: photoUrl })
+            ...(photoUrl && { avatar_url: photoUrl }),
+            // Only update role if it's not empty or null
+            ...(formData.role && { role: formData.role })
           })
           .eq("id", initialData.id);
 
         if (profileError) throw profileError;
         
-        // Update user role in accounts table 
-        const { error: roleError } = await supabase
-          .from("accounts")
-          .update({
-            role: formData.role,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", initialData.id);
-          
-        if (roleError) throw roleError;
+        // Update role in accounts table if role is provided
+        if (formData.role) {
+          const { error: roleError } = await supabase
+            .from("accounts")
+            .update({
+              role: formData.role,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", initialData.id);
+            
+          if (roleError) throw roleError;
+        }
 
         toast({
           title: "Success",
           description: "User updated successfully",
         });
       } else {
-        // Create new user in auth
+        if (!formData.email || !formData.password) {
+          throw new Error("Email and password are required");
+        }
+        
+        // Step 1: Create new user in auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -131,53 +139,57 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
         if (authError) throw authError;
 
-        if (authData.user) {
-          // User creation succeeded, now create/update the accounts record
-          const displayName = `${formData.first_name} ${formData.last_name}`.trim();
-          
-          // Create account record directly
-          const { error: accountError } = await supabase
-            .from("accounts")
-            .insert({
-              user_id: authData.user.id,
-              role: formData.role,
-              type: formData.type,
-              display_name: displayName,
-              // Don't include email field as it doesn't exist in the accounts table
-            });
-
-          if (accountError) {
-            console.error("Error creating account:", accountError);
-            throw accountError;
-          }
-
-          // Upload photo if provided
-          let photoUrl = null;
-          if (photoFile) {
-            photoUrl = await uploadPhoto(authData.user.id);
-          }
-
-          // Create employer profile
-          const { error: profileError } = await supabase
-            .from("employer_profiles")
-            .insert({
-              id: authData.user.id,
-              first_name: formData.first_name,
-              last_name: formData.last_name,
-              email: formData.email,
-              phone: formData.phone,
-              whatsapp_number: formData.whatsapp_number,
-              role: formData.role,
-              ...(photoUrl && { avatar_url: photoUrl })
-            });
-
-          if (profileError) throw profileError;
-          
-          toast({
-            title: "Success",
-            description: "Employee created successfully",
-          });
+        if (!authData.user) {
+          throw new Error("Failed to create user");
         }
+        
+        // Step 2: Create account entry for the user with type employee
+        const { data: accountData, error: accountError } = await supabase
+          .from("accounts")
+          .insert({
+            user_id: authData.user.id,
+            type: "employee",
+            display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+            // Note: not setting role here as per request - it will be updated later in the edit form
+          })
+          .select()
+          .single();
+
+        if (accountError) {
+          console.error("Error creating account:", accountError);
+          throw accountError;
+        }
+
+        if (!accountData) {
+          throw new Error("Failed to create account");
+        }
+
+        // Upload photo if provided
+        let photoUrl = null;
+        if (photoFile) {
+          photoUrl = await uploadPhoto(accountData.id);
+        }
+
+        // Create employer profile
+        const { error: profileError } = await supabase
+          .from("employer_profiles")
+          .insert({
+            id: accountData.id,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            phone: formData.phone,
+            whatsapp_number: formData.whatsapp_number,
+            ...(photoUrl && { avatar_url: photoUrl })
+            // Note: not setting role here as per request
+          });
+
+        if (profileError) throw profileError;
+        
+        toast({
+          title: "Success",
+          description: "Employee created successfully",
+        });
       }
 
       onSuccess();
@@ -198,7 +210,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email *</Label>
           <Input
             id="email"
             type="email"
@@ -210,7 +222,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Password *</Label>
           <Input
             id="password"
             type="password"
@@ -222,7 +234,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
+          <Label htmlFor="firstName">First Name *</Label>
           <Input
             id="firstName"
             value={formData.first_name}
@@ -233,7 +245,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
+          <Label htmlFor="lastName">Last Name *</Label>
           <Input
             id="lastName"
             value={formData.last_name}
@@ -242,24 +254,6 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             }
             required
           />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="role">Role</Label>
-          <Select
-            value={formData.role}
-            onValueChange={(value: "admin" | "agent") =>
-              setFormData((prev) => ({ ...prev, role: value }))
-            }
-            defaultValue="agent"
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="agent">Agent</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create Employee"}
@@ -301,7 +295,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="firstName">First Name</Label>
+        <Label htmlFor="firstName">First Name *</Label>
         <Input
           id="firstName"
           value={formData.first_name}
@@ -312,7 +306,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="lastName">Last Name</Label>
+        <Label htmlFor="lastName">Last Name *</Label>
         <Input
           id="lastName"
           value={formData.last_name}

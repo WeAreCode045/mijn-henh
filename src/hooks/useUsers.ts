@@ -43,6 +43,14 @@ export function useUsers() {
 
         // Create a map for emails
         const emailMap = new Map();
+        const userIdToAccountIdMap = new Map();
+        
+        // Track user_id to account_id mapping
+        accountsData.forEach(account => {
+          if (account.user_id) {
+            userIdToAccountIdMap.set(account.user_id, account.id);
+          }
+        });
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
@@ -58,11 +66,13 @@ export function useUsers() {
             if (usersData && usersData.users) {
               usersData.users.forEach(user => {
                 if (user.id && user.email) {
+                  // Map user id to email
                   emailMap.set(user.id, user.email);
                   
-                  const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
-                  if (matchingAccount) {
-                    emailMap.set(matchingAccount.id, user.email);
+                  // Also map account id to email if we have the mapping
+                  const accountId = userIdToAccountIdMap.get(user.id);
+                  if (accountId) {
+                    emailMap.set(accountId, user.email);
                   }
                 }
               });
@@ -109,8 +119,8 @@ export function useUsers() {
         const employeeProfiles = accountsData.map(account => {
           const profile = profileMap.get(account.id) || {};
           
-          // Get email from emailMap, profile, or fall back to empty string
-          const userEmail = emailMap.get(account.id) || profile.email || '';
+          // Get email from emailMap (auth users), profile, or fall back to empty string
+          const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
           
           return {
             id: account.id,

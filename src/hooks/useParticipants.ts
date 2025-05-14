@@ -27,19 +27,20 @@ export function useParticipants() {
           return [];
         }
         
-        // Get emails for these accounts
+        // Create a map for emails
         const emailMap = new Map();
+        const userIdToAccountIdMap = new Map();
         
-        // First try to get emails from the accounts table directly
+        // Track user_id to account_id mapping
         accountsData.forEach(account => {
-          if (account.email) {
-            emailMap.set(account.id, account.email);
+          if (account.user_id) {
+            userIdToAccountIdMap.set(account.user_id, account.id);
           }
         });
         
         // For any missing emails, try to get them from auth.users via admin API
         const userIds = accountsData
-          .filter(account => account.user_id && !emailMap.has(account.id))
+          .filter(account => account.user_id)
           .map(account => account.user_id);
           
         if (userIds.length > 0) {
@@ -50,9 +51,15 @@ export function useParticipants() {
             
             if (usersData && usersData.users) {
               usersData.users.forEach(user => {
-                const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
-                if (matchingAccount && user.email) {
-                  emailMap.set(matchingAccount.id, user.email);
+                if (user.id && user.email) {
+                  // Map user id to email
+                  emailMap.set(user.id, user.email);
+                  
+                  // Also map account id to email if we have the mapping
+                  const accountId = userIdToAccountIdMap.get(user.id);
+                  if (accountId) {
+                    emailMap.set(accountId, user.email);
+                  }
                 }
               });
             }
@@ -91,7 +98,7 @@ export function useParticipants() {
           if (!participantsMap.has(account.id)) {
             const profile = profileMap.get(account.id) || {};
             // Get email from the emailMap, profile, or fallback to empty string
-            const userEmail = emailMap.get(account.id) || profile.email || '';
+            const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
             
             participantsMap.set(account.id, {
               id: account.id,
