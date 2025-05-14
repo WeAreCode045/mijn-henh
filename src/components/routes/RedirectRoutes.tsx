@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Route, Navigate, useParams } from "react-router-dom";
+import { useAuth } from "@/providers/AuthProvider";
 
 // This component handles the redirect from /property/:id to dashboard with tab=property
 function PropertyTabRedirect() {
@@ -22,8 +23,15 @@ function PropertyContentRedirect() {
 
 // This component handles redirects from auth page when user is already authenticated
 function AuthParticipantRedirect() {
-  // Removed searchParams usage entirely, hardcode to home route with replace
-  return <Navigate to="/" replace />;
+  const { user, initialized } = useAuth();
+  
+  // Only redirect to home if the user is authenticated
+  if (initialized && user) {
+    return <Navigate to="/" replace />;
+  }
+  
+  // Otherwise, stay on the auth page
+  return null;
 }
 
 export const RedirectRoutes = [
