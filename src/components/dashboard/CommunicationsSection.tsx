@@ -331,7 +331,7 @@ export function CommunicationsSection() {
                 <div className="text-xs text-muted-foreground">
                   <span>{submission.email}</span>
                   <span className="mx-2">•</span>
-                  <span>Property: {submission.property?.title || 'Unknown'}</span>
+                  <span>Property: {submission.property.title || 'Unknown'}</span>
                 </div>
                 <div className="flex gap-1">
                   <Button 
