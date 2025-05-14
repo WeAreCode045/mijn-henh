@@ -38,7 +38,7 @@ function HomeRedirect() {
     return <Navigate to="/auth" replace />;
   }
   
-  // If user is authenticated or auth is still initializing, we'll let the parent routes handle it
+  // For authenticated users or during initialization, don't redirect
   console.log("HomeRedirect - User exists or auth initializing, continuing");
   return null;
 }
