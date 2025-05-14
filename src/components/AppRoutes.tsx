@@ -23,22 +23,22 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* RedirectRoutes First - These handle redirection logic */}
+      {RedirectRoutes}
+      
+      {/* Auth Routes - Handle login/signup */}
       {AuthRoutes}
       
       {/* Webview Routes - Always available */}
       {WebViewRoutes}
       
-      {/* Redirect Routes - Always available */}
-      {RedirectRoutes}
-      
-      {/* Participant Routes */}
+      {/* Participant Routes - Only visible to buyers/sellers */}
       {isParticipant && ParticipantRoutes}
       
-      {/* Agent/Admin Routes */}
+      {/* Agent/Admin Routes - Only visible to agents/admins */}
       {(isAgent || isAdmin) && AdminRoutes}
       
-      {/* 404 Route */}
+      {/* 404 Route - Always last */}
       {FallbackRoutes}
     </Routes>
   );
