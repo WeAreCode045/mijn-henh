@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
@@ -46,8 +47,8 @@ export function useUsers() {
         
         // Track user_id to account_id mapping
         if (accountsData) {
-          accountsData.forEach(account => {
-            if (account.user_id) {
+          accountsData.forEach((account: any) => {
+            if (account && account.user_id) {
               userIdToAccountIdMap.set(account.user_id, account.id);
             }
           });
@@ -55,8 +56,8 @@ export function useUsers() {
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account.user_id)
-          .map(account => account.user_id);
+          .filter((account: any) => account && account.user_id)
+          .map((account: any) => account.user_id);
           
         if (userIds.length > 0) {
           try {
@@ -65,8 +66,8 @@ export function useUsers() {
             });
             
             if (usersData && usersData.users) {
-              usersData.users.forEach(user => {
-                if (user.id && user.email) {
+              usersData.users.forEach((user: any) => {
+                if (user && user.id && user.email) {
                   // Map user id to email
                   emailMap.set(user.id, user.email);
                   
@@ -99,7 +100,7 @@ export function useUsers() {
             created_at,
             updated_at
           `)
-          .in('id', accountsData.map(account => account.id));
+          .in('id', accountsData.map((account: any) => account.id));
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -111,13 +112,15 @@ export function useUsers() {
         // Create a map of id to profile
         const profileMap = new Map();
         if (profiles) {
-          profiles.forEach(profile => {
-            profileMap.set(profile.id, profile);
+          profiles.forEach((profile: any) => {
+            if (profile && profile.id) {
+              profileMap.set(profile.id, profile);
+            }
           });
         }
         
         // Map accounts to user profiles
-        const employeeProfiles = accountsData.map(account => {
+        const employeeProfiles = accountsData.map((account: any) => {
           const profile = profileMap.get(account.id) || {};
           
           // Get email from emailMap (auth users), profile, or fall back to empty string

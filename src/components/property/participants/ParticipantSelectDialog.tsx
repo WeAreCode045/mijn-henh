@@ -75,7 +75,7 @@ export function ParticipantSelectDialog({
           .insert({
             user_id: userId,
             type: 'participant',
-            role: role as any, // Type coercion needed due to schema constraints
+            role: role as string, // Type coercion to avoid recursion
             display_name: `${formData.firstName} ${formData.lastName}`.trim(),
             email: formData.email // Add email to the accounts table
           })
@@ -96,7 +96,7 @@ export function ParticipantSelectDialog({
               first_name: formData.firstName,
               last_name: formData.lastName,
               email: formData.email,
-              role: role
+              role: role as string // Type coercion to avoid recursion
             }
           ]);
         
@@ -131,7 +131,7 @@ export function ParticipantSelectDialog({
         .insert({
           property_id: propertyId,
           user_id: userId,
-          role: role,
+          role: role as string, // Type coercion to avoid recursion
           status: "pending"
         });
         
