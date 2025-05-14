@@ -14,19 +14,23 @@ import { useToast } from '@/components/ui/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { supabase } from '@/integrations/supabase/client';
 import { ParticipantRole } from '@/types/participant';
+import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
+import { ParticipantProfileData } from '@/types/participant';
 
 interface CreateParticipantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  propertyId: string;
-  role: ParticipantRole;
+  propertyId?: string;
+  role?: ParticipantRole;
+  onSuccess?: (options?: RefetchOptions) => Promise<QueryObserverResult<ParticipantProfileData[], Error>>;
 }
 
 export function CreateParticipantDialog({
   open,
   onOpenChange,
   propertyId,
-  role,
+  role = 'buyer',
+  onSuccess
 }: CreateParticipantDialogProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -97,22 +101,29 @@ export function CreateParticipantDialog({
         accountId = userData[0].id;
       }
       
-      // Link the user to the property as a participant
-      const { error: linkError } = await supabase
-        .from("property_participants")
-        .insert({
-          property_id: propertyId,
-          user_id: userId,
-          role: role as string, // Type coercion to avoid recursion
-          status: "pending"
-        });
-        
-      if (linkError) throw linkError;
+      // Link the user to the property as a participant if propertyId is provided
+      if (propertyId) {
+        const { error: linkError } = await supabase
+          .from("property_participants")
+          .insert({
+            property_id: propertyId,
+            user_id: userId,
+            role: role as string, 
+            status: "pending"
+          });
+          
+        if (linkError) throw linkError;
+      }
       
       toast({
         title: "Success",
-        description: `${role} added successfully`,
+        description: createNew ? "Participant created successfully" : `${role} added successfully`,
       });
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        await onSuccess();
+      }
       
       // Reset form and close dialog
       setSearchEmail("");
@@ -141,7 +152,9 @@ export function CreateParticipantDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Add {role === "seller" ? "Seller" : "Buyer"} to Property
+            {propertyId 
+              ? `Add ${role === "seller" ? "Seller" : "Buyer"} to Property` 
+              : "Create New Participant"}
           </DialogTitle>
         </DialogHeader>
 
@@ -156,13 +169,15 @@ export function CreateParticipantDialog({
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="new" id="new" />
                 <Label htmlFor="new" className="cursor-pointer">
-                  Create new {role}
+                  Create new {propertyId ? role : "participant"}
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="existing" id="existing" />
                 <Label htmlFor="existing" className="cursor-pointer">
-                  Add existing user as {role}
+                  {propertyId 
+                    ? `Add existing user as ${role}`
+                    : "Use existing participant"}
                 </Label>
               </div>
             </RadioGroup>
@@ -230,7 +245,7 @@ export function CreateParticipantDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Participant"}
+              {isLoading ? "Adding..." : createNew ? "Create Participant" : "Add Participant"}
             </Button>
           </DialogFooter>
         </form>
