@@ -1,5 +1,5 @@
 
 // Re-export from the primary implementation
-import { useToast, toast } from "@/hooks/use-toast";
+import { useToast, toast, type Toast } from "@/hooks/use-toast";
 
-export { useToast, toast };
+export { useToast, toast, type Toast };

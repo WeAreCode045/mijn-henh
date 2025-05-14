@@ -18,13 +18,17 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000,
       retry: 1,
-      onError: (error) => {
-        console.log("Query error (non-fatal):", error);
+      meta: {
+        onError: (error: Error) => {
+          console.log("Query error (non-fatal):", error);
+        }
       }
     },
     mutations: {
-      onError: (error) => {
-        console.log('Mutation error (non-fatal):', error);
+      meta: {
+        onError: (error: Error) => {
+          console.log('Mutation error (non-fatal):', error);
+        }
       }
     }
   },
