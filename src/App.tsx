@@ -8,52 +8,67 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client"; 
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { BrowserRouter } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import AppRoutes from "@/components/AppRoutes";
 
-// Add error boundary component for better error handling
-const ErrorFallback = () => (
-  <div className="min-h-screen flex items-center justify-center flex-col p-4">
-    <h2 className="text-xl font-semibold mb-4">Something went wrong</h2>
-    <p className="mb-4">The application encountered an error. Please try refreshing the page.</p>
-    <button 
-      onClick={() => window.location.reload()} 
-      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-    >
-      Refresh Page
-    </button>
-  </div>
-);
-
-// Create a QueryClient instance with default options
+// Create a QueryClient instance with default options - we're adding more error logging
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000,
       retry: 1,
+      onError: (error) => {
+        console.log("Query error (non-fatal):", error);
+      }
     },
     mutations: {
-      // Add proper error handling in the mutations options
       onError: (error) => {
-        console.error('Mutation error:', error);
+        console.log('Mutation error (non-fatal):', error);
       }
     }
   },
 });
 
+const AppContent = () => {
+  // Simple state to ensure we at least show loading for a minimal time
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    console.log("App initializing...");
+    // Ensure loading spinner shows for at least 500ms to prevent flash
+    const timer = setTimeout(() => {
+      setIsReady(true);
+      console.log("App ready to render");
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // If not ready, show loading spinner
+  if (!isReady) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <AuthProvider>
+      <SidebarProvider>
+        <BrowserRouter>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
+        </BrowserRouter>
+      </SidebarProvider>
+    </AuthProvider>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <SessionContextProvider supabaseClient={supabase}>
-      <AuthProvider>
-        <SidebarProvider>
-          <BrowserRouter>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <AppRoutes />
-            </TooltipProvider>
-          </BrowserRouter>
-        </SidebarProvider>
-      </AuthProvider>
+      <AppContent />
     </SessionContextProvider>
   </QueryClientProvider>
 );
