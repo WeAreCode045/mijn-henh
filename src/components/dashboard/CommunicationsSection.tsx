@@ -17,7 +17,7 @@ interface Submission {
   id: string;
   created_at: string;
   property_id: string;
-  property: PropertyTitle; // Changed from array to single object
+  property: PropertyTitle; // Single object with title
   name: string;
   email: string;
   message: string;
