@@ -19,6 +19,7 @@ import ParticipantDashboard from "@/pages/ParticipantDashboard";
 import ParticipantProfile from "@/pages/ParticipantProfile";
 import Participants from "@/pages/Participants";
 import { PropertyLayout } from "@/components/PropertyLayout";
+import { RedirectRoutes } from "@/components/routes/RedirectRoutes";
 
 export default function AppRoutes() {
   const { isAdmin, isAgent, userRole } = useAuth();
@@ -32,6 +33,9 @@ export default function AppRoutes() {
 
   return (
     <Routes>
+      {/* Redirect Routes - Handle special redirects */}
+      {RedirectRoutes}
+
       {/* Public Routes */}
       <Route
         path="/auth"
@@ -43,51 +47,39 @@ export default function AppRoutes() {
       />
 
       {/* Protected Routes with PropertyLayout */}
-      {isParticipant ? (
-        <>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <PropertyLayout>
-                  <ParticipantDashboard />
-                </PropertyLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/participant"
-            element={
-              <ProtectedRoute>
-                <PropertyLayout>
-                  <ParticipantDashboard />
-                </PropertyLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/participant/profile"
-            element={
-              <ProtectedRoute>
-                <PropertyLayout>
-                  <ParticipantProfile />
-                </PropertyLayout>
-              </ProtectedRoute>
-            }
-          />
-        </>
-      ) : (
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <PropertyLayout>
-                <Dashboard />
-              </PropertyLayout>
-            </ProtectedRoute>
-          }
-        />
-      )}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <PropertyLayout>
+              <Dashboard />
+            </PropertyLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Participant Routes */}
+      <Route
+        path="/participant"
+        element={
+          <ProtectedRoute>
+            <PropertyLayout>
+              <ParticipantDashboard />
+            </PropertyLayout>
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path="/participant/profile"
+        element={
+          <ProtectedRoute>
+            <PropertyLayout>
+              <ParticipantProfile />
+            </PropertyLayout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Agent Routes with PropertyLayout */}
       {(isAgent || isAdmin) && (

@@ -4,10 +4,10 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Spinner } from "./ui/spinner";
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading, initialized } = useAuth();
+  const { user, isLoading, initialized, userRole } = useAuth();
 
   // Add debugging to understand auth state
-  console.log("PublicRoute - Auth state:", { user, isLoading, initialized });
+  console.log("PublicRoute - Auth state:", { user, isLoading, initialized, userRole });
 
   // If authentication state is still initializing, show a loading spinner
   if (isLoading || !initialized) {
@@ -19,11 +19,12 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // If user exists after initialization, redirect to root
+  // If user exists after initialization, redirect based on role
   if (user) {
-    console.log("PublicRoute - User exists, redirecting to /");
-    // Always redirect to root with replace to prevent navigation issues
-    return <Navigate to="/" replace />;
+    console.log("PublicRoute - User exists, redirecting based on role");
+    // Direct participants to their dashboard, others to main dashboard
+    const redirectPath = (userRole === 'buyer' || userRole === 'seller') ? '/participant' : '/';
+    return <Navigate to={redirectPath} replace />;
   }
 
   // No authenticated user, render children

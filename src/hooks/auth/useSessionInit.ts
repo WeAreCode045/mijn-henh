@@ -77,7 +77,22 @@ export function useSessionInit({
       console.log('Initializing auth session...');
       
       try {
-        // First check for an existing session
+        // Set up the auth state change listener first
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log('Auth state change event triggered:', event);
+            if (isMounted) {
+              await handleAuthStateChange(session);
+              
+              // For sign_in events, force a refresh to ensure we have the newest data
+              if (event === 'SIGNED_IN') {
+                console.log('User signed in, handling auth state');
+              }
+            }
+          }
+        );
+        
+        // Then check for an existing session
         const { data: { session: existingSession }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -85,34 +100,21 @@ export function useSessionInit({
           if (isMounted) {
             clearAuthState();
             setIsLoading(false);
+            setInitialized(true);
           }
         } else if (existingSession) {
           // We have a session, apply it immediately
           console.log('Existing session found:', existingSession.user?.id);
           if (isMounted) {
             await handleAuthStateChange(existingSession);
+            setInitialized(true);
           }
         } else {
           console.log('No existing session found');
           if (isMounted) {
             setIsLoading(false);
+            setInitialized(true);
           }
-        }
-        
-        // Then set up the auth state change listener for future changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (_, session) => {
-            console.log('Auth state change event triggered');
-            if (isMounted) {
-              await handleAuthStateChange(session);
-            }
-          }
-        );
-        
-        // Set initialized to true only if component is still mounted
-        if (isMounted) {
-          console.log('Auth initialization complete');
-          setInitialized(true);
         }
         
         // Return cleanup function

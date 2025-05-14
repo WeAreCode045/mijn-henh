@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Route, Navigate, useParams } from "react-router-dom";
+import { Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 
 // This component handles the redirect from /property/:id to dashboard with tab=property
@@ -21,16 +21,30 @@ function PropertyContentRedirect() {
   return <Navigate to={`/property/${id}/content/general`} replace />;
 }
 
-// This component handles redirects from auth page when user is already authenticated
-function AuthParticipantRedirect() {
-  const { user, initialized } = useAuth();
+// This component handles redirects for the home route based on authentication status
+function HomeRedirect() {
+  const { user, initialized, userRole } = useAuth();
+  const location = useLocation();
   
-  // Only redirect to home if the user is authenticated
-  if (initialized && user) {
-    return <Navigate to="/" replace />;
+  console.log("HomeRedirect - Current path:", location.pathname);
+  console.log("HomeRedirect - Auth state:", { user: !!user, initialized, userRole });
+  
+  // Only redirect if we're sure about the auth state
+  if (initialized) {
+    if (!user) {
+      console.log("HomeRedirect - No user, redirecting to /auth");
+      return <Navigate to="/auth" replace />;
+    }
+    
+    // For participants, redirect to participant dashboard
+    if (userRole === 'buyer' || userRole === 'seller') {
+      console.log("HomeRedirect - User is participant, redirecting to /participant");
+      return <Navigate to="/participant" replace />;
+    }
   }
   
-  // Otherwise, stay on the auth page
+  // Don't redirect, let the route render normally
+  console.log("HomeRedirect - No redirect needed");
   return null;
 }
 
@@ -51,11 +65,5 @@ export const RedirectRoutes = [
     key="property-content-redirect"
     path="/property/:id/content" 
     element={<PropertyContentRedirect />} 
-  />,
-
-  <Route
-    key="auth-participant-redirect"
-    path="/auth" 
-    element={<AuthParticipantRedirect />}
   />
 ];

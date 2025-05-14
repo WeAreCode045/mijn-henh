@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,16 @@ export default function Auth() {
   const [fullName, setFullName] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, initialized } = useAuth();
+  const { user, initialized, userRole } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (initialized && user) {
-      navigate('/', { replace: true });
+      console.log("Auth page - user is already authenticated, redirecting to home");
+      const redirectPath = (userRole === 'buyer' || userRole === 'seller') ? '/participant' : '/';
+      navigate(redirectPath, { replace: true });
     }
-  }, [user, initialized, navigate]);
+  }, [user, initialized, navigate, userRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +87,8 @@ export default function Auth() {
             description: "Logged in successfully",
           });
           
-          navigate('/', { replace: true });
+          // Will be redirected by the effect hook based on role
+          console.log("Login successful, waiting for auth state to update");
         }
       }
     } catch (error) {
