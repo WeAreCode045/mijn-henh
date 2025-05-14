@@ -18,23 +18,19 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000,
       retry: 1,
-      meta: {
-        onError: (error: Error) => {
-          console.log("Query error (non-fatal):", error);
-        }
+      onError: (error) => {
+        console.log("Query error (non-fatal):", error);
       }
     },
     mutations: {
-      meta: {
-        onError: (error: Error) => {
-          console.log('Mutation error (non-fatal):', error);
-        }
+      onError: (error) => {
+        console.log('Mutation error (non-fatal):', error);
       }
     }
   },
 });
 
-const App = () => {
+const AppContent = () => {
   // Simple state to ensure we at least show loading for a minimal time
   const [isReady, setIsReady] = useState(false);
 
@@ -55,22 +51,26 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionContextProvider supabaseClient={supabase}>
+    <AuthProvider>
+      <SidebarProvider>
         <BrowserRouter>
-          <AuthProvider>
-            <SidebarProvider>
-              <TooltipProvider>
-                <AppRoutes />
-                <Toaster />
-                <Sonner />
-              </TooltipProvider>
-            </SidebarProvider>
-          </AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppRoutes />
+          </TooltipProvider>
         </BrowserRouter>
-      </SessionContextProvider>
-    </QueryClientProvider>
+      </SidebarProvider>
+    </AuthProvider>
   );
 };
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <SessionContextProvider supabaseClient={supabase}>
+      <AppContent />
+    </SessionContextProvider>
+  </QueryClientProvider>
+);
 
 export default App;

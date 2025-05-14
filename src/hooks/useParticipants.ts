@@ -33,8 +33,8 @@ export function useParticipants() {
         
         // Track user_id to account_id mapping
         if (accountsData) {
-          accountsData.forEach((account: any) => {
-            if (account && account.user_id) {
+          accountsData.forEach(account => {
+            if (account.user_id) {
               userIdToAccountIdMap.set(account.user_id, account.id);
             }
           });
@@ -42,8 +42,8 @@ export function useParticipants() {
         
         // For any missing emails, try to get them from auth.users via admin API
         const userIds = accountsData
-          .filter((account: any) => account && account.user_id)
-          .map((account: any) => account.user_id);
+          .filter(account => account.user_id)
+          .map(account => account.user_id);
           
         if (userIds.length > 0) {
           try {
@@ -52,8 +52,8 @@ export function useParticipants() {
             });
             
             if (usersData && usersData.users) {
-              usersData.users.forEach((user: any) => {
-                if (user && user.id && user.email) {
+              usersData.users.forEach(user => {
+                if (user.id && user.email) {
                   // Map user id to email
                   emailMap.set(user.id, user.email);
                   
@@ -75,7 +75,7 @@ export function useParticipants() {
         const { data: profiles, error: profilesError } = await supabase
           .from("participants_profile")
           .select(`*`)
-          .in('id', accountsData.map((account: any) => account.id));
+          .in('id', accountsData.map(account => account.id));
 
         if (profilesError && profilesError.code !== 'PGRST116') {
           console.error("Error fetching participant profiles:", profilesError);
@@ -87,10 +87,8 @@ export function useParticipants() {
         // Create a map of id to profile for quick lookups
         const profileMap = new Map();
         if (profiles) {
-          profiles.forEach((profile: any) => {
-            if (profile && profile.id) {
-              profileMap.set(profile.id, profile);
-            }
+          profiles.forEach(profile => {
+            profileMap.set(profile.id, profile);
           });
         }
         
@@ -99,8 +97,8 @@ export function useParticipants() {
         
         // Process each account to create participant data
         if (accountsData) {
-          accountsData.forEach((account: any) => {
-            if (account && account.id && !participantsMap.has(account.id)) {
+          accountsData.forEach(account => {
+            if (!participantsMap.has(account.id)) {
               const profile = profileMap.get(account.id) || {};
               // Get email from the emailMap, profile, or fallback to empty string
               const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';

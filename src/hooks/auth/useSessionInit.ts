@@ -30,60 +30,26 @@ export function useSessionInit({
       try {
         // Get the user's type and role from the accounts table
         const { data: accountData, error: accountError } = await supabase.from('accounts')
-          .select('id, type, role, email')
-          .eq('id', session.user.id)
+          .select('id, type, role')
+          .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
                 
-        if (accountError && accountError.code !== 'PGRST116') {
+        if (accountError) {
           console.error('Error getting user account on auth change:', accountError);
-          
-          // Try to get account by user_id
-          const { data: accountByUserId, error: secondError } = await supabase.from('accounts')
-            .select('id, type, role, email')
-            .eq('user_id', session.user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-            
-          if (secondError && secondError.code !== 'PGRST116') {
-            console.error('Secondary error getting user account:', secondError);
-            setUserRole(null);
-          } else if (accountByUserId) {
-            console.log('Found user account by user_id:', accountByUserId);
-            console.log('User role from accounts table by user_id:', accountByUserId.role);
-            setUserRole(accountByUserId.role);
-            
-            try {
-              const email = accountByUserId.email || session.user.email;
-              const userProfile = await fetchUserProfile(accountByUserId.id, accountByUserId.type, email);
-              if (userProfile) {
-                console.log('User profile fetched by user_id:', userProfile);
-                setProfile(userProfile);
-              }
-            } catch (profileError) {
-              console.error('Error fetching user profile by user_id:', profileError);
-            }
-          } else {
-            setUserRole(null);
-          }
+          setUserRole(null);
         } else if (accountData) {
           console.log('User account data:', accountData);
           setUserRole(accountData.role);
           
           // Fetch the user profile based on type
-          try {
-            const email = accountData.email || session.user.email;
-            const userProfile = await fetchUserProfile(accountData.id, accountData.type, email);
-            if (userProfile) {
-              console.log('User profile fetched:', userProfile);
-              setProfile(userProfile);
-            } else {
-              console.log('No profile found for user');
-            }
-          } catch (profileError) {
-            console.error('Error fetching user profile:', profileError);
+          const userProfile = await fetchUserProfile(session.user.id, accountData.type, session.user.email);
+          if (userProfile) {
+            console.log('User profile fetched:', userProfile);
+            setProfile(userProfile);
+          } else {
+            console.log('No profile found for user');
           }
         } else {
           console.log('No account found for user');
@@ -93,14 +59,12 @@ export function useSessionInit({
         console.error('Unexpected error in auth state change:', err);
       } finally {
         setIsLoading(false);
-        setInitialized(true);  // Mark as initialized once we're done processing
       }
     } else {
       clearAuthState();
       setIsLoading(false);
-      setInitialized(true);  // Mark as initialized even when no session
     }
-  }, [clearAuthState, fetchUserProfile, setIsLoading, setInitialized, setProfile, setSession, setUser, setUserRole]);
+  }, [clearAuthState, fetchUserProfile, setIsLoading, setProfile, setSession, setUser, setUserRole]);
 
   useEffect(() => {
     // Important flag to prevent state updates after unmounting
@@ -109,8 +73,8 @@ export function useSessionInit({
     const initSession = async () => {
       if (!isMounted) return;
       
-      console.log('Initializing auth session...');
       setIsLoading(true);
+      console.log('Initializing auth session...');
       
       try {
         // First check for an existing session
@@ -121,7 +85,6 @@ export function useSessionInit({
           if (isMounted) {
             clearAuthState();
             setIsLoading(false);
-            setInitialized(true);
           }
         } else if (existingSession) {
           // We have a session, apply it immediately
@@ -132,21 +95,25 @@ export function useSessionInit({
         } else {
           console.log('No existing session found');
           if (isMounted) {
-            clearAuthState();
             setIsLoading(false);
-            setInitialized(true);
           }
         }
         
         // Then set up the auth state change listener for future changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
+          async (_, session) => {
             console.log('Auth state change event triggered');
             if (isMounted) {
               await handleAuthStateChange(session);
             }
           }
         );
+        
+        // Set initialized to true only if component is still mounted
+        if (isMounted) {
+          console.log('Auth initialization complete');
+          setInitialized(true);
+        }
         
         // Return cleanup function
         return () => {

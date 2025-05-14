@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
@@ -8,7 +7,7 @@ import { useAuth } from "@/providers/AuthProvider";
 export function useUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { session, initialized } = useAuth();
+  const { session } = useAuth();
 
   const isAuthenticated = !!session;
 
@@ -43,6 +42,47 @@ export function useUsers() {
 
         // Create a map for emails
         const emailMap = new Map();
+        const userIdToAccountIdMap = new Map();
+        
+        // Track user_id to account_id mapping
+        if (accountsData) {
+          accountsData.forEach(account => {
+            if (account.user_id) {
+              userIdToAccountIdMap.set(account.user_id, account.id);
+            }
+          });
+        }
+        
+        // Get emails from auth.users for each user_id
+        const userIds = accountsData
+          .filter(account => account.user_id)
+          .map(account => account.user_id);
+          
+        if (userIds.length > 0) {
+          try {
+            const { data: usersData } = await supabase.auth.admin.listUsers({
+              perPage: 1000
+            });
+            
+            if (usersData && usersData.users) {
+              usersData.users.forEach(user => {
+                if (user.id && user.email) {
+                  // Map user id to email
+                  emailMap.set(user.id, user.email);
+                  
+                  // Also map account id to email if we have the mapping
+                  const accountId = userIdToAccountIdMap.get(user.id);
+                  if (accountId) {
+                    emailMap.set(accountId, user.email);
+                  }
+                }
+              });
+            }
+          } catch (err) {
+            console.error("Error fetching user emails from auth.users:", err);
+            // Continue without these emails
+          }
+        }
         
         // Fetch employer profiles for these account IDs
         const { data: profiles, error: profilesError } = await supabase
@@ -59,7 +99,7 @@ export function useUsers() {
             created_at,
             updated_at
           `)
-          .in('id', accountsData.map((account: any) => account.id));
+          .in('id', accountsData.map(account => account.id));
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -71,19 +111,17 @@ export function useUsers() {
         // Create a map of id to profile
         const profileMap = new Map();
         if (profiles) {
-          profiles.forEach((profile: any) => {
-            if (profile && profile.id) {
-              profileMap.set(profile.id, profile);
-            }
+          profiles.forEach(profile => {
+            profileMap.set(profile.id, profile);
           });
         }
         
         // Map accounts to user profiles
-        const employeeProfiles = accountsData.map((account: any) => {
+        const employeeProfiles = accountsData.map(account => {
           const profile = profileMap.get(account.id) || {};
           
-          // Try to get email from different sources
-          const userEmail = account.email || profile.email || '';
+          // Get email from emailMap (auth users), profile, or fall back to empty string
+          const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
           
           return {
             id: account.id,
@@ -109,7 +147,7 @@ export function useUsers() {
         throw err;
       }
     },
-    enabled: isAuthenticated && initialized
+    enabled: isAuthenticated
   });
 
   const deleteUser = async (userId: string) => {

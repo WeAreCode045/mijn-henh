@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Route, Navigate, useParams } from "react-router-dom";
-import { useAuth } from "@/providers/AuthProvider";
 
 // This component handles the redirect from /property/:id to dashboard with tab=property
 function PropertyTabRedirect() {
@@ -27,22 +26,6 @@ function AuthParticipantRedirect() {
   return <Navigate to="/" replace />;
 }
 
-// This component handles redirects for unauthenticated users trying to access the root
-function HomeRedirect() {
-  const { user, initialized } = useAuth();
-  console.log("HomeRedirect - Auth state:", { user, initialized });
-  
-  // Only redirect if we're fully initialized and have no user
-  if (initialized && !user) {
-    console.log("HomeRedirect - No authenticated user, redirecting to /auth");
-    return <Navigate to="/auth" replace />;
-  }
-  
-  // For authenticated users or during initialization, don't redirect
-  console.log("HomeRedirect - User exists or auth initializing, continuing");
-  return null;
-}
-
 export const RedirectRoutes = [
   <Route 
     key="property-redirect"
@@ -66,11 +49,5 @@ export const RedirectRoutes = [
     key="auth-participant-redirect"
     path="/auth" 
     element={<AuthParticipantRedirect />}
-  />,
-  
-  <Route
-    key="home-redirect"
-    path="/"
-    element={<HomeRedirect />}
   />
 ];

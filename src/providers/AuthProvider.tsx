@@ -26,8 +26,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  console.log("AuthProvider - Initializing");
-  
   const {
     user, setUser,
     session, setSession,
@@ -52,22 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUserProfile
   });
 
-  // Ensure the role is correctly determined from all possible sources
-  const effectiveRole = profile?.role || userRole;
-  const isAdmin = effectiveRole === 'admin';
-  const isAgent = effectiveRole === 'agent' || effectiveRole === 'admin';
-
-  // Debug log to verify provider state
-  console.log("AuthProvider - State:", { 
-    user: user?.id, 
-    initialized,
-    isLoading,
-    userRole,
-    profileRole: profile?.role,
-    effectiveRole,
-    isAdmin,
-    isAgent 
-  });
+  const isAdmin = userRole === 'admin';
+  const isAgent = userRole === 'agent' || userRole === 'admin';
 
   const value = {
     user,
@@ -76,23 +60,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...authMethods,
     isAdmin,
     isAgent,
-    userRole: effectiveRole || null,
+    userRole,
     profile,
     initialized,
   };
-
-  if (isLoading && !initialized) {
-    return <LoadingSpinner />;
-  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => {
-  console.log("useAuth hook called");
   const context = useContext(AuthContext);
   if (context === undefined) {
-    console.error("useAuth must be used within an AuthProvider");
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

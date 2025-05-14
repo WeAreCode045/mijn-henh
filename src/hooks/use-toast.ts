@@ -1,14 +1,13 @@
 
 import { useState } from "react";
 
-export interface Toast {
+interface Toast {
   id: string;
   title?: string;
   description?: string;
   status?: "success" | "error" | "warning" | "info";
   duration?: number;
   isClosable?: boolean;
-  variant?: "default" | "destructive";
 }
 
 export function useToast() {

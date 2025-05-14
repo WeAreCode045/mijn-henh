@@ -4,13 +4,12 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Spinner } from "./ui/spinner";
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  console.log("PublicRoute - Initializing");
   const { user, isLoading, initialized } = useAuth();
 
   // Add debugging to understand auth state
   console.log("PublicRoute - Auth state:", { user, isLoading, initialized });
 
-  // Don't redirect if we're still loading or auth isn't initialized yet
+  // If authentication state is still initializing, show a loading spinner
   if (isLoading || !initialized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -20,9 +19,10 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // Only redirect to home if we're fully initialized AND have a user
+  // If user exists after initialization, redirect to root
   if (user) {
     console.log("PublicRoute - User exists, redirecting to /");
+    // Always redirect to root with replace to prevent navigation issues
     return <Navigate to="/" replace />;
   }
 

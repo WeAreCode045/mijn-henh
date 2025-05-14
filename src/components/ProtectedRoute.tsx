@@ -9,7 +9,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Add debugging to understand auth state
   console.log("ProtectedRoute - Auth state:", { user, isLoading, initialized });
 
-  // Only show loading state if auth is still initializing
+  // If authentication state is still initializing, show a loading spinner
   if (isLoading || !initialized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -22,6 +22,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // If no user after initialization, redirect to auth
   if (!user) {
     console.log("ProtectedRoute - No user, redirecting to /auth");
+    // Always redirect to auth with replace to prevent navigation issues
     return <Navigate to="/auth" replace />;
   }
 

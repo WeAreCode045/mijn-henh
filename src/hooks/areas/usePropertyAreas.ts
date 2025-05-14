@@ -27,7 +27,7 @@ export function usePropertyAreas(propertyId?: string, options?: PropertyAreasOpt
         }
 
         // Return the areas array or an empty array if it's null
-        return (areas?.areas || []) as unknown as PropertyArea[];
+        return (areas?.areas || []) as PropertyArea[];
       } catch (error) {
         console.error("Error in usePropertyAreas:", error);
         throw error;

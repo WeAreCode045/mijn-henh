@@ -1,3 +1,4 @@
+
 export interface Submission {
   id: string;
   property_id: string;
@@ -18,10 +19,6 @@ export interface Submission {
     avatar_url?: string;
   };
   replies?: SubmissionReply[];
-  property?: {  // Added property field to match CommunicationsSection
-    id?: string;
-    title: string;
-  };
 }
 
 export interface SubmissionReply {

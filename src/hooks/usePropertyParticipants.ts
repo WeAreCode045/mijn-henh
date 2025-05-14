@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,13 +53,8 @@ export function usePropertyParticipants(propertyId: string) {
         
         // First try to get emails and names from the accounts table
         if (accountsData) {
-          accountsData.forEach((account: any) => {
-            if (account && account.user_id) {
-              displayNameMap.set(account.user_id, account.display_name);
-              if (account.email) {
-                emailMap.set(account.user_id, account.email);
-              }
-            }
+          accountsData.forEach(account => {
+            displayNameMap.set(account.user_id, account.display_name);
           });
         }
         
@@ -71,8 +65,8 @@ export function usePropertyParticipants(propertyId: string) {
           });
           
           if (usersData && usersData.users) {
-            usersData.users.forEach((user: any) => {
-              if (user && user.email) {
+            usersData.users.forEach(user => {
+              if (user.email) {
                 emailMap.set(user.id, user.email);
               }
             });
@@ -83,18 +77,12 @@ export function usePropertyParticipants(propertyId: string) {
         }
         
         // Map participants with user details
-        const enrichedParticipants: PropertyParticipant[] = participantsData.map((participant: any) => {
+        const enrichedParticipants: PropertyParticipant[] = participantsData.map(participant => {
           const userId = participant.user_id;
-          
-          // Convert documents_signed to string array if needed
-          const documentsSigned = Array.isArray(participant.documents_signed) 
-            ? participant.documents_signed 
-            : (participant.documents_signed ? [String(participant.documents_signed)] : []);
           
           return {
             ...participant,
             role: participant.role as ParticipantRole,
-            documents_signed: documentsSigned,
             user: {
               id: userId,
               email: emailMap.get(userId) || '',
