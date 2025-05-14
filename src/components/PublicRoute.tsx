@@ -9,7 +9,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   // Add debugging to understand auth state
   console.log("PublicRoute - Auth state:", { user, isLoading, initialized });
 
-  // If authentication state is still initializing, show a loading spinner
+  // Don't redirect if we're still loading or auth isn't initialized yet
   if (isLoading || !initialized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -19,10 +19,9 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // If user exists after initialization, redirect to root
+  // Only redirect to home if we're fully initialized AND have a user
   if (user) {
     console.log("PublicRoute - User exists, redirecting to /");
-    // Always redirect to root with replace to prevent navigation issues
     return <Navigate to="/" replace />;
   }
 

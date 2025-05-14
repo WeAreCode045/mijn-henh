@@ -94,12 +94,14 @@ export function useSessionInit({
         console.error('Unexpected error in auth state change:', err);
       } finally {
         setIsLoading(false);
+        setInitialized(true);  // Mark as initialized once we're done processing
       }
     } else {
       clearAuthState();
       setIsLoading(false);
+      setInitialized(true);  // Mark as initialized even when no session
     }
-  }, [clearAuthState, fetchUserProfile, setIsLoading, setProfile, setSession, setUser, setUserRole]);
+  }, [clearAuthState, fetchUserProfile, setIsLoading, setInitialized, setProfile, setSession, setUser, setUserRole]);
 
   useEffect(() => {
     // Important flag to prevent state updates after unmounting
@@ -127,7 +129,6 @@ export function useSessionInit({
           console.log('Existing session found:', existingSession.user?.id);
           if (isMounted) {
             await handleAuthStateChange(existingSession);
-            setInitialized(true);
           }
         } else {
           console.log('No existing session found');

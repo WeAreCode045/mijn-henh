@@ -22,6 +22,7 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (initialized && user) {
+      console.log("Auth page: User already authenticated, redirecting to /");
       navigate('/', { replace: true });
     }
   }, [user, initialized, navigate]);
@@ -29,8 +30,16 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
+      // Clean up any existing auth state first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.error("Error during pre-auth logout:", err);
+        // Continue even if this fails
+      }
+
       const names = fullName.trim().split(' ');
       const firstName = names[0] || '';
       const lastName = names.slice(1).join(' ') || '';
@@ -85,6 +94,7 @@ export default function Auth() {
             description: "Logged in successfully",
           });
           
+          // Use replace to prevent back navigation to login page
           navigate('/', { replace: true });
         }
       }
