@@ -21,6 +21,8 @@ import Participants from "@/pages/Participants";
 import { PropertyLayout } from "@/components/PropertyLayout";
 
 export default function AppRoutes() {
+  // Debug info for authentication state
+  console.log("AppRoutes - Initializing and checking auth context");
   const { isAdmin, isAgent, userRole } = useAuth();
   const isParticipant = userRole === 'buyer' || userRole === 'seller';
 

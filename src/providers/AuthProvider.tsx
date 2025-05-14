@@ -26,6 +26,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  console.log("AuthProvider - Initializing");
+  
   const {
     user, setUser,
     session, setSession,
@@ -55,6 +57,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAgent = userRole === 'agent' || userRole === 'admin' || 
                  profile?.role === 'agent' || profile?.role === 'admin';
 
+  // Debug log to verify provider state
+  console.log("AuthProvider - State:", { 
+    user: user?.id, 
+    initialized, 
+    isLoading, 
+    userRole,
+    isAdmin,
+    isAgent 
+  });
+
   const value = {
     user,
     session,
@@ -71,8 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useAuth = () => {
+  console.log("useAuth hook called");
   const context = useContext(AuthContext);
   if (context === undefined) {
+    console.error("useAuth must be used within an AuthProvider");
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

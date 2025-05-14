@@ -54,18 +54,19 @@ const AppContent = () => {
     return <LoadingSpinner />;
   }
 
+  // Move BrowserRouter to wrap both AuthProvider and AppRoutes
   return (
-    <AuthProvider>
-      <SidebarProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <SidebarProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
             <AppRoutes />
           </TooltipProvider>
-        </BrowserRouter>
-      </SidebarProvider>
-    </AuthProvider>
+        </SidebarProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 
