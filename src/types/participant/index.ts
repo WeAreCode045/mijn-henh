@@ -12,7 +12,11 @@ export interface ParticipantProfileData {
   country?: string;
   date_of_birth?: string | null;
   place_of_birth?: string | null;
-  identification?: any;
+  identification?: {
+    type?: string | null;
+    document_number?: string | null;
+    social_number?: string | null;
+  };
   nationality?: string | null;
   gender?: string | null;
   iban?: string | null;

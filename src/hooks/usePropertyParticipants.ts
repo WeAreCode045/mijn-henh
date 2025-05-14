@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,9 +52,11 @@ export function usePropertyParticipants(propertyId: string) {
         const displayNameMap = new Map();
         
         // First try to get emails and names from the accounts table
-        accountsData?.forEach(account => {
-          displayNameMap.set(account.user_id, account.display_name);
-        });
+        if (accountsData) {
+          accountsData.forEach(account => {
+            displayNameMap.set(account.user_id, account.display_name);
+          });
+        }
         
         // For any missing emails or names, try to get them from auth.users via admin API
         try {
@@ -81,6 +82,7 @@ export function usePropertyParticipants(propertyId: string) {
           
           return {
             ...participant,
+            role: participant.role as ParticipantRole,
             user: {
               id: userId,
               email: emailMap.get(userId) || '',

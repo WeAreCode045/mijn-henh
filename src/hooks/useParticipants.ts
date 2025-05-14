@@ -32,11 +32,13 @@ export function useParticipants() {
         const userIdToAccountIdMap = new Map();
         
         // Track user_id to account_id mapping
-        accountsData.forEach(account => {
-          if (account.user_id) {
-            userIdToAccountIdMap.set(account.user_id, account.id);
-          }
-        });
+        if (accountsData) {
+          accountsData.forEach(account => {
+            if (account.user_id) {
+              userIdToAccountIdMap.set(account.user_id, account.id);
+            }
+          });
+        }
         
         // For any missing emails, try to get them from auth.users via admin API
         const userIds = accountsData
@@ -94,39 +96,45 @@ export function useParticipants() {
         const participantsMap = new Map();
         
         // Process each account to create participant data
-        accountsData.forEach(account => {
-          if (!participantsMap.has(account.id)) {
-            const profile = profileMap.get(account.id) || {};
-            // Get email from the emailMap, profile, or fallback to empty string
-            const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
-            
-            participantsMap.set(account.id, {
-              id: account.id,
-              email: userEmail,
-              first_name: profile.first_name || '',
-              last_name: profile.last_name || '',
-              phone: profile.phone || '',
-              whatsapp_number: profile.whatsapp_number || '',
-              address: profile.address || '',
-              city: profile.city || '',
-              postal_code: profile.postal_code || '',
-              country: profile.country || '',
-              date_of_birth: profile.date_of_birth || null,
-              place_of_birth: profile.place_of_birth || null,
-              identification: profile.identification || null,
-              nationality: profile.nationality || null,
-              gender: profile.gender || null,
-              iban: profile.iban || null,
-              role: profile.role || account.role || 'buyer',
-              created_at: profile.created_at || '',
-              updated_at: profile.updated_at || '',
-              properties: [], // Will be populated later
-              avatar_url: null,
-              full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
-              bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility
-            });
-          }
-        });
+        if (accountsData) {
+          accountsData.forEach(account => {
+            if (!participantsMap.has(account.id)) {
+              const profile = profileMap.get(account.id) || {};
+              // Get email from the emailMap, profile, or fallback to empty string
+              const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
+              
+              participantsMap.set(account.id, {
+                id: account.id,
+                email: userEmail,
+                first_name: profile.first_name || '',
+                last_name: profile.last_name || '',
+                phone: profile.phone || '',
+                whatsapp_number: profile.whatsapp_number || '',
+                address: profile.address || '',
+                city: profile.city || '',
+                postal_code: profile.postal_code || '',
+                country: profile.country || '',
+                date_of_birth: profile.date_of_birth || null,
+                place_of_birth: profile.place_of_birth || null,
+                identification: profile.identification || { 
+                  type: null, 
+                  document_number: null, 
+                  social_number: null 
+                },
+                nationality: profile.nationality || null,
+                gender: profile.gender || null,
+                iban: profile.iban || null,
+                role: profile.role || account.role || 'buyer',
+                created_at: profile.created_at || '',
+                updated_at: profile.updated_at || '',
+                properties: [], // Will be populated later
+                avatar_url: null,
+                full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
+                bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility
+              });
+            }
+          });
+        }
         
         // Convert the map to an array of participant profiles
         const participantProfiles: ParticipantProfileData[] = Array.from(participantsMap.values());

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
@@ -46,11 +45,13 @@ export function useUsers() {
         const userIdToAccountIdMap = new Map();
         
         // Track user_id to account_id mapping
-        accountsData.forEach(account => {
-          if (account.user_id) {
-            userIdToAccountIdMap.set(account.user_id, account.id);
-          }
-        });
+        if (accountsData) {
+          accountsData.forEach(account => {
+            if (account.user_id) {
+              userIdToAccountIdMap.set(account.user_id, account.id);
+            }
+          });
+        }
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData

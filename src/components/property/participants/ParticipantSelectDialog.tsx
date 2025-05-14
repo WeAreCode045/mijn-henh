@@ -69,7 +69,7 @@ export function ParticipantSelectDialog({
           .insert({
             user_id: userId,
             type: 'participant',
-            role: role,
+            role: role as any, // Type coercion needed due to schema constraints
             display_name: `${formData.firstName} ${formData.lastName}`.trim()
           });
         
@@ -96,7 +96,7 @@ export function ParticipantSelectDialog({
         
         if (userError) throw userError;
         
-        const existingUser = userData.users.find(
+        const existingUser = userData?.users.find(
           (user) => user.email?.toLowerCase() === searchEmail.toLowerCase()
         );
         

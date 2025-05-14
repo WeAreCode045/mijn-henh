@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -149,8 +148,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           .insert({
             user_id: authData.user.id,
             type: "employee",
+            role: "agent", // Default role required by schema
             display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-            // Note: not setting role here as per request - it will be updated later in the edit form
           })
           .select()
           .single();
