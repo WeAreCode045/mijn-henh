@@ -37,6 +37,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>(initialData?.avatar_url || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -77,6 +78,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       if (isEditMode && initialData?.id) {
@@ -116,6 +118,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           description: "User updated successfully",
         });
       } else {
+        // Create new user in auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -129,75 +132,52 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         if (authError) throw authError;
 
         if (authData.user) {
+          // User creation succeeded, now create/update the accounts record
+          const displayName = `${formData.first_name} ${formData.last_name}`.trim();
+          
+          // Create account record directly
+          const { error: accountError } = await supabase
+            .from("accounts")
+            .insert({
+              user_id: authData.user.id,
+              role: formData.role,
+              type: formData.type,
+              display_name: displayName,
+              // Don't include email field as it doesn't exist in the accounts table
+            });
+
+          if (accountError) {
+            console.error("Error creating account:", accountError);
+            throw accountError;
+          }
+
+          // Upload photo if provided
           let photoUrl = null;
           if (photoFile) {
             photoUrl = await uploadPhoto(authData.user.id);
           }
 
-          // We don't need to add a profile or account as there's a trigger in Supabase 
-          // that creates an account and profile for new users. Let's just update them:
-          const { error: accountError } = await supabase
-            .from("accounts")
-            .update({
-              role: formData.role,
-              type: formData.type,
-              display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-              email: formData.email
-            })
-            .eq("user_id", authData.user.id);
-
-          if (accountError) {
-            console.error("Error updating account:", accountError);
-            // If the trigger hasn't created the account yet, we might need to create it manually
-            const { error: insertError } = await supabase
-              .from("accounts")
-              .insert({
-                user_id: authData.user.id,
-                role: formData.role,
-                type: formData.type,
-                display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-                email: formData.email
-              });
-
-            if (insertError) throw insertError;
-          }
-
-          // Update employer_profiles
-          const { error: profileUpdateError } = await supabase
+          // Create employer profile
+          const { error: profileError } = await supabase
             .from("employer_profiles")
-            .update({
+            .insert({
+              id: authData.user.id,
               first_name: formData.first_name,
               last_name: formData.last_name,
               email: formData.email,
               phone: formData.phone,
               whatsapp_number: formData.whatsapp_number,
-              updated_at: new Date().toISOString(),
+              role: formData.role,
               ...(photoUrl && { avatar_url: photoUrl })
-            })
-            .eq("id", authData.user.id);
+            });
 
-          if (profileUpdateError) {
-            // If update fails, try to insert
-            const { error: profileInsertError } = await supabase
-              .from("employer_profiles")
-              .insert({
-                id: authData.user.id,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
-                email: formData.email,
-                phone: formData.phone,
-                whatsapp_number: formData.whatsapp_number,
-                ...(photoUrl && { avatar_url: photoUrl })
-              });
-
-            if (profileInsertError) throw profileInsertError;
-          }
+          if (profileError) throw profileError;
+          
+          toast({
+            title: "Success",
+            description: "Employee created successfully",
+          });
         }
-
-        toast({
-          title: "Success",
-          description: "User created successfully",
-        });
       }
 
       onSuccess();
@@ -208,6 +188,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -261,8 +243,26 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             required
           />
         </div>
-        <Button type="submit" className="w-full">
-          Create Employee
+        <div className="space-y-2">
+          <Label htmlFor="role">Role</Label>
+          <Select
+            value={formData.role}
+            onValueChange={(value: "admin" | "agent") =>
+              setFormData((prev) => ({ ...prev, role: value }))
+            }
+            defaultValue="agent"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="agent">Agent</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creating..." : "Create Employee"}
         </Button>
       </form>
     );
@@ -362,8 +362,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full">
-        Update User
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Updating..." : "Update User"}
       </Button>
     </form>
   );

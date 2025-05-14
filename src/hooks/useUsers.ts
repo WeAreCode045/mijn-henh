@@ -44,17 +44,9 @@ export function useUsers() {
         // Create a map for emails
         const emailMap = new Map();
         
-        // First try to get emails from the accounts table directly
-        accountsData.forEach(account => {
-          if (account.email) {
-            emailMap.set(account.id, account.email);
-            emailMap.set(account.user_id, account.email);
-          }
-        });
-        
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account.user_id && !emailMap.has(account.user_id))
+          .filter(account => account.user_id)
           .map(account => account.user_id);
           
         if (userIds.length > 0) {
