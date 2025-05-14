@@ -45,8 +45,14 @@ export function ParticipantSelectDialog({
     
     try {
       let userId;
+      let accountId;
       
       if (createNew) {
+        // Validate required fields for new user
+        if (!formData.email || !formData.firstName || !formData.lastName) {
+          throw new Error("All fields are required for creating a new user");
+        }
+        
         // Create new auth user
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
@@ -64,23 +70,29 @@ export function ParticipantSelectDialog({
         userId = authData.user.id;
         
         // Create account with type participant
-        const { error: accountError } = await supabase
+        const { data: accountData, error: accountError } = await supabase
           .from('accounts')
           .insert({
             user_id: userId,
             type: 'participant',
             role: role as any, // Type coercion needed due to schema constraints
-            display_name: `${formData.firstName} ${formData.lastName}`.trim()
-          });
+            display_name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email // Add email to the accounts table
+          })
+          .select()
+          .single();
         
         if (accountError) throw accountError;
+        if (!accountData) throw new Error("Failed to create account");
+        
+        accountId = accountData.id;
         
         // Create participant profile
         const { error: profileError } = await supabase
           .from('participants_profile')
           .insert([
             {
-              id: userId,
+              id: accountId,
               first_name: formData.firstName,
               last_name: formData.lastName,
               email: formData.email,
@@ -90,21 +102,27 @@ export function ParticipantSelectDialog({
         
         if (profileError) throw profileError;
       } else {
+        // Validate search email
+        if (!searchEmail) {
+          throw new Error("Email is required for finding existing users");
+        }
+        
         // Search for existing user by email
-        const { data: userData, error: userError } = await supabase.auth.admin
-          .listUsers();
+        const { data: userData, error: userError } = await supabase
+          .from('accounts')
+          .select('user_id, id')
+          .eq('email', searchEmail.toLowerCase())
+          .eq('type', 'participant')
+          .limit(1);
         
         if (userError) throw userError;
         
-        const existingUser = userData?.users.find(
-          (user) => user.email?.toLowerCase() === searchEmail.toLowerCase()
-        );
-        
-        if (!existingUser) {
-          throw new Error("No user found with that email");
+        if (!userData || userData.length === 0) {
+          throw new Error("No participant found with that email");
         }
         
-        userId = existingUser.id;
+        userId = userData[0].user_id;
+        accountId = userData[0].id;
       }
       
       // Link the user to the property as a participant

@@ -34,7 +34,12 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
     setIsLoading(true);
 
     try {
-      // First, create the auth user
+      // Validate required fields
+      if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+        throw new Error("All fields are required");
+      }
+
+      // Step 1: Create the auth user with email and password
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -48,14 +53,15 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Create account with type participant
+      // Step 2: Create account entry with type participant
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .insert({
           user_id: authData.user.id,
           type: 'participant',
           role: 'buyer', // Default role, can be changed later
-          display_name: `${formData.firstName} ${formData.lastName}`.trim()
+          display_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email // Include email in the accounts table
         })
         .select()
         .single();
@@ -63,12 +69,12 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
       if (accountError) throw accountError;
       if (!accountData) throw new Error("Failed to create account");
 
-      // Create participant profile
+      // Step 3: Create participant profile
       const { error: profileError } = await supabase
         .from('participants_profile')
         .insert([
           {
-            id: authData.user.id,
+            id: accountData.id, // Use account ID for profile
             first_name: formData.firstName,
             last_name: formData.lastName,
             email: formData.email

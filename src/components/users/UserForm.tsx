@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -148,8 +149,9 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           .insert({
             user_id: authData.user.id,
             type: "employee",
-            role: "agent", // Default role required by schema
+            role: formData.role || "agent", // Use the role from the form or default to "agent"
             display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+            email: formData.email // Add email to the accounts table
           })
           .select()
           .single();
@@ -180,7 +182,6 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             phone: formData.phone,
             whatsapp_number: formData.whatsapp_number,
             ...(photoUrl && { avatar_url: photoUrl })
-            // Note: not setting role here as per request
           });
 
         if (profileError) throw profileError;
