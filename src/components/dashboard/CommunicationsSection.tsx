@@ -143,6 +143,8 @@ export function CommunicationsSection() {
         created_at: item.created_at,
         property_id: item.property_id,
         property: {
+          // Convert the property data into the expected format
+          // Ensure property is an object with a title property, not an array
           title: item.property?.title || 'Unknown'
         },
         name: item.name,
@@ -331,7 +333,7 @@ export function CommunicationsSection() {
                 <div className="text-xs text-muted-foreground">
                   <span>{submission.email}</span>
                   <span className="mx-2">•</span>
-                  <span>Property: {submission.property.title || 'Unknown'}</span>
+                  <span>Property: {submission.property?.title || 'Unknown'}</span>
                 </div>
                 <div className="flex gap-1">
                   <Button 
