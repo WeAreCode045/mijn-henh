@@ -138,20 +138,33 @@ export function CommunicationsSection() {
       if (error) throw error;
       
       // Transform the data to match the Submission type
-      const formattedData = data?.map(item => ({
-        id: item.id,
-        created_at: item.created_at,
-        property_id: item.property_id,
-        property: {
-          // Convert the property data into the expected format
-          // Ensure property is an object with a title property, not an array
-          title: item.property?.title || 'Unknown'
-        },
-        name: item.name,
-        email: item.email,
-        message: item.message,
-        is_read: item.is_read
-      })) || [];
+      const formattedData = data?.map(item => {
+        // Ensure property is correctly handled as a single object
+        let propertyData: PropertyTitle = { title: 'Unknown' };
+        
+        // Check if property exists and has the expected structure
+        if (item.property && typeof item.property === 'object') {
+          // If it's a single object directly
+          if ('title' in item.property) {
+            propertyData = { title: item.property.title || 'Unknown' };
+          } 
+          // If it's potentially an array with one item (from the join)
+          else if (Array.isArray(item.property) && item.property.length > 0 && 'title' in item.property[0]) {
+            propertyData = { title: item.property[0].title || 'Unknown' };
+          }
+        }
+        
+        return {
+          id: item.id,
+          created_at: item.created_at,
+          property_id: item.property_id,
+          property: propertyData,
+          name: item.name,
+          email: item.email,
+          message: item.message,
+          is_read: item.is_read
+        };
+      }) || [];
       
       setSubmissions(formattedData);
     } catch (error: any) {
@@ -305,6 +318,10 @@ export function CommunicationsSection() {
     }
   };
 
+  useEffect(() => {
+    fetchSubmissions();
+  }, [toast]);
+
   return (
     <CardContent>
       {isLoading ? (
@@ -333,7 +350,7 @@ export function CommunicationsSection() {
                 <div className="text-xs text-muted-foreground">
                   <span>{submission.email}</span>
                   <span className="mx-2">•</span>
-                  <span>Property: {submission.property?.title || 'Unknown'}</span>
+                  <span>Property: {submission.property.title}</span>
                 </div>
                 <div className="flex gap-1">
                   <Button 
