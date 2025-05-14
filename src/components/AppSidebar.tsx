@@ -126,7 +126,7 @@ export function AppSidebar() {
     avatar_url: profile.avatar_url || undefined,
     phone: profile.phone || undefined,
     whatsapp_number: profile.whatsapp_number || undefined,
-    role: (profile.role || userRole) as User['role'],
+    role: profile.role || userRole as User['role'],
   } : null;
 
   // For debugging
@@ -237,15 +237,27 @@ export function AppSidebar() {
       
       <SidebarFooter className="mb-4 px-4 !bg-primary text-white">
         <SidebarGroup>
-          {userProfile && (
-            <div className="px-2 py-3 rounded bg-primary-foreground/5">
+          {/* Force render profile card if user is logged in */}
+          <div className="px-2 py-3 rounded bg-primary-foreground/5">
+            {userProfile && (
               <UserProfileCard 
                 user={userProfile} 
                 inSidebar={true} 
                 onUpdateProfile={handleUpdateProfile}
               />
-            </div>
-          )}
+            )}
+            {!userProfile && user && (
+              <UserProfileCard 
+                user={{
+                  id: user.id,
+                  email: user.email || '',
+                  role: userRole as User['role'],
+                }} 
+                inSidebar={true} 
+                onUpdateProfile={handleUpdateProfile}
+              />
+            )}
+          </div>
           <SidebarMenu className="mt-4">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout} className="text-white hover:bg-primary-foreground/10">

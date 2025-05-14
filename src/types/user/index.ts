@@ -11,7 +11,7 @@ export interface User extends UserTimestamps {
   phone?: string;
   whatsapp_number?: string;
   type?: "employee" | "participant";
-  role?: string;
+  role?: "admin" | "agent" | "buyer" | "seller" | string;
   avatar_url?: string;
 }
 

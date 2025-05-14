@@ -25,7 +25,11 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Debug the user object
+  console.log("UserProfileCard received user:", user);
+
   if (!user) {
+    console.log("UserProfileCard: No user provided");
     return null;
   }
 
@@ -35,6 +39,10 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
                       
   // Ensure the role is properly formatted for display
   const displayRole = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User';
+
+  // For debugging
+  console.log("UserProfileCard displayName:", displayName);
+  console.log("UserProfileCard displayRole:", displayRole);
 
   const handleEditClick = () => {
     setIsEditing(true);

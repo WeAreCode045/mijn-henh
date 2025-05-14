@@ -52,17 +52,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUserProfile
   });
 
-  // Ensure the role is correctly determined
-  const isAdmin = userRole === 'admin' || profile?.role === 'admin';
-  const isAgent = userRole === 'agent' || userRole === 'admin' || 
-                 profile?.role === 'agent' || profile?.role === 'admin';
+  // Ensure the role is correctly determined from all possible sources
+  const effectiveRole = profile?.role || userRole;
+  const isAdmin = effectiveRole === 'admin';
+  const isAgent = effectiveRole === 'agent' || effectiveRole === 'admin';
 
   // Debug log to verify provider state
   console.log("AuthProvider - State:", { 
     user: user?.id, 
-    initialized, 
-    isLoading, 
+    initialized,
+    isLoading,
     userRole,
+    profileRole: profile?.role,
+    effectiveRole,
     isAdmin,
     isAgent 
   });
@@ -74,10 +76,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...authMethods,
     isAdmin,
     isAgent,
-    userRole,
+    userRole: effectiveRole || null,
     profile,
     initialized,
   };
+
+  if (isLoading && !initialized) {
+    return <LoadingSpinner />;
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
