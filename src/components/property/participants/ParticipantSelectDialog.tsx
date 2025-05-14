@@ -4,18 +4,16 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { ParticipantRole } from "@/types/participant";
-import { useToast } from "@/components/ui/use-toast";
-import { useParticipants } from "@/hooks/useParticipants";
-import { Spinner } from "@/components/ui/spinner";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
+import { ParticipantRole } from "@/types/participant";
 
 interface ParticipantSelectDialogProps {
   open: boolean;
@@ -31,43 +29,111 @@ export function ParticipantSelectDialog({
   role,
 }: ParticipantSelectDialogProps) {
   const { toast } = useToast();
-  const { participants, isLoading } = useParticipants();
-  const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [createNew, setCreateNew] = useState(true);
+  const [formData, setFormData] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "tempPassword123", // Default password for new users
+  });
 
-  const handleSubmit = async () => {
-    if (!selectedParticipant) {
-      toast({
-        title: "Error",
-        description: "Please select a participant",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
     try {
-      // Add the selected participant to the property
-      const { error } = await supabase
-        .from('property_participants')
-        .insert({
-          property_id: propertyId,
-          user_id: selectedParticipant,
-          role: role,
-          status: 'pending'
+      let userId;
+      
+      if (createNew) {
+        // Create new auth user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+            },
+          }
         });
 
-      if (error) throw error;
-
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Failed to create user");
+        
+        userId = authData.user.id;
+        
+        // Create account with type participant
+        const { error: accountError } = await supabase
+          .from('accounts')
+          .insert({
+            user_id: userId,
+            type: 'participant',
+            role: role,
+            display_name: `${formData.firstName} ${formData.lastName}`.trim()
+          });
+        
+        if (accountError) throw accountError;
+        
+        // Create participant profile
+        const { error: profileError } = await supabase
+          .from('participants_profile')
+          .insert([
+            {
+              id: userId,
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              email: formData.email,
+              role: role
+            }
+          ]);
+        
+        if (profileError) throw profileError;
+      } else {
+        // Search for existing user by email
+        const { data: userData, error: userError } = await supabase.auth.admin
+          .listUsers();
+        
+        if (userError) throw userError;
+        
+        const existingUser = userData.users.find(
+          (user) => user.email?.toLowerCase() === searchEmail.toLowerCase()
+        );
+        
+        if (!existingUser) {
+          throw new Error("No user found with that email");
+        }
+        
+        userId = existingUser.id;
+      }
+      
+      // Link the user to the property as a participant
+      const { error: linkError } = await supabase
+        .from("property_participants")
+        .insert({
+          property_id: propertyId,
+          user_id: userId,
+          role: role,
+          status: "pending"
+        });
+        
+      if (linkError) throw linkError;
+      
       toast({
         title: "Success",
-        description: `${role === 'seller' ? 'Seller' : 'Buyer'} added successfully`,
+        description: `${role} added successfully`,
       });
-
-      onOpenChange(false);
       
-      // Optionally trigger a page refresh to show the new participant
-      window.location.reload();
+      // Reset form and close dialog
+      setSearchEmail("");
+      setFormData({
+        email: "",
+        firstName: "",
+        lastName: "",
+        password: "tempPassword123",
+      });
+      setCreateNew(true);
+      onOpenChange(false);
     } catch (error: any) {
       console.error("Error adding participant:", error);
       toast({
@@ -76,139 +142,108 @@ export function ParticipantSelectDialog({
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Function to create and invite a new participant
-  const createAndInviteParticipant = async (participantData: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: ParticipantRole;
-    propertyId: string;
-  }) => {
-    try {
-      // This would typically be handled by a backend API endpoint
-      // For demo purposes, we're showing the flow here
-      
-      // 1. Create user in auth system
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: participantData.email,
-        password: "tempPassword123", // Should be randomly generated
-        options: {
-          data: {
-            full_name: `${participantData.firstName} ${participantData.lastName}`,
-          },
-        },
-      });
-
-      if (authError) throw authError;
-      
-      // 2. Create account for this user 
-      if (authData.user) {
-        const userId = authData.user.id;
-        
-        // Add to property_participants
-        const { error: participantError } = await supabase
-          .from('property_participants')
-          .insert({
-            property_id: participantData.propertyId,
-            user_id: userId,
-            role: participantData.role,
-            status: 'pending'
-          });
-          
-        if (participantError) throw participantError;
-      }
-      
-      // Success
-      return { success: true };
-    } catch (error: any) {
-      console.error("Error creating participant:", error);
-      return { success: false, error };
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Select {role === "seller" ? "Seller" : "Buyer"}</DialogTitle>
+          <DialogTitle>
+            Add {role === "seller" ? "Seller" : "Buyer"} to Property
+          </DialogTitle>
         </DialogHeader>
-        
-        {isLoading ? (
-          <div className="flex justify-center p-8">
-            <Spinner size="lg" />
-            <span className="ml-2">Loading participants...</span>
-          </div>
-        ) : participants && participants.length > 0 ? (
-          <div className="my-4 max-h-[400px] overflow-y-auto">
-            <RadioGroup 
-              value={selectedParticipant || ""} 
-              onValueChange={setSelectedParticipant}
+
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4 py-4">
+            <RadioGroup
+              defaultValue="new"
+              value={createNew ? "new" : "existing"}
+              onValueChange={(value) => setCreateNew(value === "new")}
+              className="flex flex-col space-y-2"
             >
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">Select</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {participants.map((participant) => (
-                    <TableRow key={participant.id}>
-                      <TableCell>
-                        <RadioGroupItem 
-                          value={participant.id} 
-                          id={`participant-${participant.id}`} 
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Label htmlFor={`participant-${participant.id}`} className="cursor-pointer">
-                          {participant.first_name} {participant.last_name}
-                        </Label>
-                      </TableCell>
-                      <TableCell>{participant.email}</TableCell>
-                      <TableCell>{participant.role}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="new" id="new" />
+                <Label htmlFor="new" className="cursor-pointer">
+                  Create new {role}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="existing" id="existing" />
+                <Label htmlFor="existing" className="cursor-pointer">
+                  Add existing user as {role}
+                </Label>
+              </div>
             </RadioGroup>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p>No participants found. Create a new participant first.</p>
-          </div>
-        )}
-        
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="button" 
-            onClick={handleSubmit}
-            disabled={!selectedParticipant || isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Spinner size="sm" className="mr-2" />
-                Adding...
-              </>
+
+            {createNew ? (
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
             ) : (
-              `Add ${role === "seller" ? "Seller" : "Buyer"}`
+              <div className="grid gap-2">
+                <Label htmlFor="searchEmail">Email *</Label>
+                <Input
+                  id="searchEmail"
+                  type="email"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  required
+                  placeholder="Search for existing user by email"
+                />
+              </div>
             )}
-          </Button>
-        </DialogFooter>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Adding..." : "Add Participant"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

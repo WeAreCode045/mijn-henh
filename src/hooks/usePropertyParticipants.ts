@@ -54,12 +54,7 @@ export function usePropertyParticipants(propertyId: string) {
         
         // First try to get emails and names from the accounts table
         accountsData?.forEach(account => {
-          if (account.email) {
-            emailMap.set(account.user_id, account.email);
-          }
-          if (account.display_name) {
-            displayNameMap.set(account.user_id, account.display_name);
-          }
+          displayNameMap.set(account.user_id, account.display_name);
         });
         
         // For any missing emails or names, try to get them from auth.users via admin API

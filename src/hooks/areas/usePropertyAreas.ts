@@ -1,39 +1,45 @@
 
-import { useState, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { PropertyFormData, PropertyArea, PropertyImage } from '@/types/property';
-import { useAreaImageUpload } from './useAreaImageUpload';
-import { useAreaImageSelect } from './useAreaImageSelect';
-import { useAreaImageRemove } from './useAreaImageRemove';
-import { useAreaManagement } from './useAreaManagement';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { PropertyArea } from '@/types/property';
 
-export function usePropertyAreas(
-  formData: PropertyFormData,
-  setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>
-) {
-  const [isUploading, setIsUploading] = useState(false);
-  
-  // Use specialized area management utilities
-  const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormState);
-  const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormState);
-  const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormState);
-  const { handleAreaImageUpload } = useAreaImageUpload(formData, setFormState, setIsUploading);
+export interface UsePropertyAreasReturn {
+  areas: PropertyArea[];
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+}
 
-  const handleAddArea = useCallback(() => {
-    console.log("usePropertyAreas - Adding new area");
-    addArea();
-  }, [addArea]);
+export function usePropertyAreas(propertyId: string): UsePropertyAreasReturn {
+  const {
+    data: areas = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['property-areas', propertyId],
+    queryFn: async () => {
+      if (!propertyId) return [];
+      
+      const { data, error } = await supabase
+        .from('properties')
+        .select('areas')
+        .eq('id', propertyId)
+        .single();
+        
+      if (error) throw error;
+      
+      return data?.areas || [];
+    },
+    enabled: !!propertyId,
+  });
 
   return {
-    // Area management
-    addArea: handleAddArea,
-    removeArea,
-    updateArea,
-    
-    // Image management
-    handleAreaImageRemove,
-    handleAreaImagesSelect,
-    handleAreaImageUpload,
-    isUploading
+    areas,
+    isLoading,
+    error: error as Error,
+    refetch: async () => {
+      await refetch();
+    },
   };
 }

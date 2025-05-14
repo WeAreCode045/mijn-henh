@@ -51,14 +51,12 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
       // Create account with type participant
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .insert([
-          {
-            user_id: authData.user.id,
-            type: 'participant',
-            display_name: `${formData.firstName} ${formData.lastName}`.trim()
-            // Note: not setting role here as per request - it will be set later
-          }
-        ])
+        .insert({
+          user_id: authData.user.id,
+          type: 'participant',
+          role: 'buyer', // Default role, can be changed later
+          display_name: `${formData.firstName} ${formData.lastName}`.trim()
+        })
         .select()
         .single();
 
@@ -70,7 +68,7 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
         .from('participants_profile')
         .insert([
           {
-            id: accountData.id,
+            id: authData.user.id,
             first_name: formData.firstName,
             last_name: formData.lastName,
             email: formData.email
