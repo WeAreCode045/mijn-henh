@@ -9,13 +9,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Reply, Archive, AlertCircle, Trash2, X } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
+interface PropertyTitle {
+  title: string;
+}
+
 interface Submission {
   id: string;
   created_at: string;
   property_id: string;
-  property: {
-    title: string;
-  };
+  property: PropertyTitle; // Changed from array to single object
   name: string;
   email: string;
   message: string;
@@ -135,7 +137,21 @@ export function CommunicationsSection() {
 
       if (error) throw error;
       
-      setSubmissions(data || []);
+      // Transform the data to match the Submission type
+      const formattedData = data?.map(item => ({
+        id: item.id,
+        created_at: item.created_at,
+        property_id: item.property_id,
+        property: {
+          title: item.property?.title || 'Unknown'
+        },
+        name: item.name,
+        email: item.email,
+        message: item.message,
+        is_read: item.is_read
+      })) || [];
+      
+      setSubmissions(formattedData);
     } catch (error: any) {
       console.error('Error fetching submissions:', error);
       toast({
