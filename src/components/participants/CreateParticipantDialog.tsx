@@ -11,99 +11,125 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { supabase } from '@/integrations/supabase/client';
+import { ParticipantRole } from '@/types/participant';
 
 interface CreateParticipantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  propertyId: string;
+  role: ParticipantRole;
 }
 
-export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: CreateParticipantDialogProps) {
+export function CreateParticipantDialog({
+  open,
+  onOpenChange,
+  propertyId,
+  role,
+}: CreateParticipantDialogProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [createNew, setCreateNew] = useState(true);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "tempPassword123", // Default password for new users
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
-      // Validate required fields
-      if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-        throw new Error("All fields are required");
-      }
-
-      // Step 1: Create the auth user with email and password
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          },
+      let userId;
+      let accountId;
+      
+      if (createNew) {
+        // Validate required fields for new user
+        if (!formData.email || !formData.firstName || !formData.lastName) {
+          throw new Error("All fields are required for creating a new user");
         }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Failed to create user");
-
-      // Step 2: Create account entry with type participant
-      const { data: accountData, error: accountError } = await supabase
-        .from('accounts')
+        
+        // Use the edge function instead of direct signup for more control
+        const response = await fetch('/api/create-participant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            lastName: formData.lastName
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to create participant");
+        }
+        
+        userId = data.userId;
+        accountId = data.accountId;
+      } else {
+        // Validate search email
+        if (!searchEmail) {
+          throw new Error("Email is required for finding existing users");
+        }
+        
+        // Search for existing user by email
+        const { data: userData, error: userError } = await supabase
+          .from('accounts')
+          .select('user_id, id')
+          .eq('email', searchEmail.toLowerCase())
+          .eq('type', 'participant')
+          .limit(1);
+        
+        if (userError) throw userError;
+        
+        if (!userData || userData.length === 0) {
+          throw new Error("No participant found with that email");
+        }
+        
+        userId = userData[0].user_id;
+        accountId = userData[0].id;
+      }
+      
+      // Link the user to the property as a participant
+      const { error: linkError } = await supabase
+        .from("property_participants")
         .insert({
-          user_id: authData.user.id,
-          type: 'participant',
-          role: 'buyer', // Default role, can be changed later
-          display_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: formData.email // Include email in the accounts table
-        })
-        .select()
-        .single();
-
-      if (accountError) throw accountError;
-      if (!accountData) throw new Error("Failed to create account");
-
-      // Step 3: Create participant profile
-      const { error: profileError } = await supabase
-        .from('participants_profile')
-        .insert([
-          {
-            id: accountData.id, // Use account ID for profile
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            email: formData.email
-          }
-        ]);
-
-      if (profileError) throw profileError;
-
+          property_id: propertyId,
+          user_id: userId,
+          role: role as string, // Type coercion to avoid recursion
+          status: "pending"
+        });
+        
+      if (linkError) throw linkError;
+      
       toast({
-        title: 'Success',
-        description: 'Participant created successfully',
-      });
-
-      // Reset form and close dialog
-      setFormData({
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
+        title: "Success",
+        description: `${role} added successfully`,
       });
       
+      // Reset form and close dialog
+      setSearchEmail("");
+      setFormData({
+        email: "",
+        firstName: "",
+        lastName: "",
+        password: "tempPassword123",
+      });
+      setCreateNew(true);
       onOpenChange(false);
-      onSuccess();
     } catch (error: any) {
-      console.error('Error creating participant:', error);
+      console.error("Error adding participant:", error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to create participant',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to add participant",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -114,56 +140,97 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Participant</DialogTitle>
+          <DialogTitle>
+            Add {role === "seller" ? "Seller" : "Buyer"} to Property
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="firstName">First Name *</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="lastName">Last Name *</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                required
-              />
-            </div>
+          <div className="space-y-4 py-4">
+            <RadioGroup
+              defaultValue="new"
+              value={createNew ? "new" : "existing"}
+              onValueChange={(value) => setCreateNew(value === "new")}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="new" id="new" />
+                <Label htmlFor="new" className="cursor-pointer">
+                  Create new {role}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="existing" id="existing" />
+                <Label htmlFor="existing" className="cursor-pointer">
+                  Add existing user as {role}
+                </Label>
+              </div>
+            </RadioGroup>
+
+            {createNew ? (
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                <Label htmlFor="searchEmail">Email *</Label>
+                <Input
+                  id="searchEmail"
+                  type="email"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  required
+                  placeholder="Search for existing user by email"
+                />
+              </div>
+            )}
           </div>
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Participant'}
+              {isLoading ? "Adding..." : "Add Participant"}
             </Button>
           </DialogFooter>
         </form>
