@@ -50,9 +50,9 @@ export function useSessionInit({
           if (secondError && secondError.code !== 'PGRST116') {
             console.error('Secondary error getting user account:', secondError);
             setUserRole(null);
-            setIsLoading(false);
           } else if (accountByUserId) {
             console.log('Found user account by user_id:', accountByUserId);
+            console.log('User role from accounts table by user_id:', accountByUserId.role);
             setUserRole(accountByUserId.role);
             
             try {
@@ -67,7 +67,6 @@ export function useSessionInit({
             }
           } else {
             setUserRole(null);
-            setIsLoading(false);
           }
         } else if (accountData) {
           console.log('User account data:', accountData);
@@ -110,8 +109,8 @@ export function useSessionInit({
     const initSession = async () => {
       if (!isMounted) return;
       
-      setIsLoading(true);
       console.log('Initializing auth session...');
+      setIsLoading(true);
       
       try {
         // First check for an existing session
@@ -133,6 +132,7 @@ export function useSessionInit({
         } else {
           console.log('No existing session found');
           if (isMounted) {
+            clearAuthState();
             setIsLoading(false);
             setInitialized(true);
           }
@@ -140,7 +140,7 @@ export function useSessionInit({
         
         // Then set up the auth state change listener for future changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (_, session) => {
+          async (event, session) => {
             console.log('Auth state change event triggered');
             if (isMounted) {
               await handleAuthStateChange(session);

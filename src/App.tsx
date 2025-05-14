@@ -34,7 +34,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AppContent = () => {
+const App = () => {
   // Simple state to ensure we at least show loading for a minimal time
   const [isReady, setIsReady] = useState(false);
 
@@ -54,28 +54,23 @@ const AppContent = () => {
     return <LoadingSpinner />;
   }
 
-  // Move BrowserRouter to wrap both AuthProvider and AppRoutes
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <SidebarProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </SidebarProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <SessionContextProvider supabaseClient={supabase}>
+        <BrowserRouter>
+          <AuthProvider>
+            <SidebarProvider>
+              <TooltipProvider>
+                <AppRoutes />
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </SidebarProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </SessionContextProvider>
+    </QueryClientProvider>
   );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SessionContextProvider supabaseClient={supabase}>
-      <AppContent />
-    </SessionContextProvider>
-  </QueryClientProvider>
-);
 
 export default App;
