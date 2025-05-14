@@ -30,7 +30,7 @@ export function useSessionInit({
       try {
         // Get the user's type and role from the accounts table
         const { data: accountData, error: accountError } = await supabase.from('accounts')
-          .select('id, type, role')
+          .select('id, type, role, email')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -39,17 +39,23 @@ export function useSessionInit({
         if (accountError) {
           console.error('Error getting user account on auth change:', accountError);
           setUserRole(null);
+          setIsLoading(false);
         } else if (accountData) {
           console.log('User account data:', accountData);
           setUserRole(accountData.role);
           
           // Fetch the user profile based on type
-          const userProfile = await fetchUserProfile(session.user.id, accountData.type, session.user.email);
-          if (userProfile) {
-            console.log('User profile fetched:', userProfile);
-            setProfile(userProfile);
-          } else {
-            console.log('No profile found for user');
+          try {
+            const email = accountData.email || session.user.email;
+            const userProfile = await fetchUserProfile(accountData.id, accountData.type, email);
+            if (userProfile) {
+              console.log('User profile fetched:', userProfile);
+              setProfile(userProfile);
+            } else {
+              console.log('No profile found for user');
+            }
+          } catch (profileError) {
+            console.error('Error fetching user profile:', profileError);
           }
         } else {
           console.log('No account found for user');
@@ -85,17 +91,20 @@ export function useSessionInit({
           if (isMounted) {
             clearAuthState();
             setIsLoading(false);
+            setInitialized(true);
           }
         } else if (existingSession) {
           // We have a session, apply it immediately
           console.log('Existing session found:', existingSession.user?.id);
           if (isMounted) {
             await handleAuthStateChange(existingSession);
+            setInitialized(true);
           }
         } else {
           console.log('No existing session found');
           if (isMounted) {
             setIsLoading(false);
+            setInitialized(true);
           }
         }
         
@@ -108,12 +117,6 @@ export function useSessionInit({
             }
           }
         );
-        
-        // Set initialized to true only if component is still mounted
-        if (isMounted) {
-          console.log('Auth initialization complete');
-          setInitialized(true);
-        }
         
         // Return cleanup function
         return () => {

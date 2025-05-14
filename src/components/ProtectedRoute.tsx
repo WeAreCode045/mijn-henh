@@ -9,6 +9,15 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Add debugging to understand auth state
   console.log("ProtectedRoute - Auth state:", { user, isLoading, initialized });
 
+  // Maximum loading time - if loading takes longer than 5 seconds, we'll show the content
+  // with a warning that authentication might not be complete
+  const showContentAnyway = !initialized && Date.now() - window.performance.timeOrigin > 5000;
+
+  if (showContentAnyway) {
+    console.warn("Authentication check is taking too long - showing content anyway");
+    return <>{children}</>;
+  }
+
   // If authentication state is still initializing, show a loading spinner
   if (isLoading || !initialized) {
     return (

@@ -8,7 +8,7 @@ import { useAuth } from "@/providers/AuthProvider";
 export function useUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { session } = useAuth();
+  const { session, initialized } = useAuth();
 
   const isAuthenticated = !!session;
 
@@ -43,47 +43,6 @@ export function useUsers() {
 
         // Create a map for emails
         const emailMap = new Map();
-        const userIdToAccountIdMap = new Map();
-        
-        // Track user_id to account_id mapping
-        if (accountsData) {
-          accountsData.forEach((account: any) => {
-            if (account && account.user_id) {
-              userIdToAccountIdMap.set(account.user_id, account.id);
-            }
-          });
-        }
-        
-        // Get emails from auth.users for each user_id
-        const userIds = accountsData
-          .filter((account: any) => account && account.user_id)
-          .map((account: any) => account.user_id);
-          
-        if (userIds.length > 0) {
-          try {
-            const { data: usersData } = await supabase.auth.admin.listUsers({
-              perPage: 1000
-            });
-            
-            if (usersData && usersData.users) {
-              usersData.users.forEach((user: any) => {
-                if (user && user.id && user.email) {
-                  // Map user id to email
-                  emailMap.set(user.id, user.email);
-                  
-                  // Also map account id to email if we have the mapping
-                  const accountId = userIdToAccountIdMap.get(user.id);
-                  if (accountId) {
-                    emailMap.set(accountId, user.email);
-                  }
-                }
-              });
-            }
-          } catch (err) {
-            console.error("Error fetching user emails from auth.users:", err);
-            // Continue without these emails
-          }
-        }
         
         // Fetch employer profiles for these account IDs
         const { data: profiles, error: profilesError } = await supabase
@@ -123,8 +82,8 @@ export function useUsers() {
         const employeeProfiles = accountsData.map((account: any) => {
           const profile = profileMap.get(account.id) || {};
           
-          // Get email from emailMap (auth users), profile, or fall back to empty string
-          const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
+          // Try to get email from different sources
+          const userEmail = account.email || profile.email || '';
           
           return {
             id: account.id,
@@ -150,7 +109,7 @@ export function useUsers() {
         throw err;
       }
     },
-    enabled: isAuthenticated
+    enabled: isAuthenticated && initialized
   });
 
   const deleteUser = async (userId: string) => {

@@ -40,6 +40,9 @@ const Users = () => {
     refetch();
   };
 
+  // Check if data is still loading and it's been more than 5 seconds
+  const loadingTooLong = isLoading && Date.now() - window.performance.timeOrigin > 5000;
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -63,6 +66,16 @@ const Users = () => {
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
             Error loading employees: {error instanceof Error ? error.message : 'Unknown error'}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {loadingTooLong && (
+        <Alert variant="warning" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Loading Taking Longer Than Expected</AlertTitle>
+          <AlertDescription>
+            Loading employees is taking longer than expected. You may need to refresh the page.
           </AlertDescription>
         </Alert>
       )}

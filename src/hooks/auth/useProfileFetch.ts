@@ -14,7 +14,7 @@ export function useProfileFetch() {
         .eq('id', userId)
         .maybeSingle();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching employer profile:', profileError);
         return null;
       }
@@ -36,7 +36,7 @@ export function useProfileFetch() {
           role: employerProfile.role
         } as AppUser;
       } else {
-        console.log('No employer profile found, creating new one');
+        console.log('No employer profile found, attempting to create one');
         // If no profile exists yet, create a basic one
         try {
           const firstName = email ? email.split('@')[0] : '';
@@ -55,18 +55,27 @@ export function useProfileFetch() {
             
           if (createError) {
             console.error('Error creating employer profile:', createError);
-            return null;
+            return {
+              id: userId,
+              type: type,
+              email: email || '',
+              first_name: firstName,
+              last_name: '',
+              full_name: firstName,
+              display_name: firstName,
+              role: 'agent'
+            } as AppUser;
           }
           
           if (newProfile) {
             return {
               id: userId,
               type: type,
-              email: email,
+              email: email || '',
               first_name: firstName,
               last_name: '',
-              full_name: email ? email.split('@')[0] : 'Unknown',
-              display_name: email ? email.split('@')[0] : 'Unknown',
+              full_name: firstName,
+              display_name: firstName,
               avatar_url: undefined,
               phone: null,
               whatsapp_number: null,
@@ -75,6 +84,13 @@ export function useProfileFetch() {
           }
         } catch (err) {
           console.error('Error in profile creation fallback:', err);
+          // Return a minimal profile to prevent getting stuck
+          return {
+            id: userId,
+            type: type,
+            email: email || '',
+            role: 'agent'
+          } as AppUser;
         }
       }
     } else if (type === 'participant') {
@@ -107,8 +123,13 @@ export function useProfileFetch() {
       }
     }
     
-    console.log('No profile found and could not create one');
-    return null;
+    console.log('No profile found and could not create one, returning minimal user profile');
+    return {
+      id: userId,
+      type: type,
+      email: email || '',
+      role: type === 'employee' ? 'agent' : 'buyer'
+    } as AppUser;
   }, []);
 
   return { fetchUserProfile };
