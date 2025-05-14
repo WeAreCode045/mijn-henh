@@ -10,7 +10,7 @@ import { Reply, Archive, AlertCircle, Trash2, X } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
 interface PropertyTitle {
-  title: string;
+  title: string;  // Ensuring this is explicitly typed as string
 }
 
 interface Submission {
@@ -144,13 +144,14 @@ export function CommunicationsSection() {
         
         // Check if property exists and has the expected structure
         if (item.property && typeof item.property === 'object') {
-          // If it's a single object directly
-          if ('title' in item.property) {
-            propertyData = { title: item.property.title || 'Unknown' };
+          // If it's a single object directly with title as a property
+          if ('title' in item.property && typeof item.property.title === 'string') {
+            propertyData = { title: item.property.title };
           } 
           // If it's potentially an array with one item (from the join)
-          else if (Array.isArray(item.property) && item.property.length > 0 && 'title' in item.property[0]) {
-            propertyData = { title: item.property[0].title || 'Unknown' };
+          else if (Array.isArray(item.property) && item.property.length > 0 && 
+                  'title' in item.property[0] && typeof item.property[0].title === 'string') {
+            propertyData = { title: item.property[0].title };
           }
         }
         
