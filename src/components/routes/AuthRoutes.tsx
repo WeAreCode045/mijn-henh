@@ -2,6 +2,7 @@
 import React, { lazy } from "react";
 import { Route } from "react-router-dom";
 import { LoadingSpinner } from "../common/LoadingSpinner";
+import PublicRoute from "../PublicRoute";
 
 // Lazy-loaded components
 const Auth = lazy(() => import("../../pages/Auth"));
@@ -11,9 +12,11 @@ export const AuthRoutes = [
     key="auth"
     path="/auth" 
     element={
-      <React.Suspense fallback={<LoadingSpinner />}>
-        <Auth />
-      </React.Suspense>
+      <PublicRoute>
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <Auth />
+        </React.Suspense>
+      </PublicRoute>
     } 
   />
 ];
