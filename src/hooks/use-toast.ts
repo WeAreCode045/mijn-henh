@@ -21,7 +21,7 @@ function generateId() {
 
 type UseToastReturn = {
   toasts: ToasterToast[]
-  toast: (props: Omit<ToasterToast, "id">) => void
+  toast: (props: Omit<ToasterToast, "id"> & { id?: string }) => void
   dismiss: (toastId: string) => void
 }
 
@@ -29,7 +29,7 @@ export const useToast = (): UseToastReturn => {
   const [toasts, setToasts] = useState<ToasterToast[]>([])
 
   const toast = useCallback(
-    (props: Omit<ToasterToast, "id">) => {
+    (props: Omit<ToasterToast, "id"> & { id?: string }) => {
       const id = props?.id ?? generateId()
 
       setToasts((toasts) => {
@@ -59,7 +59,7 @@ export const useToast = (): UseToastReturn => {
 }
 
 // Toast function for use outside of React components
-type ToastProps = Omit<ToasterToast, "id">
+type ToastProps = Omit<ToasterToast, "id"> & { id?: string }
 let toastState: UseToastReturn | undefined
 
 const initializeToastState = () => {

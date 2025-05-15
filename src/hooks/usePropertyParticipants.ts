@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,13 +49,15 @@ export function usePropertyParticipants(propertyId: string) {
         }
         
         // Create a map for emails and display names
-        const emailMap = new Map();
-        const displayNameMap = new Map();
+        const emailMap = new Map<string, string>();
+        const displayNameMap = new Map<string, string>();
         
         // First try to get emails and names from the accounts table
-        if (accountsData) {
+        if (accountsData && accountsData.length > 0) {
           accountsData.forEach(account => {
-            displayNameMap.set(account.user_id, account.display_name);
+            if (account && account.user_id) {
+              displayNameMap.set(account.user_id, account.display_name || '');
+            }
           });
         }
         
@@ -66,7 +69,7 @@ export function usePropertyParticipants(propertyId: string) {
           
           if (usersData && usersData.users) {
             usersData.users.forEach(user => {
-              if (user.email) {
+              if (user && user.id && user.email) {
                 emailMap.set(user.id, user.email);
               }
             });
@@ -80,9 +83,14 @@ export function usePropertyParticipants(propertyId: string) {
         const enrichedParticipants: PropertyParticipant[] = participantsData.map(participant => {
           const userId = participant.user_id;
           
+          const documentsSigned = Array.isArray(participant.documents_signed) 
+            ? participant.documents_signed 
+            : [];
+          
           return {
             ...participant,
             role: participant.role as ParticipantRole,
+            documents_signed: documentsSigned,
             user: {
               id: userId,
               email: emailMap.get(userId) || '',

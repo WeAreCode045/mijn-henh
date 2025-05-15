@@ -28,13 +28,13 @@ export function useParticipants() {
         }
         
         // Create a map for emails
-        const emailMap = new Map();
-        const userIdToAccountIdMap = new Map();
+        const emailMap = new Map<string, string>();
+        const userIdToAccountIdMap = new Map<string, string>();
         
         // Track user_id to account_id mapping
-        if (accountsData) {
+        if (accountsData && accountsData.length > 0) {
           accountsData.forEach(account => {
-            if (account.user_id) {
+            if (account && account.user_id) {
               userIdToAccountIdMap.set(account.user_id, account.id);
             }
           });
@@ -42,7 +42,7 @@ export function useParticipants() {
         
         // For any missing emails, try to get them from auth.users via admin API
         const userIds = accountsData
-          .filter(account => account.user_id)
+          .filter(account => account && account.user_id)
           .map(account => account.user_id);
           
         if (userIds.length > 0) {
@@ -53,7 +53,7 @@ export function useParticipants() {
             
             if (usersData && usersData.users) {
               usersData.users.forEach(user => {
-                if (user.id && user.email) {
+                if (user && user.id && user.email) {
                   // Map user id to email
                   emailMap.set(user.id, user.email);
                   
@@ -98,7 +98,7 @@ export function useParticipants() {
         // Process each account to create participant data
         if (accountsData) {
           accountsData.forEach(account => {
-            if (!participantsMap.has(account.id)) {
+            if (account && !participantsMap.has(account.id)) {
               const profile = profileMap.get(account.id) || {};
               // Get email from the emailMap, profile, or fallback to empty string
               const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';

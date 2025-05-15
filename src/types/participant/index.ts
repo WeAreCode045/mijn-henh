@@ -39,7 +39,7 @@ export interface PropertyParticipant {
   status: string;
   created_at: string;
   updated_at: string;
-  documents_signed?: any[];
+  documents_signed?: string[];
   webview_approved?: boolean;
   user?: {
     id: string;

@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
@@ -41,13 +42,13 @@ export function useUsers() {
         }
 
         // Create a map for emails
-        const emailMap = new Map();
-        const userIdToAccountIdMap = new Map();
+        const emailMap = new Map<string, string>();
+        const userIdToAccountIdMap = new Map<string, string>();
         
         // Track user_id to account_id mapping
-        if (accountsData) {
+        if (accountsData && accountsData.length > 0) {
           accountsData.forEach(account => {
-            if (account.user_id) {
+            if (account && account.user_id) {
               userIdToAccountIdMap.set(account.user_id, account.id);
             }
           });
@@ -55,7 +56,7 @@ export function useUsers() {
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account.user_id)
+          .filter(account => account && account.user_id)
           .map(account => account.user_id);
           
         if (userIds.length > 0) {
@@ -66,7 +67,7 @@ export function useUsers() {
             
             if (usersData && usersData.users) {
               usersData.users.forEach(user => {
-                if (user.id && user.email) {
+                if (user && user.id && user.email) {
                   // Map user id to email
                   emailMap.set(user.id, user.email);
                   
@@ -118,6 +119,8 @@ export function useUsers() {
         
         // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
+          if (!account) return null;
+          
           const profile = profileMap.get(account.id) || {};
           
           // Get email from emailMap (auth users), profile, or fall back to empty string
@@ -138,7 +141,7 @@ export function useUsers() {
             created_at: profile.created_at || '',
             updated_at: profile.updated_at || ''
           };
-        });
+        }).filter(Boolean) as User[];
 
         console.log("Transformed employee profiles:", employeeProfiles);
         return employeeProfiles;
