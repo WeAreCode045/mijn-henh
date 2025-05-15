@@ -42,21 +42,11 @@ export function useUsers() {
         }
 
         // Create a map for emails
-        const emailMap = new Map<string, string>();
-        const userIdToAccountIdMap = new Map<string, string>();
-        
-        // Track user_id to account_id mapping
-        if (accountsData && accountsData.length > 0) {
-          accountsData.forEach(account => {
-            if (account && account.user_id) {
-              userIdToAccountIdMap.set(account.user_id, account.id);
-            }
-          });
-        }
+        const emailMap = new Map();
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account && account.user_id)
+          .filter(account => account.user_id)
           .map(account => account.user_id);
           
         if (userIds.length > 0) {
@@ -67,14 +57,12 @@ export function useUsers() {
             
             if (usersData && usersData.users) {
               usersData.users.forEach(user => {
-                if (user && user.id && user.email) {
-                  // Map user id to email
+                if (user.id && user.email) {
                   emailMap.set(user.id, user.email);
                   
-                  // Also map account id to email if we have the mapping
-                  const accountId = userIdToAccountIdMap.get(user.id);
-                  if (accountId) {
-                    emailMap.set(accountId, user.email);
+                  const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
+                  if (matchingAccount) {
+                    emailMap.set(matchingAccount.id, user.email);
                   }
                 }
               });
@@ -119,12 +107,10 @@ export function useUsers() {
         
         // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
-          if (!account) return null;
-          
           const profile = profileMap.get(account.id) || {};
           
-          // Get email from emailMap (auth users), profile, or fall back to empty string
-          const userEmail = emailMap.get(account.id) || emailMap.get(account.user_id) || profile.email || '';
+          // Get email from emailMap, profile, or fall back to empty string
+          const userEmail = emailMap.get(account.id) || profile.email || '';
           
           return {
             id: account.id,
@@ -141,7 +127,7 @@ export function useUsers() {
             created_at: profile.created_at || '',
             updated_at: profile.updated_at || ''
           };
-        }).filter(Boolean) as User[];
+        });
 
         console.log("Transformed employee profiles:", employeeProfiles);
         return employeeProfiles;

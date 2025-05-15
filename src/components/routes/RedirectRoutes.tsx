@@ -1,7 +1,6 @@
 
 import React from "react";
-import { Route, Navigate, useParams, useLocation } from "react-router-dom";
-import { useAuth } from "@/providers/AuthProvider";
+import { Route, Navigate, useParams } from "react-router-dom";
 
 // This component handles the redirect from /property/:id to dashboard with tab=property
 function PropertyTabRedirect() {
@@ -21,31 +20,10 @@ function PropertyContentRedirect() {
   return <Navigate to={`/property/${id}/content/general`} replace />;
 }
 
-// This component handles redirects for the home route based on authentication status
-function HomeRedirect() {
-  const { user, initialized, userRole } = useAuth();
-  const location = useLocation();
-  
-  console.log("HomeRedirect - Current path:", location.pathname);
-  console.log("HomeRedirect - Auth state:", { user: !!user, initialized, userRole });
-  
-  // Only redirect if we're sure about the auth state
-  if (initialized) {
-    if (!user) {
-      console.log("HomeRedirect - No user, redirecting to /auth");
-      return <Navigate to="/auth" replace />;
-    }
-    
-    // For participants, redirect to participant dashboard
-    if (userRole === 'buyer' || userRole === 'seller') {
-      console.log("HomeRedirect - User is participant, redirecting to /participant");
-      return <Navigate to="/participant" replace />;
-    }
-  }
-  
-  // Don't redirect, let the route render normally
-  console.log("HomeRedirect - No redirect needed");
-  return null;
+// This component handles redirects from auth page when user is already authenticated
+function AuthParticipantRedirect() {
+  // Removed searchParams usage entirely, hardcode to home route with replace
+  return <Navigate to="/" replace />;
 }
 
 export const RedirectRoutes = [
@@ -65,5 +43,11 @@ export const RedirectRoutes = [
     key="property-content-redirect"
     path="/property/:id/content" 
     element={<PropertyContentRedirect />} 
+  />,
+
+  <Route
+    key="auth-participant-redirect"
+    path="/auth" 
+    element={<AuthParticipantRedirect />}
   />
 ];

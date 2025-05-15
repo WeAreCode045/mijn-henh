@@ -34,12 +34,7 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
     setIsLoading(true);
 
     try {
-      // Validate required fields
-      if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
-        throw new Error("All fields are required");
-      }
-
-      // Step 1: Create the auth user with email and password
+      // First, create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -53,35 +48,44 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
       if (authError) throw authError;
       if (!authData.user) throw new Error("Failed to create user");
 
-      // Step 2: Create account entry with type participant
-      const { data: accountData, error: accountError } = await supabase
+      // Create account with type participant
+      const { error: accountError } = await supabase
         .from('accounts')
-        .insert({
-          user_id: authData.user.id,
-          type: 'participant',
-          role: 'buyer', // Default role, can be changed later
-          display_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: formData.email // Include email in the accounts table
-        })
-        .select()
-        .single();
-
-      if (accountError) throw accountError;
-      if (!accountData) throw new Error("Failed to create account");
-
-      // Step 3: Create participant profile
-      const { error: profileError } = await supabase
-        .from('participants_profile')
-        .insert([
+        .upsert([
           {
-            id: accountData.id, // Use account ID for profile
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            email: formData.email
+            user_id: authData.user.id,
+            email: formData.email,
+            type: 'participant',
+            role: 'buyer', // Default role
+            status: 'active',
+            display_name: `${formData.firstName} ${formData.lastName}`.trim()
           }
         ]);
 
-      if (profileError) throw profileError;
+      if (accountError) throw accountError;
+
+      // Create participant profile
+      const { data: accountsData } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('user_id', authData.user.id)
+        .eq('type', 'participant')
+        .single();
+
+      if (accountsData) {
+        const { error: profileError } = await supabase
+          .from('participants_profile')
+          .upsert([
+            {
+              id: accountsData.id,
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              email: formData.email
+            }
+          ]);
+
+        if (profileError) throw profileError;
+      }
 
       toast({
         title: 'Success',
@@ -120,7 +124,7 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -130,7 +134,7 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -140,7 +144,7 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="firstName">First Name *</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
                 id="firstName"
                 value={formData.firstName}
@@ -149,7 +153,7 @@ export function CreateParticipantDialog({ open, onOpenChange, onSuccess }: Creat
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="lastName">Last Name *</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <Input
                 id="lastName"
                 value={formData.lastName}
