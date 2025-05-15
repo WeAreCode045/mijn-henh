@@ -1,24 +1,29 @@
 
+/**
+ * Represents an image in an area with sort order
+ */
+export interface AreaImage {
+  id: string;
+  ImageID: string;
+  imageSortOrder: number;
+  url: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Represents an area of a property
+ */
 export interface PropertyArea {
   id: string;
   name: string;
-  description?: string;
-  images?: string[];
-  area_type?: string;
-  sort_order?: number;
+  size: string;
+  title: string;
+  description: string;
+  imageIds: string[]; // Explicitly defined property
+  columns: number;
+  images: PropertyImage[] | string[];
+  areaImages?: AreaImage[]; // New property for the updated format
+  [key: string]: unknown;
 }
 
-export interface AreaImage {
-  id: string;
-  url: string;
-  property_id?: string;
-  is_main?: boolean;
-  is_featured_image?: boolean;
-  type?: string;
-  area?: string | null;
-  sort_order?: number;
-  filePath?: string;
-  title?: string;
-  description?: string;
-  columns?: number;
-}
+import { PropertyImage } from './PropertyTypes';

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,24 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 
-// Helper function to clean up auth state
-const cleanupAuthState = () => {
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
-
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -36,14 +17,10 @@ export default function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, initialized } = useAuth();
-  
-  // Debug auth state
-  console.log("Auth page: Auth state:", { user, initialized });
 
   // Redirect if already authenticated
   useEffect(() => {
     if (initialized && user) {
-      console.log("Auth page: User already authenticated, redirecting to /");
       navigate('/', { replace: true });
     }
   }, [user, initialized, navigate]);
@@ -51,19 +28,8 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    try {
-      // Clean up any existing auth state first
-      cleanupAuthState();
-      
-      // Attempt global sign out to ensure clean slate
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.error("Error during pre-auth logout:", err);
-        // Continue even if this fails
-      }
 
+    try {
       const names = fullName.trim().split(' ');
       const firstName = names[0] || '';
       const lastName = names.slice(1).join(' ') || '';
@@ -118,7 +84,6 @@ export default function Auth() {
             description: "Logged in successfully",
           });
           
-          // Use replace to prevent back navigation to login page
           navigate('/', { replace: true });
         }
       }

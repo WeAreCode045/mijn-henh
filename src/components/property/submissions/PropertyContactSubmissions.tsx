@@ -34,8 +34,8 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
     // Find the submission in the submissions array to ensure we're using the correct type
     const submission = submissions.find(s => s.id === id);
     if (submission) {
-      // Cast submission to the expected Submission type
-      setSelectedSubmission(submission as unknown as Submission);
+      // Use a type assertion to assign the submission to selectedSubmission state
+      setSelectedSubmission(() => submission as Submission);
       
       // Mark as read when selected if not already read
       if (!submission.is_read) {
@@ -98,7 +98,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
           {/* Submissions List - Left Side */}
           <div className="md:col-span-1">
             <SubmissionsList 
-              contacts={submissions as unknown as Submission[]}
+              contacts={submissions}
               selectedContactId={selectedSubmission?.id || null}
               onSelect={handleSelectSubmission}
               onMarkAsRead={handleMarkAsRead}

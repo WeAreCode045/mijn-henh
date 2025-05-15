@@ -43,35 +43,32 @@ export function AppSidebar() {
     const checkUserRole = async () => {
       if (user?.id) {
         try {
-          // First try to get role by id
           const { data, error } = await supabase
-            .from('accounts')
-            .select('role')
+            .from('employer_profiles')
+            .select('*')
             .eq('id', user.id)
             .single();
 
           if (error) {
-            console.error('Error fetching user role by id:', error);
+            console.error('Error fetching user role:', error);
+            return;
+          }
+
+          // Check if user role is available in accounts table
+          const { data: accountData, error: accountError } = await supabase
+            .from('accounts')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
             
-            // If that fails, try by user_id
-            const { data: accountData, error: accountError } = await supabase
-              .from('accounts')
-              .select('role')
-              .eq('user_id', user.id)
-              .single();
-              
-            if (accountError) {
-              console.error('Error fetching user account by user_id:', accountError);
-              return;
-            }
-            
-            if (accountData) {
-              console.log('User role from accounts table by user_id:', accountData.role);
-              setLocalIsAdmin(accountData.role === 'admin');
-            }
-          } else if (data) {
-            console.log('User role from accounts table by id:', data.role);
-            setLocalIsAdmin(data.role === 'admin');
+          if (accountError && accountError.code !== 'PGRST116') {
+            console.error('Error fetching user account:', accountError);
+            return;
+          }
+
+          if (accountData) {
+            console.log('User role from accounts table:', accountData.role);
+            setLocalIsAdmin(accountData.role === 'admin');
           }
         } catch (err) {
           console.error('Error in role check:', err);
@@ -104,8 +101,8 @@ export function AppSidebar() {
   const handleUpdateProfile = async (updatedData: Partial<User>) => {
     try {
       await updateProfile({
-        first_name: updatedData.first_name || '',
-        last_name: updatedData.last_name || '',
+        first_name: updatedData.full_name?.split(' ')[0] || '',
+        last_name: updatedData.full_name?.split(' ').slice(1).join(' ') || '',
         email: updatedData.email,
         phone: updatedData.phone
       });
@@ -120,13 +117,11 @@ export function AppSidebar() {
   const userProfile: User | null = profile ? {
     id: profile.id || user?.id || '',
     email: profile.email || user?.email || '',
-    first_name: profile.first_name || '',
-    last_name: profile.last_name || '',
     full_name: profile.full_name || '',
     avatar_url: profile.avatar_url || undefined,
     phone: profile.phone || undefined,
     whatsapp_number: profile.whatsapp_number || undefined,
-    role: profile.role || userRole as User['role'],
+    role: (profile.role || userRole) as User['role'],
   } : null;
 
   // For debugging
@@ -237,27 +232,15 @@ export function AppSidebar() {
       
       <SidebarFooter className="mb-4 px-4 !bg-primary text-white">
         <SidebarGroup>
-          {/* Force render profile card if user is logged in */}
-          <div className="px-2 py-3 rounded bg-primary-foreground/5">
-            {userProfile && (
+          {userProfile && (
+            <div className="px-2 py-3 rounded bg-primary-foreground/5">
               <UserProfileCard 
                 user={userProfile} 
                 inSidebar={true} 
                 onUpdateProfile={handleUpdateProfile}
               />
-            )}
-            {!userProfile && user && (
-              <UserProfileCard 
-                user={{
-                  id: user.id,
-                  email: user.email || '',
-                  role: userRole as User['role'],
-                }} 
-                inSidebar={true} 
-                onUpdateProfile={handleUpdateProfile}
-              />
-            )}
-          </div>
+            </div>
+          )}
           <SidebarMenu className="mt-4">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout} className="text-white hover:bg-primary-foreground/10">

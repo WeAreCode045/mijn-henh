@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,15 +7,15 @@ export const useFetchSubmissions = (propertyId: string) => {
     isLoading,
     error,
     refetch,
-  } = useQuery({
-    queryKey: ["property-submissions", propertyId],
-    queryFn: async () => {
+  } = useQuery(
+    ["property-submissions", propertyId],
+    async () => {
       if (!propertyId) {
         return [];
       }
 
       const { data, error } = await supabase
-        .from("property_contact_submissions")
+        .from("property_inquiries")
         .select(
           `
           id,
@@ -27,9 +26,35 @@ export const useFetchSubmissions = (propertyId: string) => {
           message,
           created_at,
           is_read,
-          agent_id,
-          property_id,
-          updated_at
+          agent:accounts (
+            id,
+            email,
+            employer_profiles (
+              first_name,
+              last_name,
+              avatar_url
+            ),
+            display_name
+          ),
+          property:properties (
+            id,
+            title
+          ),
+          replies (
+            id,
+            created_at,
+            message,
+            agent:accounts (
+              id,
+              email,
+              employer_profiles (
+                first_name,
+                last_name,
+                avatar_url
+              ),
+              display_name
+            )
+          )
         `
         )
         .eq("property_id", propertyId)
@@ -40,10 +65,12 @@ export const useFetchSubmissions = (propertyId: string) => {
         throw error;
       }
 
-      return data || [];
+      return data;
     },
-    enabled: !!propertyId, // Only run the query if propertyId is not null
-  });
+    {
+      enabled: !!propertyId, // Only run the query if propertyId is not null
+    }
+  );
 
   const transformData = (data: any[]) => {
     return data.map((item) => {
@@ -55,23 +82,20 @@ export const useFetchSubmissions = (propertyId: string) => {
         inquiry_type: item.inquiry_type,
         message: item.message,
         created_at: item.created_at,
-        updated_at: item.updated_at || item.created_at,
         is_read: item.is_read,
-        agent_id: item.agent_id,
-        property_id: item.property_id,
         agent: {
-          id: '',
-          email: '',
-          first_name: '',
-          last_name: '',
-          display_name: '',
-          avatar_url: '',
+          id: item.agent?.id || '',
+          email: item.agent?.email || '',
+          first_name: item.agent?.employer_profiles?.first_name || '',
+          last_name: item.agent?.employer_profiles?.last_name || '',
+          display_name: item.agent?.display_name || item.agent?.employer_profiles?.first_name ? `${item.agent?.employer_profiles?.first_name} ${item.agent?.employer_profiles?.last_name || ''}` : '',
+          avatar_url: item.agent?.employer_profiles?.avatar_url || '',
         },
         property: {
-          id: item.property_id || '',
-          title: '',
+          id: item.property?.id || '',
+          title: item.property?.title || '',
         },
-        replies: [],
+        replies: item.replies || [],
       };
 
       return transformedItem;

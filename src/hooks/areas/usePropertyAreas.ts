@@ -1,38 +1,39 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { PropertyArea } from '@/types/property';
+import { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { PropertyFormData, PropertyArea, PropertyImage } from '@/types/property';
+import { useAreaImageUpload } from './useAreaImageUpload';
+import { useAreaImageSelect } from './useAreaImageSelect';
+import { useAreaImageRemove } from './useAreaImageRemove';
+import { useAreaManagement } from './useAreaManagement';
 
-interface PropertyAreasOptions {
-  enabled?: boolean;
-}
+export function usePropertyAreas(
+  formData: PropertyFormData,
+  setFormState: React.Dispatch<React.SetStateAction<PropertyFormData>>
+) {
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // Use specialized area management utilities
+  const { addArea, removeArea, updateArea } = useAreaManagement(formData, setFormState);
+  const { handleAreaImageRemove } = useAreaImageRemove(formData, setFormState);
+  const { handleAreaImagesSelect } = useAreaImageSelect(formData, setFormState);
+  const { handleAreaImageUpload } = useAreaImageUpload(formData, setFormState, setIsUploading);
 
-export function usePropertyAreas(propertyId?: string, options?: PropertyAreasOptions) {
-  return useQuery({
-    queryKey: ['property-areas', propertyId],
-    queryFn: async () => {
-      if (!propertyId) return [];
+  const handleAddArea = useCallback(() => {
+    console.log("usePropertyAreas - Adding new area");
+    addArea();
+  }, [addArea]);
 
-      try {
-        // First get the property areas
-        const { data: areas, error } = await supabase
-          .from('properties')
-          .select('areas')
-          .eq('id', propertyId)
-          .single();
-
-        if (error) {
-          console.error("Error fetching property areas:", error);
-          throw error;
-        }
-
-        // Return the areas array or an empty array if it's null
-        return (areas?.areas || []) as unknown as PropertyArea[];
-      } catch (error) {
-        console.error("Error in usePropertyAreas:", error);
-        throw error;
-      }
-    },
-    enabled: !!propertyId && (options?.enabled !== false),
-  });
+  return {
+    // Area management
+    addArea: handleAddArea,
+    removeArea,
+    updateArea,
+    
+    // Image management
+    handleAreaImageRemove,
+    handleAreaImagesSelect,
+    handleAreaImageUpload,
+    isUploading
+  };
 }

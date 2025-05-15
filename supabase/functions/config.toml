@@ -2,4 +2,4 @@
 project_id = "gjvpptmwijiosgdcozep"
 
 [functions.create-user]
-verify_jwt = false
+verify_jwt = true

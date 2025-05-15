@@ -7,57 +7,36 @@ export function useProfileFetch() {
   const fetchUserProfile = useCallback(async (userId: string, type: string, email: string | undefined) => {
     console.log('Fetching profile for', userId, type, email);
     
-    // First check the accounts table for the user role
-    const { data: accountData, error: accountError } = await supabase
-      .from('accounts')
-      .select('role, type')
-      .eq('id', userId)
-      .maybeSingle();
-    
-    let userRole = null;
-    let userType = type;
-    
-    if (accountError && accountError.code !== 'PGRST116') {
-      console.error('Error fetching account data by id:', accountError);
-      
-      // Try by user_id as a fallback
-      const { data: accountByUserId, error: userIdError } = await supabase
-        .from('accounts')
-        .select('role, type')
-        .eq('user_id', userId)
-        .maybeSingle();
-        
-      if (userIdError && userIdError.code !== 'PGRST116') {
-        console.error('Error fetching account data by user_id:', userIdError);
-      } else if (accountByUserId) {
-        console.log('Found account by user_id:', accountByUserId);
-        userRole = accountByUserId.role;
-        userType = accountByUserId.type || type;
-      }
-    } else if (accountData) {
-      console.log('Found account:', accountData);
-      userRole = accountData.role;
-      userType = accountData.type || type;
-    }
-    
-    // Use the determined type for fetching the correct profile
-    if (userType === 'employee') {
+    if (type === 'employee') {
       const { data: employerProfile, error: profileError } = await supabase
         .from('employer_profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError) {
         console.error('Error fetching employer profile:', profileError);
-        return createMinimalProfile(userId, userType, email, userRole);
+        return null;
       }
 
       if (employerProfile) {
         console.log('Found employer profile:', employerProfile);
-        return createEmployerProfile(userId, employerProfile, email, userRole);
+        const fullName = `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim();
+        return {
+          id: userId,
+          type: type,
+          email: employerProfile.email || email,
+          first_name: employerProfile.first_name || '',
+          last_name: employerProfile.last_name || '',
+          full_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
+          display_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
+          avatar_url: employerProfile.avatar_url || undefined,
+          phone: employerProfile.phone,
+          whatsapp_number: employerProfile.whatsapp_number,
+          role: employerProfile.role
+        } as AppUser;
       } else {
-        console.log('No employer profile found, attempting to create one');
+        console.log('No employer profile found, creating new one');
         // If no profile exists yet, create a basic one
         try {
           const firstName = email ? email.split('@')[0] : '';
@@ -69,25 +48,36 @@ export function useProfileFetch() {
               email: email,
               first_name: firstName,
               last_name: '',
-              role: userRole
+              role: 'agent'
             })
             .select()
             .single();
             
           if (createError) {
             console.error('Error creating employer profile:', createError);
-            return createMinimalProfile(userId, userType, email, userRole);
+            return null;
           }
           
           if (newProfile) {
-            return createEmployerProfile(userId, newProfile, email, userRole);
+            return {
+              id: userId,
+              type: type,
+              email: email,
+              first_name: firstName,
+              last_name: '',
+              full_name: email ? email.split('@')[0] : 'Unknown',
+              display_name: email ? email.split('@')[0] : 'Unknown',
+              avatar_url: undefined,
+              phone: null,
+              whatsapp_number: null,
+              role: 'agent'
+            } as AppUser;
           }
         } catch (err) {
           console.error('Error in profile creation fallback:', err);
-          return createMinimalProfile(userId, userType, email, userRole);
         }
       }
-    } else if (userType === 'participant') {
+    } else if (type === 'participant') {
       const { data: participantProfile, error: profileError } = await supabase
         .from('participants_profile')
         .select('*')
@@ -96,61 +86,30 @@ export function useProfileFetch() {
 
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching participant profile:', profileError);
-        return createMinimalProfile(userId, userType, email, userRole);
+        return null;
       }
 
       if (participantProfile) {
         const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
         return {
           id: userId,
-          type: userType,
-          email: participantProfile.email || email || '',
+          type: type,
+          email: participantProfile.email || email,
           first_name: participantProfile.first_name || '',
           last_name: participantProfile.last_name || '',
           full_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
           display_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
           avatar_url: undefined,
-          phone: participantProfile.phone || '',
-          whatsapp_number: participantProfile.whatsapp_number || '',
-          role: participantProfile.role || userRole || (userType === 'participant' ? 'buyer' : 'agent')
+          phone: participantProfile.phone,
+          whatsapp_number: participantProfile.whatsapp_number,
+          role: participantProfile.role
         } as AppUser;
       }
     }
     
-    return createMinimalProfile(userId, userType, email, userRole);
+    console.log('No profile found and could not create one');
+    return null;
   }, []);
-
-  // Helper function to create a minimal profile with consistent structure
-  function createMinimalProfile(userId: string, type: string, email: string | undefined, role: string | null): AppUser {
-    const defaultRole = type === 'employee' ? 'agent' : 'buyer';
-    console.log('Creating minimal profile with role:', role || defaultRole);
-    return {
-      id: userId,
-      type: type,
-      email: email || '',
-      role: role || defaultRole
-    } as AppUser;
-  }
-
-  // Helper function to create an employer profile with consistent structure
-  function createEmployerProfile(userId: string, profile: any, email: string | undefined, role: string | null): AppUser {
-    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-    const userRole = role || profile.role || 'agent';
-    console.log('Creating employer profile with role:', userRole);
-    return {
-      id: userId,
-      type: 'employee',
-      email: profile.email || email || '',
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-      full_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
-      display_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
-      avatar_url: profile.avatar_url || undefined,
-      phone: profile.phone || '',
-      whatsapp_number: profile.whatsapp_number || '',
-      role: userRole
-    } as AppUser;
-  }
 
   return { fetchUserProfile };
 }
