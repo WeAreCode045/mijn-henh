@@ -23,6 +23,8 @@ export function useSessionInit({
 }) {
   const handleAuthStateChange = useCallback(async (session: any) => {
     console.log('Auth state change', session ? 'Session exists' : 'No session');
+    
+    // Always update session and user state immediately
     setSession(session);
     setUser(session?.user || null);
             
@@ -73,8 +75,8 @@ export function useSessionInit({
     const initSession = async () => {
       if (!isMounted) return;
       
-      setIsLoading(true);
       console.log('Initializing auth session...');
+      setIsLoading(true);
       
       try {
         // Set up the auth state change listener first
@@ -120,7 +122,7 @@ export function useSessionInit({
         // Return cleanup function
         return () => {
           console.log('Cleaning up auth subscription');
-          subscription.unsubscribe();
+          subscription?.unsubscribe();
         };
       } catch (err) {
         console.error('Unexpected error in initSession:', err);

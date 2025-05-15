@@ -30,7 +30,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (!user) {
     console.log("ProtectedRoute - No user, redirecting to /auth");
     // Always redirect to auth with replace to prevent navigation issues
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" replace state={{ from: location }} />;
   }
 
   // Check if participant is trying to access a non-participant route

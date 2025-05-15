@@ -1,51 +1,107 @@
 
-import { useState } from "react";
+// This is the primary toast implementation that our UI components import from
+import { useState, useCallback } from 'react'
+import { TOAST_TYPES, type Toast } from '@/components/ui/toast'
 
-interface Toast {
-  id: string;
-  title?: string;
-  description?: string;
-  status?: "success" | "error" | "warning" | "info";
-  duration?: number;
-  isClosable?: boolean;
+type ToasterToast = Toast & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: React.ReactNode
+  variant?: "default" | "destructive" | "success" | "warning"
 }
 
-export function useToast() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+const TOAST_LIMIT = 20
+let count = 0
 
-  const toast = (props: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    const newToast = { id, ...props };
-    setToasts((currentToasts) => [...currentToasts, newToast]);
-    
-    if (props.duration !== Infinity) {
-      setTimeout(() => {
-        setToasts((currentToasts) =>
-          currentToasts.filter((toast) => toast.id !== id)
-        );
-      }, props.duration || 3000);
-    }
-    
-    return id;
-  };
+function generateId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return String(count)
+}
 
-  const closeToast = (id: string) => {
-    setToasts((currentToasts) =>
-      currentToasts.filter((toast) => toast.id !== id)
-    );
-  };
+type UseToastReturn = {
+  toasts: ToasterToast[]
+  toast: (props: Omit<ToasterToast, "id">) => void
+  dismiss: (toastId: string) => void
+}
+
+export const useToast = (): UseToastReturn => {
+  const [toasts, setToasts] = useState<ToasterToast[]>([])
+
+  const toast = useCallback(
+    (props: Omit<ToasterToast, "id">) => {
+      const id = props?.id ?? generateId()
+
+      setToasts((toasts) => {
+        const newToast = {
+          ...props,
+          id,
+        } as ToasterToast
+
+        const newToasts = [newToast, ...toasts].slice(0, TOAST_LIMIT)
+        return newToasts
+      })
+
+      return id
+    },
+    []
+  )
+
+  const dismiss = useCallback((toastId: string) => {
+    setToasts((toasts) => toasts.filter((t) => t.id !== toastId))
+  }, [])
 
   return {
     toasts,
     toast,
-    closeToast,
-  };
+    dismiss,
+  }
 }
 
-// Export the toast function directly
-export const toast = (props: Omit<Toast, "id">) => {
-  // Use a singleton approach for direct usage
-  const id = Math.random().toString(36).substring(2, 9);
-  console.log(`Toast triggered: ${props.title || 'Notification'}`);
-  return id;
-};
+// Toast function for use outside of React components
+type ToastProps = Omit<ToasterToast, "id">
+let toastState: UseToastReturn | undefined
+
+const initializeToastState = () => {
+  if (typeof window === 'undefined') return
+  if (toastState) return toastState
+
+  const listeners = new Set<(toasts: ToasterToast[]) => void>()
+
+  const toasts: ToasterToast[] = []
+
+  toastState = {
+    toasts,
+    toast: (props) => {
+      const id = props?.id ?? generateId()
+      const newToast = {
+        ...props,
+        id,
+      } as ToasterToast
+      
+      toasts.unshift(newToast)
+      if (toasts.length > TOAST_LIMIT) {
+        toasts.pop()
+      }
+      
+      listeners.forEach((listener) => listener([...toasts]))
+      
+      return id
+    },
+    dismiss: (toastId) => {
+      const index = toasts.findIndex((t) => t.id === toastId)
+      if (index !== -1) {
+        toasts.splice(index, 1)
+        listeners.forEach((listener) => listener([...toasts]))
+      }
+    },
+  }
+
+  return toastState
+}
+
+export const toast = (props: ToastProps) => {
+  const state = initializeToastState()
+  if (!state) return ''
+  return state.toast(props)
+}

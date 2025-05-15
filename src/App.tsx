@@ -1,76 +1,46 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { AuthProvider } from "@/providers/AuthProvider";
-import { supabase } from "@/integrations/supabase/client"; 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { BrowserRouter } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import AppRoutes from "@/components/AppRoutes";
+import { useState, useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from './providers/AuthProvider';
+import AppRoutes from './components/AppRoutes';
+import './App.css';
 
-// Create a QueryClient instance with default options - we're adding more error logging
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000,
-      retry: 1,
-      onError: (error) => {
-        console.log("Query error (non-fatal):", error);
-      }
-    },
-    mutations: {
-      onError: (error) => {
-        console.log('Mutation error (non-fatal):', error);
+const App = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Create a client with proper error handling
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        meta: {
+          onError: (error: Error) => {
+            console.error("Query error:", error);
+          }
+        }
       }
     }
-  },
-});
-
-const AppContent = () => {
-  // Simple state to ensure we at least show loading for a minimal time
-  const [isReady, setIsReady] = useState(false);
-
+  });
+  
   useEffect(() => {
     console.log("App initializing...");
-    // Ensure loading spinner shows for at least 500ms to prevent flash
-    const timer = setTimeout(() => {
-      setIsReady(true);
-      console.log("App ready to render");
-    }, 500);
-
-    return () => clearTimeout(timer);
+    setIsLoaded(true);
   }, []);
 
-  // If not ready, show loading spinner
-  if (!isReady) {
-    return <LoadingSpinner />;
-  }
-
   return (
-    <AuthProvider>
-      <SidebarProvider>
-        <BrowserRouter>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </BrowserRouter>
-      </SidebarProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+          <Toaster />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SessionContextProvider supabaseClient={supabase}>
-      <AppContent />
-    </SessionContextProvider>
-  </QueryClientProvider>
-);
 
 export default App;

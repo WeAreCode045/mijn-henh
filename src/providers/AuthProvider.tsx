@@ -6,7 +6,6 @@ import { useSession } from '@/hooks/auth/useSession';
 import { useProfileFetch } from '@/hooks/auth/useProfileFetch';
 import { useAuthMethods } from '@/hooks/auth/useAuthMethods';
 import { useSessionInit } from '@/hooks/auth/useSessionInit';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface AuthContextType {
   user: User | null;
