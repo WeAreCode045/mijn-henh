@@ -9,6 +9,7 @@ import { PropertyCity } from './PropertyCityTypes';
 import { PropertyPlace } from './PropertyPlaceTypes';
 import { PropertyBaseTypes } from './PropertyBaseTypes';
 import { PropertyImage } from "./PropertyImageTypes";
+import { ParticipantRole as ParticipantRoleType } from "@/types/participant";
 
 export type { 
   PropertyArea, 
@@ -24,7 +25,7 @@ export type PropertyParticipant = {
   id: string;
   property_id: string;
   user_id: string;
-  role: ParticipantRole;
+  role: ParticipantRoleType;
   status: string;
   created_at: string;
   updated_at: string;
@@ -37,7 +38,7 @@ export type PropertyParticipant = {
   };
 };
 
-export type ParticipantRole = 'buyer' | 'seller' | 'agent';
+export type ParticipantRole = ParticipantRoleType;
 
 export interface PropertyFormData {
   id?: string;

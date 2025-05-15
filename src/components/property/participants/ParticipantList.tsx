@@ -36,7 +36,7 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
 
   const handleResendInvite = async (participantId: string, email: string) => {
     try {
-      await resendInvite(participantId);
+      await resendInvite.mutateAsync(participantId);
       toast({
         title: "Success",
         description: `Invitation resent to ${email}`,
@@ -70,7 +70,7 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
 
   const handleRemoveParticipant = (participant: PropertyParticipant) => {
     if (window.confirm(`Are you sure you want to remove this ${participant.role}?`)) {
-      removeParticipant({ 
+      removeParticipant.mutate({ 
         participantId: participant.id, 
         role: participant.role 
       });
@@ -132,7 +132,7 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => updateParticipantStatus({
+                            onClick={() => updateParticipantStatus.mutate({
                               participantId: participant.id,
                               status: 'active'
                             })}

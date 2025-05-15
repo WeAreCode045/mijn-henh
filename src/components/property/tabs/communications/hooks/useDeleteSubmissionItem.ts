@@ -1,94 +1,72 @@
 
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface UseDeleteSubmissionItemProps {
   onSuccess?: () => void;
 }
 
 export function useDeleteSubmissionItem({ onSuccess }: UseDeleteSubmissionItemProps = {}) {
-  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
-  const deleteSubmission = async (id: string) => {
-    setIsDeleting(true);
-    try {
-      // First delete all replies to this submission
-      const { error: replyDeleteError } = await supabase
-        .from('property_submission_replies')
-        .delete()
-        .eq('submission_id', id);
-
-      if (replyDeleteError) {
-        throw replyDeleteError;
-      }
-
-      // Then delete the submission itself
-      const { error: submissionDeleteError } = await supabase
-        .from('property_contact_submissions')
-        .delete()
-        .eq('id', id);
-
-      if (submissionDeleteError) {
-        throw submissionDeleteError;
-      }
-
-      toast({
-        title: "Success",
-        description: "Submission deleted successfully",
-      });
-
-      if (onSuccess) onSuccess();
-      return true;
-    } catch (error) {
-      console.error('Error deleting submission:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete submission",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const deleteReply = async (id: string) => {
-    setIsDeleting(true);
-    try {
+  // Mutation for deleting a submission
+  const deleteSubmissionMutation = useMutation({
+    mutationFn: async (submissionId: string) => {
       const { error } = await supabase
-        .from('property_submission_replies')
+        .from("property_contact_submissions")
         .delete()
-        .eq('id', id);
+        .eq("id", submissionId);
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
+      return { success: true };
+    },
+    onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Reply deleted successfully",
+        title: "Submission deleted",
+        description: "The submission has been successfully deleted",
       });
-
-      if (onSuccess) onSuccess();
-      return true;
-    } catch (error) {
-      console.error('Error deleting reply:', error);
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to delete reply",
+        description: `Failed to delete submission: ${error.message}`,
         variant: "destructive",
       });
-      return false;
-    } finally {
-      setIsDeleting(false);
     }
-  };
+  });
+
+  // Mutation for deleting a reply
+  const deleteReplyMutation = useMutation({
+    mutationFn: async (replyId: string) => {
+      const { error } = await supabase
+        .from("property_submission_replies")
+        .delete()
+        .eq("id", replyId);
+
+      if (error) throw error;
+      return { success: true };
+    },
+    onSuccess: () => {
+      toast({
+        title: "Reply deleted",
+        description: "The reply has been successfully deleted",
+      });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete reply: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
 
   return {
-    deleteSubmission,
-    deleteReply,
-    isDeleting
+    deleteSubmission: (submissionId: string) => deleteSubmissionMutation.mutateAsync(submissionId),
+    deleteReply: (replyId: string) => deleteReplyMutation.mutateAsync(replyId),
+    isDeleting: deleteSubmissionMutation.isPending || deleteReplyMutation.isPending
   };
 }

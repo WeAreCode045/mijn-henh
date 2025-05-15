@@ -4,7 +4,6 @@ export type {
   PropertyFeature,
   PropertyArea,
   PropertyImage,
-  PropertyFloorplan,
   PropertyCity,
   PropertyFormData,
   PropertySubmitData,

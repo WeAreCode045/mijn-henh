@@ -1,7 +1,7 @@
 
 import { User } from "./user";
 
-export type ParticipantRole = 'seller' | 'buyer';
+export type ParticipantRole = 'seller' | 'buyer' | 'agent';
 export type ParticipantStatus = 'pending' | 'active' | 'declined';
 
 export interface ParticipantProfileData {

@@ -1,39 +1,35 @@
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { usePropertyEditLogger } from "@/hooks/usePropertyEditLogger";
 
 export function useMarkAsRead() {
-  const { toast } = useToast();
-  const { logPropertyChange } = usePropertyEditLogger();
-
-  const markAsRead = async (propertyId: string, submissionId: string) => {
-    try {
-      const { error } = await supabase
-        .from('property_contact_submissions')
+  const queryClient = useQueryClient();
+  
+  const mutation = useMutation({
+    mutationFn: async ({ propertyId, submissionId }: { propertyId: string, submissionId: string }) => {
+      const { data, error } = await supabase
+        .from("property_contact_submissions")
         .update({ is_read: true })
-        .eq('id', submissionId);
-
-      if (error) {
-        throw error;
-      }
-
-      // Use the function in the marked as read handler
-      await logPropertyChange(propertyId, "submission", `Marked submission ${submissionId} as read`);
-
-      toast({
-        title: "Success",
-        description: "Submission marked as read.",
-      });
-    } catch (error) {
-      console.error("Error marking submission as read:", error);
-      toast({
-        title: "Error",
-        description: "Failed to mark submission as read.",
-        variant: "destructive",
+        .eq("id", submissionId)
+        .eq("property_id", propertyId);
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ["property-submissions", variables.propertyId]
       });
     }
+  });
+
+  const markAsRead = (propertyId: string, submissionId: string) => {
+    mutation.mutate({ propertyId, submissionId });
   };
 
-  return { markAsRead };
+  return {
+    markAsRead,
+    isLoading: mutation.isPending,
+    error: mutation.error
+  };
 }

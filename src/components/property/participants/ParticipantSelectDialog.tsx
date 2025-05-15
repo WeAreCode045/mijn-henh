@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -125,7 +126,7 @@ export function ParticipantSelectDialog({
       console.log(`Adding ${role} with ID ${selectedParticipant} to property ${propertyId}`);
       
       // Add participant to the property
-      await addParticipant({
+      await addParticipant.mutateAsync({
         email: participant.email,
         firstName: participant.firstName,
         lastName: participant.lastName,

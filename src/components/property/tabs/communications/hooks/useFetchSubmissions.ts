@@ -1,5 +1,7 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Submission } from "../types";
 
 export const useFetchSubmissions = (propertyId: string) => {
   const {
@@ -7,17 +9,16 @@ export const useFetchSubmissions = (propertyId: string) => {
     isLoading,
     error,
     refetch,
-  } = useQuery(
-    ["property-submissions", propertyId],
-    async () => {
+  } = useQuery({
+    queryKey: ["property-submissions", propertyId],
+    queryFn: async () => {
       if (!propertyId) {
         return [];
       }
 
       const { data, error } = await supabase
-        .from("property_inquiries")
-        .select(
-          `
+        .from("property_contact_submissions")
+        .select(`
           id,
           name,
           email,
@@ -26,28 +27,29 @@ export const useFetchSubmissions = (propertyId: string) => {
           message,
           created_at,
           is_read,
-          agent:accounts (
+          agent_id,
+          agent:accounts(
             id,
             email,
-            employer_profiles (
+            employer_profiles(
               first_name,
               last_name,
               avatar_url
             ),
             display_name
           ),
-          property:properties (
+          property:properties(
             id,
             title
           ),
-          replies (
+          replies:property_submission_replies(
             id,
             created_at,
-            message,
-            agent:accounts (
+            reply_text,
+            agent:accounts(
               id,
               email,
-              employer_profiles (
+              employer_profiles(
                 first_name,
                 last_name,
                 avatar_url
@@ -55,8 +57,7 @@ export const useFetchSubmissions = (propertyId: string) => {
               display_name
             )
           )
-        `
-        )
+        `)
         .eq("property_id", propertyId)
         .order("created_at", { ascending: false });
 
@@ -65,12 +66,10 @@ export const useFetchSubmissions = (propertyId: string) => {
         throw error;
       }
 
-      return data;
+      return data || [];
     },
-    {
-      enabled: !!propertyId, // Only run the query if propertyId is not null
-    }
-  );
+    enabled: !!propertyId,
+  });
 
   const transformData = (data: any[]) => {
     return data.map((item) => {
@@ -83,6 +82,9 @@ export const useFetchSubmissions = (propertyId: string) => {
         message: item.message,
         created_at: item.created_at,
         is_read: item.is_read,
+        property_id: item.property_id,
+        updated_at: item.updated_at || item.created_at, // Fallback for updated_at
+        agent_id: item.agent_id,
         agent: {
           id: item.agent?.id || '',
           email: item.agent?.email || '',
@@ -95,7 +97,19 @@ export const useFetchSubmissions = (propertyId: string) => {
           id: item.property?.id || '',
           title: item.property?.title || '',
         },
-        replies: item.replies || [],
+        replies: item.replies?.map((reply: any) => ({
+          id: reply.id,
+          submission_id: reply.submission_id || item.id,
+          message: reply.reply_text,
+          created_at: reply.created_at,
+          agent_id: reply.agent_id,
+          agent: {
+            id: reply.agent?.id || '',
+            full_name: reply.agent?.display_name || (reply.agent?.employer_profiles ? `${reply.agent.employer_profiles.first_name || ''} ${reply.agent.employer_profiles.last_name || ''}` : ''),
+            email: reply.agent?.email || '',
+            avatar_url: reply.agent?.employer_profiles?.avatar_url || '',
+          }
+        })) || [],
       };
 
       return transformedItem;

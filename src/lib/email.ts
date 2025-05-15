@@ -1,36 +1,34 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-interface SendEmailArgs {
-  to: string | string[];
+interface SendEmailParams {
+  to: string;
   subject: string;
-  html?: string;
-  text?: string;
+  html: string;
   from?: string;
   fromName?: string;
 }
 
-export async function sendEmail({
-  to,
-  subject,
-  html,
-  text,
-  from,
-  fromName
-}: SendEmailArgs): Promise<{ success: boolean; error?: string }> {
+export async function sendEmail({ to, subject, html, from, fromName }: SendEmailParams) {
   try {
-    const { error } = await supabase.functions.invoke('send-email', {
-      body: { to, subject, html, text, from, fromName }
+    const { data, error } = await supabase.functions.invoke("send-email", {
+      body: {
+        to,
+        subject,
+        html,
+        from,
+        fromName
+      }
     });
 
-    if (error) throw error;
-    
-    return { success: true };
-  } catch (error: any) {
-    console.error('Error sending email:', error);
-    return {
-      success: false,
-      error: error.message || 'Failed to send email'
-    };
+    if (error) {
+      console.error("Error sending email:", error);
+      throw error;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Error sending email:", err);
+    throw err;
   }
 }

@@ -27,59 +27,20 @@ export function useParticipants() {
           return [];
         }
         
-        // Get emails for these accounts
-        const emailMap = new Map();
+        // Create a map of user ids
+        const userIds = accountsData.map(account => account.user_id);
         
-        // First try to get emails from the accounts table directly
-        if (accountsData && Array.isArray(accountsData)) {
-          accountsData.forEach(account => {
-            if (account && account.email) {
-              emailMap.set(account.id, account.email);
-            }
-          });
-        }
-        
-        // For any missing emails, try to get them from auth.users via admin API
-        const userIds = accountsData && Array.isArray(accountsData) 
-          ? accountsData
-            .filter(account => account && account.user_id && !emailMap.has(account.id))
-            .map(account => account.user_id)
-          : [];
-          
-        if (userIds.length > 0) {
-          try {
-            const { data: usersData } = await supabase.auth.admin.listUsers({
-              perPage: 1000
-            });
-            
-            if (usersData && usersData.users) {
-              usersData.users.forEach(user => {
-                const matchingAccount = accountsData.find(acc => acc && acc.user_id === user.id);
-                if (matchingAccount && user.email) {
-                  emailMap.set(matchingAccount.id, user.email);
-                }
-              });
-            }
-          } catch (err) {
-            console.error("Error fetching user emails from auth.users:", err);
-            // Continue without these emails
-          }
-        }
-        
-        // Get the participant profiles
+        // Fetch participant profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("participants_profile")
-          .select(`*`)
-          .in('id', accountsData.map(account => account.id));
-
-        if (profilesError && profilesError.code !== 'PGRST116') {
+          .select("*")
+          .in("id", userIds);
+          
+        if (profilesError) {
           console.error("Error fetching participant profiles:", profilesError);
-          throw profilesError;
         }
         
-        console.log("Participant profiles from supabase:", profiles);
-
-        // Create a map of id to profile for quick lookups
+        // Create a map for quick lookup
         const profileMap = new Map();
         if (profiles) {
           profiles.forEach(profile => {
@@ -87,10 +48,30 @@ export function useParticipants() {
           });
         }
         
-        // Create a map to store the participant data with unique id
+        // Get emails from accounts table as backup
+        const { data: accounts, error: accountsError2 } = await supabase
+          .from("accounts")
+          .select("id, user_id, email, display_name")
+          .in("user_id", userIds);
+          
+        if (accountsError2) {
+          console.error("Error fetching participant accounts:", accountsError2);
+        }
+        
+        // Create a map for quick lookup
+        const emailMap = new Map();
+        if (accounts && Array.isArray(accounts)) {
+          accounts.forEach(account => {
+            if (account && account.email) {
+              emailMap.set(account.id, account.email);
+              emailMap.set(account.user_id, account.email);
+            }
+          });
+        }
+        
+        // Map the data with profiles
         const participantsMap = new Map();
         
-        // Process each account to create participant data
         if (accountsData && Array.isArray(accountsData)) {
           accountsData.forEach(account => {
             if (account && !participantsMap.has(account.id)) {

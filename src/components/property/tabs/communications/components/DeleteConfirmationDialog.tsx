@@ -1,5 +1,4 @@
 
-import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,27 +23,30 @@ export function DeleteConfirmationDialog({
   onOpenChange,
   onConfirm,
   isDeleting,
-  itemType
+  itemType,
 }: DeleteConfirmationDialogProps) {
+  const itemName = itemType === "submission" ? "submission" : "reply";
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete {itemName}</AlertDialogTitle>
           <AlertDialogDescription>
-            {itemType === 'submission' 
-              ? 'This will permanently delete this submission and all its replies.' 
-              : 'This will permanently delete this reply.'}
+            Are you sure you want to delete this {itemName}? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
+            className="bg-red-600 hover:bg-red-700"
             disabled={isDeleting}
-            className="bg-red-500 hover:bg-red-600"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

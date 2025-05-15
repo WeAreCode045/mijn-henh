@@ -31,11 +31,10 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
   });
 
   const handleSelectSubmission = (id: string) => {
-    // Find the submission in the submissions array to ensure we're using the correct type
+    // Find the submission in the submissions array
     const submission = submissions.find(s => s.id === id);
     if (submission) {
-      // Use a type assertion to assign the submission to selectedSubmission state
-      setSelectedSubmission(() => submission as Submission);
+      setSelectedSubmission(submission);
       
       // Mark as read when selected if not already read
       if (!submission.is_read) {
@@ -139,7 +138,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
           recipientEmail={selectedSubmission.email}
           recipientName={selectedSubmission.name}
           propertyId={propertyId}
-          propertyTitle="Property" // Could be improved with actual property title
+          propertyTitle={selectedSubmission.property?.title || "Property"}
           submissionId={selectedSubmission.id}
         />
       )}

@@ -1,132 +1,201 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyFormData } from "@/types/property";
+import { Dispatch, SetStateAction } from 'react';
+import { toast } from 'sonner';
 
-interface Submission {
+// Define the submission type for this custom hook
+export interface Submission {
   id: string;
+  propertyId: string;
   name: string;
   email: string;
   phone: string;
-  inquiry_type: string;
   message: string;
-  created_at: string;
-  is_read: boolean;
-  agent: {
+  inquiryType: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  agentId: string | null;
+  agent?: {
     id: string;
+    fullName: string;
     email: string;
-    first_name: string;
-    last_name: string;
-    display_name: string;
-    avatar_url: string;
-  };
-  property: {
-    id: string;
-    title: string;
-  };
-  replies: any[];
+    phone: string;
+    avatarUrl: string | null;
+  } | null;
+  replies: SubmissionReply[];
 }
 
-export function useSubmissions(propertyId: string) {
-  const queryClient = useQueryClient();
+export interface SubmissionReply {
+  id: string;
+  submissionId: string;
+  replyText: string;
+  createdAt: string;
+  updatedAt: string;
+  agentId: string | null;
+  userId: string | null;
+  userName: string | null;
+  userEmail: string | null;
+  userPhone: string | null;
+  userAvatar: string | null;
+}
 
-  const { data: submissions, isLoading, error } = useQuery({
-    queryKey: ["submissions", propertyId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("submissions")
-        .select(`
-          id,
-          name,
-          email,
-          phone,
-          inquiry_type,
-          message,
-          created_at,
-          is_read,
-          agent: agents (
-            id,
-            email,
-            first_name,
-            last_name,
-            display_name,
-            avatar_url
-          ),
-          property: properties (
-            id,
-            title
-          ),
-          replies (
-            id,
-            created_at,
-            message,
-            agent_id
-          )
-        `)
-        .eq("property_id", propertyId);
+export function usePropertyMainImages(
+  formData: PropertyFormData,
+  setFormData: Dispatch<SetStateAction<PropertyFormData>>
+) {
+  const [isUpdating, setIsUpdating] = useState(false);
 
-      if (error) {
-        throw new Error(error.message);
+  // Set an image as the main image (previously featured image)
+  const handleSetFeaturedImage = async (url: string | null) => {
+    if (!formData.id) return;
+    
+    setIsUpdating(true);
+    try {
+      // First, unmark all images as main
+      const { error: resetError } = await supabase
+        .from('property_images')
+        .update({ is_main: false })
+        .eq('property_id', formData.id);
+        
+      if (resetError) {
+        throw resetError;
       }
-
-      if (!data) {
-        return [];
+      
+      if (url) {
+        // Mark the selected image as main
+        const { error: updateError } = await supabase
+          .from('property_images')
+          .update({ is_main: true })
+          .eq('property_id', formData.id)
+          .eq('url', url);
+          
+        if (updateError) {
+          throw updateError;
+        }
+          
+        // Update local state
+        setFormData(prevState => ({
+          ...prevState,
+          featuredImage: url
+        }));
+        
+        toast.success("Main image updated successfully.");
+      } else {
+        // If url is null, just clear the main image
+        setFormData(prevState => ({
+          ...prevState,
+          featuredImage: null
+        }));
       }
-
-      return transformData(data);
-    },
-  });
-
-  const transformData = (data: any[]) => {
-    return data.map((item) => {
-      const transformedItem = {
-        id: item.id,
-        name: item.name,
-        email: item.email,
-        phone: item.phone,
-        inquiry_type: item.inquiry_type,
-        message: item.message,
-        created_at: item.created_at,
-        is_read: item.is_read,
-        agent: {
-          id: item.agent?.id || '',
-          email: item.agent?.email || '',
-          first_name: item.agent?.first_name || '',
-          last_name: item.agent?.last_name || '',
-          display_name: item.agent?.display_name || item.agent?.first_name ? `${item.agent?.first_name} ${item.agent?.last_name || ''}` : '',
-          avatar_url: item.agent?.avatar_url || '',
-        },
-        property: {
-          id: item.property?.id || '',
-          title: item.property?.title || '',
-        },
-        replies: item.replies || [],
-      };
-
-      return transformedItem;
-    });
+    } catch (error) {
+      console.error("Error updating main image:", error);
+      toast.error("Failed to update main image.");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const markAsReadMutation = useMutation({
-    mutationFn: async (submissionId: string) => {
-      const { data, error } = await supabase
-        .from("submissions")
-        .update({ is_read: true })
-        .eq("id", submissionId);
-
-      if (error) {
-        throw new Error(error.message);
+  // Toggle whether an image is in the featured images collection
+  const handleToggleFeaturedImage = async (url: string) => {
+    if (!formData.id) return;
+    
+    setIsUpdating(true);
+    try {
+      // Check if the image is already in the featured images
+      const isInFeatured = formData.featuredImages?.includes(url) || false;
+      
+      if (!isInFeatured) {
+        // Check if we already have 4 featured images
+        const currentFeaturedImages = formData.featuredImages || [];
+        if (currentFeaturedImages.length >= 4) {
+          // Remove the oldest featured image
+          const oldestFeaturedImage = currentFeaturedImages[0];
+          
+          // Unmark it in the database
+          const { error: resetError } = await supabase
+            .from('property_images')
+            .update({ is_featured_image: false })
+            .eq('property_id', formData.id)
+            .eq('url', oldestFeaturedImage);
+            
+          if (resetError) {
+            throw resetError;
+          }
+        }
       }
+      
+      // Toggle the is_featured_image flag in the database
+      const { error: updateError } = await supabase
+        .from('property_images')
+        .update({ is_featured_image: !isInFeatured })
+        .eq('property_id', formData.id)
+        .eq('url', url);
+        
+      if (updateError) {
+        throw updateError;
+      }
+      
+      // Update local state
+      setFormData(prevState => {
+        const currentFeaturedImages = prevState.featuredImages || [];
+        let updatedFeaturedImages;
+        
+        if (isInFeatured) {
+          // Remove from featured
+          updatedFeaturedImages = currentFeaturedImages.filter(img => img !== url);
+        } else {
+          // Add to featured, maintaining max 4 images
+          updatedFeaturedImages = [...currentFeaturedImages, url];
+          if (updatedFeaturedImages.length > 4) {
+            updatedFeaturedImages = updatedFeaturedImages.slice(1); // Remove oldest
+          }
+        }
+        
+        return {
+          ...prevState,
+          featuredImages: updatedFeaturedImages,
+          // Update legacy fields for backward compatibility
+          coverImages: updatedFeaturedImages
+        };
+      });
+      
+      toast.success(isInFeatured 
+        ? "Image removed from featured images." 
+        : "Image added to featured images.");
+    } catch (error) {
+      console.error("Error toggling featured image:", error);
+      toast.error("Failed to update featured image.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["submissions", propertyId]);
-    },
-  });
+  // Handle reply data safely
+  const processReplyData = (reply: any): SubmissionReply => {
+    // Safely extract user data, providing defaults for missing properties
+    const userData = reply.user || {};
+    
+    return {
+      id: reply.id,
+      submissionId: reply.submission_id,
+      replyText: reply.reply_text,
+      createdAt: reply.created_at,
+      updatedAt: reply.updated_at,
+      agentId: reply.agent_id,
+      userId: reply.user_id || null,
+      userName: userData.full_name || "Unknown User",
+      userEmail: userData.email || "no-email@example.com",
+      userPhone: userData.phone || "N/A",
+      userAvatar: userData.avatar_url || null
+    };
+  };
 
   return {
-    submissions,
-    isLoading,
-    error,
-    markAsRead: markAsReadMutation.mutate,
+    handleSetFeaturedImage,
+    handleToggleFeaturedImage,
+    isUpdating,
+    processReplyData
   };
 }

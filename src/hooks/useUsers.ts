@@ -36,7 +36,7 @@ export function useUsers() {
 
         console.log("Employee accounts data from supabase:", accountsData);
         
-        if (!accountsData || accountsData.length === 0) {
+        if (!accountsData || !Array.isArray(accountsData) || accountsData.length === 0) {
           console.log("No employee accounts found");
           return [];
         }
@@ -46,7 +46,7 @@ export function useUsers() {
         
         // First try to get emails from the accounts table directly
         accountsData.forEach(account => {
-          if (account.email) {
+          if (account && account.email) {
             emailMap.set(account.id, account.email);
             emailMap.set(account.user_id, account.email);
           }
@@ -54,10 +54,10 @@ export function useUsers() {
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account.user_id && !emailMap.has(account.user_id))
+          .filter(account => account && account.user_id && !emailMap.has(account.user_id))
           .map(account => account.user_id);
           
-        if (userIds.length > 0) {
+        if (userIds && userIds.length > 0) {
           try {
             // Note: This might fail depending on permissions
             const { data: authData, error: authError } = await supabase.auth.admin.listUsers({
@@ -69,10 +69,10 @@ export function useUsers() {
               // Continue without these emails
             } else if (authData && authData.users) {
               authData.users.forEach(user => {
-                if (user.id && user.email) {
+                if (user && user.id && user.email) {
                   emailMap.set(user.id, user.email);
                   
-                  const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
+                  const matchingAccount = accountsData.find(acc => acc && acc.user_id === user.id);
                   if (matchingAccount) {
                     emailMap.set(matchingAccount.id, user.email);
                   }
@@ -111,35 +111,39 @@ export function useUsers() {
 
         // Create a map of id to profile
         const profileMap = new Map();
-        if (profiles) {
+        if (profiles && Array.isArray(profiles)) {
           profiles.forEach(profile => {
-            profileMap.set(profile.id, profile);
+            if (profile) {
+              profileMap.set(profile.id, profile);
+            }
           });
         }
         
         // Map accounts to user profiles
         const employeeProfiles = accountsData.map(account => {
+          if (!account) return null;
+          
           const profile = profileMap.get(account.id) || {};
           
           // Get email from emailMap, profile, or fall back to empty string
-          const userEmail = emailMap.get(account.id) || profile.email || '';
+          const userEmail = emailMap.get(account.id) || (profile ? profile.email : '') || '';
           
           return {
             id: account.id,
             email: userEmail,
-            first_name: profile.first_name || '',
-            last_name: profile.last_name || '',
-            full_name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || account.display_name || 'Unnamed User',
-            display_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
-            phone: profile.phone || '',
-            whatsapp_number: profile.whatsapp_number || '',
+            first_name: profile ? profile.first_name || '' : '',
+            last_name: profile ? profile.last_name || '' : '',
+            full_name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : account.display_name || 'Unnamed User',
+            display_name: account.display_name || (profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '') || 'Unnamed User',
+            phone: profile ? profile.phone || '' : '',
+            whatsapp_number: profile ? profile.whatsapp_number || '' : '',
             type: account.type || 'employee',
-            role: profile.role || account.role || 'agent',
-            avatar_url: profile.avatar_url || '',
-            created_at: profile.created_at || '',
-            updated_at: profile.updated_at || ''
+            role: profile ? profile.role || account.role || 'agent' : account.role || 'agent',
+            avatar_url: profile ? profile.avatar_url || '' : '',
+            created_at: profile ? profile.created_at || '' : '',
+            updated_at: profile ? profile.updated_at || '' : ''
           };
-        });
+        }).filter(Boolean); // Filter out any null values
 
         console.log("Transformed employee profiles:", employeeProfiles);
         return employeeProfiles;
