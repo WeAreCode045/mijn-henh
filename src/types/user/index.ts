@@ -1,10 +1,19 @@
 
-import { UserBase } from './UserBase';
 import { UserTimestamps } from './UserTimestamps';
-import { UserFormData } from './UserForm';
-import { UserIdentification } from './UserIdentification';
 
-// Simple User type that combines the base properties
-export type User = UserBase;
+export interface User extends UserTimestamps {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  display_name?: string;
+  phone?: string;
+  whatsapp_number?: string;
+  type?: "employee" | "participant";
+  role?: "admin" | "agent" | "buyer" | "seller" | string;
+  avatar_url?: string;
+}
 
-export type { UserFormData, UserBase, UserTimestamps, UserIdentification };
+export * from './UserForm';
+export * from './UserTimestamps';

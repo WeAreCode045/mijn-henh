@@ -1,33 +1,19 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { usePropertyParticipants } from "@/hooks/usePropertyParticipants";
-import { ParticipantRole } from "@/types/participant";
-import { supabase } from "@/integrations/supabase/client";
-import { sendEmail } from "@/lib/email";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { supabase } from "@/integrations/supabase/client";
+import { ParticipantRole } from "@/types/participant";
 
 interface ParticipantSelectDialogProps {
   open: boolean;
@@ -36,233 +22,233 @@ interface ParticipantSelectDialogProps {
   role: ParticipantRole;
 }
 
-interface ParticipantOption {
-  value: string;
-  label: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-}
-
 export function ParticipantSelectDialog({
   open,
   onOpenChange,
   propertyId,
   role,
 }: ParticipantSelectDialogProps) {
-  const [participants, setParticipants] = useState<ParticipantOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedParticipant, setSelectedParticipant] = useState<string>("");
-  const [openCombobox, setOpenCombobox] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { addParticipant } = usePropertyParticipants(propertyId);
   const { toast } = useToast();
-
-  // Fetch all participants when dialog opens
-  useEffect(() => {
-    const fetchParticipants = async () => {
-      if (!open) return;
-      
-      setIsLoading(true);
-      try {
-        // Get all participant profiles
-        const { data, error } = await supabase
-          .from("participants_profile")
-          .select("id, first_name, last_name, email")
-          .order("last_name", { ascending: true });
-
-        if (error) {
-          throw error;
-        }
-
-        // Transform data into options format
-        const options = data.map((participant) => ({
-          value: participant.id,
-          label: `${participant.first_name || ""} ${participant.last_name || ""} (${participant.email})`,
-          email: participant.email || "",
-          firstName: participant.first_name || "",
-          lastName: participant.last_name || "",
-        }));
-
-        setParticipants(options);
-      } catch (error) {
-        console.error("Error fetching participants:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load participants",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchParticipants();
-  }, [open, toast]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [createNew, setCreateNew] = useState(true);
+  const [formData, setFormData] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "tempPassword123", // Default password for new users
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedParticipant) {
-      toast({
-        title: "Error",
-        description: "Please select a participant",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
+    setIsLoading(true);
     
     try {
-      const participant = participants.find(p => p.value === selectedParticipant);
+      let userId;
+      let accountId;
       
-      if (!participant) {
-        throw new Error("Selected participant not found");
+      if (createNew) {
+        // Validate required fields for new user
+        if (!formData.email || !formData.firstName || !formData.lastName) {
+          throw new Error("All fields are required for creating a new user");
+        }
+        
+        // Create new auth user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+            },
+          }
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Failed to create user");
+        
+        userId = authData.user.id;
+        
+        // Create account with type participant
+        const { data: accountData, error: accountError } = await supabase
+          .from('accounts')
+          .insert({
+            user_id: userId,
+            type: 'participant',
+            role: role as string, // Type coercion to avoid recursion
+            display_name: `${formData.firstName} ${formData.lastName}`.trim(),
+            email: formData.email // Add email to the accounts table
+          })
+          .select()
+          .single();
+        
+        if (accountError) throw accountError;
+        if (!accountData) throw new Error("Failed to create account");
+        
+        accountId = accountData.id;
+        
+        // Create participant profile
+        const { error: profileError } = await supabase
+          .from('participants_profile')
+          .insert([
+            {
+              id: accountId,
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              email: formData.email,
+              role: role as string // Type coercion to avoid recursion
+            }
+          ]);
+        
+        if (profileError) throw profileError;
+      } else {
+        // Validate search email
+        if (!searchEmail) {
+          throw new Error("Email is required for finding existing users");
+        }
+        
+        // Search for existing user by email
+        const { data: userData, error: userError } = await supabase
+          .from('accounts')
+          .select('user_id, id')
+          .eq('email', searchEmail.toLowerCase())
+          .eq('type', 'participant')
+          .limit(1);
+        
+        if (userError) throw userError;
+        
+        if (!userData || userData.length === 0) {
+          throw new Error("No participant found with that email");
+        }
+        
+        userId = userData[0].user_id;
+        accountId = userData[0].id;
       }
       
-      console.log(`Adding ${role} with ID ${selectedParticipant} to property ${propertyId}`);
+      // Link the user to the property as a participant
+      const { error: linkError } = await supabase
+        .from("property_participants")
+        .insert({
+          property_id: propertyId,
+          user_id: userId,
+          role: role as string, // Type coercion to avoid recursion
+          status: "pending"
+        });
+        
+      if (linkError) throw linkError;
       
-      // Add participant to the property
-      await addParticipant({
-        email: participant.email,
-        firstName: participant.firstName,
-        lastName: participant.lastName,
-        role,
-        propertyId,
-      });
-      
-      // Get property details for the invitation
-      const { data: property } = await supabase
-        .from('properties')
-        .select('title, agent_id')
-        .eq('id', propertyId)
-        .single();
-      
-      if (!property) {
-        throw new Error("Property not found");
-      }
-      
-      // Get agency settings
-      const { data: agencySettings } = await supabase
-        .from('agency_settings')
-        .select('resend_from_email, resend_from_name')
-        .single();
-      
-      const siteUrl = window.location.origin;
-      const inviteLink = `${siteUrl}/auth?redirect=/participant`;
-      
-      // Send invitation email
-      await sendEmail({
-        to: participant.email,
-        subject: `You've been invited as a ${role} for ${property.title || 'a property'}`,
-        html: `
-          <h1>Property Invitation</h1>
-          <p>Hello ${participant.firstName} ${participant.lastName},</p>
-          <p>You have been invited to participate as a <strong>${role}</strong> for ${property.title || 'a property'}.</p>
-          <p>You can access this property using your existing account credentials.</p>
-          <p><a href="${inviteLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Access Property Portal</a></p>
-          <p style="margin-top: 20px; color: #666;">
-            If the button above doesn't work, copy and paste this link into your browser:
-            <br>
-            <span style="word-break: break-all; font-family: monospace;">${inviteLink}</span>
-          </p>
-        `,
-        from: agencySettings?.resend_from_email,
-        fromName: agencySettings?.resend_from_name
+      toast({
+        title: "Success",
+        description: `${role} added successfully`,
       });
       
       // Reset form and close dialog
-      setSelectedParticipant("");
-      onOpenChange(false);
-      
-      toast({
-        title: "Invitation sent",
-        description: `${role} invitation has been sent to ${participant.email}`,
+      setSearchEmail("");
+      setFormData({
+        email: "",
+        firstName: "",
+        lastName: "",
+        password: "tempPassword123",
       });
-    } catch (error) {
-      console.error("Error sending invitation:", error);
-      const errorMessage = error instanceof Error ? error.message : `Failed to add ${role}`;
+      setCreateNew(true);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Error adding participant:", error);
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error.message || "Failed to add participant",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Add {role === "seller" ? "Seller" : "Buyer"} to Property
+          </DialogTitle>
+        </DialogHeader>
+
         <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>
-              Add {role === "seller" ? "Seller" : "Buyer"}
-            </DialogTitle>
-            <DialogDescription>
-              Select an existing participant to invite as a {role} to this property.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="participant" className="text-right">
-                Participant
-              </Label>
-              <div className="col-span-3">
-                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={openCombobox}
-                      className="w-full justify-between"
-                      disabled={isLoading}
-                    >
-                      {selectedParticipant
-                        ? participants.find((participant) => participant.value === selectedParticipant)?.label
-                        : isLoading
-                        ? "Loading participants..."
-                        : "Select participant..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search participants..." />
-                      <CommandEmpty>No participant found.</CommandEmpty>
-                      <CommandGroup className="max-h-[300px] overflow-auto">
-                        {participants.map((participant) => (
-                          <CommandItem
-                            key={participant.value}
-                            value={participant.value}
-                            onSelect={(currentValue) => {
-                              setSelectedParticipant(
-                                currentValue === selectedParticipant ? "" : currentValue
-                              );
-                              setOpenCombobox(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                selectedParticipant === participant.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {participant.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+          <div className="space-y-4 py-4">
+            <RadioGroup
+              defaultValue="new"
+              value={createNew ? "new" : "existing"}
+              onValueChange={(value) => setCreateNew(value === "new")}
+              className="flex flex-col space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="new" id="new" />
+                <Label htmlFor="new" className="cursor-pointer">
+                  Create new {role}
+                </Label>
               </div>
-            </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="existing" id="existing" />
+                <Label htmlFor="existing" className="cursor-pointer">
+                  Add existing user as {role}
+                </Label>
+              </div>
+            </RadioGroup>
+
+            {createNew ? (
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                <Label htmlFor="searchEmail">Email *</Label>
+                <Input
+                  id="searchEmail"
+                  type="email"
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  required
+                  placeholder="Search for existing user by email"
+                />
+              </div>
+            )}
           </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -271,8 +257,8 @@ export function ParticipantSelectDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !selectedParticipant}>
-              {isSubmitting ? "Sending..." : "Send Invitation"}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Adding..." : "Add Participant"}
             </Button>
           </DialogFooter>
         </form>

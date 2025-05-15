@@ -8,7 +8,7 @@ import { useAuth } from "@/providers/AuthProvider";
 export function useUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { session } = useAuth();
+  const { session, initialized } = useAuth();
 
   const isAuthenticated = !!session;
 
@@ -44,35 +44,6 @@ export function useUsers() {
         // Create a map for emails
         const emailMap = new Map();
         
-        // Get emails from auth.users for each user_id
-        const userIds = accountsData
-          .filter(account => account.user_id)
-          .map(account => account.user_id);
-          
-        if (userIds.length > 0) {
-          try {
-            const { data: usersData } = await supabase.auth.admin.listUsers({
-              perPage: 1000
-            });
-            
-            if (usersData && usersData.users) {
-              usersData.users.forEach(user => {
-                if (user.id && user.email) {
-                  emailMap.set(user.id, user.email);
-                  
-                  const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
-                  if (matchingAccount) {
-                    emailMap.set(matchingAccount.id, user.email);
-                  }
-                }
-              });
-            }
-          } catch (err) {
-            console.error("Error fetching user emails from auth.users:", err);
-            // Continue without these emails
-          }
-        }
-        
         // Fetch employer profiles for these account IDs
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
@@ -88,7 +59,7 @@ export function useUsers() {
             created_at,
             updated_at
           `)
-          .in('id', accountsData.map(account => account.id));
+          .in('id', accountsData.map((account: any) => account.id));
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -100,17 +71,19 @@ export function useUsers() {
         // Create a map of id to profile
         const profileMap = new Map();
         if (profiles) {
-          profiles.forEach(profile => {
-            profileMap.set(profile.id, profile);
+          profiles.forEach((profile: any) => {
+            if (profile && profile.id) {
+              profileMap.set(profile.id, profile);
+            }
           });
         }
         
         // Map accounts to user profiles
-        const employeeProfiles = accountsData.map(account => {
+        const employeeProfiles = accountsData.map((account: any) => {
           const profile = profileMap.get(account.id) || {};
           
-          // Get email from emailMap, profile, or fall back to empty string
-          const userEmail = emailMap.get(account.id) || profile.email || '';
+          // Try to get email from different sources
+          const userEmail = account.email || profile.email || '';
           
           return {
             id: account.id,
@@ -136,7 +109,7 @@ export function useUsers() {
         throw err;
       }
     },
-    enabled: isAuthenticated
+    enabled: isAuthenticated && initialized
   });
 
   const deleteUser = async (userId: string) => {

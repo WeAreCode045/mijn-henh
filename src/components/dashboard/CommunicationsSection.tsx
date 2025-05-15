@@ -9,13 +9,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Reply, Archive, AlertCircle, Trash2, X } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
+interface PropertyTitle {
+  title: string;  // Ensuring this is explicitly typed as string
+}
+
 interface Submission {
   id: string;
   created_at: string;
   property_id: string;
-  property: {
-    title: string;
-  };
+  property: PropertyTitle; // Single object with title
   name: string;
   email: string;
   message: string;
@@ -135,7 +137,37 @@ export function CommunicationsSection() {
 
       if (error) throw error;
       
-      setSubmissions(data || []);
+      // Transform the data to match the Submission type
+      const formattedData = data?.map(item => {
+        // Ensure property is correctly handled as a single object
+        let propertyData: PropertyTitle = { title: 'Unknown' };
+        
+        // Check if property exists and has the expected structure
+        if (item.property && typeof item.property === 'object') {
+          // If it's a single object directly with title as a property
+          if ('title' in item.property && typeof item.property.title === 'string') {
+            propertyData = { title: item.property.title };
+          } 
+          // If it's potentially an array with one item (from the join)
+          else if (Array.isArray(item.property) && item.property.length > 0 && 
+                  'title' in item.property[0] && typeof item.property[0].title === 'string') {
+            propertyData = { title: item.property[0].title };
+          }
+        }
+        
+        return {
+          id: item.id,
+          created_at: item.created_at,
+          property_id: item.property_id,
+          property: propertyData,
+          name: item.name,
+          email: item.email,
+          message: item.message,
+          is_read: item.is_read
+        };
+      }) || [];
+      
+      setSubmissions(formattedData);
     } catch (error: any) {
       console.error('Error fetching submissions:', error);
       toast({
@@ -287,6 +319,10 @@ export function CommunicationsSection() {
     }
   };
 
+  useEffect(() => {
+    fetchSubmissions();
+  }, [toast]);
+
   return (
     <CardContent>
       {isLoading ? (
@@ -315,7 +351,7 @@ export function CommunicationsSection() {
                 <div className="text-xs text-muted-foreground">
                   <span>{submission.email}</span>
                   <span className="mx-2">•</span>
-                  <span>Property: {submission.property?.title || 'Unknown'}</span>
+                  <span>Property: {submission.property.title}</span>
                 </div>
                 <div className="flex gap-1">
                   <Button 
