@@ -23,7 +23,7 @@ export function useUsers() {
       }
       
       try {
-        // Get all accounts with employee type
+        // Get all accounts with employee type - FIX: use correct column name
         const { data: accountsData, error: accountsError } = await supabase
           .from('accounts')
           .select('*')
@@ -59,12 +59,16 @@ export function useUsers() {
           
         if (userIds.length > 0) {
           try {
-            const { data: usersData } = await supabase.auth.admin.listUsers({
+            // Note: This might fail depending on permissions
+            const { data: authData, error: authError } = await supabase.auth.admin.listUsers({
               perPage: 1000
             });
             
-            if (usersData && usersData.users) {
-              usersData.users.forEach(user => {
+            if (authError) {
+              console.error("Error fetching user emails from auth.users:", authError);
+              // Continue without these emails
+            } else if (authData && authData.users) {
+              authData.users.forEach(user => {
                 if (user.id && user.email) {
                   emailMap.set(user.id, user.email);
                   

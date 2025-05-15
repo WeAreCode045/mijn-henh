@@ -1,76 +1,44 @@
-import { PropertyData } from "./PropertyDataTypes";
-import { PropertyPlaceType } from './PropertyPlaceTypes';
 
-// Basic data types
-export interface PropertyFeature {
+import { Json } from "@/integrations/supabase/types";
+import { 
+  PropertyArea, 
+  PropertyAreaImage 
+} from "./PropertyAreaTypes";
+import { PropertyFeature } from './PropertyFeatureTypes';
+import { PropertyCity } from './PropertyCityTypes';
+import { PropertyPlace } from './PropertyPlaceTypes';
+import { PropertyBaseTypes } from './PropertyBaseTypes';
+import { PropertyImage } from "./PropertyImageTypes";
+
+export type { 
+  PropertyArea, 
+  PropertyAreaImage,
+  PropertyBaseTypes,
+  PropertyCity,
+  PropertyFeature,
+  PropertyImage,
+  PropertyPlace
+};
+
+export type PropertyParticipant = {
   id: string;
-  description: string;
-  [key: string]: unknown;
-}
+  property_id: string;
+  user_id: string;
+  role: ParticipantRole;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  documents_signed: string[];
+  webview_approved: boolean;
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+  };
+};
 
-// Import AreaImage from PropertyAreaTypes.ts
-import { AreaImage } from './PropertyAreaTypes';
+export type ParticipantRole = 'buyer' | 'seller' | 'agent';
 
-export interface PropertyArea {
-  id: string;
-  title: string;
-  description: string;
-  name: string;
-  size: string;
-  columns: number;
-  // New structure for area images
-  areaImages?: AreaImage[];
-  // Legacy fields maintained for backward compatibility
-  imageIds?: string[];
-  images?: string[] | unknown[];
-}
-
-// Explicitly export Area as an alias to PropertyArea
-export type Area = PropertyArea;
-
-export interface PropertyAgent {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string;
-  photo_url: string;
-  name?: string; // Added for compatibility
-  photoUrl?: string; // For compatibility with PropertyAgent in property.d.ts
-  avatar_url?: string;
-  address?: string; // For compatibility with PropertyAgent in property.d.ts
-}
-
-export interface PropertyImage {
-  id: string;
-  url: string;
-  sort_order?: number;
-  is_main?: boolean;
-  is_featured_image?: boolean;
-  area?: string;
-  property_id?: string;
-  type?: string;
-}
-
-export interface PropertyFloorplan {
-  id: string;
-  url: string;
-  title?: string;
-  sort_order?: number;
-  filePath?: string; // Used during upload process
-  columns?: number; // Used for layout
-}
-
-// Import PropertyNearbyPlace from PropertyPlaceTypes instead of redefining it
-import { PropertyNearbyPlace } from './PropertyPlaceTypes';
-
-export interface PropertyCity {
-  id: string;
-  name: string;
-  distance?: string;
-  [key: string]: unknown;
-}
-
-// Composite types for forms
 export interface PropertyFormData {
   id?: string;
   title: string;
@@ -83,75 +51,18 @@ export interface PropertyFormData {
   buildYear: string;
   garages: string;
   energyLabel: string;
-  hasGarden: boolean;
   description: string;
-  shortDescription: string; // Added shortDescription field
-  location_description: string;
-  features: PropertyFeature[];
-  images: PropertyImage[] | string[] | { url: string }[];
-  featuredImage: string | null;
-  featuredImages: string[];
-  areas: PropertyArea[];
-  map_image: string | null;
-  map_image_url?: string; // Added for compatibility
-  nearby_places: PropertyNearbyPlace[];
-  nearby_cities?: PropertyCity[];
-  latitude: number | null;
-  longitude: number | null;
   object_id?: string;
-  agent_id?: string;
-  template_id?: string;
-  floorplans?: PropertyFloorplan[];
-  floorplanEmbedScript: string;
-  virtualTourUrl: string;
-  youtubeUrl: string;
-  areaPhotos?: string[];
-  coverImages?: string[];
-  gridImages?: string[];
-  created_at?: string;
-  updated_at?: string;
-  status?: string; // Status property
-  propertyType?: string; // Property type property
-  archived?: boolean;
-}
-
-export interface PropertySubmitData {
-  id?: string;  // Adding the id property to fix the TypeScript error
-  title: string;
-  price: string;
-  address: string;
-  bedrooms: string;
-  bathrooms: string;
-  sqft: string;
-  livingArea: string;
-  buildYear: string;
-  garages: string;
-  energyLabel: string;
-  hasGarden: boolean;
-  description: string;
   shortDescription?: string;
-  location_description: string;
-  features: string;
-  areas: unknown;
-  nearby_places: string;
-  nearby_cities?: string;
-  latitude: number | null;
-  longitude: number | null;
-  map_image: string | null;
-  object_id?: string;
+  status?: string;
+  propertyType?: string;
+  archived?: boolean;
+  generalInfo?: Json;
+  metadata?: Json;
   agent_id?: string;
-  template_id?: string;
-  virtualTourUrl: string;
-  youtubeUrl: string;
-  images: string[]; // Required images property - ensure this exists
-  floorplanEmbedScript: string;
-  status?: string; // Status property
-  propertyType?: string; // Property type property
-  metadata?: {
-    status?: string;
-    [key: string]: unknown;
-  }; // Metadata property
+  seller_id?: string;
+  buyer_id?: string;
+  latitude?: number;
+  longitude?: number;
+  hasGarden?: boolean;
 }
-
-// Export PropertyPlaceType as a type, not the interface
-export type { PropertyPlaceType } from './PropertyPlaceTypes';

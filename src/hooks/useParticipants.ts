@@ -31,16 +31,20 @@ export function useParticipants() {
         const emailMap = new Map();
         
         // First try to get emails from the accounts table directly
-        accountsData.forEach(account => {
-          if (account.email) {
-            emailMap.set(account.id, account.email);
-          }
-        });
+        if (accountsData && Array.isArray(accountsData)) {
+          accountsData.forEach(account => {
+            if (account && account.email) {
+              emailMap.set(account.id, account.email);
+            }
+          });
+        }
         
         // For any missing emails, try to get them from auth.users via admin API
-        const userIds = accountsData
-          .filter(account => account.user_id && !emailMap.has(account.id))
-          .map(account => account.user_id);
+        const userIds = accountsData && Array.isArray(accountsData) 
+          ? accountsData
+            .filter(account => account && account.user_id && !emailMap.has(account.id))
+            .map(account => account.user_id)
+          : [];
           
         if (userIds.length > 0) {
           try {
@@ -50,7 +54,7 @@ export function useParticipants() {
             
             if (usersData && usersData.users) {
               usersData.users.forEach(user => {
-                const matchingAccount = accountsData.find(acc => acc.user_id === user.id);
+                const matchingAccount = accountsData.find(acc => acc && acc.user_id === user.id);
                 if (matchingAccount && user.email) {
                   emailMap.set(matchingAccount.id, user.email);
                 }
@@ -87,39 +91,41 @@ export function useParticipants() {
         const participantsMap = new Map();
         
         // Process each account to create participant data
-        accountsData.forEach(account => {
-          if (!participantsMap.has(account.id)) {
-            const profile = profileMap.get(account.id) || {};
-            // Get email from the emailMap, profile, or fallback to empty string
-            const userEmail = emailMap.get(account.id) || profile.email || '';
-            
-            participantsMap.set(account.id, {
-              id: account.id,
-              email: userEmail,
-              first_name: profile.first_name || '',
-              last_name: profile.last_name || '',
-              phone: profile.phone || '',
-              whatsapp_number: profile.whatsapp_number || '',
-              address: profile.address || '',
-              city: profile.city || '',
-              postal_code: profile.postal_code || '',
-              country: profile.country || '',
-              date_of_birth: profile.date_of_birth || null,
-              place_of_birth: profile.place_of_birth || null,
-              identification: profile.identification || null,
-              nationality: profile.nationality || null,
-              gender: profile.gender || null,
-              iban: profile.iban || null,
-              role: profile.role || account.role || 'buyer',
-              created_at: profile.created_at || '',
-              updated_at: profile.updated_at || '',
-              properties: [], // Will be populated later
-              avatar_url: null,
-              full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
-              bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility
-            });
-          }
-        });
+        if (accountsData && Array.isArray(accountsData)) {
+          accountsData.forEach(account => {
+            if (account && !participantsMap.has(account.id)) {
+              const profile = profileMap.get(account.id) || {};
+              // Get email from the emailMap, profile, or fallback to empty string
+              const userEmail = emailMap.get(account.id) || profile.email || '';
+              
+              participantsMap.set(account.id, {
+                id: account.id,
+                email: userEmail,
+                first_name: profile.first_name || '',
+                last_name: profile.last_name || '',
+                phone: profile.phone || '',
+                whatsapp_number: profile.whatsapp_number || '',
+                address: profile.address || '',
+                city: profile.city || '',
+                postal_code: profile.postal_code || '',
+                country: profile.country || '',
+                date_of_birth: profile.date_of_birth || null,
+                place_of_birth: profile.place_of_birth || null,
+                identification: profile.identification || null,
+                nationality: profile.nationality || null,
+                gender: profile.gender || null,
+                iban: profile.iban || null,
+                role: profile.role || account.role || 'buyer',
+                created_at: profile.created_at || '',
+                updated_at: profile.updated_at || '',
+                properties: [], // Will be populated later
+                avatar_url: null,
+                full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
+                bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility
+              });
+            }
+          });
+        }
         
         // Convert the map to an array of participant profiles
         const participantProfiles: ParticipantProfileData[] = Array.from(participantsMap.values());

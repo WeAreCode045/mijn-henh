@@ -28,7 +28,8 @@ export function useSessionInit({
             
     if (session?.user) {
       try {
-        // Get the user's type and role from the accounts table
+        // Get the user's type and role from the accounts table - fixed query
+        console.log('Fetching user account for', session.user.id);
         const { data: accountData, error: accountError } = await supabase.from('accounts')
           .select('id, type, role')
           .eq('user_id', session.user.id)
