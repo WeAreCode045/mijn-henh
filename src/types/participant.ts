@@ -30,6 +30,7 @@ export interface ParticipantProfileData {
   properties?: string[];
   created_at?: string;
   updated_at?: string;
+  full_name?: string; // Added missing property
 }
 
 export interface PropertyParticipant {

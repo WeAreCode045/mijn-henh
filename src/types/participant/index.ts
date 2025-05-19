@@ -1,8 +1,8 @@
 
 export type {
   ParticipantProfileData,
-  ParticipantForm,
   ParticipantRole,
   ParticipantStatus,
-  PropertyParticipant
+  PropertyParticipant,
+  ParticipantInvite
 } from '../participant';

@@ -70,13 +70,14 @@ export function ParticipantSelectDialog({
 
   const filteredParticipants = participants.filter(participant => {
     // Filter by search term
-    const displayName = participant.full_name || 
-                        `${participant.first_name || ''} ${participant.last_name || ''}`.trim();
+    const displayName = 
+      (participant.full_name ? participant.full_name : 
+      `${participant.first_name || ''} ${participant.last_name || ''}`).trim();
     
     const matchesSearch = 
       !searchTerm ||
       displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      participant.email.toLowerCase().includes(searchTerm.toLowerCase());
+      (participant.email || '').toLowerCase().includes(searchTerm.toLowerCase());
       
     // Filter out already assigned participants
     const isNotAssigned = !existingParticipantIds.includes(participant.id);
@@ -131,11 +132,11 @@ export function ParticipantSelectDialog({
                       onClick={() => handleSelect(participant)}
                     >
                       <TableCell>
-                        {participant.full_name || 
-                         `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 
+                        {(participant.full_name ? participant.full_name :
+                         `${participant.first_name || ''} ${participant.last_name || ''}`).trim() || 
                          '-'}
                       </TableCell>
-                      <TableCell>{participant.email}</TableCell>
+                      <TableCell>{participant.email || ''}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{participant.role || "Participant"}</Badge>
                       </TableCell>

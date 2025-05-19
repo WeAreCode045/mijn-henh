@@ -45,14 +45,14 @@ export function useUsers() {
         
         // First try to get emails from the accounts table directly
         if (accountsData && Array.isArray(accountsData)) {
-          accountsData.forEach(account => {
+          for (const account of accountsData) {
             if (account && account.email) {
               emailMap.set(account.id, account.email);
               if (account.user_id) {
                 emailMap.set(account.user_id, account.email);
               }
             }
-          });
+          }
         }
         
         // Get emails from auth.users for each user_id
