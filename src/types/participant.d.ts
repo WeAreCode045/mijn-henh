@@ -45,6 +45,13 @@ export interface ParticipantProfileData {
   updated_at: string;
   properties: any[];
   avatar_url: string | null;
-  full_name: string;
+  full_name: string;  // Add this line to fix the missing property error
   bank_account_number: string | null;
+}
+
+export interface ParticipantForm {
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
 }

@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ParticipantRole } from "@/types/participant";
 import { useToast } from "@/components/ui/use-toast";
 import { ParticipantSelectDialog } from "./ParticipantSelectDialog";
 import { PlusCircle, UserPlus } from "lucide-react";
@@ -18,7 +17,7 @@ interface ParticipantInviteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   propertyId: string;
-  role: ParticipantRole;
+  role: 'seller' | 'buyer';  // Explicitly restrict to only seller or buyer
 }
 
 export function ParticipantInviteDialog({
@@ -95,6 +94,4 @@ export function ParticipantInviteDialog({
       />
     </Dialog>
   );
-
-
 }

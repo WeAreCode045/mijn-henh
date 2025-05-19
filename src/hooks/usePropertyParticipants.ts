@@ -75,6 +75,23 @@ export function usePropertyParticipants(propertyId: string) {
           const email = profile.email || emailMap.get(participant.user_id) || '';
           const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant';
           
+          // Ensure documents_signed is always a string array
+          let documentsSigned: string[] = [];
+          if (participant.documents_signed) {
+            if (Array.isArray(participant.documents_signed)) {
+              documentsSigned = participant.documents_signed.map(doc => 
+                typeof doc === 'string' ? doc : JSON.stringify(doc)
+              );
+            } else if (typeof participant.documents_signed === 'string') {
+              try {
+                const parsed = JSON.parse(participant.documents_signed);
+                documentsSigned = Array.isArray(parsed) ? parsed.map(String) : [String(parsed)];
+              } catch {
+                documentsSigned = [participant.documents_signed];
+              }
+            }
+          }
+          
           return {
             ...participant,
             user: {
@@ -82,10 +99,11 @@ export function usePropertyParticipants(propertyId: string) {
               email,
               full_name: fullName
             },
-            // Ensure documents_signed is always an array of strings
-            documents_signed: Array.isArray(participant.documents_signed) ? participant.documents_signed : [],
-            role: participant.role as ParticipantRole, // Force type compatibility
-            status: participant.status as ParticipantStatus // Force type compatibility
+            // Ensure proper type conversion for role and status
+            role: participant.role as ParticipantRole,
+            status: participant.status as ParticipantStatus,
+            // Use our string array for documents_signed
+            documents_signed: documentsSigned
           };
         });
         

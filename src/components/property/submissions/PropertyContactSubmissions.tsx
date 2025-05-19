@@ -19,7 +19,8 @@ interface PropertyContactSubmissionsProps {
 }
 
 export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmissionsProps) {
-  const { submissions, isLoading, refetch } = useFetchSubmissions(propertyId);
+  // Use useFetchSubmissions which should return refetch
+  const { submissions, isLoading, error, refetch } = useFetchSubmissions(propertyId);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const { markAsRead } = useMarkAsRead();
   const [emailModalOpen, setEmailModalOpen] = useState(false);
@@ -27,7 +28,7 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'submission' | 'reply' } | null>(null);
 
   const { deleteSubmission, deleteReply, isDeleting } = useDeleteSubmissionItem({
-    onSuccess: refetch
+    onSuccess: () => refetch && refetch()
   });
 
   const handleSelectSubmission = (id: string) => {

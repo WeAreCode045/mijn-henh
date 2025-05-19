@@ -4,118 +4,102 @@ import { supabase } from "@/integrations/supabase/client";
 import { Submission } from "../types";
 
 export function useFetchSubmissions(propertyId: string) {
-  const { data: submissions, isLoading, error } = useQuery({
+  const {
+    data: submissions = [],
+    isLoading,
+    error,
+    refetch
+  } = useQuery({
     queryKey: ["property-contact-submissions", propertyId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("property_contact_submissions")
-        .select(`
-          id,
-          name,
-          email,
-          phone,
-          message,
-          inquiry_type,
-          is_read,
-          created_at,
-          updated_at,
-          property_id,
-          agent_id,
-          agent:accounts (
-            id,
-            email,
-            display_name,
-            employer_profiles (
-              first_name,
-              last_name,
-              phone,
-              avatar_url
-            )
-          ),
-          property:properties (
-            id,
-            title
-          ),
-          replies:property_submission_replies (
-            id,
-            submission_id,
-            agent_id,
-            reply_text,
-            created_at,
-            agent:accounts (
-              id,
-              email,
-              display_name,
-              employer_profiles (
-                first_name,
-                last_name,
-                avatar_url
-              )
-            )
-          )
-        `)
-        .eq("property_id", propertyId)
-        .order("created_at", { ascending: false });
+      try {
+        // Fetch submissions from property_contact_submissions table
+        const { data, error } = await supabase
+          .from("property_contact_submissions")
+          .select(`
+            *,
+            agent:agent_id (*),
+            property:property_id (*)
+          `)
+          .eq("property_id", propertyId)
+          .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching property submissions:", error);
-        throw error;
+        if (error) throw error;
+
+        // If no submissions were found, return empty array
+        if (!data || data.length === 0) {
+          return [];
+        }
+
+        // Fetch replies for each submission
+        const submissionIds = data.map((submission) => submission.id);
+        const { data: repliesData, error: repliesError } = await supabase
+          .from("property_submission_replies")
+          .select("*")
+          .in("submission_id", submissionIds);
+
+        if (repliesError) {
+          console.error("Error fetching replies:", repliesError);
+        }
+
+        // Map replies to submissions
+        const repliesMap = new Map();
+        if (repliesData && Array.isArray(repliesData)) {
+          repliesData.forEach((reply) => {
+            if (!repliesMap.has(reply.submission_id)) {
+              repliesMap.set(reply.submission_id, []);
+            }
+            repliesMap.get(reply.submission_id).push(reply);
+          });
+        }
+
+        // Format submissions with replies
+        const formattedSubmissions: Submission[] = data.map((submission) => {
+          // Format agent data if present
+          let agent = null;
+          if (submission.agent) {
+            agent = {
+              id: submission.agent.id || null,
+              email: submission.agent.email || null,
+              first_name: submission.agent.first_name || null,
+              last_name: submission.agent.last_name || null,
+              display_name: submission.agent.display_name || "Unknown Agent",
+              avatar_url: submission.agent.avatar_url || null,
+            };
+          }
+
+          // Return formatted submission
+          return {
+            id: submission.id,
+            property_id: submission.property_id,
+            name: submission.name,
+            email: submission.email,
+            phone: submission.phone,
+            message: submission.message,
+            inquiry_type: submission.inquiry_type,
+            is_read: submission.is_read,
+            created_at: submission.created_at,
+            updated_at: submission.updated_at,
+            agent_id: submission.agent_id,
+            agent,
+            property: submission.property,
+            replies: repliesMap.get(submission.id) || []
+          };
+        });
+
+        return formattedSubmissions;
+      } catch (err) {
+        console.error("Error in useFetchSubmissions:", err);
+        throw err;
       }
-
-      return transformSubmissions(data || []);
     },
     enabled: !!propertyId
   });
 
-  const transformSubmissions = (data: any[]): Submission[] => {
-    return data.map((item) => ({
-      id: item.id,
-      property_id: item.property_id,
-      name: item.name,
-      email: item.email,
-      phone: item.phone,
-      message: item.message,
-      inquiry_type: item.inquiry_type,
-      is_read: item.is_read,
-      created_at: item.created_at,
-      updated_at: item.updated_at || item.created_at,
-      agent_id: item.agent_id,
-      agent: item.agent ? {
-        id: item.agent.id,
-        email: item.agent.email,
-        full_name: item.agent.display_name || 
-          (item.agent.employer_profiles ? 
-            `${item.agent.employer_profiles.first_name || ''} ${item.agent.employer_profiles.last_name || ''}`.trim() : 
-            ''),
-        phone: item.agent.employer_profiles?.phone,
-        avatar_url: item.agent.employer_profiles?.avatar_url
-      } : undefined,
-      property: item.property ? {
-        id: item.property.id,
-        title: item.property.title
-      } : undefined,
-      replies: item.replies ? item.replies.map((reply: any) => ({
-        id: reply.id,
-        submission_id: reply.submission_id,
-        agent_id: reply.agent_id,
-        message: reply.reply_text,
-        created_at: reply.created_at,
-        agent: reply.agent ? {
-          id: reply.agent.id,
-          full_name: reply.agent.display_name || 
-            (reply.agent.employer_profiles ? 
-              `${reply.agent.employer_profiles.first_name || ''} ${reply.agent.employer_profiles.last_name || ''}`.trim() : 
-              ''),
-          email: reply.agent.email,
-          avatar_url: reply.agent.employer_profiles?.avatar_url
-        } : undefined
-      })) : []
-    }));
-  };
-
   return {
-    submissions: submissions || [],
+    submissions,
     isLoading,
-    error
+    error,
+    refetch // Make sure to include refetch in the return value
   };
 }
