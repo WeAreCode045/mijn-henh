@@ -57,15 +57,16 @@ export function useFetchSubmissions(propertyId: string) {
         const formattedSubmissions: Submission[] = data.map((submission) => {
           // Format agent data if present
           let agent = null;
-          if (submission.agent) {
-            // Use optional chaining for all agent properties to handle null safely
+          if (submission.agent && typeof submission.agent === 'object') {
+            // Handle possible type error with proper type checking
+            const agentData = submission.agent as Record<string, any>;
             agent = {
-              id: submission.agent?.id || null,
-              email: submission.agent?.email || null,
-              first_name: submission.agent?.first_name || null,
-              last_name: submission.agent?.last_name || null,
-              display_name: submission.agent?.display_name || "Unknown Agent",
-              avatar_url: submission.agent?.avatar_url || null,
+              id: agentData.id || null,
+              email: agentData.email || null,
+              first_name: agentData.first_name || null,
+              last_name: agentData.last_name || null,
+              display_name: agentData.display_name || "Unknown Agent",
+              avatar_url: agentData.avatar_url || null,
             };
           }
 

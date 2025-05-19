@@ -73,7 +73,10 @@ export function useUsers() {
               console.error("Error fetching user emails from auth.users:", authError);
               // Continue without these emails
             } else if (authData && authData.users) {
-              authData.users.forEach(user => {
+              // Check that users property exists and is an array
+              const authUsers = Array.isArray(authData.users) ? authData.users : [];
+              
+              authUsers.forEach(user => {
                 if (user && user.id && user.email) {
                   emailMap.set(user.id, user.email);
                   
