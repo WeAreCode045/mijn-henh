@@ -1,4 +1,8 @@
 
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Submission as SubmissionType } from "./index";
+
 export interface Submission {
   id: string;
   propertyId: string;
@@ -33,4 +37,21 @@ export interface SubmissionReply {
   userEmail: string | null;
   userPhone: string | null;
   userAvatar: string | null;
+}
+
+export function useSubmissions(propertyId: string) {
+  return useQuery({
+    queryKey: ["property-submissions", propertyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("property_contact_submissions")
+        .select("*")
+        .eq("property_id", propertyId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!propertyId
+  });
 }

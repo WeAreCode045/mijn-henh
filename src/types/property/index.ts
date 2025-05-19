@@ -6,9 +6,9 @@ export type {
   PropertyImage,
   PropertyCity,
   PropertyFormData,
-  PropertySubmitData,
   PropertyAgent,
-  Area
+  PropertyParticipant,
+  ParticipantRole
 } from './PropertyTypes';
 
 // Re-export types from PropertyPlaceTypes.ts

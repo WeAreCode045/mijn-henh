@@ -1,7 +1,8 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyFormData } from "@/types/property";
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { toast } from 'sonner';
 
 // Define the submission type for this custom hook
@@ -41,7 +42,7 @@ export interface SubmissionReply {
   userAvatar: string | null;
 }
 
-export function usePropertyMainImages(
+export function usePropertyImageManagement(
   formData: PropertyFormData,
   setFormData: Dispatch<SetStateAction<PropertyFormData>>
 ) {

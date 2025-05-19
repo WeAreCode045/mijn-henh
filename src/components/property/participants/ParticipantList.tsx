@@ -71,7 +71,7 @@ export function ParticipantList({ propertyId, title, role }: ParticipantListProp
   const handleRemoveParticipant = (participant: PropertyParticipant) => {
     if (window.confirm(`Are you sure you want to remove this ${participant.role}?`)) {
       removeParticipant.mutate({ 
-        participantId: participant.id, 
+        participantId: participant.id,
         role: participant.role 
       });
     }

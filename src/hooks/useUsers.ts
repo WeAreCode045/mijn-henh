@@ -48,14 +48,17 @@ export function useUsers() {
         accountsData.forEach(account => {
           if (account && account.email) {
             emailMap.set(account.id, account.email);
-            emailMap.set(account.user_id, account.email);
+            if (account.user_id) {
+              emailMap.set(account.user_id, account.email);
+            }
           }
         });
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
           .filter(account => account && account.user_id && !emailMap.has(account.user_id))
-          .map(account => account.user_id);
+          .map(account => account.user_id)
+          .filter(Boolean); // Remove any undefined or null values
           
         if (userIds && userIds.length > 0) {
           try {
@@ -86,6 +89,15 @@ export function useUsers() {
         }
         
         // Fetch employer profiles for these account IDs
+        const accountIds = accountsData
+          .filter(account => account && account.id)
+          .map(account => account.id)
+          .filter(Boolean); // Remove any undefined values
+          
+        if (accountIds.length === 0) {
+          return [];
+        }
+        
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -100,7 +112,7 @@ export function useUsers() {
             created_at,
             updated_at
           `)
-          .in('id', accountsData.map(account => account.id));
+          .in('id', accountIds);
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);

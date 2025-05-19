@@ -34,7 +34,25 @@ export function PropertyContactSubmissions({ propertyId }: PropertyContactSubmis
     // Find the submission in the submissions array
     const submission = submissions.find(s => s.id === id);
     if (submission) {
-      setSelectedSubmission(submission);
+      // Create a properly typed submission object
+      const typedSubmission: Submission = {
+        id: submission.id,
+        property_id: submission.property_id,
+        name: submission.name,
+        email: submission.email,
+        phone: submission.phone,
+        message: submission.message,
+        inquiry_type: submission.inquiry_type,
+        is_read: submission.is_read,
+        created_at: submission.created_at,
+        updated_at: submission.updated_at,
+        agent_id: submission.agent_id,
+        agent: submission.agent,
+        property: submission.property,
+        replies: submission.replies
+      };
+      
+      setSelectedSubmission(typedSubmission);
       
       // Mark as read when selected if not already read
       if (!submission.is_read) {

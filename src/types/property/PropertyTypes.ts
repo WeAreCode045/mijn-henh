@@ -1,24 +1,18 @@
 
 import { Json } from "@/integrations/supabase/types";
-import { 
-  PropertyArea, 
-  PropertyAreaImage 
-} from "./PropertyAreaTypes";
+import { PropertyArea } from './PropertyAreaTypes';
 import { PropertyFeature } from './PropertyFeatureTypes';
 import { PropertyCity } from './PropertyCityTypes';
-import { PropertyPlace } from './PropertyPlaceTypes';
-import { PropertyBaseTypes } from './PropertyBaseTypes';
+import { PropertyPlaceType } from './PropertyPlaceTypes';
 import { PropertyImage } from "./PropertyImageTypes";
 import { ParticipantRole as ParticipantRoleType } from "@/types/participant";
 
 export type { 
   PropertyArea, 
-  PropertyAreaImage,
-  PropertyBaseTypes,
-  PropertyCity,
   PropertyFeature,
   PropertyImage,
-  PropertyPlace
+  PropertyCity,
+  PropertyPlaceType
 };
 
 export type PropertyParticipant = {
@@ -66,4 +60,16 @@ export interface PropertyFormData {
   latitude?: number;
   longitude?: number;
   hasGarden?: boolean;
+  featuredImage?: string | null;
+  featuredImages?: string[];
+}
+
+export interface PropertyAgent {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  address?: string;
+  full_name?: string;
 }

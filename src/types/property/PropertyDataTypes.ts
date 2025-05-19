@@ -3,8 +3,7 @@ import type {
   PropertyArea,
   PropertyFeature,
   PropertyImage,
-  PropertyCity,
-  PropertyFloorplan
+  PropertyCity
 } from './PropertyTypes';
 
 // Import PropertyNearbyPlace from PropertyPlaceTypes instead
@@ -38,7 +37,7 @@ export interface PropertyData {
   object_id?: string;
   agent_id?: string;
   template_id?: string;
-  floorplans?: PropertyFloorplan[];
+  floorplans?: PropertyImage[];
   floorplanEmbedScript?: string;
   virtualTourUrl?: string;
   youtubeUrl?: string;

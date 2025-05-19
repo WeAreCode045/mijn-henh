@@ -1,6 +1,7 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyParticipant } from "@/types/participant";
+import { PropertyParticipant, ParticipantRole, ParticipantStatus } from "@/types/participant";
 import { useToast } from "@/components/ui/use-toast";
 import { sendEmail } from "@/lib/email";
 
@@ -83,7 +84,8 @@ export function usePropertyParticipants(propertyId: string) {
             },
             // Ensure documents_signed is always an array of strings
             documents_signed: Array.isArray(participant.documents_signed) ? participant.documents_signed : [],
-            role: participant.role as any // Force type compatibility
+            role: participant.role as ParticipantRole, // Force type compatibility
+            status: participant.status as ParticipantStatus // Force type compatibility
           };
         });
         
