@@ -7,7 +7,7 @@ export const processReplyData = (reply: any): SubmissionReply => {
   
   return {
     id: reply.id,
-    submissionId: reply.submission_id,
+    submission_id: reply.submission_id,
     replyText: reply.reply_text,
     createdAt: reply.created_at,
     updatedAt: reply.updated_at,

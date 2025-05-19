@@ -80,7 +80,7 @@ export function usePropertyParticipants(propertyId: string) {
           if (participant.documents_signed) {
             if (Array.isArray(participant.documents_signed)) {
               documentsSigned = participant.documents_signed.map(doc => 
-                typeof doc === 'string' ? doc : JSON.stringify(doc)
+                typeof doc === 'string' ? doc : String(doc)
               );
             } else if (typeof participant.documents_signed === 'string') {
               try {
@@ -104,7 +104,7 @@ export function usePropertyParticipants(propertyId: string) {
             status: participant.status as ParticipantStatus,
             // Use our string array for documents_signed
             documents_signed: documentsSigned
-          };
+          } as PropertyParticipant;
         });
         
         return participantsWithProfiles;

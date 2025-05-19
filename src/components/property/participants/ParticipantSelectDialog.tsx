@@ -70,9 +70,12 @@ export function ParticipantSelectDialog({
 
   const filteredParticipants = participants.filter(participant => {
     // Filter by search term
+    const displayName = participant.full_name || 
+                        `${participant.first_name || ''} ${participant.last_name || ''}`.trim();
+    
     const matchesSearch = 
       !searchTerm ||
-      (participant.full_name && participant.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       participant.email.toLowerCase().includes(searchTerm.toLowerCase());
       
     // Filter out already assigned participants
@@ -127,7 +130,11 @@ export function ParticipantSelectDialog({
                       className={selectedParticipant?.id === participant.id ? "bg-blue-50" : ""}
                       onClick={() => handleSelect(participant)}
                     >
-                      <TableCell>{participant.full_name || `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || '-'}</TableCell>
+                      <TableCell>
+                        {participant.full_name || 
+                         `${participant.first_name || ''} ${participant.last_name || ''}`.trim() || 
+                         '-'}
+                      </TableCell>
                       <TableCell>{participant.email}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{participant.role || "Participant"}</Badge>
