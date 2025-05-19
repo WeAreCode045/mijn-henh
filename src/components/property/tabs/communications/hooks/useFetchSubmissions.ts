@@ -58,17 +58,15 @@ export function useFetchSubmissions(propertyId: string) {
           // Format agent data if present
           let agent = null;
           if (submission.agent) {
-            // Use explicit type checking to ensure we're accessing properties safely
-            if (typeof submission.agent === 'object' && submission.agent !== null) {
-              agent = {
-                id: submission.agent?.id || null,
-                email: submission.agent?.email || null,
-                first_name: submission.agent?.first_name || null,
-                last_name: submission.agent?.last_name || null,
-                display_name: submission.agent?.display_name || "Unknown Agent",
-                avatar_url: submission.agent?.avatar_url || null,
-              };
-            }
+            // Use optional chaining for all agent properties to handle null safely
+            agent = {
+              id: submission.agent?.id || null,
+              email: submission.agent?.email || null,
+              first_name: submission.agent?.first_name || null,
+              last_name: submission.agent?.last_name || null,
+              display_name: submission.agent?.display_name || "Unknown Agent",
+              avatar_url: submission.agent?.avatar_url || null,
+            };
           }
 
           // Return formatted submission

@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
@@ -41,7 +42,7 @@ export function useUsers() {
         }
 
         // Create a map for emails
-        const emailMap = new Map();
+        const emailMap = new Map<string, string>();
         
         // First try to get emails from the accounts table directly
         if (accountsData && Array.isArray(accountsData)) {
@@ -93,7 +94,7 @@ export function useUsers() {
         const accountIds = accountsData
           .filter(account => account && account.id)
           .map(account => account.id)
-          .filter(Boolean); // Remove any undefined values
+          .filter(Boolean as unknown as (id: string | null | undefined) => id is string); // Type guard to ensure non-null values
           
         if (accountIds.length === 0) {
           return [];
