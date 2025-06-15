@@ -1,6 +1,7 @@
 
 export interface UserBase {
   id: string;
+  user_id?: string; // Add user_id field to support both account.id and auth user_id
   email: string;
   full_name: string;
   display_name?: string;

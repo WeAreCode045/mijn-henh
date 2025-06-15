@@ -60,20 +60,17 @@ export function useUsers() {
         const userIds = accountsData
           .filter(account => account && account.user_id && !emailMap.has(account.user_id))
           .map(account => account.user_id)
-          .filter(Boolean); // Remove any undefined or null values
+          .filter(Boolean);
           
         if (userIds && userIds.length > 0) {
           try {
-            // Note: This might fail depending on permissions
             const { data: authData, error: authError } = await supabase.auth.admin.listUsers({
               perPage: 1000
             });
             
             if (authError) {
               console.error("Error fetching user emails from auth.users:", authError);
-              // Continue without these emails
             } else if (authData && authData.users) {
-              // Check that users property exists and is an array
               const authUsers = Array.isArray(authData.users) ? authData.users : [];
               
               authUsers.forEach(user => {
@@ -89,7 +86,6 @@ export function useUsers() {
             }
           } catch (err) {
             console.error("Error fetching user emails from auth.users:", err);
-            // Continue without these emails
           }
         }
         
@@ -97,7 +93,7 @@ export function useUsers() {
         const accountIds = accountsData
           .filter(account => account && account.id)
           .map(account => account.id)
-          .filter(Boolean as unknown as (id: string | null | undefined) => id is string); // Type guard to ensure non-null values
+          .filter(Boolean);
           
         if (accountIds.length === 0) {
           return [];
@@ -149,7 +145,8 @@ export function useUsers() {
             const userEmail = emailMap.get(account.id) || (profile ? profile.email : '') || '';
             
             employeeProfiles.push({
-              id: account.id,
+              id: account.id, // This is the account.id
+              user_id: account.user_id, // This is the auth user_id - needed for employer_profiles table
               email: userEmail,
               first_name: profile ? profile.first_name || '' : '',
               last_name: profile ? profile.last_name || '' : '',
