@@ -109,7 +109,6 @@ export function UserProfileForm({
           }}
           placeholder="Enter first name"
         />
-        <div className="text-xs text-gray-500">Current value: "{formData.first_name}"</div>
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${idPrefix}last-name`}>Last Name</Label>
@@ -122,7 +121,6 @@ export function UserProfileForm({
           }}
           placeholder="Enter last name"
         />
-        <div className="text-xs text-gray-500">Current value: "{formData.last_name}"</div>
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${idPrefix}email`}>Email</Label>
