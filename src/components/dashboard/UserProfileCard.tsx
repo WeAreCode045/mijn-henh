@@ -2,8 +2,8 @@
 import { User } from "@/types/user";
 import { UserProfileDisplay } from "./user-profile/UserProfileDisplay";
 import { UserProfileSidebar } from "./user-profile/UserProfileSidebar";
+import { UserProfileForm } from "./user-profile/UserProfileForm";
 import { useUserProfileData } from "./user-profile/hooks/useUserProfileData";
-import { useUserProfileActions } from "./user-profile/hooks/useUserProfileActions";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -32,10 +32,11 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     isLoadingProfile
   } = useUserProfileData(user);
 
-  const handleEditProfile = async (updatedUser: Partial<User>) => {
-    console.log("UserProfileCard - Profile updated:", updatedUser);
+  const handleEditProfile = async (e: React.FormEvent, formData: any, avatarFile?: File) => {
+    e.preventDefault();
+    console.log("UserProfileCard - Profile updated:", formData);
     if (onUpdateProfile) {
-      await onUpdateProfile(updatedUser);
+      await onUpdateProfile(formData);
     }
     setEditingUser(null);
   };
@@ -63,9 +64,14 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
                   ×
                 </Button>
               </div>
-              <UserProfileCard
+              <UserProfileForm
                 user={editingUser}
-                onUpdateProfile={handleEditProfile}
+                formData={formData}
+                onFormDataChange={setFormData}
+                onSubmit={handleEditProfile}
+                onCancel={() => setEditingUser(null)}
+                isUpdating={false}
+                inSidebar={true}
               />
             </div>
           </div>
@@ -95,9 +101,13 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
                 ×
               </Button>
             </div>
-            <UserProfileCard
+            <UserProfileForm
               user={editingUser}
-              onUpdateProfile={handleEditProfile}
+              formData={formData}
+              onFormDataChange={setFormData}
+              onSubmit={handleEditProfile}
+              onCancel={() => setEditingUser(null)}
+              isUpdating={false}
             />
           </div>
         </div>
