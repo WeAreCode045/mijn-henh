@@ -41,24 +41,12 @@ export function useUsers() {
           return [];
         }
 
-        // Create a map for emails
+        // Create a map for emails from auth.users
         const emailMap = new Map<string, string>();
-        
-        // First try to get emails from the accounts table directly
-        if (accountsData && Array.isArray(accountsData)) {
-          for (const account of accountsData) {
-            if (account && account.email) {
-              emailMap.set(account.id, account.email);
-              if (account.user_id) {
-                emailMap.set(account.user_id, account.email);
-              }
-            }
-          }
-        }
         
         // Get emails from auth.users for each user_id
         const userIds = accountsData
-          .filter(account => account && account.user_id && !emailMap.has(account.user_id))
+          .filter(account => account && account.user_id)
           .map(account => account.user_id)
           .filter(Boolean);
           
@@ -76,11 +64,6 @@ export function useUsers() {
               authUsers.forEach(user => {
                 if (user && user.id && user.email) {
                   emailMap.set(user.id, user.email);
-                  
-                  const matchingAccount = accountsData.find(acc => acc && acc.user_id === user.id);
-                  if (matchingAccount) {
-                    emailMap.set(matchingAccount.id, user.email);
-                  }
                 }
               });
             }
@@ -89,16 +72,7 @@ export function useUsers() {
           }
         }
         
-        // Fetch employer profiles for these account IDs
-        const accountIds = accountsData
-          .filter(account => account && account.id)
-          .map(account => account.id)
-          .filter(Boolean);
-          
-        if (accountIds.length === 0) {
-          return [];
-        }
-        
+        // Fetch employer profiles using user_id (not account.id)
         const { data: profiles, error: profilesError } = await supabase
           .from("employer_profiles")
           .select(`
@@ -113,7 +87,7 @@ export function useUsers() {
             created_at,
             updated_at
           `)
-          .in('id', accountIds);
+          .in('id', userIds); // Use user_ids here, not account IDs
 
         if (profilesError) {
           console.error("Error fetching employer profiles:", profilesError);
@@ -122,12 +96,12 @@ export function useUsers() {
         
         console.log("Employer profiles from supabase:", profiles);
 
-        // Create a map of id to profile
+        // Create a map of user_id to profile
         const profileMap = new Map();
         if (profiles && Array.isArray(profiles)) {
           profiles.forEach(profile => {
             if (profile) {
-              profileMap.set(profile.id, profile);
+              profileMap.set(profile.id, profile); // profile.id is the user_id
             }
           });
         }
@@ -139,10 +113,10 @@ export function useUsers() {
           for (const account of accountsData) {
             if (!account) continue;
             
-            const profile = profileMap.get(account.id) || {};
+            const profile = profileMap.get(account.user_id) || {}; // Use account.user_id to get profile
             
-            // Get email from emailMap, profile, or fall back to empty string
-            const userEmail = emailMap.get(account.id) || (profile ? profile.email : '') || '';
+            // Get email from emailMap, profile, or account
+            const userEmail = emailMap.get(account.user_id) || (profile ? profile.email : '') || account.email || '';
             
             employeeProfiles.push({
               id: account.id, // This is the account.id

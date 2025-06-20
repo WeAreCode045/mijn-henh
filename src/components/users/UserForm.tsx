@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, UserFormData } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -80,34 +79,41 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
     try {
       if (isEditMode && initialData) {
-        console.log("Updating employee with data:", {
-          accountId: initialData.id,
-          userId: initialData.user_id,
-          formData
-        });
+        console.log("=== EDIT MODE DEBUG ===");
+        console.log("Initial data:", initialData);
+        console.log("Account ID:", initialData.id);
+        console.log("User ID:", initialData.user_id);
+        console.log("Form data:", formData);
 
         let photoUrl = null;
         if (photoFile) {
-          // Use user_id for photo upload if available, otherwise account id
-          const uploadId = initialData.user_id || initialData.id;
-          photoUrl = await uploadPhoto(uploadId);
+          // Use user_id for photo upload
+          if (!initialData.user_id) {
+            throw new Error("No user_id available for photo upload");
+          }
+          photoUrl = await uploadPhoto(initialData.user_id);
           console.log("Photo uploaded:", photoUrl);
         }
 
-        // Update employer_profiles table using user_id (not account.id)
+        // Update employer_profiles table using user_id
         if (initialData.user_id) {
           console.log("Updating employer_profiles for user_id:", initialData.user_id);
+          
+          const updateData = {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            phone: formData.phone,
+            whatsapp_number: formData.whatsapp_number,
+            updated_at: new Date().toISOString(),
+            ...(photoUrl && { avatar_url: photoUrl })
+          };
+          
+          console.log("Profile update data:", updateData);
+          
           const { error: profileError } = await supabase
             .from("employer_profiles")
-            .update({
-              first_name: formData.first_name,
-              last_name: formData.last_name,
-              phone: formData.phone,
-              whatsapp_number: formData.whatsapp_number,
-              updated_at: new Date().toISOString(),
-              ...(photoUrl && { avatar_url: photoUrl })
-            })
-            .eq("id", initialData.user_id); // Use user_id here, not account.id
+            .update(updateData)
+            .eq("id", initialData.user_id); // Use user_id here
 
           if (profileError) {
             console.error("Error updating employer_profiles:", profileError);
@@ -118,14 +124,20 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           console.warn("No user_id available for profile update");
         }
         
-        // Update user role in accounts table using account.id
+        // Update accounts table using account.id
         console.log("Updating accounts for account.id:", initialData.id);
+        
+        const accountUpdateData = {
+          role: formData.role,
+          display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+          updated_at: new Date().toISOString()
+        };
+        
+        console.log("Account update data:", accountUpdateData);
+        
         const { error: roleError } = await supabase
           .from("accounts")
-          .update({
-            role: formData.role,
-            updated_at: new Date().toISOString()
-          })
+          .update(accountUpdateData)
           .eq("id", initialData.id); // Use account.id here
           
         if (roleError) {
@@ -136,7 +148,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
         toast({
           title: "Success",
-          description: "User updated successfully",
+          description: "Employee updated successfully",
         });
       } else {
         console.log("Creating new employee with data:", formData);
