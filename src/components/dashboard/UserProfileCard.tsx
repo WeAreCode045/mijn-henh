@@ -2,9 +2,10 @@
 import { User } from "@/types/user";
 import { UserProfileDisplay } from "./user-profile/UserProfileDisplay";
 import { UserProfileSidebar } from "./user-profile/UserProfileSidebar";
-import { UserProfileEditDialog } from "./user-profile/UserProfileEditDialog";
 import { useUserProfileData } from "./user-profile/hooks/useUserProfileData";
 import { useUserProfileActions } from "./user-profile/hooks/useUserProfileActions";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface UserProfileCardProps {
   user: User;
@@ -16,6 +17,8 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
   console.log("UserProfileCard - User data received:", user);
   console.log("UserProfileCard - User first_name:", user.first_name);
   console.log("UserProfileCard - User last_name:", user.last_name);
+  
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   
   if (!user) {
     console.log("UserProfileCard - No user data, returning null");
@@ -29,14 +32,13 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     isLoadingProfile
   } = useUserProfileData(user);
 
-  const {
-    isEditing,
-    setIsEditing,
-    isUpdating,
-    isUploadingAvatar,
-    handleEditClick,
-    handleSubmit
-  } = useUserProfileActions(onUpdateProfile);
+  const handleEditProfile = async (updatedUser: Partial<User>) => {
+    console.log("UserProfileCard - Profile updated:", updatedUser);
+    if (onUpdateProfile) {
+      await onUpdateProfile(updatedUser);
+    }
+    setEditingUser(null);
+  };
 
   console.log("UserProfileCard - Form data from hook:", formData);
 
@@ -46,20 +48,28 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
         <UserProfileSidebar
           user={user}
           displayName={displayName}
-          onEditClick={handleEditClick}
+          onEditClick={() => setEditingUser(user)}
         />
-        <UserProfileEditDialog
-          isOpen={isEditing}
-          onOpenChange={setIsEditing}
-          user={user}
-          formData={formData}
-          onFormDataChange={setFormData}
-          onSubmit={handleSubmit}
-          isUpdating={isUpdating}
-          isUploadingAvatar={isUploadingAvatar}
-          isLoadingProfile={isLoadingProfile}
-          inSidebar={true}
-        />
+        {editingUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Edit Profile</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingUser(null)}
+                >
+                  ×
+                </Button>
+              </div>
+              <UserProfileCard
+                user={editingUser}
+                onUpdateProfile={handleEditProfile}
+              />
+            </div>
+          </div>
+        )}
       </>
     );
   }
@@ -70,19 +80,28 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
         user={user}
         displayName={displayName}
         phone={formData.phone || user.phone}
-        onEditClick={handleEditClick}
+        onEditClick={() => setEditingUser(user)}
       />
-      <UserProfileEditDialog
-        isOpen={isEditing}
-        onOpenChange={setIsEditing}
-        user={user}
-        formData={formData}
-        onFormDataChange={setFormData}
-        onSubmit={handleSubmit}
-        isUpdating={isUpdating}
-        isUploadingAvatar={isUploadingAvatar}
-        isLoadingProfile={isLoadingProfile}
-      />
+      {editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Edit Profile</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditingUser(null)}
+              >
+                ×
+              </Button>
+            </div>
+            <UserProfileCard
+              user={editingUser}
+              onUpdateProfile={handleEditProfile}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }
