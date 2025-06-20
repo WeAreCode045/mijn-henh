@@ -351,27 +351,29 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
             </Select>
           </div>
 
-          {/* Optional fields that can be filled during creation but are not required */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              />
+          {/* Contact fields only in edit mode */}
+          {isEditMode && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
+                <Input
+                  id="whatsappNumber"
+                  type="tel"
+                  value={formData.whatsapp_number}
+                  onChange={(e) => setFormData(prev => ({ ...prev, whatsapp_number: e.target.value }))}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
-              <Input
-                id="whatsappNumber"
-                type="tel"
-                value={formData.whatsapp_number}
-                onChange={(e) => setFormData(prev => ({ ...prev, whatsapp_number: e.target.value }))}
-              />
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
