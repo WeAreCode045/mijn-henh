@@ -13,6 +13,8 @@ interface UserProfileCardProps {
 }
 
 export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
+  console.log("UserProfileCard - User data:", user);
+  
   if (!user) {
     return null;
   }
@@ -21,8 +23,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     formData,
     setFormData,
     displayName,
-    isLoadingProfile,
-    fetchCompleteProfile
+    isLoadingProfile
   } = useUserProfileData(user);
 
   const {
@@ -32,7 +33,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     isUploadingAvatar,
     handleEditClick,
     handleSubmit
-  } = useUserProfileActions(onUpdateProfile, fetchCompleteProfile);
+  } = useUserProfileActions(onUpdateProfile);
 
   if (inSidebar) {
     return (

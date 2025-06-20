@@ -5,8 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function useUserProfileActions(
-  onUpdateProfile?: (updatedUser: Partial<User>) => Promise<void>,
-  fetchCompleteProfile?: () => Promise<void>
+  onUpdateProfile?: (updatedUser: Partial<User>) => Promise<void>
 ) {
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -14,10 +13,9 @@ export function useUserProfileActions(
   const { toast } = useToast();
 
   const handleEditClick = async () => {
+    console.log("handleEditClick - Opening profile edit dialog");
     setIsEditing(true);
-    if (fetchCompleteProfile) {
-      await fetchCompleteProfile();
-    }
+    // No longer need to fetch profile data since it's already available in the User object
   };
 
   const uploadAvatar = async (file: File, userId: string): Promise<string | null> => {
@@ -63,7 +61,9 @@ export function useUserProfileActions(
     e.preventDefault();
     if (!onUpdateProfile) return;
 
+    console.log("handleSubmit - Form data:", formData);
     setIsUpdating(true);
+    
     try {
       let avatarUrl = null;
       
@@ -82,6 +82,8 @@ export function useUserProfileActions(
         ...(avatarUrl && { avatar_url: avatarUrl })
       };
 
+      console.log("handleSubmit - Updating employer_profiles with:", profileUpdateData);
+
       if (formData.user_id) {
         const { error: profileError } = await supabase
           .from('employer_profiles')
@@ -95,6 +97,8 @@ export function useUserProfileActions(
           throw profileError;
         }
 
+        console.log("handleSubmit - Profile updated successfully");
+        
         // The trigger will automatically update the display_name in accounts table
         toast({
           title: "Success",
