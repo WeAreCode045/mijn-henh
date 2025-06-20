@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ParticipantFormData, ParticipantRole } from "@/types/participant";
 import { Button } from "@/components/ui/button";
@@ -18,11 +17,15 @@ interface ParticipantFormProps {
 
 export function ParticipantForm({ isEditMode, initialData, onSuccess }: ParticipantFormProps) {
   const { toast } = useToast();
+  
+  // Simplified form data for creation - only required fields
   const [formData, setFormData] = useState<ParticipantFormData>({
     email: initialData?.email || "",
     password: "",
     first_name: initialData?.first_name || "",
     last_name: initialData?.last_name || "",
+    role: (initialData?.role as ParticipantRole) || "buyer",
+    // Optional fields with defaults
     phone: initialData?.phone || "",
     whatsapp_number: initialData?.whatsapp_number || "",
     date_of_birth: initialData?.date_of_birth || "",
@@ -33,7 +36,6 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
     city: initialData?.city || "",
     postal_code: initialData?.postal_code || "",
     country: initialData?.country || "",
-    role: (initialData?.role as ParticipantRole) || "buyer",
     iban: initialData?.iban || "",
     identification: initialData?.identification || {
       type: null,
@@ -256,7 +258,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
 
         toast({
           title: "Success",
-          description: "Participant created successfully",
+          description: "Participant created successfully. Additional details can be added by editing the participant.",
         });
       }
 
@@ -277,12 +279,19 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
+          <CardTitle>
+            {isEditMode ? "Edit Participant" : "Create New Participant"}
+          </CardTitle>
+          {!isEditMode && (
+            <p className="text-sm text-muted-foreground">
+              Create a participant with basic information. Additional details can be added later by editing the participant.
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
                 id="firstName"
                 value={formData.first_name}
@@ -291,7 +300,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName">Last Name *</Label>
               <Input
                 id="lastName"
                 value={formData.last_name}
@@ -302,7 +311,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
               type="email"
@@ -315,7 +324,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
 
           {!isEditMode && (
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Password *</Label>
               <Input
                 id="password"
                 type="password"
@@ -326,6 +335,23 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
             </div>
           )}
 
+          <div className="space-y-2">
+            <Label htmlFor="role">Role *</Label>
+            <Select
+              value={formData.role}
+              onValueChange={(value: ParticipantRole) => setFormData(prev => ({ ...prev, role: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="buyer">Buyer</SelectItem>
+                <SelectItem value="seller">Seller</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Optional fields that can be filled during creation but are not required */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
@@ -346,192 +372,180 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
               />
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={formData.role}
-              onValueChange={(value: ParticipantRole) => setFormData(prev => ({ ...prev, role: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="buyer">Buyer</SelectItem>
-                <SelectItem value="seller">Seller</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.date_of_birth}
-                onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="placeOfBirth">Place of Birth</Label>
-              <Input
-                id="placeOfBirth"
-                value={formData.place_of_birth}
-                onChange={(e) => setFormData(prev => ({ ...prev, place_of_birth: e.target.value }))}
-              />
-            </div>
-          </div>
+      {isEditMode && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Personal Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input
+                    id="dateOfBirth"
+                    type="date"
+                    value={formData.date_of_birth}
+                    onChange={(e) => setFormData(prev => ({ ...prev, date_of_birth: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="placeOfBirth">Place of Birth</Label>
+                  <Input
+                    id="placeOfBirth"
+                    value={formData.place_of_birth}
+                    onChange={(e) => setFormData(prev => ({ ...prev, place_of_birth: e.target.value }))}
+                  />
+                </div>
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nationality">Nationality</Label>
-              <Input
-                id="nationality"
-                value={formData.nationality}
-                onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select
-                value={formData.gender || ""}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                  <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nationality">Nationality</Label>
+                  <Input
+                    id="nationality"
+                    value={formData.nationality}
+                    onChange={(e) => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select
+                    value={formData.gender || ""}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Address</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-            />
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Address</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                />
+              </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="postalCode">Postal Code</Label>
-              <Input
-                id="postalCode"
-                value={formData.postal_code}
-                onChange={(e) => setFormData(prev => ({ ...prev, postal_code: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
-              <Input
-                id="country"
-                value={formData.country}
-                onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">Postal Code</Label>
+                  <Input
+                    id="postalCode"
+                    value={formData.postal_code}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postal_code: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    value={formData.country}
+                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Identification</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="identificationType">Document Type</Label>
-            <Select
-              value={formData.identification?.type || ""}
-              onValueChange={(value: "passport" | "IDcard") => 
-                setFormData(prev => ({ 
-                  ...prev, 
-                  identification: { ...prev.identification, type: value }
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select document type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="passport">Passport</SelectItem>
-                <SelectItem value="IDcard">ID Card</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Identification</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="identificationType">Document Type</Label>
+                <Select
+                  value={formData.identification?.type || ""}
+                  onValueChange={(value: "passport" | "IDcard") => 
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      identification: { ...prev.identification, type: value }
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select document type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="passport">Passport</SelectItem>
+                    <SelectItem value="IDcard">ID Card</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="socialNumber">Social Security Number</Label>
-              <Input
-                id="socialNumber"
-                value={formData.identification?.social_number || ""}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  identification: { ...prev.identification, social_number: e.target.value }
-                }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="documentNumber">Document Number</Label>
-              <Input
-                id="documentNumber"
-                value={formData.identification?.document_number || ""}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  identification: { ...prev.identification, document_number: e.target.value }
-                }))}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="socialNumber">Social Security Number</Label>
+                  <Input
+                    id="socialNumber"
+                    value={formData.identification?.social_number || ""}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      identification: { ...prev.identification, social_number: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="documentNumber">Document Number</Label>
+                  <Input
+                    id="documentNumber"
+                    value={formData.identification?.document_number || ""}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      identification: { ...prev.identification, document_number: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Financial Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="iban">IBAN</Label>
-            <Input
-              id="iban"
-              value={formData.iban}
-              onChange={(e) => setFormData(prev => ({ ...prev, iban: e.target.value }))}
-              placeholder="Enter IBAN number"
-            />
-          </div>
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="iban">IBAN</Label>
+                <Input
+                  id="iban"
+                  value={formData.iban}
+                  onChange={(e) => setFormData(prev => ({ ...prev, iban: e.target.value }))}
+                  placeholder="Enter IBAN number"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update Participant" : "Create Participant")}
