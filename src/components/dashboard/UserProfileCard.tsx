@@ -1,17 +1,10 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PenSquare, UserCircle, Mail, Phone } from "lucide-react";
 import { User } from "@/types/user";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { ChangePasswordForm } from "@/components/users/ChangePasswordForm";
+import { UserProfileDisplay } from "./user-profile/UserProfileDisplay";
+import { UserProfileSidebar } from "./user-profile/UserProfileSidebar";
+import { UserProfileEditDialog } from "./user-profile/UserProfileEditDialog";
+import { useUserProfileData } from "./user-profile/hooks/useUserProfileData";
+import { useUserProfileActions } from "./user-profile/hooks/useUserProfileActions";
 
 interface UserProfileCardProps {
   user: User;
@@ -20,328 +13,67 @@ interface UserProfileCardProps {
 }
 
 export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    whatsapp_number: "",
-  });
-
   if (!user) {
     return null;
   }
 
-  // Compute display name from first and last name
-  const displayName = `${formData.first_name || user.first_name || ''} ${formData.last_name || user.last_name || ''}`.trim() || 
-                      (user.email ? user.email.split('@')[0] : 'Unknown');
+  const {
+    formData,
+    setFormData,
+    displayName,
+    isLoadingProfile,
+    fetchCompleteProfile
+  } = useUserProfileData(user);
 
-  const fetchCompleteProfile = async () => {
-    if (!user.user_id) return;
-    
-    setIsLoadingProfile(true);
-    try {
-      const { data: profile, error } = await supabase
-        .from('employer_profiles')
-        .select('*')
-        .eq('id', user.user_id)
-        .single();
+  const {
+    isEditing,
+    setIsEditing,
+    isUpdating,
+    handleEditClick,
+    handleSubmit
+  } = useUserProfileActions(onUpdateProfile, fetchCompleteProfile);
 
-      if (error) {
-        console.error('Error fetching complete profile:', error);
-        toast({
-          title: "Warning",
-          description: "Could not load complete profile data",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (profile) {
-        setFormData({
-          first_name: profile.first_name || "",
-          last_name: profile.last_name || "",
-          email: profile.email || user.email || "",
-          phone: profile.phone || "",
-          whatsapp_number: profile.whatsapp_number || "",
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load profile data",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
-
-  // Load profile data when component mounts
-  useEffect(() => {
-    if (user.user_id) {
-      fetchCompleteProfile();
-    } else {
-      // Fallback to user data if no user_id
-      setFormData({
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        whatsapp_number: user.whatsapp_number || "",
-      });
-    }
-  }, [user.user_id]);
-
-  const handleEditClick = async () => {
-    setIsEditing(true);
-    if (user.user_id) {
-      await fetchCompleteProfile();
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!onUpdateProfile) return;
-
-    setIsUpdating(true);
-    try {
-      await onUpdateProfile({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone,
-        whatsapp_number: formData.whatsapp_number,
-        // Update full_name to maintain compatibility
-        full_name: `${formData.first_name} ${formData.last_name}`.trim()
-      });
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  // If in sidebar, use a more compact layout
   if (inSidebar) {
     return (
-      <div className="flex items-center space-x-3 p-1">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={user.avatar_url} />
-          <AvatarFallback>
-            <UserCircle className="h-6 w-6" />
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{displayName}</p>
-          <p className="text-xs text-white/70 truncate">{user.role}</p>
-          <p className="text-xs text-white/70 truncate">{user.email}</p>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mt-1 p-0 h-6 text-xs text-white/70 hover:text-white"
-            onClick={handleEditClick}
-          >
-            <PenSquare className="h-3 w-3 mr-1" />
-            Edit
-          </Button>
-        </div>
-
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Your Profile</DialogTitle>
-            </DialogHeader>
-            {isLoadingProfile ? (
-              <div className="flex justify-center p-4">
-                <span>Loading profile data...</span>
-              </div>
-            ) : (
-              <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="profile">Profile</TabsTrigger>
-                  <TabsTrigger value="password">Change Password</TabsTrigger>
-                </TabsList>
-                <TabsContent value="profile">
-                  <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="sidebar-first-name">First Name</Label>
-                      <Input
-                        id="sidebar-first-name"
-                        value={formData.first_name}
-                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sidebar-last-name">Last Name</Label>
-                      <Input
-                        id="sidebar-last-name"
-                        value={formData.last_name}
-                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sidebar-email">Email</Label>
-                      <Input
-                        id="sidebar-email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sidebar-phone">Phone</Label>
-                      <Input
-                        id="sidebar-phone"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sidebar-whatsapp">WhatsApp Number</Label>
-                      <Input
-                        id="sidebar-whatsapp"
-                        value={formData.whatsapp_number}
-                        onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={isUpdating}>
-                        {isUpdating ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-                <TabsContent value="password">
-                  <div className="mt-4">
-                    <ChangePasswordForm />
-                  </div>
-                </TabsContent>
-              </Tabs>
-            )}
-          </DialogContent>
-        </Dialog>
-      </div>
+      <>
+        <UserProfileSidebar
+          user={user}
+          displayName={displayName}
+          onEditClick={handleEditClick}
+        />
+        <UserProfileEditDialog
+          isOpen={isEditing}
+          onOpenChange={setIsEditing}
+          user={user}
+          formData={formData}
+          onFormDataChange={setFormData}
+          onSubmit={(e) => handleSubmit(e, formData)}
+          isUpdating={isUpdating}
+          isLoadingProfile={isLoadingProfile}
+          inSidebar={true}
+        />
+      </>
     );
   }
 
-  // Default full card layout
   return (
-    <Card className="border shadow-sm">
-      <CardContent className="p-6">
-        <div className="flex flex-col items-center text-center">
-          <Avatar className="h-24 w-24 mb-4">
-            <AvatarImage src={user.avatar_url} />
-            <AvatarFallback>
-              <UserCircle className="h-12 w-12" />
-            </AvatarFallback>
-          </Avatar>
-          <h3 className="text-xl font-semibold">{displayName}</h3>
-          <p className="text-sm text-gray-500 mb-1">{user.role}</p>
-          <div className="flex items-center mt-4 space-x-1 text-sm text-gray-500">
-            <Mail className="h-4 w-4" />
-            <span>{user.email}</span>
-          </div>
-          {(formData.phone || user.phone) && (
-            <div className="flex items-center mt-2 space-x-1 text-sm text-gray-500">
-              <Phone className="h-4 w-4" />
-              <span>{formData.phone || user.phone}</span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-center p-4 pt-0">
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <Button variant="outline" size="sm" onClick={handleEditClick} className="space-x-1">
-            <PenSquare className="h-4 w-4" />
-            <span>Edit Profile</span>
-          </Button>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Your Profile</DialogTitle>
-            </DialogHeader>
-            {isLoadingProfile ? (
-              <div className="flex justify-center p-4">
-                <span>Loading profile data...</span>
-              </div>
-            ) : (
-              <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="profile">Profile</TabsTrigger>
-                  <TabsTrigger value="password">Change Password</TabsTrigger>
-                </TabsList>
-                <TabsContent value="profile">
-                  <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="first-name">First Name</Label>
-                      <Input
-                        id="first-name"
-                        value={formData.first_name}
-                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last-name">Last Name</Label>
-                      <Input
-                        id="last-name"
-                        value={formData.last_name}
-                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="whatsapp">WhatsApp Number</Label>
-                      <Input
-                        id="whatsapp"
-                        value={formData.whatsapp_number}
-                        onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={isUpdating}>
-                        {isUpdating ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-                <TabsContent value="password">
-                  <div className="mt-4">
-                    <ChangePasswordForm />
-                  </div>
-                </TabsContent>
-              </Tabs>
-            )}
-          </DialogContent>
-        </Dialog>
-      </CardFooter>
-    </Card>
+    <>
+      <UserProfileDisplay
+        user={user}
+        displayName={displayName}
+        phone={formData.phone || user.phone}
+        onEditClick={handleEditClick}
+      />
+      <UserProfileEditDialog
+        isOpen={isEditing}
+        onOpenChange={setIsEditing}
+        user={user}
+        formData={formData}
+        onFormDataChange={setFormData}
+        onSubmit={(e) => handleSubmit(e, formData)}
+        isUpdating={isUpdating}
+        isLoadingProfile={isLoadingProfile}
+      />
+    </>
   );
 }
