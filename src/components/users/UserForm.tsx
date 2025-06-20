@@ -36,6 +36,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>(initialData?.avatar_url || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -76,6 +77,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       if (isEditMode && initialData) {
@@ -104,6 +106,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             last_name: formData.last_name,
             phone: formData.phone,
             whatsapp_number: formData.whatsapp_number,
+            role: formData.role,
             updated_at: new Date().toISOString(),
             ...(photoUrl && { avatar_url: photoUrl })
           };
@@ -124,7 +127,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           console.warn("No user_id available for profile update");
         }
         
-        // Update accounts table using account.id
+        // Update accounts table using account.id - THIS IS THE KEY FIX
         console.log("Updating accounts for account.id:", initialData.id);
         
         const accountUpdateData = {
@@ -290,6 +293,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -372,8 +377,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             </SelectContent>
           </Select>
         </div>
-        <Button type="submit" className="w-full">
-          Create Employee
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creating..." : "Create Employee"}
         </Button>
       </form>
     );
@@ -473,8 +478,8 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full">
-        Update User
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Updating..." : "Update User"}
       </Button>
     </form>
   );

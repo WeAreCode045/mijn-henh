@@ -21,6 +21,7 @@ export function useUserProfileActions(
   const uploadAvatar = async (file: File, userId: string): Promise<string | null> => {
     try {
       setIsUploadingAvatar(true);
+      console.log("Starting avatar upload for user:", userId);
       
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}.${fileExt}`;
@@ -43,6 +44,7 @@ export function useUserProfileActions(
         .from('agent-photos')
         .getPublicUrl(filePath);
 
+      console.log("Avatar uploaded successfully:", publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -69,7 +71,11 @@ export function useUserProfileActions(
       
       // Upload avatar if provided
       if (avatarFile && formData.user_id) {
+        console.log("Uploading avatar file:", avatarFile.name);
         avatarUrl = await uploadAvatar(avatarFile, formData.user_id);
+        if (!avatarUrl) {
+          throw new Error("Failed to upload avatar");
+        }
       }
 
       // Update employer_profiles table using user_id
@@ -79,6 +85,7 @@ export function useUserProfileActions(
         email: formData.email,
         phone: formData.phone,
         whatsapp_number: formData.whatsapp_number,
+        updated_at: new Date().toISOString(),
         ...(avatarUrl && { avatar_url: avatarUrl })
       };
 
