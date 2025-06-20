@@ -7,27 +7,71 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  Card, 
-  CardContent 
-} from "@/components/ui/card";
 import { useParticipants } from "@/hooks/useParticipants";
 import { ParticipantProfileData } from "@/types/participant";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle, Eye, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { PropertyLayout } from "@/components/PropertyLayout";
 import { Spinner } from "@/components/ui/spinner";
-import { CreateParticipantDialog } from "@/components/participants/CreateParticipantDialog";
+import { ParticipantForm } from "@/components/participants/ParticipantForm";
+import { ParticipantList } from "@/components/participants/ParticipantList";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Participants = () => {
   const { participants, isLoading, error, refetch } = useParticipants();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<ParticipantProfileData | null>(null);
+  const { toast } = useToast();
 
-  const handleViewProfile = (participant: ParticipantProfileData) => {
+  const handleEdit = (participant: ParticipantProfileData) => {
     setSelectedParticipant(participant);
-    setIsDialogOpen(true);
+    setIsEditMode(true);
+    setIsFormDialogOpen(true);
+  };
+
+  const handleCreate = () => {
+    setSelectedParticipant(null);
+    setIsEditMode(false);
+    setIsFormDialogOpen(true);
+  };
+
+  const handleDelete = async (participantId: string) => {
+    if (!window.confirm("Are you sure you want to delete this participant?")) {
+      return;
+    }
+
+    try {
+      // Delete from accounts table (this should cascade to participants_profile)
+      const { error: accountError } = await supabase
+        .from('accounts')
+        .delete()
+        .eq('user_id', participantId);
+      
+      if (accountError) {
+        console.error("Error deleting from accounts:", accountError);
+        throw accountError;
+      }
+      
+      toast({
+        title: "Success",
+        description: "Participant deleted successfully",
+      });
+
+      refetch();
+    } catch (error: any) {
+      console.error("Error in deleteParticipant:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete participant",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormDialogOpen(false);
+    refetch();
   };
 
   console.log("Participants page loaded");
@@ -38,7 +82,7 @@ const Participants = () => {
       <div className="container mx-auto py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Participants</h1>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button onClick={handleCreate}>
             <UserPlus className="mr-2 h-4 w-4" />
             Create Participant
           </Button>
@@ -55,108 +99,29 @@ const Participants = () => {
             <Spinner size="lg" />
             <span className="ml-2">Loading participants...</span>
           </div>
-        ) : participants.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <UserCircle className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-600">No participants found</h3>
-            <p className="text-gray-500 mt-2">Participants will appear here when buyers or sellers are added to properties.</p>
-          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {participants.map((participant) => (
-              <Card key={participant.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex flex-col items-center text-center mb-4">
-                    <Avatar className="h-16 w-16 mb-2">
-                      <AvatarImage src={participant.avatar_url || ""} />
-                      <AvatarFallback>
-                        <UserCircle className="h-8 w-8" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <h3 className="text-lg font-semibold">
-                      {participant.first_name} {participant.last_name}
-                    </h3>
-                    <p className="text-sm text-gray-500">{participant.email}</p>
-                    <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs mt-2 capitalize">
-                      {participant.role}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex justify-center">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleViewProfile(participant)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Profile
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <ParticipantList
+            participants={participants}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            isLoading={isLoading}
+          />
         )}
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-md">
+        <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Participant Profile</DialogTitle>
+              <DialogTitle>
+                {isEditMode ? "Edit Participant" : "Create New Participant"}
+              </DialogTitle>
             </DialogHeader>
-            {selectedParticipant && (
-              <div className="space-y-4">
-                <div className="flex flex-col items-center text-center mb-4">
-                  <Avatar className="h-20 w-20 mb-2">
-                    <AvatarImage src={selectedParticipant.avatar_url || ""} />
-                    <AvatarFallback>
-                      <UserCircle className="h-10 w-10" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <h2 className="text-xl font-semibold">
-                    {selectedParticipant.first_name} {selectedParticipant.last_name}
-                  </h2>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs mt-1 capitalize">
-                    {selectedParticipant.role}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p>{selectedParticipant.email || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Phone</p>
-                    <p>{selectedParticipant.phone || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">WhatsApp</p>
-                    <p>{selectedParticipant.whatsapp_number || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Country</p>
-                    <p>{selectedParticipant.country || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">City</p>
-                    <p>{selectedParticipant.city || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Address</p>
-                    <p>{selectedParticipant.address || "N/A"}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ParticipantForm
+              isEditMode={isEditMode}
+              initialData={selectedParticipant || undefined}
+              onSuccess={handleFormSuccess}
+            />
           </DialogContent>
         </Dialog>
-        
-        {/* Create Participant Dialog */}
-        <CreateParticipantDialog
-          open={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          onSuccess={refetch}
-        />
       </div>
     </PropertyLayout>
   );
