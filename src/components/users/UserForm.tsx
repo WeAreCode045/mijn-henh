@@ -95,6 +95,28 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           console.log("Photo uploaded:", photoUrl);
         }
 
+        // Update Auth User data (name and phone)
+        if (initialData.user_id) {
+          console.log("Updating auth user data for user_id:", initialData.user_id);
+          
+          const authUpdateData: any = {
+            data: {
+              full_name: `${formData.first_name} ${formData.last_name}`.trim(),
+              phone: formData.phone
+            }
+          };
+          
+          console.log("Auth user update data:", authUpdateData);
+          
+          const { error: authError } = await supabase.auth.updateUser(authUpdateData);
+          
+          if (authError) {
+            console.error("Error updating auth user:", authError);
+            throw new Error(`Failed to update user data: ${authError.message}`);
+          }
+          console.log("Successfully updated auth user data");
+        }
+
         // Update employer_profiles table using user_id
         if (initialData.user_id) {
           console.log("Updating employer_profiles for user_id:", initialData.user_id);
@@ -113,7 +135,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           const { error: profileError } = await supabase
             .from("employer_profiles")
             .update(updateData)
-            .eq("id", initialData.user_id); // Use user_id here
+            .eq("id", initialData.user_id);
 
           if (profileError) {
             console.error("Error updating employer_profiles:", profileError);
@@ -138,7 +160,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
         const { error: roleError } = await supabase
           .from("accounts")
           .update(accountUpdateData)
-          .eq("id", initialData.id); // Use account.id here
+          .eq("id", initialData.id);
           
         if (roleError) {
           console.error("Error updating accounts:", roleError);
@@ -159,6 +181,7 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           options: {
             data: {
               full_name: `${formData.first_name} ${formData.last_name}`.trim(),
+              phone: formData.phone,
             },
           },
         });
@@ -340,6 +363,17 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
               setFormData((prev) => ({ ...prev, last_name: e.target.value }))
             }
             required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, phone: e.target.value }))
+            }
           />
         </div>
         <div className="space-y-2">
