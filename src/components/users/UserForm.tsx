@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface UserFormProps {
@@ -93,28 +93,6 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
           }
           photoUrl = await uploadPhoto(initialData.user_id);
           console.log("Photo uploaded:", photoUrl);
-        }
-
-        // Update Auth User data (name and phone)
-        if (initialData.user_id) {
-          console.log("Updating auth user data for user_id:", initialData.user_id);
-          
-          const authUpdateData: any = {
-            data: {
-              full_name: `${formData.first_name} ${formData.last_name}`.trim(),
-              phone: formData.phone
-            }
-          };
-          
-          console.log("Auth user update data:", authUpdateData);
-          
-          const { error: authError } = await supabase.auth.updateUser(authUpdateData);
-          
-          if (authError) {
-            console.error("Error updating auth user:", authError);
-            throw new Error(`Failed to update user data: ${authError.message}`);
-          }
-          console.log("Successfully updated auth user data");
         }
 
         // Update employer_profiles table using user_id
