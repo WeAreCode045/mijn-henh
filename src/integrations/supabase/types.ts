@@ -325,6 +325,13 @@ export type Database = {
             referencedRelation: "agency_settings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_employer_profiles_user_id"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "accounts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       participants_profile: {

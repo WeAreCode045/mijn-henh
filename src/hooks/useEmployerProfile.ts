@@ -21,22 +21,22 @@ export interface EmployerProfileData {
   updated_at?: string;
 }
 
-export function useEmployerProfile(accountId?: string) {
+export function useEmployerProfile(userId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['employer-profile', accountId],
+    queryKey: ['employer-profile', userId],
     queryFn: async () => {
-      if (!accountId) return null;
+      if (!userId) return null;
 
-      // Check if account has employee type in accounts table
+      // Check if user has employee type in accounts table using user_id
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
-        .select('type')
-        .eq('id', accountId)
+        .select('type, user_id')
+        .eq('user_id', userId)
         .eq('type', 'employee')
-        .single();
+        .maybeSingle();
 
       if (accountError && accountError.code !== 'PGRST116') {
         console.error('Error checking account type:', accountError);
@@ -49,89 +49,46 @@ export function useEmployerProfile(accountId?: string) {
         return null;
       }
 
+      // Fetch from employer_profiles using user_id (now properly linked via FK)
       const { data, error } = await supabase
         .from('employer_profiles')
         .select('*')
-        .eq('id', accountId)
-        .single();
+        .eq('id', userId)
+        .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching employer profile:', error);
-        
-        if (error.code === 'PGRST116') { // No rows returned
-          return null;
-        }
-        
         throw error;
       }
 
       return data as EmployerProfileData;
     },
-    enabled: !!accountId,
+    enabled: !!userId,
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<EmployerProfileData>) => {
-      if (!accountId) throw new Error('Account ID is required');
+      if (!userId) throw new Error('User ID is required');
 
-      // Check if profile exists first
-      const { data: existingProfile } = await supabase
+      // Use upsert to handle both insert and update cases
+      const { data, error } = await supabase
         .from('employer_profiles')
-        .select('id')
-        .eq('id', accountId)
+        .upsert({ id: userId, ...profileData })
+        .select('*')
         .single();
 
-      let result;
-      
-      if (existingProfile) {
-        // Update existing profile
-        const { data, error } = await supabase
-          .from('employer_profiles')
-          .update(profileData)
-          .eq('id', accountId)
-          .select('*')
-          .single();
+      if (error) throw error;
 
-        if (error) throw error;
-        result = data;
-        
-        // Also update display_name in accounts
-        if (profileData.first_name || profileData.last_name) {
-          const displayName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
-          await supabase
-            .from('accounts')
-            .update({ display_name: displayName })
-            .eq('id', accountId);
-        }
-      } else {
-        // Insert new profile
-        const { data, error } = await supabase
-          .from('employer_profiles')
-          .insert({ id: accountId, ...profileData })
-          .select('*')
-          .single();
-
-        if (error) throw error;
-        result = data;
-        
-        // Set display_name in accounts
-        if (profileData.first_name || profileData.last_name) {
-          const displayName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
-          await supabase
-            .from('accounts')
-            .update({ display_name: displayName })
-            .eq('id', accountId);
-        }
-      }
-
-      return result;
+      // The trigger will automatically update display_name in accounts table
+      return data;
     },
     onSuccess: () => {
       toast({
         title: 'Profile Updated',
         description: 'Your profile has been updated successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ['employer-profile', accountId] });
+      queryClient.invalidateQueries({ queryKey: ['employer-profile', userId] });
+      queryClient.invalidateQueries({ queryKey: ['users'] }); // Refresh users list
     },
     onError: (error) => {
       toast({

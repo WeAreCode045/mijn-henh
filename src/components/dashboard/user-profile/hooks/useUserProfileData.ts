@@ -24,11 +24,12 @@ export function useUserProfileData(user: User) {
     
     setIsLoadingProfile(true);
     try {
+      // Fetch from employer_profiles using user_id (which is now properly linked via foreign key)
       const { data: profile, error } = await supabase
         .from('employer_profiles')
         .select('*')
         .eq('id', user.user_id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching complete profile:', error);
@@ -47,6 +48,15 @@ export function useUserProfileData(user: User) {
           email: profile.email || user.email || "",
           phone: profile.phone || "",
           whatsapp_number: profile.whatsapp_number || "",
+        });
+      } else {
+        // If no profile exists, initialize with user data
+        setFormData({
+          first_name: user.first_name || "",
+          last_name: user.last_name || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          whatsapp_number: user.whatsapp_number || "",
         });
       }
     } catch (error) {

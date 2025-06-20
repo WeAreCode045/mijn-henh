@@ -68,14 +68,41 @@ export function useUserProfileActions(
       let avatarUrl = null;
       
       // Upload avatar if provided
-      if (avatarFile) {
-        // We need the user_id for upload, which should be available in the user object
-        const userId = formData.user_id || formData.id;
-        if (userId) {
-          avatarUrl = await uploadAvatar(avatarFile, userId);
-        }
+      if (avatarFile && formData.user_id) {
+        avatarUrl = await uploadAvatar(avatarFile, formData.user_id);
       }
 
+      // Update employer_profiles table using user_id
+      const profileUpdateData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone: formData.phone,
+        whatsapp_number: formData.whatsapp_number,
+        ...(avatarUrl && { avatar_url: avatarUrl })
+      };
+
+      if (formData.user_id) {
+        const { error: profileError } = await supabase
+          .from('employer_profiles')
+          .upsert({ 
+            id: formData.user_id, 
+            ...profileUpdateData 
+          });
+
+        if (profileError) {
+          console.error('Error updating employer profile:', profileError);
+          throw profileError;
+        }
+
+        // The trigger will automatically update the display_name in accounts table
+        toast({
+          title: "Success",
+          description: "Profile updated successfully",
+        });
+      }
+
+      // Prepare data for parent component callback
       const updateData = {
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -90,6 +117,11 @@ export function useUserProfileActions(
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
     } finally {
       setIsUpdating(false);
     }

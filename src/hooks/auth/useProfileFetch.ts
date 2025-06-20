@@ -8,74 +8,63 @@ export function useProfileFetch() {
     console.log('Fetching profile for', userId, type, email);
     
     if (type === 'employee') {
-      const { data: employerProfile, error: profileError } = await supabase
-        .from('employer_profiles')
-        .select('*')
-        .eq('id', userId)
+      // Use the optimized query with the new FK relationship
+      const { data: accountWithProfile, error: accountError } = await supabase
+        .from('accounts')
+        .select(`
+          id,
+          user_id,
+          role,
+          type,
+          email,
+          display_name,
+          employer_profiles!fk_employer_profiles_user_id (
+            id,
+            email,
+            first_name,
+            last_name,
+            phone,
+            whatsapp_number,
+            avatar_url,
+            role
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('type', 'employee')
         .maybeSingle();
 
-      if (profileError) {
-        console.error('Error fetching employer profile:', profileError);
+      if (accountError) {
+        console.error('Error fetching account with profile:', accountError);
         return null;
       }
 
-      if (employerProfile) {
-        console.log('Found employer profile:', employerProfile);
-        const fullName = `${employerProfile.first_name || ''} ${employerProfile.last_name || ''}`.trim();
+      if (accountWithProfile) {
+        const profile = accountWithProfile.employer_profiles;
+        console.log('Found account with profile:', accountWithProfile);
+        
+        const firstName = profile?.first_name || '';
+        const lastName = profile?.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        
         return {
-          id: userId,
+          id: accountWithProfile.id, // account.id
+          user_id: accountWithProfile.user_id, // auth user_id
           type: type,
-          email: employerProfile.email || email,
-          first_name: employerProfile.first_name || '',
-          last_name: employerProfile.last_name || '',
+          email: profile?.email || accountWithProfile.email || email,
+          first_name: firstName,
+          last_name: lastName,
           full_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
-          display_name: fullName || (email ? email.split('@')[0] : 'Unknown'),
-          avatar_url: employerProfile.avatar_url || undefined,
-          phone: employerProfile.phone,
-          whatsapp_number: employerProfile.whatsapp_number,
-          role: employerProfile.role
+          display_name: accountWithProfile.display_name || fullName || (email ? email.split('@')[0] : 'Unknown'),
+          avatar_url: profile?.avatar_url || undefined,
+          phone: profile?.phone,
+          whatsapp_number: profile?.whatsapp_number,
+          role: profile?.role || accountWithProfile.role
         } as AppUser;
       } else {
-        console.log('No employer profile found, creating new one');
-        // If no profile exists yet, create a basic one
-        try {
-          const firstName = email ? email.split('@')[0] : '';
-          
-          const { data: newProfile, error: createError } = await supabase
-            .from('employer_profiles')
-            .insert({
-              id: userId,
-              email: email,
-              first_name: firstName,
-              last_name: '',
-              role: 'agent'
-            })
-            .select()
-            .single();
-            
-          if (createError) {
-            console.error('Error creating employer profile:', createError);
-            return null;
-          }
-          
-          if (newProfile) {
-            return {
-              id: userId,
-              type: type,
-              email: email,
-              first_name: firstName,
-              last_name: '',
-              full_name: email ? email.split('@')[0] : 'Unknown',
-              display_name: email ? email.split('@')[0] : 'Unknown',
-              avatar_url: undefined,
-              phone: null,
-              whatsapp_number: null,
-              role: 'agent'
-            } as AppUser;
-          }
-        } catch (err) {
-          console.error('Error in profile creation fallback:', err);
-        }
+        console.log('No account found, creating new one');
+        // If no account exists yet, we could create one here if needed
+        // For now, just return null to let the calling code handle it
+        return null;
       }
     } else if (type === 'participant') {
       const { data: participantProfile, error: profileError } = await supabase
@@ -93,6 +82,7 @@ export function useProfileFetch() {
         const fullName = `${participantProfile.first_name || ''} ${participantProfile.last_name || ''}`.trim();
         return {
           id: userId,
+          user_id: userId,
           type: type,
           email: participantProfile.email || email,
           first_name: participantProfile.first_name || '',
@@ -107,7 +97,7 @@ export function useProfileFetch() {
       }
     }
     
-    console.log('No profile found and could not create one');
+    console.log('No profile found');
     return null;
   }, []);
 

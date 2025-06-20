@@ -23,29 +23,48 @@ export function useUsers() {
       }
       
       try {
-        // Get all accounts with employee type
-        const { data: accountsData, error: accountsError } = await supabase
+        // Get all employee accounts with their employer profiles in a single optimized query
+        const { data: accountsWithProfiles, error: accountsError } = await supabase
           .from('accounts')
-          .select('*')
+          .select(`
+            id,
+            user_id,
+            role,
+            type,
+            email,
+            display_name,
+            created_at,
+            updated_at,
+            employer_profiles!fk_employer_profiles_user_id (
+              id,
+              email,
+              first_name,
+              last_name,
+              phone,
+              whatsapp_number,
+              avatar_url,
+              role,
+              created_at,
+              updated_at
+            )
+          `)
           .eq('type', 'employee');
 
         if (accountsError) {
-          console.error("Error fetching accounts:", accountsError);
-          throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
+          console.error("Error fetching accounts with profiles:", accountsError);
+          throw new Error(`Failed to fetch employee data: ${accountsError.message}`);
         }
 
-        console.log("Employee accounts data from supabase:", accountsData);
+        console.log("Employee accounts with profiles from supabase:", accountsWithProfiles);
         
-        if (!accountsData || !Array.isArray(accountsData) || accountsData.length === 0) {
+        if (!accountsWithProfiles || !Array.isArray(accountsWithProfiles) || accountsWithProfiles.length === 0) {
           console.log("No employee accounts found");
           return [];
         }
 
-        // Create a map for emails from auth.users
+        // Get emails from auth.users for each user_id if needed
         const emailMap = new Map<string, string>();
-        
-        // Get emails from auth.users for each user_id
-        const userIds = accountsData
+        const userIds = accountsWithProfiles
           .filter(account => account && account.user_id)
           .map(account => account.user_id)
           .filter(Boolean);
@@ -72,69 +91,41 @@ export function useUsers() {
           }
         }
         
-        // Fetch employer profiles using user_id (not account.id)
-        const { data: profiles, error: profilesError } = await supabase
-          .from("employer_profiles")
-          .select(`
-            id,
-            email,
-            first_name,
-            last_name,
-            phone,
-            whatsapp_number,
-            avatar_url,
-            role,
-            created_at,
-            updated_at
-          `)
-          .in('id', userIds); // Use user_ids here, not account IDs
-
-        if (profilesError) {
-          console.error("Error fetching employer profiles:", profilesError);
-          throw new Error(`Failed to fetch employer profiles: ${profilesError.message}`);
-        }
-        
-        console.log("Employer profiles from supabase:", profiles);
-
-        // Create a map of user_id to profile
-        const profileMap = new Map();
-        if (profiles && Array.isArray(profiles)) {
-          profiles.forEach(profile => {
-            if (profile) {
-              profileMap.set(profile.id, profile); // profile.id is the user_id
-            }
-          });
-        }
-        
-        // Map accounts to user profiles
+        // Transform the data to User objects
         const employeeProfiles = [];
         
-        if (accountsData && Array.isArray(accountsData)) {
-          for (const account of accountsData) {
-            if (!account) continue;
-            
-            const profile = profileMap.get(account.user_id) || {}; // Use account.user_id to get profile
-            
-            // Get email from emailMap, profile, or account
-            const userEmail = emailMap.get(account.user_id) || (profile ? profile.email : '') || account.email || '';
-            
-            employeeProfiles.push({
-              id: account.id, // This is the account.id
-              user_id: account.user_id, // This is the auth user_id - needed for employer_profiles table
-              email: userEmail,
-              first_name: profile ? profile.first_name || '' : '',
-              last_name: profile ? profile.last_name || '' : '',
-              full_name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : account.display_name || 'Unnamed User',
-              display_name: account.display_name || (profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '') || 'Unnamed User',
-              phone: profile ? profile.phone || '' : '',
-              whatsapp_number: profile ? profile.whatsapp_number || '' : '',
-              type: account.type || 'employee',
-              role: profile ? profile.role || account.role || 'agent' : account.role || 'agent',
-              avatar_url: profile ? profile.avatar_url || '' : '',
-              created_at: profile ? profile.created_at || '' : '',
-              updated_at: profile ? profile.updated_at || '' : ''
-            });
-          }
+        for (const account of accountsWithProfiles) {
+          if (!account) continue;
+          
+          // employer_profiles is now joined via foreign key relationship
+          const profile = account.employer_profiles || {};
+          
+          // Get email from various sources (auth, profile, account)
+          const userEmail = emailMap.get(account.user_id) || 
+                           (profile ? profile.email : '') || 
+                           account.email || '';
+          
+          employeeProfiles.push({
+            id: account.id, // This is the account.id
+            user_id: account.user_id, // This is the auth user_id
+            email: userEmail,
+            first_name: profile.first_name || '',
+            last_name: profile.last_name || '',
+            full_name: profile.first_name && profile.last_name 
+              ? `${profile.first_name} ${profile.last_name}`.trim()
+              : account.display_name || 'Unnamed User',
+            display_name: account.display_name || 
+              (profile.first_name && profile.last_name 
+                ? `${profile.first_name} ${profile.last_name}`.trim()
+                : '') || 'Unnamed User',
+            phone: profile.phone || '',
+            whatsapp_number: profile.whatsapp_number || '',
+            type: account.type || 'employee',
+            role: profile.role || account.role || 'agent',
+            avatar_url: profile.avatar_url || '',
+            created_at: profile.created_at || account.created_at || '',
+            updated_at: profile.updated_at || account.updated_at || ''
+          });
         }
 
         console.log("Transformed employee profiles:", employeeProfiles);
@@ -158,7 +149,7 @@ export function useUsers() {
     }
     
     try {
-      // Delete from accounts (this should cascade to employer_profiles)
+      // Delete from accounts (this will cascade to employer_profiles due to FK constraint)
       const { error: accountError } = await supabase
         .from('accounts')
         .delete()
