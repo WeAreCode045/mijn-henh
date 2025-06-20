@@ -177,56 +177,62 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             console.log("Photo uploaded for new user:", photoUrl);
           }
 
-          // Update accounts table
-          const { error: accountError } = await supabase
-            .from("accounts")
-            .update({
-              role: formData.role,
-              type: formData.type,
-              display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-              email: formData.email
-            })
-            .eq("user_id", authData.user.id);
+          // Wait a moment for the trigger to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
 
-          if (accountError) {
-            console.error("Error updating account:", accountError);
-            // If update fails, try to insert
-            const { error: insertError } = await supabase
+          // Check if account was created by trigger, if not create it manually
+          const { data: existingAccount } = await supabase
+            .from("accounts")
+            .select("id")
+            .eq("user_id", authData.user.id)
+            .single();
+
+          if (!existingAccount) {
+            console.log("No account found from trigger, creating manually");
+            const { error: accountInsertError } = await supabase
               .from("accounts")
               .insert({
                 user_id: authData.user.id,
                 role: formData.role,
                 type: formData.type,
                 display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-                email: formData.email
+                email: formData.email,
+                status: 'active'
               });
 
-            if (insertError) {
-              console.error("Error inserting account:", insertError);
-              throw insertError;
+            if (accountInsertError) {
+              console.error("Error creating account manually:", accountInsertError);
+              throw new Error(`Failed to create account: ${accountInsertError.message}`);
             }
-            console.log("Account inserted successfully");
+            console.log("Account created manually");
           } else {
+            console.log("Account found from trigger, updating it");
+            const { error: accountUpdateError } = await supabase
+              .from("accounts")
+              .update({
+                role: formData.role,
+                type: formData.type,
+                display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+                email: formData.email
+              })
+              .eq("user_id", authData.user.id);
+
+            if (accountUpdateError) {
+              console.error("Error updating account:", accountUpdateError);
+              throw new Error(`Failed to update account: ${accountUpdateError.message}`);
+            }
             console.log("Account updated successfully");
           }
 
-          // Update employer_profiles using auth user_id
-          const { error: profileUpdateError } = await supabase
+          // Check if employer profile exists, if not create/update it
+          const { data: existingProfile } = await supabase
             .from("employer_profiles")
-            .update({
-              first_name: formData.first_name,
-              last_name: formData.last_name,
-              email: formData.email,
-              phone: formData.phone,
-              whatsapp_number: formData.whatsapp_number,
-              updated_at: new Date().toISOString(),
-              ...(photoUrl && { avatar_url: photoUrl })
-            })
-            .eq("id", authData.user.id);
+            .select("id")
+            .eq("id", authData.user.id)
+            .single();
 
-          if (profileUpdateError) {
-            console.error("Error updating profile:", profileUpdateError);
-            // If update fails, try to insert
+          if (!existingProfile) {
+            console.log("No employer profile found from trigger, creating manually");
             const { error: profileInsertError } = await supabase
               .from("employer_profiles")
               .insert({
@@ -236,22 +242,42 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
                 email: formData.email,
                 phone: formData.phone,
                 whatsapp_number: formData.whatsapp_number,
+                role: formData.role,
                 ...(photoUrl && { avatar_url: photoUrl })
               });
 
             if (profileInsertError) {
-              console.error("Error inserting profile:", profileInsertError);
-              throw profileInsertError;
+              console.error("Error creating profile manually:", profileInsertError);
+              throw new Error(`Failed to create profile: ${profileInsertError.message}`);
             }
-            console.log("Profile inserted successfully");
+            console.log("Profile created manually");
           } else {
+            console.log("Profile found from trigger, updating it");
+            const { error: profileUpdateError } = await supabase
+              .from("employer_profiles")
+              .update({
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                email: formData.email,
+                phone: formData.phone,
+                whatsapp_number: formData.whatsapp_number,
+                role: formData.role,
+                updated_at: new Date().toISOString(),
+                ...(photoUrl && { avatar_url: photoUrl })
+              })
+              .eq("id", authData.user.id);
+
+            if (profileUpdateError) {
+              console.error("Error updating profile:", profileUpdateError);
+              throw new Error(`Failed to update profile: ${profileUpdateError.message}`);
+            }
             console.log("Profile updated successfully");
           }
         }
 
         toast({
           title: "Success",
-          description: "User created successfully",
+          description: "Employee created successfully",
         });
       }
 
@@ -315,6 +341,24 @@ export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) 
             }
             required
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="role">Role</Label>
+          <Select
+            value={formData.role}
+            onValueChange={(value: "admin" | "agent") =>
+              setFormData((prev) => ({ ...prev, role: value }))
+            }
+            defaultValue="agent"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="agent">Agent</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button type="submit" className="w-full">
           Create Employee
