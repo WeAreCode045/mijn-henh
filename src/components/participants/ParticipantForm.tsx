@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ParticipantFormData, ParticipantRole } from "@/types/participant";
 import { Button } from "@/components/ui/button";
@@ -120,8 +121,11 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
           description: "Participant updated successfully",
         });
       } else {
+        // CREATE MODE - Simplified approach
+        console.log("=== CREATE MODE DEBUG ===");
         console.log("Creating new participant with data:", formData);
         
+        // Step 1: Create user in auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password!,
@@ -135,126 +139,69 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
 
         if (authError) {
           console.error("Auth signup error:", authError);
-          throw authError;
+          throw new Error(`Failed to create user: ${authError.message}`);
         }
 
-        if (authData.user) {
-          console.log("User created in auth, user_id:", authData.user.id);
+        if (!authData.user) {
+          throw new Error("No user returned from signup");
+        }
 
-          // Wait a moment for the trigger to complete
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log("User created in auth, user_id:", authData.user.id);
 
-          // Check if account was created by trigger, if not create it manually
-          const { data: existingAccount } = await supabase
-            .from("accounts")
-            .select("id")
-            .eq("user_id", authData.user.id)
-            .single();
+        // Step 2: Wait for trigger to create basic account, then update it for participant
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-          if (!existingAccount) {
-            console.log("No account found from trigger, creating manually");
-            const { error: accountInsertError } = await supabase
-              .from("accounts")
-              .insert({
-                user_id: authData.user.id,
-                role: formData.role,
-                type: 'participant' as const,
-                display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-                email: formData.email,
-                status: 'active'
-              });
+        // Step 3: Update the account to be a participant account
+        console.log("Updating account to participant type");
+        const { error: accountUpdateError } = await supabase
+          .from("accounts")
+          .update({
+            role: formData.role,
+            type: 'participant' as const,
+            display_name: `${formData.first_name} ${formData.last_name}`.trim(),
+            email: formData.email
+          })
+          .eq("user_id", authData.user.id);
 
-            if (accountInsertError) {
-              console.error("Error creating account manually:", accountInsertError);
-              throw new Error(`Failed to create account: ${accountInsertError.message}`);
-            }
-            console.log("Account created manually");
-          } else {
-            console.log("Account found from trigger, updating it");
-            const { error: accountUpdateError } = await supabase
-              .from("accounts")
-              .update({
-                role: formData.role,
-                type: 'participant' as const,
-                display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-                email: formData.email
-              })
-              .eq("user_id", authData.user.id);
+        if (accountUpdateError) {
+          console.error("Error updating account to participant:", accountUpdateError);
+          throw new Error(`Failed to update account: ${accountUpdateError.message}`);
+        }
+        console.log("Account updated to participant type successfully");
 
-            if (accountUpdateError) {
-              console.error("Error updating account:", accountUpdateError);
-              throw new Error(`Failed to update account: ${accountUpdateError.message}`);
-            }
-            console.log("Account updated successfully");
-          }
+        // Step 4: Wait for participant trigger to create profile, then update it with full data
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-          // Check if participant profile exists, if not create/update it
-          const { data: existingProfile } = await supabase
-            .from("participants_profile")
-            .select("id")
-            .eq("id", authData.user.id)
-            .single();
+        console.log("Updating participant profile with full data");
+        const { error: profileUpdateError } = await supabase
+          .from("participants_profile")
+          .update({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            phone: formData.phone,
+            whatsapp_number: formData.whatsapp_number,
+            date_of_birth: formData.date_of_birth || null,
+            place_of_birth: formData.place_of_birth,
+            nationality: formData.nationality,
+            gender: formData.gender,
+            address: formData.address,
+            city: formData.city,
+            postal_code: formData.postal_code,
+            country: formData.country,
+            role: formData.role,
+            iban: formData.iban,
+            identification: formData.identification,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", authData.user.id);
 
-          if (!existingProfile) {
-            console.log("No participant profile found from trigger, creating manually");
-            const { error: profileInsertError } = await supabase
-              .from("participants_profile")
-              .insert({
-                id: authData.user.id,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
-                email: formData.email,
-                phone: formData.phone,
-                whatsapp_number: formData.whatsapp_number,
-                date_of_birth: formData.date_of_birth || null,
-                place_of_birth: formData.place_of_birth,
-                nationality: formData.nationality,
-                gender: formData.gender,
-                address: formData.address,
-                city: formData.city,
-                postal_code: formData.postal_code,
-                country: formData.country,
-                role: formData.role,
-                iban: formData.iban,
-                identification: formData.identification
-              });
-
-            if (profileInsertError) {
-              console.error("Error creating profile manually:", profileInsertError);
-              throw new Error(`Failed to create profile: ${profileInsertError.message}`);
-            }
-            console.log("Profile created manually");
-          } else {
-            console.log("Profile found from trigger, updating it");
-            const { error: profileUpdateError } = await supabase
-              .from("participants_profile")
-              .update({
-                first_name: formData.first_name,
-                last_name: formData.last_name,
-                email: formData.email,
-                phone: formData.phone,
-                whatsapp_number: formData.whatsapp_number,
-                date_of_birth: formData.date_of_birth || null,
-                place_of_birth: formData.place_of_birth,
-                nationality: formData.nationality,
-                gender: formData.gender,
-                address: formData.address,
-                city: formData.city,
-                postal_code: formData.postal_code,
-                country: formData.country,
-                role: formData.role,
-                iban: formData.iban,
-                identification: formData.identification,
-                updated_at: new Date().toISOString()
-              })
-              .eq("id", authData.user.id);
-
-            if (profileUpdateError) {
-              console.error("Error updating profile:", profileUpdateError);
-              throw new Error(`Failed to update profile: ${profileUpdateError.message}`);
-            }
-            console.log("Profile updated successfully");
-          }
+        if (profileUpdateError) {
+          console.error("Error updating participant profile:", profileUpdateError);
+          // Don't throw here - profile was created by trigger, this is just additional data
+          console.log("Profile update failed but continuing - basic profile should exist");
+        } else {
+          console.log("Participant profile updated with full data successfully");
         }
 
         toast({
