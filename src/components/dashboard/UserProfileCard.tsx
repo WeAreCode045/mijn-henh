@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PenSquare, UserCircle, Mail, Phone } from "lucide-react";
 import { User } from "@/types/user";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileCardProps {
   user: User;
@@ -17,13 +19,16 @@ interface UserProfileCardProps {
 
 export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     first_name: user?.first_name || "",
     last_name: user?.last_name || "",
     email: user?.email || "",
     phone: user?.phone || "",
+    whatsapp_number: user?.whatsapp_number || "",
   });
-  const [isUpdating, setIsUpdating] = useState(false);
 
   if (!user) {
     return null;
@@ -33,14 +38,51 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
   const displayName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 
                       (user.email ? user.email.split('@')[0] : 'Unknown');
 
-  const handleEditClick = () => {
+  const fetchCompleteProfile = async () => {
+    if (!user.user_id) return;
+    
+    setIsLoadingProfile(true);
+    try {
+      const { data: profile, error } = await supabase
+        .from('employer_profiles')
+        .select('*')
+        .eq('id', user.user_id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching complete profile:', error);
+        toast({
+          title: "Warning",
+          description: "Could not load complete profile data",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (profile) {
+        setFormData({
+          first_name: profile.first_name || "",
+          last_name: profile.last_name || "",
+          email: profile.email || user.email || "",
+          phone: profile.phone || "",
+          whatsapp_number: profile.whatsapp_number || "",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  const handleEditClick = async () => {
     setIsEditing(true);
-    setFormData({
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-      email: user.email || "",
-      phone: user.phone || "",
-    });
+    await fetchCompleteProfile();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,6 +96,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
         last_name: formData.last_name,
         email: formData.email,
         phone: formData.phone,
+        whatsapp_number: formData.whatsapp_number,
         // Update full_name to maintain compatibility
         full_name: `${formData.first_name} ${formData.last_name}`.trim()
       });
@@ -95,49 +138,63 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
             <DialogHeader>
               <DialogTitle>Edit Your Profile</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="sidebar-first-name">First Name</Label>
-                <Input
-                  id="sidebar-first-name"
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                />
+            {isLoadingProfile ? (
+              <div className="flex justify-center p-4">
+                <span>Loading profile data...</span>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="sidebar-last-name">Last Name</Label>
-                <Input
-                  id="sidebar-last-name"
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sidebar-email">Email</Label>
-                <Input
-                  id="sidebar-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sidebar-phone">Phone</Label>
-                <Input
-                  id="sidebar-phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isUpdating}>
-                  {isUpdating ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sidebar-first-name">First Name</Label>
+                  <Input
+                    id="sidebar-first-name"
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sidebar-last-name">Last Name</Label>
+                  <Input
+                    id="sidebar-last-name"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sidebar-email">Email</Label>
+                  <Input
+                    id="sidebar-email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sidebar-phone">Phone</Label>
+                  <Input
+                    id="sidebar-phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sidebar-whatsapp">WhatsApp Number</Label>
+                  <Input
+                    id="sidebar-whatsapp"
+                    value={formData.whatsapp_number}
+                    onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isUpdating}>
+                    {isUpdating ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -179,49 +236,63 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
             <DialogHeader>
               <DialogTitle>Edit Your Profile</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="first-name">First Name</Label>
-                <Input
-                  id="first-name"
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                />
+            {isLoadingProfile ? (
+              <div className="flex justify-center p-4">
+                <span>Loading profile data...</span>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="last-name">Last Name</Label>
-                <Input
-                  id="last-name"
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isUpdating}>
-                  {isUpdating ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="first-name">First Name</Label>
+                  <Input
+                    id="first-name"
+                    value={formData.first_name}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="last-name">Last Name</Label>
+                  <Input
+                    id="last-name"
+                    value={formData.last_name}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp">WhatsApp Number</Label>
+                  <Input
+                    id="whatsapp"
+                    value={formData.whatsapp_number}
+                    onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isUpdating}>
+                    {isUpdating ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
+            )}
           </DialogContent>
         </Dialog>
       </CardFooter>
