@@ -5,6 +5,33 @@ import { User } from "@/types/user";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
 
+// Define the type for the joined employer_profiles data
+interface EmployerProfileData {
+  id?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  whatsapp_number?: string;
+  avatar_url?: string;
+  role?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Define the type for account with joined profile
+interface AccountWithProfile {
+  id: string;
+  user_id: string;
+  role: string;
+  type: string;
+  email?: string;
+  display_name?: string;
+  created_at?: string;
+  updated_at?: string;
+  employer_profiles?: EmployerProfileData | null;
+}
+
 export function useUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -48,7 +75,7 @@ export function useUsers() {
               updated_at
             )
           `)
-          .eq('type', 'employee');
+          .eq('type', 'employee') as { data: AccountWithProfile[] | null, error: any };
 
         if (accountsError) {
           console.error("Error fetching accounts with profiles:", accountsError);
@@ -98,33 +125,33 @@ export function useUsers() {
           if (!account) continue;
           
           // employer_profiles is now joined via foreign key relationship
-          const profile = account.employer_profiles || {};
+          const profile = account.employer_profiles;
           
           // Get email from various sources (auth, profile, account)
           const userEmail = emailMap.get(account.user_id) || 
-                           (profile ? profile.email : '') || 
+                           (profile?.email || '') || 
                            account.email || '';
           
           employeeProfiles.push({
             id: account.id, // This is the account.id
             user_id: account.user_id, // This is the auth user_id
             email: userEmail,
-            first_name: profile.first_name || '',
-            last_name: profile.last_name || '',
-            full_name: profile.first_name && profile.last_name 
+            first_name: profile?.first_name || '',
+            last_name: profile?.last_name || '',
+            full_name: profile?.first_name && profile?.last_name 
               ? `${profile.first_name} ${profile.last_name}`.trim()
               : account.display_name || 'Unnamed User',
             display_name: account.display_name || 
-              (profile.first_name && profile.last_name 
+              (profile?.first_name && profile?.last_name 
                 ? `${profile.first_name} ${profile.last_name}`.trim()
                 : '') || 'Unnamed User',
-            phone: profile.phone || '',
-            whatsapp_number: profile.whatsapp_number || '',
+            phone: profile?.phone || '',
+            whatsapp_number: profile?.whatsapp_number || '',
             type: account.type || 'employee',
-            role: profile.role || account.role || 'agent',
-            avatar_url: profile.avatar_url || '',
-            created_at: profile.created_at || account.created_at || '',
-            updated_at: profile.updated_at || account.updated_at || ''
+            role: profile?.role || account.role || 'agent',
+            avatar_url: profile?.avatar_url || '',
+            created_at: profile?.created_at || account.created_at || '',
+            updated_at: profile?.updated_at || account.updated_at || ''
           });
         }
 
