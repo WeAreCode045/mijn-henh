@@ -40,6 +40,8 @@ export function UserProfileForm({
 
   console.log("UserProfileForm - Received formData:", formData);
   console.log("UserProfileForm - User data:", user);
+  console.log("UserProfileForm - First name value:", formData.first_name);
+  console.log("UserProfileForm - Last name value:", formData.last_name);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -102,7 +104,7 @@ export function UserProfileForm({
         <Label htmlFor={`${idPrefix}first-name`}>First Name</Label>
         <Input
           id={`${idPrefix}first-name`}
-          value={formData.first_name}
+          value={formData.first_name || ""}
           onChange={(e) => {
             console.log("UserProfileForm - First name changed to:", e.target.value);
             onFormDataChange({ ...formData, first_name: e.target.value });
@@ -114,7 +116,7 @@ export function UserProfileForm({
         <Label htmlFor={`${idPrefix}last-name`}>Last Name</Label>
         <Input
           id={`${idPrefix}last-name`}
-          value={formData.last_name}
+          value={formData.last_name || ""}
           onChange={(e) => {
             console.log("UserProfileForm - Last name changed to:", e.target.value);
             onFormDataChange({ ...formData, last_name: e.target.value });
@@ -127,7 +129,7 @@ export function UserProfileForm({
         <Input
           id={`${idPrefix}email`}
           type="email"
-          value={formData.email}
+          value={formData.email || ""}
           onChange={(e) => onFormDataChange({ ...formData, email: e.target.value })}
           placeholder="Enter email"
         />
@@ -136,7 +138,7 @@ export function UserProfileForm({
         <Label htmlFor={`${idPrefix}phone`}>Phone</Label>
         <Input
           id={`${idPrefix}phone`}
-          value={formData.phone}
+          value={formData.phone || ""}
           onChange={(e) => onFormDataChange({ ...formData, phone: e.target.value })}
           placeholder="Enter phone number"
         />
@@ -145,7 +147,7 @@ export function UserProfileForm({
         <Label htmlFor={`${idPrefix}whatsapp`}>WhatsApp Number</Label>
         <Input
           id={`${idPrefix}whatsapp`}
-          value={formData.whatsapp_number}
+          value={formData.whatsapp_number || ""}
           onChange={(e) => onFormDataChange({ ...formData, whatsapp_number: e.target.value })}
           placeholder="Enter WhatsApp number"
         />
