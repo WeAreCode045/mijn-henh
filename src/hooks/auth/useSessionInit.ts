@@ -54,16 +54,19 @@ export function useSessionInit({
             if (employerProfile && employerProfile.role && employerProfile.role !== accountData.role) {
               console.log('Role mismatch detected. Updating account role from', accountData.role, 'to', employerProfile.role);
               
+              // Cast the role to the correct type before updating
+              const validRole = employerProfile.role as 'admin' | 'agent' | 'buyer' | 'seller';
+              
               // Update the account role to match employer profile
               const { error: updateError } = await supabase
                 .from('accounts')
-                .update({ role: employerProfile.role })
+                .update({ role: validRole })
                 .eq('user_id', session.user.id);
                 
               if (!updateError) {
                 console.log('Account role updated successfully');
                 // Use the updated role
-                setUserRole(employerProfile.role);
+                setUserRole(validRole);
               } else {
                 console.error('Failed to update account role:', updateError);
                 setUserRole(accountData.role);
