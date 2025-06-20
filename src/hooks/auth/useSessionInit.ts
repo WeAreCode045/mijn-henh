@@ -28,7 +28,7 @@ export function useSessionInit({
             
     if (session?.user) {
       try {
-        // Get the user's type and role from the accounts table - fixed query
+        // Get the user's type and role from the accounts table
         console.log('Fetching user account for', session.user.id);
         const { data: accountData, error: accountError } = await supabase.from('accounts')
           .select('id, type, role')
@@ -42,7 +42,38 @@ export function useSessionInit({
           setUserRole(null);
         } else if (accountData) {
           console.log('User account data:', accountData);
-          setUserRole(accountData.role);
+          
+          // For employees, check if we need to sync the role from employer_profiles
+          if (accountData.type === 'employee') {
+            const { data: employerProfile } = await supabase
+              .from('employer_profiles')
+              .select('role')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (employerProfile && employerProfile.role && employerProfile.role !== accountData.role) {
+              console.log('Role mismatch detected. Updating account role from', accountData.role, 'to', employerProfile.role);
+              
+              // Update the account role to match employer profile
+              const { error: updateError } = await supabase
+                .from('accounts')
+                .update({ role: employerProfile.role })
+                .eq('user_id', session.user.id);
+                
+              if (!updateError) {
+                console.log('Account role updated successfully');
+                // Use the updated role
+                setUserRole(employerProfile.role);
+              } else {
+                console.error('Failed to update account role:', updateError);
+                setUserRole(accountData.role);
+              }
+            } else {
+              setUserRole(accountData.role);
+            }
+          } else {
+            setUserRole(accountData.role);
+          }
           
           // Fetch the user profile based on type
           const userProfile = await fetchUserProfile(session.user.id, accountData.type, session.user.email);
