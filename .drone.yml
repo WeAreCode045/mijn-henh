@@ -1,0 +1,31 @@
+kind: pipeline
+type: docker
+name: deploy
+
+steps:
+  - name: deploy-staging
+    image: node:20
+    commands:
+      - |
+        cd /etc/easypanel/projects/h-en-h/staging-henh/code
+        git pull origin staging || git clone -b staging https://github.com/WeAreCode045/mijn-henh.git .
+        npm install
+        npm run build
+    when:
+      branch:
+        - staging
+      event:
+        - push
+
+  - name: promote-to-production
+    image: node:20
+    commands:
+      - |
+        cd /etc/easypanel/projects/h-en-h/mijn-henh/code
+        git pull origin main || git clone -b main https://github.com/WeAreCode045/mijn-henh.git .
+        npm install
+        npm run build
+    when:
+      event:
+        - promote  # handmatige trigger via Drone UI
+
