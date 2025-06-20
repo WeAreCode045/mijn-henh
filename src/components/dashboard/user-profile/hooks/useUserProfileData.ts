@@ -27,10 +27,11 @@ export function useUserProfileData(user: User) {
     let firstName = user.first_name || "";
     let lastName = user.last_name || "";
     
-    if (!firstName && !lastName && user.full_name) {
+    // Only try to parse full_name if we don't have both first and last names
+    if ((!firstName || !lastName) && user.full_name) {
       const nameParts = user.full_name.trim().split(" ");
-      firstName = nameParts[0] || "";
-      lastName = nameParts.slice(1).join(" ") || "";
+      if (!firstName) firstName = nameParts[0] || "";
+      if (!lastName) lastName = nameParts.slice(1).join(" ") || "";
     }
     
     const newFormData = {
@@ -45,9 +46,30 @@ export function useUserProfileData(user: User) {
     setFormData(newFormData);
   }, [user.id, user.first_name, user.last_name, user.full_name, user.email, user.phone, user.whatsapp_number]);
 
-  const displayName = `${formData.first_name || user.first_name || ''} ${formData.last_name || user.last_name || ''}`.trim() || 
-                      (user.full_name || '') || 
-                      (user.email ? user.email.split('@')[0] : 'Unknown');
+  // Create display name with fallback logic
+  const displayName = (() => {
+    const formFirstName = formData.first_name || user.first_name || '';
+    const formLastName = formData.last_name || user.last_name || '';
+    const combinedName = `${formFirstName} ${formLastName}`.trim();
+    
+    if (combinedName) {
+      return combinedName;
+    }
+    
+    if (user.full_name) {
+      return user.full_name;
+    }
+    
+    if (user.display_name) {
+      return user.display_name;
+    }
+    
+    if (user.email) {
+      return user.email.split('@')[0];
+    }
+    
+    return 'Unknown';
+  })();
 
   console.log("useUserProfileData - Final formData state:", formData);
   console.log("useUserProfileData - Display name:", displayName);

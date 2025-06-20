@@ -4,6 +4,7 @@ import { UserProfileDisplay } from "./user-profile/UserProfileDisplay";
 import { UserProfileSidebar } from "./user-profile/UserProfileSidebar";
 import { UserProfileForm } from "./user-profile/UserProfileForm";
 import { useUserProfileData } from "./user-profile/hooks/useUserProfileData";
+import { useUserProfileActions } from "./user-profile/hooks/useUserProfileActions";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -32,13 +33,31 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     isLoadingProfile
   } = useUserProfileData(user);
 
-  const handleEditProfile = async (e: React.FormEvent, formData: any, avatarFile?: File) => {
-    e.preventDefault();
-    console.log("UserProfileCard - Profile updated:", formData);
-    if (onUpdateProfile) {
-      await onUpdateProfile(formData);
-    }
+  const {
+    isEditing,
+    setIsEditing,
+    isUpdating,
+    isUploadingAvatar,
+    handleEditClick,
+    handleSubmit
+  } = useUserProfileActions(onUpdateProfile);
+
+  const handleFormSubmit = async (e: React.FormEvent, submitFormData: any, avatarFile?: File) => {
+    console.log("UserProfileCard - Form submit with data:", submitFormData);
+    await handleSubmit(e, submitFormData, avatarFile);
     setEditingUser(null);
+    // Force a refresh of the form data after successful update
+    if (onUpdateProfile) {
+      await onUpdateProfile({
+        first_name: submitFormData.first_name,
+        last_name: submitFormData.last_name,
+        email: submitFormData.email,
+        phone: submitFormData.phone,
+        whatsapp_number: submitFormData.whatsapp_number,
+        full_name: `${submitFormData.first_name} ${submitFormData.last_name}`.trim(),
+        display_name: `${submitFormData.first_name} ${submitFormData.last_name}`.trim()
+      });
+    }
   };
 
   console.log("UserProfileCard - Form data from hook:", formData);
@@ -69,9 +88,10 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
                 user={editingUser}
                 formData={formData}
                 onFormDataChange={setFormData}
-                onSubmit={handleEditProfile}
+                onSubmit={handleFormSubmit}
                 onCancel={() => setEditingUser(null)}
-                isUpdating={false}
+                isUpdating={isUpdating}
+                isUploadingAvatar={isUploadingAvatar}
                 inSidebar={true}
               />
             </div>
@@ -107,9 +127,10 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
               user={editingUser}
               formData={formData}
               onFormDataChange={setFormData}
-              onSubmit={handleEditProfile}
+              onSubmit={handleFormSubmit}
               onCancel={() => setEditingUser(null)}
-              isUpdating={false}
+              isUpdating={isUpdating}
+              isUploadingAvatar={isUploadingAvatar}
             />
           </div>
         </div>

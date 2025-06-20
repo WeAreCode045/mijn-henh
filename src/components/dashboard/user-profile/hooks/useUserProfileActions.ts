@@ -15,7 +15,6 @@ export function useUserProfileActions(
   const handleEditClick = async () => {
     console.log("handleEditClick - Opening profile edit dialog");
     setIsEditing(true);
-    // No longer need to fetch profile data since it's already available in the User object
   };
 
   const uploadAvatar = async (file: File, userId: string): Promise<string | null> => {
@@ -61,9 +60,8 @@ export function useUserProfileActions(
 
   const handleSubmit = async (e: React.FormEvent, formData: any, avatarFile?: File) => {
     e.preventDefault();
-    if (!onUpdateProfile) return;
-
-    console.log("handleSubmit - Form data:", formData);
+    console.log("handleSubmit - Form data received:", formData);
+    
     setIsUpdating(true);
     
     try {
@@ -80,11 +78,11 @@ export function useUserProfileActions(
 
       // Update employer_profiles table using user_id
       const profileUpdateData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone,
-        whatsapp_number: formData.whatsapp_number,
+        first_name: formData.first_name || '',
+        last_name: formData.last_name || '',
+        email: formData.email || '',
+        phone: formData.phone || '',
+        whatsapp_number: formData.whatsapp_number || '',
         updated_at: new Date().toISOString(),
         ...(avatarUrl && { avatar_url: avatarUrl })
       };
@@ -106,25 +104,46 @@ export function useUserProfileActions(
 
         console.log("handleSubmit - Profile updated successfully");
         
-        // The trigger will automatically update the display_name in accounts table
+        // Also update accounts table display_name if we have both names
+        if (formData.first_name && formData.last_name && formData.id) {
+          const displayName = `${formData.first_name} ${formData.last_name}`.trim();
+          const { error: accountError } = await supabase
+            .from('accounts')
+            .update({ 
+              display_name: displayName,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', formData.id);
+
+          if (accountError) {
+            console.error('Error updating account display_name:', accountError);
+            // Don't throw here as the profile update was successful
+          }
+        }
+        
         toast({
           title: "Success",
           description: "Profile updated successfully",
         });
       }
 
-      // Prepare data for parent component callback
+      // Prepare data for parent component callback with consistent structure
       const updateData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone,
-        whatsapp_number: formData.whatsapp_number,
-        full_name: `${formData.first_name} ${formData.last_name}`.trim(),
+        first_name: formData.first_name || '',
+        last_name: formData.last_name || '',
+        email: formData.email || '',
+        phone: formData.phone || '',
+        whatsapp_number: formData.whatsapp_number || '',
+        full_name: `${formData.first_name || ''} ${formData.last_name || ''}`.trim(),
+        display_name: `${formData.first_name || ''} ${formData.last_name || ''}`.trim(),
         ...(avatarUrl && { avatar_url: avatarUrl })
       };
 
-      await onUpdateProfile(updateData);
+      console.log("handleSubmit - Calling onUpdateProfile with:", updateData);
+      if (onUpdateProfile) {
+        await onUpdateProfile(updateData);
+      }
+      
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
