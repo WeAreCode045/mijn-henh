@@ -4,8 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Edit, Trash2 } from "lucide-react";
 import { User } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
-import { useState } from "react";
 
 interface UserListProps {
   users: User[];
@@ -15,15 +13,7 @@ interface UserListProps {
 }
 
 export function UserList({ users, onEdit, onDelete, isLoading }: UserListProps) {
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-
   console.log("UserList rendering with:", { users, isLoading });
-
-  const handleEditProfile = async (updatedUser: Partial<User>) => {
-    console.log("UserList - Profile updated:", updatedUser);
-    // Handle the profile update here if needed
-    setEditingUser(null);
-  };
 
   if (isLoading) {
     return (
@@ -75,17 +65,6 @@ export function UserList({ users, onEdit, onDelete, isLoading }: UserListProps) 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    console.log("UserList - Opening profile edit for user:", user);
-                    setEditingUser(user);
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
                   onClick={() => onEdit(user)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -109,27 +88,6 @@ export function UserList({ users, onEdit, onDelete, isLoading }: UserListProps) 
           </CardContent>
         </Card>
       ))}
-      
-      {editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Edit Profile</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setEditingUser(null)}
-              >
-                ×
-              </Button>
-            </div>
-            <UserProfileCard
-              user={editingUser}
-              onUpdateProfile={handleEditProfile}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
