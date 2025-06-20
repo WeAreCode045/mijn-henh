@@ -1,90 +1,135 @@
 
-import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Spinner } from "@/components/ui/spinner";
+import { Card, CardContent } from "@/components/ui/card";
+import { UserCircle, Edit, Trash2 } from "lucide-react";
+import { User } from "@/types/user";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
+import { useState } from "react";
 
 interface UserListProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (userId: string) => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
-export function UserList({ users, onEdit, onDelete, isLoading = false }: UserListProps) {
+export function UserList({ users, onEdit, onDelete, isLoading }: UserListProps) {
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
   console.log("UserList rendering with:", { users, isLoading });
+
+  const handleEditProfile = async (updatedUser: Partial<User>) => {
+    console.log("UserList - Profile updated:", updatedUser);
+    // Handle the profile update here if needed
+    setEditingUser(null);
+  };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <Spinner />
-        <span className="ml-2">Loading employees...</span>
+      <div className="flex justify-center items-center py-8">
+        <div className="text-gray-500">Loading employees...</div>
       </div>
     );
   }
 
   if (!users || users.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <p className="text-gray-500">No employees found. Add your first employee by clicking the "Add New Employee" button above.</p>
+      <div className="text-center py-8">
+        <UserCircle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+        <h3 className="text-lg font-medium text-gray-600">No employees found</h3>
+        <p className="text-gray-500">Add your first employee to get started.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>WhatsApp</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell className="font-medium">{user.full_name || 'Unnamed User'}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.phone || '-'}</TableCell>
-              <TableCell>{user.whatsapp_number || '-'}</TableCell>
-              <TableCell className="capitalize">{user.role || '-'}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(user)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm(`Are you sure you want to delete ${user.full_name}?`)) {
-                        onDelete(user.id);
-                      }
-                    }}
-                  >
-                    Delete
-                  </Button>
+    <div className="space-y-4">
+      {users.map((user) => (
+        <Card key={user.id} className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={user.avatar_url} />
+                  <AvatarFallback>
+                    <UserCircle className="h-6 w-6" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {user.display_name || user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unnamed User'}
+                  </h3>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                      {user.role}
+                    </span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                      {user.type}
+                    </span>
+                  </div>
                 </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    console.log("UserList - Opening profile edit for user:", user);
+                    setEditingUser(user);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(user)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Account
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete(user.id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+            {user.phone && (
+              <div className="mt-4 text-sm text-gray-600">
+                <span className="font-medium">Phone:</span> {user.phone}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+      
+      {editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Edit Profile</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditingUser(null)}
+              >
+                ×
+              </Button>
+            </div>
+            <UserProfileCard
+              user={editingUser}
+              onUpdateProfile={handleEditProfile}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
