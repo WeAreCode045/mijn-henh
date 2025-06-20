@@ -1,5 +1,5 @@
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { UserCircle, PenSquare } from "lucide-react";
 import { User } from "@/types/user";
@@ -14,6 +14,7 @@ export function UserProfileSidebar({ user, displayName, onEditClick }: UserProfi
   return (
     <div className="flex items-center space-x-3 p-1">
       <Avatar className="h-10 w-10">
+        <AvatarImage src={user.avatar_url} alt="Profile photo" />
         <AvatarFallback>
           <UserCircle className="h-6 w-6" />
         </AvatarFallback>
