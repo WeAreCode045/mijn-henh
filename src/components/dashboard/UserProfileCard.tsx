@@ -13,9 +13,12 @@ interface UserProfileCardProps {
 }
 
 export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: UserProfileCardProps) {
-  console.log("UserProfileCard - User data:", user);
+  console.log("UserProfileCard - User data received:", user);
+  console.log("UserProfileCard - User first_name:", user.first_name);
+  console.log("UserProfileCard - User last_name:", user.last_name);
   
   if (!user) {
+    console.log("UserProfileCard - No user data, returning null");
     return null;
   }
 
@@ -34,6 +37,8 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     handleEditClick,
     handleSubmit
   } = useUserProfileActions(onUpdateProfile);
+
+  console.log("UserProfileCard - Form data from hook:", formData);
 
   if (inSidebar) {
     return (

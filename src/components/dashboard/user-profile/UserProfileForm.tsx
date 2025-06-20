@@ -38,6 +38,9 @@ export function UserProfileForm({
   const [avatarPreview, setAvatarPreview] = useState<string>(user.avatar_url || "");
   const idPrefix = inSidebar ? "sidebar-" : "";
 
+  console.log("UserProfileForm - Received formData:", formData);
+  console.log("UserProfileForm - User data:", user);
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -52,6 +55,7 @@ export function UserProfileForm({
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
+    console.log("UserProfileForm - Submitting with formData:", formData);
     onSubmit(e, { ...formData, user_id: user.user_id, id: user.id }, avatarFile || undefined);
   };
 
@@ -99,16 +103,26 @@ export function UserProfileForm({
         <Input
           id={`${idPrefix}first-name`}
           value={formData.first_name}
-          onChange={(e) => onFormDataChange({ ...formData, first_name: e.target.value })}
+          onChange={(e) => {
+            console.log("UserProfileForm - First name changed to:", e.target.value);
+            onFormDataChange({ ...formData, first_name: e.target.value });
+          }}
+          placeholder="Enter first name"
         />
+        <div className="text-xs text-gray-500">Current value: "{formData.first_name}"</div>
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${idPrefix}last-name`}>Last Name</Label>
         <Input
           id={`${idPrefix}last-name`}
           value={formData.last_name}
-          onChange={(e) => onFormDataChange({ ...formData, last_name: e.target.value })}
+          onChange={(e) => {
+            console.log("UserProfileForm - Last name changed to:", e.target.value);
+            onFormDataChange({ ...formData, last_name: e.target.value });
+          }}
+          placeholder="Enter last name"
         />
+        <div className="text-xs text-gray-500">Current value: "{formData.last_name}"</div>
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${idPrefix}email`}>Email</Label>
@@ -117,6 +131,7 @@ export function UserProfileForm({
           type="email"
           value={formData.email}
           onChange={(e) => onFormDataChange({ ...formData, email: e.target.value })}
+          placeholder="Enter email"
         />
       </div>
       <div className="space-y-2">
@@ -125,6 +140,7 @@ export function UserProfileForm({
           id={`${idPrefix}phone`}
           value={formData.phone}
           onChange={(e) => onFormDataChange({ ...formData, phone: e.target.value })}
+          placeholder="Enter phone number"
         />
       </div>
       <div className="space-y-2">
@@ -133,6 +149,7 @@ export function UserProfileForm({
           id={`${idPrefix}whatsapp`}
           value={formData.whatsapp_number}
           onChange={(e) => onFormDataChange({ ...formData, whatsapp_number: e.target.value })}
+          placeholder="Enter WhatsApp number"
         />
       </div>
       <div className="flex justify-end space-x-2 pt-4">
