@@ -111,24 +111,10 @@ export function UserList({ users, onEdit, onDelete, isLoading }: UserListProps) 
       ))}
       
       {editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Edit Profile</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setEditingUser(null)}
-              >
-                ×
-              </Button>
-            </div>
-            <UserProfileCard
-              user={editingUser}
-              onUpdateProfile={handleEditProfile}
-            />
-          </div>
-        </div>
+        <UserProfileCard
+          user={editingUser}
+          onUpdateProfile={handleEditProfile}
+        />
       )}
     </div>
   );
