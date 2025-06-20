@@ -62,18 +62,20 @@ export function useUserProfileData(user: User) {
   };
 
   useEffect(() => {
+    // Always initialize with user data first
+    setFormData({
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      whatsapp_number: user.whatsapp_number || "",
+    });
+
+    // Then fetch complete profile if user_id exists
     if (user.user_id) {
       fetchCompleteProfile();
-    } else {
-      setFormData({
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        whatsapp_number: user.whatsapp_number || "",
-      });
     }
-  }, [user.user_id]);
+  }, [user.user_id, user.first_name, user.last_name, user.email, user.phone, user.whatsapp_number]);
 
   return {
     formData,

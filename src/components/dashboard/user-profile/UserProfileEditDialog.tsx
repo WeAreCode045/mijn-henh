@@ -17,8 +17,9 @@ interface UserProfileEditDialogProps {
     whatsapp_number: string;
   };
   onFormDataChange: (data: any) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, formData: any, avatarFile?: File) => void;
   isUpdating: boolean;
+  isUploadingAvatar?: boolean;
   isLoadingProfile: boolean;
   inSidebar?: boolean;
 }
@@ -31,6 +32,7 @@ export function UserProfileEditDialog({
   onFormDataChange,
   onSubmit,
   isUpdating,
+  isUploadingAvatar = false,
   isLoadingProfile,
   inSidebar = false
 }: UserProfileEditDialogProps) {
@@ -58,6 +60,7 @@ export function UserProfileEditDialog({
                 onSubmit={onSubmit}
                 onCancel={() => onOpenChange(false)}
                 isUpdating={isUpdating}
+                isUploadingAvatar={isUploadingAvatar}
                 inSidebar={inSidebar}
               />
             </TabsContent>

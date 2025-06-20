@@ -29,6 +29,7 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
     isEditing,
     setIsEditing,
     isUpdating,
+    isUploadingAvatar,
     handleEditClick,
     handleSubmit
   } = useUserProfileActions(onUpdateProfile, fetchCompleteProfile);
@@ -47,8 +48,9 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
           user={user}
           formData={formData}
           onFormDataChange={setFormData}
-          onSubmit={(e) => handleSubmit(e, formData)}
+          onSubmit={handleSubmit}
           isUpdating={isUpdating}
+          isUploadingAvatar={isUploadingAvatar}
           isLoadingProfile={isLoadingProfile}
           inSidebar={true}
         />
@@ -70,8 +72,9 @@ export function UserProfileCard({ user, onUpdateProfile, inSidebar = false }: Us
         user={user}
         formData={formData}
         onFormDataChange={setFormData}
-        onSubmit={(e) => handleSubmit(e, formData)}
+        onSubmit={handleSubmit}
         isUpdating={isUpdating}
+        isUploadingAvatar={isUploadingAvatar}
         isLoadingProfile={isLoadingProfile}
       />
     </>
