@@ -7,25 +7,28 @@ steps:
     image: node:20
     commands:
       - |
-        cd /etc/easypanel/projects/h-en-h/staging-henh/code
+        cd /etc/easypanel/projects/h-en-h/staging/code
         git pull origin staging || git clone -b staging https://github.com/WeAreCode045/mijn-henh.git .
         npm install
         npm run build
+        pm2 restart henh-staging || pm2 start npm --name henh-staging -- run start
     when:
       branch:
         - staging
       event:
         - push
 
-  - name: promote-to-production
+  - name: deploy-production
     image: node:20
     commands:
       - |
-        cd /etc/easypanel/projects/h-en-h/mijn-henh/code
+        cd /etc/easypanel/projects/h-en-h/production/code
         git pull origin main || git clone -b main https://github.com/WeAreCode045/mijn-henh.git .
-        npm install
+        npm install --production
         npm run build
+        pm2 restart henh-production || pm2 start npm --name henh-production -- run start
     when:
+      branch:
+        - main
       event:
-        - promote  # handmatige trigger via Drone UI
-
+        - push
