@@ -15,7 +15,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
-          role: Database["public"]["Enums"]["user_type"]
+          role: Database["public"]["Enums"]["user_role"] | null
           status: string
           type: Database["public"]["Enums"]["account_type"] | null
           updated_at: string
@@ -26,7 +26,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
-          role: Database["public"]["Enums"]["user_type"]
+          role?: Database["public"]["Enums"]["user_role"] | null
           status?: string
           type?: Database["public"]["Enums"]["account_type"] | null
           updated_at?: string
@@ -37,7 +37,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_type"]
+          role?: Database["public"]["Enums"]["user_role"] | null
           status?: string
           type?: Database["public"]["Enums"]["account_type"] | null
           updated_at?: string
@@ -1060,7 +1060,6 @@ export type Database = {
     Enums: {
       account_type: "employee" | "participant"
       user_role: "admin" | "agent" | "seller" | "buyer"
-      user_type: "admin" | "agent" | "buyer" | "seller"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1178,7 +1177,6 @@ export const Constants = {
     Enums: {
       account_type: ["employee", "participant"],
       user_role: ["admin", "agent", "seller", "buyer"],
-      user_type: ["admin", "agent", "buyer", "seller"],
     },
   },
 } as const

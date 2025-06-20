@@ -96,6 +96,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
         
         const accountUpdateData = {
           role: formData.role,
+          type: 'participant' as const,
           display_name: `${formData.first_name} ${formData.last_name}`.trim(),
           email: formData.email,
           updated_at: new Date().toISOString()
@@ -157,7 +158,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
               .insert({
                 user_id: authData.user.id,
                 role: formData.role,
-                type: 'participant',
+                type: 'participant' as const,
                 display_name: `${formData.first_name} ${formData.last_name}`.trim(),
                 email: formData.email,
                 status: 'active'
@@ -174,7 +175,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
               .from("accounts")
               .update({
                 role: formData.role,
-                type: 'participant',
+                type: 'participant' as const,
                 display_name: `${formData.first_name} ${formData.last_name}`.trim(),
                 email: formData.email
               })

@@ -1,6 +1,8 @@
 
-export type ParticipantRole = 'buyer' | 'seller' | 'agent' | 'admin';
+export type ParticipantRole = 'buyer' | 'seller';
 export type ParticipantStatus = 'pending' | 'active' | 'declined';
+export type AccountType = 'employee' | 'participant';
+export type UserRole = 'admin' | 'agent' | 'buyer' | 'seller';
 
 export interface PropertyParticipant {
   id: string;
@@ -45,7 +47,7 @@ export interface ParticipantProfileData {
   updated_at: string;
   properties: any[];
   avatar_url: string | null;
-  full_name: string;  // Add this property
+  full_name: string;
   bank_account_number: string | null;
 }
 

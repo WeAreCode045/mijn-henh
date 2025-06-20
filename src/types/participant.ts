@@ -1,8 +1,10 @@
 
 import { User } from "./user";
 
-export type ParticipantRole = 'seller' | 'buyer';
+export type ParticipantRole = 'buyer' | 'seller';
 export type ParticipantStatus = 'pending' | 'active' | 'declined';
+export type AccountType = 'employee' | 'participant';
+export type UserRole = 'admin' | 'agent' | 'buyer' | 'seller';
 
 export interface ParticipantProfileData {
   id: string;
