@@ -23,6 +23,12 @@ const EmployeesPage = () => {
   // Debug information
   console.log("EmployeesPage component rendering with:", { users, isLoading, error });
 
+  // Convert EmployeeData to User type
+  const convertedUsers: User[] = (users || []).map(user => ({
+    ...user,
+    email: user.email || '', // Ensure email is always present as required by UserBase
+  }));
+
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
     setIsEditMode(true);
@@ -71,7 +77,7 @@ const EmployeesPage = () => {
       </Dialog>
 
       <EmployeeList
-        users={users || []}
+        users={convertedUsers}
         onEdit={handleEditClick}
         onDelete={deleteEmployee}
         isLoading={isLoading}
