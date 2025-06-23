@@ -8,7 +8,6 @@ import { ParticipantProfileData } from "@/types/participant";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { ParticipantForm } from "@/components/participants/forms/ParticipantForm";
-import { Button } from "@/components/ui/button";
 
 export default function ParticipantProfile() {
   const { user } = useAuth();
@@ -124,12 +123,6 @@ export default function ParticipantProfile() {
           )}
         </CardContent>
       </Card>
-        </Card>
-        
-        <div className="flex justify-end">
-          <Button type="submit">Save Changes</Button>
-        </div>
-      </form>
     </div>
   );
 }
