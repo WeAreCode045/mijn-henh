@@ -121,7 +121,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
           description: "Participant updated successfully",
         });
       } else {
-        // CREATE MODE - Direct participant account creation
+        // CREATE MODE - Simplified participant creation
         console.log("=== CREATE MODE DEBUG ===");
         console.log("Creating new participant with data:", formData);
         
@@ -148,27 +148,30 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
 
         console.log("User created in auth, user_id:", authData.user.id);
 
-        // Step 2: Directly create participant account (no conversion needed)
-        console.log("Creating participant account directly");
-        const { error: accountError } = await supabase
+        // Step 2: Convert the default employee account to participant account
+        // The handle_new_user trigger creates an employee account by default
+        console.log("Converting default employee account to participant account");
+        
+        const { error: accountConvertError } = await supabase
           .from("accounts")
-          .insert({
-            user_id: authData.user.id,
+          .update({
             role: formData.role,
             type: 'participant' as const,
             status: 'active',
             display_name: `${formData.first_name} ${formData.last_name}`.trim(),
-            email: formData.email
-          });
+            email: formData.email,
+            updated_at: new Date().toISOString()
+          })
+          .eq("user_id", authData.user.id);
 
-        if (accountError) {
-          console.error("Error creating participant account:", accountError);
-          throw new Error(`Failed to create participant account: ${accountError.message}`);
+        if (accountConvertError) {
+          console.error("Error converting account to participant:", accountConvertError);
+          throw new Error(`Failed to convert account to participant: ${accountConvertError.message}`);
         }
-        console.log("Participant account created successfully");
+        console.log("Successfully converted account to participant type");
 
-        // Step 3: Wait for participant profile trigger to create basic profile
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Step 3: Wait briefly for participant profile trigger to create basic profile
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Step 4: Update participant profile with full data if provided
         const hasAdditionalData = formData.phone || formData.whatsapp_number || formData.date_of_birth || 
