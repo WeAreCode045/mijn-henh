@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { useAuth } from "@/providers/AuthProvider";
-import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
+import { useEmployeeManagement } from "@/components/users/employee/hooks/useEmployeeManagement";
 import { useAgendaDialog } from "@/hooks/useAgendaDialog";
 import {
   Dialog,

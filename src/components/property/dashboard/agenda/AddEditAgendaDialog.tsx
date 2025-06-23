@@ -4,7 +4,7 @@ import { AgendaDialogHeader } from "./form/DialogHeader";
 import { AgendaDialogContent } from "./form/DialogContent";
 import { AgendaDialogFooter } from "./form/DialogFooter";
 import { AgendaAddEditDialogProps } from "./types";
-import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
+import { useEmployeeManagement } from "@/components/users/employee/hooks/useEmployeeManagement";
 import { useAuth } from "@/providers/AuthProvider";
 
 export function AddEditAgendaDialog({

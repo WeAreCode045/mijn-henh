@@ -5,3 +5,4 @@ export type {
   ParticipantStatus,
   PropertyParticipant
 } from '../participant';
+export type { ParticipantIdentification } from './ParticipantIdentification';

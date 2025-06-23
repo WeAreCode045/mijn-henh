@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useParticipants } from "@/hooks/useParticipants";
+import { useParticipants } from "@/components/users/participant/hooks/useParticipants";
 import { ParticipantProfileData } from "@/types/participant";
 import { useParticipantProfile } from "@/components/users/participant/profile/hooks/useParticipantProfile";
 import { Spinner } from "@/components/ui/spinner";

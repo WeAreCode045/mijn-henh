@@ -1,5 +1,5 @@
 
-import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
+import { useEmployeeManagement } from "@/components/users/employee/hooks/useEmployeeManagement";
 
 export function useUsers() {
   const { users: employees, isLoading, error } = useEmployeeManagement();
