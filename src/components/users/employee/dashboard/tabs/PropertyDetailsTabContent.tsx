@@ -1,5 +1,5 @@
 
-import { PropertyQuickview } from "../PropertyQuickview";
+import { PropertyQuickview } from "@/components/dashboard/PropertyQuickview";
 import { useSearchParams } from "react-router-dom";
 
 export function PropertyDetailsTabContent() {

@@ -27,6 +27,7 @@ const EmployeesPage = () => {
   const convertedUsers: User[] = (users || []).map(user => ({
     ...user,
     email: user.email || '', // Ensure email is always present as required by UserBase
+    full_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unnamed User', // Ensure full_name is always present
   }));
 
   const handleEditClick = (user: User) => {

@@ -1,5 +1,5 @@
 
-import { AgendaSection } from "../AgendaSection";
+import { AgendaSection } from "@/components/dashboard/agenda/AgendaSection";
 import { DateRange } from "react-day-picker";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 
