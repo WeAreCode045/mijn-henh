@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,18 +10,18 @@ import {
 import { User } from "@/types/user";
 import { EmployeeForm } from "@/components/users/employee/forms/EmployeeForm";
 import { EmployeeList } from "@/components/users/employee/EmployeeList";
-import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
+import { useEmployeeManagement } from "@/components/users/employee/hooks/useEmployeeManagement";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 const EmployeesPage = () => {
-  const { users, refetch, deleteUser, isLoading, error, isAuthenticated } = useEmployeeManagement();
+  const { users, refetch, deleteEmployee, isLoading, error } = useEmployeeManagement();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Debug information
-  console.log("EmployeesPage component rendering with:", { users, isLoading, error, isAuthenticated });
+  console.log("EmployeesPage component rendering with:", { users, isLoading, error });
 
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
@@ -45,16 +46,6 @@ const EmployeesPage = () => {
         <h1 className="text-2xl font-bold">Employees</h1>
         <Button onClick={handleAddNewClick}>Add New Employee</Button>
       </div>
-
-      {!isAuthenticated && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Authentication Required</AlertTitle>
-          <AlertDescription>
-            You need to be logged in to view employees. Please log in with an admin account.
-          </AlertDescription>
-        </Alert>
-      )}
 
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -82,7 +73,7 @@ const EmployeesPage = () => {
       <EmployeeList
         users={users || []}
         onEdit={handleEditClick}
-        onDelete={deleteUser}
+        onDelete={deleteEmployee}
         isLoading={isLoading}
       />
     </div>

@@ -15,20 +15,19 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
 import GlobalFeaturesPage from "@/pages/properties/GlobalFeaturesPage";
 import WebviewsPage from "@/pages/properties/WebviewsPage";
-import ParticipantDashboard from "@/components/users/participant/dashboard/ParticipantDashboard";
 import ParticipantProfile from "@/components/users/participant/profile/ParticipantProfile";
 import ParticipantsPage from "@/pages/ParticipantsPage";
 import { PropertyLayout } from "@/components/PropertyLayout";
 
 export default function AppRoutes() {
   const { isAdmin, isAgent, userRole } = useAuth();
-  const isParticipant = userRole === 'buyer' || userRole === 'seller';
+  const isEmployee = userRole === 'admin' || userRole === 'agent' || userRole === 'employee';
 
   // Debug information
   console.log("AppRoutes - isAdmin:", isAdmin);
   console.log("AppRoutes - isAgent:", isAgent);
   console.log("AppRoutes - userRole:", userRole);
-  console.log("AppRoutes - isParticipant:", isParticipant);
+  console.log("AppRoutes - isEmployee:", isEmployee);
 
   return (
     <Routes>
@@ -42,55 +41,32 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Protected Routes with PropertyLayout */}
-      {isParticipant ? (
-        <>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <PropertyLayout>
-                  <ParticipantDashboard />
-                </PropertyLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/participant"
-            element={
-              <ProtectedRoute>
-                <PropertyLayout>
-                  <ParticipantDashboard />
-                </PropertyLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/participant/profile"
-            element={
-              <ProtectedRoute>
-                <PropertyLayout>
-                  <ParticipantProfile />
-                </PropertyLayout>
-              </ProtectedRoute>
-            }
-          />
-        </>
-      ) : (
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <PropertyLayout>
-                <Dashboard />
-              </PropertyLayout>
-            </ProtectedRoute>
-          }
-        />
-      )}
+      {/* Universal Dashboard Route - handles both employee and participant dashboards */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <PropertyLayout>
+              <Dashboard />
+            </PropertyLayout>
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Agent Routes with PropertyLayout */}
-      {(isAgent || isAdmin) && (
+      {/* Participant Profile Route */}
+      <Route
+        path="/participant/profile"
+        element={
+          <ProtectedRoute>
+            <PropertyLayout>
+              <ParticipantProfile />
+            </PropertyLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Employee/Admin Routes */}
+      {(isEmployee) && (
         <>
           <Route
             path="/properties"
