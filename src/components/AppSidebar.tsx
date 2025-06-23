@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard, 
   Home, 
@@ -26,7 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserProfileCard } from "@/components/dashboard/UserProfileCard";
 import { useState, useEffect } from "react";
 import { User } from "@/types/user";
-import { useEmployerProfile } from "@/hooks/useEmployerProfile";
+import { useEmployerProfile } from "@/components/users/employee/hooks/useEmployerProfile";
 
 export function AppSidebar() {
   const navigate = useNavigate();

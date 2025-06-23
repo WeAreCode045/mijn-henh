@@ -8,7 +8,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useParticipants } from "@/hooks/useParticipants";
+import { useParticipants } from "@/components/users/participant/hooks/useParticipants";
 import { 
   Table, 
   TableHeader, 
