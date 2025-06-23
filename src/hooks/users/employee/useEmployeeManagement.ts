@@ -164,8 +164,8 @@ export function useEmployeeManagement() {
     enabled: isAuthenticated,
   });
 
-  const deleteUserMutation = useMutation(
-    async (userId: string) => {
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
       if (!isAuthenticated) {
         toast({
           title: "Error",
@@ -203,12 +203,10 @@ export function useEmployeeManagement() {
         throw error;
       }
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["employees"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+  });
 
   return {
     users,

@@ -1,9 +1,10 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AgendaDialogHeader } from "./form/DialogHeader";
 import { AgendaDialogContent } from "./form/DialogContent";
 import { AgendaDialogFooter } from "./form/DialogFooter";
 import { AgendaAddEditDialogProps } from "./types";
-import { useUsers } from "@/hooks/useUsers";
+import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
 import { useAuth } from "@/providers/AuthProvider";
 
 export function AddEditAgendaDialog({
@@ -27,7 +28,7 @@ export function AddEditAgendaDialog({
   availableUsers: externalAvailableUsers,
   mode
 }: AgendaAddEditDialogProps) {
-  const { isLoading: usersLoading, users } = useUsers(); // Fetch all users
+  const { isLoading: usersLoading, users } = useEmployeeManagement(); // Fetch all users
   const { user: currentUser } = useAuth();
   
   console.log("AddEditAgendaDialog - Users loading:", usersLoading);

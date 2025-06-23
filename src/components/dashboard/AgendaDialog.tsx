@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { AgendaItem } from "@/components/property/dashboard/agenda/types";
 import { useAuth } from "@/providers/AuthProvider";
-import { useUsers } from "@/hooks/useUsers";
+import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
 import { useAgendaDialog } from "@/hooks/useAgendaDialog";
 import {
   Dialog,
@@ -30,9 +30,9 @@ export function AgendaDialog({
   propertyId,
 }: AgendaDialogProps) {
   const { user } = useAuth();
-  const { users, isLoading: usersLoading } = useUsers();
+  const { users, isLoading: usersLoading } = useEmployeeManagement();
   
-  // Transform users from useUsers hook, excluding the current user
+  // Transform users from useEmployeeManagement hook, excluding the current user
   const availableUsers = (users && users.length > 0 && user?.id)
     ? users
         .filter(u => u.id !== user.id) // Filter out current user

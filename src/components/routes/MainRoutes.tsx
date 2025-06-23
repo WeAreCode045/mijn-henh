@@ -11,10 +11,10 @@ const GlobalFeaturesPage = lazy(() => import("../../pages/properties/GlobalFeatu
 const WebviewsPage = lazy(() => import("../../pages/properties/WebviewsPage"));
 const PropertyFormPage = lazy(() => import("../../pages/PropertyFormPage"));
 const Settings = lazy(() => import("../../pages/Settings"));
-const Users = lazy(() => import("../../pages/Users"));
+const EmployeesPage = lazy(() => import("../../pages/EmployeesPage"));
 const Import = lazy(() => import("../../pages/Import"));
-const ParticipantDashboard = lazy(() => import("../../pages/ParticipantDashboard"));
-const Participants = lazy(() => import("../../pages/Participants"));
+const ParticipantDashboard = lazy(() => import("../users/participant/dashboard/ParticipantDashboard"));
+const ParticipantsPage = lazy(() => import("../../pages/ParticipantsPage"));
 
 export const MainRoutes = [
   <Route 
@@ -206,7 +206,7 @@ export const MainRoutes = [
       <ProtectedRoute>
         <PropertyLayout>
           <React.Suspense fallback={<LoadingSpinner />}>
-            <Users />
+            <EmployeesPage />
           </React.Suspense>
         </PropertyLayout>
       </ProtectedRoute>
@@ -248,7 +248,7 @@ export const MainRoutes = [
       <ProtectedRoute>
         <PropertyLayout>
           <React.Suspense fallback={<LoadingSpinner />}>
-            <Participants />
+            <ParticipantsPage />
           </React.Suspense>
         </PropertyLayout>
       </ProtectedRoute>
@@ -262,7 +262,7 @@ export const MainRoutes = [
       <ProtectedRoute>
         <PropertyLayout>
           <React.Suspense fallback={<LoadingSpinner />}>
-            <Users />
+            <EmployeesPage />
           </React.Suspense>
         </PropertyLayout>
       </ProtectedRoute>
