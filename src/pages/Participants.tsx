@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,11 +33,38 @@ const Participants = () => {
       }
     }
     
+    // Transform to ParticipantProfileData format
     return {
-      ...p,
-      identification: identification || {}
+      id: p.id,
+      first_name: p.first_name || "",
+      last_name: p.last_name || "",
+      email: p.email || "",
+      phone: p.phone || "",
+      whatsapp_number: p.whatsapp_number || "",
+      date_of_birth: p.date_of_birth || "",
+      place_of_birth: p.place_of_birth || "",
+      nationality: p.nationality || "",
+      gender: p.gender || "",
+      address: p.address || "",
+      city: p.city || "",
+      postal_code: p.postal_code || "",
+      country: p.country || "",
+      iban: p.iban || "",
+      role: p.role,
+      identification: identification ? {
+        type: identification.type === "passport" || identification.type === "IDcard" ? identification.type : null,
+        social_number: identification.social_number || "",
+        document_number: identification.document_number || ""
+      } : {
+        type: null,
+        social_number: "",
+        document_number: ""
+      },
+      created_at: p.created_at,
+      updated_at: p.updated_at
     } as ParticipantProfileData;
   });
+
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<ParticipantProfileData | null>(null);
@@ -48,8 +76,8 @@ const Participants = () => {
     isEditMode && selectedParticipantUserId ? selectedParticipantUserId : undefined
   );
 
-  // Get the initial form data for editing
-  const initialFormData = isEditMode ? participantProfile || selectedParticipant : undefined;
+  // Get the initial form data for editing - use the fetched profile data if available
+  const initialFormData = isEditMode ? (participantProfile || selectedParticipant) : undefined;
 
   const handleEdit = (participant: ParticipantProfileData) => {
     console.log("Participants - Editing participant:", participant);

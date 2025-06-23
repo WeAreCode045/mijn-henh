@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ParticipantProfileData } from '@/types/participant';
+import { ParticipantProfileData, ParticipantRole } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
 
 export function useParticipantProfile(participantUserId?: string) {
@@ -107,10 +107,6 @@ export function useParticipantProfile(participantUserId?: string) {
       console.log("useParticipantProfile - Transformed profile data:", transformedData);
       
       return transformedData;
-      
-      console.log("useParticipantProfile - Transformed profile data:", profileData);
-      
-      return profileData;
     },
     enabled: !!participantUserId,
   });

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ParticipantProfileData } from "@/types/participant";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { ParticipantForm } from "@/components/participants/forms/ParticipantForm";
+import { ParticipantForm } from "@/components/participants/ParticipantForm";
 
 export default function ParticipantProfile() {
   const { user } = useAuth();
