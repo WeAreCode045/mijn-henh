@@ -4,38 +4,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { ParticipantProfileData } from '@/types/participant';
 import { useToast } from '@/components/ui/use-toast';
 
-export function useParticipantProfile(accountId?: string) {
+export function useParticipantProfile(participantUserId?: string) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['participant-profile', accountId],
+    queryKey: ['participant-profile', participantUserId],
     queryFn: async () => {
-      if (!accountId) return null;
+      if (!participantUserId) return null;
 
-      // Check if account has participant type in accounts table
-      const { data: accountData, error: accountError } = await supabase
-        .from('accounts')
-        .select('type')
-        .eq('id', accountId)
-        .eq('type', 'participant')
-        .single();
-
-      if (accountError && accountError.code !== 'PGRST116') {
-        console.error('Error checking account type:', accountError);
-        throw accountError;
-      }
-
-      // Only proceed if account is a participant type
-      if (!accountData) {
-        console.log("Account is not a participant type");
-        return null;
-      }
+      console.log("useParticipantProfile - Fetching profile for user_id:", participantUserId);
 
       const { data, error } = await supabase
         .from('participants_profile')
         .select('*')
-        .eq('id', accountId)
+        .eq('id', participantUserId)
         .single();
 
       if (error) {
@@ -49,24 +32,28 @@ export function useParticipantProfile(accountId?: string) {
         throw error;
       }
 
+      console.log("useParticipantProfile - Retrieved profile:", data);
+
       // Add bank_account_number field for compatibility
       return {
         ...data,
         bank_account_number: data.iban || null
       } as unknown as ParticipantProfileData;
     },
-    enabled: !!accountId,
+    enabled: !!participantUserId,
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<ParticipantProfileData>) => {
-      if (!accountId) throw new Error('Account ID is required');
+      if (!participantUserId) throw new Error('Participant user ID is required');
+
+      console.log("useParticipantProfile - Updating profile for user_id:", participantUserId, "with data:", profileData);
 
       // Check if profile exists first
       const { data: existingProfile } = await supabase
         .from('participants_profile')
         .select('id')
-        .eq('id', accountId)
+        .eq('id', participantUserId)
         .single();
 
       let result;
@@ -75,40 +62,69 @@ export function useParticipantProfile(accountId?: string) {
         // Update existing profile
         const { data, error } = await supabase
           .from('participants_profile')
-          .update(profileData)
-          .eq('id', accountId)
+          .update({
+            ...profileData,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', participantUserId)
           .select('*')
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating participant profile:", error);
+          throw error;
+        }
         result = data;
+        console.log("Profile updated successfully:", result);
         
         // Also update display_name in accounts
         if (profileData.first_name || profileData.last_name) {
-          const displayName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
-          await supabase
+          const displayName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
+          const { error: accountError } = await supabase
             .from('accounts')
-            .update({ display_name: displayName })
-            .eq('id', accountId);
+            .update({ 
+              display_name: displayName,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', participantUserId);
+
+          if (accountError) {
+            console.error("Error updating account display_name:", accountError);
+          }
         }
       } else {
         // Insert new profile
         const { data, error } = await supabase
           .from('participants_profile')
-          .insert({ id: accountId, ...profileData })
+          .insert({ 
+            id: participantUserId, 
+            ...profileData,
+            updated_at: new Date().toISOString()
+          })
           .select('*')
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error creating participant profile:", error);
+          throw error;
+        }
         result = data;
+        console.log("Profile created successfully:", result);
         
         // Set display_name in accounts
         if (profileData.first_name || profileData.last_name) {
           const displayName = `${profileData.first_name || ''} ${profileData.last_name || ''}`.trim();
-          await supabase
+          const { error: accountError } = await supabase
             .from('accounts')
-            .update({ display_name: displayName })
-            .eq('id', accountId);
+            .update({ 
+              display_name: displayName,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', participantUserId);
+
+          if (accountError) {
+            console.error("Error updating account display_name:", accountError);
+          }
         }
       }
 
@@ -117,11 +133,13 @@ export function useParticipantProfile(accountId?: string) {
     onSuccess: () => {
       toast({
         title: 'Profile Updated',
-        description: 'Your profile has been updated successfully.',
+        description: 'The participant profile has been updated successfully.',
       });
-      queryClient.invalidateQueries({ queryKey: ['participant-profile', accountId] });
+      queryClient.invalidateQueries({ queryKey: ['participant-profile', participantUserId] });
+      queryClient.invalidateQueries({ queryKey: ['participants'] });
     },
     onError: (error) => {
+      console.error("Profile update mutation error:", error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to update profile',
@@ -135,5 +153,6 @@ export function useParticipantProfile(accountId?: string) {
     isLoading,
     error,
     updateProfile: updateProfileMutation.mutate,
+    isUpdating: updateProfileMutation.isPending,
   };
 }

@@ -33,7 +33,7 @@ export function ParticipantProfileCard({ participant, onUpdateProfile, inSidebar
   const {
     isUpdating,
     handleSubmit
-  } = useParticipantProfileActions(onUpdateProfile);
+  } = useParticipantProfileActions(participant.id, onUpdateProfile);
 
   const handleFormSubmit = async (e: React.FormEvent, submitFormData: any) => {
     console.log("ParticipantProfileCard - Form submit with data:", submitFormData);

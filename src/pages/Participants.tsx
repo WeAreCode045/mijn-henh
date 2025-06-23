@@ -25,6 +25,7 @@ const Participants = () => {
   const { toast } = useToast();
 
   const handleEdit = (participant: ParticipantProfileData) => {
+    console.log("Participants - Editing participant:", participant);
     setSelectedParticipant(participant);
     setIsEditMode(true);
     setIsFormDialogOpen(true);
@@ -42,6 +43,8 @@ const Participants = () => {
     }
 
     try {
+      console.log("Participants - Deleting participant with ID:", participantId);
+      
       // Delete from accounts table (this should cascade to participants_profile)
       const { error: accountError } = await supabase
         .from('accounts')

@@ -23,44 +23,44 @@ export function useParticipantFormSubmit({ isEditMode, initialData, onSuccess }:
         console.log("Initial data:", initialData);
         console.log("Form data:", formData);
 
-        // Update participants_profile table
-        if (initialData.id) {
-          console.log("Updating participants_profile for id:", initialData.id);
-          
-          const updateData = {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            phone: formData.phone,
-            whatsapp_number: formData.whatsapp_number,
-            date_of_birth: formData.date_of_birth || null,
-            place_of_birth: formData.place_of_birth,
-            nationality: formData.nationality,
-            gender: formData.gender,
-            address: formData.address,
-            city: formData.city,
-            postal_code: formData.postal_code,
-            country: formData.country,
-            iban: formData.iban,
-            identification: formData.identification,
-            updated_at: new Date().toISOString(),
-          };
-          
-          console.log("Profile update data:", updateData);
-          
-          const { error: profileError } = await supabase
-            .from("participants_profile")
-            .update(updateData)
-            .eq("id", initialData.id);
+        // Use the participant's user ID (which is stored as 'id' in participants_profile)
+        const participantUserId = initialData.id;
+        console.log("Updating participant with user_id:", participantUserId);
 
-          if (profileError) {
-            console.error("Error updating participants_profile:", profileError);
-            throw new Error(`Failed to update profile: ${profileError.message}`);
-          }
-          console.log("Successfully updated participants_profile");
+        // Update participants_profile table
+        const updateData = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone: formData.phone,
+          whatsapp_number: formData.whatsapp_number,
+          date_of_birth: formData.date_of_birth || null,
+          place_of_birth: formData.place_of_birth,
+          nationality: formData.nationality,
+          gender: formData.gender,
+          address: formData.address,
+          city: formData.city,
+          postal_code: formData.postal_code,
+          country: formData.country,
+          iban: formData.iban,
+          identification: formData.identification,
+          updated_at: new Date().toISOString(),
+        };
+        
+        console.log("Profile update data:", updateData);
+        
+        const { error: profileError } = await supabase
+          .from("participants_profile")
+          .update(updateData)
+          .eq("id", participantUserId);
+
+        if (profileError) {
+          console.error("Error updating participants_profile:", profileError);
+          throw new Error(`Failed to update profile: ${profileError.message}`);
         }
+        console.log("Successfully updated participants_profile");
         
         // Update accounts table - find account by user_id matching the profile id
-        console.log("Updating accounts for user_id:", initialData.id);
+        console.log("Updating accounts for user_id:", participantUserId);
         
         const accountUpdateData = {
           role: formData.role,
@@ -75,7 +75,7 @@ export function useParticipantFormSubmit({ isEditMode, initialData, onSuccess }:
         const { error: roleError } = await supabase
           .from("accounts")
           .update(accountUpdateData)
-          .eq("user_id", initialData.id);
+          .eq("user_id", participantUserId);
           
         if (roleError) {
           console.error("Error updating accounts:", roleError);

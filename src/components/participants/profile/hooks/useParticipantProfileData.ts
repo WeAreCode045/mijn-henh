@@ -28,6 +28,8 @@ export function useParticipantProfileData(participant: ParticipantProfileData) {
   });
 
   useEffect(() => {
+    if (!participant) return;
+    
     console.log("useParticipantProfileData - Setting form data from participant:", participant);
     
     const newFormData = {
@@ -54,23 +56,23 @@ export function useParticipantProfileData(participant: ParticipantProfileData) {
     
     console.log("useParticipantProfileData - Setting formData to:", newFormData);
     setFormData(newFormData);
-  }, [participant.id, participant.first_name, participant.last_name, participant.email, participant.phone, participant.whatsapp_number]);
+  }, [participant?.id, participant?.first_name, participant?.last_name, participant?.email, participant?.phone, participant?.whatsapp_number, participant?.address, participant?.city, participant?.iban]);
 
   // Create display name with fallback logic
   const displayName = (() => {
-    const formFirstName = formData.first_name || participant.first_name || '';
-    const formLastName = formData.last_name || participant.last_name || '';
+    const formFirstName = formData.first_name || participant?.first_name || '';
+    const formLastName = formData.last_name || participant?.last_name || '';
     const combinedName = `${formFirstName} ${formLastName}`.trim();
     
     if (combinedName) {
       return combinedName;
     }
     
-    if (participant.full_name) {
+    if (participant?.full_name) {
       return participant.full_name;
     }
     
-    if (participant.email) {
+    if (participant?.email) {
       return participant.email.split('@')[0];
     }
     

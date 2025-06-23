@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function useParticipantProfileActions(
+  participantUserId: string,
   onUpdateProfile?: (updatedData: Partial<ParticipantProfileData>) => Promise<void>
 ) {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -12,7 +13,16 @@ export function useParticipantProfileActions(
 
   const handleSubmit = async (e: React.FormEvent, formData: any) => {
     e.preventDefault();
-    console.log("handleSubmit - Form data received:", formData);
+    console.log("useParticipantProfileActions - Form data received for user_id:", participantUserId, formData);
+    
+    if (!participantUserId) {
+      toast({
+        title: "Error",
+        description: "Participant ID is required",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsUpdating(true);
     
@@ -41,23 +51,19 @@ export function useParticipantProfileActions(
         updated_at: new Date().toISOString(),
       };
 
-      console.log("handleSubmit - Updating participants_profile with:", profileUpdateData);
-
-      // Get the current user ID
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No authenticated user");
+      console.log("useParticipantProfileActions - Updating participants_profile for user_id:", participantUserId, "with:", profileUpdateData);
 
       const { error: profileError } = await supabase
         .from('participants_profile')
         .update(profileUpdateData)
-        .eq('id', user.id);
+        .eq('id', participantUserId);
 
       if (profileError) {
         console.error('Error updating participant profile:', profileError);
         throw profileError;
       }
 
-      console.log("handleSubmit - Profile updated successfully");
+      console.log("useParticipantProfileActions - Profile updated successfully");
       
       // Also update accounts table display_name if we have both names
       if (formData.first_name && formData.last_name) {
@@ -68,7 +74,7 @@ export function useParticipantProfileActions(
             display_name: displayName,
             updated_at: new Date().toISOString()
           })
-          .eq('user_id', user.id);
+          .eq('user_id', participantUserId);
 
         if (accountError) {
           console.error('Error updating account display_name:', accountError);
@@ -101,7 +107,7 @@ export function useParticipantProfileActions(
         full_name: `${formData.first_name || ''} ${formData.last_name || ''}`.trim(),
       };
 
-      console.log("handleSubmit - Calling onUpdateProfile with:", updateData);
+      console.log("useParticipantProfileActions - Calling onUpdateProfile with:", updateData);
       if (onUpdateProfile) {
         await onUpdateProfile(updateData);
       }
