@@ -121,7 +121,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
           description: "Participant updated successfully",
         });
       } else {
-        // CREATE MODE - Simplified approach
+        // CREATE MODE - Direct participant account creation
         console.log("=== CREATE MODE DEBUG ===");
         console.log("Creating new participant with data:", formData);
         
@@ -148,65 +148,67 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
 
         console.log("User created in auth, user_id:", authData.user.id);
 
-        // Step 2: Wait for trigger to create basic account, then update it for participant
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Step 3: Update the account to be a participant account
-        console.log("Updating account to participant type");
-        const { error: accountUpdateError } = await supabase
+        // Step 2: Directly create participant account (no conversion needed)
+        console.log("Creating participant account directly");
+        const { error: accountError } = await supabase
           .from("accounts")
-          .update({
+          .insert({
+            user_id: authData.user.id,
             role: formData.role,
             type: 'participant' as const,
+            status: 'active',
             display_name: `${formData.first_name} ${formData.last_name}`.trim(),
             email: formData.email
-          })
-          .eq("user_id", authData.user.id);
+          });
 
-        if (accountUpdateError) {
-          console.error("Error updating account to participant:", accountUpdateError);
-          throw new Error(`Failed to update account: ${accountUpdateError.message}`);
+        if (accountError) {
+          console.error("Error creating participant account:", accountError);
+          throw new Error(`Failed to create participant account: ${accountError.message}`);
         }
-        console.log("Account updated to participant type successfully");
+        console.log("Participant account created successfully");
 
-        // Step 4: Wait for participant trigger to create profile, then update it with full data
+        // Step 3: Wait for participant profile trigger to create basic profile
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        console.log("Updating participant profile with full data");
-        const { error: profileUpdateError } = await supabase
-          .from("participants_profile")
-          .update({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            phone: formData.phone,
-            whatsapp_number: formData.whatsapp_number,
-            date_of_birth: formData.date_of_birth || null,
-            place_of_birth: formData.place_of_birth,
-            nationality: formData.nationality,
-            gender: formData.gender,
-            address: formData.address,
-            city: formData.city,
-            postal_code: formData.postal_code,
-            country: formData.country,
-            role: formData.role,
-            iban: formData.iban,
-            identification: formData.identification,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", authData.user.id);
+        // Step 4: Update participant profile with full data if provided
+        const hasAdditionalData = formData.phone || formData.whatsapp_number || formData.date_of_birth || 
+                                 formData.place_of_birth || formData.nationality || formData.gender ||
+                                 formData.address || formData.city || formData.postal_code || 
+                                 formData.country || formData.iban;
 
-        if (profileUpdateError) {
-          console.error("Error updating participant profile:", profileUpdateError);
-          // Don't throw here - profile was created by trigger, this is just additional data
-          console.log("Profile update failed but continuing - basic profile should exist");
-        } else {
-          console.log("Participant profile updated with full data successfully");
+        if (hasAdditionalData) {
+          console.log("Updating participant profile with additional data");
+          const { error: profileUpdateError } = await supabase
+            .from("participants_profile")
+            .update({
+              phone: formData.phone,
+              whatsapp_number: formData.whatsapp_number,
+              date_of_birth: formData.date_of_birth || null,
+              place_of_birth: formData.place_of_birth,
+              nationality: formData.nationality,
+              gender: formData.gender,
+              address: formData.address,
+              city: formData.city,
+              postal_code: formData.postal_code,
+              country: formData.country,
+              iban: formData.iban,
+              identification: formData.identification,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", authData.user.id);
+
+          if (profileUpdateError) {
+            console.error("Error updating participant profile with additional data:", profileUpdateError);
+            // Don't throw here - basic profile should exist from trigger
+            console.log("Profile update failed but basic profile should exist from trigger");
+          } else {
+            console.log("Participant profile updated with additional data successfully");
+          }
         }
 
         toast({
           title: "Success",
-          description: "Participant created successfully. Additional details can be added by editing the participant.",
+          description: "Participant created successfully",
         });
       }
 
