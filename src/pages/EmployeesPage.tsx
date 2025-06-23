@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,20 +7,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { User } from "@/types/user";
-import { UserForm } from "@/components/users/UserForm";
-import { UserList } from "@/components/users/UserList";
-import { useUsers } from "@/hooks/useUsers";
+import { EmployeeForm } from "@/components/users/employee/forms/EmployeeForm";
+import { EmployeeList } from "@/components/users/employee/EmployeeList";
+import { useEmployeeManagement } from "@/hooks/users/employee/useEmployeeManagement";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-const Users = () => {
-  const { users, refetch, deleteUser, isLoading, error, isAuthenticated } = useUsers();
+const EmployeesPage = () => {
+  const { users, refetch, deleteUser, isLoading, error, isAuthenticated } = useEmployeeManagement();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Debug information
-  console.log("Users component rendering with:", { users, isLoading, error, isAuthenticated });
+  console.log("EmployeesPage component rendering with:", { users, isLoading, error, isAuthenticated });
 
   const handleEditClick = (user: User) => {
     setSelectedUser(user);
@@ -72,7 +71,7 @@ const Users = () => {
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit Employee" : "Add New Employee"}</DialogTitle>
           </DialogHeader>
-          <UserForm
+          <EmployeeForm
             isEditMode={isEditMode}
             initialData={selectedUser || undefined}
             onSuccess={handleFormSuccess}
@@ -80,7 +79,7 @@ const Users = () => {
         </DialogContent>
       </Dialog>
 
-      <UserList
+      <EmployeeList
         users={users || []}
         onEdit={handleEditClick}
         onDelete={deleteUser}
@@ -90,4 +89,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default EmployeesPage;

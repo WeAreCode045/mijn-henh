@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,16 +8,16 @@ import {
 } from "@/components/ui/dialog";
 import { useParticipants } from "@/hooks/useParticipants";
 import { ParticipantProfileData } from "@/types/participant";
-import { useParticipantProfile } from "@/hooks/useParticipantProfile";
+import { useParticipantProfile } from "@/components/users/participant/profile/hooks/useParticipantProfile";
 import { Spinner } from "@/components/ui/spinner";
-import { ParticipantForm } from "@/components/participants/ParticipantForm";
-import { ParticipantList } from "@/components/participants/ParticipantList";
+import { ParticipantForm } from "@/components/users/participant/forms/ParticipantForm";
+import { ParticipantList } from "@/components/users/participant/ParticipantList";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PropertyLayout } from "@/components/PropertyLayout";
 import { UserPlus } from "lucide-react";
 
-const Participants = () => {
+const ParticipantsPage = () => {
   const { participants: participantsData, isLoading, error, refetch } = useParticipants();
   
   // Ensure participants have the correct type
@@ -132,7 +131,7 @@ const Participants = () => {
     }
   };
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = (formData: ParticipantProfileData) => {
     setIsFormDialogOpen(false);
     setSelectedParticipant(null);
     setSelectedParticipantUserId(null);
@@ -181,7 +180,7 @@ const Participants = () => {
           />
         )}
 
-        <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+        <Dialog open={isFormDialogOpen} onOpenChange={handleDialogClose}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{isEditMode ? 'Edit Participant' : 'Add New Participant'}</DialogTitle>
@@ -206,4 +205,4 @@ const Participants = () => {
   );
 };
 
-export default Participants;
+export default ParticipantsPage;

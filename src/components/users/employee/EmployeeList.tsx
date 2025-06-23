@@ -1,19 +1,18 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Edit, Trash2 } from "lucide-react";
 import { User } from "@/types/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface UserListProps {
+interface EmployeeListProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (userId: string) => void;
   isLoading: boolean;
 }
 
-export function UserList({ users, onEdit, onDelete, isLoading }: UserListProps) {
-  console.log("UserList rendering with:", { users, isLoading });
+export function EmployeeList({ users, onEdit, onDelete, isLoading }: EmployeeListProps) {
+  console.log("EmployeeList rendering with:", { users, isLoading });
 
   if (isLoading) {
     return (

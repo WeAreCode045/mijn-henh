@@ -12,9 +12,9 @@ import { Spinner } from "@/components/ui/spinner";
 interface ParticipantFormProps {
   isEditMode: boolean;
   initialData?: ParticipantProfileData;
-  onSuccess: () => void;
+  onSuccess: (formData: ParticipantProfileData) => void;
   onCancel?: () => void;
-  isProfile?: boolean; // Whether this is used in the profile page
+  isProfile?: boolean;
 }
 
 export function ParticipantForm({ 
@@ -118,7 +118,6 @@ export function ParticipantForm({
     
     try {
       if (isEditMode) {
-        // Update existing participant
         await updateParticipant();
         toast({
           title: "Success",
@@ -126,7 +125,6 @@ export function ParticipantForm({
           variant: "default",
         });
       } else {
-        // Create new participant
         await createParticipant();
         toast({
           title: "Success",
@@ -135,7 +133,8 @@ export function ParticipantForm({
         });
       }
       
-      onSuccess();
+      // Pass the form data to onSuccess
+      onSuccess(formData as ParticipantProfileData);
     } catch (error) {
       console.error("Error saving participant:", error);
       toast({

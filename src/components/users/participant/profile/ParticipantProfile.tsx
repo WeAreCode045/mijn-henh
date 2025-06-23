@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useParticipantProfile } from "@/hooks/useParticipantProfile";
+import { useParticipantProfile } from "./hooks/useParticipantProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ParticipantProfileData } from "@/types/participant";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { ParticipantForm } from "@/components/participants/ParticipantForm";
+import { ParticipantForm } from "../forms/ParticipantForm";
 
 export default function ParticipantProfile() {
   const { user } = useAuth();
@@ -24,7 +24,6 @@ export default function ParticipantProfile() {
       }
 
       try {
-        // Find the participant account for this user
         const { data, error } = await supabase
           .from('accounts')
           .select('id')
@@ -67,10 +66,7 @@ export default function ParticipantProfile() {
 
     try {
       setIsLoading(true);
-
-      // Update the profile
       await updateProfile(formData);
-
       toast({
         title: "Success",
         description: "Profile updated successfully.",

@@ -59,7 +59,6 @@ export function ParticipantSelectDialog({
       setSelectedParticipant(null);
     } catch (error) {
       console.error("Error adding participant:", error);
-      // Error is already handled in the useMutation configuration
     }
   };
 
@@ -68,8 +67,28 @@ export function ParticipantSelectDialog({
     .filter(p => p.role === role)
     .map(p => p.user_id);
 
-  const filteredParticipants = participants.filter(participant => {
-    // Filter by search term
+  // Transform participants data to match ParticipantProfileData structure
+  const transformedParticipants: ParticipantProfileData[] = participants.map(participant => {
+    // Ensure identification has the correct type
+    const identification = participant.identification ? {
+      type: (participant.identification.type === "passport" || participant.identification.type === "IDcard") 
+        ? participant.identification.type as "passport" | "IDcard"
+        : null,
+      social_number: participant.identification.social_number || "",
+      document_number: participant.identification.document_number || ""
+    } : {
+      type: null,
+      social_number: "",
+      document_number: ""
+    };
+
+    return {
+      ...participant,
+      identification
+    } as ParticipantProfileData;
+  });
+
+  const filteredParticipants = transformedParticipants.filter(participant => {
     const displayName = 
       (participant.full_name ? participant.full_name : 
       `${participant.first_name || ''} ${participant.last_name || ''}`).trim();
@@ -79,7 +98,6 @@ export function ParticipantSelectDialog({
       displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (participant.email || '').toLowerCase().includes(searchTerm.toLowerCase());
       
-    // Filter out already assigned participants
     const isNotAssigned = !existingParticipantIds.includes(participant.id);
     
     return matchesSearch && isNotAssigned;

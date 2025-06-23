@@ -1,8 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types/user";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/providers/AuthProvider";
 
 // Define the type for the joined employer_profiles data
@@ -32,7 +31,7 @@ interface AccountWithProfile {
   employer_profiles?: EmployerProfileData | null;
 }
 
-export function useUsers() {
+export function useEmployeeManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { session } = useAuth();
@@ -40,9 +39,9 @@ export function useUsers() {
   const isAuthenticated = !!session;
 
   const { data: users, refetch, isLoading, error } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["employees"],
     queryFn: async () => {
-      console.log("Fetching users in useUsers hook");
+      console.log("Fetching employees in useEmployeeManagement hook");
       
       if (!isAuthenticated) {
         console.log("User not authenticated, skipping fetch");
@@ -158,57 +157,65 @@ export function useUsers() {
         console.log("Transformed employee profiles:", employeeProfiles);
         return employeeProfiles;
       } catch (err) {
-        console.error("Error in useUsers query function:", err);
+        console.error("Error in useEmployeeManagement query function:", err);
         throw err;
       }
     },
-    enabled: isAuthenticated
+    enabled: isAuthenticated,
   });
 
-  const deleteUser = async (userId: string) => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to delete users",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      // Delete from accounts (this will cascade to employer_profiles due to FK constraint)
-      const { error: accountError } = await supabase
-        .from('accounts')
-        .delete()
-        .eq('id', userId);
-      
-      if (accountError) {
-        console.error("Error deleting from accounts:", accountError);
-        throw accountError;
+  const deleteUserMutation = useMutation(
+    async (userId: string) => {
+      if (!isAuthenticated) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to delete users",
+          variant: "destructive",
+        });
+        return;
       }
       
-      toast({
-        title: "Success",
-        description: "User deleted successfully",
-      });
-
-      refetch();
-    } catch (error: any) {
-      console.error("Error in deleteUser:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete user",
-        variant: "destructive",
-      });
+      try {
+        // Delete from accounts (this will cascade to employer_profiles due to FK constraint)
+        const { error: accountError } = await supabase
+          .from('accounts')
+          .delete()
+          .eq('id', userId);
+        
+        if (accountError) {
+          console.error("Error deleting from accounts:", accountError);
+          throw accountError;
+        }
+        
+        toast({
+          title: "Success",
+          description: "User deleted successfully",
+        });
+  
+        return;
+      } catch (error: any) {
+        console.error("Error in deleteUser:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to delete user",
+          variant: "destructive",
+        });
+        throw error;
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employees"]);
+      },
     }
-  };
+  );
 
   return {
-    users: users || [],
+    users,
     refetch,
-    deleteUser,
+    deleteUser: deleteUserMutation.mutate,
     isLoading,
     error,
-    isAuthenticated
+    isAuthenticated,
   };
 }

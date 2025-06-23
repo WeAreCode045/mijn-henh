@@ -1,8 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ParticipantProfileData, ParticipantRole } from '@/types/participant';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export function useParticipantProfile(participantUserId?: string) {
   const queryClient = useQueryClient();
@@ -15,7 +14,6 @@ export function useParticipantProfile(participantUserId?: string) {
 
       console.log("useParticipantProfile - Fetching profile for user_id:", participantUserId);
 
-      // First, get the participant profile
       const { data: profileData, error: profileError } = await supabase
         .from('participants_profile')
         .select('*')
@@ -24,26 +22,22 @@ export function useParticipantProfile(participantUserId?: string) {
 
       if (profileError) {
         console.error('Error fetching participant profile:', profileError);
-        if (profileError.code === 'PGRST116') { // No rows returned
+        if (profileError.code === 'PGRST116') {
           return null;
         }
         throw profileError;
       }
 
-      // Then get the account data for role and other fields
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', participantUserId)
         .single();
 
-      if (accountError && accountError.code !== 'PGRST116') { // Ignore not found error for accounts
+      if (accountError && accountError.code !== 'PGRST116') {
         console.error('Error fetching account data:', accountError);
         throw accountError;
       }
-
-      console.log("useParticipantProfile - Raw profile data:", profileData);
-      console.log("useParticipantProfile - Raw account data:", accountData);
 
       // Helper function to safely parse JSON data
       const safeParseJson = (jsonString: unknown): {

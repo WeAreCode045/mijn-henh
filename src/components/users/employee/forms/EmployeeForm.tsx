@@ -14,13 +14,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-interface UserFormProps {
+interface EmployeeFormProps {
   isEditMode: boolean;
   initialData?: User;
   onSuccess: () => void;
 }
 
-export function UserForm({ isEditMode, initialData, onSuccess }: UserFormProps) {
+export function EmployeeForm({ isEditMode, initialData, onSuccess }: EmployeeFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState<UserFormData>({
     email: initialData?.email || "",

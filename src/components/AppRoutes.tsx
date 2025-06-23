@@ -10,14 +10,14 @@ import Auth from "@/pages/Auth";
 import Import from "@/pages/Import";
 import NotFound from "@/pages/NotFound";
 import Settings from "@/pages/Settings";
-import Users from "@/pages/Users";
+import EmployeesPage from "@/pages/EmployeesPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
 import GlobalFeaturesPage from "@/pages/properties/GlobalFeaturesPage";
 import WebviewsPage from "@/pages/properties/WebviewsPage";
-import ParticipantDashboard from "@/pages/ParticipantDashboard";
-import ParticipantProfile from "@/pages/ParticipantProfile";
-import Participants from "@/pages/Participants";
+import ParticipantDashboard from "@/components/users/participant/dashboard/ParticipantDashboard";
+import ParticipantProfile from "@/components/users/participant/profile/ParticipantProfile";
+import ParticipantsPage from "@/pages/ParticipantsPage";
 import { PropertyLayout } from "@/components/PropertyLayout";
 
 export default function AppRoutes() {
@@ -167,7 +167,7 @@ export default function AppRoutes() {
             element={
               <ProtectedRoute>
                 <PropertyLayout>
-                  <Participants />
+                  <ParticipantsPage />
                 </PropertyLayout>
               </ProtectedRoute>
             }
@@ -177,7 +177,7 @@ export default function AppRoutes() {
             element={
               <ProtectedRoute>
                 <PropertyLayout>
-                  <Users />
+                  <EmployeesPage />
                 </PropertyLayout>
               </ProtectedRoute>
             }
@@ -187,7 +187,7 @@ export default function AppRoutes() {
             element={
               <ProtectedRoute>
                 <PropertyLayout>
-                  <Users />
+                  <EmployeesPage />
                 </PropertyLayout>
               </ProtectedRoute>
             }
