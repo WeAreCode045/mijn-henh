@@ -15,30 +15,102 @@ export function useParticipantProfile(participantUserId?: string) {
 
       console.log("useParticipantProfile - Fetching profile for user_id:", participantUserId);
 
-      const { data, error } = await supabase
+      // First, get the participant profile
+      const { data: profileData, error: profileError } = await supabase
         .from('participants_profile')
         .select('*')
         .eq('id', participantUserId)
         .single();
 
-      if (error) {
-        console.error('Error fetching participant profile:', error);
-        
-        // If the profile doesn't exist, we should return null rather than throwing
-        if (error.code === 'PGRST116') { // No rows returned
+      if (profileError) {
+        console.error('Error fetching participant profile:', profileError);
+        if (profileError.code === 'PGRST116') { // No rows returned
           return null;
         }
-        
-        throw error;
+        throw profileError;
       }
 
-      console.log("useParticipantProfile - Retrieved profile:", data);
+      // Then get the account data for role and other fields
+      const { data: accountData, error: accountError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', participantUserId)
+        .single();
 
-      // Add bank_account_number field for compatibility
-      return {
-        ...data,
-        bank_account_number: data.iban || null
-      } as unknown as ParticipantProfileData;
+      if (accountError && accountError.code !== 'PGRST116') { // Ignore not found error for accounts
+        console.error('Error fetching account data:', accountError);
+        throw accountError;
+      }
+
+      console.log("useParticipantProfile - Raw profile data:", profileData);
+      console.log("useParticipantProfile - Raw account data:", accountData);
+
+      // Helper function to safely parse JSON data
+      const safeParseJson = (jsonString: unknown): {
+        type?: "passport" | "IDcard" | null;
+        social_number?: string | null;
+        document_number?: string | null;
+      } | null => {
+        if (!jsonString) return null;
+        try {
+          const parsed = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+          // Ensure the parsed data has the expected structure
+          if (parsed && typeof parsed === 'object') {
+            return {
+              type: parsed.type || null,
+              social_number: parsed.social_number || null,
+              document_number: parsed.document_number || null
+            };
+          }
+          return null;
+        } catch (e) {
+          console.error('Error parsing JSON:', e);
+          return null;
+        }
+      };
+
+      // Parse identification data
+      const identificationData = safeParseJson(profileData.identification);
+      
+      // Transform the data to match ParticipantProfileData type
+      const transformedData: ParticipantProfileData = {
+        ...profileData,
+        // Map account data
+        role: (accountData?.role as ParticipantRole) || 'buyer',
+        // Ensure identification is properly formatted
+        identification: identificationData ? {
+          type: identificationData.type || null,
+          social_number: identificationData.social_number || "",
+          document_number: identificationData.document_number || ""
+        } : {
+          type: null,
+          social_number: "",
+          document_number: ""
+        },
+        // Ensure all required fields have proper defaults
+        first_name: profileData.first_name || "",
+        last_name: profileData.last_name || "",
+        email: profileData.email || "",
+        phone: profileData.phone || "",
+        whatsapp_number: profileData.whatsapp_number || "",
+        date_of_birth: profileData.date_of_birth || "",
+        place_of_birth: profileData.place_of_birth || "",
+        nationality: profileData.nationality || "",
+        gender: profileData.gender || "",
+        address: profileData.address || "",
+        city: profileData.city || "",
+        postal_code: profileData.postal_code || "",
+        country: profileData.country || "",
+        iban: profileData.iban || ""
+      };
+      
+      console.log("useParticipantProfile - Transformed profile data:", transformedData);
+      
+      return transformedData;
+      
+      console.log("useParticipantProfile - Transformed profile data:", profileData);
+      
+      return profileData;
     },
     enabled: !!participantUserId,
   });

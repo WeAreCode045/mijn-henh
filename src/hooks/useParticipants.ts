@@ -1,13 +1,63 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ParticipantProfileData } from "@/types/participant";
+import { ParticipantProfileData, ParticipantRole } from "@/types/participant";
+
+// Type for the identification document
+interface Identification {
+  type?: 'passport' | 'id_card' | 'drivers_license' | string;
+  number?: string;
+  issue_date?: string;
+  expiry_date?: string;
+  issued_by?: string;
+  [key: string]: unknown; // Allow additional properties
+}
+
+// Type for the raw identification data from Supabase
+type RawIdentification = string | number | boolean | null | Identification | { [key: string]: RawIdentification } | RawIdentification[];
+
+type ParticipantAccount = {
+  id: string;
+  user_id: string;
+  email?: string;
+  role?: string;
+  display_name?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type ParticipantProfile = {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  whatsapp_number?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  country?: string | null;
+  date_of_birth?: string | null;
+  place_of_birth?: string | null;
+  identification?: RawIdentification;
+  nationality?: string | null;
+  gender?: string | null;
+  iban?: string | null;
+  role?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type ParticipantData = Omit<ParticipantProfileData, 'identification'> & {
+  identification: Identification | null;
+};
 
 export function useParticipants() {
-  const { data: participants, isLoading, error, refetch } = useQuery({
+  const { data: participants = [], isLoading, error, refetch } = useQuery<ParticipantData[]>({
     queryKey: ["participants"],
     queryFn: async () => {
       console.log("Fetching participants in useParticipants hook");
+      
       try {
         // First get all accounts with participant type
         const { data: accountsData, error: accountsError } = await supabase
@@ -38,91 +88,102 @@ export function useParticipants() {
           
         if (profilesError) {
           console.error("Error fetching participant profiles:", profilesError);
+          throw profilesError;
         }
         
         // Create a map for quick lookup
-        const profileMap = new Map();
+        const profileMap = new Map<string, ParticipantProfile>();
         if (profiles) {
           profiles.forEach(profile => {
             profileMap.set(profile.id, profile);
           });
         }
         
-        // Get emails from accounts table as backup
-        const { data: accounts, error: accountsError2 } = await supabase
-          .from("accounts")
-          .select("id, user_id, email, display_name")
-          .in("user_id", userIds);
-          
-        if (accountsError2) {
-          console.error("Error fetching participant accounts:", accountsError2);
-        }
-        
-        // Create a map for quick lookup
-        const emailMap = new Map();
-        if (accounts && Array.isArray(accounts)) {
-          accounts.forEach(account => {
-            if (account && account.email) {
-              emailMap.set(account.id, account.email);
-              emailMap.set(account.user_id, account.email);
-            }
-          });
-        }
-        
         // Map the data with profiles
-        const participantsMap = new Map();
-        
-        if (accountsData && Array.isArray(accountsData)) {
-          accountsData.forEach(account => {
-            if (account && !participantsMap.has(account.id)) {
-              const profile = profileMap.get(account.id) || {};
-              // Get email from the emailMap, profile, or fallback to empty string
-              const userEmail = emailMap.get(account.id) || profile.email || '';
-              
-              participantsMap.set(account.id, {
-                id: account.id,
-                email: userEmail,
-                first_name: profile.first_name || '',
-                last_name: profile.last_name || '',
-                phone: profile.phone || '',
-                whatsapp_number: profile.whatsapp_number || '',
-                address: profile.address || '',
-                city: profile.city || '',
-                postal_code: profile.postal_code || '',
-                country: profile.country || '',
-                date_of_birth: profile.date_of_birth || null,
-                place_of_birth: profile.place_of_birth || null,
-                identification: profile.identification || null,
-                nationality: profile.nationality || null,
-                gender: profile.gender || null,
-                iban: profile.iban || null,
-                role: profile.role || account.role || 'buyer',
-                created_at: profile.created_at || '',
-                updated_at: profile.updated_at || '',
-                properties: [], // Will be populated later
-                avatar_url: null,
-                full_name: account.display_name || `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed Participant',
-                bank_account_number: profile.iban || null // Use iban as bank_account_number for compatibility
-              });
+        return accountsData.map(account => {
+          const profile = profileMap.get(account.id);
+          
+          // Initialize with default values if profile is undefined
+          if (!profile) {
+            return {
+              id: account.id,
+              email: account.email || null,
+              first_name: null,
+              last_name: null,
+              phone: null,
+              whatsapp_number: null,
+              address: null,
+              city: null,
+              postal_code: null,
+              country: null,
+              date_of_birth: null,
+              place_of_birth: null,
+              identification: null,
+              nationality: null,
+              gender: null,
+              iban: null,
+              role: (account.role as ParticipantRole) || 'buyer',
+              created_at: account.created_at,
+              updated_at: account.updated_at,
+              full_name: account.display_name || 'Unnamed Participant',
+            };
+          }
+          
+          // Parse identification from RawIdentification to Identification
+          let identification: Identification | null = null;
+          if (profile.identification) {
+            try {
+              // Handle different types of identification data
+              const rawId = profile.identification;
+              if (typeof rawId === 'string') {
+                // If it's a string, try to parse it as JSON
+                identification = JSON.parse(rawId) as Identification;
+              } else if (rawId && typeof rawId === 'object' && !Array.isArray(rawId)) {
+                // If it's already an object, use it directly
+                identification = rawId as Identification;
+              }
+              // For other types (number, boolean, array), leave as null
+            } catch (e) {
+              console.error('Error parsing identification:', e);
+              identification = null;
             }
-          });
-        }
-        
-        // Convert the map to an array of participant profiles
-        const participantProfiles: ParticipantProfileData[] = Array.from(participantsMap.values());
-        
-        console.log("Transformed participants:", participantProfiles);
-        return participantProfiles;
-      } catch (err) {
-        console.error("Error in useParticipants query function:", err);
-        throw err;
+          }
+          
+          return {
+            id: account.id,
+            email: account.email || profile.email || null,
+            first_name: profile.first_name ?? null,
+            last_name: profile.last_name ?? null,
+            phone: profile.phone ?? null,
+            whatsapp_number: profile.whatsapp_number ?? null,
+            address: profile.address ?? null,
+            city: profile.city ?? null,
+            postal_code: profile.postal_code ?? null,
+            country: profile.country ?? null,
+            date_of_birth: profile.date_of_birth ?? null,
+            place_of_birth: profile.place_of_birth ?? null,
+            identification,
+            nationality: profile.nationality ?? null,
+            gender: profile.gender ?? null,
+            iban: profile.iban ?? null,
+            role: (profile.role || account.role || 'buyer') as ParticipantRole,
+            created_at: profile.created_at ?? new Date().toISOString(),
+            updated_at: profile.updated_at ?? '',
+            full_name: account.display_name || 
+              [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim() || 
+              'Unnamed Participant',
+          };
+        });
+      } catch (error) {
+        console.error("Error in useParticipants:", error);
+        throw error;
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   return {
-    participants: participants || [],
+    participants,
     isLoading,
     error,
     refetch

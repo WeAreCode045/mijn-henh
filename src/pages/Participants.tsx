@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,17 +8,35 @@ import {
 } from "@/components/ui/dialog";
 import { useParticipants } from "@/hooks/useParticipants";
 import { ParticipantProfileData } from "@/types/participant";
-import { UserPlus } from "lucide-react";
-import { PropertyLayout } from "@/components/PropertyLayout";
+import { useParticipantProfile } from "@/hooks/useParticipantProfile";
 import { Spinner } from "@/components/ui/spinner";
 import { ParticipantForm } from "@/components/participants/ParticipantForm";
 import { ParticipantList } from "@/components/participants/ParticipantList";
 import { useToast } from "@/hooks/use-toast";
-import { useParticipantProfile } from "@/hooks/useParticipantProfile";
 import { supabase } from "@/integrations/supabase/client";
+import { PropertyLayout } from "@/components/PropertyLayout";
+import { UserPlus } from "lucide-react";
 
 const Participants = () => {
-  const { participants, isLoading, error, refetch } = useParticipants();
+  const { participants: participantsData, isLoading, error, refetch } = useParticipants();
+  
+  // Ensure participants have the correct type
+  const participants: ParticipantProfileData[] = participantsData.map(p => {
+    let identification = p.identification;
+    if (identification && typeof identification === 'string') {
+      try {
+        identification = JSON.parse(identification);
+      } catch (e) {
+        console.error('Error parsing identification:', e);
+        identification = null;
+      }
+    }
+    
+    return {
+      ...p,
+      identification: identification || {}
+    } as ParticipantProfileData;
+  });
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<ParticipantProfileData | null>(null);
@@ -28,8 +45,11 @@ const Participants = () => {
 
   // Fetch participant profile data when editing
   const { profile: participantProfile, isLoading: isLoadingProfile } = useParticipantProfile(
-    isEditMode ? selectedParticipantUserId : undefined
+    isEditMode && selectedParticipantUserId ? selectedParticipantUserId : undefined
   );
+
+  // Get the initial form data for editing
+  const initialFormData = isEditMode ? participantProfile || selectedParticipant : undefined;
 
   const handleEdit = (participant: ParticipantProfileData) => {
     console.log("Participants - Editing participant:", participant);
@@ -73,11 +93,12 @@ const Participants = () => {
       });
 
       refetch();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error in deleteParticipant:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete participant';
       toast({
         title: "Error",
-        description: error.message || "Failed to delete participant",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -129,19 +150,15 @@ const Participants = () => {
           <ParticipantList
             participants={participants}
             onEdit={handleEdit}
-            onDelete={handleDelete}
-            isLoading={isLoading}
           />
         )}
 
-        <Dialog open={isFormDialogOpen} onOpenChange={handleDialogClose}>
+        <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
-                {isEditMode ? "Edit Participant" : "Create New Participant"}
-              </DialogTitle>
+              <DialogTitle>{isEditMode ? 'Edit Participant' : 'Add New Participant'}</DialogTitle>
             </DialogHeader>
-            {isEditMode && isLoadingProfile ? (
+            {isLoadingProfile && isEditMode ? (
               <div className="flex justify-center p-8">
                 <Spinner size="lg" />
                 <span className="ml-2">Loading participant data...</span>
@@ -149,8 +166,9 @@ const Participants = () => {
             ) : (
               <ParticipantForm
                 isEditMode={isEditMode}
-                initialData={isEditMode ? participantProfile || selectedParticipant : undefined}
+                initialData={initialFormData}
                 onSuccess={handleFormSuccess}
+                onCancel={() => setIsFormDialogOpen(false)}
               />
             )}
           </DialogContent>
