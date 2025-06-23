@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ParticipantFormData, ParticipantRole } from "@/types/participant";
 import { Button } from "@/components/ui/button";
 import { ParticipantProfileData } from "@/types/participant";
@@ -17,31 +17,62 @@ interface ParticipantFormProps {
 }
 
 export function ParticipantForm({ isEditMode, initialData, onSuccess }: ParticipantFormProps) {
-  // Simplified form data for creation - only required fields
+  console.log("ParticipantForm - isEditMode:", isEditMode, "initialData:", initialData);
+  
   const [formData, setFormData] = useState<ParticipantFormData>({
-    email: initialData?.email || "",
+    email: "",
     password: "",
-    first_name: initialData?.first_name || "",
-    last_name: initialData?.last_name || "",
-    role: (initialData?.role as ParticipantRole) || "buyer",
-    // Optional fields with defaults
-    phone: initialData?.phone || "",
-    whatsapp_number: initialData?.whatsapp_number || "",
-    date_of_birth: initialData?.date_of_birth || "",
-    place_of_birth: initialData?.place_of_birth || "",
-    nationality: initialData?.nationality || "",
-    gender: initialData?.gender || "",
-    address: initialData?.address || "",
-    city: initialData?.city || "",
-    postal_code: initialData?.postal_code || "",
-    country: initialData?.country || "",
-    iban: initialData?.iban || "",
-    identification: initialData?.identification || {
+    first_name: "",
+    last_name: "",
+    role: "buyer",
+    phone: "",
+    whatsapp_number: "",
+    date_of_birth: "",
+    place_of_birth: "",
+    nationality: "",
+    gender: "",
+    address: "",
+    city: "",
+    postal_code: "",
+    country: "",
+    iban: "",
+    identification: {
       type: null,
       social_number: "",
       document_number: ""
     }
   });
+
+  // Initialize form data when initialData changes
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      console.log("ParticipantForm - Setting form data from initialData:", initialData);
+      
+      setFormData({
+        email: initialData.email || "",
+        password: "", // Password not needed for edit
+        first_name: initialData.first_name || "",
+        last_name: initialData.last_name || "",
+        role: (initialData.role as ParticipantRole) || "buyer",
+        phone: initialData.phone || "",
+        whatsapp_number: initialData.whatsapp_number || "",
+        date_of_birth: initialData.date_of_birth || "",
+        place_of_birth: initialData.place_of_birth || "",
+        nationality: initialData.nationality || "",
+        gender: initialData.gender || "",
+        address: initialData.address || "",
+        city: initialData.city || "",
+        postal_code: initialData.postal_code || "",
+        country: initialData.country || "",
+        iban: initialData.iban || "",
+        identification: {
+          type: initialData.identification?.type || null,
+          social_number: initialData.identification?.social_number || "",
+          document_number: initialData.identification?.document_number || ""
+        }
+      });
+    }
+  }, [isEditMode, initialData]);
 
   const { handleSubmit, isSubmitting } = useParticipantFormSubmit({
     isEditMode,
@@ -51,6 +82,7 @@ export function ParticipantForm({ isEditMode, initialData, onSuccess }: Particip
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("ParticipantForm - Form submission with data:", formData);
     await handleSubmit(formData);
   };
 

@@ -15,6 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { ParticipantForm } from "@/components/participants/ParticipantForm";
 import { ParticipantList } from "@/components/participants/ParticipantList";
 import { useToast } from "@/hooks/use-toast";
+import { useParticipantProfile } from "@/hooks/useParticipantProfile";
 import { supabase } from "@/integrations/supabase/client";
 
 const Participants = () => {
@@ -22,17 +23,27 @@ const Participants = () => {
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<ParticipantProfileData | null>(null);
+  const [selectedParticipantUserId, setSelectedParticipantUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Fetch participant profile data when editing
+  const { profile: participantProfile, isLoading: isLoadingProfile } = useParticipantProfile(
+    isEditMode ? selectedParticipantUserId : undefined
+  );
 
   const handleEdit = (participant: ParticipantProfileData) => {
     console.log("Participants - Editing participant:", participant);
+    console.log("Participants - Using user_id for profile fetch:", participant.id);
+    
     setSelectedParticipant(participant);
+    setSelectedParticipantUserId(participant.id); // This is the user_id from participants_profile
     setIsEditMode(true);
     setIsFormDialogOpen(true);
   };
 
   const handleCreate = () => {
     setSelectedParticipant(null);
+    setSelectedParticipantUserId(null);
     setIsEditMode(false);
     setIsFormDialogOpen(true);
   };
@@ -74,11 +85,23 @@ const Participants = () => {
 
   const handleFormSuccess = () => {
     setIsFormDialogOpen(false);
+    setSelectedParticipant(null);
+    setSelectedParticipantUserId(null);
     refetch();
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setIsFormDialogOpen(open);
+    if (!open) {
+      setSelectedParticipant(null);
+      setSelectedParticipantUserId(null);
+    }
   };
 
   console.log("Participants page loaded");
   console.log("Participants data:", participants);
+  console.log("Selected participant for edit:", selectedParticipant);
+  console.log("Participant profile data:", participantProfile);
 
   return (
     <PropertyLayout>
@@ -111,18 +134,25 @@ const Participants = () => {
           />
         )}
 
-        <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
+        <Dialog open={isFormDialogOpen} onOpenChange={handleDialogClose}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {isEditMode ? "Edit Participant" : "Create New Participant"}
               </DialogTitle>
             </DialogHeader>
-            <ParticipantForm
-              isEditMode={isEditMode}
-              initialData={selectedParticipant || undefined}
-              onSuccess={handleFormSuccess}
-            />
+            {isEditMode && isLoadingProfile ? (
+              <div className="flex justify-center p-8">
+                <Spinner size="lg" />
+                <span className="ml-2">Loading participant data...</span>
+              </div>
+            ) : (
+              <ParticipantForm
+                isEditMode={isEditMode}
+                initialData={isEditMode ? participantProfile || selectedParticipant : undefined}
+                onSuccess={handleFormSuccess}
+              />
+            )}
           </DialogContent>
         </Dialog>
       </div>
