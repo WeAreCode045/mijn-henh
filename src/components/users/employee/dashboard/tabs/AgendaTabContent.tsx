@@ -17,7 +17,7 @@ interface AgendaTabContentProps {
 export function AgendaTabContent(props: AgendaTabContentProps) {
   return (
     <div className="p-6">
-      <AgendaSection {...props} />
+      <AgendaSection />
     </div>
   );
 }
