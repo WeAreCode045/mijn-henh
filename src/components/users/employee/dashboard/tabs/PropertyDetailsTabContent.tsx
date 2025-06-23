@@ -16,7 +16,7 @@ export function PropertyDetailsTabContent() {
 
   return (
     <div className="p-6">
-      <PropertyQuickview propertyId={propertyId} />
+      <PropertyQuickview />
     </div>
   );
 }

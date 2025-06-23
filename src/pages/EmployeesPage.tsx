@@ -29,6 +29,7 @@ const EmployeesPage = () => {
     email: user.email || '', // Ensure email is always present as required by UserBase
     full_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unnamed User', // Ensure full_name is always present
     type: (user.type as "employee" | "participant") || "employee", // Cast type to the expected union type
+    role: (user.role as "admin" | "agent" | "buyer" | "seller") || "agent", // Cast role to the expected union type
   }));
 
   const handleEditClick = (user: User) => {
